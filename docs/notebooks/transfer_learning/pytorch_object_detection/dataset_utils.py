@@ -18,11 +18,11 @@
 
 import os
 import csv
-import glob
 import numpy as np
 import torch
 import torchvision
 from PIL import Image
+from typing import Any, Tuple
 
 
 COCO_LABELS = [
@@ -43,6 +43,7 @@ COCO_LABELS = [
 KITTI_LABELS = [
     '__background__', 'Person', 'Vehicle'
 ]
+
 
 class PennFudanDataset(torch.utils.data.Dataset):
     def __init__(self, root, transforms):
@@ -100,12 +101,14 @@ class PennFudanDataset(torch.utils.data.Dataset):
         target["iscrowd"] = iscrowd
 
         if self.transforms is not None:
-            img, target = self.transforms(img, target)
+            img = self.transforms(img)
+            # target needs augmentations
 
         return img, target
 
     def __len__(self):
         return len(self.imgs)
+
 
 class Kitti(torchvision.datasets.Kitti):
     def _parse_target(self, index: int):
@@ -116,12 +119,12 @@ class Kitti(torchvision.datasets.Kitti):
             for line in content:
                 if line[0] in ['Pedestrian', 'Person_sitting', 'Cyclist']:
                     boxes.append([float(x) for x in line[4:8]])
-                    labels.append(1) # Re-label Pedestrian, Person_sitting, Cyclist to Person=1
+                    labels.append(1)  # Re-label Pedestrian, Person_sitting, Cyclist to Person=1
                 if line[0] in ['Car', 'Truck', 'Van', 'Tram']:
                     boxes.append([float(x) for x in line[4:8]])
-                    labels.append(2) # Re-label Car, Truck, Van, Tram to Vehicle=2
-        
-        boxes = torch.FloatTensor(boxes)  
+                    labels.append(2)  # Re-label Car, Truck, Van, Tram to Vehicle=2
+
+        boxes = torch.FloatTensor(boxes)
         target = {}
         target['image_id'] = torch.tensor([index])
         target['boxes'] = boxes
@@ -130,3 +133,28 @@ class Kitti(torchvision.datasets.Kitti):
         target['iscrowd'] = torch.zeros((len(target['labels']),), dtype=torch.int64)
 
         return target
+
+    def __getitem__(self, index: int) -> Tuple[Any, Any]:
+        """Get item at a given index.
+
+        Args:
+            index (int): Index
+        Returns:
+            tuple: (image, target), where
+            target is a list of dictionaries with the following keys:
+
+            - type: str
+            - truncated: float
+            - occluded: int
+            - alpha: float
+            - bbox: float[4]
+            - dimensions: float[3]
+            - locations: float[3]
+            - rotation_y: float
+
+        """
+        image = Image.open(self.images[index])
+        target = self._parse_target(index) if self.train else None
+        if self.transforms:
+            image = self.transforms(image)
+        return image, target

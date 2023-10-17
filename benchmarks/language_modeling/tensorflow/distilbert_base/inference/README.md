@@ -17,6 +17,9 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/dis
 Download Frozen graph for INT8:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/FusedBMM_int8_distilbert_frozen_graph.pb
 
+Download Frozen graph for IN8 with OneDNN graph (Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point):
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/distilbert_itex_int8.pb
+
 Downloading dataset:
 cd to directory:  <model_zoo_dir>/models/language_modeling/tensorflow/distilbert_base/inference/
 python download_dataset.py --path_to_save_dataset <enter path to save dataset>

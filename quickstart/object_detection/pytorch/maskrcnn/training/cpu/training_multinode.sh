@@ -80,15 +80,14 @@ PRECISION=$1
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
-rm -rf ${OUTPUT_DIR}/distributed_throughput_log_${PRECISION}*
+rm -rf ${OUTPUT_DIR}/maskrcnn_dist_training_log_${PRECISION}*
 
 python -m intel_extension_for_pytorch.cpu.launch \
+    --memory-allocator tcmalloc \
     --distributed \
     --nnodes ${NNODES} \
     --hostfile ${HOSTFILE} \
-    --nproc_per_node $SOCKETS \
-    --log_path=${OUTPUT_DIR} \
-    --log_file_prefix="./distributed_throughput_log_${PRECISION}" \
+    --logical-cores-for-ccl --ccl_worker_count 8 \
     ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/train_net.py \
     $ARGS \
     --iter-warmup 10 \
@@ -101,11 +100,11 @@ python -m intel_extension_for_pytorch.cpu.launch \
     SOLVER.STEPS '"(60000, 80000)"' \
     SOLVER.BASE_LR 0.0025 \
     MODEL.DEVICE cpu \
-    2>&1 | tee ${OUTPUT_DIR}/distributed_throughput_log_${PRECISION}.txt
+    2>&1 | tee ${OUTPUT_DIR}/maskrcnn_dist_training_log_${PRECISION}.log
 
 # For the summary of results
 wait
-throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/distributed_throughput_log_${PRECISION}* |sed -e 's/.*Training throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/maskrcnn_dist_training_log_${PRECISION}.log |sed -e 's/.*Training throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
         i = 0;

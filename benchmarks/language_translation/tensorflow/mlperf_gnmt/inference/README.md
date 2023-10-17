@@ -29,20 +29,20 @@ Set the `DATASET_DIR` to point as instructed above  when running MLPerf GNMT.
 | [`batch_inference.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/batch_inference.sh) | Runs batch inference (batch_size=32). |
 | [`accuracy.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/accuracy.sh) | Runs accuracy |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit you will need:</p>
+      <p>To run using AI Tools you will need:</p>
       <ul>
         <li>git
         <li>numactl
@@ -54,7 +54,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3
         <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
@@ -63,7 +63,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pip
         <li>wget
         <li><a href="https://bazel.build/">Bazel</a> to build tensorflow addons
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -83,7 +83,7 @@ then build and install the TensorFlow addons wheel.
 ```
 # TensorFlow addons (r0.5) build and installation instructions:
 #   Clone TensorFlow addons (r0.5) and apply a patch: A patch file
-#   is attached in Intel Model Zoo MLpref GNMT model scripts,
+#   is attached in Intel AI Reference Models MLpref GNMT model scripts,
 #   it fixes TensorFlow addons (r0.5) to work with TensorFlow
 #   version 2.11, and prevents TensorFlow 2.0.0 to be installed
 #   by default as a required dependency.
@@ -104,7 +104,7 @@ Once that has been completed, ensure you have the required environment variables
 set, and then run a quickstart script.
 
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set env var paths

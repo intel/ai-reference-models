@@ -69,7 +69,12 @@ cd ${MODEL_DIR}
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
-NUM_INSTANCES="1"
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
+
+NUM_INSTANCES=`expr $cores_per_socket / $CORES_PER_NUMA`
 
 #Set up env variable for bfloat32
 if [[ $PRECISION == "bfloat32" ]]; then
@@ -94,9 +99,9 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --model-source-dir ${TF_MODELS_DIR} \
   --mpi_num_processes=${NUM_INSTANCES} \
-  --mpi_num_processes_per_socket=1 \
+  --mpi_num_processes_per_socket=${NUM_INSTANCES} \
   --batch-size ${BATCH_SIZE} \
-  --num-intra-threads ${cores_per_socket} \
+  --num-intra-threads ${CORES_PER_NUMA} \
   --num-inter-threads 1 \
   --num-cores ${cores_per_socket} \
   --synthetic-data --num-train-steps 100 --num_warmup_batches=20 --weight_decay=1e-4 \

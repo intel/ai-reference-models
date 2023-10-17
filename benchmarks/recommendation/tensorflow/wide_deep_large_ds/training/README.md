@@ -34,20 +34,20 @@ The `DATASET_DIR` environment variable will be used as the dataset directory whe
 | [`training.sh`](/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/training.sh) | Trains the model for 10 epochs. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
 | [`training_demo.sh`](/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/training_demo.sh) | A short demo run that trains the model for 100 steps. |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit you will need:</p>
+      <p>To run using AI Tools you will need:</p>
       <ul>
         <li>numactl
         <li>wget
@@ -56,14 +56,14 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3
         <li>intel-tensorflow>=2.5.0
         <li>numactl
         <li>git
         <li>wget
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -73,12 +73,12 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
 After the setup is complete, set environment variables for the path to your
 dataset directory and an output directory where logs will be written. You can
 optionally provide a directory where checkpoint files will be read and
-written. Navigate to your model zoo directory, then select a
+written. Navigate to your AI Reference Models directory, then select a
 [quickstart script](#quick-start-scripts) to run. Note that some quickstart
 scripts might use other environment variables in addition to the ones below,
 like `STEPS` and `TARGET_ACCURACY` for the `fp32_training_check_accuracy.sh` script.
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export DATASET_DIR=<path to the dataset directory>

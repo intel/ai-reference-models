@@ -104,8 +104,11 @@ export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRETRAINED_MODEL=<path to the downloaded pre-trained model>
 export CHECKPOINT_DIR=<path to the downloaded checkpoints folder>
-# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
-export BATCH_SIZE=<customized batch size value>
+
+#Optional envs
+export BATCH_SIZE=<customized batch size value, otherwise it will run with the default value>
+export OMP_NUM_THREADS=<customized value for omp_num_threads, otherwise it will run with the default value>
+export CORES_PER_INSTANCE=<customized value for cores_per_instance, otherwise it will run with the default value>
 
 Run the script:
 ./quickstart/language_modeling/tensorflow/bert_large/inference/cpu/<script_name.sh>

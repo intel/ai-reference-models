@@ -1,0 +1,22 @@
+fp32-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-training
+  cmd: quickstart/training.sh
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+    TRAINING_EPOCHS: '1'
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+bf16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-training
+  cmd: quickstart/training.sh
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+    TRAINING_EPOCHS: '1'
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/

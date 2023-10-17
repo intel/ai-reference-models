@@ -25,21 +25,21 @@ Set the `DATASET_DIR` to point to the TF records directory when running MobileNe
 | `inference_realtime_multi_instance.sh` | A multi-instance run that uses 4 cores per instance with `batch_size=1` for the specified precision (fp32, int8, bfloat16, bfloat32). Uses synthetic data if no DATASET_DIR is set|
 | `inference_throughput_multi_instance.sh` | A multi-instance run that uses 4 cores per instance with `batch_size=448` for the specified precision (fp32, int8, bfloat16, bfloat32). Uses synthetic data if no DATASET_DIR is set |
 | `accuracy.sh` | Measures the model accuracy (batch_size=100) for the specified precision (fp32, int8, bfloat16, bfloat32). |
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit on Linux</th>
-    <th>Setup without AI Kit on Linux</th>
-    <th>Setup without AI Kit on Windows</th>
+    <th>Setup using AI Tools on Linux</th>
+    <th>Setup without AI Tools on Linux</th>
+    <th>Setup without AI Tools on Windows</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit on Linux you will need:</p>
+      <p>To run using AI Tools on Linux you will need:</p>
       <ul>
         <li>numactl
         <li>wget
@@ -48,22 +48,22 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Linux you will need:</p>
+      <p>To run without AI Tools on Linux you will need:</p>
       <ul>
         <li>Python 3
         <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
         <li>git
         <li>numactl
         <li>wget
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Windows you will need:</p>
+      <p>To run without AI Tools on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
-        <li>A clone of the Model Zoo repo<br />
+        <li><a href="/docs/general/Windows.md">Intel AI Reference Models on Windows Systems prerequisites</a>
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -90,7 +90,7 @@ Set the environment variables and run quickstart script on either Linux or Windo
 
 ### Run on Linux:
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export PRETRAINED_MODEL=<path to the frozen graph downloaded above>
@@ -106,7 +106,7 @@ export BATCH_SIZE=<customized batch size value>
 ### Run on Windows
 Using `cmd.exe` run:
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 set PRETRAINED_MODEL=<path to the frozen graph downloaded above>

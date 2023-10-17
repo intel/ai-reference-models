@@ -38,11 +38,11 @@ BERT_WEIGHT=$(pwd)/squad_large_finetuned_checkpoint
 
 | Script name | Description |
 |-------------|-------------|
-| `fp16_inference_plain_format.sh` | Runs BERT Large inference (plain format) for fp16 precision |
+| `fp16_inference_plain_format.sh` | Runs BERT Large inference (plain format) for FP16 precision |
 
 Requirements:
-* Host machine has Intel(R) Data Center Max Series GPU
-* Follow instructions to install GPU-compatible driver [602](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-jammy-dc.html#step-1-add-package-repository)
+* Host machine has Intel(R) Data Center Max Series 1550 x4 OAM GPU
+* Follow instructions to install GPU-compatible driver [647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
 * Docker
 
 ## Docker pull Command
@@ -56,13 +56,14 @@ The BERT Large inference container includes scripts,models,libraries needed to r
 ```
 export DATASET_DIR=<path to dataset>
 export OUTPUT_DIR=<path to output log files>
+export PRECISION=<export precision. FP16 is currently supported>
 export BERT_WEIGHT=$(pwd)/squad_large_finetuned_checkpoint
+export NUM_OAM=<provide 4 for number of OAM Modules supported by the platform>
+export BATCH_SIZE=<provide batch size. default is 64>
 
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/language-modeling:pytorch-max-gpu-bert-large-inference
-
 SCRIPT=quickstart/fp16_inference_plain_format.sh
-Tile=2
 
 docker run \
   --privileged \
@@ -71,7 +72,9 @@ docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env BERT_WEIGHT=${BERT_WEIGHT} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env Tile=${Tile} \
+  --env NUM_OAM=${NUM_OAM} \
+  --env PRECISION=${PRECISION} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \

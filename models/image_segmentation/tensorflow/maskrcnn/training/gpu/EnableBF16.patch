@@ -1,0 +1,395 @@
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/main.py b/TensorFlow2/Segmentation/MaskRCNN/main.py
+index 53b59d6e..6902a0ba 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/main.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/main.py
+@@ -57,6 +57,20 @@ def main():
+     # setup dataset
+     dataset = Dataset(params)
+ 
++    try:
++      import horovod.tensorflow.keras as hvd
++      import tensorflow as tf
++      hvd.init()
++      params.mpi_num = hvd.size()
++      params.model_dir = params.model_dir if hvd.rank() == 0 else \
++          os.path.join(params.model_dir, str(hvd.rank()))
++      xpus = tf.config.experimental.list_physical_devices('XPU')
++      tf.config.experimental.set_visible_devices(xpus[hvd.local_rank()], 'XPU')
++      logging.info("MPI horovod is enabled, this is running in MPI mode! local_rank = {}".format(hvd.local_rank()))
++    except ImportError:
++      params.mpi_num = 0
++      logging.info("No MPI horovod support, this is running in no-MPI mode!")
++
+     if params.mode == 'train':
+         run_training(dataset, params)
+     if params.mode == 'eval':
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/arguments.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/arguments.py
+index 63368c09..ad04efa4 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/arguments.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/arguments.py
+@@ -53,6 +53,14 @@ RUNTIME_GROUP.add_argument(
+     ]
+ )
+ 
++LOGGING_GROUP.add_argument(
++    '--mpi_num',
++    type=int,
++    default=0,
++    metavar='N',
++    help='Number of mpi ranks'
++)
++
+ RUNTIME_GROUP.add_argument(
+     '--data_dir',
+     type=str,
+@@ -72,7 +80,7 @@ RUNTIME_GROUP.add_argument(
+ RUNTIME_GROUP.add_argument(
+     '--backbone_checkpoint',
+     type=str,
+-    default='/weights/rn50_tf_amp_ckpt_v20.06.0/nvidia_rn50_tf_amp',
++    default=None,
+     metavar='FILE',
+     help='Pretrained checkpoint for resnet'
+ )
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset.py
+index 29d2373a..4bd0f2b6 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset.py
+@@ -48,6 +48,32 @@ class Dataset:
+ 
+     def train_fn(self, batch_size):
+         """ Input function for training. """
++        # Features
++        if self._params.use_synthetic_data:
++            self._logger.info("Using synthetic data")
++            name_to_features = {
++                "source_ids": tf.zeros((batch_size, ), dtype=tf.float32),
++                "images": tf.zeros((batch_size, 1024, 1024, 3), dtype=tf.float32),
++                "image_info": tf.zeros((batch_size, 5,) , dtype=tf.float32),
++                "cropped_gt_masks": tf.zeros((batch_size, 100, 116, 116), dtype=tf.float32),
++                "gt_boxes": tf.zeros((batch_size, 100, 4) , dtype=tf.float32),
++                "gt_classes": tf.zeros((batch_size, 100, 1) , dtype=tf.float32),
++                "score_targets_2": tf.zeros((batch_size, 256, 256, 3), dtype=tf.float32),
++                "box_targets_2": tf.zeros((batch_size, 256, 256, 12), dtype=tf.float32),
++                "score_targets_3": tf.zeros((batch_size, 128, 128, 3), dtype=tf.float32),
++                "box_targets_3": tf.zeros((batch_size, 128, 128, 12), dtype=tf.float32),
++                "score_targets_4": tf.zeros((batch_size, 64, 64, 3), dtype=tf.float32),
++                "box_targets_4": tf.zeros((batch_size, 64, 64, 12), dtype=tf.float32),
++                "score_targets_5": tf.zeros((batch_size, 32, 32, 3), dtype=tf.float32),
++                "box_targets_5": tf.zeros((batch_size, 32, 32, 12), dtype=tf.float32),
++                "score_targets_6": tf.zeros((batch_size, 16, 16, 3), dtype=tf.float32),
++                "box_targets_6": tf.zeros((batch_size, 16, 16, 12), dtype=tf.float32),
++            }
++
++            return tf.data.Dataset.from_tensors((name_to_features, {})).repeat()
++
++        if self._params.mpi_num:
++            batch_size = batch_size * self._params.mpi_num
+         data = tf.data.TFRecordDataset(self._train_files)
+ 
+         data = data.cache()
+@@ -73,7 +99,9 @@ class Dataset:
+ 
+         data = data.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+         data = data.with_options(self._data_options)
+-
++        if self._params.mpi_num:
++            import horovod.tensorflow.keras as hvd
++            data = data.shard(hvd.size(), hvd.rank())
+         return data
+ 
+     def eval_fn(self, batch_size):
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset_parser.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset_parser.py
+index 96da0e36..3c071b10 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset_parser.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset_parser.py
+@@ -99,7 +99,7 @@ def dataset_parser(value, mode, params, use_instance_mask, seed=None, regenerate
+ 
+     example_decoder = create_example_decoder()
+ 
+-    with tf.xla.experimental.jit_scope(compile_ops=True):
++    with tf.xla.experimental.jit_scope(compile_ops=False):
+ 
+         with tf.name_scope('parser'):
+ 
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/anchors.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/anchors.py
+index ba922500..e6455b3f 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/anchors.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/anchors.py
+@@ -240,7 +240,7 @@ class AnchorLabeler:
+             tf.constant(0, dtype=tf.int32, shape=match_results.shape))
+         ignore_labels = tf.fill(match_results.shape, -1)
+ 
+-        return (ignore_labels + positive_labels + negative_labels,
++        return (tf.cast(ignore_labels + positive_labels + negative_labels, tf.float32),
+                 positive_labels, negative_labels)
+ 
+     def label_anchors(self, gt_boxes, gt_labels):
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/losses.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/losses.py
+index f4e22985..b681d4c0 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/losses.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/losses.py
+@@ -28,8 +28,8 @@ class MaskRCNNLoss(tf.keras.layers.Layer):
+     so that it doesn't expand `mask_targets`.
+     """
+ 
+-    def __init__(self):
+-        super().__init__(trainable=False, dtype=tf.float32)
++    def __init__(self, name="MaskRCNNLoss"):
++        super().__init__(name=name, trainable=False, dtype=tf.float32)
+ 
+     def call(self, inputs, **kwargs):
+         """
+@@ -82,8 +82,8 @@ class FastRCNNLoss(tf.keras.layers.Layer):
+     Reference: https://github.com/facebookresearch/Detectron/blob/master/detectron/modeling/fast_rcnn_heads.py
+     """
+ 
+-    def __init__(self, num_classes):
+-        super().__init__(trainable=False, dtype=tf.float32)
++    def __init__(self, num_classes, name="FastRCNNLoss"):
++        super().__init__(name=name, trainable=False, dtype=tf.float32)
+         self._num_classes = num_classes
+ 
+     def call(self, inputs, **kwargs):
+@@ -155,8 +155,8 @@ class RPNLoss(tf.keras.layers.Layer):
+     Computes total RPN detection loss including box and score from all levels.
+     """
+ 
+-    def __init__(self, batch_size, rpn_batch_size_per_im, min_level, max_level):
+-        super().__init__(trainable=False, dtype=tf.float32)
++    def __init__(self, batch_size, rpn_batch_size_per_im, min_level, max_level, name="RPNLoss"):
++        super().__init__(name=name, trainable=False, dtype=tf.float32)
+         self._batch_size = batch_size
+         self._rpn_batch_size_per_im = rpn_batch_size_per_im
+         self._min_level = min_level
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/mask_rcnn.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/mask_rcnn.py
+index 1cc1e3fd..21b9f9a7 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/mask_rcnn.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/mask_rcnn.py
+@@ -251,21 +251,21 @@ class MaskRCNN(tf.keras.Model):
+         mask_rcnn_loss = self.mask_rcnn_loss(model_outputs)
+         mask_rcnn_loss *= self._params.mrcnn_weight_loss_mask
+         self.add_loss(mask_rcnn_loss)
+-        self.add_metric(mask_rcnn_loss, name='mask_rcnn_loss')
++        # self.add_metric(mask_rcnn_loss, name='mask_rcnn_loss')
+ 
+         fast_rcnn_class_loss, fast_rcnn_box_loss = self.fast_rcnn_loss(model_outputs)
+         fast_rcnn_box_loss *= self._params.fast_rcnn_box_loss_weight
+         self.add_loss(fast_rcnn_box_loss)
+-        self.add_metric(fast_rcnn_box_loss, name='fast_rcnn_box_loss')
++        # self.add_metric(fast_rcnn_box_loss, name='fast_rcnn_box_loss')
+         self.add_loss(fast_rcnn_class_loss)
+-        self.add_metric(fast_rcnn_class_loss, name='fast_rcnn_class_loss')
++        # self.add_metric(fast_rcnn_class_loss, name='fast_rcnn_class_loss')
+ 
+         rpn_score_loss, rpn_box_loss = self.rpn_loss(model_outputs)
+         rpn_box_loss *= self._params.rpn_box_loss_weight
+         self.add_loss(rpn_box_loss)
+-        self.add_metric(rpn_box_loss, name='rpn_box_loss')
++        # self.add_metric(rpn_box_loss, name='rpn_box_loss')
+         self.add_loss(rpn_score_loss)
+-        self.add_metric(rpn_score_loss, name='rpn_score_loss')
++        # self.add_metric(rpn_score_loss, name='rpn_score_loss')
+ 
+         l2_regularization_loss = tf.add_n([
+             tf.nn.l2_loss(tf.cast(v, dtype=tf.float32))
+@@ -274,7 +274,7 @@ class MaskRCNN(tf.keras.Model):
+         ])
+         l2_regularization_loss *= self._params.l2_weight_decay
+         self.add_loss(l2_regularization_loss)
+-        self.add_metric(l2_regularization_loss, name='l2_regularization_loss')
++        # self.add_metric(l2_regularization_loss, name='l2_regularization_loss')
+ 
+     def get_config(self):
+         pass
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/ops/roi_ops.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/ops/roi_ops.py
+index 8670753e..deaf434a 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/ops/roi_ops.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/ops/roi_ops.py
+@@ -96,16 +96,16 @@ def _propose_rois_gpu(scores,
+         pre_nms_boxes = tf.cast(pre_nms_boxes, dtype=tf.float32)
+         pre_nms_scores = tf.cast(pre_nms_scores, dtype=tf.float32)
+ 
+-        with tf.device('CPU:0'):
+-            boxes, scores, _, _ = tf.image.combined_non_max_suppression(
+-                pre_nms_boxes,
+-                pre_nms_scores,
+-                max_output_size_per_class=topk_limit,
+-                max_total_size=post_nms_topk_limit,
+-                iou_threshold=rpn_nms_threshold,
+-                score_threshold=0.0,
+-                pad_per_class=False
+-            )
++        # with tf.device('CPU:0'):
++        boxes, scores, _, _ = tf.image.combined_non_max_suppression(
++            pre_nms_boxes,
++            pre_nms_scores,
++            max_output_size_per_class=topk_limit,
++            max_total_size=post_nms_topk_limit,
++            iou_threshold=rpn_nms_threshold,
++            score_threshold=0.0,
++            pad_per_class=False
++        )
+ 
+         boxes = box_utils.to_absolute_coordinates(boxes, height, width)
+ 
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/callbacks.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/callbacks.py
+index 4e7b56c9..20ae757c 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/callbacks.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/callbacks.py
+@@ -127,12 +127,12 @@ class DLLoggerPerfCallback(KerasCallback):
+         self._dllogger.log(
+             step=step,
+             data={
++                f'{mode}_time': self._calculate_total_time(self._start_timestamps[mode], time.time()),
+                 f'{mode}_throughput': self._calculate_throughput(deltas, self._batch_sizes[mode]),
+-                f'{mode}_latency': self._calculate_latency(deltas),
+-                f'{mode}_latency_90': self._calculate_latency_confidence(deltas, 90.0),
+-                f'{mode}_latency_95': self._calculate_latency_confidence(deltas, 95.0),
+-                f'{mode}_latency_99': self._calculate_latency_confidence(deltas, 99.0),
+-                f'{mode}_time': self._calculate_total_time(self._start_timestamps[mode], time.time())
++                # f'{mode}_latency': self._calculate_latency(deltas),
++                # f'{mode}_latency_90': self._calculate_latency_confidence(deltas, 90.0),
++                # f'{mode}_latency_95': self._calculate_latency_confidence(deltas, 95.0),
++                # f'{mode}_latency_99': self._calculate_latency_confidence(deltas, 99.0),
+             }
+         )
+ 
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/learning_rate.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/learning_rate.py
+index ee96214e..a3566a1a 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/learning_rate.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/learning_rate.py
+@@ -1,6 +1,6 @@
+ import tensorflow as tf
+ 
+-
++@tf.keras.utils.register_keras_serializable('PiecewiseConstantWithWarmupSchedule')
+ class PiecewiseConstantWithWarmupSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+     """
+     Schedule that starts with learning rate at `init_value` and monotonically increases
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/run.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/run.py
+index d7b001b3..f0854fd7 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/run.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/run.py
+@@ -14,35 +14,39 @@ from mrcnn_tf2.runtime.weights_mapping import WEIGHTS_MAPPING
+ def run_training(dataset, params):
+     setup(params)
+ 
+-    strategy = tf.distribute.MirroredStrategy()
+-    params.replicas = strategy.num_replicas_in_sync
++    params.replicas = 1
+     params.global_train_batch_size = params.train_batch_size * params.replicas
+-    logging.info(f'Distributed Strategy is activated for {params.replicas} device(s)')
+-
+-    with strategy.scope():
+-
+-        learning_rate = PiecewiseConstantWithWarmupSchedule(
+-            init_value=params.init_learning_rate,
+-            # scale boundaries from epochs to steps
+-            boundaries=[
+-                int(b * dataset.train_size / params.global_train_batch_size)
+-                for b in params.learning_rate_boundaries
+-            ],
+-            values=params.learning_rate_values,
+-            # scale only by local BS as distributed strategy later scales it by number of replicas
+-            scale=params.train_batch_size
+-        )
+ 
+-        optimizer = tf.keras.optimizers.SGD(
+-            learning_rate=learning_rate,
+-            momentum=params.momentum
+-        )
++    learning_rate_init_value = params.init_learning_rate
++    if params.mpi_num > 1:
++        learning_rate_init_value = learning_rate_init_value * params.mpi_num
++    learning_rate = PiecewiseConstantWithWarmupSchedule(
++        init_value=learning_rate_init_value,
++        # scale boundaries from epochs to steps
++        boundaries=[
++            int(b * dataset.train_size / params.global_train_batch_size)
++            for b in params.learning_rate_boundaries
++        ],
++        values=params.learning_rate_values,
++        # scale only by local BS as distributed strategy later scales it by number of replicas
++        scale=params.train_batch_size
++    )
+ 
+-        mask_rcnn_model = create_model(params)
++    optimizer = tf.keras.optimizers.legacy.SGD(
++        learning_rate=learning_rate,
++        momentum=params.momentum
++    )
++    if params.mpi_num > 1:
++        import horovod.tensorflow.keras as hvd
++        logging.info("MPI horovod is enabled, using hvd.DistributedOptimizer")
++        optimizer = hvd.DistributedOptimizer(optimizer, groups=1)
+ 
+-        mask_rcnn_model.compile(
+-            optimizer=optimizer
+-        )
++    mask_rcnn_model = create_model(params)
++
++    mask_rcnn_model.compile(
++        optimizer=optimizer,
++        experimental_run_tf_function=False
++    )
+ 
+     # distributed strategy splits data between instances so we need global BS
+     train_data = dataset.train_fn(batch_size=params.global_train_batch_size)
+@@ -112,8 +116,9 @@ def setup(params):
+         logging.info('XLA is activated')
+ 
+     if params.amp:
+-        policy = tf.keras.mixed_precision.experimental.Policy("mixed_float16", loss_scale="dynamic")
+-        tf.keras.mixed_precision.experimental.set_policy(policy)
++        # change precision from mixed_float16 to mixed_bfloat16
++        policy = tf.keras.mixed_precision.Policy("mixed_bfloat16")
++        tf.keras.mixed_precision.set_global_policy(policy)
+         logging.info('AMP is activated')
+ 
+ 
+@@ -164,13 +169,26 @@ def create_callbacks(params):
+             mapping=lambda name: WEIGHTS_MAPPING.get(name.replace(':0', ''), name)
+         )
+ 
+-    yield tf.keras.callbacks.ModelCheckpoint(
+-        filepath=os.path.join(params.model_dir, params.checkpoint_name_format),
+-        verbose=1
+-    )
++    # if params.mpi_num > 1:
++    #     import horovod.tensorflow.keras as hvd
++    #     if hvd.rank() == 0:
++    #         yield tf.keras.callbacks.ModelCheckpoint(
++    #             filepath=os.path.join(params.model_dir, params.checkpoint_name_format),
++    #             verbose=1
++    #         )
++    # else:
++    #     yield tf.keras.callbacks.ModelCheckpoint(
++    #         filepath=os.path.join(params.model_dir, params.checkpoint_name_format),
++    #         verbose=1
++    #     )
+ 
+     if params.log_tensorboard:
+         yield tf.keras.callbacks.TensorBoard(
+-            log_dir=params.log_tensorboard,
+-            update_freq='batch'
++            log_dir=params.log_tensorboard, profile_batch=0,
++            update_freq=5
+         )
++
++    if params.mpi_num > 1:
++        import horovod.tensorflow.keras as hvd
++        logging.info("MPI horovod is enabled, hvd.callbacks.BroadcastGlobalVariablesCallback")
++        yield hvd.callbacks.BroadcastGlobalVariablesCallback(0)
+diff --git a/TensorFlow2/Segmentation/MaskRCNN/scripts/train.py b/TensorFlow2/Segmentation/MaskRCNN/scripts/train.py
+index 6b61827e..e46ff590 100644
+--- a/TensorFlow2/Segmentation/MaskRCNN/scripts/train.py
++++ b/TensorFlow2/Segmentation/MaskRCNN/scripts/train.py
+@@ -62,7 +62,6 @@ if __name__ == '__main__':
+         f'python {main_path}'
+         f' train'
+         f' --data_dir "{flags.data_dir}"'
+-        f' --backbone_checkpoint "{checkpoint_path}"'
+         f' --train_batch_size {flags.batch_size}'
+     )
+     cmd_eval = (

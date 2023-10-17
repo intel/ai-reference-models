@@ -84,6 +84,9 @@ class ModelInitializer(BaseModelInitializer):
         self.run_cmd += " --warmup-steps {0}".format(self.additional_args.warmup_steps)
         self.run_cmd += " --steps {0}".format(self.additional_args.steps)
 
+        if self.args.onednn_graph:
+            self.run_cmd += " --onednn-graph"
+
         if self.args.accuracy_only:
             self.run_cmd += " --accuracy-only "
             self.run_cmd += " --data-location {0}".format(self.args.data_location)

@@ -1,0 +1,10 @@
+future==0.18.3
+numpy==1.26.0
+onnx==1.14.1
+pydot==1.4.2
+torch==2.0.1
+torchviz==0.0.2
+scikit-learn==1.3.0
+tqdm==4.66.1
+tensorboard==2.14.0
+wheel==0.38.1

@@ -156,7 +156,7 @@ def get_train_op(loss, params):
     global_step = tf.compat.v1.train.get_global_step()
     tvars = tf.compat.v1.trainable_variables()
     grads_and_vars = optimizer.compute_gradients(
-        loss, tvars)
+        loss, tvars, gate_gradients=tf.compat.v1.train.Optimizer.GATE_NONE)
     train_op = optimizer.apply_gradients(
         grads_and_vars,global_step=global_step, name="train")
     # Save gradient norm to Tensorboard
@@ -320,7 +320,7 @@ def train_schedule(
   mlperf_log.transformer_print(key=mlperf_log.TRAIN_LOOP)
   # Profiling with timeline
   if FLAGS.save_profile == "Yes":
-    profile_hooks = [tf.compat.v1.train.ProfilerHook(save_steps=1, output_dir=FLAGS.profile_dir)] # the json file 
+    profile_hooks = [tf.compat.v1.train.ProfilerHook(save_steps=1, output_dir=FLAGS.profile_dir)] # the json file
   #profile file will be saved in in profile_dir
   #Creating hooks for printing Examples per Second, used with estimator.train
   training_batch_size = estimator.params.batch_size

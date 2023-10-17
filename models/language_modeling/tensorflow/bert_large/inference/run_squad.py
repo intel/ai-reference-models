@@ -202,6 +202,7 @@ flags.DEFINE_bool("weight_sharing", False,
                   "Simulate weight sharing across multiple instances.")
 flags.DEFINE_integer("num_cores_per_socket", None,
                      "Number of cores per socket.")
+flags.DEFINE_bool("onednn_graph", False, "Enable OneDNN Graph for ITEX users.")
 
 class UpdateGlobalStepHook(session_run_hook.SessionRunHook):
   def __init__(self):
@@ -665,11 +666,25 @@ def create_model_top(bert_config, is_training, input_ids, input_mask, segment_id
                  'input_mask': input_mask,
                  'segment_ids': segment_ids}
 
-        outputs = ['start_logits:0', 'end_logits:0']
-
         with tf.io.gfile.GFile(frozen_graph, "rb") as f:
             graph_def = tf.compat.v1.GraphDef()
             graph_def.ParseFromString(f.read())
+
+        if FLAGS.onednn_graph:
+          all_node_name = [n.name for n in graph_def.node]
+
+          outputs = []
+
+          candidate_outputs_1 = ['unstacked_logits:0', 'unstacked_logits:1']
+          candidate_outputs_2 = ['start_logits:0', 'end_logits:0']
+
+          if "unstacked_logits" in all_node_name:
+            outputs = candidate_outputs_1
+
+          if "start_logits" in all_node_name:
+            outputs = candidate_outputs_2
+        else:
+          outputs = ['start_logits:0', 'end_logits:0']
 
         return tf.graph_util.import_graph_def(graph_def, inputs, outputs, name="")
 
@@ -1301,7 +1316,22 @@ def do_benchmark():
         'segment_ids:0': segment_ids}
 
   def run_model(sess, tid):
-    outputs = ['start_logits:0', 'end_logits:0']
+    if FLAGS.onednn_graph:
+      all_tensor_name = [tensor.name for op in sess.graph.get_operations() for tensor in op.values()]
+
+      outputs = []
+
+      candidate_outputs_1 = ['unstacked_logits:0', 'unstacked_logits:1']
+      candidate_outputs_2 = ['start_logits:0', 'end_logits:0']
+
+      if candidate_outputs_1[0] in all_tensor_name and candidate_outputs_1[1] in all_tensor_name:
+        outputs = candidate_outputs_1
+
+      if candidate_outputs_2[0] in all_tensor_name and candidate_outputs_2[1] in all_tensor_name:
+        outputs = candidate_outputs_2
+    else:
+      outputs = ['start_logits:0', 'end_logits:0']
+
     feed_dict = create_feed_dict()
     for step in range(FLAGS.warmup_steps):
       _ = sess.run(outputs, feed_dict=feed_dict)

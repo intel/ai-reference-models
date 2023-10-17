@@ -19,10 +19,10 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG MAX_PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG MAX_PYT_BASE_TAG="xpu-max"
+ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG BASE_TAG="xpu-max"
 
-FROM ${MAX_PYT_BASE_IMAGE}:${MAX_PYT_BASE_TAG}
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /workspace/pytorch-max-series-bert-large-inference
 

@@ -1,14 +1,16 @@
-# Model Zoo for Intel® Architecture
+# Intel® AI Reference Models
 
 This repository contains **links to pre-trained models, sample scripts, best practices, and step-by-step tutorials** for many popular open-source machine learning models optimized by Intel to run on Intel® Xeon® Scalable processors and Intel® Data Center GPUs.
 
-Model packages and containers for running the Model Zoo's workloads can be found at the [Intel® Developer Catalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html).
+Containers for running the workloads can be found at the [Intel® Developer Catalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html).
 
-## Purpose of the Model Zoo
+[Intel® AI Reference Models in a Jupyter Notebook](/notebooks/README.md) is also available for the [listed workloads](/notebooks/README.md#supported-models)
 
-  - Demonstrate the AI workloads and deep learning models Intel has optimized and validated to run on Intel hardware
-  - Show how to efficiently execute, train, and deploy Intel-optimized models
-  - Make it easy to get started running Intel-optimized models on Intel hardware in the cloud or on bare metal
+## Purpose of Intel® AI Reference Models
+
+Intel optimizes popular deep learning frameworks such as TensorFlow* and PyTorch* by contributing to the upstream projects. Additional optimizations are built into plugins/extensions such as the [Intel Extension for Pytorch*](https://github.com/intel/intel-extension-for-pytorch) and the [Intel Extension for TensorFlow*](https://github.com/intel/intel-extension-for-tensorflow). Popular neural network models running against common datasets are the target workloads that drive these optimizations. 
+
+The purpose of the Intel® AI Reference Models repository (and associated containers) is to quickly replicate the complete software environment that demonstrates the best-known performance of each of these target model/dataset combinations. When executed in optimally-configured hardware environments, these software environments showcase the AI capabilities of Intel platforms. 
 
 ***DISCLAIMER: These scripts are not intended for benchmarking Intel platforms.
 For any performance and/or benchmarking information on specific Intel platforms, visit [https://www.intel.ai/blog](https://www.intel.ai/blog).***
@@ -16,12 +18,12 @@ For any performance and/or benchmarking information on specific Intel platforms,
 Intel is committed to the respect of human rights and avoiding complicity in human rights abuses, a policy reflected in the [Intel Global Human Rights Principles](https://www.intel.com/content/www/us/en/policy/policy-human-rights.html). Accordingly, by accessing the Intel material on this platform you agree that you will not use the material in a product or application that causes or contributes to a violation of an internationally recognized human right.
 
 ## License
-The Model Zoo for Intel® Architecture is licensed under [Apache License Version 2.0](https://github.com/IntelAI/models/blob/master/LICENSE).
+The Intel® AI Reference Models is licensed under [Apache License Version 2.0](https://github.com/intel/ai-reference-models/blob/master/LICENSE).
 
 ## Datasets
 To the extent that any public datasets are referenced by Intel or accessed using tools or code on this site those datasets are provided by the third party indicated as the data source. Intel does not create the data, or datasets, and does not warrant their accuracy or quality. By accessing the public dataset(s) you agree to the terms associated with those datasets and that your use complies with the applicable license.
 
-Please check the list of datasets used in Model Zoo for Intel® Architecture in [datasets directory](/datasets).
+Please check the list of datasets used in Intel® AI Reference Models in [datasets directory](/datasets).
 
 Intel expressly disclaims the accuracy, adequacy, or completeness of any public datasets, and is not liable for any errors, omissions, or defects in the data, or for any reliance on the data. Intel is not liable for any liability or damages relating to your use of public datasets.
 
@@ -30,7 +32,7 @@ The model documentation in the tables below have information on the
 prerequisites to run each model. The model scripts run on Linux. Certain
 models are also able to run using bare metal on Windows. For more information
 and a list of models that are supported on Windows, see the
-[documentation here](/docs/general/Windows.md#using-intel-model-zoo-on-windows-systems).
+[documentation here](/docs/general/Windows.md#using-intel-ai-reference-models-on-windows-systems).
 
 Instructions available to run on [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx).
 
@@ -73,7 +75,6 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 | Model                                                    | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | -------------------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [3D U-Net](https://arxiv.org/pdf/1606.06650.pdf)         | TensorFlow | Inference | [FP32](/benchmarks/image_segmentation/tensorflow/3d_unet/inference/fp32/README.md) | [BRATS 2018](https://github.com/IntelAI/models/tree/master/benchmarks/image_segmentation/tensorflow/3d_unet/inference/fp32#datasets) |
 | [3D U-Net MLPerf*](https://arxiv.org/pdf/1606.06650.pdf) | TensorFlow | Inference | [FP32 BFloat16 Int8](/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/inference/README.md) | [BRATS 2019](https://www.med.upenn.edu/cbica/brats2019/data.html) |
 | [3D U-Net MLPerf*](https://arxiv.org/pdf/1606.06650.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Inference | [FP32 BFloat16 Int8 BFloat32](/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/README_SPR_Baremetal.md) | [BRATS 2019](https://www.med.upenn.edu/cbica/brats2019/data.html) |
 | [MaskRCNN](https://arxiv.org/abs/1703.06870)             | TensorFlow | Inference | [FP32](/benchmarks/image_segmentation/tensorflow/maskrcnn/inference/fp32/README.md) | [MS COCO 2014](https://github.com/IntelAI/models/tree/master/benchmarks/image_segmentation/tensorflow/maskrcnn/inference/fp32#datasets-and-pretrained-model) |
@@ -114,7 +115,6 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 | Model                                                 | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | ----------------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [Faster R-CNN](https://arxiv.org/pdf/1506.01497.pdf)  | TensorFlow | Inference | [Int8](/benchmarks/object_detection/tensorflow/faster_rcnn/inference/int8/README.md) [FP32](/benchmarks/object_detection/tensorflow/faster_rcnn/inference/fp32/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images) |
 | [R-FCN](https://arxiv.org/pdf/1605.06409.pdf)         | TensorFlow | Inference | [Int8 FP32](/benchmarks/object_detection/tensorflow/rfcn/inference/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images) |
 | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf)| TensorFlow | Inference | [Int8 FP32 BFloat16](/benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images) |
 | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf)  [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | TensorFlow | Inference | [Int8 FP32 BFloat16 BFloat32](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/README_SPR_baremetal.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images) |
@@ -145,6 +145,9 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [Wide & Deep Large Dataset](https://arxiv.org/pdf/1606.07792.pdf) | TensorFlow | Training | [FP32](/benchmarks/recommendation/tensorflow/wide_deep_large_ds/training/README.md) | [Large Kaggle Display Advertising Challenge dataset](https://github.com/IntelAI/models/tree/master/benchmarks/recommendation/tensorflow/wide_deep_large_ds/training/fp32#dataset) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 Int8 BFloat16 BFloat32](/quickstart/recommendation/pytorch/dlrm/inference/cpu/README.md) | [Criteo Terabyte](/quickstart/recommendation/pytorch/dlrm/inference/cpu/README.md#datasets) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Training  | [FP32 BFloat16 BFloat32](/quickstart/recommendation/pytorch/dlrm/training/cpu/README.md) | [Criteo Terabyte](/quickstart/recommendation/pytorch/dlrm/training/cpu/README.md#datasets) |
+| [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 FP16 BFloat16 BFloat32 Int8](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/README.md) | [Criteo 1TB Click Logs dataset](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu#datasets) |
+| [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Training  | [FP32 FP16 BFloat16 BFloat32](/quickstart/recommendation/pytorch/torchrec_dlrm/training/cpu/README.md) | [Random dataset](/quickstart/recommendation/pytorch/torchrec_dlrm/training/cpu#datasets) |
+| [MEMREC-DLRM](https://arxiv.org/pdf/2305.07205.pdf)         | PyTorch | Inference  | [FP32](/quickstart/recommendation/pytorch/memrec_dlrm/inference/cpu/README.md) | [Criteo Terabyte](/quickstart/recommendation/pytorch/memrec_dlrm/inference/cpu/README.md#datasets) |
 
 ### Text-to-Speech
 
@@ -189,6 +192,8 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Training  | Max Series | [BFloat16](/quickstart/language_modeling/pytorch/bert_large/training/gpu/README.md) |
 |[BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Inference | Max Series | [FP32 FP16](/quickstart/language_modeling/tensorflow/bert_large/inference/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | Max Series | [BFloat16](/quickstart/language_modeling/tensorflow/bert_large/training/gpu/README.md) |
+| [DLRM](https://arxiv.org/pdf/1906.00091.pdf) | TensorFlow | Inference | Max Series | [FP16](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/gpu/README.md) |
+| [DLRM](https://arxiv.org/pdf/1906.00091.pdf) | TensorFlow | Training | Max Series | [BFloat16](/quickstart/recommendation/pytorch/torchrec_dlrm/training/gpu/README.md) |
 
 ## How to Contribute
 If you would like to add a new benchmarking script, please use [this guide](/Contribute.md).

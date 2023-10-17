@@ -96,6 +96,14 @@ bash test_convergence.sh
 
 # Run quickstart to distribute training dlrm on 2 sockets
 # Note, you need to follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Torch-CCL and run this command on the machine which sockets larger than 2
+# The default setting will run 2 ranks on 1 nodes with BATCH_SIZE=32768 and CCL_WORKER_COUNT=8
+NUM_BATCH=10000 bash distribute_training.sh
+
+# To run more settings, you can config following ENV
+export BATCH_SIZE=65536
+export NUM_CCL_WORKER=4
+export HOSTFILE=<your hostfile>
+export NODE=2
 NUM_BATCH=10000 bash distribute_training.sh
 ```
 

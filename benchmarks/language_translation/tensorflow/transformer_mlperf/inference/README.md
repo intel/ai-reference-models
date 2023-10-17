@@ -23,12 +23,11 @@ Set `DATASET_DIR` to point out to the location of the dataset directory.
 | `inference_throughput_multi_instance.sh` | Runs multi instance batch inference with batch-size=448 for precisions (int8, fp32, bfloat16) to get throughput using 1 instance per socket. |
 | `accuracy.sh` | Measures the inference accuracy for the specified precision (int8, fp32, or bfloat16). |
 
-<!--- 50. AI Kit -->
 ## Run the model
 
 Setup your environment using the instructions below,
 
-* Follow the instructions to setup your bare metal environment on Linux system. Ensure that you have a clone of the [Model Zoo Github repository](https://github.com/IntelAI/models).
+* Follow the instructions to setup your bare metal environment on Linux system. Ensure that you have a clone of the [AI Reference Models Github repository](https://github.com/IntelAI/models).
   ```
   git clone https://github.com/IntelAI/models.git
   ```
@@ -39,7 +38,7 @@ Setup your environment using the instructions below,
 
   While using Int8 precision:
 
-  Install [intel-tensorflow==2.11.dev202242](https://pypi.org/project/intel-tensorflow/2.11.dev202242/) on your system. 
+  Install [intel-tensorflow==2.11.dev202242](https://pypi.org/project/intel-tensorflow/2.11.dev202242/) on your system.
 
 After installing the prerequisites, download the pretrained model and set
 the `PRETRAINED_MODEL` environment variable to the .pb file path:
@@ -48,13 +47,17 @@ the `PRETRAINED_MODEL` environment variable to the .pb file path:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_int8.pb
 export PRETRAINED_MODEL=$(pwd)/transformer_mlperf_int8.pb
 
+# Int8 Pretrained model for OneDNN Graph (Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point):
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/transformer_lt_itex_int8.pb
+export PRETRAINED_MODEL=$(pwd)/transformer_lt_itex_int8.pb
+
 # FP32 Pretrained model:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_fp32.pb
 export PRETRAINED_MODEL=$(pwd)/transformer_mlperf_fp32.pb
 
 # BFloat16 Pretrained model:
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_bf16.pb
-export PRETRAINED_MODEL=$(pwd)/transformer_mlperf_bfloat16.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/3_0/transformer_bf16_frozen_8_30.pb
+export PRETRAINED_MODEL=$(pwd)/transformer_bf16_frozen_8_30.pb
 ```
 
 Once that has been completed, ensure you have the required environment variables
@@ -62,7 +65,7 @@ set, and then run a quickstart script.
 
 ### Run on Linux
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set the required environment vars
@@ -80,7 +83,7 @@ export BATCH_SIZE=<customized batch size value>
 ### Run on Windows
 Using `cmd.exe`, run:
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set env vars

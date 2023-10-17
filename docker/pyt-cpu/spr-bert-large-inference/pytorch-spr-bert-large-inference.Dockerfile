@@ -19,10 +19,10 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYT_BASE_TAG="2.0.0-pip-base"
+ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG BASE_TAG="2.0.0-pip-base"
 
-FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG} AS intel-extension-for-pytorch
+FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-extension-for-pytorch
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
     build-essential \

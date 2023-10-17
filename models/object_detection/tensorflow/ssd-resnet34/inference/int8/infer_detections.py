@@ -43,6 +43,8 @@ from pycocotools.cocoeval import COCOeval
 from PIL import Image
 import coco_constants
 
+from tensorflow.core.protobuf import rewriter_config_pb2
+
 class MyEncoder(json.JSONEncoder):
    def default(self, obj):
      if isinstance(obj, (numpy.int_, numpy.intc, numpy.intp, numpy.int8,
@@ -106,6 +108,9 @@ class ssd_resnet34_infer:
                             help="Number of steps",
                             dest='steps', type=int, default=800)
 
+    arg_parser.add_argument('--onednn-graph', dest='onednn_graph',
+                            help='enable OneDNN Graph', action='store_true')
+
     # parse the arguments
     self.args = arg_parser.parse_args()
 
@@ -113,6 +118,9 @@ class ssd_resnet34_infer:
     self.config = tf.compat.v1.ConfigProto()
     self.config.intra_op_parallelism_threads = self.args.num_intra_threads
     self.config.inter_op_parallelism_threads = self.args.num_inter_threads
+    if self.args.onednn_graph:
+      self.config.graph_options.rewrite_options.constant_folding = rewriter_config_pb2.RewriterConfig.OFF
+
 
     if self.args.batch_size == -1:
       self.args.batch_size = 64
@@ -319,7 +327,7 @@ class ssd_resnet34_infer:
 
   def run_inference_for_eval(self, graph):
     with graph.as_default():
-      with tf.compat.v1.Session() as sess:
+      with tf.compat.v1.Session(config=self.config) as sess:
 
         num_iter = self.num_batches
 

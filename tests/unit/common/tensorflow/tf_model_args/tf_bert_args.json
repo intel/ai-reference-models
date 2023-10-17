@@ -36,6 +36,24 @@
     "cpuset": "0-111"
   },
   {
+    "_comment": "bert_large_int8_squad_inference",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=bert_large --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --checkpoint=/checkpoints --intelai-models=/workspace/intelai_models --in-graph=/in_graph/bert.pb --output-dir=/workspace/logs --batch-size=32 --data-location=/dataset --infer-option=SQuAD",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/run_squad.py --init_checkpoint=/checkpoints/model.ckpt-3649 --vocab_file=/dataset/vocab.txt --bert_config_file=/dataset/bert_config.json --predict_file=/dataset/dev-v1.1.json --precision=int8 --output_dir=/workspace/logs --predict_batch_size=32 --experimental_gelu=False --optimized_softmax=True --input_graph=/in_graph/bert.pb --do_predict=True  --inter_op_parallelism_threads=2 --intra_op_parallelism_threads=56 --warmup_steps=10 --steps=30 --num_cores_per_socket=28",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "bert_large_int8_inference_optional_args",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=bert_large --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --checkpoint=/checkpoints --intelai-models=/workspace/intelai_models --in-graph=/in_graph/bert.pb --output-dir=/workspace/logs --data-location=/dataset --infer-option=SQuAD --num-intra-threads=28 --num-inter-threads=1 --benchmark-only --doc-stride=128 --max-seq-length=384",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/run_squad.py --init_checkpoint=/checkpoints/model.ckpt-3649 --vocab_file=/dataset/vocab.txt --bert_config_file=/dataset/bert_config.json --predict_file=/dataset/dev-v1.1.json --precision=int8 --output_dir=/workspace/logs --predict_batch_size=32 --experimental_gelu=False --optimized_softmax=True --input_graph=/in_graph/bert.pb --do_predict=True  --mode=benchmark --doc_stride=128 --max_seq_length=384 --inter_op_parallelism_threads=1 --intra_op_parallelism_threads=28 --warmup_steps=10 --steps=30 --num_cores_per_socket=28",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "bert_large_int8_squad_accuracy",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=bert_large --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --checkpoint=/checkpoints --intelai-models=/workspace/intelai_models --in-graph=/in_graph/bert.pb --output-dir=/workspace/logs --batch-size=32 --data-location=/dataset --infer-option=SQuAD --accuracy-only",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/run_squad.py --init_checkpoint=/checkpoints/model.ckpt-3649 --vocab_file=/dataset/vocab.txt --bert_config_file=/dataset/bert_config.json --predict_file=/dataset/dev-v1.1.json --precision=int8 --output_dir=/workspace/logs --predict_batch_size=32 --experimental_gelu=False --optimized_softmax=True --input_graph=/in_graph/bert.pb --do_predict=True  --mode=accuracy --inter_op_parallelism_threads=2 --intra_op_parallelism_threads=56 --warmup_steps=10 --steps=30 --num_cores_per_socket=28",
+    "cpuset": "0-111"
+  },
+  {
     "_comment": "bert_large_bfloat16_squad_inference",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=bert_large --precision=bfloat16 --mode=inference --benchmark-dir=/workspace/benchmarks --checkpoint=/checkpoints --intelai-models=/workspace/intelai_models --batch-size=32 --output-dir=/workspace/logs --infer-option=SQuAD --data-location=/dataset --benchmark-only",
     "output": "python /workspace/intelai_models/inference/run_squad.py --init_checkpoint=/checkpoints/model.ckpt-3649 --vocab_file=/dataset/vocab.txt --bert_config_file=/dataset/bert_config.json --predict_file=/dataset/dev-v1.1.json --precision=bfloat16 --output_dir=/workspace/logs --predict_batch_size=32 --experimental_gelu=False --optimized_softmax=True --do_predict=True  --mode=benchmark --inter_op_parallelism_threads=2 --intra_op_parallelism_threads=56 --warmup_steps=10 --steps=30 --num_cores_per_socket=28",

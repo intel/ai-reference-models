@@ -14,23 +14,23 @@ Intel-optimized TensorFlow.
 |-------------|-------------|
 | [fp32_inference.sh](/quickstart/text_to_speech/tensorflow/wavenet/inference/cpu/fp32/fp32_inference.sh) | Runs inference with a pretrained model |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>AI Kit does not currently support TF 1.15.2 models</p>
+      <p>AI Tools does not currently support TF 1.15.2 models</p>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3.6 or 3.7
         <li>git
@@ -38,7 +38,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>wget
         <li><a href="https://pypi.org/project/intel-tensorflow/1.15.2/">intel-tensorflow==1.15.2</a>
         <li>librosa==0.5
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -68,12 +68,12 @@ tar -xvf wavenet_fp32_pretrained_model.tar.gz
 export PRETRAINED_MODEL=$(pwd)/wavenet_checkpoints
 ```
 
-Navigate to the your model zoo directory, then set an environment variable
+Navigate to the your AI Reference Models directory, then set an environment variable
 for an `OUTPUT_DIR` directory where logs will be written and ensure that you
 have the `TF_WAVENET_DIR` and `PRETRAINED_MODEL` variables set. Once this
 setup is done, you can run the `fp32_inference.sh` [quickstart script](#quick-start-scripts).
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export OUTPUT_DIR=<path to the directory where log files will be written>

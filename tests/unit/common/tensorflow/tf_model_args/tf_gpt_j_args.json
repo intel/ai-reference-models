@@ -1,0 +1,17 @@
+[
+    { "_comment": "gpt_j_fp32_accuracy",
+      "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=gpt_j --precision=fp32 --mode=inference --benchmark-dir=/workspace/intelai-models/benchmarks --intelai-models=/workspace/intelai-models/benchmarks/../models/language_modeling/tensorflow/gpt_j --num-cores=-1 --batch-size=-1 --socket-id=-1 --output-dir=/workspace/all_test_log/internal_GPT-J_fp32_bs100_Accuracy_instance2_accuracy --num-train-steps=1  --accuracy-only     --verbose  --checkpoint=/localdisk/gpt-j/checkpoint --num-inter-threads=1 --num-intra-threads=64 --disable-tcmalloc=True",
+      "output": "python /workspace/intelai-models/benchmarks/../models/language_modeling/tensorflow/gpt_j/inference/run_eval.py --model_name_or_path EleutherAI/gpt-j-6B --dataset_name EleutherAI/lambada_openai --precision fp32 --checkpoint=/localdisk/gpt-j/checkpoint --output_dir=/workspace/all_test_log/internal_GPT-J_fp32_bs100_Accuracy_instance2_accuracy",
+      "cpuset": "0-111"},
+  
+    { "_comment": "gpt_j_bf16_accuracy",
+      "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=gpt_j --precision=bfloat16 --mode=inference --benchmark-dir=/workspace/intelai-models/benchmarks --intelai-models=/workspace/intelai-models/benchmarks/../models/language_modeling/tensorflow/gpt_j --num-cores=-1 --batch-size=-1 --socket-id=-1 --output-dir=/workspace/all_test_log/internal_GPT-J_bfloat16_bs100_Accuracy_instance2_accuracy --num-train-steps=1  --accuracy-only     --verbose  --checkpoint=/localdisk/gpt-j/checkpoint --num-inter-threads=1 --num-intra-threads=64 --disable-tcmalloc=True",
+      "output": "python /workspace/intelai-models/benchmarks/../models/language_modeling/tensorflow/gpt_j/inference/run_eval.py --model_name_or_path EleutherAI/gpt-j-6B --dataset_name EleutherAI/lambada_openai --precision bfloat16 --checkpoint=/localdisk/gpt-j/checkpoint --output_dir=/workspace/all_test_log/internal_GPT-J_bfloat16_bs100_Accuracy_instance2_accuracy",
+      "cpuset": "0-111"},
+  
+    { "_comment": "gpt_j_fp16_accuracy",
+      "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=gpt_j --precision=fp16 --mode=inference --benchmark-dir=/workspace/intelai-models/benchmarks --intelai-models=/workspace/intelai-models/benchmarks/../models/language_modeling/tensorflow/gpt_j --num-cores=-1 --batch-size=-1 --socket-id=-1 --output-dir=/workspace/all_test_log/internal_GPT-J_fp16_bs100_Accuracy_instance2_accuracy --num-train-steps=1  --accuracy-only     --verbose  --checkpoint=/localdisk/gpt-j/checkpoint --num-inter-threads=1 --num-intra-threads=64 --disable-tcmalloc=True",
+      "output": "python /workspace/intelai-models/benchmarks/../models/language_modeling/tensorflow/gpt_j/inference/run_eval.py --model_name_or_path EleutherAI/gpt-j-6B --dataset_name EleutherAI/lambada_openai --precision fp16 --checkpoint=/localdisk/gpt-j/checkpoint --output_dir=/workspace/all_test_log/internal_GPT-J_fp16_bs100_Accuracy_instance2_accuracy",
+      "cpuset": "0-111"}
+  
+  ]

@@ -1,0 +1,132 @@
+fp32-online_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+bf16-online_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: bfloat16
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+int8-online_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+avx-int8-online_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: avx-int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+fp32-throughput_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/inference_throughput.sh
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+bf16-throughput_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/inference_throughput.sh
+  shm-size: 8G
+  env:
+    PRECISION: bfloat16
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+int8-throughput_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/inference_throughput.sh
+  shm-size: 8G
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+avx-int8-throughput_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/inference_throughput.sh
+  shm-size: 8G
+  env:
+    PRECISION: avx-int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+fp32-accuracy_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/accuracy.sh
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+bf16-accuracy_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/accuracy.sh
+  shm-size: 8G
+  env:
+    PRECISION: bfloat16
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+int8-accuracy_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/accuracy.sh
+  shm-size: 8G
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+avx-int8-accuracy_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  cmd: quickstart/accuracy.sh
+  shm-size: 8G
+  env:
+    PRECISION: avx-int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/

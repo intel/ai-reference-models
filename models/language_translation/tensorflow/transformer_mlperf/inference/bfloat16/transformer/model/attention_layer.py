@@ -131,20 +131,22 @@ class Attention(tf.compat.v1.layers.Layer):
         else:
           k = self.k_dense_layer(y)
           v = self.v_dense_layer(y)
-
+    # Split q, k, v into heads.
+    # Only perform split_heads on k, v if not dealing with k, v encoder-decoder caches
+    q = self.split_heads(q)
+    if not encdec_cache:
+      k = self.split_heads(k)
+      v = self.split_heads(v)
+      
     if cache is not None:
       # Combine cached keys and values with new keys and values.
-      k = tf.concat([cache["k"], k], axis=1)
-      v = tf.concat([cache["v"], v], axis=1)
+      k = tf.concat([cache["k"], k], axis=2)
+      v = tf.concat([cache["v"], v], axis=2)
 
       # Update cache
       cache["k"] = k
       cache["v"] = v
 
-    # Split q, k, v into heads.
-    q = self.split_heads(q)
-    k = self.split_heads(k)
-    v = self.split_heads(v)
 
     # Scale q to prevent the dot product between q and k from growing too large.
     # Calculate dot product attention

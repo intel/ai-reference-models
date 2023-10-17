@@ -84,16 +84,28 @@ elif [[ $GPU_TYPE == "max_series" ]]; then
 fi
 
 if [[ $PRECISION == "fp16" ]]; then
+  DTYPE="float16"
   export ITEX_AUTO_MIXED_PRECISION=1
   export ITEX_AUTO_MIXED_PRECISION_DATA_TYPE="FLOAT16"
 fi
 
+if [[ $PRECISION == "int8" ]]; then
+  DTYPE="int8"
+  benchmark="--benchmark"
+else
+  benchmark=""
+fi
+
+if [[ $PRECISION == "fp32" ]]; then
+  DTYPE="float32"
+fi
 # source "${MODEL_DIR}/quickstart/common/utils.sh"
 mac=`lspci | grep Dis| head -n 1| awk '{print $1}'`
 node=`lspci -s $mac -v | grep NUMA | awk -F, '{print $5}' | awk '{print $3}'`
 numactl -N $node -l python -u models/image_recognition/tensorflow/resnet50v1_5/inference/gpu/int8/eval_image_classifier_inference.py \
-         --input-graph=${pretrained_model} \
-         --warmup-steps=10 \
-         --steps=5000 \
-         --batch-size=1 \
-         --benchmark 
+                        --input-graph=${pretrained_model} \
+                        --warmup-steps=5 \
+                        --steps=20 \
+                        --batch-size=$BATCH_SIZE \
+                        --dtype ${DTYPE} \
+                        ${benchmark} 2>&1 | tee ${OUTPUT_DIR}/resnet50_inf_bs${BATCH_SIZE}_${PRECISION}_raw.log

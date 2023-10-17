@@ -69,4 +69,3 @@ tfhub_model_map = {
         "image_size": 331
     }
 }
-

@@ -55,6 +55,7 @@ echo "    PYTHON_EXE: ${PYTHON_EXE}"
 echo "    PYTHONPATH: ${PYTHONPATH}"
 echo "    DRY_RUN: ${DRY_RUN}"
 echo "    GPU: ${GPU}"
+echo "    ONEDNN_GRAPH: ${ONEDNN_GRAPH}"
 
 #  Enable GPU Flag
 gpu_arg=""
@@ -78,6 +79,13 @@ fi
 if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
   echo "${MODE} mode for ${MODEL_NAME} is not supported"
   exit 1
+fi
+
+# Enable OneDNN Graph Flag
+onednn_graph_arg=""
+if [ ${ONEDNN_GRAPH} == "True" ]; then
+  onednn_graph_arg="--onednn-graph=True"
+  export ITEX_ONEDNN_GRAPH=1
 fi
 
 # Determines if we are running in a container by checking for .dockerenv
@@ -408,7 +416,8 @@ ${output_results_arg} \
 ${weight_sharing_arg} \
 ${synthetic_data_arg} \
 ${verbose_arg} \
-${gpu_arg}"
+${gpu_arg} \
+${onednn_graph_arg}"
 
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
   CMD="${CMD} --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE}"
@@ -1431,10 +1440,12 @@ function gpt_j() {
         if [ ${BENCHMARK_ONLY} == "True" ]; then
           CMD=" ${CMD} --max_output_tokens=${MAX_OUTPUT_TOKENS}"
           CMD=" ${CMD} --input_tokens=${INPUT_TOKENS}"
-          if [[ -z "${SKIP_ROWS}" ]]; then
-            SKIP_ROWS=0
+          CMD=" ${CMD} --steps=${STEPS}"
+          CMD=" ${CMD} --warmup_steps=${WARMUP_STEPS}"
+          if [[ -z "${DUMMY_DATA}" ]]; then
+            DUMMY_DATA=0
           fi
-          CMD=" ${CMD} --skip_rows=${SKIP_ROWS}"
+          CMD=" ${CMD} --dummy_data=${DUMMY_DATA}"
         fi
         CMD=${CMD} run_model
       else
@@ -1683,6 +1694,7 @@ function vision_transformer() {
 
     if [ ${MODE} == "training" ]; then
 	CMD="${CMD} $(add_arg "--init-checkpoint" ${INIT_CHECKPOINT})"
+	CMD="${CMD} $(add_arg "--epochs" ${EPOCHS})"
     fi
 	    
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] ||
@@ -1775,6 +1787,58 @@ function rgat() {
     fi
 }
 
+function stable_diffusion() {
+    if [ ${MODE} == "inference" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
+        curr_dir=${pwd}
+        echo "Curr dir: "
+        echo ${curr_dir}
+
+        infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
+        benchmarks_patch_path=${infer_dir}/patch
+        echo "benchmarks_patch_path:"
+        echo ${benchmarks_patch_path}
+
+        cd /tmp
+        rm -rf keras-cv
+        git clone https://github.com/keras-team/keras-cv.git
+        cd keras-cv
+        git reset --hard 66fa74b6a2a0bb1e563ae8bce66496b118b95200
+        git apply ${benchmarks_patch_path}
+        pip install .
+        cd ${curr_dir}
+
+        if [[ ${NOINSTALL} != "True" ]]; then
+          python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/requirements.txt"
+        fi
+
+        python -c $'from tensorflow import keras\n_ = keras.utils.get_file(
+            "bpe_simple_vocab_16e6.txt.gz",
+            "https://github.com/openai/CLIP/blob/main/clip/bpe_simple_vocab_16e6.txt.gz?raw=true",
+            file_hash="924691ac288e54409236115652ad4aa250f48203de50a9e4722a6ecd48d6804a",
+        )\n_ = keras.utils.get_file(
+          origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/kcv_encoder.h5",
+          file_hash="4789e63e07c0e54d6a34a29b45ce81ece27060c499a709d556c7755b42bb0dc4",
+        )\n_ = keras.utils.get_file(
+          origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/kcv_diffusion_model.h5",
+          file_hash="8799ff9763de13d7f30a683d653018e114ed24a6a819667da4f5ee10f9e805fe",
+        )\n_ = keras.utils.get_file(
+          origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/kcv_decoder.h5",
+          file_hash="ad350a65cc8bc4a80c8103367e039a3329b4231c2469a1093869a345f55b1962",
+        )'
+
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+        CMD="${CMD} $(add_arg "--output-dir" ${OUTPUT_DIR})"
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    fi
+}
+
 # Wide & Deep model
 function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
@@ -1857,7 +1921,7 @@ function wide_deep_large_ds() {
 
 function graphsage() {
     if [ ${MODE} == "inference" ]; then
-      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
         if [ ${NUM_INTER_THREADS} != "None" ]; then
@@ -1955,6 +2019,8 @@ elif [ ${MODEL_NAME} == "gpt_j" ]; then
   gpt_j
 elif [ ${MODEL_NAME} == "rgat" ]; then
   rgat
+elif [ ${MODEL_NAME} == "stable_diffusion" ]; then
+  stable_diffusion
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1

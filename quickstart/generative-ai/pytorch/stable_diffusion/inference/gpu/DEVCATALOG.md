@@ -33,7 +33,6 @@ export IMAGE_NAME=intel/generative-ai:pytorch-flex-gpu-stable-diffusion-inferenc
 export PRECISION=<provide either fp32 or fp16>
 export OUTPUT_DIR=<path to output directory>
 export SCRIPT=quickstart/online_inference.sh
-export OUTPUT_DIR=<path to output directory>
 
 DOCKER_ARGS="--rm -it"
 

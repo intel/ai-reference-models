@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# 3D U-Net FP32 inference
+# 3D U-Net FP32 Inference
 
 <!-- 10. Description -->
 ## Description
@@ -73,23 +73,23 @@ export DATASET_DIR=/home/<user>/3DUnetCNN/brats
 |-------------|-------------|
 | [fp32_inference.sh](fp32_inference.sh) | Runs inference with a batch size of 1 using the BraTS dataset and a pretrained model |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>AI Kit does not currently support TF 1.15.2 models</p>
+      <p>AI Tools does not currently support TF 1.15.2 models</p>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3.6 or 3.7
         <li><a href="https://pypi.org/project/intel-tensorflow/1.15.2/">intel-tensorflow==1.15.2</a>
@@ -101,7 +101,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>nibabel==2.3.3
         <li>SimpleITK===1.2.0
         <li>h5py==2.10.0
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -123,7 +123,7 @@ the `PRETRAINED_MODEL` path set from the previous command.
 Once the environment variables are all set, you can run the
 [quickstart script](#quick-start-scripts).
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export DATASET_DIR=<path to the dataset>

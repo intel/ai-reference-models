@@ -9,8 +9,14 @@ Intel® Extension for TensorFlow with Intel® Data Center GPU Max Series.
 
 <!--- 20. GPU Setup -->
 ## Software Requirements:
-- Intel® Data Center GPU Max Series
-- Follow [instructions](https://intel.github.io/intel-extension-for-tensorflow/latest/get_started.html) to install the latest ITEX version and other prerequisites.
+- Host machine has Intel® Data Center Max Series 1550 x4 OAM GPU
+- Follow instructions to install GPU-compatible driver [647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
+- Create and activate virtual environment.
+  ```bash
+  virtualenv -p python <virtualenv_name>
+  source <virtualenv_name>/bin/activate
+  ```
+- Follow [instructions](https://pypi.org/project/intel-extension-for-tensorflow/) to install the latest ITEX version and other prerequisites.
 
 - Intel® oneAPI Base Toolkit: Need to install components of Intel® oneAPI Base Toolkit
   - Intel® oneAPI DPC++ Compiler
@@ -41,20 +47,14 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 ## Quick Start Scripts
 
 | Script name | Description |
-|:-------------:|:-------------:|
-| [`online_inference.sh`](online_inference.sh) | Runs online inference for int8, fp16 and fp32 precisions. | 
-| [`batch_inference.sh`](batch_inference.sh)| Runs batch inference for int8, fp16 and fp32 precisions. |
-| [`accuracy.sh`](accuracy.sh) | Measures the model accuracy for int8, fp16 and fp32 precisions. |
+|-------------|-------------|
+| `batch_inference` | Runs ResNet50 V1.5 batch inference for the precision set on x4 OAM |
+| `accuracy` | Measures model accuracy for the precision set |
+| `online_inference` | Runs ResNet50 V1.5 online inference for the precision set |
 
 <!--- 50. Baremetal -->
 ## Run the model
 Install the following pre-requisites:
-* Create and activate virtual environment.
-  ```bash
-  virtualenv -p python <virtualenv_name>
-  source <virtualenv_name>/bin/activate
-  ```
-  
 * Download the frozen graph model file, and set the FROZEN_GRAPH environment variable to point to where it was saved:
   ```bash
   # For fp32 and fp16:
@@ -74,22 +74,24 @@ TF records files will need to be set as the `DATASET_DIR` environment variable
 prior to running a [quickstart script](#quick-start-scripts).
 
 ### Run the model on Baremetal
-Navigate to the ResNet50 v1.5 inference directory, and set environment variables:
+Navigate to the models directory, and set environment variables:
 ```
 cd models
 export OUTPUT_DIR=<path where output log files will be written>
 export PRECISION=<Set precision: int8, fp16 or fp32>
 export FROZEN_GRAPH=<path to pretrained model file (*.pb)>
 export GPU_TYPE=max_series
+export NUM_OAM=<provide 4 for number of OAM Modules supported by the platform>
 
 # Optional envs
 export BATCH_SIZE=<Set batch_size else it will run with default batch>
 
-# Set 'Tile' env variable is only for running "batch_inference.sh" script:
-export Tile=2
-
 # Set 'DATASET_DIR' only when running "accuracy.sh" script, "online_inference.sh" and "batch_inference.sh" scripts run with synthetic dataset:
 export DATASET_DIR=<path to the preprocessed imagenet dataset directory>
+
+# Install dependencies:
+NOTE: To run apt-get commands may require sudo root permissions.
+./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/setup.sh
 
 # Run quickstart script:
 ./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/<script name>.sh
@@ -99,4 +101,3 @@ export DATASET_DIR=<path to the preprocessed imagenet dataset directory>
 ## License
 
 [LICENSE](/LICENSE)
-

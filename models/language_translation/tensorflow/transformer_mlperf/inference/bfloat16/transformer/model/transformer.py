@@ -230,9 +230,9 @@ class Transformer(object):
     # Create cache storing decoder attention values for each layer.
     cache = {
         "layer_%d" % layer: {
-            "k": tf.zeros([batch_size, 0, self.params.hidden_size],
+            "k": tf.zeros([batch_size, self.params.num_heads, 0, self.params.hidden_size//self.params.num_heads],
                            dtype=tf.bfloat16),
-            "v": tf.zeros([batch_size, 0, self.params.hidden_size],
+            "v": tf.zeros([batch_size, self.params.num_heads, 0, self.params.hidden_size//self.params.num_heads],
                            dtype=tf.bfloat16)
         } for layer in range(self.params.num_hidden_layers)}
 
@@ -383,6 +383,8 @@ class DecoderStack(tf.compat.v1.layers.Layer):
     self.batch_size = params.batch_size
     self.beam_size = params.beam_size
     self.hidden_size = params.hidden_size
+    self.enc_dec_cache_helper = attention_layer.Attention(
+          params.hidden_size, params.num_heads, params.attention_dropout, train)
     mlperf_log.transformer_print(
         key=mlperf_log.MODEL_HP_NUM_HIDDEN_LAYERS,
         value=params.num_hidden_layers)
@@ -428,11 +430,8 @@ class DecoderStack(tf.compat.v1.layers.Layer):
 
   def cache_encdec(self, encoder_outputs, encdec_attention_bias):
     with tf.compat.v1.name_scope("encdec_cache"):
-      encoder_outputs = beam_search._expand_to_beam_size(encoder_outputs, self.beam_size)
-      encoder_outputs = beam_search._flatten_beam_dim(encoder_outputs)
       encdec_attention_bias = beam_search._expand_to_beam_size(encdec_attention_bias, self.beam_size)
       encdec_attention_bias = beam_search._flatten_beam_dim(encdec_attention_bias)
-      self.enc_out_cache["encoder_outputs"] = encoder_outputs
       self.enc_out_cache["encoder_decoder_attention_bias"] = encdec_attention_bias
     for n, layer in enumerate(self.layers):
       with tf.compat.v1.variable_scope("decoder_stack/" + "layer_%d" % n + "/encdec_attention", reuse=tf.compat.v1.AUTO_REUSE):
@@ -442,5 +441,17 @@ class DecoderStack(tf.compat.v1.layers.Layer):
           shape=[self.hidden_size, self.hidden_size])
         with tf.compat.v1.tpu.bfloat16_scope("attention/"):
           k = tf.matmul(encoder_outputs, tf.cast(Wk, tf.bfloat16))
+          k = beam_search._expand_to_beam_size(k, self.beam_size)
+          k = beam_search._flatten_beam_dim(k)
+          k = self.enc_dec_cache_helper.split_heads(k)
+          
           v = tf.matmul(encoder_outputs, tf.cast(Wv, tf.bfloat16))
+          v = beam_search._expand_to_beam_size(v, self.beam_size) 
+          v = beam_search._flatten_beam_dim(v)
+          v = self.enc_dec_cache_helper.split_heads(v)
           self.encdec_cache["layer_%d" % n] = {"k": k, "v": v}
+    with tf.compat.v1.name_scope("encdec_cache"):
+      encoder_outputs = beam_search._expand_to_beam_size(encoder_outputs, self.beam_size)
+      encoder_outputs = beam_search._flatten_beam_dim(encoder_outputs)
+      self.enc_out_cache["encoder_outputs"] = encoder_outputs
+      

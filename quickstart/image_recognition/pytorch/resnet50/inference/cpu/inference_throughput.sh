@@ -48,9 +48,16 @@ ARGS="$ARGS -e -a resnet50 ../ --dummy"
 # default value, you can fine-tune it to get perfect performance.
 BATCH_SIZE=112
 
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+TOTAL_CORES=`expr $CORES \* $SOCKETS`
+
+
 if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
-    BATCH_SIZE=116
     echo "running int8 path"
+    NUMA_NODES=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+    CORES_PER_NODE=`expr $TOTAL_CORES / $NUMA_NODES`
+    BATCH_SIZE=`expr $CORES_PER_NODE \* 8`
     ARGS="$ARGS --int8 --configure-dir ${MODEL_DIR}/models/image_recognition/pytorch/common/resnet50_configure_sym.json"
 elif [[ $PRECISION == "bf16" ]]; then
     BATCH_SIZE=68
@@ -73,12 +80,6 @@ else
     echo "Supported precisions are: fp32, avx-fp32, bf16, int8, and avx-int8"
     exit 1
 fi
-
-CORES=`lscpu | grep Core | awk '{print $4}'`
-SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
-TOTAL_CORES=`expr $CORES \* $SOCKETS`
-
-CORES_PER_INSTANCE=$CORES
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1

@@ -67,8 +67,14 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-# Get number of cores per socket line from lscpu
-export OMP_NUM_THREADS=4
+cores_per_socket="4"
+
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
+if [ -z "${OMP_NUM_THREADS}" ]; then 
+  export OMP_NUM_THREADS=4
+else
+  export OMP_NUM_THREADS=${OMP_NUM_THREADS}
+fi
 
 MODE="inference"
 

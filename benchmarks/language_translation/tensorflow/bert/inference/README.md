@@ -28,8 +28,6 @@ You can also use the helper script [download_glue_data.py](https://gist.github.c
 | [`accuracy.sh`](/quickstart/language_translation/tensorflow/bert/inference/cpu/accuracy.sh) | Runs accuracy |
 
 
-
-<!--- 50. AI Kit -->
 ## Run the model
 * Download the fp32 "BERT-Base, Uncased" pre-trained model and unzip it inside the dataset directory `data/MRPC`.
 If you run on Windows, please use a browser to download the pretrained model using the link below. For Linux, run:
@@ -52,7 +50,7 @@ If you run on Windows, please use a browser to download the pretrained model usi
   If you re-run multiple times (making sure to point to different `output-dir`), you should see results between 84% and 88%.
 
 
-* Follow the instructions to setup your bare metal environment on either Linux or Windows systems. Ensure that you have a clone of the [Model Zoo Github repository](https://github.com/IntelAI/models).
+* Follow the instructions to setup your bare metal environment on either Linux or Windows systems. Ensure that you have a clone of the [AI Reference Models Github repository](https://github.com/IntelAI/models).
   ```
   git clone https://github.com/IntelAI/models.git
   ```
@@ -62,7 +60,7 @@ If you run on Windows, please use a browser to download the pretrained model usi
 
 ## Run on Linux
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set env vars
@@ -106,4 +104,3 @@ As an example, if the pretrained model path on Windows is `D:\user\transformer_l
 
 * To run more advanced use cases, see the instructions [here](fp32/Advanced.md)
   for calling the `launch_benchmark.py` script directly.
-

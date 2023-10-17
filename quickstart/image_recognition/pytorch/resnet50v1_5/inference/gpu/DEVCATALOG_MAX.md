@@ -35,8 +35,8 @@ The folder that contains the `val` directory should be set as the
 | `inference_block_format.sh` | Runs ResNet50 V1.5 INT8 inference (block format)|
 
 Requirements:
-* Host machine has Intel(R) Data Center Max Series GPU
-* Follow instructions to install GPU-compatible driver [602](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-jammy-dc.html#step-1-add-package-repository)
+* Host machine has Intel(R) Data Center Max Series 1550 GPU x4 OAM GPU
+* Follow instructions to install GPU-compatible driver [647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
 * Docker
 
 ### Docker pull command:
@@ -51,12 +51,11 @@ export PRECISION=<export precision>
 export DATASET_DIR=${PWD}/imagenet
 export OUTPUT_DIR=${PWD}/logs
 export BATCH_SIZE=<export batch size,default is 1024>
-export NUM_ITERATIONS=<export number of iterations,default is 10>
+export NUM_ITERATIONS=<export number of iterations,default is 500>
 IMAGE_NAME=intel/image-recognition:pytorch-max-gpu-resnet50v1-5-inference
 DOCKER_ARGS="--rm -it"
-
+export NUM_OAM=<provide 4 for number of OAM Modules supported by the platform>
 SCRIPT=quickstart/inference_block_format.sh
-Tile=2
 
 docker run \
   --privileged \
@@ -67,7 +66,7 @@ docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env Tile=${Tile} \
+  --env NUM_OAM=${NUM_OAM} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
@@ -77,4 +76,3 @@ docker run \
   $IMAGE_NAME \
   /bin/bash $SCRIPT
 ```
-

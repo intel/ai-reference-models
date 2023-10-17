@@ -19,12 +19,15 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG MAX_TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG MAX_TF_BASE_TAG="gpu-horovod"
+ARG BASE_IMAGE="intel/intel-extension-for-tensorflow"
+ARG BASE_TAG="xpu"
 
-FROM ${MAX_TF_BASE_IMAGE}:${MAX_TF_BASE_TAG}
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /workspace/tf-max-series-resnet50v1-5-inference
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
 
 ARG INT8_MODEL_URL
 ARG FP16_MODEL_URL

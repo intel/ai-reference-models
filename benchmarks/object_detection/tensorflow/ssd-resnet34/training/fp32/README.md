@@ -20,20 +20,20 @@ SSD-ResNet34 training uses the COCO training dataset. Use the [instructions](htt
 | [`fp32_training.sh`](/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/fp32/fp32_training.sh) | Runs 100 training steps using mpirun for the specified number of processes (defaults to MPI_NUM_PROCESSES=1).  |
 
 <!--- 50. Bare Metal -->
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit you will need:</p>
+      <p>To run using AI Tools you will need:</p>
       <ul>
         <li>git
         <li>numactl
@@ -57,7 +57,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3
         <li>git
@@ -78,7 +78,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>protoc
         <li>pycocotools
         <li>tensorflow-addons==0.18.0
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -111,7 +111,7 @@ from previous runs. You can optionally set the `MPI_NUM_PROCESSES` environment
 variable (defaults to 1). After all the setup is complete, run the
 [quickstart script](#quick-start-scripts).
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export TF_MODELS_DIR=<path to your clone of the TensorFlow models repo>

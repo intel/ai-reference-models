@@ -1,0 +1,23 @@
+fp16-multi-card-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-inference
+  cmd: quickstart/multi_card_distributed_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp16
+    GLOBAL_BATCH_SIZE: '65536' 
+    TOTAL_TRAINING_SAMPLES: '4195197692'
+    OUTPUT_DIR: /tmp
+    NUM_OAM: '4'
+    DATASET_DIR: /dataset/dlrm-v2
+    PRETRAINED_MODEL: /dlrm-v2_weights/model_weights
+  volumes:
+    - src: /dataset/dlrm-v2
+      dst: /dataset/dlrm-v2
+    - src: /dev/dri
+      dst: /dev/dri
+    - src: /dlrm-v2_weights/model_weights
+      dst: /dlrm-v2_weights/model_weights
+    
+
+      

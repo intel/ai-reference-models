@@ -71,7 +71,7 @@ from schedulers import LinearWarmUpScheduler, LinearWarmupPolyDecayScheduler
 import mlperf_logger
 from lamb import Lamb
 import intel_extension_for_pytorch as ipex
-import intel_extension_for_pytorch.tpp as tpp
+from intel_extension_for_pytorch import tpp as tpp
 
 
 ref_time = 0
@@ -1424,8 +1424,11 @@ def main():
                 # dataset_future = pool.submit(create_pretraining_dataset, data_file, args.max_predictions_per_seq, shared_file_list, args, worker_init_fn=worker_init)
                 pass
             t0 = get_time()
+            bench_time = 0
+            completed_steps = 0
             for step, batch in enumerate(train_dataloader):
                 training_steps += 1
+                t_beg=time.time()
                 t1 = get_time()
                 (
                     input_ids,
@@ -1498,6 +1501,11 @@ def main():
                     optimizer.acc_and_zero_grad()
                 # mlperf_logger.barrier()
                 t5 = get_time()
+                t_end=time.time()
+                completed_steps += 1
+                if global_step >= 10:
+                    bench_time += (t_end - t_beg)
+
                 gloss, lm_acc, num_masked, seq_acc, seq_tot = calc_accuracy(
                     outputs, masked_lm_labels, next_sentence_labels, args
                 )
@@ -1564,10 +1572,12 @@ def main():
                         print_summary("SYS:", t_all_time[:, 7])
                         print_summary("ARS:", t_all_time[:, 8])
                         print_summary("ARE:", t_all_time[:, 9])
-                if args.benchmark_steps > 0 and global_step + 1 >= args.benchmark_steps:
+                if args.benchmark_steps > 0 and completed_steps + 1  >= args.benchmark_steps:
                     mlperf_logger.barrier()
                     if args.local_rank == 0:
                         print(f"Done Benchmarking {args.benchmark_steps} steps.")
+                        throughput = ( completed_steps - 10 ) *   total_batch_size / bench_time
+                        print("Throughput: {:.3f} sentence/s".format(throughput), flush=True)
                     sys.exit(0)
 
                 update_step = training_steps % args.gradient_accumulation_steps == 0

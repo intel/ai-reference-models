@@ -1,9 +1,9 @@
 # Transfer Learning for Object Detection using PyTorch
 
-This notebook uses object detection models from torchvision that were originally trained 
-using COCO and does transfer learning with the [PennFudan dataset](https://www.cis.upenn.edu/~jshi/ped_html/), 
-available via public download, or the [Kitti dataset](http://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=2d), 
-available through torchvision datasets.
+This notebook uses object detection models from torchvision that were originally trained
+using COCO and does transfer learning with the [PennFudan dataset](https://www.cis.upenn.edu/~jshi/ped_html/),
+available via public download, or the [Kitti dataset](http://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=2d),
+available through Torchvision datasets.
 
 The notebook performs the following steps:
 
@@ -17,51 +17,11 @@ The notebook performs the following steps:
 
 ## Running the notebook
 
-The instructions below explain how to run the notebook on bare metal using a
-virtual environment.
+To run the notebook, follow the instructions in `setup.md`.
 
-1. Get a clone of the Model Zoo repository from GitHub:
-   ```
-   git clone https://github.com/IntelAI/models.git intelai_models
-   export MODEL_ZOO_DIR=$(pwd)/intelai_models
-   ```
-2. Create a Python3 virtual environment and install required packages.
+## References
 
-   You can use virtualenv:
-   ```
-   python3 -m venv intel-pyt-venv
-   source intel-pyt-venv/bin/activate
-   ```
-   Or Anaconda:
-   ```
-   conda create -n intel-pyt python=3.9
-   conda activate intel-pyt
-   ```
-   Then, from inside the activated virtualenv or conda environment run these steps: 
-   ```
-   pip install --upgrade pip
-   pip install -r ${MODEL_ZOO_DIR}/docs/notebooks/transfer_learning/pytorch_object_detection/requirements.txt
-   ```
-3. Set environment variables for the path to the dataset folder and an output directory.
-   The dataset and output directories can be empty. The notebook will download the PennFudan 
-   dataset to the dataset directory, if it is empty. Subsequent runs will reuse the dataset.
-   ```
-   export DATASET_DIR=<directory to download the dataset>
-   export OUTPUT_DIR=<output directory for the saved model>
-
-   mkdir -p $DATASET_DIR
-   mkdir -p $OUTPUT_DIR
-   ```
-4. Navigate to the notebook directory in your clone of the model zoo repo, and then start the
-   [notebook server](https://jupyter.readthedocs.io/en/latest/running.html#starting-the-notebook-server):
-   ```
-   cd ${MODEL_ZOO_DIR}/docs/notebooks/transfer_learning/pytorch_object_detection
-   jupyter notebook --port 8888
-   ```
-5. Copy and paste the URL from the terminal to your browser to view and run
-   the notebook.
-   
-Dataset Citations:
+Dataset citations:
 ```
 @InProceedings{10.1007/978-3-540-76386-4_17,
     author="Wang, Liming

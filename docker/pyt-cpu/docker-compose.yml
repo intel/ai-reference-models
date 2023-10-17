@@ -1,0 +1,215 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2023 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+version: '3'
+services:
+  spr-bert-large-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-spr-bert-large-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-bert-large-inference/pytorch-spr-bert-large-inference.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-maskrcnn-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-spr-maskrcnn-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-maskrcnn-inference/pytorch-spr-maskrcnn-inference.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-maskrcnn-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-spr-maskrcnn-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-maskrcnn-training/pytorch-spr-maskrcnn-training.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-resnet50-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-resnet50-training/pytorch-spr-resnet50-training.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-resnet50-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-resnet50-inference/pytorch-spr-resnet50-inference.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-ssd-resnet34-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-ssd-resnet34-inference/pytorch-spr-ssd-resnet34-inference.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-ssd-resnet34-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-ssd-resnet34-training/pytorch-spr-ssd-resnet34-training.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-resnext-32x16d-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnext-32x16d-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-resnext-32x16d-inference/pytorch-resnext-32x16d-inference.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-dlrm-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-dlrm-inference/pytorch-spr-dlrm-inference.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-dlrm-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-dlrm-training/pytorch-spr-dlrm-training.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-rnnt-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-rnnt-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-rnnt-training/pytorch-spr-rnnt-training.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-rnnt-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-rnnt-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-rnnt-inference/pytorch-spr-rnnt-inference.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-distilbert-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-distilbert-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-distilbert-inference/pytorch-spr-distilbert-inference.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  spr-bert-large-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-bert-large-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
+      dockerfile: docker/pyt-cpu/spr-bert-large-training/pytorch-spr-bert-large-training.Dockerfile
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"

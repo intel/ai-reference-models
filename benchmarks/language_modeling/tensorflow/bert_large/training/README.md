@@ -70,16 +70,16 @@ in TensorFlow record file format. The output TensorFlow record files are expecte
 ### Setup on baremetal
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit you will need:</p>
+      <p>To run using AI Tools you will need:</p>
       <ul>
         <li>numactl
         <li>unzip
@@ -95,7 +95,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3
         <li>intel-tensorflow>=2.5.0
@@ -107,7 +107,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>openssh-server (only required for multi-instance)
         <li>libopenmpi-dev (only required for multi-instance)
         <li>horovod==0.27.0 (only required for multi-instance)
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>

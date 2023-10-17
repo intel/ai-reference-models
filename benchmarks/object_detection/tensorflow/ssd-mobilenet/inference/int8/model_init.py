@@ -69,6 +69,9 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.data_location:
             self.command_prefix += " -d {0}".format(self.args.data_location)
 
+        if self.args.onednn_graph:
+            self.command_prefix += " --onednn-graph"
+
         if self.args.accuracy_only:
             self.command_prefix += " -r"
             assert self.args.data_location, "accuracy must provide the data."

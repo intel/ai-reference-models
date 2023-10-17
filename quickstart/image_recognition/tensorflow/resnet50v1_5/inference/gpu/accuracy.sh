@@ -95,20 +95,23 @@ elif [[ $GPU_TYPE == "max_series" ]]; then
 fi
 
 if [[ $PRECISION == "fp16" ]]; then
+  DTYPE="float16"
   export ITEX_AUTO_MIXED_PRECISION=1
   export ITEX_AUTO_MIXED_PRECISION_DATA_TYPE="FLOAT16"
 fi
 
-source "${MODEL_DIR}/quickstart/common/utils.sh"
-_command python benchmarks/launch_benchmark.py \
-         --model-name=resnet50v1_5 \
-         --precision=${PRECISION} \
-         --mode=inference \
-         --framework tensorflow \
-         --in-graph ${pretrained_model} \
-         --data-location=${DATASET_DIR} \
-         --output-dir ${OUTPUT_DIR} \
+if [[ $PRECISION == "int8" ]]; then
+  DTYPE="int8"
+fi
+
+if [[ $PRECISION == "fp32" ]]; then
+  DTYPE="float32"
+fi
+
+python -u models/image_recognition/tensorflow/resnet50v1_5/inference/gpu/int8/eval_image_classifier_inference.py \
+         --input-graph=${pretrained_model} \
+         --data-num-inter-threads 1 \
          --accuracy-only \
-         --batch-size=${BATCH_SIZE} \
-         --gpu \
-         $@
+	 --batch-size=${BATCH_SIZE} \
+         --data-location ${DATASET_DIR} \
+         --dtype ${DTYPE} 2>&1 | tee ${OUTPUT_DIR}/resnet50_acc_${PRECISION}_raw.log

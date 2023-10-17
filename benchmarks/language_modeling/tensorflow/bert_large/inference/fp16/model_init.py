@@ -168,6 +168,9 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.weight_sharing:
             model_args += " --weight_sharing"
 
+        if self.args.onednn_graph:
+            model_args += " --onednn_graph"
+
         if not self.args.gpu:
             model_args += " --num_cores_per_socket=" + str(platform_util.num_cores_per_socket)
             if self.args.warmup_steps:

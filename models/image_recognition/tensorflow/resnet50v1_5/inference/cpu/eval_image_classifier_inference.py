@@ -105,6 +105,10 @@ class eval_classifier_optimized_graph:
       choices=['float32', 'fp16', 'bfloat16'],
       help='data type used for computation',
       default="float32")
+    arg_parser.add_argument(
+      '--onednn-graph', dest='onednn_graph',
+      help='enable OneDNN Graph',
+      action='store_true')
 
     self.args = arg_parser.parse_args()
     # validate the arguements
@@ -135,6 +139,8 @@ class eval_classifier_optimized_graph:
     infer_config.use_per_session_threads = 1
     infer_config.graph_options.rewrite_options.remapping = (
                   rewriter_config_pb2.RewriterConfig.AGGRESSIVE)
+    if self.args.onednn_graph:
+      infer_config.graph_options.rewrite_options.constant_folding = rewriter_config_pb2.RewriterConfig.OFF
     if dtype == 'fp16':
       infer_config.graph_options.rewrite_options.auto_mixed_precision = (
                     rewriter_config_pb2.RewriterConfig.ON)

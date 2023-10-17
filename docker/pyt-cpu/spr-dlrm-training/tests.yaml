@@ -1,0 +1,36 @@
+fp32-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-training
+  cmd: quickstart/training.sh
+  shm-size: 10G
+  env:
+    PRECISION: fp32
+    NUM_BATCH: '1500'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm
+bf16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-training
+  cmd: quickstart/training.sh
+  shm-size: 10G
+  env:
+    PRECISION: bf16
+    NUM_BATCH: '1500'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm
+bf32-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-training
+  cmd: quickstart/training.sh
+  shm-size: 10G
+  env:
+    PRECISION: bf32
+    NUM_BATCH: '1500'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm

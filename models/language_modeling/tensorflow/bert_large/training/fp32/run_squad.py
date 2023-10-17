@@ -191,6 +191,8 @@ flags.DEFINE_bool(
     "If true, turns on gradient synchronization via horovod."
     "Default is False as it gives better accuracy.")
 
+flags.DEFINE_bool("gpu", False, "Run the benchmark script using GPU")
+
 
 class SquadExample(object):
   """A single training/test example for simple sequence classification.
@@ -710,7 +712,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
       total_loss = (start_loss + end_loss) / 2.0
 
       train_op = optimization.create_optimizer(
-          total_loss, learning_rate, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=use_tpu, use_multi_cpu=(is_mpi if FLAGS.mpi_workers_sync_gradients else 0))
+          total_loss, learning_rate, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=use_tpu, use_multi_cpu=(is_mpi if FLAGS.mpi_workers_sync_gradients else 0), use_gpu=FLAGS.gpu)
 
       log_hook = bf.logTheLossHook(total_loss, n=3)
       output_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(

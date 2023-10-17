@@ -144,9 +144,9 @@ def load_model(args, config = None, checkpoint = None):
         )
     return model
 
-def load_jit_model(model, inputs, dtype, device, jit_trace_path):
+def load_jit_model(model, inputs, dtype, device, jit_trace_path, use_jit_cache):
     jit_model = None
-    if (os.path.isfile(jit_trace_path)):
+    if (os.path.isfile(jit_trace_path)) and use_jit_cache:
         print("load trace model ...")
         jit_model = torch.jit.load(jit_trace_path)
         print("load trace model done")
@@ -390,6 +390,11 @@ def train(args, train_dataset, model, tokenizer):
                 record_shapes=record_shapes,
             ) as prof:
                 # Skip past any already trained steps if resuming training
+                try:
+                    import memory_check
+                    memory_check.display_mem("xpu:0")
+                except:
+                    pass
                 if steps_trained_in_current_epoch > 0:
                     steps_trained_in_current_epoch -= 1
                     continue
@@ -652,7 +657,7 @@ def evaluate(args, model, tokenizer, prefix=""):
         if iter_num == 0:
            model = torch.xpu.optimize(model=model, dtype=MAP_TORCH_DTYPE[args.dtype], level="O1", weights_prepack = False)
            if args.do_jit:
-               jit_model = load_jit_model(model, inputs, MAP_TORCH_DTYPE[args.dtype], args.device, jit_trace_path)
+               jit_model = load_jit_model(model, inputs, MAP_TORCH_DTYPE[args.dtype], args.device, jit_trace_path, args.jit_cache)
         with torch.no_grad():
             outputs = None
             batch_start = None
@@ -1007,6 +1012,12 @@ def main():
     )
     parser.add_argument(
         "--do_jit", action="store_true", help="Whether to run eval with jit on the dev set."
+    )
+    parser.add_argument(
+        "--jit_cache",
+        action="store_true",
+        default=True,
+        help="Whether to use jit model cache",
     )
     parser.add_argument(
         "--evaluate_during_training",

@@ -140,7 +140,19 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 ## Quick Start Script for fast_bert with TPP optimization 
 |  DataType   | pre-train  |  finetune|
 | ----------- | ----------- | ----------- |
-| BF16        |bash sh run_fast_bert_pretrain_8_node.sh | bash sh fast_bert_squad_finetune.sh --use_tpp --tpp_bf16 --unpad |
+| BF16        |bash sh run_fast_bert_pretrain.sh | bash sh fast_bert_squad_finetune.sh --use_tpp --tpp_bf16 --unpad |
+
+```
+bash sh run_fast_bert_pretrain.sh
+```
+will run 32 ranks on 8 nodes with `global batch size=2048`.
+You can config following ENV to run more settings, for example
+```
+export NPROCESS=16
+export PROCESS_PER_NODE=2
+export GBS=1024
+```
+will run 16 ranks on 8 nodes with `global batch size=1024`.
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and

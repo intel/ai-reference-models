@@ -1,0 +1,156 @@
+fp32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/inference_realtime.sh fp32
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+bf16-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/inference_realtime.sh bf16
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+int8-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/inference_realtime.sh int8
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+avx-int8-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/inference_realtime.sh avx-int8
+  env:
+    PRECISION: avx-int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+fp32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/inference_throughput.sh fp32
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+bf16-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/inference_throughput.sh bf16
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+int8-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/inference_throughput.sh int8
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+avx-int8-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/inference_throughput.sh avx-int8
+  env:
+    PRECISION: avx-int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+fp32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/accuracy.sh fp32
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+bf16-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/accuracy.sh bf16
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+int8-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/accuracy.sh int8
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/
+avx-int8-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  cmd: quickstart/accuracy.sh avx-int8
+  env:
+    PRECISION: avx-int8
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-inference/
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-inference/
+      dst: /pytorch/pretrained_models/ssd-resnet34-inference/

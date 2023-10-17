@@ -96,8 +96,19 @@ if [[ $PRECISION == "bfloat32" ]]; then
 fi
 
 MODE="inference"
-CORES_PER_INSTANCE="4"
 
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  CORES_PER_INSTANCE="4"
+  echo "Running with default ${CORES_PER_INSTANCE} cores per instance"
+fi
+
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
+if [ -z "${OMP_NUM_THREADS}" ]; then 
+  export OMP_NUM_THREADS=4
+else
+  export OMP_NUM_THREADS=${OMP_NUM_THREADS}
+fi
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}" ]; then
   BATCH_SIZE="1"

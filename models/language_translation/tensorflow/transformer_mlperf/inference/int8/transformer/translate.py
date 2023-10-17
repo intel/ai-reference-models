@@ -29,6 +29,7 @@ from tensorflow.python.ops import state_ops
 from tensorflow.python.training import training_util
 from tensorflow.python.training import session_run_hook
 from tensorflow.python.training.basic_session_run_hooks import StopAtStepHook, ProfilerHook
+from tensorflow.core.protobuf import rewriter_config_pb2
 
 from mlperf_compliance import mlperf_log
 
@@ -223,6 +224,24 @@ def translate_text(estimator, subtokenizer, txt):
 def main(unused_argv):
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
+  if FLAGS.onednn_graph:
+    import intel_extension_for_tensorflow as itex
+    auto_mixed_precision_options = itex.AutoMixedPrecisionOptions()
+    auto_mixed_precision_options.data_type = itex.BFLOAT16
+
+    auto_mixed_precision_options.allowlist_add= "MatMul,Mul,Sub,_MklLayerNorm,ExpandDims"
+    auto_mixed_precision_options.inferlist_remove = "MatMul,Mul,Sub,_MklLayerNorm"
+    auto_mixed_precision_options.clearlist_remove = "ExpandDims"
+
+    graph_options = itex.GraphOptions(auto_mixed_precision_options=auto_mixed_precision_options)
+    graph_options.auto_mixed_precision = itex.ON
+
+    config = itex.ConfigProto(graph_options=graph_options)
+    try:
+      itex.set_backend("cpu", config)
+    except Exception:
+      itex.set_config(config)
+
   if FLAGS.text == None and FLAGS.file == None:
     tf.compat.v1.logging.warn("Nothing to translate. Make sure to call this script using "
                     "flags --text or --file.")
@@ -245,12 +264,16 @@ def main(unused_argv):
   params.extra_decode_length = _EXTRA_DECODE_LENGTH
   params.batch_size = FLAGS.batch_size
   params.frozen_graph = FLAGS.input_graph
+  params.onednn_graph = FLAGS.onednn_graph
 
   # Add inter_op and intra_op parallelism thread
   session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
       intra_op_parallelism_threads=FLAGS.intra_op_parallelism_threads,
       allow_soft_placement=True)
+  if FLAGS.onednn_graph:
+    session_config.graph_options.rewrite_options.constant_folding = (
+      rewriter_config_pb2.RewriterConfig.OFF)
   run_config = tf.estimator.RunConfig(session_config=session_config)
   estimator = tf.estimator.Estimator(
       model_fn=transformer_main.model_fn, model_dir=FLAGS.model_dir, params=params,
@@ -336,6 +359,10 @@ if __name__ == "__main__":
       help="Number of steps for benchmark.")
   parser.add_argument("--input_graph", type=str, default=None,
       help="Frozen graph path.")
+  parser.add_argument(
+      "--onednn-graph", dest="onednn_graph",
+      help="enable onednn graph for itex users",
+      action='store_true')
 
   FLAGS, unparsed = parser.parse_known_args()
   main(sys.argv)

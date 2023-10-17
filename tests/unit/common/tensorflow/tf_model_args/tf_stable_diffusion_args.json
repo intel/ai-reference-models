@@ -1,0 +1,16 @@
+[
+  { "_comment": "stable_diffusion_inference_benchmark_fp32",
+  "input": "run_tf_benchmark.py --framework tensorflow --use-case diffusion --precision fp32 --mode inference --model-name stable_diffusion --batch-size 3 --intelai-models=/workspace/intelai_models --output-dir=/tmp/stable_diffusion --socket-id 0 --verbose",
+  "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_inference.py --precision=fp32 --batch-size=3 --output-dir=/tmp/stable_diffusion",
+  "cpuset": "0-111"},
+
+  { "_comment": "stable_diffusion_inference_benchmark_bf16",
+  "input": "run_tf_benchmark.py --framework tensorflow --use-case diffusion --precision bfloat16 --mode inference --model-name stable_diffusion --batch-size 3 --intelai-models=/workspace/intelai_models --output-dir=/tmp/stable_diffusion --socket-id 0 --verbose",
+  "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_inference.py --precision=bfloat16 --batch-size=3 --output-dir=/tmp/stable_diffusion",
+  "cpuset": "0-111"},
+
+  { "_comment": "stable_diffusion_inference_benchmark_fp16",
+  "input": "run_tf_benchmark.py --framework tensorflow --use-case diffusion --precision fp16 --mode inference --model-name stable_diffusion --batch-size 3 --intelai-models=/workspace/intelai_models --output-dir=/tmp/stable_diffusion --socket-id 0 --verbose",
+  "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_inference.py --precision=fp16 --batch-size=3 --output-dir=/tmp/stable_diffusion",
+  "cpuset": "0-111"}
+]

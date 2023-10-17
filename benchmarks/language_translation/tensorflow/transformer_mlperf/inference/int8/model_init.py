@@ -107,6 +107,9 @@ class ModelInitializer(BaseModelInitializer):
                    " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads) + \
                    " --intra_op_parallelism_threads=" + str(self.args.num_intra_threads)
 
+        if self.args.onednn_graph:
+            cmd_args += " --onednn-graph"
+
         self.bleu_params += " --translation=" + translate_file + \
                             " --reference=" + self.args.reference
 

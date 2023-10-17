@@ -117,8 +117,12 @@ class ModelInitializer(BaseModelInitializer):
             else:
                 set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket)
 
-        model_script = os.path.join(
-            self.args.intelai_models, self.args.mode, "run_squad.py")
+        if self.args.onednn_graph:
+            model_script = os.path.join(
+                self.args.intelai_models, self.args.mode, "run_squad_int8.py")
+        else:
+            model_script = os.path.join(
+                self.args.intelai_models, self.args.mode, "run_squad.py")
 
         model_args = " --init_checkpoint=" + str(self.args.init_checkpoint) + \
                      " --vocab_file=" + str(self.args.vocab_file) + \

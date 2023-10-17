@@ -36,9 +36,8 @@ Set the `DATASET_DIR` to point to the directory with the dataset files when runn
 | `inference_throughput_multi_instance.sh` | Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32, bfloat16 or bfloat32) with a default `batch_size=65536`. Waits for all instances to complete, then prints a summarized throughput value. |
 | `accuracy.sh` | Measures the inference accuracy for the specified precision (fp32, bfloat16 or bfloat32) with a default `batch_size=128`. |
 
-<!--- 50. AI Kit -->
 ## Run the model
-* Follow the instructions to setup your bare metal environment on either Linux or Windows systems. Ensure that you have a clone of the [Model Zoo Github repository](https://github.com/IntelAI/models).
+* Follow the instructions to setup your bare metal environment on either Linux or Windows systems. Ensure that you have a clone of the [AI Reference Models Github repository](https://github.com/IntelAI/models).
   ```
   git clone https://github.com/IntelAI/models.git
   ```
@@ -62,7 +61,7 @@ export PRETRAINED_MODEL=$(pwd)/dien_bf16_pretrained_opt_model.pb
 
 ## Run on Linux
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set env vars
