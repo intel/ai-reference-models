@@ -346,6 +346,18 @@ def test_disable_tcmalloc(launch_benchmark, mock_popen,
     assert "--env DISABLE_TCMALLOC=".format(expected_disable_tcmalloc) in docker_run_cmd
 
 
+@pytest.mark.parametrize("expected_onednn_graph", [["False"]])
+def test_onednn_graph(launch_benchmark, mock_popen,
+                      platform_mock, expected_onednn_graph):
+    platform_mock.return_value = platform_config.OS_TYPE
+    launch_benchmark.main()
+    assert mock_popen.called
+    args, _ = mock_popen.call_args
+    # convert the run command args to a string and then check for the custom volume mounts
+    docker_run_cmd = " ".join(args[0])
+    assert "--env ONEDNN_GRAPH=".format(expected_onednn_graph) in docker_run_cmd
+
+
 @pytest.mark.parametrize("numa_cores_per_instance_arg,socket_id_args,num_cores_arg,mpi_num_proc_arg,run_privileged",
                          [["4", -1, -1, None, True],
                           [None, -1, -1, None, False],

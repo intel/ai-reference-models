@@ -51,7 +51,7 @@ from absl import logging
 #  show_msg(current_step, msg)
 #  return current_step.assign_add(1)
 
-def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=False, use_multi_cpu=0):
+def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=False, use_multi_cpu=0, use_gpu=False):
   """Creates an optimizer training op."""
   global_step = tf.compat.v1.train.get_or_create_global_step()
 
@@ -87,17 +87,21 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
   # is how the model was trained (note that the Adam m/v variables are NOT
   # loaded from init_checkpoint.)
   use_itex_optimizer = False
-  try:
-    import intel_extension_for_tensorflow as itex
-    optimizer = itex.ops.AdamWithWeightDecayOptimizer(
-        learning_rate=learning_rate,
-        weight_decay_rate=0.01,
-        beta_1=0.9,
-        beta_2=0.999,
-        epsilon=1e-6,
-        exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
-    use_itex_optimizer = True
-  except:
+  if use_gpu:
+    try:
+      import intel_extension_for_tensorflow as itex
+      optimizer = itex.ops.AdamWithWeightDecayOptimizer(
+          learning_rate=learning_rate,
+          weight_decay_rate=0.01,
+          beta_1=0.9,
+          beta_2=0.999,
+          epsilon=1e-6,
+          exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
+      use_itex_optimizer = True
+    except:
+      print("Load plugin Intel(R) Extension for Tensorflow* failed.\n")
+
+  if not use_itex_optimizer:
     optimizer = AdamWeightDecayOptimizer(
         learning_rate=learning_rate,
         weight_decay_rate=0.01,

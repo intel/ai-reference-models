@@ -84,6 +84,9 @@ class ModelInitializer(BaseModelInitializer):
             " --batch-size=" + str(self.args.batch_size) + \
             " --model-name=" + str(self.args.model_name)
 
+        if self.args.onednn_graph:
+            self.benchmark_command += "--onednn-graph"
+
         if not self.args.accuracy_only:
             self.benchmark_command += \
                 " --steps=" + str(self.args.steps) + " --warmup-steps=" + str(self.args.warmup_steps)

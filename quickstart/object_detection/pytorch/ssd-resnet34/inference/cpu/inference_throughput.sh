@@ -42,8 +42,17 @@ if [[ "$1" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+TOTAL_CORES=`expr $CORES \* $SOCKETS`
+
+BATCH_SIZE=112
+
 ARGS=""
 if [[ "$1" == "int8" || "$1" == "avx-int8" ]]; then
+    NUMA_NODES=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+    CORES_PER_NODE=`expr $TOTAL_CORES / $NUMA_NODES`
+    BATCH_SIZE=`expr $CORES_PER_NODE \* 2`
     ARGS="$ARGS --int8"
     ARGS="$ARGS --seed 1 --threshold 0.2 --configure ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/pytorch_default_recipe_ssd_configure.json"
     export DNNL_GRAPH_CONSTANT_CACHE=1
@@ -124,7 +133,6 @@ if [ "$weight_sharing" = true ]; then
     wait
 
 else
-    BATCH_SIZE=112
     python -m intel_extension_for_pytorch.cpu.launch \
         --throughput_mode \
         ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \

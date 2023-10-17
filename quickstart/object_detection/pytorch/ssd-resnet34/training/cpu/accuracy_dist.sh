@@ -81,11 +81,9 @@ source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator jemalloc \
-    --ncore_per_instance ${CORES_PER_INSTANCE} \
     --distributed \
     --nnodes ${NNODES} \
     --hostfile ${HOSTFILE} \
-    --nproc_per_node ${SOCKETS} \
     --logical_core_for_ccl --ccl_worker_count 8 \
     ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/training/cpu/train.py \
     --epochs 5 \

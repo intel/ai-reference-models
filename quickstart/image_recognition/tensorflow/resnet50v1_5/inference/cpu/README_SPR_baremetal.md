@@ -87,9 +87,11 @@ export PRETRAINED_MODEL=<path to the downloaded pretrained model file>
 export OUTPUT_DIR=<directory where log files will be written>
 
 # Optional env vars
-export BATCH_SIZE=<customized batch size value>
-export WARMUP_STEPS=<customized warm up steps value>
-export STEPS=<customized steps value>
+export BATCH_SIZE=<customized batch size value, otherwise it will run with the default value>
+export WARMUP_STEPS=<customized warm up steps value, otherwise it will run with the default value>
+export STEPS=<customized steps value, otherwise it will run with the default value>
+export OMP_NUM_THREADS=<customized value for omp_num_threads, otherwise it will run with the default value>
+export CORES_PER_INSTANCE=<customized value for cores_per_instance, otherwise it will run with the default value>
 ```
 ### Run real time inference (Latency):
 ```

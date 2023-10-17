@@ -68,8 +68,19 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
 fi
 
 MODE="inference"
-# Use 4core/instance 
-CORES_PER_INSTANCE="4"
+
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  CORES_PER_INSTANCE="4"
+  echo "Running with default ${CORES_PER_INSTANCE} cores per instance"
+fi
+
+# If OMP_NUM_THREADS env is not mentioned, Get number of cores per instance
+if [ -z "${OMP_NUM_THREADS}" ]; then 
+  export OMP_NUM_THREADS=4
+else
+  export OMP_NUM_THREADS=${OMP_NUM_THREADS}
+fi
 
 #Set up env variable for bfloat32
 if [[ $PRECISION == "bfloat32" ]]; then
@@ -97,6 +108,9 @@ echo "WARMUP_STEPS: $WARMUP_STEPS"
 # System envirables   
 export TF_ENABLE_MKL_NATIVE_FORMAT=1 
 export TF_ONEDNN_ENABLE_FAST_CONV=1 
+
+# Remove old log file
+rm -rf  ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr

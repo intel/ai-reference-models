@@ -483,17 +483,6 @@ def train300_mlperf_coco(args):
     else:
         print("training with fp32 data type")
 
-    if args.bf32 and args.autocast:
-        assert False, "args.bf32 and args.autocast can't be set together"
-        exit(-1)
-
-    if args.autocast:
-        print("training with bf16 data type autocast")
-    elif args.bf32:
-        print("training with bf32 fpmath mode")
-    else:
-        print("training with fp32 data type")
-
     optim.zero_grad(set_to_none=True)
     for epoch in range(args.epochs):
         mllogger.start(

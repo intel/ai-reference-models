@@ -189,7 +189,7 @@ def _bottleneck_block_v1(inputs, filters, training, projection_shortcut,
   mlperf_log.resnet_print(key=mlperf_log.MODEL_HP_SHORTCUT_ADD)
   # TODO(nhasabni): temporarily replacing Add by AddN for performance.
   # Remove it later once we optimize this in graph.
-  inputs = tf.math.add(inputs, shortcut)
+  inputs = tf.math.add_n([inputs, shortcut])
 
   mlperf_log.resnet_print(key=mlperf_log.MODEL_HP_RELU)
   inputs = tf.nn.relu(inputs)

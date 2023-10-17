@@ -27,6 +27,7 @@ import time
 from argparse import ArgumentParser
 from inference.coco_detection_evaluator import CocoDetectionEvaluator
 from inference.coco_label_map import category_map
+from tensorflow.core.protobuf import rewriter_config_pb2
 
 IMAGE_SIZE = 300
 COCO_NUM_VAL_IMAGES = 4952
@@ -118,6 +119,8 @@ class model_infer:
     arg_parser.add_argument('-w', "--warmup_iter",
                             help='For accuracy measurement only.',
                             dest='warmup_iter', default=200, type=int)
+    arg_parser.add_argument('--onednn-graph', dest='onednn_graph',
+                            help='enable OneDNN Graph', action='store_true')
 
     # parse the arguments
     self.args = arg_parser.parse_args()
@@ -125,6 +128,8 @@ class model_infer:
     self.config = tf.compat.v1.ConfigProto()
     self.config.intra_op_parallelism_threads = self.args.num_intra_threads
     self.config.inter_op_parallelism_threads = self.args.num_inter_threads
+    if self.args.onednn_graph:
+      self.config.graph_options.rewrite_options.constant_folding = rewriter_config_pb2.RewriterConfig.OFF
     self.config.use_per_session_threads = 1
 
     self.load_graph()

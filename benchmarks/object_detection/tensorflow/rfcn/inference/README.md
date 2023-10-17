@@ -26,21 +26,21 @@ downloading and preprocessing the COCO validation dataset.
 | [`inference.sh`](/quickstart/object_detection/tensorflow/rfcn/inference/cpu/inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
 | [`accuracy.sh`](/quickstart/object_detection/tensorflow/rfcn/inference/cpu/accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit on Linux</th>
-    <th>Setup without AI Kit on Linux</th>
-    <th>Setup without AI Kit on Windows</th>
+    <th>Setup using AI Tools on Linux</th>
+    <th>Setup without AI Tools on Linux</th>
+    <th>Setup without AI Tools on Windows</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit on Linux you will need:</p>
+      <p>To run using AI Tools on Linux you will need:</p>
       <ul>
         <li>git
         <li>numactl
@@ -59,7 +59,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Linux you will need:</p>
+      <p>To run without AI Tools on Linux you will need:</p>
       <ul>
         <li>Python 3
         <li>git
@@ -75,14 +75,14 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pillow>=9.3.0
         <li>protobuf-compiler
         <li>pycocotools
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Windows you will need:</p>
+      <p>To run without AI Tools on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li><a href="/docs/general/Windows.md">Intel AI Reference Models on Windows Systems prerequisites</a>
         <li>build-essential
         <li>Cython
         <li>contextlib2
@@ -92,7 +92,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pillow>=9.3.0
         <li>protobuf-compiler
         <li>pycocotools
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -117,7 +117,7 @@ export PRETRAINED_MODEL=$(pwd)/rfcn_final_fused_pad_and_conv.pb
 ```
 
 RFCN uses the object detection code from the [TensorFlow Model Garden](https://github.com/tensorflow/models).
-Clone this repo with the SHA specified below and apply the patch from the model zoo directory.
+Clone this repo with the SHA specified below and apply the patch from the AI Reference Models directory.
 Set the `TF_MODELS_DIR` environment variable to the path of your clone of the TF Model Garden.
 ```
 # Clone the TensorFlow Model Garden
@@ -125,8 +125,8 @@ git clone https://github.com/tensorflow/models.git tensorflow-models
 cd tensorflow-models
 git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b
 
-# Apply the TF2 patch from the model zoo repo directory
-git apply --ignore-space-change --ignore-whitespace <model zoo directory>/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
+# Apply the TF2 patch from the AI Reference Models repo directory
+git apply --ignore-space-change --ignore-whitespace <AI Reference Models directory>/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
 
 # Set the TF_MODELS_DIR env var
 export TF_MODELS_DIR=$(pwd)
@@ -141,13 +141,13 @@ protoc object_detection/protos/*.proto --python_out=.
 cd ../..
 ```
 
-Once your environment is setup, navigate back to your Model Zoo directory. Ensure that
+Once your environment is setup, navigate back to your AI Reference Models directory. Ensure that
 you have set environment variables pointing to the TensorFlow Model Garden repo, the dataset,
 and output directories, and then run a quickstart script.
 
 To run inference with performance metrics:
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
@@ -162,7 +162,7 @@ export BATCH_SIZE=<customized batch size value>
 
 To get accuracy metrics:
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export DATASET_DIR=<path to TF record file (ex: /home/user/coco_output/coco_val.record)>
@@ -188,9 +188,9 @@ cd %TF_MODELS_DIR%\research
 After installing the prerequisites and cloning the TensorFlow models repo, and downloading the pretrained model,
 set the environment variables for the paths to your `PRETRAINED_MODEL`, an `OUTPUT_DIR` where log files will be written,
 TF_MODELS_DIR, and `DATASET_DIR` for COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts.
-Navigate to your model zoo directory and then run a [quickstart script](#quick-start-scripts).
+Navigate to your AI Reference Models directory and then run a [quickstart script](#quick-start-scripts).
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 set PRETRAINED_MODEL=<path to the frozen graph downloaded above>

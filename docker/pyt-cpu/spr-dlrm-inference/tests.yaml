@@ -1,0 +1,112 @@
+fp32-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  cmd: quickstart/accuracy.sh
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+      dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm
+bf32-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  cmd: quickstart/accuracy.sh
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+      dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm
+bf16-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  cmd: quickstart/accuracy.sh
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+      dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm
+int8-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  cmd: quickstart/accuracy.sh
+  shm-size: 8G
+  env:
+    PRECISION: int8
+    WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+      dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm
+fp32-performance:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  cmd: quickstart/inference_performance.sh
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+      dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm
+bf32-performance:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  cmd: quickstart/inference_performance.sh
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+      dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm
+bf16-performance:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  cmd: quickstart/inference_performance.sh
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+      dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm
+int8-performance:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  cmd: quickstart/inference_performance.sh
+  shm-size: 8G
+  env:
+    PRECISION: int8
+    WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+  volumes:
+    - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+      dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
+    - src: /pytorch/spr_dlrm_preprocessed/dlrm
+      dst: /pytorch/spr_dlrm_preprocessed/dlrm

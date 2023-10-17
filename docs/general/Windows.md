@@ -1,4 +1,4 @@
-# Using Model Zoo for Intel® Architecture on Windows Systems
+# Using Intel® AI Reference Models on Windows Systems
 
 ## Prerequisites for running on bare metal
 

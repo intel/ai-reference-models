@@ -19,10 +19,10 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG MAX_PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG MAX_PYT_BASE_TAG="xpu-max"
+ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG BASE_TAG="xpu-max"
 
-FROM ${MAX_PYT_BASE_IMAGE}:${MAX_PYT_BASE_TAG}
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /workspace/pytorch-max-series-resnet50v1-5-inference
 COPY quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README_Max_Series.md README.md

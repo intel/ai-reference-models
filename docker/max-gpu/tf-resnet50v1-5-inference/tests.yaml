@@ -1,0 +1,105 @@
+fp32-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    NUM_OAM: '4'
+    GPU_TYPE: max_series
+    FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp32-gpu.pb
+fp16-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    NUM_OAM: '4'
+    GPU_TYPE: max_series
+    FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp16-gpu.pb
+int8-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    NUM_OAM: '4'
+    GPU_TYPE: max_series
+    FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+fp32-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+  cmd: quickstart/online_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    GPU_TYPE: max_series
+    FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp32-gpu.pb
+fp16-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+  cmd: quickstart/online_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    GPU_TYPE: max_series
+    FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp16-gpu.pb
+int8-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+  cmd: quickstart/online_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    GPU_TYPE: max_series
+    FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+fp32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+  cmd: quickstart/accuracy.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    GPU_TYPE: max_series
+    FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp32-gpu.pb
+    DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+  volumes:
+    - src: /tf_dataset/dataset/TF_Imagenet_FullData
+      dst: /tf_dataset/dataset/TF_Imagenet_FullData
+fp16-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+  cmd: quickstart/accuracy.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    GPU_TYPE: max_series
+    FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp16-gpu.pb
+    DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+  volumes:
+    - src: /tf_dataset/dataset/TF_Imagenet_FullData
+      dst: /tf_dataset/dataset/TF_Imagenet_FullData
+int8-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+  cmd: quickstart/accuracy.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    GPU_TYPE: max_series
+    FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+    DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+  volumes:
+    - src: /tf_dataset/dataset/TF_Imagenet_FullData
+      dst: /tf_dataset/dataset/TF_Imagenet_FullData

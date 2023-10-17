@@ -20,6 +20,7 @@
 from __future__ import division
 import sys
 import tensorflow as tf
+from tensorflow.core.protobuf import rewriter_config_pb2
 from tensorflow.python.data.experimental import parallel_interleave
 from tensorflow.python.data.experimental import map_and_batch
 from tensorflow.python.framework import dtypes
@@ -112,6 +113,8 @@ class model_infer:
     arg_parser.add_argument("--benchmark",
                             help='Run in benchmark mode.',
                             dest='benchmark', action='store_true')                        
+    arg_parser.add_argument('--onednn-graph', dest='onednn_graph',
+                            help='enable OneDNN Graph', action='store_true')
 
     # parse the arguments
     self.args = arg_parser.parse_args()
@@ -119,6 +122,8 @@ class model_infer:
     self.config = tf.compat.v1.ConfigProto()
     # self.config.intra_op_parallelism_threads = self.args.num_intra_threads
     # self.config.inter_op_parallelism_threads = self.args.num_inter_threads
+    if self.args.onednn_graph:
+      self.config.graph_options.rewrite_options.constant_folding = rewriter_config_pb2.RewriterConfig.OFF
     self.config.use_per_session_threads = 1
 
     self.load_graph()

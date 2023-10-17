@@ -21,20 +21,20 @@ Set `DATASET_DIR` to point out to the location of the dataset directory.
 | [`training_demo.sh`](/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/training_demo.sh) | Runs 100 training steps. The script runs in single instance mode by default, for multi instance mode set `MPI_NUM_PROCESSES`. |
 | [`training.sh`](/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/training.sh) | Uses mpirun to execute 2 processes with 1 process per socket with a batch size of 5120 for the specified precision (fp32 or bfloat16). Logs for each instance are saved to the output directory. |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit you will need:</p>
+      <p>To run using AI Tools you will need:</p>
       <ul>
         <li>numactl
         <li>gcc-8 (for multi-instance only)
@@ -48,7 +48,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3
         <li>intel-tensorflow>=2.5.0
@@ -60,7 +60,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>openmpi (for multi-instance only)
         <li>openssh (for multi-instance only)
         <li>horovod (for multi-instance only)
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -69,11 +69,11 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
 
 After you've completed the setup, export environment variables for the `DATASET_DIR`
 and an `OUTPUT_DIR` where log files will be written, then run a
-[quickstart script](#quick-start-scripts) from your model zoo directory. To run
+[quickstart script](#quick-start-scripts) from your AI Reference Models directory. To run
 multi-instance training, set the `MPI_NUM_PROCESSES` var to specify the number of
 instances to run (for example `export MPI_NUM_PROCESSES=2` for 2 instances).
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set required environment variables

@@ -43,7 +43,6 @@ import random
 
 import numpy.random
 import tensorflow as tf  # pylint: disable=g-bad-import-order
-tf.compat.v1.disable_eager_execution()
 
 from mlperf_compliance import mlperf_log
 from mlperf_resnet import imagenet_preprocessing
@@ -168,7 +167,6 @@ def parse_record(raw_record, is_training, dtype):
 
 
 def input_fn(is_training, data_dir, batch_size, num_epochs=1, num_gpus=None,
-             datasets_num_private_threads=None,
              dtype=tf.float32):
   """Input function which provides batches for train or eval.
 
@@ -194,11 +192,6 @@ def input_fn(is_training, data_dir, batch_size, num_epochs=1, num_gpus=None,
   # Convert to individual records
   dataset = dataset.flat_map(tf.data.TFRecordDataset)
 
-  if datasets_num_private_threads:
-    options = tf.data.Options()
-    options.experimental_threading.private_threadpool_size = datasets_num_private_threads
-    dataset = dataset.with_options(options)
-
   return resnet_run_loop.process_record_dataset(
       dataset=dataset,
       is_training=is_training,
@@ -212,9 +205,9 @@ def input_fn(is_training, data_dir, batch_size, num_epochs=1, num_gpus=None,
   )
 
 
-def get_synth_input_fn(use_bfloat16):
+def get_synth_input_fn():
   return resnet_run_loop.get_synth_input_fn(
-      _DEFAULT_IMAGE_SIZE, _DEFAULT_IMAGE_SIZE, _NUM_CHANNELS, _NUM_CLASSES, use_bfloat16)
+      _DEFAULT_IMAGE_SIZE, _DEFAULT_IMAGE_SIZE, _NUM_CHANNELS, _NUM_CLASSES)
 
 
 ###############################################################################
@@ -363,7 +356,7 @@ def main(argv):
                           value=_NUM_IMAGES['train'])
   mlperf_log.resnet_print(key=mlperf_log.PREPROC_NUM_EVAL_EXAMPLES,
                           value=_NUM_IMAGES['validation'])
-  input_function = flags.use_synthetic_data and get_synth_input_fn(flags.use_bfloat16) or input_fn
+  input_function = flags.use_synthetic_data and get_synth_input_fn() or input_fn
 
   resnet_run_loop.resnet_main(seed,
       flags, imagenet_model_fn, input_function,
