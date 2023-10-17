@@ -12,17 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-#
-# THIS IS A GENERATED DOCKERFILE.
-#
-# This file was assembled from multiple pieces, whose use is documented
-# throughout. Please refer to the TensorFlow dockerfiles documentation
-# for more information.
 
-ARG MAX_TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG MAX_TF_BASE_TAG="gpu-horovod"
+ARG BASE_IMAGE="intel/intel-extension-for-tensorflow"
+ARG BASE_TAG="xpu"
 
-FROM ${MAX_TF_BASE_IMAGE}:${MAX_TF_BASE_TAG}
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /workspace/tf-max-series-bert-large-inference
 
@@ -31,12 +25,9 @@ ARG MODEL_URL
 RUN mkdir -p frozen_graph && \
     wget ${MODEL_URL} -O frozen_graph/fp32_bert_squad.pb
 
-COPY benchmarks benchmarks
-COPY models models
-COPY quickstart/common quickstart/common
+COPY models/language_modeling/tensorflow/bert_large/inference/gpu models/language_modeling/tensorflow/bert_large/inference/gpu
 
-COPY quickstart/language_modeling/tensorflow/bert_large/inference/gpu/accuracy.sh quickstart/accuracy.sh
-COPY quickstart/language_modeling/tensorflow/bert_large/inference/gpu/benchmark.sh quickstart/benchmark.sh
+COPY quickstart/language_modeling/tensorflow/bert_large/inference/gpu/inference.sh quickstart/inference.sh
 COPY quickstart/language_modeling/tensorflow/bert_large/inference/gpu/README.md quickstart/README.md
 
 COPY LICENSE licenses/LICENSE

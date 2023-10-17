@@ -36,21 +36,21 @@ test uses synthetic dataset.
 | [multi_instance_online_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/multi_instance_online_inference_1200.sh) | Runs multi instance realtime inference (batch-size=1) using 4 cores per instance for the specified precision (fp32, int8 or bfloat16). Uses synthetic data with an input size of 1200x1200. Waits for all instances to complete, then prints a summarized throughput value. |
 | [multi_instance_batch_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/multi_instance_batch_inference_1200.sh) | Runs multi instance batch inference (batch-size=16) using 1 instance per socket for the specified precision (fp32, int8 or bfloat16). Uses synthetic data with an input size of 1200x1200. Waits for all instances to complete, then prints a summarized throughput value. |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit on Linux</th>
-    <th>Setup without AI Kit on Linux</th>
-    <th>Setup without AI Kit on Windows</th>
+    <th>Setup using AI Tools on Linux</th>
+    <th>Setup without AI Tools on Linux</th>
+    <th>Setup without AI Tools on Windows</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit on Linux you will need:</p>
+      <p>To run using AI Tools on Linux you will need:</p>
       <ul>
         <li>build-essential
         <li>git
@@ -69,12 +69,13 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pillow>=9.3.0
         <li>pycocotools
         <li>tensorflow-addons==0.18.0
+        <li>intel-extension-for-tensorflow (only required when using onednn graph optimization)
         <li>Activate the tensorflow 2.5.0 conda environment
         <pre>conda activate tensorflow</pre>
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Linux you will need:</p>
+      <p>To run without AI Tools on Linux you will need:</p>
       <ul>
         <li>Python 3
         <li>build-essential
@@ -94,14 +95,15 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pillow>=9.3.0
         <li>pycocotools
         <li>tensorflow-addons==0.18.0
-        <li>A clone of the Model Zoo repo<br />
+        <li>intel-extension-for-tensorflow (only required when using onednn graph optimization)
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Windows you will need:</p>
+      <p>To run without AI Tools on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li><a href="/docs/general/Windows.md">Intel AI Reference Models on Windows Systems prerequisites</a>
         <li>build-essential
         <li>Cython
         <li>contextlib2
@@ -112,7 +114,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pillow>=9.3.0
         <li>pycocotools
         <li>tensorflow-addons==0.18.0
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -158,6 +160,10 @@ export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_bs1_pretrained_model.pb
 # SSD-ResNet34 Int8 1200x1200 Pretrained model
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
 export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+
+# SSD-ResNet34 Int8 1200x1200 Pretrained model for OneDnn Graph (Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point)
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/ssd_rn34_itex_int8.pb
+export PRETRAINED_MODEL=$(pwd)/ssd_rn34_itex_int8.pb
 ```
 
 Set the environment variables and run quickstart script on either Linux or Windows systems. If the accuracy test is being run, then set the `DATASET_DIR` to point to the folder where the COCO dataset
@@ -165,7 +171,7 @@ Set the environment variables and run quickstart script on either Linux or Windo
 
 ### Run on Linux
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # set environment variables
@@ -183,7 +189,7 @@ export BATCH_SIZE=<customized batch size value>
 ### Run on Windows
 Using `cmd.exe`,  run:
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 set PRETRAINED_MODEL=<path to the 300x300 or 1200x1200 pretrained model pb file>

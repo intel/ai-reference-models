@@ -27,7 +27,6 @@ echo 'GPU_TYPE='$GPU_TYPE
 declare -A input_envs
 input_envs[PRECISION]=${PRECISION}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
-input_envs[PRETRAINED_DIR]=${PRETRAINED_DIR}
 input_envs[BATCH_SIZE]=${BATCH_SIZE}
 input_envs[GPU_TYPE]=${GPU_TYPE}
 

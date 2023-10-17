@@ -112,6 +112,11 @@ class ModelInitializer(BaseModelInitializer):
         # if the data location directory is not empty, then include the arg
         if self.args.data_location and os.listdir(self.args.data_location):
             cmd += " --data-location=" + self.args.data_location
+
+        # enable onednn graph
+        if self.args.onednn_graph:
+            cmd += " --onednn-graph"
+
         if self.args.accuracy_only:
             cmd += " --accuracy-only"
         self.run_command(cmd)

@@ -1,0 +1,19 @@
+fp16-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+  cmd: quickstart/fp16_inference_plain_format.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: FP16
+    BATCH_SIZE: '64'
+    OUTPUT_DIR: /tmp
+    NUM_OAM: '4'
+    BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
+    DATASET_DIR: /dataset/bert_squad
+  volumes:
+    - src: /dataset/bert_squad
+      dst: /dataset/bert_squad
+    - src: /dataset/squad_large_finetuned_checkpoint
+      dst: /dataset/squad_large_finetuned_checkpoint
+
+      

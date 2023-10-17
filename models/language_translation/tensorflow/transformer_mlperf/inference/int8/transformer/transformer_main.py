@@ -56,7 +56,10 @@ def model_fn(features, labels, mode, params):
   if params.frozen_graph and mode == tf.estimator.ModeKeys.PREDICT:
     print("Reading***** From *** pb", flush=True)
     input_map = {'input_tokens': features}
-    output_names = ['model/Transformer/strided_slice_15',
+    if params.onednn_graph:
+      output_names = ['model/Transformer/strided_slice_15']
+    else:
+      output_names = ['model/Transformer/strided_slice_15',
                     'model/Transformer/strided_slice_16']
 
     with tf.io.gfile.GFile(params.frozen_graph, "rb") as f:
@@ -64,7 +67,10 @@ def model_fn(features, labels, mode, params):
       graph_def.ParseFromString(f.read())
     tf.graph_util.import_graph_def(graph_def, input_map, output_names, name="")
     output_tensors = [tf.compat.v1.get_default_graph().get_tensor_by_name(name + ":0") for name in output_names]
-    output = {'outputs': output_tensors[0] , 'scores': output_tensors[1]}
+    if params.onednn_graph:
+      output = {'outputs': output_tensors[0]}
+    else:
+      output = {'outputs': output_tensors[0] , 'scores': output_tensors[1]}
     return tf.estimator.EstimatorSpec(
         tf.estimator.ModeKeys.PREDICT,
         predictions=output)
@@ -409,6 +415,7 @@ def main(_):
   params.num_cpu_cores = FLAGS.num_cpu_cores
   params.epochs_between_eval = FLAGS.epochs_between_eval
   params.repeat_dataset = single_iteration_train_epochs
+  params.onednn_graph = FLAGS.onednn_graph
   # Add inter_op and intra_op parallelism thread
   session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
@@ -532,6 +539,10 @@ if __name__ == "__main__":
   parser.add_argument(
       "--print_iter", "-pi", type=int, default=None,
       help="print_iteration to print loss and timing", metavar="<PI>")
+  parser.add_argument(
+      "--onednn-graph", dest="--onednn_graph",
+      help="enable onednn graph for itex users",
+      action='store_true')
 
   FLAGS, unparsed = parser.parse_known_args()
 

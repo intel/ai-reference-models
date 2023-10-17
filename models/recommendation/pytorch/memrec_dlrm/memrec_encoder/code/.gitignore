@@ -1,0 +1,5 @@
+build
+dist
+memrec_encoder.egg-info
+mmh3.cpython-38-x86_64-linux-gnu.so
+mmh3.egg-info

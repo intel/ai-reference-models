@@ -5,12 +5,18 @@
 ## Description
 
 This document has instructions for running ResNet50v1.5 inference using
-Intel(R) Extension for PyTorch with GPU.
+Intel® Extension for PyTorch with GPU.
 
 <!--- 20. GPU Setup -->
 ## Software Requirements:
-- Intel® Data Center GPU Max Series
-- Follow [instructions](https://intel.github.io/intel-extension-for-pytorch/xpu/latest/tutorials/installation.html) to install the latest IPEX version and other prerequisites.
+- Host machine has Intel® Data Center Max Series 1550 x4 OAM GPU
+- Follow instructions to install GPU-compatible driver [647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
+- Create and activate virtual environment.
+  ```bash
+  virtualenv -p python <virtualenv_name>
+  source <virtualenv_name>/bin/activate
+  ```
+- Follow [instructions](https://pypi.org/project/intel-extension-for-pytorch/) to install the latest IPEX version and other prerequisites.
 
 - Intel® oneAPI Base Toolkit: Need to install components of Intel® oneAPI Base Toolkit
   - Intel® oneAPI DPC++ Compiler
@@ -65,19 +71,12 @@ The folder that contains the `val` directory should be set as the
 
 <!--- 50. Baremetal -->
 ## Run the model
-Install the following pre-requisites:
-* Create and activate virtual environment.
-  ```bash
-  virtualenv -p python <virtualenv_name>
-  source <virtualenv_name>/bin/activate
-  ```
-* Clone the Model Zoo repository:
+* Clone the AI Reference Models repository:
   ```bash
   git clone https://github.com/IntelAI/models.git
   ```
-* Navigate to ResNet50v1.5 inference directory and install model specific dependencies for the workload:
+* Navigate to models directory:
   ```bash
-  # Navigate to the model zoo repo
   cd models
   ```
 
@@ -92,10 +91,12 @@ Set environment variables for the path to your dataset, an output directory to r
 # To run with ImageNet data, the dataset directory will need to be specified in addition to an output directory and precision.
 export DATASET_DIR=<path to the preprocessed imagenet dataset>
 export OUTPUT_DIR=<Path to save the output logs>
-export Tile=2
+export PRECISION=int8
+export NUM_OAM=<provide 4 for number of OAM Modules supported by the platform>
 
 # Optional envs
-export BATCH_SIZE=<Set batch_size else it will run with default batch>
+export BATCH_SIZE=<Set batch_size else it will run with default batch of 1024>
+export NUM_ITERATIONS=<export number of iterations,default is 500>
 
 # Run a quickstart script
 ./quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/inference_block_format.sh

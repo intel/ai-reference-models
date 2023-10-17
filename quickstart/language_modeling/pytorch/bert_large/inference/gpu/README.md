@@ -1,16 +1,22 @@
 <!--- 0. Title -->
-# BERT Large inference for Intel(R) Data Center GPU Max Series
+# BERT Large Inference
 
 <!-- 10. Description -->
 ## Description
 
 This document has instructions for running BERT Large inference using
-Intel-optimized PyTorch with Intel(R) Data Center GPU Max Series.
+Intel-optimized PyTorch with Intel® Data Center GPU Max Series.
 
 <!--- 20. GPU Setup -->
 ## Software Requirements:
-- Intel® Data Center GPU Max Series
-- Follow [instructions](https://intel.github.io/intel-extension-for-pytorch/xpu/latest/tutorials/installation.html) to install the latest IPEX version and other prerequisites.
+- Host machine has Intel® Data Center Max Series 1550 x4 OAM GPU
+- Follow instructions to install GPU-compatible driver [647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
+- Create and activate virtual environment.
+  ```bash
+  virtualenv -p python <virtualenv_name>
+  source <virtualenv_name>/bin/activate
+  ```
+- Follow [instructions](https://pypi.org/project/intel-extension-for-pytorch/) to install the latest IPEX version and other prerequisites.
 
 - Intel® oneAPI Base Toolkit: Need to install components of Intel® oneAPI Base Toolkit
   - Intel® oneAPI DPC++ Compiler
@@ -69,19 +75,12 @@ BERT_WEIGHT=$(pwd)/squad_large_finetuned_checkpoint
 
 <!--- 50. Baremetal -->
 ## Run the model
-Install the following pre-requisites:
-* Create and activate virtual environment.
-  ```bash
-  virtualenv -p python <virtualenv_name>
-  source <virtualenv_name>/bin/activate
-  ```
-* Clone the Model Zoo repository:
+* Clone the Intel AI reference Models repository repository:
   ```bash
   git clone https://github.com/IntelAI/models.git
   ```
 * Navigate models directory and install model specific dependencies for the workload:
   ```bash
-  # Navigate to the model zoo repo
   cd models
   # Install model specific dependencies:
   python -m pip install -r models/language_modeling/pytorch/bert_large/inference/gpu/requirements.txt
@@ -95,7 +94,11 @@ downloading the SQuAD dataset.
 export DATASET_DIR=<path the dataset directory>
 export OUTPUT_DIR=<directory where log files will be written>
 export BERT_WEIGHT=<directory where BERT weight files will be downloaded>
-export Tile=2
+export PRECISION=<export precision. FP16 is currently supported>
+export NUM_OAM=<provide 4 for number of OAM Modules supported by the platform>
+
+# Optional envs
+export BATCH_SIZE=<Set batch_size else it will run with default batch of 64>
 
 # Run a quickstart script
 ./quickstart/language_modeling/pytorch/bert_large/inference/gpu/fp16_inference_plain_format.sh

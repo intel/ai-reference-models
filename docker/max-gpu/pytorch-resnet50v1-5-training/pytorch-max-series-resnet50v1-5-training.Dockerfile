@@ -19,10 +19,10 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG MAX_PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG MAX_PYT_BASE_TAG="xpu-max"
+ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG BASE_TAG="xpu-max"
 
-FROM ${MAX_PYT_BASE_IMAGE}:${MAX_PYT_BASE_TAG}
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 RUN curl -fsSL https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB | apt-key add -
 RUN echo "deb [trusted=yes] https://apt.repos.intel.com/oneapi all main " > /etc/apt/sources.list.d/oneAPI.list

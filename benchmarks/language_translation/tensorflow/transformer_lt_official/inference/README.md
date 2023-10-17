@@ -35,21 +35,21 @@ The path to the directory with these files should be set as the
 | [`online_inference.sh`](/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/online_inference.sh) | Runs online inference (batch_size=1). |
 | [`batch_inference.sh`](/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/batch_inference.sh) | Runs batch inference (batch_size=64). |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit on Linux</th>
-    <th>Setup without AI Kit on Linux</th>
-    <th>Setup without AI Kit on Windows</th>
+    <th>Setup using AI Tools on Linux</th>
+    <th>Setup without AI Tools on Linux</th>
+    <th>Setup without AI Tools on Windows</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit on Linux you will need:</p>
+      <p>To run using AI Tools on Linux you will need:</p>
       <ul>
         <li>Cython
         <li>numactl
@@ -60,7 +60,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Linux you will need:</p>
+      <p>To run without AI Tools on Linux you will need:</p>
       <ul>
         <li>Python 3
         <li>intel-tensorflow>=2.5.0
@@ -69,17 +69,17 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>numactl
         <li>pandas
         <li>wget
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Windows you will need:</p>
+      <p>To run without AI Tools on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li><a href="/docs/general/Windows.md">Intel AI Reference Models on Windows Systems prerequisites</a>
         <li>Cython
         <li>pandas
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -95,12 +95,12 @@ tar -xzf transformer_lt_official_fp32_pretrained_model.tar.gz
 export PRETRAINED_MODEL=$(pwd)/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb
 ```
 
-Navigate to the model zoo directory, ensure that you have all the required
+Navigate to the AI Reference Models directory, ensure that you have all the required
 environment variables set, then run a [quickstart script](#quick-start-scripts) on either [Linux](#run-on-linux) or [Windows](#run-on-windows) systems.
 
 ### Run on Linux
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set env vars
@@ -118,7 +118,7 @@ export BATCH_SIZE=<customized batch size value>
 ### Run on Windows
 Using `cmd.exe`, run:
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set env vars

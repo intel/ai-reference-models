@@ -1,5 +1,4 @@
 #!/bin/bash
-#
 # Copyright (c) 2022-2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 function Parser() {
     while [ $# -ne 0 ]; do
@@ -99,30 +97,6 @@ else
 fi
 fi
 
-# set dataset and model_path
-if test -z $dataset || ! test -d $dataset ; then
-  dataset=$DATASET_DIR
-fi
-
-# if [ "$MODEL" == "bert_base" ] ; then
-#   if test -d ./squad_base_finetuned_checkpoint ; then
-#     :
-#   else
-#     ./download_squad_base_fine_tuned_model.sh
-#   fi
-#   model_path=./squad_base_finetuned_checkpoint
-# elif [ "$MODEL" == "bert_large" ] ; then
-#   if test -d ./squad_large_finetuned_checkpoint ; then
-#     :
-#   else
-#     ./download_squad_large_fine_tuned_model.sh
-#   fi
-#   model_path=./squad_large_finetuned_checkpoint 
-# else
-#   echo "The modle (${MODEL}) does not exist."
-#   exit
-# fi
-
 $NUMA_RAGS $GDB_ARGS python -u run_squad.py \
   --model_type bert \
   --model_name_or_path ${BERT_WEIGHT} \
@@ -131,7 +105,7 @@ $NUMA_RAGS $GDB_ARGS python -u run_squad.py \
   --do_jit \
   --device_choice ${DEVICE} \
   --dtype ${DTYPE}    \
-  --predict_file $dataset/dev-v1.1.json \
+  --predict_file $DATASET_DIR/dev-v1.1.json \
   --per_gpu_eval_batch_size ${BATCH} \
   --max_seq_length 384 \
   --doc_stride 128 \

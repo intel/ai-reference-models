@@ -34,13 +34,13 @@ def main(args):
             path_category = os.path.join(base_path,category)
             path = os.path.join(path_category,dataset,'**','*')
             if dataset == 'test':
-                with open(os.path.join(path_category,category+'_all.csv'), 'w', newline='') as file:
+                with open(os.path.join(base_path,category+'_all.csv'), 'w', newline='') as file:
                     print("#### %s csv file %s_all.csv has been generated for %s dataset ####" %('test',category, category.upper()))
                     write_file(file,path)
             else:
-                with open(os.path.join(path_category,category+'_train.csv'), 'w', newline='') as file:
+                with open(os.path.join(base_path,category+'_train.csv'), 'w', newline='') as file:
                     print("#### %s csv file %s_all.csv has been generated for %s dataset ####" %('train',category,  category.upper()))
-                    write_file(file,path)
+                    write_file(file, path)
                     
 
 def write_file(file,path):

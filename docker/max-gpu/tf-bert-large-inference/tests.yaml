@@ -1,0 +1,162 @@
+fp32-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    PRETRAINED_DIR: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    SQUAD_DIR: /dataset/squad_dir
+    NUM_OAM: '4'
+    FROZEN_GRAPH: /workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
+    INFERENCE_MODE: benchmark
+  volumes:
+    - src: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+      dst: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir
+fp16-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    PRETRAINED_DIR: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    SQUAD_DIR: /dataset/squad_dir
+    NUM_OAM: '4'
+    FROZEN_GRAPH: /workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
+    INFERENCE_MODE: benchmark
+  volumes:
+    - src: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+      dst: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir
+bf16-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: bfloat16
+    OUTPUT_DIR: /tmp
+    PRETRAINED_DIR: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    SQUAD_DIR: /dataset/squad_dir
+    NUM_OAM: '4'
+    FROZEN_GRAPH: /workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
+    INFERENCE_MODE: benchmark
+  volumes:
+    - src: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+      dst: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir
+fp32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    PRETRAINED_DIR: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    SQUAD_DIR: /dataset/squad_dir
+    NUM_OAM: '4'
+    FROZEN_GRAPH: /workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
+    INFERENCE_MODE: accuracy
+  volumes:
+    - src: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+      dst: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir
+fp16-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    PRETRAINED_DIR: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    SQUAD_DIR: /dataset/squad_dir
+    NUM_OAM: '4'
+    FROZEN_GRAPH: /workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
+    INFERENCE_MODE: accuracy
+  volumes:
+    - src: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+      dst: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir
+bf16-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: bfloat16
+    OUTPUT_DIR: /tmp
+    PRETRAINED_DIR: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    SQUAD_DIR: /dataset/squad_dir
+    NUM_OAM: '4'
+    FROZEN_GRAPH: /workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
+    INFERENCE_MODE: accuracy
+  volumes:
+    - src: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+      dst: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir
+fp32-profile-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    PRETRAINED_DIR: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    SQUAD_DIR: /dataset/squad_dir
+    NUM_OAM: '4'
+    FROZEN_GRAPH: /workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
+    INFERENCE_MODE: profile
+  volumes:
+    - src: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+      dst: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir
+fp16-profile-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    PRETRAINED_DIR: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    SQUAD_DIR: /dataset/squad_dir
+    NUM_OAM: '4'
+    FROZEN_GRAPH: /workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
+    INFERENCE_MODE: profile
+  volumes:
+    - src: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+      dst: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir
+bf16-profile-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: bfloat16
+    OUTPUT_DIR: /tmp
+    PRETRAINED_DIR: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    SQUAD_DIR: /dataset/squad_dir
+    NUM_OAM: '4'
+    FROZEN_GRAPH: /workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
+    INFERENCE_MODE: profile
+  volumes:
+    - src: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+      dst: /dataset/pretrained_dir/wwm_uncased_L-24_H-1024_A-16
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir

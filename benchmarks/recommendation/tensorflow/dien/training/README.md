@@ -33,9 +33,8 @@ Set the `DATASET_DIR` to point to the directory with the dataset files when runn
 |-------------|-------------|
 | [`training.sh`](/quickstart/recommendation/tensorflow/dien/training/cpu/training.sh) | Runs training with a batch size of 128 for the specified precisions fp32, bfloat16 and bfloat32. |
 
-<!--- 50. AI Kit -->
 ## Run the model
-* Follow the instructions to setup your bare metal environment on Linux systems. Ensure that you have a clone of the [Model Zoo Github repository](https://github.com/IntelAI/models).
+* Follow the instructions to setup your bare metal environment on Linux systems. Ensure that you have a clone of the [AI Reference Models Github repository](https://github.com/IntelAI/models).
   ```
   git clone https://github.com/IntelAI/models.git
   ```
@@ -44,7 +43,7 @@ Set the `DATASET_DIR` to point to the directory with the dataset files when runn
 
 ## Run on Linux
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set env vars
