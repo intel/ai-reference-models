@@ -183,7 +183,7 @@ class eval_stable_diffusion:
                 im.save(self.args.output_dir + "/original/" + row["image"].split('/')[-1])
 
                 print("Generating image with Stable Diffusion for the prompt: ", row["caption"])
-                generated_img = model.text_to_image(row["caption"])
+                generated_img = model.text_to_image(row["caption"], seed=2023)
                 generated_imgs.append(generated_img)
                 save_img = generated_img.reshape(generated_img.shape[1], generated_img.shape[2], generated_img.shape[3])
                 im = Image.fromarray(save_img)
