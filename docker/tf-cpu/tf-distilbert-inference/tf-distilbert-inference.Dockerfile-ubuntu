@@ -1,0 +1,52 @@
+# Copyright (c) 2020-2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============================================================================
+#
+# THIS IS A GENERATED DOCKERFILE.
+#
+# This file was assembled from multiple pieces, whose use is documented
+# throughout. Please refer to the TensorFlow dockerfiles documentation
+# for more information.
+
+ARG TF_BASE_IMAGE=intel/intel-optimized-tensorflow-avx512
+
+ARG TF_BASE_TAG=latest
+
+FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
+
+WORKDIR /workspace/tf-distilbert-inference
+
+RUN apt-get update && \
+    apt-get install -y numactl unzip wget
+
+RUN python -m pip install \
+    datasets>=2.6.1 \
+    evaluate==0.3.0 \
+    scikit-learn>=1.1.2 \
+    scipy>=1.9.3 \
+    sklearn==0.0 \
+    tokenizers==0.13.1 \
+    transformers==4.30.0
+
+COPY benchmarks benchmarks
+COPY models/common models/common
+COPY models/language_modeling/tensorflow/distilbert_base/inference models/language_modeling/tensorflow/distilbert_base/inference
+COPY quickstart/common quickstart/common 
+COPY quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/inference_realtime_multi_instance.sh quickstart/inference_realtime.sh
+COPY quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/inference_realtime_weight_sharing.sh quickstart/inference_realtime_weight_sharing.sh
+COPY quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/inference_throughput_multi_instance.sh quickstart/inference_throughput.sh
+COPY quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/accuracy.sh quickstart/accuracy.sh
+
+COPY LICENSE license/LICENSE
+COPY third_party license/third_party

@@ -35,3 +35,17 @@ services:
       dockerfile: docker/tf-cpu/tf-resnet50v1-5-inference/tf-resnet50v1-5-inference.Dockerfile-${OS:-ubuntu}
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-distilbert-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-distilbert-inference/tf-distilbert-inference.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"

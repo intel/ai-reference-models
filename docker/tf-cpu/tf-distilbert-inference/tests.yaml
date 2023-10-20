@@ -1,0 +1,258 @@
+DistilBERT Realtime Inference fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/inference_realtime.sh
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/realtime_fp32
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+    BATCH_SIZE: '1'
+    PRECISION: fp32
+    OMP_NUM_THREADS: '4'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    WARMUP_STEPS: '20'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+    dst: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/realtime_fp32
+    dst: /output/tf-distilbert-inference/realtime_fp32
+DistilBERT Weightsharing Inference fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/inference_realtime_weight_sharing.sh
+  env:
+    TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
+    OMP_NUM_THREADS: '4'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb  
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/weightsharing_fp32
+    BATCH_SIZE: '1'
+    PRECISION: fp32
+    WARMUP_STEPS: '20'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+    dst: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/weightsharing_fp32
+    dst: /output/tf-distilbert-inference/weightsharing_fp32
+DistilBERT Throughput fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/inference_throughput.sh
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/throughput_fp32
+    BATCH_SIZE: '56'
+    PRECISION: fp32
+    OMP_NUM_THREADS: '64'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+    WARMUP_STEPS: '20'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+    dst: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/throughput_fp32
+    dst: /output/tf-distilbert-inference/throughput_fp32
+DistilBERT Accuracy fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/accuracy.sh --verbose -- DEBIAN_FRONTEND=noninteractive
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/accuracy_fp32
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+    BATCH_SIZE: '56'
+    PRECISION: fp32
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+    dst: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/accuracy_fp32
+    dst: /output/tf-distilbert-inference/accuracy_fp32
+DistilBERT Accuracy bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/accuracy.sh --verbose -- DEBIAN_FRONTEND=noninteractive 
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/accuracy_bf16
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+    BATCH_SIZE: '56'
+    PRECISION: bfloat16
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+    dst: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/accuracy_bf16
+    dst: /output/tf-distilbert-inference/accuracy_bf16
+DistilBERT Realtime Inference bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/inference_realtime.sh
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/realtime_bf16
+    BATCH_SIZE: '1'
+    PRECISION: bfloat16
+    OMP_NUM_THREADS: '4'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+    WARMUP_STEPS: '20'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+    dst: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/realtime_bf16
+    dst: /output/tf-distilbert-inference/realtime_bf16
+DistilBERT Weightsharing Inference bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/inference_realtime_weight_sharing.sh
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/weightsharing_bf16
+    BATCH_SIZE: '1'
+    PRECISION: bfloat16
+    TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
+    OMP_NUM_THREADS: '4'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+    WARMUP_STEPS: '20'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+    dst: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/weightsharing_bf16
+    dst: /output/tf-distilbert-inference/weightsharing_bf16
+DistilBERT Throughput bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/inference_throughput.sh
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/throughput_bf16
+    BATCH_SIZE: '198'
+    PRECISION: bfloat16
+    OMP_NUM_THREADS: '64'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+    WARMUP_STEPS: '20'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+    dst: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/throughput_bf16
+    dst: /output/tf-distilbert-inference/throughput_bf16
+DistilBERT Accuracy int8:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/accuracy.sh -- DEBIAN_FRONTEND=noninteractive
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/accuracy_int8
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+    BATCH_SIZE: '56'
+    PRECISION: int8
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+    dst: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/accuracy_int8
+    dst: /output/tf-distilbert-inference/accuracy_int8
+DistilBERT Realtime Inference int8:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/inference_realtime.sh
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/realtime_int8
+    BATCH_SIZE: '1'
+    PRECISION: int8
+    OMP_NUM_THREADS: '4'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+    WARMUP_STEPS: '20'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+    dst: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/realtime_int8
+    dst: /output/tf-distilbert-inference/realtime_int8
+DistilBERT Weightsharing Inference int8:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/inference_realtime_weight_sharing.sh
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/weightsharing_int8
+    BATCH_SIZE: '1'
+    PRECISION: int8
+    TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
+    OMP_NUM_THREADS: '4'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+    WARMUP_STEPS: '20'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+    dst: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/weightsharing_int8
+    dst: /output/tf-distilbert-inference/weightsharing_int8
+DistilBERT Throughput int8:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+  cmd: /bin/bash quickstart/inference_throughput.sh
+  env:
+    DATASET_DIR: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    OUTPUT_DIR: /output/tf-distilbert-inference/throughput_int8
+    BATCH_SIZE: '110'
+    PRECISION: int8
+    OMP_NUM_THREADS: '64'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    IN_GRAPH: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+    WARMUP_STEPS: '20'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+    dst: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
+  - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
+    dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
+  - src: /output/tf-distilbert-inference/throughput_int8
+    dst: /output/tf-distilbert-inference/throughput_int8
