@@ -102,6 +102,7 @@ export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
 
+<< EOF
 #oneCCL settings
 export CCL_WORKER_COUNT=8
 export CCL_LOG_LEVEL=info
@@ -138,6 +139,7 @@ export PSM3_RV_MR_CACHE_SIZE=8192
 export PSM3_KASSIST_MODE=none
 #export PSM3_NIC='irdma*
 export FI_PSM3_CONN_TIMEOUT=100
+EOF
 
 rm -rf ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}*
 

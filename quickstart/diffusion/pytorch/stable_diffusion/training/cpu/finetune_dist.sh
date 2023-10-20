@@ -67,6 +67,7 @@ PRECISION=$1
 export MODEL_NAME="runwayml/stable-diffusion-v1-5"
 export DATA_DIR="./cat"
 
+<< EOF
 #oneCCL settings
 export CCL_WORKER_COUNT=8
 export CCL_LOG_LEVEL=info
@@ -103,6 +104,7 @@ export PSM3_RV_MR_CACHE_SIZE=8192
 export PSM3_KASSIST_MODE=none
 #export PSM3_NIC='irdma*
 export FI_PSM3_CONN_TIMEOUT=100
+EOF
 
 rm -rf ${OUTPUT_DIR}/stable_diffusion_dist_finetune_log_${PRECISION}*
 
