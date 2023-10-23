@@ -3,7 +3,7 @@
 This notebook demonstrates instruction tuning [pretrained causal language models from Hugging Face](https://huggingface.co/models)
 using text generation datasets from the [Hugging Face Datasets catalog](https://huggingface.co/datasets) or
 a custom dataset. The [databricks-dolly-15k](https://huggingface.co/datasets/databricks/databricks-dolly-15k) dataset is used
-from the Hugging Face Datasets catalog, and an [Intel domain dataset](https://raw.githubusercontent.com/intel/intel-extension-for-transformers/1.0.1/examples/optimization/pytorch/huggingface/language-modeling/chatbot/intel_domain.json)
+from the Hugging Face Datasets catalog, and a subset of the [Code Alpaca](https://github.com/sahil280114/codealpaca) dataset
 is used as an example of a custom dataset being loaded from a json file.
 
 The notebook includes options for bfloat16 precision training,
@@ -20,7 +20,7 @@ The notebook performs the following steps:
 
 ## Running the notebook
 
-To run the notebook, follow the instructions in `setup.md`.
+To run the notebook, follow the instructions to install the `setup.md`.
 
 ## References
 
@@ -35,5 +35,16 @@ Dataset Citations
   month = April,
   year = 2023,
   url = {https://github.com/togethercomputer/RedPajama-Data}
+}
+```
+
+```
+@misc{codealpaca,
+  author = {Sahil Chaudhary},
+  title = {Code Alpaca: An Instruction-following LLaMA model for code generation},
+  year = {2023},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/sahil280114/codealpaca}},
 }
 ```

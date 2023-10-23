@@ -19,7 +19,7 @@ The notebook performs the following steps:
 
 ## Running the notebook
 
-To run the notebook, follow the instructions to install the [Transfer Learning Notebook requirements](setup.md).
+To run the notebook, follow the instructions to install the `setup.md`.
 
 ## References
 
