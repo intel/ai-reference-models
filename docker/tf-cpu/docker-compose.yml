@@ -149,3 +149,17 @@ services:
       dockerfile: docker/tf-cpu/tf-ssd-resnet34-inference/tf-ssd-resnet34-inference.Dockerfile-${OS:-ubuntu}
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-ssd-resnet34-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-ssd-resnet34-training/tf-ssd-resnet34-training.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"

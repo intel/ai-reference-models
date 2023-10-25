@@ -1,0 +1,161 @@
+# Copyright (c) 2020-2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============================================================================
+#
+# THIS IS A GENERATED DOCKERFILE.
+#
+# This file was assembled from multiple pieces, whose use is documented
+# throughout. Please refer to the TensorFlow dockerfiles documentation
+# for more information.
+
+ARG TF_BASE_IMAGE=intel/intel-optimized-tensorflow
+ARG TF_BASE_TAG=2.13-pip-base
+
+FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /workspace/tf-ssd-resnet34-training 
+
+ARG PY_VERSION=3.10
+ARG PYTHON=python3.10
+
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa -y  && \
+    apt install -y python${PY_VERSION} \
+    python${PY_VERSION}-dev \
+    python3-pip
+    
+RUN apt-get update && apt-get install --no-install-recommends --fix-missing -y gcc 
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y curl build-essential 
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y git cmake libxext-dev \
+        libsm-dev \
+        ca-certificates \
+        python3-tk && \
+    apt-get clean all
+
+# Install OpenMPI
+ARG OPENMPI_VERSION="openmpi-4.1.0"
+ARG OPENMPI_DOWNLOAD_URL="https://www.open-mpi.org/software/ompi/v4.1/downloads/openmpi-4.1.0.tar.gz"
+
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    curl -fSsL -O ${OPENMPI_DOWNLOAD_URL} && \
+    tar zxf ${OPENMPI_VERSION}.tar.gz && \
+    cd ${OPENMPI_VERSION} && \
+    ./configure --enable-mpirun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    cd / && \
+    rm -rf /tmp/openmpi
+
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
+
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+
+# Install OpenSSH for MPI to communicate between containers
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y  \
+    openssh-server \
+    openssh-client && \
+    rm  /etc/ssh/ssh_host_*_key \
+    /etc/ssh/ssh_host_*_key.pub && \
+    apt-get clean all
+
+
+ARG HOROVOD_VERSION=39c8f7c
+ENV HOROVOD_WITHOUT_MXNET=1 \
+    HOROVOD_WITHOUT_PYTORCH=1 \
+    HOROVOD_WITH_TENSORFLOW=1 \
+    HOROVOD_CPU_OPERATIONS=MPI \
+    HOROVOD_WITH_MPI=1 \
+    HOROVOD_WITHOUT_GLOO=1
+
+# Install Horovod
+
+RUN python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+
+RUN ln -sf $(which ${PYTHON}) /usr/local/bin/python && \
+    ln -sf $(which ${PYTHON}) /usr/local/bin/python3 && \
+    ln -sf $(which ${PYTHON}) /usr/bin/python
+
+RUN pip install opencv-python
+
+RUN apt-get update && apt-get install --no-install-recommends --fix-missing -y numactl
+
+RUN pip install tensorflow-addons==0.18.0
+
+ARG TF_MODELS_BRANCH="8110bb64ca63c48d0caee9d565e5b4274db2220a"
+
+ARG FETCH_PR
+
+ARG CODE_DIR=/tensorflow/models
+
+ENV TF_MODELS_DIR=${CODE_DIR}
+
+RUN apt-get update && apt-get install --no-install-recommends --fix-missing -y git && \
+    git clone https://github.com/tensorflow/models.git ${CODE_DIR} && \
+    ( cd ${CODE_DIR} && \
+    if [ ! -z "${FETCH_PR}" ]; then git fetch origin ${FETCH_PR}; fi && \
+    git checkout ${TF_MODELS_BRANCH} )
+
+ARG TF_MODELS_DIR=/tensorflow/models
+
+# Downloads protoc and runs it for object detection
+RUN cd ${TF_MODELS_DIR}/research && \
+    apt-get update && apt-get install --no-install-recommends --fix-missing -y \
+        unzip \
+        wget && \
+    wget --quiet -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip && \
+    unzip -o protobuf.zip && \
+    rm protobuf.zip && \
+    ./bin/protoc object_detection/protos/*.proto --python_out=.
+
+# Note pycocotools has to be install after the other requirements
+RUN pip install \
+        Cython \
+        contextlib2 \
+        jupyter \
+        lxml \
+        matplotlib \
+        numpy>=1.17.4 \
+        'pillow>=9.3.0' && \
+    pip install pycocotools
+
+COPY benchmarks benchmarks
+COPY models models
+COPY quickstart/common quickstart/common
+COPY quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/training.sh quickstart/training.sh
+
+
+COPY LICENSE license/LICENSE
+COPY third_party license/third_party
+
+COPY docker/tf-cpu/generate_ssh_key.sh /workspace/generate_ssh_key.sh
+
+RUN cat /workspace/generate_ssh_key.sh >> ${HOME}/.bash_profile && \
+    cat /workspace/generate_ssh_key.sh >> ${HOME}/.bashrc
+
+ENV BASH_ENV=/root/.bash_profile
