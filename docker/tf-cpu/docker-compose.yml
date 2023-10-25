@@ -77,3 +77,18 @@ services:
       dockerfile: docker/tf-cpu/tf-bert-large-inference/tf-bert-large-inference.Dockerfile-${OS:-ubuntu}
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-bert-large-pretraining:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-pretraining
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-bert-large-pretraining/tf-bert-large-pretraining.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+      
