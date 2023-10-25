@@ -1,0 +1,122 @@
+DIEN Accuracy bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-recommendation-tf-dien-inference
+  cmd: /bin/bash quickstart/accuracy.sh
+  env:
+    DATASET_DIR: /tf_dataset/dataset/DIEN
+    OUTPUT_DIR: /output/tf-dien-inference/accuracy_bf16
+    PRECISION: bfloat16
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/dien/dien_fp32_dynamic_mklgrus.pb
+    BATCH_SIZE: '128'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/dien/dien_fp32_dynamic_mklgrus.pb
+    dst: /tf_dataset/pre-trained-models/dien/dien_fp32_dynamic_mklgrus.pb
+  - src: /tf_dataset/dataset/DIEN
+    dst: /tf_dataset/dataset/DIEN
+  - src: $PWD/output/tf-dien-inference/accuracy_bf16
+    dst: /output/tf-dien-inference/accuracy_bf16
+DIEN Accuracy fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-recommendation-tf-dien-inference
+  cmd: /bin/bash quickstart/accuracy.sh
+  env:
+    DATASET_DIR: /tf_dataset/dataset/DIEN
+    OUTPUT_DIR: /output/tf-dien-inference/accuracy_fp32
+    PRECISION: fp32
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/dien/dien_fp32_dynamic_mklgrus.pb
+    BATCH_SIZE: '128'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/dien/dien_fp32_dynamic_mklgrus.pb
+    dst: /tf_dataset/pre-trained-models/dien/dien_fp32_dynamic_mklgrus.pb
+  - src: /tf_dataset/dataset/DIEN
+    dst: /tf_dataset/dataset/DIEN
+  - src: $PWD/output/tf-dien-inference/accuracy_fp32
+    dst: /output/tf-dien-inference/accuracy_fp32
+DIEN Realtime Inference bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-recommendation-tf-dien-inference
+  cmd: /bin/bash quickstart/inference_realtime.sh --num-inter-threads 1  --num-intra-threads 4 --benchmark-only --verbose
+  env:
+    DATASET_DIR: /tf_dataset/dataset/DIEN
+    OUTPUT_DIR: /output/tf-dien-inference/realtime_bf16
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+    PRECISION: bfloat16
+    BATCH_SIZE: '16'
+    OMP_NUM_THREADS: '4'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+    dst: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+  - src: /tf_dataset/dataset/DIEN
+    dst: /tf_dataset/dataset/DIEN
+  - src: $PWD/output/tf-dien-inference/realtime_bf16
+    dst: /output/tf-dien-inference/realtime_bf16
+DIEN Realtime Inference fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-recommendation-tf-dien-inference
+  cmd: /bin/bash quickstart/inference_realtime.sh --num-inter-threads 1  --num-intra-threads 4 --benchmark-only --verbose
+  env:
+    DATASET_DIR: /tf_dataset/dataset/DIEN
+    OUTPUT_DIR: /output/tf-dien-inference/realtime_fp32
+    PRECISION: fp32
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+    BATCH_SIZE: '16'
+    OMP_NUM_THREADS: '4'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+    dst: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+  - src: /tf_dataset/dataset/DIEN
+    dst: /tf_dataset/dataset/DIEN
+  - src: $PWD/output/tf-dien-inference/realtime_fp32
+    dst: /output/tf-dien-inference/realtime_fp32
+DIEN Throughput bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-recommendation-tf-dien-inference
+  cmd: /bin/bash quickstart/inference_throughput.sh --num-inter-threads 1  --num-intra-threads 64 --benchmark-only --verbose
+  env:
+    DATASET_DIR: /tf_dataset/dataset/DIEN
+    OUTPUT_DIR: /output/tf-dien-inference/throughput_bf16
+    PRECISION: bfloat16
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+    BATCH_SIZE: '65536'
+    OMP_NUM_THREADS: '64'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+    dst: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+  - src: /tf_dataset/dataset/DIEN
+    dst: /tf_dataset/dataset/DIEN
+  - src: $PWD/output/tf-dien-inference/throughput_bf16
+    dst: /output/tf-dien-inference/throughput_bf16
+DIEN Throughput fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-recommendation-tf-dien-inference
+  cmd: /bin/bash quickstart/inference_throughput.sh --num-inter-threads 1  --num-intra-threads 64 --benchmark-only --verbose
+  env:
+    DATASET_DIR: /tf_dataset/dataset/DIEN
+    OUTPUT_DIR: /output/tf-dien-inference/throughput_fp32
+    PRECISION: fp32
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+    BATCH_SIZE: '65536'
+    OMP_NUM_THREADS: '64'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+    dst: /tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+  - src: /tf_dataset/dataset/DIEN
+    dst: /tf_dataset/dataset/DIEN
+  - src: $PWD/output/tf-dien-inference/throughput_fp32
+    dst: /output/tf-dien-inference/throughput_fp32
