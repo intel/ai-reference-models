@@ -1,0 +1,81 @@
+# Copyright (c) 2020-2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============================================================================
+#
+# THIS IS A GENERATED DOCKERFILE.
+#
+# This file was assembled from multiple pieces, whose use is documented
+# throughout. Please refer to the TensorFlow dockerfiles documentation
+# for more information.
+
+ARG TF_BASE_IMAGE=intel/intel-optimized-tensorflow
+ARG TF_BASE_TAG=2.13-pip-base
+
+FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
+
+WORKDIR /workspace/tf-ssd-mobilenet-inference
+
+RUN yum update -y && \
+    yum install -y git \
+        cmake \
+        unzip \
+        ca-certificates \
+        python3-tkinter && \
+    yum clean all
+
+COPY benchmarks benchmarks 
+COPY quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_realtime_multi_instance.sh quickstart/inference_realtime_multi_instance.sh
+COPY quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_throughput_multi_instance.sh quickstart/inference_throughput_multi_instance.sh
+COPY quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/accuracy.sh quickstart/accuracy.sh
+COPY models/common models/common 
+COPY models/object_detection/tensorflow/ssd-mobilenet/inference models/object_detection/tensorflow/ssd-mobilenet/inference
+COPY models/object_detection/tensorflow/ssd-mobilenet/inference/__init__.py  models/object_detection/tensorflow/ssd-mobilenet/inference/__init__.py
+COPY quickstart/common quickstart/common
+
+ARG TF_MODELS_BRANCH
+
+ARG FETCH_PR
+
+ARG CODE_DIR=/tensorflow/models
+
+ENV TF_MODELS_DIR=${CODE_DIR}
+
+RUN git clone https://github.com/tensorflow/models.git ${CODE_DIR} && \
+    ( cd ${CODE_DIR} && \
+    if [ ! -z "${FETCH_PR}" ]; then git fetch origin ${FETCH_PR}; fi && \
+    git checkout ${TF_MODELS_BRANCH} )
+
+# Note pycocotools has to be install after the other requirements
+
+ARG TF_MODELS_DIR=/tensorflow/models
+
+# Downloads protoc and runs it for object detection
+RUN cd ${TF_MODELS_DIR}/research && \
+    wget --quiet -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip && \
+    unzip -o protobuf.zip && \
+    rm protobuf.zip && \
+    ./bin/protoc object_detection/protos/*.proto --python_out=.
+
+RUN python -m pip install Cython \
+        contextlib2 \
+        jupyter \
+        lxml \
+        matplotlib \
+        numpy>=1.17.4 \
+        'pillow>=9.3.0' \
+        pycocotools \
+        requests
+
+COPY LICENSE license/LICENSE
+COPY third_party license/third_party
