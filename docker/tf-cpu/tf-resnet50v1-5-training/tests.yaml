@@ -1,0 +1,34 @@
+ResNet50 v1.5 Training fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-training
+  cmd: /bin/bash quickstart/training_demo.sh
+  env:
+    DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+    OUTPUT_DIR: /output/tf-resnet50v1-5-training/fp32
+    BATCH_SIZE: '512'
+    PRECISION: fp32
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/dataset/TF_Imagenet_FullData
+    dst: /tf_dataset/dataset/TF_Imagenet_FullData
+  - src: $PWD/output/tf-resnet50v1-5-training/fp32
+    dst: /output/tf-resnet50v1-5-training/fp32
+ResNet50 v1.5 Training bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-training
+  cmd: /bin/bash quickstart/training_demo.sh
+  env:
+    DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+    OUTPUT_DIR: /output/tf-resnet50v1-5-training/bf16
+    BATCH_SIZE: '1024'
+    PRECISION: bfloat16
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/dataset/TF_Imagenet_FullData
+    dst: /tf_dataset/dataset/TF_Imagenet_FullData
+  - src: $PWD/output/tf-resnet50v1-5-training/bf16
+    dst: /output/tf-resnet50v1-5-training/bf16
