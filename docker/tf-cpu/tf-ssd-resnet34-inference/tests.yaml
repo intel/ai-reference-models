@@ -1,0 +1,177 @@
+SSD-ResNet34 Realtime Inference fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+  cmd: /bin/bash quickstart/multi_instance_online_inference_1200.sh --benchmark-only warmup-steps=100 steps=200
+  env:
+    BATCH_SIZE: '1'
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    OUTPUT_DIR: /output/tf-ssd-resnet34-inference/realtime_fp32
+    PRECISION: fp32
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/ssd-resnet34-sh/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/ssd-resnet34-sh/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+    dst: /tf_dataset/pre-trained-models/ssd-resnet34-sh/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  - src: /tf_dataset/dataset/ssd-resnet34
+    dst: /tf_dataset/dataset/ssd-resnet34
+  - src: $PWD/output/tf-ssd-resnet34-inference/realtime_fp32
+    dst: /output/tf-ssd-resnet34-inference/realtime_fp32
+SSD-ResNet34 Realtime Inference bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+  cmd: /bin/bash quickstart/multi_instance_online_inference_1200.sh --benchmark-only warmup-steps=100 steps=200
+  env:
+    BATCH_SIZE: '1'
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    OUTPUT_DIR: /output/tf-ssd-resnet34-inference/realtime_bf16
+    PRECISION: bfloat16
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/ssd-resnet34/bfloat16/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/ssd-resnet34/bfloat16/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+    dst: /tf_dataset/pre-trained-models/ssd-resnet34/bfloat16/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  - src: /tf_dataset/dataset/ssd-resnet34
+    dst: /tf_dataset/dataset/ssd-resnet34
+  - src: $PWD/output/tf-ssd-resnet34-inference/realtime_bf16
+    dst: /output/tf-ssd-resnet34-inference/realtime_bf16
+SSD-ResNet34 Realtime Inference int8:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+  cmd: /bin/bash quickstart/multi_instance_online_inference_1200.sh --benchmark-only warmup-steps=100 steps=200
+  env:
+    BATCH_SIZE: '1'
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    OUTPUT_DIR: /output/tf-ssd-resnet34-inference/realtime_int8
+    PRECISION: int8
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/ssd-resnet34-sh/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/ssd-resnet34-sh/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+    dst: /tf_dataset/pre-trained-models/ssd-resnet34-sh/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+  - src: /tf_dataset/dataset/ssd-resnet34
+    dst: /tf_dataset/dataset/ssd-resnet34
+  - src: $PWD/output/tf-ssd-resnet34-inference/realtime_int8
+    dst: /output/tf-ssd-resnet34-inference/realtime_int8
+SSD-ResNet34 Throughput fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+  cmd: /bin/bash quickstart/multi_instance_batch_inference_1200.sh  --benchmark-only warmup-steps=100 steps=200
+  env:
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0 
+    OUTPUT_DIR: /output/tf-ssd-resnet34-inference/throughput_fp32
+    BATCH_SIZE: '112'
+    PRECISION: fp32
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/ssd-resnet34-sh/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/ssd-resnet34-sh/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+    dst: /tf_dataset/pre-trained-models/ssd-resnet34-sh/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  - src: /tf_dataset/dataset/ssd-resnet34
+    dst: /tf_dataset/dataset/ssd-resnet34
+  - src: $PWD/output/tf-ssd-resnet34-inference/throughput_fp32
+    dst: /output/tf-ssd-resnet34-inference/throughput_fp32
+SSD-ResNet34 Throughput bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+  cmd: /bin/bash quickstart/multi_instance_batch_inference_1200.sh --benchmark-only warmup-steps=100 steps=200
+  env:
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    OUTPUT_DIR: /output/tf-ssd-resnet34-inference/throughput_bf16
+    BATCH_SIZE: '112'
+    PRECISION: bfloat16
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/ssd-resnet34/bfloat16/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/ssd-resnet34/bfloat16/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+    dst: /tf_dataset/pre-trained-models/ssd-resnet34/bfloat16/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  - src: /tf_dataset/dataset/ssd-resnet34
+    dst: /tf_dataset/dataset/ssd-resnet34
+  - src: $PWD/output/tf-ssd-resnet34-inference/throughput_bf16
+    dst: /output/tf-ssd-resnet34-inference/throughput_bf16
+SSD-ResNet34 Throughput int8:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+  cmd: /bin/bash quickstart/multi_instance_batch_inference_1200.sh --benchmark-only warmup-steps=100 steps=200
+  env:
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    OUTPUT_DIR: /output/tf-ssd-resnet34-inference/throughput_int8
+    BATCH_SIZE: '112'
+    PRECISION: int8
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/ssd-resnet34-sh/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/ssd-resnet34-sh/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+    dst: /tf_dataset/pre-trained-models/ssd-resnet34-sh/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+  - src: /tf_dataset/dataset/ssd-resnet34
+    dst: /tf_dataset/dataset/ssd-resnet34
+  - src: $PWD/output/tf-ssd-resnet34-inference/throughput_int8
+    dst: /output/tf-ssd-resnet34-inference/throughput_int8
+SSD-ResNet34 Accuracy fp32:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+  cmd: /bin/bash quickstart/accuracy_1200.sh
+  env:
+    BATCH_SIZE: '1'
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
+    OUTPUT_DIR: /output/tf-ssd-resnet34-inference/accuracy_fp32
+    PRECISION: fp32
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/ssd-resnet34-sh/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/ssd-resnet34-sh/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+    dst: /tf_dataset/pre-trained-models/ssd-resnet34-sh/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  - src: /tf_dataset/dataset/ssd-resnet34
+    dst: /tf_dataset/dataset/ssd-resnet34
+  - src: $PWD/output/tf-ssd-resnet34-inference/accuracy_fp32
+    dst: /output/tf-ssd-resnet34-inference/accuracy_fp32
+SSD-ResNet34 Accuracy bf16:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+  cmd: /bin/bash quickstart/accuracy_1200.sh
+  env:
+    BATCH_SIZE: '1'
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
+    OUTPUT_DIR: /output/tf-ssd-resnet34-inference/accuracy_bf16
+    PRECISION: bfloat16
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/ssd-resnet34/bfloat16/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/ssd-resnet34/bfloat16/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+    dst: /tf_dataset/pre-trained-models/ssd-resnet34/bfloat16/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+  - src: /tf_dataset/dataset/ssd-resnet34
+    dst: /tf_dataset/dataset/ssd-resnet34
+  - src: $PWD/output/tf-ssd-resnet34-inference/accuracy_bf16
+    dst: /output/tf-ssd-resnet34-inference/accuracy_bf16
+SSD-ResNet34 Accuracy int8:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+  cmd: /bin/bash quickstart/accuracy_1200.sh
+  env:
+    BATCH_SIZE: '1'
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
+    OUTPUT_DIR: /output/tf-ssd-resnet34-inference/accuracy_int8
+    PRECISION: int8
+    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/ssd-resnet34-sh/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/pre-trained-models/ssd-resnet34-sh/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+    dst: /tf_dataset/pre-trained-models/ssd-resnet34-sh/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+  - src: /tf_dataset/dataset/ssd-resnet34
+    dst: /tf_dataset/dataset/ssd-resnet34
+  - src: $PWD/output/tf-ssd-resnet34-inference/accuracy_int8
+    dst: /output/tf-ssd-resnet34-inference/accuracy_int8
