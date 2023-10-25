@@ -18,7 +18,7 @@ DistilBERT Realtime Inference fp32:
     dst: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/realtime_fp32
+  - src: $PWD/output/tf-distilbert-inference/realtime_fp32
     dst: /output/tf-distilbert-inference/realtime_fp32
 DistilBERT Weightsharing Inference fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -41,7 +41,7 @@ DistilBERT Weightsharing Inference fp32:
     dst: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/weightsharing_fp32
+  - src: $PWD/output/tf-distilbert-inference/weightsharing_fp32
     dst: /output/tf-distilbert-inference/weightsharing_fp32
 DistilBERT Throughput fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -63,7 +63,7 @@ DistilBERT Throughput fp32:
     dst: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/throughput_fp32
+  - src: $PWD/output/tf-distilbert-inference/throughput_fp32
     dst: /output/tf-distilbert-inference/throughput_fp32
 DistilBERT Accuracy fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -82,7 +82,7 @@ DistilBERT Accuracy fp32:
     dst: /tf_dataset/pre-trained-models/sst2/fp32/frozen_graph_distilbert_fp32.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/accuracy_fp32
+  - src: $PWD/output/tf-distilbert-inference/accuracy_fp32
     dst: /output/tf-distilbert-inference/accuracy_fp32
 DistilBERT Accuracy bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -101,7 +101,7 @@ DistilBERT Accuracy bf16:
     dst: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/accuracy_bf16
+  - src: $PWD/output/tf-distilbert-inference/accuracy_bf16
     dst: /output/tf-distilbert-inference/accuracy_bf16
 DistilBERT Realtime Inference bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -123,7 +123,7 @@ DistilBERT Realtime Inference bf16:
     dst: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/realtime_bf16
+  - src: $PWD/output/tf-distilbert-inference/realtime_bf16
     dst: /output/tf-distilbert-inference/realtime_bf16
 DistilBERT Weightsharing Inference bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -146,7 +146,7 @@ DistilBERT Weightsharing Inference bf16:
     dst: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/weightsharing_bf16
+  - src: $PWD/output/tf-distilbert-inference/weightsharing_bf16
     dst: /output/tf-distilbert-inference/weightsharing_bf16
 DistilBERT Throughput bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -168,7 +168,7 @@ DistilBERT Throughput bf16:
     dst: /tf_dataset/pre-trained-models/sst2/fp32/bmmV2_no_reshape_fp32_graph.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/throughput_bf16
+  - src: $PWD/output/tf-distilbert-inference/throughput_bf16
     dst: /output/tf-distilbert-inference/throughput_bf16
 DistilBERT Accuracy int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -187,7 +187,7 @@ DistilBERT Accuracy int8:
     dst: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/accuracy_int8
+  - src: $PWD/output/tf-distilbert-inference/accuracy_int8
     dst: /output/tf-distilbert-inference/accuracy_int8
 DistilBERT Realtime Inference int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -209,7 +209,7 @@ DistilBERT Realtime Inference int8:
     dst: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/realtime_int8
+  - src: $PWD/output/tf-distilbert-inference/realtime_int8
     dst: /output/tf-distilbert-inference/realtime_int8
 DistilBERT Weightsharing Inference int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -232,7 +232,7 @@ DistilBERT Weightsharing Inference int8:
     dst: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/weightsharing_int8
+  - src: $PWD/output/tf-distilbert-inference/weightsharing_int8
     dst: /output/tf-distilbert-inference/weightsharing_int8
 DistilBERT Throughput int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
@@ -254,5 +254,5 @@ DistilBERT Throughput int8:
     dst: /tf_dataset/pre-trained-models/sst2/int8/DB-int8.pb
   - src: /localdisk/datasets/sst-2/sst2_validation_dataset/
     dst: /localdisk/datasets/sst-2/sst2_validation_dataset/
-  - src: /output/tf-distilbert-inference/throughput_int8
+  - src: $PWD/output/tf-distilbert-inference/throughput_int8
     dst: /output/tf-distilbert-inference/throughput_int8

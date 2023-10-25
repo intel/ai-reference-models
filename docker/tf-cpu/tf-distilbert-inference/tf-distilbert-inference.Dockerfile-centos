@@ -27,7 +27,7 @@ FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
 WORKDIR /workspace/tf-distilbert-inference
 
-RUN yum update && \
+RUN yum update -y && \
     yum install -y numactl unzip wget && \
     yum clean all
 
