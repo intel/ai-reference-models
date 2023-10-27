@@ -77,9 +77,11 @@ echo "### running with jit mode"
 
 export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
 CORES=`lscpu | grep Core | awk '{print $4}'`
-ARGS="$ARGS --use_share_weight --total_cores ${CORES} --cores_per_instance ${OMP_NUM_THREADS}"
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
+NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
+ARGS="$ARGS --use_share_weight --total_cores ${CORES_PER_NUMA} --cores_per_instance ${OMP_NUM_THREADS}"
 FINETUNED_MODEL=${FINETUNED_MODEL:-"google/vit-base-patch16-224"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/image-classification/run_image_classification.py"}
