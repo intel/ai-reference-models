@@ -1053,7 +1053,7 @@ function mlperf_gnmt() {
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      python3 -m pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps
+      python3 -m pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps --force-reinstall
     fi
 
     # For accuracy, dataset location is required.
