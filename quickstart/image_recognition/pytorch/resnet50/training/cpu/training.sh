@@ -89,7 +89,7 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-BATCH_SIZE=128
+BATCH_SIZE=${BATCH_SIZE:-128}
 
 rm -rf ./resnet50_training_log_*
 

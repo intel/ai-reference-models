@@ -68,7 +68,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 export TRAIN=1
 
 PRECISION=$1
-BATCH_SIZE=${BATCH_SIZE-112}
+BATCH_SIZE=${BATCH_SIZE:-112}
 
 rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput*
 

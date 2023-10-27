@@ -66,7 +66,8 @@ unset launcher_arg
 fi
 
 LOG_0="${LOG}/throughput.log"
-export BATCH_SIZE=16
+
+BATCH_SIZE=${BATCH_SIZE:-32768}
 $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
     --embedding_dim 128 \
     --dense_arch_layer_sizes 512,256,128 \

@@ -57,7 +57,7 @@ export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-BATCH_SIZE=448
+BATCH_SIZE=${BATCH_SIZE:-448}
 PRECISION=$1
 
 rm -rf ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_throughput*

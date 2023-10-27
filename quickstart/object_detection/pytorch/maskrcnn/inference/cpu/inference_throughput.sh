@@ -85,8 +85,8 @@ if [[ ${PLATFORM} == "windows" ]]; then
 else
   CORES=`lscpu | grep Core | awk '{print $4}'`
 fi
-BATCH_SIZE=`expr $CORES \* 2`
 
+BATCH_SIZE=${BATCH_SIZE:-`expr $CORES \* 2`}
 rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_throughput*
 
 # check if stoch PYT or IPEX is installed on the system

@@ -20,7 +20,7 @@ MODEL_DIR=${MODEL_DIR-../../../../../..}
 #export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 ARGS="--benchmark"
 precision=fp32
-batch_size=28
+batch_size=${batch_size:-28}
 
 if [[ "$1" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
@@ -30,7 +30,7 @@ if [[ "$1" == "bf16" ]]
 then
     ARGS="$ARGS --bf16"
     precision=bf16
-    batch_size=128
+    batch_size=${batch_size:-128}
     echo "### running bf16 mode"
 elif [[ $1 == "bf32" ]]; then
     echo "### running BF32 mode"
