@@ -125,3 +125,7 @@ RUN apt-get update && \
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
+
+RUN mkdir -p /workspace/tf-ssd-resnet34-inference/pretrained_model && \
+    wget -qO /workspace/tf-ssd-resnet34-inference/pretrained_model/ssd_resnet34_fp32_1200x1200_pretrained_model.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/ssd_resnet34_fp32_1200x1200_pretrained_model.pb && \
+    wget -qO /workspace/tf-ssd-resnet34-inference/pretrained_model/ssd_resnet34_int8_1200x1200_pretrained_model.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/ssd_resnet34_int8_1200x1200_pretrained_model.pb

@@ -111,3 +111,7 @@ RUN python -m pip install Cython \
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
+
+RUN mkdir -p /workspace/tf-ssd-mobilenet-inference/pretrained_model && \
+    wget -qO /workspace/tf-ssd-mobilenet-inference/pretrained_model/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb && \
+    wget -qO /workspace/tf-ssd-mobilenet-inference/pretrained_model/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb

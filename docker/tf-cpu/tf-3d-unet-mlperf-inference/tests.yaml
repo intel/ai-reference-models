@@ -6,7 +6,6 @@
     OUTPUT_DIR: /output/tf-3d-unet-mlperf-inference/accuracy_fp32
     BATCH_SIZE: '1'
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
   shm_size: 8G
   privileged: true
   init: true
@@ -15,8 +14,6 @@
     dst: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
   - src: $PWD/output/tf-3d-unet-mlperf-inference/accuracy_fp32
     dst: /output/tf-3d-unet-mlperf-inference/accuracy_fp32
-  - src: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
-    dst: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
 3d-UNet-MLPerf Accuracy bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
   cmd: /bin/bash quickstart/accuracy.sh
@@ -25,7 +22,6 @@
     OUTPUT_DIR: /output/tf-3d-unet-mlperf-inference/accuracy_bf16
     BATCH_SIZE: '1'
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
   shm_size: 8G
   privileged: true
   init: true
@@ -34,8 +30,6 @@
     dst: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
   - src: $PWD/output/tf-3d-unet-mlperf-inference/accuracy_bf16
     dst: /output/tf-3d-unet-mlperf-inference/accuracy_bf16
-  - src: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
-    dst: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
 3d-UNet-MLPerf Accuracy int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
   cmd: /bin/bash quickstart/accuracy.sh
@@ -44,7 +38,6 @@
     OUTPUT_DIR: /output/tf-3d-unet-mlperf-inference/accuracy_int8
     BATCH_SIZE: '1'
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/3DUNet/3dunet_new_int8_bf16.pb
   shm_size: 8G
   privileged: true
   init: true
@@ -53,8 +46,6 @@
     dst: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
   - src: $PWD/output/tf-3d-unet-mlperf-inference/accuracy_int8
     dst: /output/tf-3d-unet-mlperf-inference/accuracy_int8
-  - src: /tf_dataset/pre-trained-models/3DUNet/3dunet_new_int8_bf16.pb
-    dst: /tf_dataset/pre-trained-models/3DUNet/3dunet_new_int8_bf16.pb
 3d-UNet-MLPerf Realtime Inference int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
   cmd: /bin/bash quickstart/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1 
@@ -64,7 +55,6 @@
     OUTPUT_DIR: /output/tf-3d-unet-mlperf-inference/realtime_int8
     BATCH_SIZE: '1'
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/3DUNet/3dunet_new_int8_bf16.pb
     OMP_NUM_THREADS: '4'
   shm_size: 8G
   privileged: true
@@ -74,8 +64,6 @@
     dst: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
   - src: $PWD/output/tf-3d-unet-mlperf-inference/realtime_int8
     dst: /output/tf-3d-unet-mlperf-inference/realtime_int8
-  - src: /tf_dataset/pre-trained-models/3DUNet/3dunet_new_int8_bf16.pb
-    dst: /tf_dataset/pre-trained-models/3DUNet/3dunet_new_int8_bf16.pb
 3d-UNet-MLPerf Realtime Inference bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
   cmd: /bin/bash quickstart/inference_realtime.sh
@@ -84,7 +72,6 @@
     OUTPUT_DIR: /output/tf-3d-unet-mlperf-inference/realtime_bf16
     BATCH_SIZE: '1'
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
     TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE: Mean
     TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD: Mean,Rsqrt,SquaredDifference
     OMP_NUM_THREADS: '4'
@@ -97,8 +84,6 @@
     dst: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
   - src: $PWD/output/tf-3d-unet-mlperf-inference/realtime_bf16
     dst: /output/tf-3d-unet-mlperf-inference/realtime_bf16
-  - src: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
-    dst: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
 3d-UNet-MLPerf Realtime Inference fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
   cmd: /bin/bash quickstart/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1
@@ -107,7 +92,6 @@
     OUTPUT_DIR: /output/tf-3d-unet-mlperf-inference/realtime_fp32
     BATCH_SIZE: '1'
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
@@ -118,8 +102,6 @@
     dst: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
   - src: $PWD/output/tf-3d-unet-mlperf-inference/realtime_fp32
     dst: /output/tf-3d-unet-mlperf-inference/realtime_fp32
-  - src: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
-    dst: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
 3d-UNet-MLPerf Throughput int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
   cmd: /bin/bash quickstart/inference_throughput.sh --benchmark-only --num-intra-threads 64 --num-inter-threads 1
@@ -128,7 +110,6 @@
     OUTPUT_DIR: /output/tf-3d-unet-mlperf-inference/throughput_int8
     BATCH_SIZE: '6'
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/3DUNet/3dunet_new_int8_bf16.pb
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
@@ -139,8 +120,6 @@
     dst: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
   - src: $PWD/output/tf-3d-unet-mlperf-inference/throughput_int8
     dst: /output/tf-3d-unet-mlperf-inference/throughput_int8
-  - src: /tf_dataset/pre-trained-models/3DUNet/3dunet_new_int8_bf16.pb
-    dst: /tf_dataset/pre-trained-models/3DUNet/3dunet_new_int8_bf16.pb
 3d-UNet-MLPerf Throughput bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
   cmd: /bin/bash quickstart/inference_throughput.sh --benchmark-only --num-intra-threads 64 --num-inter-threads 1
@@ -149,7 +128,6 @@
     OUTPUT_DIR: /output/tf-3d-unet-mlperf-inference/throughput_bf16
     BATCH_SIZE: '6'
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
     TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE: Mean
     TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD: Mean,Rsqrt,SquaredDifference
     OMP_NUM_THREADS: '64'
@@ -162,8 +140,6 @@
     dst: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
   - src: $PWD/output/tf-3d-unet-mlperf-inference/throughput_bf16
     dst: /output/tf-3d-unet-mlperf-inference/throughput_bf16
-  - src: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
-    dst: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
 3d-UNet-MLPerf Throughput fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
   cmd: /bin/bash quickstart/inference_throughput.sh --benchmark-only --num-intra-threads 64 --num-inter-threads 1
@@ -172,7 +148,6 @@
     OUTPUT_DIR: /output/tf-3d-unet-mlperf-inference/throughput_fp32
     BATCH_SIZE: '6'
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
@@ -183,5 +158,3 @@
     dst: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
   - src: $PWD/output/tf-3d-unet-mlperf-inference/throughput_fp32
     dst: /output/tf-3d-unet-mlperf-inference/throughput_fp32
-  - src: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
-    dst: /tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb

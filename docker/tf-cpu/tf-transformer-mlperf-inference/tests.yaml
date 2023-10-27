@@ -6,15 +6,12 @@ Transformer Realtime inference fp32:
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/realtime_fp32
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_fp32.pb
     BATCH_SIZE: '1'
     OMP_NUM_THREADS: '4'
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_fp32.pb
-    dst: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_fp32.pb
   - src: /tf_dataset/pre-trained-models/transformer_mlperf/data
     dst: /tf_dataset/pre-trained-models/transformer_mlperf/data
   - src: $PWD/output/tf-transformer-mlperf-inference/realtime_fp32
@@ -27,14 +24,11 @@ Transformer Realtime inference bf16:
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/realtime_bf16
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_bf16.pb
     BATCH_SIZE: '1'
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_bf16.pb
-    dst: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_bf16.pb
   - src: /tf_dataset/pre-trained-models/transformer_mlperf/data
     dst: /tf_dataset/pre-trained-models/transformer_mlperf/data
   - src: $PWD/output/tf-transformer-mlperf-inference/realtime_bf16
@@ -47,14 +41,11 @@ Transformer Realtime inference int8:
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/realtime_int8
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_int8.pb
     BATCH_SIZE: '1'
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_int8.pb
-    dst: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_int8.pb
   - src: /tf_dataset/pre-trained-models/transformer_mlperf/data
     dst: /tf_dataset/pre-trained-models/transformer_mlperf/data
   - src: $PWD/output/tf-transformer-mlperf-inference/realtime_int8
@@ -67,14 +58,11 @@ Transformer Throughput bf16:
     KMP_AFFINITY=granularity: fine,verbose,compact,1,0 
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/throughput_bf16
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_bf16.pb
     BATCH_SIZE: '448'
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_bf16.pb
-    dst: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_bf16.pb
   - src: /tf_dataset/pre-trained-models/transformer_mlperf/data
     dst: /tf_dataset/pre-trained-models/transformer_mlperf/data
   - src: $PWD/output/tf-transformer-mlperf-inference/throughput_bf16
@@ -87,14 +75,11 @@ Transformer Throughput fp32:
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/throughput_fp32
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_fp32.pb
     BATCH_SIZE: '448'
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_fp32.pb
-    dst: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_fp32.pb
   - src: /tf_dataset/pre-trained-models/transformer_mlperf/data
     dst: /tf_dataset/pre-trained-models/transformer_mlperf/data
   - src: $PWD/output/tf-transformer-mlperf-inference/throughput_fp32
@@ -107,14 +92,11 @@ Transformer Throughput int8:
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/throughput_int8
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_int8.pb
     BATCH_SIZE: '448'
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_int8.pb
-    dst: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_int8.pb
   - src: /tf_dataset/pre-trained-models/transformer_mlperf/data
     dst: /tf_dataset/pre-trained-models/transformer_mlperf/data
   - src: $PWD/output/tf-transformer-mlperf-inference/throughput_int8
@@ -127,13 +109,10 @@ Transformer Accuracy fp32:
     DATASET_DIR: /tf_dataset/pre-trained-models/transformer_mlperf/data
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/accuracy_fp32
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_fp32.pb
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_fp32.pb
-    dst: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_fp32.pb
   - src: /tf_dataset/pre-trained-models/transformer_mlperf/data
     dst: /tf_dataset/pre-trained-models/transformer_mlperf/data
   - src: $PWD/output/tf-transformer-mlperf-inference/accuracy_fp32
@@ -146,13 +125,10 @@ Transformer Accuracy bf16:
     DATASET_DIR: /tf_dataset/pre-trained-models/transformer_mlperf/data
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/accuracy_bf16
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_bf16.pb
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_bf16.pb
-    dst: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_bf16.pb
   - src: /tf_dataset/pre-trained-models/transformer_mlperf/data
     dst: /tf_dataset/pre-trained-models/transformer_mlperf/data
   - src: $PWD/output/tf-transformer-mlperf-inference/accuracy_bf16
@@ -165,13 +141,10 @@ Transformer Accuracy int8:
     DATASET_DIR: /tf_dataset/pre-trained-models/transformer_mlperf/data
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/accuracy_int8
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_int8.pb
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_int8.pb
-    dst: /tf_dataset/pre-trained-models/transformer_mlperf/graph/transformer_mlperf_int8.pb
   - src: /tf_dataset/pre-trained-models/transformer_mlperf/data
     dst: /tf_dataset/pre-trained-models/transformer_mlperf/data
   - src: $PWD/output/tf-transformer-mlperf-inference/accuracy_int8

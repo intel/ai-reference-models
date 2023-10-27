@@ -6,13 +6,10 @@ MobileNet-V1 Accuracy fp32:
     OUTPUT_DIR: /output/tf-mobilenet-v1-inference/accuracy_fp32
     BATCH_SIZE: '100'
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
-    dst: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
   - src: /tf_dataset/dataset/TF_Imagenet_FullData
     dst: /tf_dataset/dataset/TF_Imagenet_FullData
   - src: $PWD/output/tf-mobilenet-v1-inference/accuracy_fp32
@@ -25,13 +22,10 @@ MobileNet-V1 Accuracy bf16:
     OUTPUT_DIR: /output/tf-mobilenet-v1-inference/accuracy_bf16
     BATCH_SIZE: '100'
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
-    dst: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
   - src: /tf_dataset/dataset/TF_Imagenet_FullData
     dst: /tf_dataset/dataset/TF_Imagenet_FullData
   - src: $PWD/output/tf-mobilenet-v1-inference/accuracy_bf16
@@ -44,13 +38,10 @@ MobileNet-V1 Accuracy int8:
     OUTPUT_DIR: /output/tf-mobilenet-v1-inference/accuracy_int8
     BATCH_SIZE: '100'
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
-    dst: /tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
   - src: /tf_dataset/dataset/TF_Imagenet_FullData
     dst: /tf_dataset/dataset/TF_Imagenet_FullData
   - src: $PWD/output/tf-mobilenet-v1-inference/accuracy_int8
@@ -63,15 +54,12 @@ MobileNet-V1 Realtime Inference fp32:
     OUTPUT_DIR: /output/tf-mobilenet-v1-inference/realtime_fp32
     BATCH_SIZE: '1'
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
-    dst: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
   - src: /tf_dataset/dataset/TF_Imagenet_FullData
     dst: /tf_dataset/dataset/TF_Imagenet_FullData
   - src: $PWD/output/tf-mobilenet-v1-inference/realtime_fp32
@@ -84,15 +72,12 @@ MobileNet-V1 Realtime Inference bf16:
     OUTPUT_DIR: /output/tf-mobilenet-v1-inference/realtime_bf16
     BATCH_SIZE: '1'
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
-    dst: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
   - src: /tf_dataset/dataset/TF_Imagenet_FullData
     dst: /tf_dataset/dataset/TF_Imagenet_FullData
   - src: $PWD/output/tf-mobilenet-v1-inference/realtime_bf16
@@ -105,15 +90,12 @@ MobileNet-V1 Realtime Inference int8:
     OUTPUT_DIR: /output/tf-mobilenet-v1-inference/realtime_int8
     BATCH_SIZE: '1'
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
-    dst: /tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
   - src: /tf_dataset/dataset/TF_Imagenet_FullData
     dst: /tf_dataset/dataset/TF_Imagenet_FullData
   - src: $PWD/output/tf-mobilenet-v1-inference/realtime_int8
@@ -126,15 +108,12 @@ MobileNet-V1 Throughput fp32:
     OUTPUT_DIR: /output/tf-mobilenet-v1-inference/throughput_fp32
     BATCH_SIZE: '448'
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
-    dst: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
   - src: /tf_dataset/dataset/TF_Imagenet_FullData
     dst: /tf_dataset/dataset/TF_Imagenet_FullData
   - src: $PWD/output/tf-mobilenet-v1-inference/throughput_fp32
@@ -147,15 +126,12 @@ MobileNet-V1 Throughput bf16:
     OUTPUT_DIR: /output/tf-mobilenet-v1-inference/throughput_bf16
     BATCH_SIZE: '448'
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
-    dst: /tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
   - src: /tf_dataset/dataset/TF_Imagenet_FullData
     dst: /tf_dataset/dataset/TF_Imagenet_FullData
   - src: $PWD/output/tf-mobilenet-v1-inference/throughput_bf16
@@ -168,15 +144,12 @@ MobileNet-V1 Throughput int8:
     OUTPUT_DIR: /output/tf-mobilenet-v1-inference/throughput_int8
     BATCH_SIZE: '448'
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
-    dst: /tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
   - src: /tf_dataset/dataset/TF_Imagenet_FullData
     dst: /tf_dataset/dataset/TF_Imagenet_FullData
   - src: $PWD/output/tf-mobilenet-v1-inference/throughput_int8

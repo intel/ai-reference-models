@@ -51,3 +51,7 @@ COPY quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/accur
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
+
+RUN mkdir -p /workspace/tf-distilbert-inference/pretrained_model && \
+    wget -qO /workspace/tf-distilbert-inference/pretrained_model/distilbert_frozen_graph_fp32_final.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/distilbert_frozen_graph_fp32_final.pb && \
+    wget -qO /workspace/tf-distilbert-inference/pretrained_model/distilbert_itex_int8.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/distilbert_itex_int8.pb

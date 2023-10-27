@@ -40,3 +40,7 @@ COPY quickstart/recommendation/tensorflow/dien/inference/cpu/accuracy.sh quickst
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
+
+RUN mkdir -p /workspace/tf-dien-inference/pretrained_model && \
+    wget -qO /workspace/tf-dien-inference/pretrained_model/dien_fp32_static_mklgrus.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/dien_fp32_static_mklgrus.pb && \
+    wget -qO /workspace/tf-dien-inference/pretrained_model/dien_fp32_dynamic_mklgrus.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/dien_fp32_dynamic_mklgrus.pb

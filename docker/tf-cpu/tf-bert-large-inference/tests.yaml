@@ -4,8 +4,6 @@ BERT-Large Realtime Inference fp32:
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/realtime_fp32
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
     BATCH_SIZE: '1'
     PRECISION: fp32
     OMP_NUM_THREADS: '4'
@@ -14,10 +12,6 @@ BERT-Large Realtime Inference fp32:
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-  - src: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/realtime_fp32
@@ -28,9 +22,7 @@ BERT-Large Weightsharing Inference fp32:
   env:
     TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
     OMP_NUM_THREADS: '4'
-    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb 
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0 
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/weightsharing_fp32
     BATCH_SIZE: '1'
@@ -39,10 +31,6 @@ BERT-Large Weightsharing Inference fp32:
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-  - src: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/weightsharing_fp32
@@ -57,16 +45,10 @@ BERT-Large Throughput fp32:
     PRECISION: fp32
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-  - src: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/throughput_fp32
@@ -77,18 +59,12 @@ BERT-Large Accuracy fp32:
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/accuracy_fp32
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
     BATCH_SIZE: '56'
     PRECISION: fp32
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-  - src: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/new_fp32_bert_squad.pb
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/accuracy_fp32
@@ -99,18 +75,12 @@ BERT-Large Accuracy bf16:
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/accuracy_bf16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
     BATCH_SIZE: '56'
     PRECISION: bfloat16
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-  - src: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/accuracy_bf16
@@ -126,16 +96,10 @@ BERT-Large Realtime Inference bf16:
     LD_PRELOAD: /workspace/tcmalloc/install/lib/libtcmalloc.so.4
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-  - src: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/realtime_bf16
@@ -152,16 +116,10 @@ BERT-Large Weightsharing Inference bf16:
     TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-  - src: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/weightsharing_bf16
@@ -176,16 +134,10 @@ BERT-Large Throughput bf16:
     PRECISION: bfloat16
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/optimized_bf16_bert.pb
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/throughput_bf16
@@ -196,18 +148,12 @@ BERT-Large Accuracy int8:
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/accuracy_int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
     BATCH_SIZE: '56'
     PRECISION: int8
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-  - src: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/accuracy_int8
@@ -223,16 +169,10 @@ BERT-Large Realtime Inference int8:
     LD_PRELOAD: /workspace/tcmalloc/install/lib/libtcmalloc.so.4
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/realtime_int8
@@ -249,16 +189,10 @@ BERT-Large Weightsharing Inference int8:
     TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-  - src: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/weightsharing_int8
@@ -273,16 +207,10 @@ BERT-Large Throughput int8:
     PRECISION: int8
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
-    CHECKPOINT_DIR: /tf_dataset/dataset/data-bert-squad/squad-ckpts
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
-    dst: /tf_dataset/pre-trained-models/bert_squad/per_channel_opt_int8_bf16_bert.pb
-  - src: /tf_dataset/dataset/data-bert-squad/squad-ckpts
-    dst: /tf_dataset/dataset/data-bert-squad/squad-ckpts
   - src: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     dst: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
   - src: $PWD/output/tf-bert-large-inference/throughput_int8

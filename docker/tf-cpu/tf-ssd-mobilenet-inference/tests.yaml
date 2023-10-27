@@ -5,14 +5,11 @@ SSD-MobileNet Accuracy int8:
     DATASET_DIR: /tf_dataset/dataset/SSDMobilenet
     OUTPUT_DIR: /output/tf-ssd-mobilenet-inference/accuracy_int8
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/SSDMobilenet/int8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
     BATCH_SIZE: '1'
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/SSDMobilenet/int8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
-    dst: /tf_dataset/pre-trained-models/SSDMobilenet/int8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
   - src: /tf_dataset/dataset/SSDMobilenet
     dst: /tf_dataset/dataset/SSDMobilenet
   - src: $PWD/output/tf-ssd-mobilenet-inference/accuracy_int8
@@ -23,15 +20,12 @@ SSD-MobileNet Accuracy fp32:
   env:
     DATASET_DIR: /tf_dataset/dataset/SSDMobilenet
     OUTPUT_DIR: /output/tf-ssd-mobilenet-inference/accuracy_fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
     PRECISION: fp32
     BATCH_SIZE: '1'
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
-    dst: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
   - src: /tf_dataset/dataset/SSDMobilenet
     dst: /tf_dataset/dataset/SSDMobilenet
   - src: $PWD/output/tf-ssd-mobilenet-inference/accuracy_fp32
@@ -43,7 +37,6 @@ SSD-MobileNet Accuracy bf16:
     DATASET_DIR: /tf_dataset/dataset/SSDMobilenet
     OUTPUT_DIR: /output/tf-ssd-mobilenet-inference/accuracy_bf16
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
     TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD: BiasAdd,Relu6,Mul,AddV2
     TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE: BiasAdd,AddV2,Mul
     TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_CLEARLIST_REMOVE: Relu6
@@ -52,8 +45,6 @@ SSD-MobileNet Accuracy bf16:
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
-    dst: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
   - src: /tf_dataset/dataset/SSDMobilenet
     dst: /tf_dataset/dataset/SSDMobilenet
   - src: $PWD/output/tf-ssd-mobilenet-inference/accuracy_bf16
@@ -66,15 +57,12 @@ SSD-MobileNet Realtime Inference fp32:
     OUTPUT_DIR: /output/tf-ssd-mobilenet-inference/realtime_fp32
     BATCH_SIZE: '1'
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
-    dst: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
   - src: $PWD/output/tf-ssd-mobilenet-inference/realtime_fp32
     dst: /output/tf-ssd-mobilenet-inference/realtime_fp32
 SSD-MobileNet Realtime Inference bf16:
@@ -85,7 +73,6 @@ SSD-MobileNet Realtime Inference bf16:
     OUTPUT_DIR: /output/tf-ssd-mobilenet-inference/realtime_bf16
     BATCH_SIZE: '1'
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD: BiasAdd,Relu6,Mul,AddV2
@@ -95,8 +82,6 @@ SSD-MobileNet Realtime Inference bf16:
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
-    dst: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
   - src: $PWD/output/tf-ssd-mobilenet-inference/realtime_bf16
     dst: /output/tf-ssd-mobilenet-inference/realtime_bf16
 SSD-MobileNet Realtime Inference int8:
@@ -107,15 +92,12 @@ SSD-MobileNet Realtime Inference int8:
     OUTPUT_DIR: /output/tf-ssd-mobilenet-inference/realtime_int8
     BATCH_SIZE: '1'
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/SSDMobilenet/int8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
     OMP_NUM_THREADS: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/SSDMobilenet/int8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
-    dst: /tf_dataset/pre-trained-models/SSDMobilenet/int8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
   - src: $PWD/output/tf-ssd-mobilenet-inference/realtime_int8
     dst: /output/tf-ssd-mobilenet-inference/realtime_int8
 SSD-MobileNet Throughput fp32:
@@ -126,15 +108,12 @@ SSD-MobileNet Throughput fp32:
     OUTPUT_DIR: /output/tf-ssd-mobilenet-inference/throughput_fp32
     BATCH_SIZE: '448'
     PRECISION: fp32
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
-    dst: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
   - src: $PWD/output/tf-ssd-mobilenet-inference/throughput_fp32
     dst: /output/tf-ssd-mobilenet-inference/throughput_fp32
 SSD-MobileNet Throughput bf16:
@@ -145,7 +124,6 @@ SSD-MobileNet Throughput bf16:
     OUTPUT_DIR: /output/tf-ssd-mobilenet-inference/throughput_bf16
     BATCH_SIZE: '448'
     PRECISION: bfloat16
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD: BiasAdd,Relu6,Mul,AddV2
@@ -155,8 +133,6 @@ SSD-MobileNet Throughput bf16:
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
-    dst: /tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
   - src: $PWD/output/tf-ssd-mobilenet-inference/throughput_bf16
     dst: /output/tf-ssd-mobilenet-inference/throughput_bf16
 SSD-MobileNet Throughput int8:
@@ -167,14 +143,11 @@ SSD-MobileNet Throughput int8:
     OUTPUT_DIR: /output/tf-ssd-mobilenet-inference/throughput_int8
     BATCH_SIZE: '448'
     PRECISION: int8
-    PRETRAINED_MODEL: /tf_dataset/pre-trained-models/SSDMobilenet/int8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
     OMP_NUM_THREADS: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
   init: true
   volumes:
-  - src: /tf_dataset/pre-trained-models/SSDMobilenet/int8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
-    dst: /tf_dataset/pre-trained-models/SSDMobilenet/int8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
   - src: $PWD/output/tf-ssd-mobilenet-inference/throughput_int8
     dst: /output/tf-ssd-mobilenet-inference/throughput_int8

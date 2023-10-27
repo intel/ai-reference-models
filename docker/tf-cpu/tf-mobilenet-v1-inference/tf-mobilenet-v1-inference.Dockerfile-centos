@@ -39,3 +39,7 @@ COPY quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu quicksta
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
+
+RUN mkdir -p /workspace/tf-mobilenet-v1-inference/pretrained_model && \
+    wget -qO /workspace/tf-mobilenet-v1-inference/pretrained_model/mobilenetv1_fp32_pretrained_model_new.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/mobilenetv1_fp32_pretrained_model.pb && \
+    wget -qO /workspace/tf-mobilenet-v1-inference/pretrained_model/mobilenetv1_int8_pretrained_model_new.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/mobilenetv1_int8_pretrained_model.pb

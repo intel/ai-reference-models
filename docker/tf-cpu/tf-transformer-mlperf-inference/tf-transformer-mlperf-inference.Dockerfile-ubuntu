@@ -56,3 +56,8 @@ COPY models models
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
+
+RUN mkdir -p /workspace/tf-transformer-mlperf-inference/pretrained_model && \
+    wget -qO /workspace/tf-transformer-mlperf-inference/pretrained_model/transformer_mlperf_int8.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_int8.pb && \
+    wget -qO /workspace/tf-transformer-mlperf-inference/pretrained_model/transformer_mlperf_fp32.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_fp32.pb && \
+    wget -qO /workspace/tf-transformer-mlperf-inference/pretrained_model/transformer_mlperf_bf16.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_bf16.pb
