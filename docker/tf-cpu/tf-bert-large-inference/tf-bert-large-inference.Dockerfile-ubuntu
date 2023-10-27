@@ -28,19 +28,9 @@ FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 WORKDIR /workspace/tf-bert-large-inference
 
 RUN apt-get update && \
-    apt-get install -y numactl unzip wget
+    apt-get install -y numactl unzip wget google-perftools
 
-RUN mkdir -p /workspace/tcmalloc && \
-    cd /workspace/tcmalloc && \
-    wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz && \
-    tar -xzf gperftools-2.7.90.tar.gz && \
-    rm gperftools-2.7.90.tar.gz && \
-    cd gperftools-2.7.90 && \
-    ./configure --prefix=/workspace/tcmalloc/install && \
-    make && \
-    make install && \
-    cd /workspace && \
-    rm -rf gperftools-2.7.90
+ENV LD_PRELOAD="/usr/lib/x86_64-linux-gnu/libtcmalloc.so.4.5.9"
 
 COPY benchmarks benchmarks
 COPY models/common models/common
