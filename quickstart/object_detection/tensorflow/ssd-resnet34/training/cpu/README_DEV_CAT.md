@@ -1,11 +1,12 @@
-# TensorFlow SSD-MobileNet inference
+# TensorFlow SSD-ResNet34 training
 
 ## Description
-This document has instructions for running SSD-MobileNet inference using Intel-optimized TensorFlow.
+This document has instructions for running SSD-ResNet34 training
+using Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/object-detection:spr-ssd-mobilenet-inference
+docker pull intel/object-detection:tf-cpu-centos-ssd-resnet34-training
 ```
 
 <table>
@@ -17,27 +18,14 @@ docker pull intel/object-detection:spr-ssd-mobilenet-inference
    </thead>
    <tbody>
       <tr>
-         <td>inference_realtime.sh</td>
-         <td>Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32 or bfloat16). Waits for all instances to complete, then prints a summarized throughput value. </td>
-      </tr>
-      <tr>
-         <td>inference_throughput.sh</td>
-         <td>Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32 or bfloat16). Waits for all instances to complete, then prints a summarized throughput value.</td>
-      </tr>
-      <tr>
-         <td>accuracy.sh</td>
-         <td>Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32 or bfloat16).</td>
+         <td>training.sh</td>
+         <td>Uses mpirun to execute 1 processes with 1 process per socket with a batch size of 896 for the specified precision (fp32 or bfloat16 or bfloat32). Logs for each instance are saved to the output directory.</td>
       </tr>
    </tbody>
 </table>
 
 ## Datasets
-The [COCO validation dataset](http://cocodataset.org) is used in these
-SSD-Mobilenet quickstart scripts. The accuracy quickstart script require the dataset to be converted into the TF records format.
-See the [COCO dataset](https://github.com/IntelAI/models/tree/master/datasets/coco) for instructions on
-downloading and preprocessing the COCO validation dataset.
-
-Set the `DATASET_DIR` to point to the dataset directory that contains the TF records file `coco_val.record` when running SSD-MobileNet accuracy script.
+SSD-ResNet34 training uses the COCO training dataset. Use the [instructions](https://github.com/IntelAI/models/tree/master/datasets/coco/README_train.md) to download and preprocess the dataset.
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -50,15 +38,18 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 
-To run SSD-MobileNet inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
+To run Mask R-CNN training, set environment variables to specify the dataset directory, precision to run, and an output directory. 
 ```bash
 # Set the required environment vars
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
-export SCRIPT=<specify the script to run>
-export PRECISION=<specify the precision to run>
+export PRECISION=<specify the precision to run (fp32 or bfloat16)>
+
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run --rm \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env PRECISION=${PRECISION} \
@@ -66,9 +57,9 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tf-spr-ssd-mobilenet-inference \
-  intel/object-detection:spr-ssd-mobilenet-inference \
-  /bin/bash quickstart/${SCRIPT}
+  -w /workspace/tf-ssd-resnet34-training \
+  intel/object-detection:tf-cpu-centos-ssd-resnet34-training \
+  /bin/bash quickstart/training.sh
 ```
 
 ## Documentation and Sources
@@ -79,7 +70,7 @@ docker run --rm \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)

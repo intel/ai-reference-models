@@ -5,7 +5,7 @@ This document has instructions for running BERT Large Pretraining using Intel-op
 
 ## Pull Command
 ```
-docker pull intel/language-modeling:tf-spr-bert-large-pretraining
+docker pull intel/language-modeling:tf-cpu-centos-bert-large-pretraining
 ```
 
 <table>
@@ -53,10 +53,12 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
 To run BERT Large Pretraining, set environment variables to specify the dataset directory, precision to run, and an output directory. 
 ```bash
 # Set the required environment vars
-export BATCH_SIZE=<batch size>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRECISION=<specify the precision to run (fp32 or bfloat16)>
+
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run --rm \
   --env BATCH_SIZE=${BATCH_SIZE} \
@@ -68,7 +70,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-spr-bert-large-pretraining \
-  intel/language-modeling:tf-spr-bert-large-pretraining \
+  intel/language-modeling:tf-cpu-centos-bert-large-pretraining \
   /bin/bash quickstart/pretraining.sh
 ```
 
@@ -80,7 +82,7 @@ docker run --rm \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/language_modeling/tensorflow/bert_large/training/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/language_modeling/tensorflow/bert_large/training/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)

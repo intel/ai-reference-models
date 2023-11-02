@@ -6,7 +6,7 @@ Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/language-modeling:tf-spr-bert-large-inference
+docker pull intel/language-modeling:tf-cpu-centos-bert-large-inference
 ```
 
 <table>
@@ -19,19 +19,19 @@ docker pull intel/language-modeling:tf-spr-bert-large-inference
    <tbody>
       <tr>
          <td>inference_realtime.sh</td>
-         <td>Runs multi instance realtime inference for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, int8, bfloat16). Waits for all instances to complete, then prints a summarized throughput value.</td>
+         <td>Runs multi instance realtime inference for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, int8, bfloat16 and bfloat32) to compute latency. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
         <td>inference_realtime_weight_sharing.sh</td>
-        <td>Runs multi instance realtime inference with weight sharing for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, int8, bfloat16). Waits for all instances to complete, then prints a summarized throughput value.</td>
+        <td>Runs multi instance realtime inference with weight sharing for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, int8, bfloat16 and bfloat32) to compute latency for weight sharing. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
          <td>inference_throughput.sh</td>
-         <td>Runs multi instance batch inference for BERT large (SQuAD) using 1 instance per socket with batch size 128 (for precisions: fp32, int8 or bfloat16). Waits for all instances to complete, then prints a summarized throughput value.</td>
+         <td>Runs multi instance batch inference for BERT large (SQuAD) using 1 instance per socket with batch size 128 (for precisions: fp32, int8 or bfloat16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
          <td>accuracy.sh</td>
-         <td>Measures BERT large (SQuAD) inference accuracy for the specified precision (fp32, int8 or bfloat16) with batch size 56.</td>
+         <td>Measures BERT large (SQuAD) inference accuracy for the specified precision (fp32, int8 or bfloat16 and bfloat32).</td>
       </tr>
    </tbody>
 </table>
@@ -63,11 +63,13 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
 To run BERT Large inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
 ```bash
 # Set the required environment vars
-export BATCH_SIZE=<customized batch size value>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export SCRIPT=<specify the script to run>
 export PRECISION=<specify the precision to run>
+
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run --rm \
   --env BATCH_SIZE=${BATCH_SIZE} \
@@ -78,8 +80,8 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tf-spr-bert-large-inference \
-  intel/language-modeling:tf-spr-bert-large-inference \
+  -w /workspace/tf-bert-large-inference \
+  intel/language-modeling:tf-cpu-centos-bert-large-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 
@@ -91,7 +93,7 @@ docker run --rm \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)

@@ -1,12 +1,11 @@
-# TensorFlow Transformer Language inference
+# TensorFlow MobileNet V1 inference
 
 ## Description
-This document has instructions for running Transformer Language inference using
-Intel-optimized TensorFlow.
+This document has instructions for running MobileNet V1 inference using Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/language-translation:tf-spr-transformer-mlperf-inference
+docker pull intel/image-recognition:tf-cpu-centos-mobilenet-v1-inference
 ```
 
 <table>
@@ -18,23 +17,26 @@ docker pull intel/language-translation:tf-spr-transformer-mlperf-inference
    </thead>
    <tbody>
       <tr>
-         <td>inference_realtime.sh</td>
-         <td>Runs multi instance realtime inference (batch-size=1) using 4 cores per instance for the specified precision (fp32 or bfloat16).</td>
+         <td>inference_realtime_multi_instance.sh</td>
+         <td>A multi-instance run that uses 4 cores per instance with `batch_size=1` for the specified precision (fp32, int8, bfloat16, bfloat32). Uses synthetic data if no DATASET_DIR is set</td>
       </tr>
       <tr>
-         <td>inference_throughput.sh</td>
-         <td>Runs multi instance batch inference (batch-size=64 for the precisions fp32 or bfloat16, and batch-size=448 for int8 precision) using 1 instance per socket.</td>
+         <td>inference_throughput_multi_instance.sh</td>
+         <td>A multi-instance run that uses 4 cores per instance with `batch_size=448` for the specified precision (fp32, int8, bfloat16, bfloat32). Uses synthetic data if no DATASET_DIR is set</td>
       </tr>
       <tr>
          <td>accuracy.sh</td>
-         <td>Measures the inference accuracy for the specified precision (fp32 or bfloat16).</td>
+         <td>Measures the model accuracy (batch_size=100) for the specified precision (fp32, int8, bfloat16, bfloat32).</td>
       </tr>
    </tbody>
 </table>
 
 ## Datasets
-Follow [instructions](https://github.com/IntelAI/models/tree/master/datasets/transformer_data/README.md) to download and preprocess the WMT English-German dataset.
-Set `DATASET_DIR` to point out to the location of the dataset directory.
+Download and preprocess the ImageNet dataset using the [instructions here](https://github.com/IntelAI/models/blob/master/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
+
+Set the `DATASET_DIR` to point to the TF records directory when running MobileNet V1.
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -47,7 +49,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 
-To run Transformer Language inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
+To run MobileNet V1 inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
 ```bash
 # Set the required environment vars
 export DATASET_DIR=<path to the dataset>
@@ -55,7 +57,11 @@ export OUTPUT_DIR=<directory where log files will be written>
 export SCRIPT=<specify the script to run>
 export PRECISION=<specify the precision to run>
 
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
+
 docker run --rm \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env PRECISION=${PRECISION} \
@@ -63,20 +69,20 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tf-spr-transformer-mlperf-inference \
-  intel/language-translation:tf-spr-transformer-mlperf-inference \
+  -w /workspace/tf-mobilenet-v1-inference \
+  intel/image-recognition:tf-cpu-centos-mobilenet-v1-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 
 ## Documentation and Sources
 #### Get Started​
-[Docker* Repository](https://hub.docker.com/r/intel/language-translation)
+[Docker* Repository](https://hub.docker.com/r/intel/image-recognition)
 
 [Main GitHub*](https://github.com/IntelAI/models)
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/language_translation/tensorflow/transformer_mlperf/inference/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)

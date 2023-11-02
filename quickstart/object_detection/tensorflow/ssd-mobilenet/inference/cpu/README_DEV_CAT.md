@@ -1,11 +1,11 @@
-# TensorFlow DIEN inference
+# TensorFlow SSD-MobileNet inference
 
 ## Description
-This document has instructions for running DIEN inference using Intel-optimized TensorFlow.
+This document has instructions for running SSD-MobileNet inference using Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/recommendation:tf-spr-dien-inference
+docker pull intel/object-detection:spr-ssd-mobilenet-inference
 ```
 
 <table>
@@ -17,36 +17,28 @@ docker pull intel/recommendation:tf-spr-dien-inference
    </thead>
    <tbody>
       <tr>
-         <td>inference_realtime.sh</td>
-         <td>Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32, bfloat16 or bfloat32) with a default`batch_size=16`. Waits for all instances to complete, then prints a summarized throughput value.</td>
+         <td>inference_realtime_multi_instance.sh</td>
+         <td>A multi-instance run that uses 4 cores per instance with a batch size of 1. Uses synthetic data if no `DATASET_DIR` is set. Supported versions are (fp32, int8, bfloat16, bfloat32) </td>
       </tr>
       <tr>
-         <td>inference_throughput.sh</td>
-         <td>Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32, bfloat16 or bfloat32) with a default `batch_size=65536`. Waits for all instances to complete, then prints a summarized throughput value.</td>
+         <td>inference_throughput_multi_instance.sh</td>
+         <td>A multi-instance run that uses all the cores for each socket for each instance with a batch size of 448 and synthetic data. Supported versions are (fp32, int8, bfloat16, bfloat32)</td>
       </tr>
       <tr>
          <td>accuracy.sh</td>
-         <td>Measures the inference accuracy for the specified precision (fp32, bfloat16 or bfloat32) with a default `batch_size=128`.</td>
+         <td>Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required). Supported versions are (fp32, int8, bfloat16, bfloat32).</td>
       </tr>
    </tbody>
 </table>
 
 ## Datasets
-Use [prepare_data.sh](https://github.com/alibaba/ai-matrix/blob/master/macro_benchmark/DIEN_TF2/prepare_data.sh) to get [a subset of the Amazon book reviews data](http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/) and process it.
-Or download and extract the preprocessed data files directly:
-```bash
-wget https://zenodo.org/record/3463683/files/data.tar.gz
-wget https://zenodo.org/record/3463683/files/data1.tar.gz
-wget https://zenodo.org/record/3463683/files/data2.tar.gz
 
-tar -jxvf data.tar.gz
-mv data/* .
-tar -jxvf data1.tar.gz
-mv data1/* .
-tar -jxvf data2.tar.gz
-mv data2/* .
-```
-Set the `DATASET_DIR` to point to the directory with the dataset files when running DIEN.
+The [COCO validation dataset](http://cocodataset.org) is used in these
+SSD-Mobilenet quickstart scripts. The accuracy quickstart script require the dataset to be converted into the TF records format.
+See the [COCO dataset](https://github.com/IntelAI/models/tree/master/datasets/coco) for instructions on
+downloading and preprocessing the COCO validation dataset.
+
+Set the `DATASET_DIR` to point to the dataset directory that contains the TF records file `coco_val.record` when running SSD-MobileNet accuracy script.
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -59,7 +51,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 
-To run DIEN inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
+To run SSD-MobileNet inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
 ```bash
 # Set the required environment vars
 export DATASET_DIR=<path to the dataset>
@@ -67,7 +59,11 @@ export OUTPUT_DIR=<directory where log files will be written>
 export SCRIPT=<specify the script to run>
 export PRECISION=<specify the precision to run>
 
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
+
 docker run --rm \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env PRECISION=${PRECISION} \
@@ -75,20 +71,20 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tf-spr-dien-inference \
-  intel/recommendation:tf-spr-dien-inference \
+  -w /workspace/tf-ssd-mobilenet-inference \
+  intel/object-detection:tf-cpu-centos-ssd-mobilenet-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 
 ## Documentation and Sources
 #### Get Started​
-[Docker* Repository](https://hub.docker.com/r/intel/recommendation)
+[Docker* Repository](https://hub.docker.com/r/intel/object-detection)
 
 [Main GitHub*](https://github.com/IntelAI/models)
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/recommendation/tensorflow/dien/inference/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)

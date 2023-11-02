@@ -5,7 +5,7 @@ This document has instructions for running ResNet50 v1.5 inference using Intel-o
 
 ## Pull Command
 ```
-docker pull intel/image-recognition:tf-spr-resnet50v1-5-inference
+docker pull intel/image-recognition:tf-cpu-centos-resnet50v1-5-inference
 ```
 
 <table>
@@ -18,11 +18,11 @@ docker pull intel/image-recognition:tf-spr-resnet50v1-5-inference
    <tbody>
       <tr>
          <td>inference_realtime.sh</td>
-         <td>Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32, int8, bfloat16, bfloat32) with 1000 steps, 500 warmup steps and `batch-size=1`. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value.</td>
+         <td>Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32, int8, bfloat16, fp16, bfloat32) with 1500 steps and 50 warmup steps. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
          <td>inference_throughput.sh</td>
-         <td>Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32, int8, bfloat16, bfloat32) with 1000 steps, 500 warmup steps and `batch-size=448`. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value.</td>
+         <td>Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32, int8, bfloat16, fp16, bfloat32) with 1500 steps and 50 warmup steps. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
          <td>inference_realtime_weightsharing.sh</td>
@@ -30,7 +30,7 @@ docker pull intel/image-recognition:tf-spr-resnet50v1-5-inference
       </tr>
       <tr>
          <td>accuracy.sh</td>
-         <td>Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, int8, bfloat16, bfloat32) with `batch-size=100`.</td>
+         <td>Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, int8, bfloat16, fp16, bfloat32).</td>
       </tr>
    </tbody>
 </table>
@@ -40,7 +40,7 @@ Download and preprocess the ImageNet dataset using the [instructions here](https
 After running the conversion script you should have a directory with the
 ImageNet dataset in the TF records format.
 
-Set the `DATASET_DIR` to point to the TF records directory when running ResNet50 v1.5
+Set the `DATASET_DIR` to point to the TF records directory when running ResNet50 v1.5.
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -56,11 +56,13 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
 To run ResNet50 v1.5 inference, set environment variables to specify the dataset directory, precision, and an output directory. 
 ```bash
 # Set the required environment vars
-export BATCH_SIZE=<Mention the batch size>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export SCRIPT=<specify the script to run>
 export PRECISION=<specify the precision to run>
+
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run --rm \
   --env BATCH_SIZE=${BATCH_SIZE} \
@@ -71,8 +73,8 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tf-spr-resnet50v1-5-inference \
-  intel/image-recognition:tf-spr-resnet50v1-5-inference \
+  -w /workspace/tf-resnet50v1-5-inference \
+  intel/image-recognition:tf-cpu-centos-resnet50v1-5-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 
@@ -84,7 +86,7 @@ docker run --rm \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)

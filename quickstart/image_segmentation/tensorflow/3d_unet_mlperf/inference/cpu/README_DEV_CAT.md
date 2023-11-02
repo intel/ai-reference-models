@@ -1,11 +1,12 @@
-# TensorFlow MobileNet V1 inference
+# TensorFlow MLPerf 3D U-Net inference
 
 ## Description
-This document has instructions for running MobileNet V1 inference using Intel-optimized TensorFlow.
+This document has instructions for running MLPerf 3D U-Net inference using
+Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/image-recognition:spr-mobilenet-v1-inference
+docker pull intel/image-segmentation:tf-cpu-centos-3d-unet-mlperf-inference
 ```
 
 <table>
@@ -18,25 +19,23 @@ docker pull intel/image-recognition:spr-mobilenet-v1-inference
    <tbody>
       <tr>
          <td>inference_realtime.sh</td>
-         <td>Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32, int8, bfloat16, bfloat32) with 1000 steps, 500 warmup steps and `batch-size=1`. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value.</td>
+         <td>Runs multi instance realtime inference using 4 cores per instance for the specified precision (int8, fp32 or bfloat16) with 100 steps and 50 warmup steps. Dummy data is used for performance evaluation. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
          <td>inference_throughput.sh</td>
-         <td>Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32, int8, bfloat16, bfloat32) with 1000 steps, 500 warmup steps and `batch-size=448`. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value.</td>
+         <td>Runs multi instance batch inference using 1 instance per socket for the specified precision (int8, fp32 or bfloat16) with 100 steps and 50 warmup steps. Dummy data is used for performance evaluation. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
          <td>accuracy.sh</td>
-         <td>Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, int8, bfloat16, bfloat32) with `batch-size=100`.</td>
+         <td>Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (int8, fp32 or bfloat16).</td>
       </tr>
    </tbody>
 </table>
 
 ## Datasets
-Download and preprocess the ImageNet dataset using the [instructions here](https://github.com/IntelAI/models/blob/master/datasets/imagenet/README.md).
-After running the conversion script you should have a directory with the
-ImageNet dataset in the TF records format.
+Download [Brats 2019](https://www.med.upenn.edu/cbica/brats2019/data.html) separately and unzip the dataset.
 
-Set the `DATASET_DIR` to point to the TF records directory when running MobileNet V1.
+Set the `DATASET_DIR` to point to the directory that contains the dataset files when running MLPerf 3D U-Net accuracy script.
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -49,14 +48,16 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 
-To run MobileNet V1 inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
+To run MLPerf 3D U-Net inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
 ```bash
 # Set the required environment vars
-export BATCH_SIZE=<Mention the batch size>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export SCRIPT=<specify the script to run>
 export PRECISION=<specify the precision to run>
+
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run --rm \
   --env BATCH_SIZE=${BATCH_SIZE} \
@@ -67,20 +68,20 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tf-spr-mobilenet-v1-inference \
-  intel/image-recognition:spr-mobilenet-v1-inference \
+  -w /workspace/tf-3d-unet-mlperf-inference \
+  intel/image-segmentation:tf-cpu-centos-3d-unet-mlperf-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 
 ## Documentation and Sources
 #### Get Started​
-[Docker* Repository](https://hub.docker.com/r/intel/image-recognition)
+[Docker* Repository](https://hub.docker.com/r/intel/image-segmentation)
 
 [Main GitHub*](https://github.com/IntelAI/models)
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/image-segmentation/tensorflow/3d_unet_mlperf/inference/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)

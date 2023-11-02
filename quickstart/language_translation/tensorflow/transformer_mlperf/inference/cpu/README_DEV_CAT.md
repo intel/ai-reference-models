@@ -1,11 +1,12 @@
-# TensorFlow ResNet50 v1.5 training
+# TensorFlow Transformer Language inference
 
 ## Description
-This document has instructions for running ResNet50 v1.5 training using Intel-optimized TensorFlow.
+This document has instructions for running Transformer Language inference using
+Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/image-recognition:tf-spr-resnet50v1-5-training
+docker pull intel/language-translation:tf-cpu-centos-transformer-mlperf-inference
 ```
 
 <table>
@@ -17,20 +18,23 @@ docker pull intel/image-recognition:tf-spr-resnet50v1-5-training
    </thead>
    <tbody>
       <tr>
-         <td>training.sh</td>
-         <td>Uses mpirun to execute 1 process per socket with a batch size of 1024 for the specified precision (fp32 or bfloat16 or bfloat32 or fp16). Checkpoint files and logs for each instance are saved to the output directory.</td>
+         <td>inference_realtime.sh</td>
+         <td>Runs multi instance realtime inference (batch-size=1) to compute latency using 4 cores per instance for the specified precision (int8, fp32, bfloat32 or bfloat16).</td>
+      </tr>
+      <tr>
+         <td>inference_throughput.sh</td>
+         <td>Runs multi instance batch inference with batch-size=448 for precisions (int8, fp32, bfloat16 and bfloat32) to compute throughput using 1 instance per socket.</td>
+      </tr>
+      <tr>
+         <td>accuracy.sh</td>
+         <td>Measures the inference accuracy for the specified precision (int8, fp32, bfloat32 or bfloat16).</td>
       </tr>
    </tbody>
 </table>
 
-Note that the ImageNet dataset is used in these ResNet50 v1.5 examples.
-
 ## Datasets
-Download and preprocess the ImageNet dataset using the [instructions here](https://github.com/IntelAI/models/blob/master/datasets/imagenet/README.md).
-After running the conversion script you should have a directory with the
-ImageNet dataset in the TF records format.
-
-Set the `DATASET_DIR` to point to this directory when running ResNet50 v1.5.
+Follow [instructions](https://github.com/IntelAI/models/tree/master/datasets/transformer_data/README.md) to download and preprocess the WMT English-German dataset.
+Set `DATASET_DIR` to point out to the location of the dataset directory.
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -43,13 +47,16 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 
-To run ResNet50 v1.5 training, set environment variables to specify the dataset directory, precision to run, and an output directory. 
+To run Transformer Language inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
 ```bash
 # Set the required environment vars
-export BATCH_SIZE=1024
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
-export PRECISION=<specify the precision to run (fp32 or bfloat16 or bfloat32 or fp16)>
+export SCRIPT=<specify the script to run>
+export PRECISION=<specify the precision to run>
+
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run --rm \
   --env BATCH_SIZE=${BATCH_SIZE} \
@@ -60,20 +67,20 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tf-spr-resnet50v1-5-training \
-  intel/image-recognition:tf-spr-resnet50v1-5-training \
-  /bin/bash quickstart/training.sh
+  -w /workspace/tf-transformer-mlperf-inference \
+  intel/language-translation:tf-cpu-centos-transformer-mlperf-inference \
+  /bin/bash quickstart/${SCRIPT}
 ```
 
 ## Documentation and Sources
 #### Get Started​
-[Docker* Repository](https://hub.docker.com/r/intel/image-recognition)
+[Docker* Repository](https://hub.docker.com/r/intel/language-translation)
 
 [Main GitHub*](https://github.com/IntelAI/models)
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/language_translation/tensorflow/transformer_mlperf/inference/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)

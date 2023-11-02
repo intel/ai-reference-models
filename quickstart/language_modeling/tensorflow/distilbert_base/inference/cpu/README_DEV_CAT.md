@@ -1,12 +1,12 @@
-# TensorFlow MLPerf 3D U-Net inference
+# TensorFlow DistilBERT inference
 
 ## Description
-This document has instructions for running MLPerf 3D U-Net inference using
+This document has instructions for running DistilBERT inference using
 Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/image-segmentation:tf-spr-3d-unet-mlperf-inference
+docker pull intel/language-modeling:tf-cpu-centos-distilbert-inference
 ```
 
 <table>
@@ -18,28 +18,34 @@ docker pull intel/image-segmentation:tf-spr-3d-unet-mlperf-inference
    </thead>
    <tbody>
       <tr>
-        <td>inference.sh</td>
-        <td>Runs realtime inference using a default `batch_size=1` for the specified precision (int8, fp32 or bfloat16). To run inference for throughtput, set `BATCH_SIZE` environment variable.</td>
+         <td>inference_realtime.sh</td>
+         <td>Runs multi instance realtime inference for DistilBERT with batch size 1 ( for precisions: fp32, int8, bfloat16) to compute latency. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
-         <td>inference_realtime.sh</td>
-         <td>Runs multi instance realtime inference using 4 cores per instance for the specified precision (int8, fp32 or bfloat16) with 100 steps and 50 warmup steps. Dummy data is used for performance evaluation. Waits for all instances to complete, then prints a summarized throughput value.</td>
+        <td>inference_realtime_weight_sharing.sh</td>
+        <td>Runs multi instance realtime inference with weight sharing for DistilBERT with batch size 1 ( for precisions: fp32, int8, bfloat16 and bfloat32) to compute latency for weight sharing. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
          <td>inference_throughput.sh</td>
-         <td>Runs multi instance batch inference using 1 instance per socket for the specified precision (int8, fp32 or bfloat16) with 100 steps and 50 warmup steps. Dummy data is used for performance evaluation. Waits for all instances to complete, then prints a summarized throughput value.</td>
+         <td>Runs multi instance batch inference for DistilBERT with batch size 56 (for precisions: fp32, int8 or bfloat16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
          <td>accuracy.sh</td>
-         <td>Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (int8, fp32 or bfloat16).</td>
+         <td>Measures DistilBERT inference accuracy for the specified precision (fp32, int8 or bfloat16 and bfloat32).</td>
       </tr>
    </tbody>
 </table>
 
 ## Datasets
-Download [Brats 2019](https://www.med.upenn.edu/cbica/brats2019/data.html) separately and unzip the dataset.
+We use a part of Stanford Sentiment Treebank corpus for our task. Specifically, the validation split present in the SST2 dataset in the hugging face [repository](https://huggingface.co/datasets/sst2). It contains 872 labeled English sentences. Instructions to get the frozen graph and dataset are given below:
 
-Set the `DATASET_DIR` to point to the directory that contains the dataset files when running MLPerf 3D U-Net accuracy script.
+```
+
+Downloading dataset:
+cd to directory:  <model_zoo_dir>/models/language_modeling/tensorflow/distilbert_base/inference/
+python download_dataset.py --path_to_save_dataset <enter path to save dataset>
+
+```
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -52,14 +58,16 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 
-To run MLPerf 3D U-Net inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
+To run DistilBERT inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
 ```bash
 # Set the required environment vars
-export BATCH_SIZE=<customized batch size value>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export SCRIPT=<specify the script to run>
 export PRECISION=<specify the precision to run>
+
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run --rm \
   --env BATCH_SIZE=${BATCH_SIZE} \
@@ -70,20 +78,20 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tf-spr-3d-unet-mlperf-inference \
-  intel/image-segmentation:tf-spr-3d-unet-mlperf-inference \
+  -w /workspace/tf-distilbert-inference \
+  intel/language-modeling:tf-cpu-centos-distilbert-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 
 ## Documentation and Sources
 #### Get Started​
-[Docker* Repository](https://hub.docker.com/r/intel/image-segmentation)
+[Docker* Repository](https://hub.docker.com/r/intel/language-modeling)
 
 [Main GitHub*](https://github.com/IntelAI/models)
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/image-segmentation/tensorflow/3d_unet_mlperf/inference/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)

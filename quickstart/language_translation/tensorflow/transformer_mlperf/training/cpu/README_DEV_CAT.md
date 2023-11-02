@@ -6,7 +6,7 @@ using Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/language-translation:tf-spr-transformer-mlperf-training
+docker pull intel/language-translation:tf-cpu-centos-transformer-mlperf-training
 ```
 
 <table>
@@ -46,7 +46,11 @@ export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRECISION=<specify the precision to run (fp32 or bfloat16)>
 
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
+
 docker run --rm \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env PRECISION=${PRECISION} \
@@ -54,8 +58,8 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tf-spr-transformer-mlperf-training \
-  intel/language-translation:tf-spr-transformer-mlperf-training \
+  -w /workspace/tf-transformer-mlperf-training \
+  intel/language-translation:tf-cpu-centos-transformer-mlperf-training \
   /bin/bash quickstart/training.sh
 ```
 
@@ -67,7 +71,7 @@ docker run --rm \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/README_SPR_DEV_CAT.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/README_DEV_CAT.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/dockerfiles/tensorflow)
