@@ -147,6 +147,7 @@ def convert_int8(args, model, dataloader):
     )
     batch = fetch_batch(dataloader)
     batch.sparse_features = unpack(batch.sparse_features)
+    print_memory("int8 prepare")
     model = prepare(
         model,
         qconfig,
@@ -165,11 +166,15 @@ def convert_int8(args, model, dataloader):
         exit()
     else:
         model.load_qconf_summary(qconf_summary = args.int8_configure_dir)
+        print_memory("int8 convert")
         convert(model, inplace=True)
         model.eval()
         torch._C._jit_set_texpr_fuser_enabled(False)
+        print_memory("int8 trace")
         model = torch.jit.trace(model, (batch.dense_features, batch.sparse_features), check_trace=True)
+        print_memory("int8 freeze")
         model = torch.jit.freeze(model)
+        print_memory("int8 jit optimize")
         model(batch.dense_features, batch.sparse_features)
         model(batch.dense_features, batch.sparse_features)
         print(model.graph_for(batch.dense_features, batch.sparse_features))
@@ -185,7 +190,16 @@ def ipex_optimize(args, model, optimizer, dataloader):
     if dtype == torch.int8:
         assert args.inference_only
         with torch.no_grad():
-            model = convert_int8(args, model, dataloader)
+            if args.int8_prepare:
+                    model = convert_int8(args, model, dataloader)
+                    torch.jit.save(model, args.int8_model_dir)
+                    print(f"save int8 model to {args.int8_model_dir}")
+                    exit()
+            else:
+                # just run JIT, since we load optimized INT8 model
+                print_memory("int8 jit optimize")
+                model(example_batch.dense_features, example_batch.sparse_features)
+                model(example_batch.dense_features, example_batch.sparse_features)            
     elif args.inference_only:
         with torch.no_grad():
             model = ipex.optimize(
@@ -488,10 +502,21 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="Whether only run inference path.",
     )
     parser.add_argument(
+        "--int8-prepare",
+        action="store_true",
+        help="prepare int8 model weight and save to disk.",
+    )
+    parser.add_argument(
         "--int8-configure-dir",
         type=str,
         default="./int8_configure.json",
         help="Int8 recipe location.",
+    )
+    parser.add_argument(
+        "--int8-model-dir",
+        type=str,
+        default="./dlrm-v2-int8.pt",
+        help="Int8 model location.",
     )
     parser.add_argument(
         "--calibration",
@@ -943,80 +968,15 @@ def train_val_test(
 
     return results
 
-
-def main(argv: List[str]) -> None:
-    """
-    Trains, validates, and tests a Deep Learning Recommendation Model (DLRM)
-    (https://arxiv.org/abs/1906.00091). The DLRM model contains both data parallel
-    components (e.g. multi-layer perceptrons & interaction arch) and model parallel
-    components (e.g. embedding tables). The DLRM model is pipelined so that dataloading,
-    data-parallel to model-parallel comms, and forward/backward are overlapped. Can be
-    run with either a random dataloader or an in-memory Criteo 1 TB click logs dataset
-    (https://ailab.criteo.com/download-criteo-1tb-click-logs-dataset/).
-
-    Args:
-        argv (List[str]): command line args.
-
-    Returns:
-        None.
-    """
-
-    args = parse_args(argv)
-    for name, val in vars(args).items():
-        try:
-            vars(args)[name] = list(map(int, val.split(",")))
-        except (ValueError, AttributeError):
-            pass
-
-    if args.multi_hot_sizes is not None:
-        assert (
-            args.num_embeddings_per_feature is not None
-            and len(args.multi_hot_sizes) == len(args.num_embeddings_per_feature)
-            or args.num_embeddings_per_feature is None
-            and len(args.multi_hot_sizes) == len(DEFAULT_CAT_NAMES)
-        ), "--multi_hot_sizes must be a comma delimited list the same size as the number of embedding tables."
-    assert (
-        args.in_memory_binary_criteo_path is None
-        or args.synthetic_multi_hot_criteo_path is None
-    ), "--in_memory_binary_criteo_path and --synthetic_multi_hot_criteo_path are mutually exclusive CLI arguments."
-    assert (
-        args.multi_hot_sizes is None or args.synthetic_multi_hot_criteo_path is None
-    ), "--multi_hot_sizes is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
-    assert (
-        args.multi_hot_distribution_type is None
-        or args.synthetic_multi_hot_criteo_path is None
-    ), "--multi_hot_distribution_type is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
+def construct_model(args):
+    if args.dtype == "int8" and not args.int8_prepare:
+        assert args.inference_only
+        print(f"loading int8 model from {args.int8_model_dir}")
+        model = torch.jit.load(args.int8_model_dir)
+        print_memory("int8 loading finished")
+        return DLRMTrain(model), None, None
 
     device: torch.device = torch.device("cpu")
-    backend = "gloo"
-
-    pprint(vars(args))
-    # logger.event(
-    #     key=mllog_constants.GLOBAL_BATCH_SIZE,
-    #     value=dist.get_world_size() * args.batch_size,
-    # )
-    # logger.event(
-    #     key=mllog_constants.GRADIENT_ACCUMULATION_STEPS,
-    #     value=1,  # Gradient accumulation is not supported in the reference implementation
-    # )
-    # logger.event(
-    #     key=mllog_constants.SEED,
-    #     value=args.seed,  # Seeding model is not supported in the reference implementation
-    # )
-
-    if args.num_embeddings_per_feature is not None:
-        args.num_embeddings = None
-
-    # Sets default limits for random dataloader iterations when left unspecified.
-    if (
-        args.in_memory_binary_criteo_path is None
-        and args.synthetic_multi_hot_criteo_path is None
-    ):
-        for split in ["train", "val", "test"]:
-            attr = f"limit_{split}_batches"
-            if getattr(args, attr) is None:
-                setattr(args, attr, 10)
-
     eb_configs = [
         EmbeddingBagConfig(
             name=f"t_{feature_name}",
@@ -1028,11 +988,6 @@ def main(argv: List[str]) -> None:
         )
         for feature_idx, feature_name in enumerate(DEFAULT_CAT_NAMES)
     ]
-    sharded_module_kwargs = {}
-    if args.over_arch_layer_sizes is not None:
-        sharded_module_kwargs["over_arch_layer_sizes"] = args.over_arch_layer_sizes
-
-    print_memory("start init dlrm ")
     if args.interaction_type == InteractionType.ORIGINAL:
         dlrm_model = DLRM(
             embedding_bag_collection=EmbeddingBagCollection(
@@ -1153,44 +1108,87 @@ def main(argv: List[str]) -> None:
         lr_scheduler = LRPolicyScheduler(
             optimizer, args.lr_warmup_steps, args.lr_decay_start, args.lr_decay_steps
         )
+    return model, optimizer, lr_scheduler
 
+def main(argv: List[str]) -> None:
+    """
+    Trains, validates, and tests a Deep Learning Recommendation Model (DLRM)
+    (https://arxiv.org/abs/1906.00091). The DLRM model contains both data parallel
+    components (e.g. multi-layer perceptrons & interaction arch) and model parallel
+    components (e.g. embedding tables). The DLRM model is pipelined so that dataloading,
+    data-parallel to model-parallel comms, and forward/backward are overlapped. Can be
+    run with either a random dataloader or an in-memory Criteo 1 TB click logs dataset
+    (https://ailab.criteo.com/download-criteo-1tb-click-logs-dataset/).
+
+    Args:
+        argv (List[str]): command line args.
+
+    Returns:
+        None.
+    """
+
+    args = parse_args(argv)
+    for name, val in vars(args).items():
+        try:
+            vars(args)[name] = list(map(int, val.split(",")))
+        except (ValueError, AttributeError):
+            pass
+
+    if args.multi_hot_sizes is not None:
+        assert (
+            args.num_embeddings_per_feature is not None
+            and len(args.multi_hot_sizes) == len(args.num_embeddings_per_feature)
+            or args.num_embeddings_per_feature is None
+            and len(args.multi_hot_sizes) == len(DEFAULT_CAT_NAMES)
+        ), "--multi_hot_sizes must be a comma delimited list the same size as the number of embedding tables."
+    assert (
+        args.in_memory_binary_criteo_path is None
+        or args.synthetic_multi_hot_criteo_path is None
+    ), "--in_memory_binary_criteo_path and --synthetic_multi_hot_criteo_path are mutually exclusive CLI arguments."
+    assert (
+        args.multi_hot_sizes is None or args.synthetic_multi_hot_criteo_path is None
+    ), "--multi_hot_sizes is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
+    assert (
+        args.multi_hot_distribution_type is None
+        or args.synthetic_multi_hot_criteo_path is None
+    ), "--multi_hot_distribution_type is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
+
+    backend = "gloo"
+    device = torch.device('cpu')
+
+    pprint(vars(args))
     # logger.event(
-    #     key=mllog_constants.OPT_NAME,
-    #     value=mllog_constants.ADAGRAD if args.adagrad else mllog_constants.SGD,
+    #     key=mllog_constants.GLOBAL_BATCH_SIZE,
+    #     value=dist.get_world_size() * args.batch_size,
     # )
     # logger.event(
-    #     key=mllog_constants.OPT_BASE_LR,
-    #     value=args.learning_rate,
+    #     key=mllog_constants.GRADIENT_ACCUMULATION_STEPS,
+    #     value=1,  # Gradient accumulation is not supported in the reference implementation
     # )
     # logger.event(
-    #     key=mllog_constants.OPT_ADAGRAD_LR_DECAY,
-    #     value=ADAGRAD_LR_DECAY,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_WEIGHT_DECAY,
-    #     value=WEIGHT_DECAY,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_ADAGRAD_INITIAL_ACCUMULATOR_VALUE,
-    #     value=ADAGRAD_INIT_ACC,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_ADAGRAD_EPSILON,
-    #     value=ADAGRAD_EPS,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_LR_WARMUP_STEPS,
-    #     value=args.lr_warmup_steps,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_LR_DECAY_START_STEP,
-    #     value=args.lr_decay_start,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_LR_DECAY_STEPS,
-    #     value=args.lr_decay_steps,
+    #     key=mllog_constants.SEED,
+    #     value=args.seed,  # Seeding model is not supported in the reference implementation
     # )
 
+    if args.num_embeddings_per_feature is not None:
+        args.num_embeddings = None
+
+    # Sets default limits for random dataloader iterations when left unspecified.
+    if (
+        args.in_memory_binary_criteo_path is None
+        and args.synthetic_multi_hot_criteo_path is None
+    ):
+        for split in ["train", "val", "test"]:
+            attr = f"limit_{split}_batches"
+            if getattr(args, attr) is None:
+                setattr(args, attr, 10)
+
+    sharded_module_kwargs = {}
+    if args.over_arch_layer_sizes is not None:
+        sharded_module_kwargs["over_arch_layer_sizes"] = args.over_arch_layer_sizes
+
+    print_memory("start init dlrm ")
+    model, optimizer, lr_scheduler = construct_model(args)
     print_memory("start create dataloader ")
 
     # only create 1 multi-hot sample to save memory
@@ -1214,7 +1212,6 @@ def main(argv: List[str]) -> None:
     #     key=mllog_constants.TRAIN_SAMPLES,
     #     value=dist.get_world_size() * len(train_dataloader) * args.batch_size,
     # )
-
     if args.multi_hot_sizes is not None:
         print_memory("start to create Multihot for dummy data ")
         multihot = Multihot(
