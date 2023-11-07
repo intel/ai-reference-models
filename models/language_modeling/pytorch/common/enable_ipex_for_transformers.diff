@@ -762,6 +762,22 @@ index ae12ae293..1fff54a49 100644
  
      def beam_sample(
          self,
+diff --git a/src/transformers/modeling_utils.py b/src/transformers/modeling_utils.py
+index 0df8d7e25..99d107a81 100644
+--- a/src/transformers/modeling_utils.py
++++ b/src/transformers/modeling_utils.py
+@@ -1831,7 +1831,10 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
+                 and is_main_process
+                 and reg.fullmatch(filename_no_suffix) is not None
+             ):
+-                os.remove(full_filename)
++                try:
++                    os.remove(full_filename)
++                except OSError as e:
++                    print(e)
+ 
+         # Save the model
+         for shard_file, shard in shards.items():
 diff --git a/src/transformers/models/bert/modeling_bert.py b/src/transformers/models/bert/modeling_bert.py
 index ee7dcd5e4..5ead9c989 100755
 --- a/src/transformers/models/bert/modeling_bert.py
