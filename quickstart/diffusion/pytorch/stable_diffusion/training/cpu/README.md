@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 ### Initialize an [🤗Accelerate](https://github.com/huggingface/accelerate/) environment with:
 ```bash
-accelerate config
+export ACCELERATE_USE_IPEX=False
 ```
 
 ### Model Specific Setup
