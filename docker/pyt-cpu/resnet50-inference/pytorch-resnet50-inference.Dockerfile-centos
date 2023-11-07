@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,54 +17,41 @@ ARG BASE_TAG="2.0.0-pip-base"
 
 FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-optimized-pytorch
 
-RUN apt-get update && \
-    apt-get install --no-install-recommends --fix-missing -y \
-    build-essential \
+WORKDIR /workspace/pytorch-resnet50-inference 
+
+RUN yum update -y && \
+    yum install -y \
     ca-certificates \
     git \
-    wget \
+    cmake>=3.19.6 \
     make \
-    cmake \
     autoconf \
     bzip2 \
     tar
 
-# Build Torch Vision
-ARG TORCHVISION_VERSION="01c11a0564b8417561ae4c414fe659fc97476987"
-
-RUN git clone https://github.com/pytorch/vision && \
-    cd vision && \
-    git checkout ${TORCHVISION_VERSION} && \
-    python setup.py install
-
-RUN pip install matplotlib Pillow pycocotools && \
-    pip install yacs opencv-python cityscapesscripts transformers defusedxml 
+RUN pip install packaging intel-openmp
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
     git checkout c8209150f9d219a137412b06431c9d52839c7272 && \
     ./autogen.sh && \
-    ./configure --prefix=/workspace/lib/tcmalloc && \
+    ./configure --prefix=/workspace/lib/jemalloc && \
     make && \ 
     make install
 
-ENV LD_PRELOAD="/workspace/lib/tcmalloc/lib/libjemalloc.so":$LD_PRELOAD
-WORKDIR /workspace/pytorch-spr-resnet50-inference 
-
-COPY models/image_recognition/pytorch/common models/image_recognition/pytorch/common
+COPY quickstart/image_recognition/pytorch/resnet50/inference/cpu/calibration.sh quickstart/calibration.sh
+COPY quickstart/image_recognition/pytorch/resnet50/inference/cpu/accuracy.sh quickstart/accuracy.sh
 COPY quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_realtime.sh quickstart/inference_realtime.sh
 COPY quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_throughput.sh quickstart/inference_throughput.sh
-COPY quickstart/image_recognition/pytorch/resnet50/inference/cpu/accuracy.sh quickstart/accuracy.sh
+COPY models/image_recognition/pytorch/common models/image_recognition/pytorch/common 
 
-ENV DNNL_MAX_CPU_ISA="AVX512_CORE_AMX"
-
-# ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so:/root/conda/envs/pytorch/lib/libiomp5.so:$LD_PRELOAD"
+ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-RUN apt-get update && \
-    apt-get install --no-install-recommends --fix-missing -y \
-      numactl \
-      libegl1-mesa 
-
+RUN yum update -y && \
+    yum install -y \
+    numactl \
+    mesa-libGL 
+    
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
