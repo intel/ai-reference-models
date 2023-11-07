@@ -1,0 +1,112 @@
+fp32-training-perf:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-training
+  cmd: quickstart/throughput.sh fp32
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-training
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-training
+      dst: /pytorch/pretrained_models/ssd-resnet34-training
+fp32-training-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-training
+  cmd: quickstart/accuracy.sh fp32
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-training
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-training
+      dst: /pytorch/pretrained_models/ssd-resnet34-training
+bf16-training-perf:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-training
+  cmd: quickstart/throughput.sh bf16
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-training
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-training
+      dst: /pytorch/pretrained_models/ssd-resnet34-training
+bf16-training-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-training
+  cmd: quickstart/accuracy.sh bf16
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-training
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-training
+      dst: /pytorch/pretrained_models/ssd-resnet34-training
+bf32-training-perf:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-training
+  cmd: quickstart/throughput.sh bf32
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-training
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-training
+      dst: /pytorch/pretrained_models/ssd-resnet34-training
+bf32-training-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-training
+  cmd: quickstart/accuracy.sh bf32
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-training
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-training
+      dst: /pytorch/pretrained_models/ssd-resnet34-training
+avx-fp32-training-perf:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-training
+  cmd: quickstart/throughput.sh avx-fp32
+  shm-size: 8G
+  env:
+    PRECISION: avx-fp32
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-training
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-training
+      dst: /pytorch/pretrained_models/ssd-resnet34-training
+avx-fp32-training-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-training
+  cmd: quickstart/accuracy.sh avx-fp32
+  shm-size: 8G
+  env:
+    PRECISION: avx-fp32
+    CHECKPOINT_DIR: /pytorch/pretrained_models/ssd-resnet34-training
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+    - src: /pytorch/pretrained_models/ssd-resnet34-training
+      dst: /pytorch/pretrained_models/ssd-resnet34-training
