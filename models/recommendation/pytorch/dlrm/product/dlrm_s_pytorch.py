@@ -1439,7 +1439,10 @@ def run():
         if training_record[0] == 0:
             print("num-batches larger than warm up iters, please increase num-batches or decrease warmup iters")
             exit()
-        total_samples = training_record[1] * args.mini_batch_size
+        if args.local_batch_size > 0:
+            total_samples = training_record[1] * args.local_batch_size
+        else:
+            total_samples = training_record[1] * args.mini_batch_size
         throughput = total_samples / training_record[0] * 1000
         print("Throughput: {:.3f} fps".format(throughput))
 
