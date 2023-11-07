@@ -1,0 +1,198 @@
+fp32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+avx-fp32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: avx-fp32
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+bf16-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+int8-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: int8
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+avx-int8-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: avx-int8
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+bf32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_realtime.sh
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+fp32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_throughput.sh 
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+avx-fp32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_throughput.sh 
+  shm-size: 8G
+  env:
+    PRECISION: avx-fp32
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+bf16-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_throughput.sh 
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+int8-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_throughput.sh
+  shm-size: 8G
+  env:
+    PRECISION: int8
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+avx-int8-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_throughput.sh
+  shm-size: 8G
+  env:
+    PRECISION: avx-int8
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+bf32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/inference_throughput.sh
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+fp32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/accuracy.sh 
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+avx-fp32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/accuracy.sh 
+  shm-size: 8G
+  env:
+    PRECISION: avx-fp32
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+bf16-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/accuracy.sh 
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+int8-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/accuracy.sh 
+  shm-size: 8G
+  env:
+    PRECISION: int8
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+avx-int8-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/accuracy.sh 
+  shm-size: 8G
+  env:
+    PRECISION: avx-int8
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
+bf32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
+  cmd: quickstart/accuracy.sh
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
