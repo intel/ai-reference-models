@@ -70,7 +70,7 @@ def _make_preprocessing_model(graph_tensor_spec, train_embed):
 
 def generate_dataset(graph_spec, data_location, batch_size):
     datasets = dict()
-    for split in ["train", "valid", "test"]:
+    for split in ["test"]:
         data_dir = os.path.join(data_location, split)
         data_files = [os.path.join(data_dir, file) for file in os.listdir(data_dir)]
         raw_dataset = tf.data.TFRecordDataset(data_files)

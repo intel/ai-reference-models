@@ -24,6 +24,13 @@ tar -xf RGAT-pretrained-model.tar.gz
 
 3. ### Download and preprocess the dataset
 
+i. Create a virtual environment, activate and install the necesarry packages.
+```
+pip install six wheel mock numpy packaging requests pyyaml
+pip install keras_preprocessing --no-deps
+pip install tensorflow_gnn scipy ogb
+```
+ii. NOTE: the step below is broken and under investigation. Please contact TF dev team.
 Run the ['download_and_preprocess_data.py`](../../../../../models/graph_networks/tensorflow/rgat/download_and_preprocess_data.py) using the following command:
 
 ```
@@ -70,4 +77,12 @@ Runs multi instance batch inference using 1 socket per instance for the specifie
 ### Accuracy
 ```
 ./quickstart/graph_networks/tensorflow/rgat/inference/cpu/accuracy.sh
+```
+
+### Appendix
+1. If you run into bazel not found issues - one way to install is
+```
+pip install nodeenv
+nodeenv -p
+npm install -g @bazel/bazelisk
 ```
