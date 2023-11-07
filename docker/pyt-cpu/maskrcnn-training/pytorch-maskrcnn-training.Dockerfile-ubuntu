@@ -19,6 +19,8 @@ ARG BASE_TAG="2.0.0-pip-base"
 
 FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-optimized-pytorch
 
+WORKDIR /workspace/pytorch-maskrcnn-training 
+
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
     build-essential \
@@ -31,14 +33,6 @@ RUN apt-get update && \
     bzip2 \
     tar
 
-# Build Torch Vision
-ARG TORCHVISION_VERSION="01c11a0564b8417561ae4c414fe659fc97476987"
-
-RUN git clone https://github.com/pytorch/vision && \
-    cd vision && \
-    git checkout ${TORCHVISION_VERSION} && \
-    python setup.py install
-
 RUN pip install matplotlib Pillow pycocotools && \
     pip install yacs opencv-python cityscapesscripts transformers defusedxml intel-openmp 
 
@@ -46,25 +40,19 @@ RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
     git checkout c8209150f9d219a137412b06431c9d52839c7272 && \
     ./autogen.sh && \
-    ./configure --prefix=/workspace/lib/tcmalloc && \
+    ./configure --prefix=/workspace/lib/jemalloc && \
     make && \ 
     make install
 
-ENV LD_PRELOAD="/workspace/lib/tcmalloc/lib/libjemalloc.so":$LD_PRELOAD
-
-WORKDIR /workspace/pytorch-spr-maskrcnn-training
+ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 
 COPY models/object_detection/pytorch/maskrcnn models/object_detection/pytorch/maskrcnn
 COPY quickstart/object_detection/pytorch/maskrcnn/training/cpu/training.sh quickstart/training.sh
 
 RUN apt-get update && apt-get install -y python3.10-dev && \
-    cd /workspace/pytorch-spr-maskrcnn-training/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark && \
+    cd /workspace/pytorch-maskrcnn-training/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark && \
     python setup.py develop 
 
-
-ENV DNNL_MAX_CPU_ISA="AVX512_CORE_AMX"
-
-# ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so:/root/conda/envs/pytorch/lib/libiomp5.so:$LD_PRELOAD"
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 RUN apt-get update && \
