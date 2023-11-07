@@ -487,6 +487,7 @@ def calib_func(prepared_model):
 
 
 def eval_func(traced_model):
+    print('Evaluating LLM')
     acc, latency = evaluator.evaluate(traced_model)
     print("Accuracy:", acc)
     print("Latency (sec):", latency)
@@ -600,6 +601,7 @@ def benchmark_evaluate(prompt):
     total_time = 0.0
     num_iter = args.num_iter - args.num_warmup
     total_list = []
+    print('Evaluating LLM: total Steps {}'.format(num_iter))
     with torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(
         enabled=amp_enabled, dtype=amp_dtype
     ):
