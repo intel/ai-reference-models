@@ -673,7 +673,7 @@ def main():
         eval_dataset_future = pool.submit(create_eval_dataset, args, worker_init_fn=worker_init)
     # comparing to number of samples in a shard. There are ~38k samples in 4096-way shard, comparing to 10k to be safe
     need_next_training_shard = args.train_batch_size * args.gradient_accumulation_steps *  args.max_steps > 10000
-
+    print("Start Training.")
     while global_step < args.max_steps and not end_training:
         if args.local_rank == 0 or args.local_rank == -1:
             now_time = time.time()

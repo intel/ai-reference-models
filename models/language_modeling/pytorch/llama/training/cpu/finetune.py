@@ -285,9 +285,9 @@ def train(
             self, old_state_dict()
         )
     ).__get__(model, type(model))
-
+    print("Start Training")
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
-
+    print("Finish Training")
     model.save_pretrained(output_dir)
 
     print(
