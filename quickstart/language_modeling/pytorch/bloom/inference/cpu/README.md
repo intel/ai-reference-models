@@ -33,6 +33,34 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   ```
   pip install datasets
   ```
+* Install oneccl-bind-pt(also named torch-ccl)
+  ```
+  git clone https://github.com/intel/torch-ccl.git
+  cd torch-ccl && git checkout v2.1.0+cpu
+  git submodule sync && git submodule update --init --recursive
+  python setup.py install
+  cd ../
+  ```
+* Install Deepspeed
+  ```
+  git clone https://github.com/delock/DeepSpeedSYCLSupport
+  cd DeepSpeedSYCLSupport
+  git checkout gma/run-opt-branch
+  python -m pip install -r requirements/requirements.txt
+  python setup.py install
+  cd ../
+  ```
+* Install OneCCL
+  ```
+  git clone https://github.com/oneapi-src/oneCCL.git
+  cd oneCCL
+  mkdir build
+  cd build
+  cmake ..
+  make -j install
+  source _install/env/setvars.sh
+  cd ../..
+  ```
 * Set INPUT_TOKEN before running the model
   ```
   export INPUT_TOKEN=32
@@ -54,15 +82,6 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 * About the BEAM_SIZE in scripts
   ```
   using BEAM_SIZE=4 by default
-  ```
-
-* Do quantization to get INT8 model before running INT8.
-  ```
-  #default using IPEX static quantization
-  bash do_quantization.sh int8-fp32 default  # or use int8-bf16
-
-  #optional using IPEX smoothquant for better accuracy
-  bash do_quantization.sh int8-fp32 sq # or use int8-bf16
   ```
 
 * Set ENV to use fp16 AMX if you are using a supported platform
