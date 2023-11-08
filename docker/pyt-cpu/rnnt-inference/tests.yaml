@@ -1,0 +1,168 @@
+fp32-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/accuracy.sh fp32
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+fp32-realtime:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/inference_realtime.sh fp32
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+fp32-throughput:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/inference_throughput.sh fp32
+  shm-size: 8G
+  env:
+    PRECISION: fp32
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+bf32-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/accuracy.sh bf32
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+bf32-realtime:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/inference_realtime.sh bf32
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+bf32-throughput:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/inference_throughput.sh bf32
+  shm-size: 8G
+  env:
+    PRECISION: bf32
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+bf16-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/accuracy.sh bf16
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+bf16-realtime:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/inference_realtime.sh bf16
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+bf16-throughput:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/inference_throughput.sh bf16
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+avx-fp32-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/accuracy.sh avx-fp32
+  shm-size: 8G
+  env:
+    PRECISION: avx-fp32
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+avx-fp32-realtime:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/inference_realtime.sh avx-fp32
+  shm-size: 8G
+  env:
+    PRECISION: avx-fp32
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
+avx-fp32-throughput:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
+  cmd: quickstart/inference_throughput.sh avx-fp32
+  shm-size: 8G
+  env:
+    PRECISION: avx-fp32
+    CHECKPOINT_DIR: /pytorch/rnnt_model
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/rnnt_dataset
+  volumes:
+    - src: /pytorch/rnnt_model
+      dst: /pytorch/rnnt_model
+    - src: /pytorch/rnnt_dataset
+      dst: /pytorch/rnnt_dataset
