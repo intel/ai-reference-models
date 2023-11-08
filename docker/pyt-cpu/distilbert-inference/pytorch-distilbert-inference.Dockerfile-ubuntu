@@ -1,0 +1,84 @@
+# Copyright (c) 2020-2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============================================================================
+
+
+ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG BASE_TAG="2.0.0-pip-base"
+
+FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-optimized-pytorch
+
+WORKDIR /workspace/pytorch-distilbert-inference
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y \
+    build-essential \
+    ca-certificates \
+    git \
+    wget \
+    make \
+    cmake \
+    autoconf \
+    bzip2 \
+    tar
+
+RUN git clone https://github.com/jemalloc/jemalloc.git && \
+    cd jemalloc && \
+    git checkout c8209150f9d219a137412b06431c9d52839c7272 && \
+    ./autogen.sh && \
+    ./configure --prefix=/workspace/lib/jemalloc && \
+    make && \ 
+    make install
+
+RUN wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz && \
+    tar -xzf gperftools-2.7.90.tar.gz && \
+    cd gperftools-2.7.90 && \
+    mkdir -p /workspace/lib/ && \
+    ./configure --prefix=/workspace/lib/tcmalloc/ && \
+    make && \
+    make install
+
+COPY models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff 
+COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/convert.py quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/convert.py
+COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/configure.json configure.json
+COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/run_accuracy.sh  quickstart/run_accuracy.sh
+COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/do_calibration.sh quickstart/do_calibration.sh
+COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/run_multi_instance_realtime.sh quickstart/run_multi_instance_realtime.sh
+COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/run_multi_instance_throughput.sh quickstart/run_multi_instance_throughput.sh
+COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/download_model_dataset.sh quickstart/download_model_dataset.sh
+
+RUN  cd quickstart && \
+     git clone https://github.com/huggingface/transformers.git && \
+     cd transformers && \
+     git checkout v4.28.1 && \
+     git apply /workspace/pytorch-distilbert-inference/models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff && \
+     pip install -e ./ && \
+     cd -
+
+RUN pip install packaging datasets intel-openmp evaluate \ 
+    datasets scikit-learn scipy
+
+ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD 
+ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+
+ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD 
+ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y \
+    numactl \
+    libegl1-mesa 
+
+COPY LICENSE licenses/LICENSE
+COPY third_party licenses/third_party
