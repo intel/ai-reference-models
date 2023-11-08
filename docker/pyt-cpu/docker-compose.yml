@@ -158,7 +158,7 @@ services:
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   rnnt-training:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-rnnt-training
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-training
     pull_policy: always
     build:
       context: ../../
@@ -166,9 +166,9 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/rnnt-training/pytorch-rnnt-training.Dockerfile
+        BASE_IMAGE: ${REGISTRY}/aiops/mlops
+        BASE_TAG: emr-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pyt-2.1-py310
+      dockerfile: docker/pyt-cpu/rnnt-training/pytorch-rnnt-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   rnnt-inference:
