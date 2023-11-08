@@ -51,12 +51,12 @@ then
 elif [[ "$1" == "int8-fp32" ]]
 then
     precision="int8-fp32"
-    ARGS="$ARGS --dtype 'int8' --quantized_model_path '${OUTPUT_DIR}/best_model.pt'"
+    ARGS="$ARGS --dtype fp32 --ipex-weight-only-quantization"
     echo "### running int8-fp32 mode"
 elif [[ "$1" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --quantized_model_path '${OUTPUT_DIR}/best_model.pt'"
+    ARGS="$ARGS --int8-bf16-mixed --ipex-weight-only-quantization"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
@@ -84,18 +84,17 @@ CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"'bigscience/bloom'"}
-
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/bloom/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
-rm -rf ${OUTPUT_DIR}/latency_log*
-python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+rm -rf ${OUTPUT_DIR}/throughput_log*
+deepspeed --bind_cores_to_rank \
   ${EVAL_SCRIPT} $ARGS \
   -m ${FINETUNED_MODEL} \
   --max-new-tokens ${OUTPUT_TOKEN} \
   --input-tokens  ${INPUT_TOKEN} \
-  --batch-size $BATCH_SIZE 
+  --batch-size $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/throughput_log_${precision}_${mode}.log
 
-CORES_PER_INSTANCE=${OMP_NUM_THREADS}
+CORES_PER_INSTANCE=${CORES}
 TOTAL_CORES=`expr $CORES \* $SOCKETS`
 INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
 INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
