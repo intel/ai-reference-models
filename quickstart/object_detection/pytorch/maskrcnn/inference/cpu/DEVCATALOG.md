@@ -104,7 +104,7 @@ docker run --rm \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/EMR_DEVCATALOG.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/DEVCATALOG.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pyt-cpu)

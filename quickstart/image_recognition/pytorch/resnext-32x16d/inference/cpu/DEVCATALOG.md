@@ -90,7 +90,7 @@ docker run --rm \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/EMR_DEVCATALOG.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/DEVCATALOG.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pyt-cpu)

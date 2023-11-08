@@ -1,25 +1,26 @@
-# PyTorch Mask RCNN training
+# PyTorch SSD-ResNet34 training
 
 ## Description 
-This document has instructions for running MaskRCNN training using Intel Extension for PyTorch. 
+This document has instructions for running SSD-ResNet34 training using Intel Extension for PyTorch. 
 
 ## Pull Command
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/object-detection:pytorch-cpu-centos-maskrcnn-training
+docker pull intel/object-detection:pytorch-cpu-centos-ssd-resnet34-training
 ```
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/object-detection:pytorch-cpu-ubuntu-maskrcnn-training
+docker pull intel/object-detection:pytorch-cpu-ubuntu-ssd-resnet34-training
 ```
 
 ## Quick Start Scripts
 | Script name | Description |
 |-------------|-------------|
-| `training.sh` | Runs training for the specified precision (fp32, avx-fp32，bf16, or bf32). |
+| `throughput.sh` | Tests the training performance for SSD-ResNet34 for the specified precision (fp32, avx-fp32, bf32 or bf16). |
+| `accuracy.sh` | Tests the training accuracy for SSD-ResNet34 for the specified precision (fp32, avx-fp32, bf32 or bf16). |
 
-**Note:** The `avx-fp32` precision runs the same scripts as `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
+**Note**: The `avx-fp32` precision runs the same scripts as `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
 
 ## Datasets
 Download and extract the 2017 training/validation images and annotations from the [COCO dataset website](https://cocodataset.org/#download) to a `coco` folder and unzip the files. After extracting the zip files, your dataset directory structure should look something like this:
@@ -44,6 +45,14 @@ coco
     └── ...
 ```
 
+## Pre-trained Model
+Download the pre-trained model and set `CHECKPOINT_DIR`
+```
+CHECKPOINT_DIR=${PWD}
+mkdir -p ${CHECKPOINT_DIR}/ssd; cd ${CHECKPOINT_DIR}/ssd
+curl -O https://download.pytorch.org/models/resnet34-333f7ec4.pth
+cd -
+```
 ## Docker Run
 (Optional) Export related proxy into docker environment.
 ```bash
@@ -54,28 +63,29 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
-To run MaskRCNN training, set environment variables to specify the dataset directory, precision to run, and an output directory. 
-```bash
-# Set the required environment vars
-export OS=<provide either centos or ubuntu>
+
+To run SSD-ResNet34, set environment variables to specify the dataset directory, precision and an output directory. 
+
+```
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
+export SCRIPT=quickstart/<specify the script to run>
 export PRECISION=<specify the precision to run>
-export SCRIPT=quickstart/training.sh 
-export BATCH_SIZE=<set batch size(default is 112)>
+export CHECKPOINT_DIR=<path to pre-trained model>
 
+IMAGE_NAME=intel/object-detection:pytorch-cpu-${OS}-ssd-resnet34-training
 DOCKER_ARGS="--privileged --init -it"
-WORKDIR=/workspace/pytorch-maskrcnn-training
-IMAGE_NAME=intel/object-detection:pytorch-centos-${OS}-maskrcnn-training
+WORKDIR=/workspace/pytorch-ssd-resnet34-training
 
 docker run --rm \
-  --env BATCH_SIZE=${BATCH_SIZE} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \
+  --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --shm-size 8G \
   -w ${WORKDIR} \
@@ -83,6 +93,7 @@ docker run --rm \
   $IMAGE_NAME \
   /bin/bash $SCRIPT $PRECISION
   ```
+
 ## Documentation and Sources
 #### Get Started​
 [Docker* Repository](https://hub.docker.com/r/intel/object-detection)
@@ -91,7 +102,7 @@ docker run --rm \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/object_detection/pytorch/maskrcnn/training/cpu/EMR_DEVCATALOG.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/DEVCATALOG.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pyt-cpu)
