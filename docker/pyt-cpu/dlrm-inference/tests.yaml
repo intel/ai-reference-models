@@ -1,5 +1,6 @@
 fp32-accuracy:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
+  pull_policy: always
   cmd: quickstart/accuracy.sh
   shm-size: 8G
   env:
@@ -13,7 +14,8 @@ fp32-accuracy:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
 bf32-accuracy:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
+  pull_policy: always
   cmd: quickstart/accuracy.sh
   shm-size: 8G
   env:
@@ -27,7 +29,8 @@ bf32-accuracy:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
 bf16-accuracy:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
+  pull_policy: always
   cmd: quickstart/accuracy.sh
   shm-size: 8G
   env:
@@ -41,7 +44,8 @@ bf16-accuracy:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
 int8-accuracy:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
+  pull_policy: always
   cmd: quickstart/accuracy.sh
   shm-size: 8G
   env:
@@ -55,7 +59,8 @@ int8-accuracy:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
 fp32-performance:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
+  pull_policy: always
   cmd: quickstart/inference_performance.sh
   shm-size: 8G
   env:
@@ -69,7 +74,8 @@ fp32-performance:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
 bf32-performance:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
+  pull_policy: always
   cmd: quickstart/inference_performance.sh
   shm-size: 8G
   env:
@@ -83,7 +89,8 @@ bf32-performance:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
 bf16-performance:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
+  pull_policy: always
   cmd: quickstart/inference_performance.sh
   shm-size: 8G
   env:
@@ -97,7 +104,8 @@ bf16-performance:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
 int8-performance:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
+  pull_policy: always
   cmd: quickstart/inference_performance.sh
   shm-size: 8G
   env:
