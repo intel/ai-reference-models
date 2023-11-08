@@ -1,4 +1,3 @@
-#
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2022 Intel Corporation
@@ -66,7 +65,7 @@ def get_retrainable_model(model_name, num_classes, do_fine_tuning=False):
         for param in model.parameters():
             param.requires_grad = False
 
-    if type(classifier_layer) == list:
+    if isinstance(classifier_layer, list):
         classifier = getattr(model, classifier_layer[0])[classifier_layer[1]]
         num_features = classifier.in_features
         model.classifier[classifier_layer[1]] = torch.nn.Linear(num_features, num_classes)
