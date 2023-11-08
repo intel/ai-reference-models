@@ -17,6 +17,8 @@ ARG BASE_TAG="2.0.0-pip-base"
 
 FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-optimized-pytorch
 
+WORKDIR /workspace/pytorch-dlrm-training
+
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
     build-essential \
@@ -33,31 +35,33 @@ RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
     git checkout c8209150f9d219a137412b06431c9d52839c7272 && \
     ./autogen.sh && \
-    ./configure --prefix=/workspace/lib/tcmalloc && \
+    ./configure --prefix=/workspace/lib/jemalloc && \
     make && \ 
     make install
 
-ENV LD_PRELOAD="/workspace/lib/tcmalloc/lib/libjemalloc.so":$LD_PRELOAD
+RUN wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz && \
+    tar -xzf gperftools-2.7.90.tar.gz && \
+    cd gperftools-2.7.90 && \
+    mkdir -p /workspace/lib/ && \
+    ./configure --prefix=/workspace/lib/tcmalloc/ && \
+    make && \
+    make install
+    
+RUN pip install packaging intel-openmp
 
-RUN pip install matplotlib Pillow pycocotools && \
-    pip install yacs opencv-python cityscapesscripts transformers defusedxml intel-openmp
+ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
+ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-WORKDIR /workspace/pytorch-spr-dlrm-training
-
-COPY models/recommendation/pytorch/dlrm models/recommendation/pytorch/dlrm
+COPY models/recommendation/pytorch/dlrm/product models/recommendation/pytorch/dlrm/product
 COPY quickstart/recommendation/pytorch/dlrm/training/cpu/training.sh quickstart/training.sh
 COPY quickstart/recommendation/pytorch/dlrm/requirements.txt quickstart/requirements.txt
 
-RUN pip install -r /workspace/pytorch-spr-dlrm-training/quickstart/requirements.txt
-
-ENV DNNL_MAX_CPU_ISA="AVX512_CORE_AMX"
+RUN pip install -r /workspace/pytorch-dlrm-training/quickstart/requirements.txt
 
 ENV KMP_AFFINITY="granularity=fine,compact,1,0"
 ENV KMP_BLOCKTIME=1
 ENV DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 ENV KMP_SETTINGS=1
-# ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so:/root/conda/envs/pytorch/lib/libiomp5.so:$LD_PRELOAD"
-ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \

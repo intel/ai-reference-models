@@ -116,7 +116,6 @@ services:
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   resnext-32x16d-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnext-32x16d-inference
     pull_policy: always
     build:
       context: ../../
@@ -154,7 +153,7 @@ services:
         no_proxy: ${no_proxy}
         BASE_IMAGE: ${REGISTRY}/aiops/mlops
         BASE_TAG: emr-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pyt-2.1-py310
-      dockerfile: docker/pyt-cpu/dlrm-training/pytorch-dlrm-training.Dockerfile
+      dockerfile: docker/pyt-cpu/dlrm-training/pytorch-dlrm-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   rnnt-training:
