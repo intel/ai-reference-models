@@ -269,37 +269,35 @@ elif [[ $MODEL_NAME == "bert_large" && $MODE == "training" && $MPI_NUM_PROCESSES
 fi
 
 # If we are running in a container, call the container_init.sh files
-if [[ ${NOINSTALL} != "True" ]]; then
-  if _running-in-container ; then
-    # For running inside a real CentOS container
-    if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
-      # Next if block only applies to CentOS 8. Please see here:
-      # https://forums.centos.org/viewtopic.php?f=54&t=78708
-      if [[ ! ${OS_VERSION} =~ "8".* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]] && [[ ${OS_PLATFORM} != *"Red Hat"* ]]; then
-        sed -i '/^mirrorlist=/s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Linux-*
-        sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
-        yum clean all
-        yum distro-sync -y
-      fi
-      if [[ $INSTALL_NUMACTL == "True" ]]; then
-        yum update -y
-        yum install -y numactl
-      fi
-    elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
-      if [[ $INSTALL_NUMACTL == "True" ]]; then
-        zypper update -y
-        zypper install -y numactl
-      fi
-    elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
-      # For ubuntu, run the container_init.sh scripts
-      if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
-        # Call the framework's container_init.sh, if it exists and we are running on ubuntu
-        INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
-      fi
-      # Call the model specific container_init.sh, if it exists
-      if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
-        ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
-      fi
+if _running-in-container ; then
+  # For running inside a real CentOS container
+  if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
+    # Next if block only applies to CentOS 8. Please see here:
+    # https://forums.centos.org/viewtopic.php?f=54&t=78708
+    if [[ ! ${OS_VERSION} =~ "8".* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]] && [[ ${OS_PLATFORM} != *"Red Hat"* ]]; then
+      sed -i '/^mirrorlist=/s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Linux-*
+      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
+      yum clean all
+      yum distro-sync -y
+    fi
+    if [[ $INSTALL_NUMACTL == "True" ]]; then
+      yum update -y
+      yum install -y numactl
+    fi
+  elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
+    if [[ $INSTALL_NUMACTL == "True" ]]; then
+      zypper update -y
+      zypper install -y numactl
+    fi
+  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
+    # For ubuntu, run the container_init.sh scripts
+    if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
+      # Call the framework's container_init.sh, if it exists and we are running on ubuntu
+      INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+    fi
+    # Call the model specific container_init.sh, if it exists
+    if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
+      ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
     fi
   fi
 fi
@@ -1055,7 +1053,7 @@ function mlperf_gnmt() {
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      python3 -m pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps
+      python3 -m pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps --force-reinstall
     fi
 
     # For accuracy, dataset location is required.
@@ -1136,7 +1134,6 @@ function ssd_mobilenet() {
     done
   fi
   CMD="${CMD} $(add_steps_args)"
-  CMD="${CMD} $(add_arg "--input-subgraph" ${INPUT_SUBGRAPH})"
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
@@ -1701,7 +1698,7 @@ function vision_transformer() {
     fi
 	    
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] ||
-       [ ${PRECISION} == "fp16" ]; then
+       [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
       CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
       CMD="${CMD} $(add_arg "--steps" ${STEPS})"
@@ -1820,11 +1817,11 @@ function stable_diffusion() {
             "https://github.com/openai/CLIP/blob/main/clip/bpe_simple_vocab_16e6.txt.gz?raw=true",
             file_hash="924691ac288e54409236115652ad4aa250f48203de50a9e4722a6ecd48d6804a",
         )\n_ = keras.utils.get_file(
-          origin="https://huggingface.co/ianstenbit/keras-sd2.1/resolve/main/text_encoder_v2_1.h5",
-          file_hash="985002e68704e1c5c3549de332218e99c5b9b745db7171d5f31fcd9a6089f25b",
+          origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/kcv_encoder.h5",
+          file_hash="4789e63e07c0e54d6a34a29b45ce81ece27060c499a709d556c7755b42bb0dc4",
         )\n_ = keras.utils.get_file(
-          origin="https://huggingface.co/ianstenbit/keras-sd2.1/resolve/main/diffusion_model_v2_1.h5",
-          file_hash="c31730e91111f98fe0e2dbde4475d381b5287ebb9672b1821796146a25c5132d",
+          origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/kcv_diffusion_model.h5",
+          file_hash="8799ff9763de13d7f30a683d653018e114ed24a6a819667da4f5ee10f9e805fe",
         )\n_ = keras.utils.get_file(
           origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/kcv_decoder.h5",
           file_hash="ad350a65cc8bc4a80c8103367e039a3329b4231c2469a1093869a345f55b1962",
@@ -1845,11 +1842,8 @@ function stable_diffusion() {
 # Wide & Deep model
 function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
-      CMD="${CMD} $(add_arg "--pretrained-model" ${PRETRAINED_MODEL})"
-      if [ ${NOINSTALL} != "True" ]; then
-        echo "Installing requirements"
-        python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/requirements.txt"
-      fi
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
       CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
@@ -1949,41 +1943,24 @@ function graphsage() {
 }
 
 function yolov5() {
-  if [ ${MODE} == "inference" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
-      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    if [ ${MODE} == "inference" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
-      if [ ${NUM_INTER_THREADS} != "None" ]; then
-        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
-      fi
+        if [ ${NUM_INTER_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+        fi
 
-      if [ ${NUM_INTRA_THREADS} != "None" ]; then
-        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+        if [ ${NUM_INTRA_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+        fi
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
       fi
-      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
-      CMD=${CMD} run_model
-    else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
-      exit 1
     fi
-  fi
-  if [ ${MODE} == "inference" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
-      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-      if [ ${NUM_INTER_THREADS} != "None" ]; then
-        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
-      fi
-
-      if [ ${NUM_INTRA_THREADS} != "None" ]; then
-        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
-      fi
-
-      CMD=${CMD} run_model
-    else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
-      exit 1
-    fi
-  fi
 }
 
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
