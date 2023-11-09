@@ -3,8 +3,18 @@
 #
 # Copyright (c) 2023 Intel Corporation
 #
-# AGPL-3.0 license
-
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 from __future__ import absolute_import
 from __future__ import division
@@ -29,19 +39,24 @@ class ModelInitializer(BaseModelInitializer):
 
         # use default batch size if -1
         if self.args.batch_size == -1:
-            self.args.batch_size = 1
+            self.args.batch_size = 128
 
         # set num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()
 
         arg_parser = ArgumentParser(description='Parse args')
 
+        arg_parser.add_argument("--warmup-steps", dest='warmup_steps',
+                                type=int, default=10,
+                                help="number of warmup steps")
+        arg_parser.add_argument("--steps", dest='steps',
+                                type=int, default=50,
+                                help="number of steps")
         arg_parser.add_argument(
             '--kmp-blocktime', dest='kmp_blocktime',
             help='number of kmp block time',
             type=int, default=1)
-
-        self.args, self.model_args = arg_parser.parse_known_args(self.custom_args, namespace=self.args)
+        self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
         # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
@@ -50,14 +65,26 @@ class ModelInitializer(BaseModelInitializer):
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         if self.args.accuracy_only:
-            script_file = "validate.py"
+            script_file = ""
         elif self.args.benchmark_only:
             script_file = "detect.py"
         benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode, script_file)
+            self.args.intelai_models, self.args.mode, self.args.precision, script_file)
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
+
+        """ self.benchmark_command = \
+            self.benchmark_command + " --batch-size=" + str(self.args.batch_size) + \
+            " --in-graph=" + self.args.input_graph + \
+            " --warmup-steps=" + str(self.args.warmup_steps) + \
+            " --precision=" + str(self.args.precision)
+        if self.args.steps:
+            self.benchmark_command += " --steps=" + str(self.args.steps)
+        if self.args.num_inter_threads:
+            self.benchmark_command += " --num-inter-threads=" + str(self.args.num_inter_threads)
+        if self.args.num_intra_threads:
+            self.benchmark_command += " --num-intra-threads=" + str(self.args.num_intra_threads) """
 
         if self.args.input_graph:
             self.benchmark_command += " --weights=" + self.args.input_graph
@@ -67,15 +94,12 @@ class ModelInitializer(BaseModelInitializer):
             self.benchmark_command += " --source=" + \
                                       self.args.data_location
         if self.args.benchmark_only:
-            self.benchmark_command += " --bs=" + str(self.args.batch_size)
-
-        # set the inference precision
-        self.benchmark_command += " --precision=" + self.args.precision
-
-        if self.model_args:
-            for arg in self.model_args:
-                self.benchmark_command += ' '
-                self.benchmark_command += str(arg)
+            self.benchmark_command += " --dataset_size=500"
+            self.benchmark_command += " --nosave"
+        if self.args.accuracy_only:
+            self.benchmark_command += " --accuracy-only"
+        """ if self.args.benchmark_only:
+            self.benchmark_command += " --benchmark-only" """
 
         # if output results is enabled, generate a results file name and pass it to the inference script
         if self.args.output_results:
