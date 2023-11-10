@@ -915,7 +915,7 @@ index 474b92f72..98aab97f0 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499b0..8f61f9619 100755
+index cf71499b0..fcecdf1ea 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,9 @@ from .utils import (
@@ -1124,7 +1124,21 @@ index cf71499b0..8f61f9619 100755
  
      def evaluation_loop(
          self,
-@@ -3158,6 +3255,20 @@ class Trainer:
+@@ -3133,7 +3230,12 @@ class Trainer:
+             logger.info("  Num examples: Unknown")
+         logger.info(f"  Batch size = {batch_size}")
+ 
+-        model.eval()
++        try:
++            model.eval()
++        except:
++            # Model after PT2 Quantization has not eval method
++            # https://github.com/pytorch/pytorch/blob/b3ad29e269aa940c6f6947627b039191856b895e/torch/ao/quantization/quantize_pt2e.py#L110
++            pass
+ 
+         self.callback_handler.eval_dataloader = dataloader
+         # Do this before wrapping.
+@@ -3158,6 +3260,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.
