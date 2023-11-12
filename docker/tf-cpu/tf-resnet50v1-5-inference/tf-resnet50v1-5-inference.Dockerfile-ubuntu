@@ -25,14 +25,14 @@ ARG TF_BASE_TAG=latest
 
 FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
-WORKDIR /workspace/tf-spr-resnet50v1-5-inference 
+WORKDIR /workspace/tf-resnet50v1-5-inference 
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y ca-certificates numactl wget 
 
 RUN mkdir -p pretrained_model && \
-    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bias_resnet50.pb -O pretrained_model/bias_resnet50.pb && \
-    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bf16_resnet50_v1.pb -O pretrained_model/bf16_resnet50_v1.pb && \
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50v1_5_int8_pretrained_model.pb -O pretrained_model/bias_resnet50.pb && \
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_v1_5_bfloat16.pb -O pretrained_model/bf16_resnet50_v1.pb && \
     wget https://zenodo.org/record/2535873/files/resnet50_v1.pb -O pretrained_model/resnet50_v1.pb
 
 COPY benchmarks benchmarks
