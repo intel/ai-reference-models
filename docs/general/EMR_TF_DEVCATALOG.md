@@ -46,5 +46,4 @@ The tables below provide links to run each use case using docker containers. The
 
 | Model                                                  | Model Documentation      | Dataset |
 | ------------------------------------------------------ | ----------| ---------------------- |
-|[DIEN](https://github.com/IntelAI/models/blob/r3.1/quickstart/recommendation/tensorflow/dien/training/cpu/README_DEV_CAT.md) | FP32 Training | DIEN dataset |
 | [DIEN](https://github.com/IntelAI/models/blob/r3.1/quickstart/recommendation/tensorflow/dien/inference/cpu/README_DEV_CAT.md) | FP32,BF32,BF16 Inference | DIEN dataset |

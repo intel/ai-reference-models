@@ -28,8 +28,9 @@ The tables below provide links to run each use case using docker containers. The
 | ------------------------------------------------------ | ----------| ---------------------- |
 | [BERT large](https://github.com/IntelAI/models/blob/r3.1/quickstart/language_modeling/pytorch/bert_large/training/cpu/DEVCATALOG.md) | FP32,BF32,BF16 Training | Preprocessed Text dataset |
 | [BERT large](https://github.com/IntelAI/models/blob/r3.1/quickstart/language_modeling/pytorch/bert_large/inference/cpu/DEVCATALOG.md) | FP32,BF32,BF16,INT8 Inference | SQuAD1.0 |
-| [RNN-T](https://github.com/IntelAI/models/blob/r3.1/quickstart/language_modeling/pytorch/rnnt/inference/cpu/DEVCATALOG.md) | FP32,BF32,BF16,INT8 Inference | RNN-T dataset |
-| [DistilBERT base](https://github.com/IntelAI/models/blob/r3.1/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/DEVCATALOG.md) | FP32,BF32,BF16,INT8-BF16,INT8-BF32 Inference | DistilBERT Base SQuAD1.1|
+| [RNN-T](https://github.com/IntelAI/models/blob/r3.1/quickstart/language_modeling/pytorch/rnnt/inference/cpu/DEVCATALOG.md) | FP32,BF32,BF16,INT8 Inference | LibriSpeech |
+| [RNN-T](https://github.com/IntelAI/models/blob/r3.1/quickstart/language_modeling/pytorch/rnnt/training/cpu/DEVCATALOG.md) | FP32,BF32,FP16 Training | LibriSpeech |
+| [DistilBERT base](https://github.com/IntelAI/models/blob/r3.1/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/DEVCATALOG.md) | FP32,BF32,BF16,INT8-BF16,INT8-BF32 Inference | SST-2 |
 
 ### Recommendation 
 
