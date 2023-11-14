@@ -21,7 +21,8 @@ import fire
 import torch
 import transformers
 from datasets import load_dataset
-
+from datasets.utils.logging import disable_progress_bar
+from transformers.utils import logging as hf_logging
 """
 Unused imports:
 import torch.nn as nn
@@ -74,6 +75,7 @@ def train(
     wandb_log_model: str = "",  # options: false | true
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
     prompt_template_name: str = "alpaca",  # The prompt template to use, will default to alpaca.
+    disable_tqdm: bool = False, # disable tqdm if needed to avoid split log failure when ddp training outputs multiple ranks.
 ):
     if int(os.environ.get("LOCAL_RANK", 0)) == 0:
         print(
@@ -103,11 +105,16 @@ def train(
             f"wandb_log_model: {wandb_log_model}\n"
             f"resume_from_checkpoint: {resume_from_checkpoint or False}\n"
             f"prompt template: {prompt_template_name}\n"
+            f"disable tqdm: {disable_tqdm}\n"
         )
     assert (
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
     gradient_accumulation_steps = 8
+
+    if disable_tqdm:
+        disable_progress_bar()
+        hf_logging.disable_progress_bar()
 
     prompter = Prompter(prompt_template_name)
 
@@ -272,6 +279,7 @@ def train(
             use_ipex=True,
             max_steps=max_steps,
             xpu_backend="ccl",
+            disable_tqdm=disable_tqdm,
         ),
         data_collator=transformers.DataCollatorForSeq2Seq(
             tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
