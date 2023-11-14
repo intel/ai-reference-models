@@ -5,7 +5,7 @@ This document has instructions for running SSD-MobileNet inference using Intel-o
 
 ## Pull Command
 ```
-docker pull intel/object-detection:spr-ssd-mobilenet-inference
+docker pull intel/object-detection:tf-cpu-centos-ssd-mobilenet-inference
 ```
 
 <table>
