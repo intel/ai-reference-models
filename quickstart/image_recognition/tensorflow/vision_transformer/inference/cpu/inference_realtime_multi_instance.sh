@@ -90,7 +90,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   ${dataset_arg} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
-  --num-intra-threads=${cores_per_socket} \
+  --num-intra-threads=${CORES_PER_INSTANCE} \
   --num-inter-threads=1 \
   --numa-cores-per-instance=${CORES_PER_INSTANCE} \
   $@ \
