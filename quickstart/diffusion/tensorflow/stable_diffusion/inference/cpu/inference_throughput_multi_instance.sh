@@ -16,7 +16,6 @@
 #
 
 MODELS=${MODELS-$PWD}
-CORES_PER_INSTANCE="socket"
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -43,9 +42,20 @@ MODE="inference"
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 BATCH_SIZE="${BATCH_SIZE:-"1"}"
 
-# Get number of cores per socket line from lscpu
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-cores_per_socket="${cores_per_socket//[[:blank:]]/}"
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  # Get number of cores per instance
+  CORES_PER_SOCKET=`lscpu | grep 'Core(s) per socket' | awk '{print $4}'`
+  SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+  NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+  CORES_PER_INSTANCE=`expr $CORES_PER_SOCKET \* $SOCKETS / $NUMAS`
+  NUM_INSTANCES=`expr $cores_per_socket / $CORES_PER_NUMA`
+
+  echo "CORES_PER_SOCKET: $CORES_PER_SOCKET"
+  echo "SOCKETS: $SOCKETS"
+  echo "NUMAS: $NUMAS"
+  echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
+fi
 
 source "${MODELS}/quickstart/common/utils.sh"
 _command python ${MODELS}/benchmarks/launch_benchmark.py \

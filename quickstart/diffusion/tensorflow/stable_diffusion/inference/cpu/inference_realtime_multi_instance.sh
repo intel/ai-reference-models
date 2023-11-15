@@ -16,7 +16,6 @@
 #
 
 MODELS=${MODELS-$PWD}
-CORES_PER_INSTANCE=4
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -38,14 +37,16 @@ if [ $PRECISION != "fp32" ] && [ $PRECISION != "bfloat16" ] &&
   exit 1
 fi
 
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  CORES_PER_INSTANCE=4
+  echo "Runs an instance per ${CORES_PER_INSTANCE}"
+fi
+
 MODE="inference"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 BATCH_SIZE="${BATCH_SIZE:-"1"}"
-
-# Get number of cores per socket line from lscpu
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
 source "${MODELS}/quickstart/common/utils.sh"
 _command python ${MODELS}/benchmarks/launch_benchmark.py \
