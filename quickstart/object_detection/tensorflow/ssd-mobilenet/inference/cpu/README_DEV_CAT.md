@@ -5,7 +5,7 @@ This document has instructions for running SSD-MobileNet inference using Intel-o
 
 ## Pull Command
 ```
-docker pull intel/object-detection:tf-cpu-centos-ssd-mobilenet-inference
+docker pull intel/object-detection:centos-tf-cpu-ssd-mobilenet-inference
 ```
 
 <table>
@@ -72,7 +72,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-ssd-mobilenet-inference \
-  intel/object-detection:tf-cpu-centos-ssd-mobilenet-inference \
+  intel/object-detection:centos-tf-cpu-ssd-mobilenet-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

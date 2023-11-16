@@ -6,7 +6,7 @@ Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/image-segmentation:tf-cpu-centos-3d-unet-mlperf-inference
+docker pull intel/image-segmentation:centos-tf-cpu-3d-unet-mlperf-inference
 ```
 
 <table>
@@ -69,7 +69,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-3d-unet-mlperf-inference \
-  intel/image-segmentation:tf-cpu-centos-3d-unet-mlperf-inference \
+  intel/image-segmentation:centos-tf-cpu-3d-unet-mlperf-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

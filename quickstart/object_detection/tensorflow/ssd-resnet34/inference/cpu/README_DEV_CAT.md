@@ -5,7 +5,7 @@ This document has instructions for running SSD-ResNet34 inference using Intel-op
 
 ## Pull Command
 ```
-docker pull intel/object-detection:tf-cpu-centos-ssd-resnet34-inference
+docker pull intel/object-detection:centos-tf-cpu-ssd-resnet34-inference
 ```
 
 <table>
@@ -79,7 +79,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-ssd-resnet34-inference \
-  intel/object-detection:tf-cpu-centos-ssd-resnet34-inference \
+  intel/object-detection:centos-tf-cpu-ssd-resnet34-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

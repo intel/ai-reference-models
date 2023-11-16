@@ -6,7 +6,7 @@ Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/language-modeling:tf-cpu-centos-distilbert-inference
+docker pull intel/language-modeling:centos-tf-cpu-distilbert-inference
 ```
 
 <table>
@@ -79,7 +79,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-distilbert-inference \
-  intel/language-modeling:tf-cpu-centos-distilbert-inference \
+  intel/language-modeling:centos-tf-cpu-distilbert-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

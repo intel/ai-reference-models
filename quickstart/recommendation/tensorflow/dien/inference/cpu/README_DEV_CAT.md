@@ -5,7 +5,7 @@ This document has instructions for running DIEN inference using Intel-optimized 
 
 ## Pull Command
 ```
-docker pull intel/recommendation:tf-cpu-centos-dien-inference
+docker pull intel/recommendation:centos-tf-cpu-dien-inference
 ```
 
 <table>
@@ -80,7 +80,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-dien-inference \
-  intel/recommendation:tf-cpu-centos-dien-inference \
+  intel/recommendation:centos-tf-cpu-dien-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

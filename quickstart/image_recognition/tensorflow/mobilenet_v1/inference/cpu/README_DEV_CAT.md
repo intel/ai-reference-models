@@ -5,7 +5,7 @@ This document has instructions for running MobileNet V1 inference using Intel-op
 
 ## Pull Command
 ```
-docker pull intel/image-recognition:tf-cpu-centos-mobilenet-v1-inference
+docker pull intel/image-recognition:centos-tf-cpu-mobilenet-v1-inference
 ```
 
 <table>
@@ -70,7 +70,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-mobilenet-v1-inference \
-  intel/image-recognition:tf-cpu-centos-mobilenet-v1-inference \
+  intel/image-recognition:centos-tf-cpu-mobilenet-v1-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

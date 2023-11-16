@@ -6,7 +6,7 @@ Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/language-modeling:tf-cpu-centos-bert-large-inference
+docker pull intel/language-modeling:centos-tf-cpu-bert-large-inference
 ```
 
 <table>
@@ -81,7 +81,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-bert-large-inference \
-  intel/language-modeling:tf-cpu-centos-bert-large-inference \
+  intel/language-modeling:centos-tf-cpu-bert-large-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

@@ -6,7 +6,7 @@ using Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/object-detection:tf-cpu-centos-ssd-resnet34-training
+docker pull intel/object-detection:centos-tf-cpu-ssd-resnet34-training
 ```
 
 <table>
@@ -58,7 +58,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-ssd-resnet34-training \
-  intel/object-detection:tf-cpu-centos-ssd-resnet34-training \
+  intel/object-detection:centos-tf-cpu-ssd-resnet34-training \
   /bin/bash quickstart/training.sh
 ```
 
