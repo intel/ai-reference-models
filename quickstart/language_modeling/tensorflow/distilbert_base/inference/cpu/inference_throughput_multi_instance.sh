@@ -17,8 +17,6 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
-CORES_PER_INSTANCE="socket"
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -77,6 +75,8 @@ BATCH_SIZE="${BATCH_SIZE:-"56"}"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
+_get_numa_cores_lists
+echo "Cores per node: ${cores_per_node}"
 _command python benchmarks/launch_benchmark.py \
          --model-name=distilbert_base \
          --precision=${PRECISION} \
@@ -87,15 +87,15 @@ _command python benchmarks/launch_benchmark.py \
          --benchmark-only \
          --batch-size=${BATCH_SIZE} \
          --output-dir=${OUTPUT_DIR} \
-         --num-intra-threads=${cores_per_socket} \
+         --num-intra-threads=${cores_per_node} \
          --num-inter-threads=1 \
-         --numa-cores-per-instance=${CORES_PER_INSTANCE} \
+         --numa-cores-per-instance=${cores_per_node} \
          --warmup-steps=${WARMUP_STEPS} \
          --steps=${STEPS} \
          $@
 
 if [[ $? == 0 ]]; then
-  grep "Throughput: " ${OUTPUT_DIR}/distilbert_base_${PRECISION}_inference_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log | sed -e "s/.*://;s/ms//" | awk ' {sum+=$(1);} END{print sum} '
+  grep "Throughput: " ${OUTPUT_DIR}/distilbert_base_${PRECISION}_inference_bs${BATCH_SIZE}_cores${cores_per_node}_all_instances.log | sed -e "s/.*://;s/ms//" | awk ' {sum+=$(1);} END{print sum} '
   exit 0
 else
   exit 1

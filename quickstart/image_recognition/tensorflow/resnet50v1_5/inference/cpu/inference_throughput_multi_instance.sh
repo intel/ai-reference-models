@@ -71,15 +71,14 @@ export TF_ENABLE_MKL_NATIVE_FORMAT=1
 export TF_ONEDNN_ENABLE_FAST_CONV=1
 
 MODE="inference"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_numa_cores_lists
   
 # If cores per instance env is not mentioned, then the workload will run with the default value.
 if [ -z "${CORES_PER_INSTANCE}" ]; then
-  CORES_PER_INSTANCE="socket"
-  echo "Runs an instance per ${CORES_PER_INSTANCE}"
+  CORES_PER_INSTANCE=${cores_per_node}
+  echo "Runs an instance per ${CORES_PER_INSTANCE} cores"
 fi
-
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
 # If OMP_NUM_THREADS env is not mentioned, then run with the default value
 if [ -z "${OMP_NUM_THREADS}" ]; then 
@@ -120,7 +119,6 @@ echo "WARMUP_STEPS: $WARMUP_STEPS"
 # Remove old log file
 rm -rf  ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log
 
-source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
@@ -132,7 +130,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
-  --data-num-intra-threads ${cores_per_socket} --data-num-inter-threads 1 \
+  --data-num-intra-threads ${CORES_PER_INSTANCE} --data-num-inter-threads 1 \
   $@ \
   -- \
   $WARMUP_STEPS \
