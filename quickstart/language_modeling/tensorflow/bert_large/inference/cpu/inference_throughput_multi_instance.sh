@@ -87,14 +87,18 @@ fi
 
 MODE="inference"
 
-# If cores per instance env is not mentioned, then the workload will run with the default value.
-if [ -z "${CORES_PER_INSTANCE}" ]; then
-  CORES_PER_INSTANCE="socket"
-  echo "Runs an instance per ${CORES_PER_INSTANCE}"
-fi
-
+sockets=$(lscpu |grep 'Socket(s):' |sed 's/[^0-9]//g')
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
+numa_nodes_num=$(lscpu |grep 'NUMA node(s):' |sed 's/[^0-9]//g')
+number_of_cores=$(($cores_per_socket * $sockets))
+cores_per_node=$((number_of_cores/numa_nodes_num))
+
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  CORES_PER_INSTANCE=${cores_per_node}
+  echo "Runs an instance per ${CORES_PER_INSTANCE} cores."
+fi
 
 # If OMP_NUM_THREADS env is not mentioned, then run with the default value
 if [ -z "${OMP_NUM_THREADS}" ]; then 
