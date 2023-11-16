@@ -7,11 +7,11 @@ This document has instructions for running ResNext 32x16d inference using Intel 
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/image-recognition:pytorch-cpu-centos-resnext-32x16d-inference
+docker pull intel/image-recognition:centos-pytorch-cpu-resnext-32x16d-inference
 ```
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/image-recognition:pytorch-cpu-ubuntu-resnext-32x16d-inference
+docker pull intel/image-recognition:ubuntu-pytorch-cpu-resnext-32x16d-inference
 ```
 
 ## Quick Start Scripts
@@ -63,7 +63,7 @@ export OUTPUT_DIR=<directory where log files will be written>
 export PRECISION=<specify the precision to run>
 export SCRIPT=quickstart/<specify the quickstart script>
 
-IMAGE_NAME=intel/image-recognition:pytorch-cpu-${OS}-resnext-32x16d-inference
+IMAGE_NAME=intel/image-recognition:${OS}-pytorch-cpu-resnext-32x16d-inference
 DOCKER_ARGS="--privileged --init -it"
 WORKDIR=/workspace/pytorch-resnext-32x16d-inference
 

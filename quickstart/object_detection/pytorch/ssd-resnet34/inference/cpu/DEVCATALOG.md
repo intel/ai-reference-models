@@ -7,12 +7,12 @@ This document has instructions for running ResNet34 inference using Intel Extens
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/object-detection:pytorch-cpu-centos-ssd-resnet34-inference
+docker pull intel/object-detection:centos-pytorch-cpu-ssd-resnet34-inference
 ```
 
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/object-detection:pytorch-cpu-ubuntu-ssd-resnet34-inference
+docker pull intel/object-detection:ubuntu-pytorch-cpu-ssd-resnet34-inference
 ```
 
 ## Quick Start Scripts
@@ -80,7 +80,7 @@ export SCRIPT=quickstart/<specify the script to run>
 export PRECISION=<specify the precision to run>
 export CHECKPOINT_DIR=${PWD}
 
-IMAGE_NAME=intel/object-detection:pytorch-cpu-${OS}-ssd-resnet34-inference
+IMAGE_NAME=intel/object-detection:${OS}-pytorch-cpu-ssd-resnet34-inference
 WORKDIR=/workspace/pytorch-ssd-resnet34-inference
 DOCKER_ARGS="--privileged --init -it"
 

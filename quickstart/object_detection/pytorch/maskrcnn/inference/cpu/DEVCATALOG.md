@@ -7,11 +7,11 @@ This document has instructions for running MaskRCNN inference using Intel Extens
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/object-detection:pytorch-cpu-centos-maskrcnn-inference
+docker pull intel/object-detection:centos-pytorch-cpu-maskrcnn-inference
 ```
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/object-detection:pytorch-cpu-ubuntu-maskrcnn-inference
+docker pull intel/object-detection:ubuntu-pytorch-cpu-maskrcnn-inference
 ```
 
 ## Quick Start Scripts
@@ -76,7 +76,7 @@ export PRECISION=<specify the precision to run>
 export MODE=<specify one of jit or imperative>
 export CHECKPOINT_DIR=<path to the downloaded pre-trained model>
 
-IMAGE_NAME=intel/object-detection:pytorch-cpu-${OS}-maskrcnn-inference
+IMAGE_NAME=intel/object-detection:${OS}-pytorch-cpu-maskrcnn-inference
 WORKDIR=/workspace/pytorch-maskrcnn-inference
 DOCKER_ARGS="--privileged --init -it"
 

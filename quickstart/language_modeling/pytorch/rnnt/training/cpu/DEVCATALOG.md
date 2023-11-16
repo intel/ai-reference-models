@@ -7,12 +7,12 @@ This document has instructions for running RNNT training using Intel Extension f
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/language-modeling:pytorch-cpu-centos-rnnt-training
+docker pull intel/language-modeling:centos-pytorch-cpu-rnnt-training
 ```
 
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/language-modeling:pytorch-cpu-ubuntu-rnnt-training
+docker pull intel/language-modeling:ubuntu-pytorch-cpu-rnnt-training
 ```
 
 
@@ -46,7 +46,7 @@ export PRECISION=<specify the precision>
 export DATASET_DIR=<specify path to processed dataset>
 export CHECKPOINT_DIR=<specify path to pre-trained model>
 
-IMAGE_NAME=intel/language-modeling:pytorch-cpu-${OS}-rnnt-training
+IMAGE_NAME=intel/language-modeling:${OS}-pytorch-cpu-rnnt-training
 SCRIPT=quickstart/<specify script name>
 WORKDIR=/workspace/pytorch-rnnt-training
 DOCKER_ARGS="--privileged --init -it"

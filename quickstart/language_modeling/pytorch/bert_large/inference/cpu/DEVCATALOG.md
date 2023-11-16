@@ -7,12 +7,12 @@ This document has instructions for running BERT Large inference using Intel Exte
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/language-modeling:pytorch-cpu-centos-bert-large-inference
+docker pull intel/language-modeling:centos-pytorch-cpu-bert-large-inference
 ```
 
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/language-modeling:pytorch-cpu-ubuntu-bert-large-inference
+docker pull intel/language-modeling:ubuntu-pytorch-cpu-bert-large-inference
 ```
 ## Quick Start Scripts
 | Script name | Description |
@@ -58,7 +58,7 @@ export PRECISION=<specify the precision>
 export SCRIPT=quickstart/<specify the quickstart script>
 export PRETRAINED_MODEL=<path to pre-trained model>
 
-IMAGE_NAME=intel/language-modeling:pytorch-cpu-${OS}-bert-large-inference
+IMAGE_NAME=intel/language-modeling:${OS}-pytorch-cpu-bert-large-inference
 DOCKER_ARGS="--privileged --init -it"
 WORKDIR=/workspace/pytorch-bert-large-inference
 EVAL_SCRIPT="${WORKDIR}/quickstart/transformers/examples/legacy/question-answering/run_squad.py"

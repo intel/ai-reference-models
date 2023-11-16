@@ -7,12 +7,12 @@ This document has instructions for running DistilBERT Base inference using Intel
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/language-modeling:pytorch-cpu-centos-distilbert-inference
+docker pull intel/language-modeling:centos-pytorch-cpu-distilbert-inference
 ```
 
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/language-modeling:pytorch-cpu-ubuntu-distilbert-inference
+docker pull intel/language-modeling:ubuntu-pytorch-cpu-distilbert-inference
 ```
 
 # Quick Start Scripts
@@ -67,7 +67,7 @@ export PRETRAINED_MODEL=<path to pre-trained model>
 export DATASET_DIR=<path to dataset directory>
 export OUTPUT_DIR=<path to output directory>
 
-IMAGE_NAME=intel/language-modeling:pytorch-cpu-${OS}-distilbert-inference
+IMAGE_NAME=intel/language-modeling:${OS}-pytorch-cpu-distilbert-inference
 SCRIPT=quickstart/<name of script>
 DOCKER_ARGS="--privileged --init -it"
 WORKDIR=/workspace/pytorch-distilbert-inference

@@ -7,12 +7,12 @@ This document has instructions for running BERT-Large training using Intel Exten
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/language-modeling:pytorch-cpu-centos-bert-large-training
+docker pull intel/language-modeling:centos-pytorch-cpu-bert-large-training
 ```
 
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/language-modeling:pytorch-cpu-ubuntu-bert-large-training
+docker pull intel/language-modeling:ubuntu-pytorch-cpu-bert-large-training
 ```
 
 ## Quick Start Scripts
@@ -54,7 +54,7 @@ export BERT_MODEL_CONFIG=<path to bert configuration file>
 export CHECKPOINT_DIR=<path to checkpoint to Directory>
 
 DOCKER_ARGS="--privileged --init -it"
-IMAGE_NAME=intel/language-modeling:pytorch-cpu-${OS}-bert-large-training
+IMAGE_NAME=intel/language-modeling:${OS}-pytorch-cpu-bert-large-training
 WORKDIR=/workspace/pytorch-bert-large-training
 TRAIN_SCRIPT=${WORKDIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py  
 

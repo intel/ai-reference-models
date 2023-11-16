@@ -7,11 +7,11 @@ This document has instructions for running ResNet50 inference using Intel Extens
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/image-recognition:pytorch-cpu-centos-resnet50-inference
+docker pull intel/image-recognition:centos-pytorch-cpu-resnet50-inference
 ```
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/image-recognition:pytorch-cpu-ubuntu-resnet50-inference
+docker pull intel/image-recognition:ubuntu-pytorch-cpu-resnet50-inference
 ```
 
 ## Quick Start Scripts
@@ -61,7 +61,7 @@ export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRECISION=<specify the precision>
 export SCRIPT=quickstart/<specify the quickstart script>
-IMAGE_NAME=intel/image-recognition:pytorch-cpu-${OS}-resnet50-inference
+IMAGE_NAME=intel/image-recognition:${OS}-pytorch-cpu-resnet50-inference
 DOCKER_ARGS="--privileged --init -it"
 WORKDIR=/workspace/pytorch-resnet50-inference
 

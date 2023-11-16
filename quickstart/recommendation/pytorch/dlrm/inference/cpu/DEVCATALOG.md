@@ -7,12 +7,12 @@ This document has instructions for running DLRM Inference using Intel Extension 
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/recommendation:pytorch-cpu-centos-dlrm-inference
+docker pull intel/recommendation:centos-pytorch-cpu-dlrm-inference
 ```
 
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/recommendation:pytorch-cpu-ubuntu-dlrm-inference
+docker pull intel/recommendation:ubuntu-pytorch-cpu-dlrm-inference
 ```
 
 ## Quick Start Scripts
@@ -58,7 +58,7 @@ export SCRIPT=quickstart/<specify the script to run>
 export PRECISION=<specify the precision to run>
 export BERT_WEIGHT=<specify path to pre-trained model>
 
-IMAGE_NAME=intel/recommendation:pytorch-cpu-${OS}-dlrm-inference
+IMAGE_NAME=intel/recommendation:${OS}-pytorch-cpu-dlrm-inference
 DOCKER_ARGS="--privileged --init -it"
 WORKDIR=/workspace/pytorch-dlrm-inference
 

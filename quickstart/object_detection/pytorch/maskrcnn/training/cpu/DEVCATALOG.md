@@ -7,11 +7,11 @@ This document has instructions for running MaskRCNN training using Intel Extensi
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/object-detection:pytorch-cpu-centos-maskrcnn-training
+docker pull intel/object-detection:centos-pytorch-cpu-maskrcnn-training
 ```
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/object-detection:pytorch-cpu-ubuntu-maskrcnn-training
+docker pull intel/object-detection:ubuntu-pytorch-cpu-maskrcnn-training
 ```
 
 ## Quick Start Scripts
@@ -66,7 +66,7 @@ export BATCH_SIZE=<set batch size(default is 112)>
 
 DOCKER_ARGS="--privileged --init -it"
 WORKDIR=/workspace/pytorch-maskrcnn-training
-IMAGE_NAME=intel/object-detection:pytorch-centos-${OS}-maskrcnn-training
+IMAGE_NAME=intel/object-detection:${OS}-pytorch-cpu-maskrcnn-training
 
 docker run --rm \
   --env BATCH_SIZE=${BATCH_SIZE} \

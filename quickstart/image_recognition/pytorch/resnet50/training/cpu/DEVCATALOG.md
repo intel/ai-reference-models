@@ -7,12 +7,12 @@ This document has instructions for running ResNet50 training using Intel Extensi
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/image-recognition:pytorch-cpu-centos-resnet50-training
+docker pull intel/image-recognition:centos-pytorch-cpu-resnet50-training
 ```
 
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/image-recognition:pytorch-cpu-ubuntu-resnet50-training
+docker pull intel/image-recognition:ubuntu-pytorch-cpu-resnet50-training
 ```
 
 ## Quick Start Scripts
@@ -65,7 +65,7 @@ export OUTPUT_DIR=<directory where log files will be written>
 export PRECISION=<specify the precision to run>
 export SCRIPT=quickstart/training.sh 
 
-IMAGE_NAME=intel/image-recognition:pytorch-cpu-${OS}-resnet50-training
+IMAGE_NAME=intel/image-recognition:${OS}-pytorch-cpu-resnet50-training
 WORKDIR=/workspace/pytorch-resnet50-training
 DOCKER_ARGS="--privileged --init -it"
 TRAINING_EPOCHS=1

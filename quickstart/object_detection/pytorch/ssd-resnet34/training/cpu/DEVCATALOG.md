@@ -7,11 +7,11 @@ This document has instructions for running SSD-ResNet34 training using Intel Ext
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/object-detection:pytorch-cpu-centos-ssd-resnet34-training
+docker pull intel/object-detection:centos-pytorch-cpu-ssd-resnet34-training
 ```
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/object-detection:pytorch-cpu-ubuntu-ssd-resnet34-training
+docker pull intel/object-detection:ubuntu-pytorch-cpu-ssd-resnet34-training
 ```
 
 ## Quick Start Scripts
@@ -73,7 +73,7 @@ export SCRIPT=quickstart/<specify the script to run>
 export PRECISION=<specify the precision to run>
 export CHECKPOINT_DIR=<path to pre-trained model>
 
-IMAGE_NAME=intel/object-detection:pytorch-cpu-${OS}-ssd-resnet34-training
+IMAGE_NAME=intel/object-detection:${OS}-pytorch-cpu-ssd-resnet34-training
 DOCKER_ARGS="--privileged --init -it"
 WORKDIR=/workspace/pytorch-ssd-resnet34-training
 

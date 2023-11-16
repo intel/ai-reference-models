@@ -7,12 +7,12 @@ This document has instructions for running RNN-T inference using Intel Extension
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/language-modeling:pytorch-cpu-centos-rnnt-inference
+docker pull intel/language-modeling:centos-pytorch-cpu-rnnt-inference
 ```
 
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/language-modeling:pytorch-cpu-ubuntu-rnnt-inference
+docker pull intel/language-modeling:ubuntu-pytorch-cpu-rnnt-inference
 ```
 
 ## Quick Start Scripts
@@ -49,7 +49,7 @@ export PRECISION=<specify the precision>
 export DATASET_DIR=<specify path to processed dataset>
 export CHECKPOINT_DIR=<specify path to pre-trained model>
 
-IMAGE_NAME=intel/language-modeling:pytorch-cpu-${OS}-rnnt-inference
+IMAGE_NAME=intel/language-modeling:${OS}-pytorch-cpu-rnnt-inference
 SCRIPT=quickstart/<specify script name>
 WORKDIR=/workspace/pytorch-rnnt-inference
 DOCKER_ARGS="--privileged --init -it"

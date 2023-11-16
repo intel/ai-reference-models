@@ -7,12 +7,12 @@ This document has instructions for running DLRM Training using Intel Extension f
 
 Docker image based on CentOS Stream8
 ```
-docker pull intel/recommendation:pytorch-cpu-centos-dlrm-training
+docker pull intel/recommendation:centos-pytorch-cpu-dlrm-training
 ```
 
 Docker image based on Ubuntu 22.04
 ```
-docker pull intel/recommendation:pytorch-cpu-ubuntu-dlrm-training
+docker pull intel/recommendation:ubuntu-pytorch-cpu-dlrm-training
 ```
 
 ## Quick Start Scripts
@@ -54,7 +54,7 @@ export PRECISION=<specify the precision to run>
 export SCRIPT=quickstart/training.sh
 export NUM_BATCH=<10000 for test performance and 50000 for testing convergence trend>  
 
-IMAGE_NAME=intel/recommendation:pytorch-cpu-${OS}-dlrm-training
+IMAGE_NAME=intel/recommendation:${OS}-pytorch-cpu-dlrm-training
 DOCKER_ARGS="--privileged --init -it"
 WORKDIR=/workspace/pytorch-dlrm-training
 
