@@ -68,10 +68,18 @@ fi
 echo "STEPS: $STEPS"
 
 # Get number of cores per socket line from lscpu
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-cores_per_socket="${cores_per_socket//[[:blank:]]/}"
+CORES_PER_SOCKET=`lscpu | grep 'Core(s) per socket' | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+CORES_PER_INSTANCE=`expr $CORES_PER_SOCKET \* $SOCKETS / $NUMAS`
+NUM_INSTANCES=`expr $cores_per_socket / $CORES_PER_NUMA`
 
+echo "CORES_PER_SOCKET: $CORES_PER_SOCKET"
+echo "SOCKETS: $SOCKETS"
+echo "NUMAS: $NUMAS"
+echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=graphsage \
   --precision ${PRECISION} \
@@ -81,7 +89,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location ${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
-  --num-intra-threads=${cores_per_socket} \
+  --num-intra-threads=${CORES_PER_INSTANCE} \
   --num-inter-threads=1 \
   --numa-cores-per-instance=${CORES_PER_INSTANCE} \
   $@ \
