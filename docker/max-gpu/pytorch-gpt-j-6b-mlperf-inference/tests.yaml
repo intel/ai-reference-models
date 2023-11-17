@@ -1,0 +1,256 @@
+float16-offline-benchmark-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: float16
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Offline
+    ACCURACY: 'false'
+    INFERENCE_TYPE: benchmark
+    BATCH_SIZE: '1'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /pytorch/gpt-jdata
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+float16-offline-benchmark-acc-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: float16
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Offline
+    INFERENCE_TYPE: benchmark
+    BATCH_SIZE: '1'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+float16-accuracy-offline-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: float16
+    DATASET_DIR: /localdisk/sramakr1/data
+    OUTPUT_DIR: /tmp/logs
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    INFERENCE_MODE: Offline
+    INFERENCE_TYPE: accuracy
+    BATCH_SIZE: '1'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+float16-server-benchmark-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: float16
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Server
+    INFERENCE_TYPE: benchmark
+    ACCURACY: 'false'
+    BATCH_SIZE: '32'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+float16-server-benchmark-acc-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: float16
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Server
+    INFERENCE_TYPE: benchmark
+    BATCH_SIZE: '32'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+float16-accuracy-server-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: float16
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Server
+    INFERENCE_TYPE: accuracy
+    BATCH_SIZE: '32'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs 
+int4-offline-benchmark-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: int4
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Offline
+    INFERENCE_TYPE: benchmark
+    ACCURACY: 'false'
+    BATCH_SIZE: '1'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+int4-offline-benchmark-acc-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: int4
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Offline
+    INFERENCE_TYPE: benchmark
+    BATCH_SIZE: '1'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+int4-accuracy-offline-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: int4
+    DATASET_DIR: /localdisk/sramakr1/data
+    OUTPUT_DIR: /tmp/logs
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    INFERENCE_MODE: Offline
+    INFERENCE_TYPE: accuracy
+    BATCH_SIZE: '1'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+int4-server-benchmark-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: int4
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Server
+    INFERENCE_TYPE: benchmark
+    ACCURACY: 'false'
+    BATCH_SIZE: '32'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+int4-server-benchmark-acc-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: int4
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Server
+    INFERENCE_TYPE: benchmark
+    BATCH_SIZE: '32' 
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs
+int4-accuracy-server-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: int4
+    DATASET_DIR: /localdisk/sramakr1/data
+    PRETRAINED_MODEL_DIR: /localdisk/sramakr1/gpt-j/checkpoint-final
+    OUTPUT_DIR: /tmp/logs
+    INFERENCE_MODE: Server
+    INFERENCE_TYPE: accuracy
+    BATCH_SIZE: '32'
+    NUM_GPU_TILES: '8'
+  volumes:
+    - src: /localdisk/sramakr1/data
+      dst: /localdisk/sramakr1/data
+    - src: /localdisk/sramakr1/gpt-j/checkpoint-final
+      dst: /localdisk/sramakr1/gpt-j/checkpoint-final
+    - src: /tmp/logs
+      dst: /tmp/logs 

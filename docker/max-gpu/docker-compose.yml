@@ -91,3 +91,16 @@ services:
       dockerfile: docker/max-gpu/pytorch-dlrm-training/pytorch-max-series-dlrm-training.Dockerfile
     extends: pytorch-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-training
+  pytorch-gpt-j-6b-mlperf-inference:
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ''
+        NO_PROXY: ''
+        BASE_IMAGE: intel/oneapi-basekit
+        BASE_TAG: ${BASE_TAG:-2023.1.0-devel-ubuntu22.04}
+        PYTHON: python3.9
+      dockerfile: docker/max-gpu/pytorch-gpt-j-6b-mlperf-inference/pytorch-max-series-gpt-j-6b-mlperf-inference.Dockerfile
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
