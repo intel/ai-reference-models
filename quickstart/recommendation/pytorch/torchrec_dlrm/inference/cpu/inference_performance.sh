@@ -40,6 +40,15 @@ LOG=${OUTPUT_DIR}/dlrm_inference_performance_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
+export EXTRA_ARGS=""
+if [ -z "${DATASET_DIR}" ]; then
+  echo "DATASET_DIR are not set, will use dummy generated dataset"
+  EXTRA_ARGS="$EXTRA_ARGS --multi_hot_distribution_type uniform "
+  EXTRA_ARGS="$EXTRA_ARGS --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 "
+else
+  EXTRA_ARGS="$EXTRA_ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
+fi
+
 ARGS=""
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --dtype bf16 --ipex-merged-emb-cat"
@@ -62,14 +71,6 @@ else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
     echo "Supported PRECISIONs are: fp32, fp16, bf16, bf32, int8"
     exit 1
-fi
-
-if [ -z "${DATASET_DIR}" ]; then
-  echo "DATASET_DIR are not set, will use dummy generated dataset"
-  ARGS="$ARGS --multi_hot_distribution_type uniform "
-  ARGS="$ARGS --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 "
-else
-  ARGS="$ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
 fi
 
 LOG_0="${LOG}/throughput.log"
@@ -116,7 +117,7 @@ $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
     --inference-only \
     --benchmark \
     --share-weight-instance=$CORES_PER_NUMA_NODE \
-    $ARGS 2>&1 | tee $LOG_0
+    $EXTRA_ARGS $ARGS 2>&1 | tee $LOG_0
 wait
 
 if [[ $PLOTMEM == "true" ]]; then

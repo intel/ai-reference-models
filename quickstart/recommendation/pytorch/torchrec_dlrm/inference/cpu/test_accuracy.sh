@@ -19,8 +19,10 @@ if [ ! -e "${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/dlrm_main.py
     echo "From which the dlrm_s_pytorch.py exist at the: \${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/dlrm_main.py"
     exit 1
 fi
-MODEL_SCRIPT=${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/dlrm_main.py
-INT8_CONFIG=${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/int8_configure.json
+
+export MODEL_SCRIPT=${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/dlrm_main.py
+export INT8_CONFIG=${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/int8_configure.json
+export BATCH_SIZE=65536
 
 echo "PRECISION: ${PRECISION}"
 echo "OUTPUT_DIR: ${OUTPUT_DIR}"
@@ -47,6 +49,7 @@ rm -rf ${LOG}
 mkdir -p ${LOG}
 
 ARGS=""
+export EXTRA_ARGS=" --synthetic_multi_hot_criteo_path $DATASET_DIR --test_auroc --snapshot-dir $WEIGHT_DIR"
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --dtype bf16 --ipex-merged-emb-cat"
     echo "running bf16 path"
@@ -60,6 +63,8 @@ elif [[ $PRECISION == "fp16" ]]; then
     echo "running fp16 path"
     ARGS="$ARGS --dtype fp16 --ipex-merged-emb-cat"
 elif [[ $PRECISION == "int8" ]]; then
+    echo "prepare int8 weight"
+    bash ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/prepare_int8.sh
     echo "running int8 path"
     ARGS="$ARGS --dtype int8 --ipex-merged-emb-cat --int8-configure-dir ${INT8_CONFIG}"
 else
@@ -69,7 +74,6 @@ else
 fi
 
 LOG_0="${LOG}/acc.log"
-export BATCH_SIZE=65536
 
 if [[ $PLOTMEM == "true" ]]; then
 pip install memory_profiler
@@ -92,9 +96,7 @@ $mrun_cmd python $MODEL_SCRIPT \
     --dcn_low_rank_dim=512 \
     --ipex-optimize \
     --inference-only \
-    --synthetic_multi_hot_criteo_path $DATASET_DIR \
-    --test_auroc \
-    $ARGS 2>&1 | tee $LOG_0
+    $ARGS $EXTRA_ARGS 2>&1 | tee $LOG_0
 
 if [[ $PLOTMEM == "true" ]]; then
 mprof plot ${MEMLOG} -o ${MEMPIC}

@@ -1,5 +1,4 @@
 ARGS="--dtype int8 --int8-prepare --ipex-merged-emb-cat --int8-configure-dir ${INT8_CONFIG}"
-
 python $MODEL_SCRIPT \
     --embedding_dim 128 \
     --dense_arch_layer_sizes 512,256,128 \
@@ -18,6 +17,4 @@ python $MODEL_SCRIPT \
     --jit \
     --inference-only \
     --benchmark \
-    --multi_hot_distribution_type uniform \
-    --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
-    $ARGS
+    $ARGS $EXTRA_ARGS
