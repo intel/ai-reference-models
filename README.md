@@ -70,6 +70,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [VGG-11 with batch normalization](https://arxiv.org/abs/1409.1556) | PyTorch | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/vgg11_bn/inference/cpu/README.md) | [ImageNet 2012](/quickstart/image_recognition/pytorch/vgg11_bn/inference/cpu/README.md#datasets) |
 | [Wide ResNet-50-2](https://arxiv.org/pdf/1605.07146.pdf)   | PyTorch | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/wide_resnet50_2/inference/cpu/README.md) | [ImageNet 2012](/quickstart/image_recognition/pytorch/wide_resnet50_2/inference/cpu/README.md#datasets) |
 | [Wide ResNet-101-2](https://arxiv.org/pdf/1605.07146.pdf)  | PyTorch | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/wide_resnet101_2/inference/cpu/README.md) | [ImageNet 2012](/quickstart/image_recognition/pytorch/wide_resnet101_2/inference/cpu/README.md#datasets) |
+| [Vision Transformer](https://huggingface.co/google/vit-base-patch16-224) | PyTorch | Inference | [FP32 BFloat16 BFloat32 FP16 INT8](/quickstart/image_classification/pytorch/vit/inference/cpu/README.md) | [ImageNet 2012](/quickstart/image_classification/pytorch/vit/inference/cpu/README.md) |
 
 ### Image Segmentation
 
@@ -85,11 +86,12 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | Model                                        | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | -------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/bert_large/inference/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
-| [BERT large ](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/bert_large/training/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#fine-tuning-with-bert-using-squad-data) and [MRPC](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#classification-training-with-bert) |
+| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/bert_large/training/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#fine-tuning-with-bert-using-squad-data) and [MRPC](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#classification-training-with-bert) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Inference | [FP32 BFloat16 Int8 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/README_SPR_Baremetal.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Training | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/README_SPR_Baremetal.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
 |[DistilBERT base](https://arxiv.org/abs/1910.01108)| Tensorflow | Inference | [FP32 BFloat16 Int8 FP16](/benchmarks/language_modeling/tensorflow/distilbert_base/inference/README.md) | [SST-2](/benchmarks/language_modeling/tensorflow/distilbert_base/inference/README.md#dataset) |
 | [GPT_J_6GB](https://huggingface.co/EleutherAI/gpt_j_6B)     | Tensorflow | Training | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/gpt_j_6B/training/README.md) | [GPT_J_6B](https://huggingface.co/EleutherAI/gpt_j_6B) |
+| [GPT-J-6B](https://huggingface.co/EleutherAI/gpt-j-6b)     | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/gpt_j/inference/README.md) | [LAMBADA](https://huggingface.co/datasets/EleutherAI/lambada_openai) |
 | [BERT base](https://arxiv.org/pdf/1810.04805.pdf)    | PyTorch | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/bert_base/inference/cpu/README.md) | [BERT Base SQuAD1.1](https://huggingface.co/csarron/bert-base-uncased-squad-v1) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | [FP32 Int8 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) | BERT Large SQuAD1.1 |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Training  | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/bert_large/training/cpu/README.md) | [preprocessed text dataset](https://drive.google.com/drive/folders/1cywmDnAsrP5-2vsr8GDc6QUc7VWe-M3v) |
@@ -98,7 +100,11 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [RNN-T](https://arxiv.org/abs/2007.15188)            | PyTorch | Training  | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/rnnt/training/cpu/README.md) | [RNN-T dataset](/quickstart/language_modeling/pytorch/rnnt/training/cpu/download_dataset.sh) |
 | [RoBERTa base](https://arxiv.org/abs/1907.11692)     | PyTorch | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/roberta_base/inference/cpu/README.md) | [RoBERTa Base SQuAD 2.0](https://huggingface.co/deepset/roberta-base-squad2) |
 | [T5](https://arxiv.org/abs/1910.10683)     | PyTorch | Inference | [FP32 Int8](/quickstart/language_modeling/pytorch/t5/inference/cpu/README.md) |  |
-| [GPT-J-6B](https://huggingface.co/EleutherAI/gpt-j-6b)     | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/gpt_j/inference/README.md) | [LAMBADA](https://huggingface.co/datasets/EleutherAI/lambada_openai) |
+| [BLOOM](https://huggingface.co/bigscience/bloom) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/bloom/inference/cpu/README.md) | |
+| [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/gptj/inference/cpu/README.md) | |
+| [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/llama/inference/cpu/README.md) | |
+| [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Training | [FP32 FP16 BFloat16 BF32](/quickstart/language_modeling/pytorch/llama/training/cpu/README.md) | |
+
 
 ### Language Translation
 
