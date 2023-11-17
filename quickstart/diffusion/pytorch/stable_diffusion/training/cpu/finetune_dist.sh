@@ -64,7 +64,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 PRECISION=$1
 
-export MODEL_NAME="runwayml/stable-diffusion-v1-5"
+export MODEL_NAME="stabilityai/stable-diffusion-2-1"
 export DATA_DIR="./cat"
 
 << EOF

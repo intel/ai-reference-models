@@ -37,8 +37,8 @@ logging.getLogger().setLevel(logging.INFO)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name_or_path", type=str, default="runwayml/stable-diffusion-v1-5", help="Model path")
-    parser.add_argument("--int8_model_path", type=str, default="quant_model.pt", help="INT8 model path")
+    parser.add_argument("--model_name_or_path", type=str, default="stabilityai/stable-diffusion-2-1", help="Model path")
+    parser.add_argument("--int8_model_path", type=str, default="sd_v2_1.pt", help="INT8 model path")
     parser.add_argument("--dataset_path", type=str, default=None, help="COCO2017 dataset path")
     parser.add_argument("--prompt", type=str, default="A big burly grizzly bear is show with grass in the background.", help="input text")
     parser.add_argument("--output_dir", type=str, default=None,help="output path")
@@ -103,7 +103,7 @@ def main():
     else:
         raise ValueError("--precision needs to be the following: fp32, bf32, bf16, fp16, int8-bf16")
 
-    input = torch.randn(2, 4, 64, 64).to(memory_format=torch.channels_last), torch.tensor(921), torch.randn(2, 77, 768)
+    input = torch.randn(2, 4, 96, 96).to(memory_format=torch.channels_last), torch.tensor(921), torch.randn(2, 77, 1024)
 
     # ipex
     if args.ipex:
