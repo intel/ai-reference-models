@@ -75,7 +75,14 @@ CORES=`lscpu | grep Core | awk '{print $4}'`
 # BATCHSIZE=$((128*CORES))
 # a converged BS and have better performance on SPR
 BATCHSIZE=${BATCHSIZE:-32768}
-export OMP_NUM_THREADS=$CORES
+
+CORES_PER_SOCKET=`lscpu | grep "Core(s) per socket" | awk '{print $4}'`
+SOCKETS=`lscpu | grep "Socket(s)" | awk '{print $2}'`
+NUMA_NODES=`lscpu | grep "NUMA node(s)" | awk '{print $3}'`
+NUMA_NODES_PER_SOCKETS=`expr $NUMA_NODES / $SOCKETS`
+CORES_PER_NUMA_NODE=`expr $CORES_PER_SOCKET / $NUMA_NODES_PER_SOCKETS`
+
+export OMP_NUM_THREADS=$CORES_PER_NUMA_NODE
 
 LOG_0="${LOG}/socket_0"
 python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
