@@ -11,28 +11,20 @@ This document has instructions for running [DistilBERT base uncased finetuned SS
 
 Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
 
-### Prepare model
-```
-  cd <clone of the model zoo>/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu
-  git clone https://github.com/huggingface/transformers.git
-  cd transformers
-  git checkout v4.28.1
-  pip install -r ./examples/pytorch/text-classification/requirements.txt
-  git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
-  pip install -e ./
-  cd ..
- ```
 ### Model Specific Setup
 
-* Install Intel OpenMP
-  ```
-  conda install intel-openmp
-  ```
+* Set Jemalloc and tcmalloc Preload for better performance
 
-* Install datasets
+  The jemalloc should be built from the [General setup](#general-setup) section.
   ```
-  pip install datasets
+  export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":"path_to/tcmalloc/lib/libtcmalloc.so":$LD_PRELOAD
+  export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
   ```
+* Set IOMP preload for better performance
+```
+  pip install packaging intel-openmp
+  export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
+```
 
 * Set SEQUENCE_LENGTH before running the model
   ```
@@ -83,44 +75,70 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   ```
 
 # Quick Start Scripts
-
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash run_multi_instance_throughput.sh fp32 | bash run_multi_instance_realtime.sh fp32 | bash run_accuracy.sh fp32 |
-| BF32        | bash run_multi_instance_throughput.sh bf32 | bash run_multi_instance_realtime.sh bf32 | bash run_accuracy.sh bf32 |
-| BF16        | bash run_multi_instance_throughput.sh bf16 | bash run_multi_instance_realtime.sh bf16 | bash run_accuracy.sh bf16 |
-| FP16        | bash run_multi_instance_throughput.sh fp16 | bash run_multi_instance_realtime.sh fp16 | bash run_accuracy.sh fp16 |
-| INT8-FP32        | bash run_multi_instance_throughput.sh int8-fp32 | bash run_multi_instance_realtime.sh int8-fp32 | bash run_accuracy.sh int8-fp32 |
-| INT8-BF16       | bash run_multi_instance_throughput.sh int8-bf16 | bash run_multi_instance_realtime.sh int8-bf16 | bash run_accuracy.sh int8-bf16 |
+| FP32        | run_multi_instance_throughput.sh fp32 | run_multi_instance_realtime.sh fp32 | run_accuracy.sh fp32 |
+| BF32        | run_multi_instance_throughput.sh bf32 | run_multi_instance_realtime.sh bf32 | run_accuracy.sh bf32 |
+| BF16        | run_multi_instance_throughput.sh bf16 | run_multi_instance_realtime.sh bf16 | run_accuracy.sh bf16 |
+| INT8-FP32        | run_multi_instance_throughput.sh int8-fp32 | run_multi_instance_realtime.sh int8-fp32 | run_accuracy.sh int8-fp32 |
+| INT8-BF16       | run_multi_instance_throughput.sh int8-bf16 | run_multi_instance_realtime.sh int8-bf16 | run_accuracy.sh int8-bf16 |
+
+**Note**: The `avx-fp32` precision runs the same scripts as `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
+* Set ENV to use AMX:
+  ```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  ```
+
+# Datasets
+Use the following instructions to download the SST-2 dataset.
+Also, clone the Intel® AI Reference Models GitHub Repository and set the `MODEL_DIR` directory.
+```
+git clone https://github.com/IntelAI/models.git
+cd models
+export MODEL_DIR=$(pwd)
+cd -
+export DATASET_DIR=$(pwd)
+wget https://dl.fbaipublicfiles.com/glue/data/SST-2.zip -O $DATASET_DIR/SST-2.zip
+unzip $DATASET_DIR/SST-2.zip -d $DATASET_DIR/
+python $MODEL_DIR/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/convert.py $DATASET_DIR
+```
+
+# Pre-Trained Model
+Follow the instructions below to download the pre-trained model. 
+
+```
+git clone https://huggingface.co/distilbert-base-uncased-finetuned-sst-2-english
+export FINETUNED_MODEL=$(pwd)/distilbert-base-uncased-finetuned-sst-2-english
+```
 
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and
 preprocess the dataset, and do the model specific setup. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+the Intel® AI Reference Models can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have an enviornment variable set to point to an output directory.
 
 ```
-# Clone the model zoo repo and set the MODEL_DIR
-git clone https://github.com/IntelAI/models.git
+# Navigate to the Intel® AI Reference Models repo and set the MODEL_DIR
 cd models
-export MODEL_DIR=$(pwd)
 
-# Clone the Transformers repo in the DistilBERT Base inference directory
-cd quickstart/language_modeling/pytorch/distilbert_base/inference/cpu
-git clone https://github.com/huggingface/transformers.git
-cd transformers
-git checkout v4.28.1
-pip install -r ./examples/pytorch/text-classification/requirements.txt
-git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
-pip install -e ./
-cd ..
+# Prepare model and install dependencies:
+./quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/setup.sh
 
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
+export PRECISION=< select from :- fp32, bf32, bf16, int8-fp32, int8-bf16>
+export HF_DATASETS_OFFLINE=0
+export SEQUENCE_LENGTH=128 
+export CORE_PER_INSTANCE=4
+export FINETUNED_MODEL=<path to pre-trained model>
+export DATASET_DIR=<path to dataset directory>
 
-# Run a quickstart script (for example, FP32 multi-instance realtime inference)
-bash run_multi_instance_realtime.sh fp32
+# Optional environemnt variables:
+export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>
+
+# Run a quickstart script
+./quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/<script.sh>
 ```
 
 <!--- 80. License -->
