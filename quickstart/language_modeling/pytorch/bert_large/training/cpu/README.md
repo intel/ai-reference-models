@@ -36,7 +36,7 @@ contains 502 files for a total of about 13Gbytes.
 
 # Generate the BERT input dataset
 
-The create_pretraining_data.py script duplicates the input plain text, replaces
+The [create_pretraining_data.py](/models/language_modeling/pytorch/bert_large/training/input_preprocessing/create_pretraining_data.py) script duplicates the input plain text, replaces
 different sets of words with masks for each duplication, and serializes the
 output into the HDF5 file format.
 
@@ -54,12 +54,12 @@ pip install tensorflow-cpu
 For phase1 the seq_len=128:
 ```shell
 export SEQ_LEN=128
-./parallel_create_hdf5.sh
+./models/language_modeling/pytorch/bert_large/training/input_preprocessing/parallel_create_hdf5.sh
 ```
 For phase2 the seq_len=512:
 ```shell
 export SEQ_LEN=512
-./parallel_create_hdf5.sh
+./models/language_modeling/pytorch/bert_large/training/input_preprocessing/parallel_create_hdf5.sh
 ```
 
 The resulting `hdf5/` subdir will have 500 files named
@@ -74,14 +74,14 @@ For phase1:
 
 ```shell
 export SEQ_LEN=128
-python3 ./chop_hdf5_files.py
+python3 ./models/language_modeling/pytorch/bert_large/training/input_preprocessing/chop_hdf5_files.py
 ```
 
 For phase2:
 
 ```shell
 export SEQ_LEN=512
-python3 ./chop_hdf5_files.py
+python3 ./models/language_modeling/pytorch/bert_large/training/input_preprocessing/chop_hdf5_files.py
 ```
 
 The above will produce a subdirectory named `2048_shards_uncompressed/`
@@ -97,24 +97,30 @@ you can use "SHARD_NUM" to control the shard files number. the default "SHARD_NU
 ```
 
 ## Bare Metal
-
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison, Torch-CCL, Jemalloc and TCMalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
 
 ### Model Specific Setup
-* Install dependence
+
+* Set Jemalloc and tcmalloc Preload for better performance
+
+  The jemalloc should be built from the [General setup](#general-setup) section.
   ```
-  pip install datasets accelerate tfrecord
-  conda install openblas
-  conda install faiss-cpu -c pytorch
-  conda install intel-openmp
+  export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":"path_to/tcmalloc/lib/libtcmalloc.so":$LD_PRELOAD
+  export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
   ```
+* Set IOMP preload for better performance
+```
+  pip install packaging intel-openmp
+  export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
+```
 
 * Set ENV to use fp16 AMX if you are using a supported platform
 ```
   export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
+
 * Set ENV to use multi-nodes distributed training (no need for single-node multi-sockets)
 
   In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes. 
@@ -122,14 +128,12 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   export NNODES=#your_node_number
   export HOSTFILE=your_ip_list_file #one ip per line 
   ```
-## Quick Start Scripts
 
-|  DataType   | Phase 1  |  Phase 2 |
-| ----------- | ----------- | ----------- |
-| FP32        | bash run_bert_pretrain_phase1.sh fp32 | bash run_bert_pretrain_phase2.sh fp32 |
-| BF32        | bash run_bert_pretrain_phase1.sh bf32 | bash run_bert_pretrain_phase2.sh bf32 |
-| BF16        | bash run_bert_pretrain_phase1.sh bf16 | bash run_bert_pretrain_phase2.sh bf16 |
-| FP16        | bash run_bert_pretrain_phase1.sh fp16 | bash run_bert_pretrain_phase2.sh fp16 |
+## Quick Start Scripts
+| Script name | Description |
+|-------------|-------------|
+| `run_bert_pretrain_phase1.sh` | Runs BERT large pretraining phase 1 using max_seq_len=128 for the first 90% dataset for the specified precision (fp32, avx-fp32, bf32 or bf16). The script saves the model to the `OUTPUT_DIR` in a directory called `model_save`. |
+| `run_bert_pretrain_phase2.sh` | Runs BERT large pretraining phase 2 using max_seq_len=512 with the remaining 10% of the dataset for the specified precision (fp32, avx-fp32, bf32 or bf16). Use path to the `model_save` directory from phase one as the `CHECKPOINT_DIR` for phase 2. |
 
 |  DataType   | Distributed Training Phase 1  |  Distributed Training Phase 2 |
 | ----------- | ----------- | ----------- |
@@ -153,45 +157,53 @@ export PROCESS_PER_NODE=2
 export GBS=1024
 ```
 will run 16 ranks on 8 nodes with `global batch size=1024`.
+
+**Note**: The `avx-fp32` precision runs the same scripts as `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
+* Set ENV to use AMX:
+  ```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  ```
+
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and
 preprocess the dataset, and do the model specific setup. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+the Intel® AI Reference Models can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have enviornment variables set to point to the dataset directory
 and an output directory.
 
 ```
-# Clone the model zoo repo and set the MODEL_DIR
+# Clone the Intel® AI Reference Models repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
 
-# Clone the Transformers repo in the BERT large training directory
-cd quickstart/language_modeling/pytorch/bert_large/training/cpu
-git clone https://github.com/huggingface/transformers.git
-cd transformers
-git checkout v4.28.1
-git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
-pip install -e ./
-cd ..
+# Install dependencies:
+./quickstart/language_modeling/pytorch/bert_large/training/cpu/setup.sh
 
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
-export DATASET_DIR=</path/to/dataset/tfrecord_dir>
+export DATASET_DIR=<path to the dataset>
 export TRAIN_SCRIPT=${MODEL_DIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py
+export PRECISION=<specify the precision to run: fp32, avx-fp32, bf16 or bf32>
 
-# For phase 1 get the bert config from https://drive.google.com/drive/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT
-export BERT_MODEL_CONFIG=/path/to/bert_config.json
+# Optional environemnt variables:
+export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>
 
-# Run the phase 1 quickstart script for fp32 (or bf16)
-bash run_bert_pretrain_phase1.sh fp32
+# For phase 1 get the bert_config.json from [here](https://drive.google.com/drive/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT)
+wget https://drive.google.com/drive/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT
+export BERT_MODEL_CONFIG=$(pwd)/bert_config.json
+
+# Run the phase 1 quickstart script:
+# This downloads the checkpoints in 'CHECKPOINT_DIR'
+export CHECKPOINT_DIR=$(pwd)/checkpoint_phase1_dir
+./quickstart/language_modeling/pytorch/bert_large/training/cpu/run_bert_pretrain_phase1.sh
 
 # For phase 2 set the pretrained model path to the checkpoints generated during phase 1
-export PRETRAINED_MODEL=/path/to/bert_large_mlperf_checkpoint/checkpoint/
+export PRETRAINED_MODEL=$(pwd)/checkpoint_phase1_dir
 
-# Run the phase 2 quickstart script for fp32 (or bf16)
-bash run_bert_pretrain_phase2.sh fp32
+# Run the phase 2 quickstart script:
+./quickstart/language_modeling/pytorch/bert_large/training/cpu/run_bert_pretrain_phase2.sh
 ```
 
 ## CheckPoint in Your Training Phase 1 or Phase 2

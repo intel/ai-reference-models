@@ -52,6 +52,7 @@ if [[ "$os_name" == *"CentOS"* ]]; then
   yum install -y \
     numactl \
     mesa-libGL 
+  yum install -y libopenblas-dev
 elif [[ "$os_name" == *"Ubuntu"* ]]; then
   echo "Ubuntu detected. Using apt-get for package management."
   apt-get update
@@ -68,6 +69,7 @@ elif [[ "$os_name" == *"Ubuntu"* ]]; then
   apt-get install --no-install-recommends --fix-missing -y \
     numactl \
     libegl1-mesa 
+  apt-get install -y libopenblas-dev
 fi
 
 cd ${WORKSPACE}
