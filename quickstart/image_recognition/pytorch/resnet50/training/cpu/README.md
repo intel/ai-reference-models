@@ -1,11 +1,55 @@
-<!--- 0. Title -->
 # PyTorch ResNet50 training
 
-<!-- 10. Description -->
 ## Description
 
 This document has instructions for running ResNet50 training using
 Intel-optimized PyTorch.
+
+
+## Dataset
+
+The [ImageNet](http://www.image-net.org/) validation dataset is used when
+testing accuracy. The inference scripts use synthetic data, so no dataset
+is needed.
+
+Download and extract the ImageNet2012 dataset from http://www.image-net.org/,
+then move validation images to labeled subfolders, using
+[the valprep.sh shell script](https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh)
+
+The accuracy script looks for a folder named `val`, so after running the
+data prep script, your folder structure should look something like this:
+
+```
+imagenet
+└── val
+    ├── ILSVRC2012_img_val.tar
+    ├── n01440764
+    │   ├── ILSVRC2012_val_00000293.JPEG
+    │   ├── ILSVRC2012_val_00002138.JPEG
+    │   ├── ILSVRC2012_val_00003014.JPEG
+    │   ├── ILSVRC2012_val_00006697.JPEG
+    │   └── ...
+    └── ...
+```
+The folder that contains the `val` directory should be set as the
+`DATASET_DIR` when running accuracy
+(for example: `export DATASET_DIR=/home/<user>/imagenet`).
+
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, bf32 or fp16). |
+| `training_dist.sh` | Distributed trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, bf32 or fp16). |
+| `training_single_socket.sh` | Trains on a single socket for one epoch for the specified precision (fp32, avx-fp32, bf16, bf32 or fp16). |
+
+> Note: The `avx-int8` and `avx-fp32` precisions run the same scripts as `int8` and `fp32`, except that the
+> `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
+> otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
+* Set ENV to use AMX:
+  ```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  ```
 
 ## Bare Metal
 
@@ -33,6 +77,7 @@ The tcmalloc should be built from the [General setup](#general-setup) section.
 IOMP should be installed in your conda env from the [General setup](#general-setup) section.
 
 ```bash
+    pip install packaging intel-openmp
     export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
 ```
 
@@ -41,7 +86,6 @@ IOMP should be installed in your conda env from the [General setup](#general-set
 ```bash
     export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
-
 * Set ENV to use multi-node distributed training (no need for single-node multi-sockets)
 
   In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
@@ -53,56 +97,16 @@ IOMP should be installed in your conda env from the [General setup](#general-set
     export MASTER_ADDR=#your_master_addr
 ```
 
-## Datasets
-
-### ImageNet
-
-Download and extract the ImageNet2012 training and validation dataset from
-[http://www.image-net.org/](http://www.image-net.org/),
-then move validation images to labeled subfolders, using
-[the valprep.sh shell script](https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh)
-
-A after running the data prep script, your folder structure should look something like this:
-
-```txt
-imagenet
-├── train
-│   ├── n02085620
-│   │   ├── n02085620_10074.JPEG
-│   │   ├── n02085620_10131.JPEG
-│   │   ├── n02085620_10621.JPEG
-│   │   └── ...
-│   └── ...
-└── val
-    ├── n01440764
-    │   ├── ILSVRC2012_val_00000293.JPEG
-    │   ├── ILSVRC2012_val_00002138.JPEG
-    │   ├── ILSVRC2012_val_00003014.JPEG
-    │   └── ...
-    └── ...
-```
-
-The folder that contains the `val` and `train` directories should be set as the
-`DATASET_DIR` (for example: `export DATASET_DIR=/home/<user>/imagenet`).
-
-<!--- 40. Quick Start Scripts -->
-## Quick Start Scripts
-
-| Script name | Description |
-|-------------|-------------|
-| `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, bf32 or fp16). |
-| `training_dist.sh` | Distributed trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, bf32 or fp16). |
-
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and
 preprocess the dataset, and do the model specific setup. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+the Intel® AI Reference Models can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have enviornment variables set to point to the dataset directory,
 an output directory, precision, and the number of training epochs.
 
 ```bash
-# Clone the model zoo repo and set the MODEL_DIR
+# Clone the Intel® AI Reference Models repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
@@ -114,7 +118,7 @@ export PRECISION=<precision to run (fp32, avx-fp32, bf16, bf32, or fp16)>
 export TRAINING_EPOCHS=<epoch_number(90 or other number)>
 
 # Run the training quickstart script
-cd ${MODEL_DIR}/quickstart/image_recognition/pytorch/resnet50/training/cpu
+./quickstart/image_recognition/pytorch/resnet50/training/cpu/training.sh
 bash training.sh
 
 # Run the distributed training quickstart script

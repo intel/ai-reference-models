@@ -1,14 +1,15 @@
 #!/bin/bash
 set -e
 
-echo "Setup PyTorch Test Enviroment for ResNet50 Inference"
+echo "Setup PyTorch Test Enviroment for ResNet50 Training"
 
 PRECISION=$1
 SCRIPT=$2
-OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/output/PyTorch/resnet50-inference/${SCRIPT}/${PRECISION}"}
+OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/output/PyTorch/resnet50-training/${SCRIPT}/${PRECISION}"}
 WORKSPACE=$3
 is_lkg_drop=$4
 DATASET=$5
+TRAINING_EPOCHS="1"
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
@@ -22,4 +23,4 @@ export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:aut
 export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 
 # Run script
-OUTPUT_DIR=${OUTPUT_DIR} DATASET_DIR=${DATASET} PRECISION=${PRECISION} ./quickstart/image_recognition/pytorch/resnet50/inference/cpu/${SCRIPT}
+OUTPUT_DIR=${OUTPUT_DIR} DATASET_DIR=${DATASET} PRECISION=${PRECISION} TRAINING_EPOCHS=${TRAINING_EPOCHS} ./quickstart/image_recognition/pytorch/resnet50/training/cpu/${SCRIPT}

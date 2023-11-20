@@ -32,7 +32,7 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, avx-fp32, int8, avx-int8, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, int8, bf32, avx-int8, or bf16."
   exit 1
 fi
 
@@ -77,7 +77,7 @@ elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "running fp32 path"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32, bf16, int8, and avx-int8"
+    echo "Supported precisions are: fp32, avx-fp32, bf16, int8, bf32, and avx-int8"
     exit 1
 fi
 

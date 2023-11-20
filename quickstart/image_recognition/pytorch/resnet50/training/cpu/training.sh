@@ -47,7 +47,7 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, avx-fp32, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, bf32 or bf16."
   exit 1
 fi
 

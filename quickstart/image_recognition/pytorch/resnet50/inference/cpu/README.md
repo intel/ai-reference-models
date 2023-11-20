@@ -1,141 +1,106 @@
-<!--- 0. Title -->
 # PyTorch ResNet50 inference
 
-<!-- 10. Description -->
 ## Description
 
 This document has instructions for running ResNet50 inference using
 Intel-optimized PyTorch.
 
-## Bare Metal
+## Dataset
 
-### General setup
+The [ImageNet](http://www.image-net.org/) validation dataset is used when
+testing accuracy. The inference scripts use synthetic data, so no dataset
+is needed.
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison and Jemalloc.
-
-### Model Specific Setup
-
-* [Datasets](#dataset)
-
-```bash
-    export DATASET_DIR=#Where_to_save_Dataset
-```
-
-* Setup the Output dir to store the log
-
-```bash
-    export OUTPUT_DIR=$Where_to_save_log
-```
-
-* Setup runnning precision
-
-```bash
-    export PRECISION=$Data_type(fp32, int8, avx-int8, bf16, bf32 or fp16)
-```
-
-* Set Jemalloc Preload for better performance
-
-The jemalloc should be built from the [General setup](#general-setup) section.
-
-```bash
-    export LD_PRELOAD="path/lib/libjemalloc.so":$LD_PRELOAD
-    export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
-```
-
-* Set IOMP preload for better performance
-
-IOMP should be installed in your conda env from the [General setup](#general-setup) section.
-
-```bash
-    export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
-```
-
-* Set ENV to use fp16 AMX if you are using a supported platform
-
-```bash
-    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
-```
-
-<!--- 40. Quick Start Scripts -->
-## Quick Start Scripts
-
-| Script name | Description |
-|-------------|-------------|
-| `inference_realtime.sh` | Runs multi instance realtime inference using 4 cores per instance with synthetic data for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, bf32, or fp16). |
-| `inference_throughput.sh` | Runs multi instance batch inference using 1 instance per socket with synthetic data for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16,  bf32, or fp16). |
-| `accuracy.sh` | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16,  bf32, or fp16). |
-
-> Note: The `avx-int8` and `avx-fp32` precisions run the same scripts as `int8` and `fp32`, except that the
-> `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
-> otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
-
-## Calibration
-If user needs to re-do the calibration, here is the reference command:
-```
-DATASET_DIR=${DATASET_DIR} PRECISION=int8 CONFIG_FILE=${INT8_CONFIG_FILE} bash calibration.sh
-```
-
-## Datasets
-
-### ImageNet
-
-The [ImageNet](http://www.image-net.org/) validation dataset is used to run ResNet50
-accuracy tests.
-
-Download and extract the ImageNet2012 dataset from [http://www.image-net.org/](http://www.image-net.org/),
+Download and extract the ImageNet2012 dataset from http://www.image-net.org/,
 then move validation images to labeled subfolders, using
 [the valprep.sh shell script](https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh)
 
-A after running the data prep script, your folder structure should look something like this:
+The accuracy script looks for a folder named `val`, so after running the
+data prep script, your folder structure should look something like this:
 
-```txt
+```
 imagenet
 └── val
     ├── ILSVRC2012_img_val.tar
     ├── n01440764
-    │   ├── ILSVRC2012_val_00000293.JPEG
-    │   ├── ILSVRC2012_val_00002138.JPEG
-    │   ├── ILSVRC2012_val_00003014.JPEG
-    │   ├── ILSVRC2012_val_00006697.JPEG
-    │   └── ...
+    │   ├── ILSVRC2012_val_00000293.JPEG
+    │   ├── ILSVRC2012_val_00002138.JPEG
+    │   ├── ILSVRC2012_val_00003014.JPEG
+    │   ├── ILSVRC2012_val_00006697.JPEG
+    │   └── ...
     └── ...
 ```
-
 The folder that contains the `val` directory should be set as the
-`DATASET_DIR` (for example: `export DATASET_DIR=/home/<user>/imagenet`).
+`DATASET_DIR` when running accuracy
+(for example: `export DATASET_DIR=/home/<user>/imagenet`).
 
-**Note:** If you don't run `accuracy.sh`, you don't need to set the environment variable `DATASET_DIR`. Performance is measured with dummy data.
+## Quick Start Scripts
 
-## Docker
+| Script name | Description |
+|-------------|-------------|
+| [`inference_realtime.sh`](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_realtime.sh) | Runs inference using synthetic data (batch_size=1) for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, or bf32). |
+| [`inference_throughput.sh`](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_throughput.sh) | Runs inference to get the throughput using synthetic data for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, or bf32). |
+| [`accuracy.sh`](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/accuracy.sh) | Measures the model accuracy (batch_size=128) for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, or bf32). |
 
-Make sure, you have all the requirements pre-setup in your Container as the [Bare Metal](#bare-metal) Setup section.
+> Note: The `avx-int8` and `avx-fp32` precisions run the same scripts as `int8` and `fp32`, except that the
+> `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
+> otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
+* Set ENV to use AMX:
+  ```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  ```
 
-### Download dataset
+## Run the Model on Bare Metal
 
-Refer to the corresponding Bare Mental Section to download the dataset.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison and Jemalloc.
 
-### Running CMD
+* Set Jemalloc Preload for better performance
 
-```bash
-DATASET_DIR=$dir/imagenet
-OUTPUT_DIR=$Where_to_save_the_log
-docker run \
-  --env DATASET_DIR=${DATASET_DIR} \
-  --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env http_proxy=${http_proxy} \
-  --env https_proxy=${https_proxy} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --privileged --init -t \
-  intel/image_recognition:pytorch-latest-resnet50-inference \
-  /bin/bash quickstart/<script name>.sh <data_type>
-```
+  After [Jemalloc setup](/docs/general/pytorch/BareMetalSetup.md#build-jemalloc), set the following environment variables.
+  ```
+  export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":$LD_PRELOAD
+  export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+  ```
 
-If you are new to docker and are running into issues with the container,
-see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
-for troubleshooting tips.
+* Set IOMP preload for better performance
 
-<!--- 80. License -->
+  IOMP should be installed in your conda env. Set the following environment variables.
+  ```
+  pip install packaging intel-openmp
+  export LD_PRELOAD=<path to the intel-openmp directory>/lib/libiomp5.so:$LD_PRELOAD
+  ```
+
+* Follow the instructions to setup your bare metal environment on either Linux or Windows systems. Once all the setup is done,
+  the Intel® AI Reference Models can be used to run a [quickstart script](#quick-start-scripts).
+  Ensure that you have a clone of the [Intel® AI Reference Models Github repository](https://github.com/IntelAI/models) and navigate to models directory.
+  ```
+  git clone https://github.com/IntelAI/models.git
+  cd models
+  ```
+
+* Run the model:
+    
+    #### Set the environment variables
+    ```
+    export OUTPUT_DIR=<path to the directory where log files will be written>
+    export PRECISION=<select one precision: fp32, avx-fp32, int8, bf32, avx-int8, or bf16>
+
+    # Optional environemnt variables:
+    export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>
+    ```
+
+    #### Run quickstart script:
+    ```
+    NOTE: `inference_realtime.sh` and `inference_throughput.sh` runs with synthetic data
+    ./quickstart/image_recognition/pytorch/resnet50/inference/cpu/<script.sh>
+    ```
+
+    #### `accuracy.sh` script runs with the Imagenet Dataset:
+    ```
+    export DATASET_DIR=<path to the Imagenet Dataset>
+    ./quickstart/image_recognition/pytorch/resnet50/inference/cpu/accuracy.sh
+    ```
+
 ## License
 
 [LICENSE](/LICENSE)
