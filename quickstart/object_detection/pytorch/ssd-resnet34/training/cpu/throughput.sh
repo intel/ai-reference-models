@@ -38,21 +38,26 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-if [[ "$1" == *"avx"* ]]; then
+if [ -z "${PRECISION}" ]; then
+  echo "Precision is not set"
+  exit 1
+fi
+
+if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
 ARGS=""
-if [ "$1" == "bf16" ]; then
+if [ "$PRECISION" == "bf16" ]; then
     ARGS="$ARGS --autocast"
     echo "### running bf16 datatype"
-elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
-elif [[ "$1" == "bf32" ]]; then
+elif [[ "$PRECISION" == "bf32" ]]; then
     ARGS="$ARGS --bf32"
     echo "### running bf32 datatype"
 else
-    echo "The specified precision '$1' is unsupported."
+    echo "The specified precision '$PRECISION' is unsupported."
     echo "Supported precisions are: fp32, avx-fp32, bf32, and bf16"
     exit 1
 fi
@@ -68,7 +73,7 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-PRECISION=$1
+# Runs with default value when BATCH_SIZE is not set
 BATCH_SIZE=${BATCH_SIZE:-224}
 
 rm -rf ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_throughput*
@@ -107,4 +112,4 @@ END   {
 sum = sum / i;
         printf("%.3f", sum);
 }')
-echo ""SSD-RN34";"training throughput";$1; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""SSD-RN34";"training throughput";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
