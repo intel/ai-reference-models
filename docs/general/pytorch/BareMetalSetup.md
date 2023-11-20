@@ -40,7 +40,8 @@ Prepare the environment, you may create a Python virtual enviromment `virtualenv
 ### Build torch-ccl 
     cd ..
     git clone https://github.com/intel-innersource/frameworks.ai.pytorch.torch-ccl.git
-    cd frameworks.ai.pytorch.torch-ccl && git checkout public_master
+    # torch-ccl branch refer to https://github.com/intel-innersource/frameworks.ai.pytorch.ipex-cpu/blob/cpu-device/dependency_version.yml
+    cd frameworks.ai.pytorch.torch-ccl && git checkout $target_branch
     git submodule sync 
     git submodule update --init --recursive
     python setup.py install 
