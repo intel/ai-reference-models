@@ -33,22 +33,27 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-if [[ "$1" == *"avx"* ]]; then
+if [ -z "${PRECISION}" ]; then
+  echo "The PRECISION env variable is not set"
+  exit 1
+fi
+
+if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
 ARGS=""
 
-if [[ "$1" == "bf16" ]]; then
+if [[ "$PRECISION" == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "### running bf16 datatype"
-elif [[ "$1" == "bf32" ]]; then
+elif [[ "$PRECISION" == "bf32" ]]; then
     ARGS="$ARGS --bf32"
     echo "### running bf32 datatype"
-elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]; then
+elif [[ "$PRECISION" == "fp32" || "$PRECISION" == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
 else
-    echo "The specified precision '$1' is unsupported."
+    echo "The specified precision '$PRECISION' is unsupported."
     echo "Supported precisions are: fp32, avx-fp32, bf16, and bf32."
     exit 1
 fi
@@ -59,7 +64,6 @@ TOTAL_CORES=`expr $CORES \* $SOCKETS`
 
 CORES_PER_INSTANCE=$CORES
 
-
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export USE_IPEX=1
 export KMP_BLOCKTIME=1
@@ -67,7 +71,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 export TRAIN=1
 
-PRECISION=$1
+# Runs with default value when batch size is not set
 BATCH_SIZE=${BATCH_SIZE:-112}
 
 rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput*
@@ -92,5 +96,5 @@ python -m intel_extension_for_pytorch.cpu.launch \
 wait
 
 throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput* |sed -e 's/.Trainng throughput//;s/[^0-9.]//g')
-echo ""maskrcnn";"training throughput";$1;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""maskrcnn";"training throughput";$PRECISION;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 
