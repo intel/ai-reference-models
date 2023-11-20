@@ -41,6 +41,11 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [-z "${PRECISION}" ]; then
+  echo "Please set PRECISION: fp32, bf16, bf32"
+  exit 1
+fi
+
 export TEST_FULLY_CONVERGENCE=0
 if [ -z "${NUM_BATCH}" ]; then
   echo "The required environment variable NUM_BATCH has not been set"

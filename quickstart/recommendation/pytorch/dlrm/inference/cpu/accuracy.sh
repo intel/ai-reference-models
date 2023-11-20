@@ -48,6 +48,11 @@ if [ -z "${WEIGHT_PATH}" ]; then
   exit 1
 fi
 
+if [-z "${PRECISION}" ]; then
+  echo "Please set PRECISION: int8, fp32, bf16, bf32"
+  exit 1
+fi
+
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}/dlrm_inference_accuracy_log
 

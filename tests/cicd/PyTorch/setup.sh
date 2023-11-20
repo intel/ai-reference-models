@@ -52,6 +52,7 @@ if [[ "$os_name" == *"CentOS"* ]]; then
   yum install -y \
     numactl \
     mesa-libGL 
+  yum install -y libsndfile
   yum clean all
   yum install mesa-libGL
 elif [[ "$os_name" == *"Ubuntu"* ]]; then
@@ -73,7 +74,7 @@ elif [[ "$os_name" == *"Ubuntu"* ]]; then
     libglib2.0-0 \
     libegl1-mesa 
   apt-get install -y python3-dev
-  apt-get install -y python3.10-dev
+  apt-get install -y gcc python3.10-dev
   apt-get install -y libgl1-mesa-glx
 fi
 

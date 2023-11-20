@@ -41,6 +41,10 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [-z "${PRECISION}" ]; then
+  echo "Please set PRECISION: int8, fp32, bf16, bf32"
+  exit 1
+fi
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
@@ -53,6 +57,9 @@ SOCKETS=`lscpu | grep "Socket(s)" | awk '{print $2}'`
 NUMA_NODES=`lscpu | grep "NUMA node(s)" | awk '{print $3}'`
 NUMA_NODES_PER_SOCKETS=`expr $NUMA_NODES / $SOCKETS`
 CORES_PER_NUMA_NODE=`expr $CORES_PER_SOCKET / $NUMA_NODES_PER_SOCKETS`
+
+# Runs with default value when BATCH SIZE is not set:
+BATCH_SIZE=${BATCH_SIZE:-128}
 
 ARGS=""
 if [[ $PRECISION == "int8" ]]; then
@@ -81,7 +88,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jema
 --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
 --arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
 --numpy-rand-seed=727  --inference-only --num-batches=1000 \
---print-freq=10 --print-time --test-mini-batch-size=128 --share-weight-instance=$CORES_PER_NUMA_NODE \
+--print-freq=10 --print-time --test-mini-batch-size=${BATCH_SIZE} --share-weight-instance=$CORES_PER_NUMA_NODE \
 $ARGS |tee $LOG_0
 wait
 
@@ -98,4 +105,4 @@ END   {
 sum = sum / i;
         printf("%.3f", sum);
 }')
-echo ""dlrm";"throughput";${PRECISION};128;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""dlrm";"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
