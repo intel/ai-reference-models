@@ -20,40 +20,42 @@
 ARGS=""
 precision=fp32
 
-if [[ "$1" == *"avx"* ]]; then
+if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
-if [[ "$1" == "bf16" ]]
+if [[ "$PRECISION" == "bf16" ]]
 then
     precision=bf16
     ARGS="$ARGS --bf16"
     echo "### running bf16 mode"
-elif [[ "$1" == "fp16" ]]
+elif [[ "$PRECISION" == "fp16" ]]
 then
     precision=fp16
     ARGS="$ARGS --fp16_cpu"
     echo "### running fp16 mode"
 
-elif [[ "$1" == "int8" || "$1" == "avx-int8" ]]
+elif [[ "$PRECISION" == "int8" || "$PRECISION" == "avx-int8" ]]
 then
     precision=int8
     ARGS="$ARGS --int8"
     echo "### running int8 mode"
-elif [[ "$1" == "bf32" ]]
+elif [[ "$PRECISION" == "bf32" ]]
 then
     precision=bf32
     ARGS="$ARGS --bf32"
     echo "### running bf32 mode"
-elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]
+elif [[ "$PRECISION" == "fp32" || "$PRECISION" == "avx-fp32" ]]
 then
     precision=fp32
     echo "### running fp32 mode"
-elif [[ "$1" == "int8-fp32" ]]
+elif [[ "$PRECISION" == "int8-fp32" ]]
 then
     precision=int8
     ARGS="$ARGS --int8_fp32"
     echo "### running int8-fp32 mode"
+else
+    echo "Please set PRECISION to : fp32, int8, bf32, bf26, avx-int8 or avx-fp32"
 fi
 
 rm -f ${OUTPUT_DIR}/accuracy_log*
@@ -95,7 +97,7 @@ else
 fi
 
 
-accuracy=$(grep 'Results:' ${OUTPUT_DIR}/accuracy_log*|awk -F ' ' '{print $12}' | awk -F ',' '{print $1}')
+accuracy=$(grep 'Results:' ${OUTPUT_DIR}/accuracy_log*|awk -F ' ' '{print $PRECISION2}' | awk -F ',' '{print $PRECISION}')
 echo ""BERT";"f1";${precision}; ${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 
 
