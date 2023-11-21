@@ -68,6 +68,7 @@ elif [[ "$os_name" == *"Ubuntu"* ]]; then
     autoconf \
     bzip2 \
     tar
+  apt-get install cmake
   apt-get install --no-install-recommends --fix-missing -y \
     numactl \
     libgl1 \

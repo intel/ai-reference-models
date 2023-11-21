@@ -38,15 +38,21 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-if [[ "$1" == *"avx"* ]]; then
+if [ -z "${PRECISION}" ]; then
+  echo "The required environment variable PRECISION has not been set"
+  echo "Please set PRECISION to fp32, avx-fp32, bf32 or bf16."
+  exit 1
+fi
+
+if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
 ARGS=""
-if [ "$1" == "bf16" ]; then
+if [ "$PRECISION" == "bf16" ]; then
     ARGS="$ARGS --mix-precision"
     echo "### running bf16 datatype"
-elif [ "$1" == "bf32" ]; then
+elif [ "$PRECISION" == "bf32" ]; then
     ARGS="$ARGS --bf32"
     echo "### running bf32 datatype"
 else
@@ -57,8 +63,8 @@ export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
+# Runs with default value when BATCH_SIZE is not set
 BATCH_SIZE=${BATCH_SIZE:-448}
-PRECISION=$1
 
 rm -rf ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_throughput*
 
@@ -95,4 +101,4 @@ END   {
 sum = sum / i;
         printf("%.3f", sum);
 }')
-echo ""RNN-T";"throughput";$1; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""RNN-T";"throughput";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
