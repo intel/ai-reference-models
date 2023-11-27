@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument("--prompt", type=str, default="A big burly grizzly bear is show with grass in the background.", help="input text")
     parser.add_argument("--output_dir", type=str, default=None,help="output path")
     parser.add_argument("--seed", type=int, default=0, help="random seed")
-    parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf32, bf16, fp16, int8-bf16')
+    parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf32, bf16, fp16, int8-bf16, int8-fp32')
     parser.add_argument('--ipex', action='store_true', default=False, help='ipex')
     parser.add_argument('--jit', action='store_true', default=False, help='jit trace')
     parser.add_argument('--compile_ipex', action='store_true', default=False, help='compile with ipex backend')
@@ -100,8 +100,11 @@ def main():
     elif args.precision == "int8-bf16":
         print("Running int8-bf16 ...")
         dtype=torch.bfloat16
+    elif args.precision == "int8-fp32":
+        print("Running int8-fp32 ...")
+        dtype=torch.float32
     else:
-        raise ValueError("--precision needs to be the following: fp32, bf32, bf16, fp16, int8-bf16")
+        raise ValueError("--precision needs to be the following: fp32, bf32, bf16, fp16, int8-bf16, int8-fp32")
 
     input = torch.randn(2, 4, 96, 96).to(memory_format=torch.channels_last), torch.tensor(921), torch.randn(2, 77, 1024)
 
@@ -122,7 +125,7 @@ def main():
             # pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=dtype, inplace=True)
             pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=dtype, inplace=True)
             pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=dtype, inplace=True)
-        elif args.precision == "int8-bf16":
+        elif args.precision == "int8-bf16" or args.precision == "int8-fp32":
             pipe.unet_fp32 = copy.deepcopy(pipe.unet)
             pipe.unet_fp32 = ipex.optimize(pipe.unet_fp32.eval(), dtype=dtype, inplace=True)
             pipe.HIGH_PRECISION_STEPS = 5
@@ -130,7 +133,7 @@ def main():
             pipe.unet = load_int8_model(pipe.unet, args.int8_model_path)
             pipe.unet = convert_to_fp32model(pipe.unet)
         else:
-            raise ValueError("--precision needs to be the following:: fp32, bf32, bf16, fp16, int8-bf16")
+            raise ValueError("--precision needs to be the following:: fp32, bf32, bf16, fp16, int8-bf16, int8-fp32")
 
     # jit trace
     if args.jit:
@@ -145,6 +148,18 @@ def main():
                 # print(pipe.unet.graph_for(input))
         elif args.precision == "int8-bf16":
             with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
+                pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
+                pipe.unet = torch.jit.freeze(pipe.unet)
+                pipe.unet(*input)
+                pipe.unet(*input)
+                # print(pipe.unet.graph_for(input))
+                pipe.unet_fp32 = torch.jit.trace(pipe.unet_fp32, input, strict=False)
+                pipe.unet_fp32 = torch.jit.freeze(pipe.unet_fp32)
+                pipe.unet_fp32(*input)
+                pipe.unet_fp32(*input)
+                # print(pipe.unet_fp32.graph_for(input))
+        elif args.precision == "int8-fp32":
+            with torch.no_grad():
                 pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
                 pipe.unet = torch.jit.freeze(pipe.unet)
                 pipe.unet(*input)
