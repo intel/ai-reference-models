@@ -43,7 +43,7 @@ Set environment variables to specify the dataset directory, precision to run, pa
 cd models
 
 # Set the required environment vars:
-export PRECISION=<specify the precision to run: fp32 or bfloat16>
+export PRECISION=<specify the precision to run: fp32>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRETRAINED_MODEL=<path to the downloaded pre-trained model>

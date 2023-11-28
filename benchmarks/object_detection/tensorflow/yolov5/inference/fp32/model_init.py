@@ -74,18 +74,6 @@ class ModelInitializer(BaseModelInitializer):
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
 
-        """ self.benchmark_command = \
-            self.benchmark_command + " --batch-size=" + str(self.args.batch_size) + \
-            " --in-graph=" + self.args.input_graph + \
-            " --warmup-steps=" + str(self.args.warmup_steps) + \
-            " --precision=" + str(self.args.precision)
-        if self.args.steps:
-            self.benchmark_command += " --steps=" + str(self.args.steps)
-        if self.args.num_inter_threads:
-            self.benchmark_command += " --num-inter-threads=" + str(self.args.num_inter_threads)
-        if self.args.num_intra_threads:
-            self.benchmark_command += " --num-intra-threads=" + str(self.args.num_intra_threads) """
-
         if self.args.input_graph:
             self.benchmark_command += " --weights=" + self.args.input_graph
 
@@ -98,8 +86,6 @@ class ModelInitializer(BaseModelInitializer):
             self.benchmark_command += " --nosave"
         if self.args.accuracy_only:
             self.benchmark_command += " --accuracy-only"
-        """ if self.args.benchmark_only:
-            self.benchmark_command += " --benchmark-only" """
 
         # if output results is enabled, generate a results file name and pass it to the inference script
         if self.args.output_results:
