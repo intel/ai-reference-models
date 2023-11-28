@@ -61,6 +61,24 @@ else
     exit 1
 fi
 
+if [ "$2" == "eager" ]; then
+    echo "### running eager mode"
+elif [ "$2" == "ipex-jit" ]; then
+    ARGS="$ARGS --ipex --jit"
+    echo "### running IPEX JIT mode"
+elif [ "$2" == "compile-ipex" ]; then
+    ARGS="$ARGS --compile_ipex"
+    echo "### running torch.compile with ipex backend"
+elif [ "$2" == "compile-inductor" ]; then
+    export TORCHINDUCTOR_FREEZING=1
+    ARGS="$ARGS --compile_inductor"
+    echo "### running torch.compile with inductor backend"
+else
+    echo "The specified mode '$2' is unsupported."
+    echo "Supported mode are: eager, ipex-jit, compile-ipex, compile-inductor"
+    exit 1
+fi
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 export KMP_BLOCKTIME=1
@@ -79,8 +97,6 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --log_file_prefix stable_diffusion_${PRECISION}_inference_accuracy \
     ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
     --dataset_path=${DATASET_DIR} \
-    --ipex \
-    --jit \
     --accuracy \
     -i=10 \
     --output_dir="${PRECISION}_results" \

@@ -178,12 +178,46 @@ def main():
                 pipe.unet(*input)
                 # print(pipe.unet.graph_for(input))
 
-    # torch compile with ipex backend
+    # torch.compile with ipex backend
     if args.compile_ipex:
-        pipe.unet = torch.compile(pipe.unet, backend='ipex')
-    # torch compile with inductor backend
+        print("torch.compile with ipex backend ...")
+        if args.precision == "fp32" or args.precision == "bf16":
+            import intel_extension_for_pytorch as ipex
+            pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=dtype, weights_prepack=False)
+            pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=dtype, weights_prepack=False)
+            pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=dtype, weights_prepack=False)
+            ipex._set_compiler_backend("torchscript")
+            pipe.text_encoder = torch.compile(pipe.text_encoder, backend="ipex")
+            pipe.unet = torch.compile(pipe.unet, backend="ipex")
+            pipe.vae = torch.compile(pipe.vae, backend="ipex")
+        else:
+            raise ValueError("If you want to use torch.compile with ipex backend, --precision needs to be the following: fp32, bf16")
+    # torch.compile with inductor backend
     if args.compile_inductor:
-        pipe.unet = torch.compile(pipe.unet, backend='inductor')
+        print("torch.compile with inductor backend ...")
+        # torch._inductor.config.profiler_mark_wrapper_call = True
+        # torch._inductor.config.cpp.enable_kernel_profile = True
+        if args.precision == "fp32" or args.precision == "bf16":
+            pipe.text_encoder = torch.compile(pipe.text_encoder)
+            pipe.unet = torch.compile(pipe.unet)
+            pipe.vae = torch.compile(pipe.vae)
+        elif args.precision == "int8-bf16" or args.precision == "int8-fp32":
+            from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
+            import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
+            from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
+            from torch._export import capture_pre_autograd_graph
+            with torch.no_grad():
+                pipe.unet = capture_pre_autograd_graph(pipe.unet, input)
+                quantizer = X86InductorQuantizer()
+                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
+                pipe.unet = prepare_pt2e(pipe.unet, quantizer)
+                # calibration
+                pipe(args.prompt)
+                pipe.unet = convert_pt2e(pipe.unet)
+                torch.ao.quantization.move_exported_model_to_eval(pipe.unet)
+                pipe.unet = torch.compile(pipe.unet)
+        else:
+            raise ValueError("If you want to use torch.compile with inductor backend, --precision needs to be the following: fp32, bf16, int8-bf16, int8-fp32")
 
     if args.distributed:
         import oneccl_bindings_for_pytorch
@@ -195,7 +229,7 @@ def main():
         # print("Create DistributedDataParallel in CPU")
         # pipe = torch.nn.parallel.DistributedDataParallel(pipe)
 
-    if not args.benchmark:
+    if args.accuracy:
         # prepare dataloader
         val_coco = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
                                     annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),

@@ -1,5 +1,18 @@
+diff --git a/src/diffusers/models/unet_2d_condition.py b/src/diffusers/models/unet_2d_condition.py
+index 38e0fa3b..40d851ff 100644
+--- a/src/diffusers/models/unet_2d_condition.py
++++ b/src/diffusers/models/unet_2d_condition.py
+@@ -618,7 +618,7 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
+         cross_attention_kwargs: Optional[Dict[str, Any]] = None,
+         down_block_additional_residuals: Optional[Tuple[torch.Tensor]] = None,
+         mid_block_additional_residual: Optional[torch.Tensor] = None,
+-        return_dict: bool = True,
++        return_dict: bool = False,
+     ) -> Union[UNet2DConditionOutput, Tuple]:
+         r"""
+         Args:
 diff --git a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-index 7347d70c..736a192b 100644
+index 7347d70c..b862bcec 100644
 --- a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 +++ b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 @@ -178,6 +178,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
@@ -62,13 +75,13 @@ index 7347d70c..736a192b 100644
 +                        latent_model_input.to(memory_format=torch.channels_last),
 +                        t,
 +                        encoder_hidden_states=prompt_embeds
-+                    )['sample']
++                    )[0]
 +                else:
 +                    noise_pred = self.unet(
 +                        latent_model_input.to(memory_format=torch.channels_last),
 +                        t,
 +                        encoder_hidden_states=prompt_embeds
-+                    )['sample']
++                    )[0]
  
                  # perform guidance
                  if do_classifier_free_guidance:

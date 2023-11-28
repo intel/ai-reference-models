@@ -29,12 +29,12 @@ python setup.py install
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash inference_throughput.sh fp32 | bash inference_realtime.sh fp32 | bash accuracy.sh fp32 |
-| BF16        | bash inference_throughput.sh bf16 | bash inference_realtime.sh bf16 | bash accuracy.sh bf16 |
-| BF32        | bash inference_throughput.sh bf32 | bash inference_realtime.sh bf32 | bash accuracy.sh bf32 |
-| FP16        | bash inference_throughput.sh fp16 | bash inference_realtime.sh fp16 | bash accuracy.sh fp16 |
-| INT8-BF16        | bash inference_throughput.sh int8-bf16 | bash inference_realtime.sh int8-bf16 | bash accuracy.sh int8-bf16 |
-| INT8-FP32        | bash inference_throughput.sh int8-fp32 | bash inference_realtime.sh int8-fp32 | bash accuracy.sh int8-fp32 |
+| FP32        | bash inference_throughput.sh fp32 ipex-jit | bash inference_realtime.sh fp32 ipex-jit | bash accuracy.sh fp32 ipex-jit |
+| BF16        | bash inference_throughput.sh bf16 ipex-jit | bash inference_realtime.sh bf16 ipex-jit | bash accuracy.sh bf16 ipex-jit |
+| BF32        | bash inference_throughput.sh bf32 ipex-jit | bash inference_realtime.sh bf32 ipex-jit | bash accuracy.sh bf32 ipex-jit |
+| FP16        | bash inference_throughput.sh fp16 ipex-jit | bash inference_realtime.sh fp16 ipex-jit | bash accuracy.sh fp16 ipex-jit |
+| INT8-BF16        | bash inference_throughput.sh int8-bf16 ipex-jit | bash inference_realtime.sh int8-bf16 ipex-jit | bash accuracy.sh int8-bf16 ipex-jit |
+| INT8-FP32        | bash inference_throughput.sh int8-fp32 ipex-jit | bash inference_realtime.sh int8-fp32 ipex-jit | bash accuracy.sh int8-fp32 ipex-jit |
 
 **NOTE**: You should get a quant_model.pt before run INT8-BF16 model or INT8-FP32 model. Please refer the [link](https://github.com/intel-innersource/frameworks.ai.nlp-toolkit.intel-nlp-toolkit/blob/develop/examples/huggingface/pytorch/text-to-image/quantization/qat/README.md).
 
