@@ -1919,6 +1919,21 @@ function wide_deep_large_ds() {
     fi
 }
 
+
+function edsr() {
+  if [ ${PRECISION} == "fp32" ]; then
+    CMD="${CMD}  $(add_arg "--warmup_steps" ${WARMUP_STEPS}) $(add_arg "--steps" ${STEPS}) \
+    $(add_arg "--input_layer" ${INPUT_LAYER}) $(add_arg "--output_layer" ${OUTPUT_LAYER}) \
+    $(add_arg "--use_real_data" ${USE_REAL_DATA})"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+
+}
+
 function graphsage() {
     if [ ${MODE} == "inference" ]; then
       if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
@@ -1940,6 +1955,7 @@ function graphsage() {
         exit 1
       fi
     fi
+
 }
 
 function yolov5() {
@@ -2034,6 +2050,8 @@ elif [ ${MODEL_NAME} == "gpt_j_6b" ]; then
   gpt_j_6B
 elif [ ${MODEL_NAME} == "mmoe" ]; then
   mmoe
+elif [ ${MODEL_NAME} == "edsr" ]; then
+  edsr
 elif [ ${MODEL_NAME} == "graphsage" ]; then
   graphsage
 elif [ ${MODEL_NAME} == "gpt_j" ]; then

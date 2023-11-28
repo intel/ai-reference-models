@@ -184,6 +184,10 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
 
+### Super Resolution
+| Model                                                  | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
+| ------------------------------------------------------ | ---------- | ----------| ------------------- | ---------------------- |
+| [EDSR](https://arxiv.org/pdf/1707.02921.pdf) | Tensorflow | Inference | [FP32](/benchmarks/super_resolution/tensorflow/edsr/inference/README.md) | [DIV2K](https://www.tensorflow.org/datasets/catalog/div2k)
 
 ## Intel® Data Center GPU Workloads
 | Model                             | Framework  | Mode      | GPU Type | Model Documentation |
