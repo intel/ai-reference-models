@@ -18,7 +18,7 @@ Set 'my_directory' as INIT_CHECKPOINT_DIR.
 ##Note:
 Make sure your add "id2label" and "label2id" fields in config.json file based on the dataset you will be using to fine-tune pretrained model.
 For ex: 
-refer to 'config.json' file at 'models/image_recognition/tensorflow/vision_transformer/training/' in this repo for imagenet2012 dataset with "id2label" and "label2id" specific to imagenet2012 labels
+refer to 'config.json' file at https://huggingface.co/google/vit-base-patch16-224/blob/main/config.json for imagenet2012 dataset with "id2label" and "label2id" specific to imagenet2012 labels
 This config.json should be used along with 'tf_model.h5' to fine-tune [vit-base-patch16-224-in21k]( https://huggingface.co/google/vit-base-patch16-224-in21k) on imagenet2012.
 
 
