@@ -1,0 +1,3 @@
+scikit-image
+matplotlib
+scipy==1.11.1
