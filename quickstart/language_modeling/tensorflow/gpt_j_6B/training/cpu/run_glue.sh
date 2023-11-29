@@ -67,11 +67,11 @@ _command numactl -C ${cores_per_socket_arr[0]} python ${MODEL_DIR}/benchmarks/la
   --num-inter-threads 2 \
   $@ \
   -- DEBIAN_FRONTEND=noninteractive \
-  train-option=GLUE task-name=MRPC \
-  do-train=True do-eval=True \
+  train-option=GLUE task-name=sst2 \
+  do-train=True do-eval=True do-predict=True \
   install_transformer_fix=False \
   profile=False \
-  learning-rate=2e-5 pad-to-max-length=True num-train-epochs=3 \
+  learning-rate=1e-5 pad-to-max-length=False num-train-epochs=2 \
   cache-dir=${DATASET_DIR} output-dir=${OUTPUT_DIR} \
   warmup-steps=3 2>&1 | tee ${OUTPUT_DIR}/gpt_j_6B_glue_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log
 

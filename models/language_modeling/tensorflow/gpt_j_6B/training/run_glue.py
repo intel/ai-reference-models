@@ -28,6 +28,8 @@ import evaluate
 import numpy as np
 import tensorflow as tf
 from datasets import load_dataset
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers.schedules import PolynomialDecay
 
 import transformers
 from transformers import (
@@ -129,7 +131,7 @@ class DataTrainingArguments:
         default=False, metadata={"help": "Overwrite the cached preprocessed datasets or not."}
     )
     pad_to_max_length: bool = field(
-        default=True,
+        default=False,
         metadata={
             "help": (
                 "Whether to pad all samples to `max_seq_length`. "
@@ -194,7 +196,7 @@ class PerformanceIndicator(tf.keras.callbacks.Callback):
         self.count = self.count +1
 
     def on_train_batch_end(self, batch, logs=None):
-        if self.count < 5:
+        if self.count < 20:
             return
         self.count = 0
         self.end_time = time.time();
@@ -271,6 +273,7 @@ def main():
       tf.keras.mixed_precision.set_global_policy('mixed_bfloat16')
     elif data_args.precision == "fp16" :
       tf.keras.mixed_precision.set_global_policy('mixed_float16')
+
     tf.config.threading.set_inter_op_parallelism_threads(data_args.inter_op_parallelism_threads)
     tf.config.threading.set_intra_op_parallelism_threads(data_args.intra_op_parallelism_threads)
     # Sending telemetry. Tracking the example usage helps us better allocate resources to maintain them. The
@@ -451,7 +454,6 @@ def main():
         return result
 
     # endregion
-
     with training_args.strategy.scope():
         # region Load pretrained model
         if checkpoint is None:
@@ -549,6 +551,17 @@ def main():
             metrics = []
         else:
             metrics = ["accuracy"]
+
+        def new_optimizer_with_decay():
+           end_lr = (10*training_args.learning_rate)/num_train_steps
+           lr_scheduler = PolynomialDecay(
+               initial_learning_rate=training_args.learning_rate,
+               end_learning_rate=end_lr, decay_steps=num_train_steps
+           )
+           opt = Adam(learning_rate=lr_scheduler)
+           return opt
+
+        optimizer= new_optimizer_with_decay()
         model.compile(optimizer=optimizer, metrics=metrics, jit_compile=training_args.xla)
         # endregion
 
@@ -622,6 +635,12 @@ def main():
                 verbose=1,
             )
         # endregion
+
+        #Save model
+        if training_args.output_dir is not None and not training_args.push_to_hub:
+            # If we're not pushing to hub, at least save a local copy when we're done
+            print("Info: Saving model in :",training_args.output_dir)
+            model.save_pretrained(training_args.output_dir)
 
         # region Evaluation
         if training_args.do_eval:
@@ -703,10 +722,6 @@ def main():
                             item = model.config.id2label[item]
                             writer.write(f"{index}\t{item}\n")
         # endregion
-
-        if training_args.output_dir is not None and not training_args.push_to_hub:
-            # If we're not pushing to hub, at least save a local copy when we're done
-            model.save_pretrained(training_args.output_dir)
 
 
 if __name__ == "__main__":
