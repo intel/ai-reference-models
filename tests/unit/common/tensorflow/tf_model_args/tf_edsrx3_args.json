@@ -1,10 +1,10 @@
 [
     { "_comment": "edsrx3_fp32_accuracy",
       "input": "run_tf_benchmark.py --framework=tensorflow --use-case=super_resolution --model-name=edsr --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size 32 --socket-id -1 --accuracy-only --output-dir=/workspace/benchmarks/common/tensorflow/logs --verbose --in-graph=/in_graph/EDSR_x3.pb --disable-tcmalloc=True --input_layer=IteratorGetNext --output_layer=NHWC_output --use_real_data=False --num-train-steps=1",
-      "output": "python /workspace/intelai_models/inference/accuracy.py --precision=fp32 --batch_size=32 --input-graph=/in_graph/EDSR_x3.pb --input_layer=IteratorGetNext --output_layer=NHWC_output",
+      "output": "python /workspace/intelai_models/inference/fp32/accuracy.py --precision=fp32 --batch_size=32 --input_graph=/in_graph/EDSR_x3.pb --input_layer=IteratorGetNext --output_layer=NHWC_output",
       "cpuset": "0-111"},
       { "_comment": "edsrx3_fp32_throughput",
       "input": "run_tf_benchmark.py --framework=tensorflow --use-case=super_resolution --model-name=edsr --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size 32 --socket-id -1 --benchmark-only --output-dir=/workspace/benchmarks/common/tensorflow/logs --verbose --in-graph=/in_graph/EDSR_x3.pb --disable-tcmalloc=True --input_layer=IteratorGetNext --output_layer=NHWC_output --use_real_data=False --warmup_steps=10 --steps=50 --num-train-steps=1",
-      "output": "python /workspace/intelai_models/inference/benchmark.py --precision=fp32 --batch_size=32 --input-graph=/in_graph/EDSR_x3.pb --input_layer=IteratorGetNext --output_layer=NHWC_output",
+      "output": "python /workspace/intelai_models/inference/fp32/benchmark.py --precision=fp32 --batch_size=32 --input_graph=/in_graph/EDSR_x3.pb --warmup_steps=10 --steps=50 --input_layer=IteratorGetNext --output_layer=NHWC_output --use_real_data=True",
       "cpuset": "0-111"}
 ]
