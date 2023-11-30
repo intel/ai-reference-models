@@ -64,9 +64,7 @@ echo "Running multi-instance GPT-J fine-tuning"
 
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
-_ht_status_spr
-_get_socket_cores_lists
-_command numactl -C ${cores_per_socket_arr[0]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=gpt_j_6B \
   --precision=${PRECISION} \
   --mode=training \
