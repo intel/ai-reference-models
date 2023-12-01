@@ -2,9 +2,9 @@
 Best known method of ResNet50v1.5 Inference(float32, float16, bfloat16, tensorfloat32, int8) for intel-extension-for-tensorflow.
 
 ## Model Information
-| **Use Case** |**Framework** | **Model Repo** | **Branch/Commit/Tag** | **PB** 
+| **Use Case** |**Framework** | **Model Repo** | **Branch/Commit/Tag** | **PB**
 | :---: | :---: | :---: | :---: | :---: |
-| inference | Tensorflow |[IntelAI/Models](https://gitlab.devtools.intel.com/intelai/models.git) | tf-gpu | [resnet50_v1.pb](https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1.pb) [resnet50_v1_int8.pb](https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1_int8.pb) | |
+| inference | Tensorflow |[IntelAI/Models](https://github.com/IntelAI/models) | master | [resnet50_v1.pb](https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1.pb) [resnet50_v1_int8.pb](https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1_int8.pb) | |
 
 **Note:** Model files were copied and modified in this directory.
 <br>
