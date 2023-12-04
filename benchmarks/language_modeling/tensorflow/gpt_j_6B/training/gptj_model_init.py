@@ -107,7 +107,7 @@ class GPTJModelInitializer(BaseModelInitializer):
             self.args.intelai_models, self.args.mode,
             run_script)
 
-        if os.environ["MPI_NUM_PROCESSES"] == "None":
+        if os.environ["MPI_NUM_PROCESSES"] == "None" or os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] != "1":
             self.benchmark_command = self.get_command_prefix(args.socket_id)
         else:
             if os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] == "1":
@@ -154,7 +154,7 @@ class GPTJModelInitializer(BaseModelInitializer):
         if self.args.data_num_intra_threads:
             benchmark_script += " --data-num-intra-threads=" + str(self.args.data_num_intra_threads)
 
-        if os.environ["MPI_NUM_PROCESSES"] == "None":
+        if os.environ["MPI_NUM_PROCESSES"] == "None" or os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] != "1":
             self.benchmark_command = self.benchmark_command + self.python_exe + " " + benchmark_script + "\n"
         else:
             numa_cmd = " -np 1 numactl -N {} -m {} "
