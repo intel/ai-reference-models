@@ -157,14 +157,16 @@ parser.add_argument("--use-gradient-as-bucket-view", action='store_true', help="
 parser.add_argument('--jit-cache', type=str, default=str(hub), help="path to save/load jit model")
 parser.add_argument('--jit-trace', action='store_true',
                     help='enable PyTorch jit trace graph mode')
+parser.add_argument('--dynamo', action='store_true', help='Use torch.compile to optimize model, inductor backend default')
 parser.add_argument('--calib-iters', default=8, type=int,
                     help='iteration number for calibration')
 parser.add_argument('--calib-bs', default=32, type=int,
                     metavar='N', help='mini-batch size for calibration')
 parser.add_argument('--perchannel-weight', default=False,
                     help='do calibration with weight per channel quantization')
+# TODO: when fix non blocking H2D perf regression, we will remove here option
 parser.add_argument('--non-blocking', default=False, action='store_true',
-                    help='non blocking H2D for input and target, default False')
+                    help='non blocking H2D for input and target, now for int8, default False')
 parser.add_argument('--channels-last', action='store_true', help='enable channels last')
 parser.add_argument('--num-iterations', default=0, type=int)
 parser.add_argument('--converge', default=None, action='store_true',
@@ -198,6 +200,8 @@ parser.add_argument('--benchmark', default=0, type=int, help='for int8 benchmark
                     'performance, move H2D out of E2E time')
 parser.add_argument("--save", help='Path to save entile model, save infernce mode, training is not available')
 parser.add_argument("--load", help='Path to load entile inference model')
+parser.add_argument("--asymm", action='store_true', help='Asymmetric quantization')
+parser.add_argument("--uint8", action='store_true', help="Use u8 quantization")
 parser.add_argument('--end-lr', type=float, default=1e-4,
                     help='the end learning rate')
 
@@ -357,22 +361,24 @@ def jit_calib(model, val_loader_calib, args):
         modelJit = torch.jit.script(model)
         modelJit = wrap_cpp_module(torch._C._jit_pass_fold_convbn(modelJit._c))
 
+        qscheme = torch.per_tensor_affine if args.asymm else torch.per_tensor_symmetric
+        dtype = torch.quint8 if args.uint8 else torch.qint8
         with torch.inference_mode():
             if args.perchannel_weight:
                 qconfig = torch.quantization.QConfig(
                     activation=torch.quantization.observer.MinMaxObserver.with_args(
-                        qscheme=torch.per_tensor_symmetric,
+                        qscheme=qscheme,
                         reduce_range=False,
-                        dtype=torch.quint8
+                        dtype=dtype
                     ),
                     weight=torch.quantization.default_per_channel_weight_observer
                 )
             else:
                 qconfig = torch.quantization.QConfig(
                     activation=torch.quantization.observer.MinMaxObserver.with_args(
-                        qscheme=torch.per_tensor_symmetric,
+                        qscheme=qscheme,
                         reduce_range=False,
-                        dtype=torch.quint8
+                        dtype=dtype
                     ),
                     weight=torch.quantization.default_weight_observer
                 )
@@ -577,18 +583,18 @@ def main_worker(ngpus_per_node, args):
         val_dataset_size = args.num_iterations * args.batch_size if (args.dummy and args.num_iterations) else 50000
         val_dataset = datasets.FakeData(val_dataset_size, (3, 224, 224), 1000, transforms.ToTensor())
     else:
-        #traindir = os.path.join(args.data, 'train')
+        traindir = os.path.join(args.data, 'train')
         valdir = os.path.join(args.data, 'val')
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-        #train_dataset = datasets.ImageFolder(
-            #traindir,
-            #transforms.Compose([
-                #transforms.RandomResizedCrop(224),
-                #transforms.RandomHorizontalFlip(),
-                #transforms.ToTensor(),
-                #normalize,
-            #]))
+        train_dataset = datasets.ImageFolder(
+            traindir,
+            transforms.Compose([
+                transforms.RandomResizedCrop(224),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ]))
         val_dataset = datasets.ImageFolder(
             valdir,
             transforms.Compose([
@@ -599,16 +605,16 @@ def main_worker(ngpus_per_node, args):
             ]))
 
     if args.distributed:
-        #train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
         val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset, shuffle=False, drop_last=True)
     else:
         train_sampler = None
         val_sampler = None
 
     # [watch out] The pin memory is default enabled on CUDA for now in torch.
-    #train_loader = torch.utils.data.DataLoader(
-        #train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
-        #num_workers=args.workers, pin_memory=True, pin_memory_device="xpu", sampler=train_sampler)
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
+        num_workers=args.workers, pin_memory=True, pin_memory_device="xpu", sampler=train_sampler)
 
     val_loader = torch.utils.data.DataLoader(
         val_dataset, batch_size=args.batch_size, shuffle=False,
@@ -743,15 +749,30 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
         prefix="Epoch: [{}]".format(epoch))
     global global_num_iter
 
+    def one_iter(model, images):
+        with torch.xpu.amp.autocast(enabled=use_autocast, dtype=torch.bfloat16):
+            # compute output
+            output = model(images)
+            loss = criterion(output, target)
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        if args.lars:
+            # Update LR for Lars
+            MLPerfLRScheduler(optimizer, global_num_iter, len(train_loader), args)
+        optimizer.step()
+        return [output, loss]
+
     # switch to train mode
     model.train()
 
+    if args.dynamo:
+        train_opt = torch.compile(one_iter, backend="inductor")
+    else:
+        train_opt = one_iter
+
     # record time
     duration_total = 0.0
-
-    non_blocking = False
-    if args.non_blocking:
-        non_blocking = True
+    warmup_iter = 5
 
     data_start = time.time()
     for i, (images, target) in enumerate(train_loader):
@@ -773,22 +794,10 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
                 except:
                     pass
                 start_time = time.time()
-                images = images.to(args.xpu, non_blocking=non_blocking)
-                target = target.to(args.xpu, non_blocking=non_blocking)
+                images = images.to(args.xpu, non_blocking=True)
+                target = target.to(args.xpu, non_blocking=True)
 
-                with torch.xpu.amp.autocast(enabled=use_autocast, dtype=torch.bfloat16):
-                    # compute output
-                    output = model(images)
-                    loss = criterion(output, target)
-
-                # compute gradient and do SGD step
-                optimizer.zero_grad(set_to_none=True)
-                loss.backward()
-                if args.lars:
-                    # Update LR for Lars
-                    MLPerfLRScheduler(optimizer, global_num_iter, len(train_loader), args)
-                optimizer.step()
-
+                [output, loss] = train_opt(model, images)
                 # D2H
                 loss = loss.cpu()
                 output = output.cpu()
@@ -817,8 +826,8 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
 
             with torch.profiler.profile(activities=activities, record_shapes=False) as prof:
                 if args.gpu is not None:
-                    images = images.cuda(args.gpu, non_blocking=non_blocking)
-                    target = target.cuda(args.gpu, non_blocking=non_blocking)
+                    images = images.cuda(args.gpu, non_blocking=True)
+                    target = target.cuda(args.gpu, non_blocking=True)
 
                 # compute output
                 output = model(images)
@@ -852,17 +861,17 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
             progress.display(i + 1)
 
         # exclude first iteration for calculating througput
-        if i >= 3:
+        if i >= warmup_iter:
             duration_total += duration_train
         data_start = time.time()
 
-        if i == (args.num_iterations - 1) and args.num_iterations >= 4:
+        if i == (args.num_iterations - 1) and args.num_iterations >= warmup_iter:
             print('Training performance: batch size:%d, throughput:%.2f image/sec'
-                  % (args.batch_size, (args.batch_size / (duration_total / (args.num_iterations - 3)))))
+                  % (args.batch_size, (args.batch_size / (duration_total / (args.num_iterations - warmup_iter)))))
             sys.exit(0)
         elif args.num_iterations == 0 and i == len(train_loader) - 1:
             print('Training performance: batch size:%d, throughput:%.2f image/sec'
-                  % (args.batch_size, (args.batch_size / (duration_total / (len(train_loader) - 4)))))
+                  % (args.batch_size, (args.batch_size / (duration_total / (len(train_loader) - warmup_iter)))))
             if args.converge is None:
                 sys.exit(0)
 
@@ -874,15 +883,18 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
         tensorboard_data['train']['top5'] = top5.avg
 
 def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args):
+    from torch._inductor import config
 
-    non_blocking = False
-    if args.non_blocking:
-        non_blocking = True
-
+    def compile_model(model, val_loader):
+        print("====Before compile model====")
+        compiled_model = torch.compile(model, backend="inductor", options={"freezing": True})
+        return compiled_model
+    
     def run_validate(loader, model, autocast_dtype, base_progress=0):
 
         # record time
         duration_total = 0.0
+        warmup_iter = 5
 
         with torch.no_grad():
             for i, (images, target) in enumerate(loader):
@@ -901,11 +913,14 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
                         except:
                             pass
                         start_time = time.time()
-                        images = images.to(args.xpu, non_blocking=non_blocking)
+                        images = images.to(args.xpu, non_blocking=True)
 
                         if args.jit_trace:
                             # compute output
                             output = model(images)
+                        elif args.dynamo:
+                            with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                                output = model(images)
                         else:
                             with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
                                 # compute output
@@ -936,7 +951,7 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
 
                     with torch.profiler.profile(activities=activities, record_shapes=False) as prof:
                         if args.gpu is not None:
-                            images = images.cuda(args.gpu, non_blocking=non_blocking)
+                            images = images.cuda(args.gpu, non_blocking=True)
 
                         # compute output
                         output = model(images)
@@ -967,19 +982,23 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
                     progress.display(i + 1)
 
                 # exclude first iteration for calculating througput
-                if i >= 1 and not (args.num_iterations == 0 and i == len(val_loader) - 1):
+                if i >= warmup_iter and not (args.num_iterations == 0 and i == len(val_loader) - 1):
                     duration_total += duration_eval
 
-                if i == (args.num_iterations - 1) and args.num_iterations >= 2:
+                if (not args.num_iterations == 0) and (args.num_iterations <= warmup_iter):
+                    print("At least ", warmup_iter, " iteartions required for performance measure")
+                    sys.exit(0)
+
+                if i == (args.num_iterations - 1) and args.num_iterations >= warmup_iter:
                     print('Evalution performance: batch size:%d, throughput:%.2f image/sec, Acc@1:%.2f, Acc@5:%.2f'
-                        % (args.batch_size, (args.batch_size / (duration_total / (args.num_iterations - 1))), top1.avg, top5.avg))
+                        % (args.batch_size, (args.batch_size / (duration_total / (args.num_iterations - warmup_iter))), top1.avg, top5.avg))
                     sys.exit(0)
                 elif args.num_iterations == 0 and i == len(val_loader) - 1:
                     if args.converge and args.distributed:
                         top1.all_reduce()
                         top5.all_reduce()
                     print('Evalution performance: batch size:%d, throughput:%.2f image/sec, Acc@1:%.2f, Acc@5:%.2f'
-                        % (args.batch_size, (args.batch_size / (duration_total / (len(val_loader) - 2))), top1.avg, top5.avg))
+                        % (args.batch_size, (args.batch_size / (duration_total / (len(val_loader) - warmup_iter))), top1.avg, top5.avg))
                     if args.converge:
                         global final_top1_acc
                         global final_top5_acc
@@ -1014,6 +1033,9 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
         print('jit trace')
         with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
             model = torch.jit.trace(model, trace_input)
+    elif args.dynamo:
+        model = compile_model(model, val_loader)
+
 
     if args.save:
         if args.jit_trace:
@@ -1052,6 +1074,7 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
     # record time
     duration_total = 0.0
 
+    # TODO: will fix non blocking H2D perf regression, then remove here option
     non_blocking = False
     if args.non_blocking:
         non_blocking = True
@@ -1059,7 +1082,7 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
     with torch.inference_mode():
         for i, (images, target) in enumerate(val_loader):
             if args.xpu is not None and args.benchmark == 1:
-                images = images.to(args.xpu, non_blocking=non_blocking)
+                images = images.to(args.xpu, non_blocking = non_blocking)
 
             with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
                 try:
@@ -1069,7 +1092,7 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
                     pass
                 start = time.time()
                 if args.xpu is not None and args.benchmark == 0:
-                    images = images.to(args.xpu, non_blocking=non_blocking)
+                    images = images.to(args.xpu, non_blocking = non_blocking)
                 if args.channels_last:
                     images = images.to(memory_format=torch.channels_last)
 
