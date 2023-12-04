@@ -21,6 +21,7 @@ import copy
 import logging
 import os
 import time
+import threading
 import numpy as np
 import pathlib
 from tqdm import tqdm
@@ -57,9 +58,31 @@ def parse_args():
     parser.add_argument('--rank', default=-1, type=int, help='node rank for distributed training')
     parser.add_argument('--dist-url', default='env://', type=str, help='url used to set up distributed training')
     parser.add_argument('--dist-backend', default='ccl', type=str, help='distributed backend')
+    parser.add_argument("--weight-sharing", action='store_true', default=False, help="using weight_sharing to test the performance of inference")
+    parser.add_argument("--number-instance", default=0, type=int, help="the instance numbers for test the performance of latcy, only works when enable weight-sharing")
 
     args = parser.parse_args()
     return args
+
+def run_weights_sharing_model(pipe, tid, args):
+    total_time = 0
+    for i in range(args.iterations + args.warmup_iterations):
+        # run model
+        start = time.time()
+        if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
+            with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
+                output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
+        else:
+            with torch.no_grad():
+                output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
+        end = time.time()
+        print('time per prompt(s): {:.2f}'.format((end - start)))
+        if i >= args.warmup_iterations:
+            total_time += end - start
+
+    print("Instance num: ", tid)
+    print("Latency: {:.2f} s".format(total_time / args.iterations))
+    print("Throughput: {:.5f} samples/sec".format(args.iterations / total_time))
 
 def main():
 
@@ -87,22 +110,22 @@ def main():
     # data type
     if args.precision == "fp32":
         print("Running fp32 ...")
-        dtype=torch.float32
+        args.dtype=torch.float32
     elif args.precision == "bf32":
         print("Running bf32 ...")
-        dtype=torch.float32
+        args.dtype=torch.float32
     elif args.precision == "bf16":
         print("Running bf16 ...")
-        dtype=torch.bfloat16
+        args.dtype=torch.bfloat16
     elif args.precision == "fp16":
         print("Running fp16 ...")
-        dtype=torch.half
+        args.dtype=torch.half
     elif args.precision == "int8-bf16":
         print("Running int8-bf16 ...")
-        dtype=torch.bfloat16
+        args.dtype=torch.bfloat16
     elif args.precision == "int8-fp32":
         print("Running int8-fp32 ...")
-        dtype=torch.float32
+        args.dtype=torch.float32
     else:
         raise ValueError("--precision needs to be the following: fp32, bf32, bf16, fp16, int8-bf16, int8-fp32")
 
@@ -122,12 +145,12 @@ def main():
             pipe.unet = ipex.optimize(pipe.unet.eval(), inplace=True, auto_kernel_selection=True)
             pipe.vae = ipex.optimize(pipe.vae.eval(), inplace=True, auto_kernel_selection=True)
         elif args.precision == "bf16" or args.precision == "fp16":
-            # pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=dtype, inplace=True)
-            pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=dtype, inplace=True)
-            pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=dtype, inplace=True)
+            # pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=args.dtype, inplace=True)
+            pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=args.dtype, inplace=True)
+            pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=args.dtype, inplace=True)
         elif args.precision == "int8-bf16" or args.precision == "int8-fp32":
             pipe.unet_fp32 = copy.deepcopy(pipe.unet)
-            pipe.unet_fp32 = ipex.optimize(pipe.unet_fp32.eval(), dtype=dtype, inplace=True)
+            pipe.unet_fp32 = ipex.optimize(pipe.unet_fp32.eval(), dtype=args.dtype, inplace=True)
             pipe.HIGH_PRECISION_STEPS = 5
             from quantization_modules import load_int8_model, convert_to_fp32model
             pipe.unet = load_int8_model(pipe.unet, args.int8_model_path)
@@ -140,14 +163,14 @@ def main():
         print("JIT trace ...")
         # from utils_vis import make_dot, draw
         if args.precision == "bf16" or args.precision == "fp16":
-            with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
+            with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
                 pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
                 pipe.unet = torch.jit.freeze(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
                 # print(pipe.unet.graph_for(input))
         elif args.precision == "int8-bf16":
-            with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
+            with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
                 pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
                 pipe.unet = torch.jit.freeze(pipe.unet)
                 pipe.unet(*input)
@@ -183,9 +206,9 @@ def main():
         print("torch.compile with ipex backend ...")
         if args.precision == "fp32" or args.precision == "bf16":
             import intel_extension_for_pytorch as ipex
-            pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=dtype, weights_prepack=False)
-            pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=dtype, weights_prepack=False)
-            pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=dtype, weights_prepack=False)
+            pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=args.dtype, weights_prepack=False)
+            pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=args.dtype, weights_prepack=False)
+            pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=args.dtype, weights_prepack=False)
             ipex._set_compiler_backend("torchscript")
             pipe.text_encoder = torch.compile(pipe.text_encoder, backend="ipex")
             pipe.unet = torch.compile(pipe.unet, backend="ipex")
@@ -249,23 +272,34 @@ def main():
     # benchmark
     if args.benchmark:
         print("Running benchmark ...")
-        total_time = 0
-        for i in range(args.iterations + args.warmup_iterations):
-            # run model
-            start = time.time()
-            if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
-                with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
-                    output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
-            else:
-                with torch.no_grad():
-                    output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
-            end = time.time()
-            print('time per prompt(s): {:.2f}'.format((end - start)))
-            if i >= args.warmup_iterations:
-                total_time += end - start
+        if args.weight_sharing:
+            print("weight sharing ...")
+            threads = []
+            for i in range(1, args.number_instance+1):
+                thread = threading.Thread(target=run_weights_sharing_model, args=(pipe, i, args))
+                threads.append(thread)
+                thread.start()
+            for thread in threads:
+                thread.join()
+            exit()
+        else:
+            total_time = 0
+            for i in range(args.iterations + args.warmup_iterations):
+                # run model
+                start = time.time()
+                if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
+                    with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
+                        output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
+                else:
+                    with torch.no_grad():
+                        output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
+                end = time.time()
+                print('time per prompt(s): {:.2f}'.format((end - start)))
+                if i >= args.warmup_iterations:
+                    total_time += end - start
 
-        print("Latency: {:.2f} s".format(total_time / args.iterations))
-        print("Throughput: {:.5f} samples/sec".format(args.iterations / total_time))
+            print("Latency: {:.2f} s".format(total_time / args.iterations))
+            print("Throughput: {:.5f} samples/sec".format(args.iterations / total_time))
 
     if args.accuracy:
         print("Running accuracy ...")
@@ -278,7 +312,7 @@ def main():
             real_image = images[0]
             print("prompt: ", prompt)
             if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
-                with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
+                with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
                     output = pipe(prompt, generator=torch.manual_seed(args.seed), output_type="numpy").images
             else:
                 with torch.no_grad():
@@ -307,7 +341,7 @@ def main():
         print("Running profiling ...")
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
             if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
-                with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
+                with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
                     pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
             else:
                 with torch.no_grad():

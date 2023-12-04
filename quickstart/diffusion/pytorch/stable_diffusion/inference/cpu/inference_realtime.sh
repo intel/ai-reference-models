@@ -79,10 +79,20 @@ else
     exit 1
 fi
 
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
+
+CORES_PER_INSTANCE=4
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
+export OMP_NUM_THREADS=$CORES_PER_INSTANCE
+
+NUMBER_INSTANCE=`expr $CORES_PER_NUMA / $CORES_PER_INSTANCE`
 
 PRECISION=$1
 
@@ -90,24 +100,25 @@ rm -rf ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_realtime*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator jemalloc \
-    --latency_mode \
+    --ninstances $NUMAS \
     --log-dir ${OUTPUT_DIR} \
     --log_file_prefix stable_diffusion_${PRECISION}_inference_realtime \
     ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
     --dataset_path=${DATASET_DIR} \
     --benchmark \
     -w 1 -i 1 \
+    --weight-sharing \
+    --number-instance $NUMBER_INSTANCE \
     $ARGS
 
 # For the summary of results
 wait
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-CORES_PER_INSTANCE=4
+TOTAL_CORES=`expr $CORES \* $SOCKETS`
+INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
+INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
 
-INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
-
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_realtime* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_realtime* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
 BEGIN {
         sum = 0;
         i = 0;
