@@ -1,4 +1,4 @@
-intel-tensorflow<2.9.1
+intel-tensorflow # upgraded to latest to avoid vulnerability
 # removed neural-compressor to avoid vulnerability in Snyk scans
 wheel==0.38.0 # Included this to avoid a vulnerability
 notebook
