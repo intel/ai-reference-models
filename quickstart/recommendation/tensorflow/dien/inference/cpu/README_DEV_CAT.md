@@ -77,6 +77,7 @@ docker run --rm \
   --env PRECISION=${PRECISION} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  ${DOCKER_RUN_ENVS} \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-dien-inference \

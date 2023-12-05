@@ -57,9 +57,9 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 To run DistilBERT inference, set environment variables to specify the dataset directory, precision to run, model directory and an output directory. 
-```
+```bash
 export OS=<provide either centos or ubuntu>
-export HF_DATASETS_OFFLINE=<provide 0 or 1. providing 1 downloads the datasets"
+export HF_DATASETS_OFFLINE=<provide 0 or 1. providing 1 downloads the datasets>
 export SEQUENCE_LENGTH=128
 export CORE_PER_INSTANCE=<recommended core per instance are 4 for realtime inference and 32 for throughput inference and accuracy>
 export PRECISION=<provide the precision>
@@ -88,6 +88,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${PRETRAINED_MODEL}:${PRETRAINED_MODEL} \
+  ${DOCKER_RUN_ENVS} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \

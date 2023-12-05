@@ -50,7 +50,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 To run DLRM inference, set environment variables to specify the dataset directory, precision,pre-trained model, and an output directory. 
-```
+```bash
 export OS=<provide either centos or ubuntu>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
@@ -73,6 +73,7 @@ docker run --rm \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${WEIGHT_PATH}:${WEIGHT_PATH} \
+  ${DOCKER_RUN_ENVS} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \

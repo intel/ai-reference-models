@@ -44,7 +44,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
 ```
 To run the BERT-Large training scripts, set environment variables to specify the dataset directory, precision and an output directory. 
 
-```
+```bash
 export OS=<provide either centos or ubuntu>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
@@ -72,6 +72,7 @@ docker run --rm \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${BERT_MODEL_CONFIG}:${BERT_MODEL_CONFIG} \
   --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
+  ${DOCKER_RUN_ENVS} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \

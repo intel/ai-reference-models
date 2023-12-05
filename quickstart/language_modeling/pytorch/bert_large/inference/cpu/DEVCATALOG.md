@@ -50,7 +50,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
 ```
 To run the BERT Large inference scripts, set environment variables to specify the dataset directory, precision and an output directory. 
 
-```
+```bash
 export OS=<provide either centos or ubuntu>
 export EVAL_DATA_FILE=<path to the eval data>
 export OUTPUT_DIR=<directory where log files will be written>
@@ -76,6 +76,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${EVAL_DATA_FILE}:${EVAL_DATA_FILE} \
   --volume ${PRETRAINED_MODEL}:${PRETRAINED_MODEL} \
+  ${DOCKER_RUN_ENVS} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \

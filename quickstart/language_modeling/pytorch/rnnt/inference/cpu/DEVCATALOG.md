@@ -64,6 +64,7 @@ docker run --rm \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
+  ${DOCKER_RUN_ENVS} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \

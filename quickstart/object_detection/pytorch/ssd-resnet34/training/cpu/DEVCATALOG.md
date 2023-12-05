@@ -66,7 +66,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
 
 To run SSD-ResNet34, set environment variables to specify the dataset directory, precision and an output directory. 
 
-```
+```bash
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export SCRIPT=quickstart/<specify the script to run>
@@ -87,6 +87,7 @@ docker run --rm \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  ${DOCKER_RUN_ENVS} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \

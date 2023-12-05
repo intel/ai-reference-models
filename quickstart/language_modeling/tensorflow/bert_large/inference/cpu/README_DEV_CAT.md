@@ -81,6 +81,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-bert-large-inference \
+  ${DOCKER_RUN_ENVS} \
   intel/language-modeling:centos-tf-cpu-bert-large-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
