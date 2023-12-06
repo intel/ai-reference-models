@@ -220,11 +220,24 @@ def main():
         print("torch.compile with inductor backend ...")
         # torch._inductor.config.profiler_mark_wrapper_call = True
         # torch._inductor.config.cpp.enable_kernel_profile = True
-        if args.precision == "fp32" or args.precision == "bf16":
-            pipe.text_encoder = torch.compile(pipe.text_encoder)
-            pipe.unet = torch.compile(pipe.unet)
-            pipe.vae = torch.compile(pipe.vae)
-        elif args.precision == "int8-bf16" or args.precision == "int8-fp32":
+        torch._inductor.config.cpp_wrapper = True
+        if args.precision == "fp32":
+            with torch.no_grad():
+                pipe.unet = torch.compile(pipe.unet)
+                pipe.unet(*input)
+                pipe.unet(*input)
+        elif args.precision == "bf16":
+            with torch.cpu.amp.autocast(), torch.no_grad():
+                pipe.unet = torch.compile(pipe.unet)
+                pipe.unet(*input)
+                pipe.unet(*input)
+        elif args.precision == "int8-fp32":
+            pipe.HIGH_PRECISION_STEPS = 5
+            pipe.unet_fp32 = copy.deepcopy(pipe.unet)
+            with torch.no_grad():
+                pipe.unet_fp32 = torch.compile(pipe.unet_fp32)
+                pipe.unet_fp32(*input)
+                pipe.unet_fp32(*input)
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
             import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
             from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
@@ -239,6 +252,32 @@ def main():
                 pipe.unet = convert_pt2e(pipe.unet)
                 torch.ao.quantization.move_exported_model_to_eval(pipe.unet)
                 pipe.unet = torch.compile(pipe.unet)
+                pipe.unet(*input)
+                pipe.unet(*input)
+        elif args.precision == "int8-bf16":
+            pipe.HIGH_PRECISION_STEPS = 5
+            pipe.unet_fp32 = copy.deepcopy(pipe.unet)
+            with torch.cpu.amp.autocast(), torch.no_grad():
+                pipe.unet_fp32 = torch.compile(pipe.unet_fp32)
+                pipe.unet_fp32(*input)
+                pipe.unet_fp32(*input)
+            from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
+            import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
+            from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
+            from torch._export import capture_pre_autograd_graph
+            with torch.no_grad():
+                pipe.unet = capture_pre_autograd_graph(pipe.unet, input)
+                quantizer = X86InductorQuantizer()
+                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
+                pipe.unet = prepare_pt2e(pipe.unet, quantizer)
+                # calibration
+                pipe(args.prompt)
+                pipe.unet = convert_pt2e(pipe.unet)
+                torch.ao.quantization.move_exported_model_to_eval(pipe.unet)
+            with torch.cpu.amp.autocast(), torch.no_grad():
+                pipe.unet = torch.compile(pipe.unet)
+                pipe.unet(*input)
+                pipe.unet(*input)
         else:
             raise ValueError("If you want to use torch.compile with inductor backend, --precision needs to be the following: fp32, bf16, int8-bf16, int8-fp32")
 
