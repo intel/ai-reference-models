@@ -47,6 +47,9 @@ elif [ "$1" == "fp16" ]; then
 elif [ "$1" == "int8-bf16" ]; then
     ARGS="$ARGS --precision=int8-bf16"
     echo "### running int8-bf16 datatype"
+elif [ "$1" == "int8-fp32" ]; then
+    ARGS="$ARGS --precision=int8-fp32"
+    echo "### running int8-fp32 datatype"
 elif [ "$1" == "bf32" ]; then
     ARGS="$ARGS --precision=bf32"
     echo "### running bf32 datatype"
@@ -54,7 +57,25 @@ elif [ "$1" == "fp32" ]; then
     echo "### running fp32 datatype"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf32, fp16, bf16, int8-bf16"
+    echo "Supported precisions are: fp32, bf32, fp16, bf16, int8-bf16, int8-fp32"
+    exit 1
+fi
+
+if [ "$2" == "eager" ]; then
+    echo "### running eager mode"
+elif [ "$2" == "ipex-jit" ]; then
+    ARGS="$ARGS --ipex --jit"
+    echo "### running IPEX JIT mode"
+elif [ "$2" == "compile-ipex" ]; then
+    ARGS="$ARGS --compile_ipex"
+    echo "### running torch.compile with ipex backend"
+elif [ "$2" == "compile-inductor" ]; then
+    export TORCHINDUCTOR_FREEZING=1
+    ARGS="$ARGS --compile_inductor"
+    echo "### running torch.compile with inductor backend"
+else
+    echo "The specified mode '$2' is unsupported."
+    echo "Supported mode are: eager, ipex-jit, compile-ipex, compile-inductor"
     exit 1
 fi
 
@@ -132,8 +153,6 @@ python -m intel_extension_for_pytorch.cpu.launch \
     ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
     --dataset_path=${DATASET_DIR} \
     --dist-backend ccl \
-    --ipex \
-    --jit \
     --accuracy \
     $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_dist_inference_accuracy.log
 
