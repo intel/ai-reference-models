@@ -50,6 +50,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   run_calibration.sh
 ```
 
+* [optional] Compile model with PyTorch Inductor backend
+```shell
+  export TORCH_INDUCTOR=1
+```
+
 ## Quick Start Scripts
 | Script name | Description |
 |-------------|-------------|
