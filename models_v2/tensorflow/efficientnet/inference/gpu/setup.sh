@@ -1,7 +1,6 @@
+#!/usr/bin/env bash
 #
-# -*- coding: utf-8 -*-
-#
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,5 +15,7 @@
 # limitations under the License.
 #
 
-#
-
+set -e
+apt-get update && apt-get install -y python3-venv protobuf-compiler
+python3 -m venv $PWD/venv
+. ./venv/bin/activate

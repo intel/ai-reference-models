@@ -1,19 +1,19 @@
 # EfficientNet Model Inference
 
-EfficientNet Model Inference BKC.
+EfficientNet Model Inference using Intel® Extension for TensorFlow.
 
 ## Model Information
 
 | **Use Case** | **Framework** | **Model Repo** | **Branch/Commit/Tag** | **Optional Patch** |
 |:---:| :---: |:--------------:|:---------------------:|:------------------:|
-|  Inference   |  Tensorflow   |       -        |           -           |         -          |
+|  Inference   |  TensorFlow   |       -        |           -           |         -          |
 
 # Pre-Requisite
 
 * Host has Intel® Data Center GPU FLEX
 * Host has installed latest Intel® Data Center GPU Flex Series
   Driver https://dgpu-docs.intel.com/driver/installation.html
-
+* Install [Intel® Extension for TensorFlow](https://pypi.org/project/intel-extension-for-tensorflow/)
 
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models/image_recognition/tensorflow/efficientnet/inference/gpu_version2`

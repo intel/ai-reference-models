@@ -15,15 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
 #
 
 #!/bin/bash
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
-input_envs[PRECISION]=${PRECISION}
 input_envs[DATASET_DIR]=${DATASET_DIR}
+input_envs[PRETRAINED_DIR]=${PRETRAINED_DIR}
+input_envs[PRECISION]=${PRECISION}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -42,29 +42,19 @@ else
   exit 1
 fi
 
-if [ -d ${PRETRAINED_DIR} ];then
-  echo "PRETRAINED_DIR is: "${PRETRAINED_DIR}
-else
-  echo "Error: the path of pretrained does not exist!"
-  exit 1
-fi
-
 BATCH_SIZE=${BATCH_SIZE:-16}
 
-
-if [ ${PRECISION} == "float16" ];then
-  echo "PRECISION is float16"
-  AMP="--amp"
+if [ ${PRECISION} == "fp16" ];then
+  AMP=" --amp "
 else
-  echo "PRECISION is default fp32"
   AMP=""
 fi
 
 echo 'Running with parameters:'
 echo " DATASET_PATH: ${DATASET_DIR}"
+echo " PRETRAINED_DIR: ${PRETRAINED_DIR}"
 echo " PRECISION: ${PRECISION}"
 echo " BATCH_SIZE: $BATCH_SIZE"
-echo "PRETRAINED_DIR: $PRETRAINED_DIR"
 
 cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
 
@@ -72,23 +62,17 @@ python scripts/inference.py \
   --data_dir=$DATASET_DIR \
   --batch_size=$BATCH_SIZE \
   --no_xla \
-  --weights_dir=$PRETRAINED_DIR $AMP |& tee Maskrcnn_inference_${PRECISION}.log
+  --weights_dir=$PRETRAINED_DIR $AMP |& tee maskrcnn_inference_${PRECISION}_BS${BATCH_SIZE}.log
 
-
-value=$(cat ./Maskrcnn_inference_${PRECISION}.log | grep -o "'predict_throughput': [0-9.]*" | awk -F ": " '{print $2}' | tail -1)
-key="throughput"
-unit="images/sec"
-
+throughput=$(cat maskrcnn_inference_${PRECISION}_BS${BATCH_SIZE}.log | grep Throughput | awk -F ' ' '{print $5}')
 yaml_content=$(cat <<EOF
 results:
- - key: $key
-   value: $value
-   unit: $unit
+ - key: throughput
+   value: $throughput
+   unit: records/sec
 EOF
 )
 
 # Write the content to a YAML file
-script_path="$(realpath "$0")"
-script_directory=$(dirname "$script_path")
-echo "$yaml_content" >  ${script_directory}/results.yaml
-echo "YAML file created, path:$script_directory/results.yaml"
+echo "$yaml_content" >  ./results.yaml
+echo "YAML file created."

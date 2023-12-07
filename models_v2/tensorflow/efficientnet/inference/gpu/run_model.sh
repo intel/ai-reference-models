@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
 #
 
 #!/bin/bash
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
-input_envs[PRECISION]=${PRECISION}
+input_envs[MODEL_NAME]=${MODEL_NAME}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -34,17 +33,19 @@ for i in "${!input_envs[@]}"; do
   fi
 done
 
+BATCH_SIZE=${BATCH_SIZE:-128}
 
 echo 'Running with parameters:'
-echo " PRECISION: ${PRECISION}"
+echo " MODEL_NAME: ${MODEL_NAME}"
+echo " BATCH_SIZE: ${BATCH_SIZE}"
 
-python stable_diffusion_inference.py --precision $PRECISION |& tee stable_diffusion_inference.log
-throughput=$(cat stable_diffusion_inference.log | grep throughput | sed -e "s/.*,//" | awk -F ' ' '{print $2}')
+python predict.py -m $MODEL_NAME -b $BATCH_SIZE |& tee ${MODEL_NAME}_inference_BS${BATCH_SIZE}.log
+throughput=$(cat ${MODEL_NAME}_inference_BS${BATCH_SIZE}.log | grep Throughput | awk -F ' ' '{print $2}')
 yaml_content=$(cat <<EOF
 results:
  - key: throughput
    value: $throughput
-   unit: it/s
+   unit: img/s
 EOF
 )
 

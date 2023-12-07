@@ -22,10 +22,12 @@
 
 set -e
 apt-get update && apt-get install -y python3-venv protobuf-compiler
+python3 -m venv $PWD/venv
+. ./venv/bin/activate
 pip install -r requirements.txt
 
 git clone https://github.com/NVIDIA/DeepLearningExamples.git
-cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
-git checkout 5be8a3cae21ee2d80e3935a4746827cb3367bcac
-git apply  ../../../../EnableInference.patch
+cd DeepLearningExamples
+git checkout 5be8a3cae21ee2d80e3935a4746827cb3367bca
+git apply ../EnableInference.patch
 cd -

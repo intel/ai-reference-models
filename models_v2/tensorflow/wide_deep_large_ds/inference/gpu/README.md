@@ -1,12 +1,12 @@
 # Wide and Deep Large Model Inference
 
-Wide and Deep Large Model Inference BKC.
+Wide and Deep Large Model Inference Intel® Extension for TensorFlow.
 
 ## Model Information
 
 | **Use Case** | **Framework** | **Model Repo** | **Branch/Commit/Tag** | **Optional Patch** |
 |:---:| :---: |:--------------:|:---------------------:|:------------------:|
-|  Inference   |  Tensorflow   |       -        |           -           |         -          |
+|  Inference   |  TensorFlow   |       -        |           -           |         -          |
 
 # Pre-Requisite
 
@@ -16,12 +16,12 @@ Wide and Deep Large Model Inference BKC.
 # Dataset and pretrained model
 * Follow [instructions](https://github.com/IntelAI/models/tree/master/datasets/large_kaggle_advertising_challenge/README.md) to download and preprocess the Large Kaggle Display Advertising Challenge Dataset.
 * Get pretrained model: `wget https://storage.googleapis.com/intel-optimized-tensorflow/models/3_0/wide_deep_fp16_pretrained_model.pb`
-
+* Install [Intel® Extension for TensorFlow](https://pypi.org/project/intel-extension-for-tensorflow/)
 
 ## Inference
 
 1. `git clone https://github.com/IntelAI/models.git`
-2. `cd models/models/recommendation/tensorflow/wide_deep_large_ds/inference/gpu`
+2. `cd models/models_v2/tensorflow/wide_deep_large_ds/inference/gpu`
  Run `setup.sh` this will create virtual environment `venv`.
 3. Setup required environment paramaters
  

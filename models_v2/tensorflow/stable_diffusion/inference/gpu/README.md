@@ -1,6 +1,6 @@
 # Stable Diffusion Inference
 
-Stable Diffusion Inference BKC.
+Stable Diffusion Inference using Intel® Extension for TensorFlow.
 
 ## Model Information
 
@@ -11,11 +11,12 @@ Stable Diffusion Inference BKC.
 # Pre-Requisite
 * Host has Intel® Data Center GPU FLEX
 * Host has installed latest Intel® Data Center GPU Flex Series Driver https://dgpu-docs.intel.com/driver/installation.html
+* Install [Intel® Extension for TensorFlow](https://pypi.org/project/intel-extension-for-tensorflow/)
 
 
 ## Inference
 1. `git clone https://github.com/IntelAI/models.git`
-2. `cd models/models/diffusion/tensorflow/stable_diffusion/inference/gpu`
+2. `cd models/models_v2/tensorflow/stable_diffusion/inference/gpu`
 3. Run `setup.sh` this will install all the required dependencies & create virtual environment `venv`.
 4. Activate virtual env: `. ./venv/bin/activate`
 5. Setup required environment paramaters
