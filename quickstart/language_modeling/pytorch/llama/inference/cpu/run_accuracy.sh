@@ -22,7 +22,6 @@ ARGS=""
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 #export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-path="ipex"
 ARGS="$ARGS --accuracy_only  --lambada"
 echo "### running with intel extension for pytorch"
 
@@ -52,12 +51,12 @@ then
 elif [[ "$1" == "int8-fp32" ]]
 then
     precision="int8-fp32"
-    ARGS="$ARGS --dtype 'int8' --ipex_smooth_quant --int8-qconfig   '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype 'int8' --int8-qconfig   '${OUTPUT_DIR}/qconfig.json'"
     echo "### running int8-fp32 mode"
 elif [[ "$1" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --ipex_smooth_quant --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
@@ -71,19 +70,32 @@ if [ -z "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-mode="jit"
-ARGS="$ARGS --jit"
-echo "### running with jit mode"
-
-
 FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/llama/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/latency_log*
-python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./LLaMa_${precision}_accuracy_${mode}" \
-  ${EVAL_SCRIPT} $ARGS \
-  --model-name-or-path   ${FINETUNED_MODEL} \
+
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    path="ipex"
+    mode="jit"
+    ARGS="$ARGS --jit"
+    echo "### running with jit mode"
+    if [[ "$1" == "int8-bf16" || "$1" == "int8-fp32" ]];then
+        ARGS="$ARGS --ipex_smooth_quant"
+    fi
+    python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./LLaMa_${precision}_accuracy_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --ipex \
+        --model-name-or-path   ${FINETUNED_MODEL}
+else
+    echo "### running with torch.compile inductor backend"
+    python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./LLaMa_${precision}_accuracy_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --inductor \
+        --model-name-or-path   ${FINETUNED_MODEL}
+fi
 
 accuracy=$(cat ${OUTPUT_DIR}/LLaMa_${precision}_accuracy* | grep "Accuracy:" |sed -e 's/.*= //;s/[^0-9.]//g')
 
