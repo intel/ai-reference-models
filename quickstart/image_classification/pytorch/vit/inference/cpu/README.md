@@ -51,6 +51,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   bash do_calibration.sh
   ```
 
+* [optional] Compile model with PyTorch Inductor backend
+  ```shell
+  export TORCH_INDUCTOR=1
+  ```
+
 # Quick Start Scripts
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
