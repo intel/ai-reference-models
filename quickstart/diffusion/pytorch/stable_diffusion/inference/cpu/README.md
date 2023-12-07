@@ -25,6 +25,11 @@ git apply ../diffusers.patch
 python setup.py install
 ```
 
+* [optional] Compile model with PyTorch Inductor backend
+```shell
+export TORCH_INDUCTOR=1
+```
+
 # Quick Start Scripts
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |

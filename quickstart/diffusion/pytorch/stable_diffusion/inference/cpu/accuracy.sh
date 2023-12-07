@@ -61,6 +61,7 @@ else
     exit 1
 fi
 
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [ "$2" == "eager" ]; then
     echo "### running eager mode"
 elif [ "$2" == "ipex-jit" ]; then
@@ -69,7 +70,7 @@ elif [ "$2" == "ipex-jit" ]; then
 elif [ "$2" == "compile-ipex" ]; then
     ARGS="$ARGS --compile_ipex"
     echo "### running torch.compile with ipex backend"
-elif [ "$2" == "compile-inductor" ]; then
+elif [[ "$2" == "compile-inductor" || "1" == ${TORCH_INDUCTOR} ]]; then
     export TORCHINDUCTOR_FREEZING=1
     ARGS="$ARGS --compile_inductor"
     echo "### running torch.compile with inductor backend"
