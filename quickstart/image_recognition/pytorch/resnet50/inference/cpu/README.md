@@ -81,12 +81,15 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 * Run the model:
     
     #### Set the environment variables
-    ```
+    ```bash
     export OUTPUT_DIR=<path to the directory where log files will be written>
     export PRECISION=<select one precision: fp32, avx-fp32, int8, bf32, avx-int8, or bf16>
 
     # Optional environemnt variables:
     export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>
+
+    # [optional] Compile model with PyTorch Inductor backend
+    export TORCH_INDUCTOR=1
     ```
 
     #### Run quickstart script:

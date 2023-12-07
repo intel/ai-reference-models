@@ -117,6 +117,9 @@ export OUTPUT_DIR=<Where_to_save_log>
 export PRECISION=<precision to run (fp32, avx-fp32, bf16, bf32, or fp16)>
 export TRAINING_EPOCHS=<epoch_number(90 or other number)>
 
+# [optional] Compile model with PyTorch Inductor backend
+export TORCH_INDUCTOR=1
+
 # Run the training quickstart script
 ./quickstart/image_recognition/pytorch/resnet50/training/cpu/training.sh
 bash training.sh

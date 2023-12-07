@@ -93,6 +93,7 @@ if [ ${WEIGHT_SHAREING} ]; then
   weight_sharing=true
 fi
 
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [ "$weight_sharing" = true ]; then
     CORES=`lscpu | grep Core | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -125,13 +126,22 @@ if [ "$weight_sharing" = true ]; then
         --use-multi-stream-module \
         --instance-number 0
 
-else
-
-  python -m intel_extension_for_pytorch.cpu.launch \
+elif [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch \
       --memory-allocator jemalloc \
       ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
       $ARGS \
       --ipex \
+      --pretrained \
+      -j 0 \
+      -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_accuracy_log_${PRECISION}.log
+else
+    echo "Running RN50 inference with torch.compile inductor backend."
+    python -m intel_extension_for_pytorch.cpu.launch \
+      --memory-allocator jemalloc \
+      ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+      $ARGS \
+      --inductor \
       --pretrained \
       -j 0 \
       -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_accuracy_log_${PRECISION}.log

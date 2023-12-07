@@ -82,18 +82,35 @@ export OMP_NUM_THREADS=$CORES_PER_INSTANCE
 
 NUMBER_INSTANCE=`expr $CORES_PER_NUMA / $CORES_PER_INSTANCE`
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --memory-allocator jemalloc \
-    --ninstances $NUMAS \
-    --log_path=${OUTPUT_DIR} \
-    --log_file_prefix="./resnet50_latency_log_${PRECISION}" \
-    ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
-    $ARGS \
-    --ipex \
-    -j 0 \
-    -b $BATCH_SIZE \
-    --weight-sharing \
-    --number-instance $NUMBER_INSTANCE
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --memory-allocator jemalloc \
+        --ninstances $NUMAS \
+        --log_path=${OUTPUT_DIR} \
+        --log_file_prefix="./resnet50_latency_log_${PRECISION}" \
+        ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+        $ARGS \
+        --ipex \
+        -j 0 \
+        -b $BATCH_SIZE \
+        --weight-sharing \
+        --number-instance $NUMBER_INSTANCE
+else
+    echo "Running RN50 inference with torch.compile inductor backend."
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --memory-allocator jemalloc \
+        --ninstance ${SOCKETS} \
+        --log_path=${OUTPUT_DIR} \
+        --log_file_prefix="./resnet50_latency_log_${PRECISION}" \
+        ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+        $ARGS \
+        --inductor \
+        -j 0 \
+        -b $BATCH_SIZE \
+	--weight-sharing \
+        --number-instance $NUMBER_INSTANCE
+fi
 
 wait
 
