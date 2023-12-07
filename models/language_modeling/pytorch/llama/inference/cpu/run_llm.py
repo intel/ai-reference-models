@@ -69,6 +69,8 @@ parser.add_argument("--dataset", nargs="?", default="lambada", const="lambada")
 parser.add_argument("--split", nargs="?", default="validation", const="validation")
 parser.add_argument("--output_dir", nargs="?", default="./saved_results")
 parser.add_argument("--ipex_static_quantize", action="store_true")
+parser.add_argument("--ipex", action="store_true")
+parser.add_argument("--inductor", action="store_true")
 parser.add_argument("--ipex_smooth_quant", action="store_true")
 parser.add_argument("--jit", action="store_true")
 parser.add_argument(
@@ -121,7 +123,7 @@ args.dtype = "int8" if args.int8_bf16_mixed else args.dtype
 has_position_id = False
 if "llama" in args.model_name_or_path:
     user_model = LlamaForCausalLM.from_pretrained(
-        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit
+        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit, return_dict=False,
     )
     tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path)
     if hasattr(user_model.config, "num_key_value_heads"):
@@ -132,13 +134,27 @@ else:
     )
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
 get_memory_usage("Host", args)
+autocast = False
+if args.dtype == "bf16":
+    autocast = True
 if args.dtype == "bf16" or args.dtype == "fp32":
-    user_model = ipex.optimize_transformers(
-        user_model.eval(),
-        dtype=torch.bfloat16 if args.dtype == "bf16" else torch.float,
-        inplace=True,
-        deployment_mode=True if args.jit and (not args.accuracy_only) else False,
-    )
+    if args.ipex:
+        user_model = ipex.optimize_transformers(
+            user_model.eval(),
+            dtype=torch.bfloat16 if args.dtype == "bf16" else torch.float,
+            inplace=True,
+            deployment_mode=True if args.jit and (not args.accuracy_only) else False,
+        )
+    if args.inductor:
+        from torch._inductor import config as inductor_config
+        inductor_config.cpp_wrapper = True
+        with torch.no_grad(), torch.cpu.amp.autocast(enabled=autocast):
+            if args.ipex:
+                print('[Info] Running torch.compile() with IPEX backend')
+                user_model = torch.compile(user_model, backend="ipex")
+            else:
+                print('[Info] Running torch.compile() BFloat16 with default backend')
+                user_model = torch.compile(user_model)
 elif args.dtype == "fp16":
     user_model = ipex.optimize(
         user_model.eval(),
@@ -497,8 +513,31 @@ def eval_func(traced_model):
 if args.dtype in ["bf32", "fp16"] and args.jit:
     generate_kwargs["jit"] = True
 
+# generate promt
+if args.benchmark:
+    # input prompt
+    current_path = pathlib.Path(__file__).parent.resolve()
+    with open(str(current_path) + "/prompt.json") as f:
+        prompt_pool = json.load(f)
+    if args.prompt is not None:
+        prompt = args.prompt
+    elif args.input_tokens in prompt_pool:
+        prompt = prompt_pool[args.input_tokens]
+    else:
+        raise SystemExit("[ERROR] Plese use --prompt if want to use custom input.")
 
-if args.dtype == "int8":
+    input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
+    print("---- Prompt size:", input_size)
+
+    if args.token_latency:
+        if args.dtype in ["bf32", "fp16"]:
+            generate_kwargs["token_latency"] = True
+        else:
+            if not hasattr(user_model.config, "token_latency"):
+                user_model.config.token_latency = True
+    prompt = [prompt] * args.batch_size
+
+if args.dtype == "int8" and args.ipex:
     qconfig = ipex.quantization.default_static_qconfig_mapping
     if args.ipex_smooth_quant:
         qconfig = ipex.quantization.get_smooth_quant_qconfig_mapping(alpha=0.6)
@@ -559,6 +598,37 @@ if args.dtype == "int8":
             deployment_mode=True,
         )
         print("model quantization - Done!")
+elif args.dtype == "int8" and args.inductor:
+    from torch._inductor import config as inductor_config
+    inductor_config.cpp_wrapper = True
+    from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
+    import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
+    from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
+    from torch._export import capture_pre_autograd_graph, dynamic_dim
+    print('[Info] Running torch.compile() INT8 quantization')
+    with torch.no_grad():
+        encoded_input = tokenizer(prompt, return_tensors="pt")
+        print("encoded_input is: {}".format(encoded_input), flush=True)
+        exported_model = capture_pre_autograd_graph(
+            user_model,
+            (),
+            kwargs=encoded_input.data,
+        )
+        quantizer = X86InductorQuantizer()
+        quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
+        prepared_model = prepare_pt2e(exported_model, quantizer)
+        prepared_model(**encoded_input)
+        converted_model = convert_pt2e(prepared_model)
+        torch.ao.quantization.move_exported_model_to_eval(converted_model)
+        with torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
+            if args.ipex:
+                print('[Info] Running torch.compile() with IPEX backend')
+                user_model = torch.compile(converted_model, backend="ipex")
+            else:
+                print('[Info] Running torch.compile() with default backend')
+                user_model = torch.compile(converted_model)
+            user_model(**encoded_input)
+            user_model(**encoded_input)
 
 
 def benchmark_warmup(prompt):
@@ -601,7 +671,6 @@ def benchmark_evaluate(prompt):
     total_time = 0.0
     num_iter = args.num_iter - args.num_warmup
     total_list = []
-    print('Evaluating LLM: total Steps {}'.format(num_iter))
     with torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(
         enabled=amp_enabled, dtype=amp_dtype
     ):
@@ -636,27 +705,6 @@ def benchmark_evaluate(prompt):
 
 if args.benchmark:
     torch._C._jit_set_texpr_fuser_enabled(False)
-    # input prompt
-    current_path = pathlib.Path(__file__).parent.resolve()
-    with open(str(current_path) + "/prompt.json") as f:
-        prompt_pool = json.load(f)
-    if args.prompt is not None:
-        prompt = args.prompt
-    elif args.input_tokens in prompt_pool:
-        prompt = prompt_pool[args.input_tokens]
-    else:
-        raise SystemExit("[ERROR] Plese use --prompt if want to use custom input.")
-
-    input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
-    print("---- Prompt size:", input_size)
-
-    if args.token_latency:
-        if args.dtype in ["bf32", "fp16"]:
-            generate_kwargs["token_latency"] = True
-        else:
-            if not hasattr(user_model.config, "token_latency"):
-                user_model.config.token_latency = True
-    prompt = [prompt] * args.batch_size
     benchmark_warmup(prompt)
     if args.use_share_weight and args.device == "cpu":
         threads = []
