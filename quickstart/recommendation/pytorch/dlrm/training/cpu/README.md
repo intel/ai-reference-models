@@ -90,6 +90,9 @@ export NUM_BATCH=<10000 for test performance and 50000 for testing convergence t
 # Optional environemnt variables:
 export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>
 
+# [optional] Compile model with PyTorch Inductor backend 
+export TORCH_INDUCTOR=1
+
 # Run quick start script:
 ./quickstart/recommendation/pytorch/dlrm/training/cpu/training.sh
 

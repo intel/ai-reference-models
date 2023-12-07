@@ -85,6 +85,9 @@ export OUTPUT_DIR=<directory where log files will be written>
 # Optional environemnt variables:
 export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>
 
+# [optional] Compile model with PyTorch Inductor backend 
+export TORCH_INDUCTOR=1
+
 # Run a quickstart script
 ./quickstart/recommendation/pytorch/dlrm/inference/cpu/<script.sh>
 ```

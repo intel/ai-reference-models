@@ -81,15 +81,29 @@ fi
 
 export OMP_NUM_THREADS=1
 LOG_0="${LOG}/throughput.log"
-python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
---raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
---data-set=terabyte \
---memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
---arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
---arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
---numpy-rand-seed=727  --inference-only --num-batches=1000 \
---print-freq=10 --print-time --test-mini-batch-size=${BATCH_SIZE} --share-weight-instance=$CORES_PER_NUMA_NODE \
-$ARGS |tee $LOG_0
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
+        --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+        --data-set=terabyte \
+        --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+        --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+        --arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
+        --numpy-rand-seed=727  --inference-only --num-batches=1000 \
+        --print-freq=10 --print-time --test-mini-batch-size=${BATCH_SIZE} --share-weight-instance=$CORES_PER_NUMA_NODE \
+        $ARGS |tee $LOG_0
+else
+    echo "### running with torch.compile inductor backend"
+    python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
+        --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+        --data-set=terabyte \
+        --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+        --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+        --arch-sparse-feature-size=128 --max-ind-range=40000000 --inductor \
+        --numpy-rand-seed=727  --inference-only --num-batches=1000 \
+        --print-freq=10 --print-time --test-mini-batch-size=${BATCH_SIZE} --share-weight-instance=$CORES_PER_NUMA_NODE \
+        $ARGS |tee $LOG_0
+fi
 wait
 
 throughput=$(grep 'Throughput:' ${LOG}/throughput.log |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '

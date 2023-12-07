@@ -39,6 +39,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
   ```
 
+* [optional] Compile model with PyTorch Inductor backend
+  ```shell
+  export TORCH_INDUCTOR=1
+  ```
+
 ## Datasets
 
 Use random dataset.

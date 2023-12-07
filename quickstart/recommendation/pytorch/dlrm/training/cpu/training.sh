@@ -90,16 +90,30 @@ CORES_PER_NUMA_NODE=`expr $CORES_PER_SOCKET / $NUMA_NODES_PER_SOCKETS`
 export OMP_NUM_THREADS=$CORES_PER_NUMA_NODE
 
 LOG_0="${LOG}/socket_0"
-python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
-  --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
-  --data-set=terabyte \
-  --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
-  --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
-  --arch-sparse-feature-size=128 --max-ind-range=40000000 \
-  --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
-  --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
-  --test-mini-batch-size=16384 --ipex-merged-emb \
-  $ARGS |tee $LOG_0
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
+      --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+      --data-set=terabyte \
+      --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+      --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+      --arch-sparse-feature-size=128 --max-ind-range=40000000 \
+      --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
+      --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
+      --test-mini-batch-size=16384 --ipex-merged-emb \
+      $ARGS |tee $LOG_0
+else
+    python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
+      --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+      --data-set=terabyte \
+      --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+      --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+      --arch-sparse-feature-size=128 --max-ind-range=40000000 \
+      --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
+      --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time \
+      --test-mini-batch-size=16384 --inductor \
+      $ARGS |tee $LOG_0
+fi
 wait
 
 throughput=$(grep 'Throughput:' ${LOG}/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '

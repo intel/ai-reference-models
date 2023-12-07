@@ -48,8 +48,6 @@ from torchrec.optim.keyed import CombinedOptimizer, KeyedOptimizerWrapper
 from torchrec.optim.optimizers import in_backward_optimizer_filter
 from tqdm import tqdm
 from jit_trace_able_utils import unpack, SparseArchTraceAbleWrapper
-import intel_extension_for_pytorch as ipex
-print(f"IPEX version {ipex.__version__}")
 
 # OSS import
 try:
@@ -234,6 +232,49 @@ def ipex_optimize(args, model, optimizer, dataloader):
         pass
     if args.dtype == 'bf32':
         ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+    return model, optimizer
+
+def stock_pt_optimize(args, model, optimizer, dataloader):
+    example_batch = fetch_batch(dataloader)
+    example_batch.sparse_features = unpack(example_batch.sparse_features)
+    dense, sparse = example_batch.dense_features, example_batch.sparse_features
+    autocast, dtype = parse_autocast(args.dtype)
+    if args.inductor:
+        from torch._inductor import config as inductor_config
+        inductor_config.cpp_wrapper = True
+        if dtype == torch.int8:
+            assert args.inference_only
+            from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
+            import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
+            from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
+            from torch._export import capture_pre_autograd_graph, dynamic_dim
+            print('[Info] Running torch.compile() INT8 quantization')
+            with torch.no_grad():
+                example_inputs = (dense, sparse)
+                exported_model = capture_pre_autograd_graph(
+                    model,
+                    example_inputs
+                )
+                quantizer = X86InductorQuantizer()
+                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
+                prepared_model = prepare_pt2e(exported_model, quantizer)
+                prepared_model(dense, sparse)
+                converted_model = convert_pt2e(prepared_model)
+                torch.ao.quantization.move_exported_model_to_eval(converted_model)
+                if args.ipex:
+                    print('[Info] Running torch.compile() with IPEX backend')
+                    model = torch.compile(converted_model, backend="ipex")
+                else:
+                    print('[Info] Running torch.compile() with default backend')
+                    model = torch.compile(converted_model)
+            with torch.no_grad():
+                model = convert_int8(args, model, dataloader)
+        else:
+            with torch.no_grad(), torch.cpu.amp.autocast(enabled=autocast, dtype=dtype):
+                print('[Info] Running torch.compile() with default backend')
+                model = torch.compile(model)
+                model(dense, sparse)
+                model(dense, sparse)
     return model, optimizer
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
@@ -563,6 +604,11 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         type=int,
         default=0,
         help="if value > 0, will use pytorch throughputbenchmark to share weight with `value` instance",
+    )
+    parser.add_argument(
+        "--inductor",
+        action="store_true",
+        help="whether use torch.compile()",
     )
     return parser.parse_args(argv)
 
@@ -1128,6 +1174,9 @@ def main(argv: List[str]) -> None:
     """
 
     args = parse_args(argv)
+    if args.ipex_optimize:
+        import intel_extension_for_pytorch as ipex
+        print(f"IPEX version {ipex.__version__}")
     for name, val in vars(args).items():
         try:
             vars(args)[name] = list(map(int, val.split(",")))
@@ -1234,6 +1283,9 @@ def main(argv: List[str]) -> None:
     if args.ipex_optimize:
         print_memory("start ipex_optimize ")
         model.model, optimizer = ipex_optimize(args, model.model, optimizer, test_dataloader)
+    if args.inductor:
+        print_memory("start StockPT ")
+        model.model, optimizer = stock_pt_optimize(args, model.model, optimizer, test_dataloader)
 
     print_memory("start running model")
     train_val_test(

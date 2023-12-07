@@ -68,27 +68,52 @@ fi
 LOG_0="${LOG}/throughput.log"
 
 BATCH_SIZE=${BATCH_SIZE:-32768}
-$mrun_cmd python $launcher_arg $MODEL_SCRIPT \
-    --embedding_dim 128 \
-    --dense_arch_layer_sizes 512,256,128 \
-    --over_arch_layer_sizes 1024,1024,512,256,1 \
-    --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
-    --epochs 1 \
-    --pin_memory \
-    --mmap_mode \
-    --batch_size $BATCH_SIZE \
-    --interaction_type=dcn \
-    --dcn_num_layers=3 \
-    --dcn_low_rank_dim=512 \
-    --adagrad \
-    --learning_rate 0.005 \
-    --multi_hot_distribution_type uniform \
-    --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
-    --limit_train_batches 100 \
-    --ipex-optimize \
-    --log-freq 10 \
-    --benchmark \
-    $ARGS 2>&1 | tee $LOG_0
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+  $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
+      --embedding_dim 128 \
+      --dense_arch_layer_sizes 512,256,128 \
+      --over_arch_layer_sizes 1024,1024,512,256,1 \
+      --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
+      --epochs 1 \
+      --pin_memory \
+      --mmap_mode \
+      --batch_size $BATCH_SIZE \
+      --interaction_type=dcn \
+      --dcn_num_layers=3 \
+      --dcn_low_rank_dim=512 \
+      --adagrad \
+      --learning_rate 0.005 \
+      --multi_hot_distribution_type uniform \
+      --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
+      --limit_train_batches 100 \
+      --ipex-optimize \
+      --log-freq 10 \
+      --benchmark \
+      $ARGS 2>&1 | tee $LOG_0
+else
+  $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
+      --embedding_dim 128 \
+      --dense_arch_layer_sizes 512,256,128 \
+      --over_arch_layer_sizes 1024,1024,512,256,1 \
+      --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
+      --epochs 1 \
+      --pin_memory \
+      --mmap_mode \
+      --batch_size $BATCH_SIZE \
+      --interaction_type=dcn \
+      --dcn_num_layers=3 \
+      --dcn_low_rank_dim=512 \
+      --adagrad \
+      --learning_rate 0.005 \
+      --multi_hot_distribution_type uniform \
+      --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
+      --limit_train_batches 100 \
+      --inductor \
+      --log-freq 10 \
+      --benchmark \
+      $ARGS 2>&1 | tee $LOG_0
+fi
 wait
 
 if [[ $PLOTMEM == "true" ]]; then
