@@ -21,10 +21,6 @@ ARGS=""
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-path="ipex"
-ARGS="$ARGS --use_ipex"
-echo "### running with intel extension for pytorch"
-
 precision="fp32"
 if [[ "$1" == "bf16" ]]
 then
@@ -60,10 +56,6 @@ else
     exit 1
 fi
 
-mode="jit"
-ARGS="$ARGS --jit_mode_eval"
-echo "### running with jit mode"
-
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
   exit 1
@@ -76,14 +68,35 @@ FINETUNED_MODEL=${FINETUNED_MODEL:-"google/vit-base-patch16-224"}
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/image-classification/run_image_classification.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/accuracy_log*
-python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
-  ${EVAL_SCRIPT} $ARGS \
-  --model_name_or_path   ${FINETUNED_MODEL} \
-  --do_eval \
-  --output_dir ./tmp \
-  --per_device_eval_batch_size $BATCH_SIZE \
-  --dataset_name imagenet-1k \
-  --remove_unused_columns False \
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    path="ipex"
+    ARGS="$ARGS --use_ipex"
+    echo "### running with intel extension for pytorch"
+
+    mode="jit"
+    ARGS="$ARGS --jit_mode_eval"
+    echo "### running with jit mode"
+    python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --do_eval \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE \
+        --dataset_name imagenet-1k \
+        --remove_unused_columns False
+else
+    echo "Running inference with torch.compile inductor backend."
+    python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --inductor \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --do_eval \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE \
+        --dataset_name imagenet-1k \
+        --remove_unused_columns False
+fi
 
 accuracy=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_accuracy" |sed -e 's/.*= //;s/[^0-9.]//g')
 f1=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_f1" |sed -e 's/.*= //;s/[^0-9.]//g')

@@ -22,9 +22,7 @@ ARGS=""
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-path="ipex"
-ARGS="$ARGS --use_ipex --benchmark --perf_begin_iter 10 --perf_run_iters 100"
-echo "### running with intel extension for pytorch"
+ARGS="$ARGS --benchmark --perf_begin_iter 10 --perf_run_iters 100"
 
 precision="fp32"
 if [[ "$1" == "bf16" ]]
@@ -61,10 +59,6 @@ else
     exit 1
 fi
 
-mode="jit"
-ARGS="$ARGS --jit_mode_eval"
-echo "### running with jit mode"
-
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
   exit 1
@@ -78,14 +72,34 @@ EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/image-classification
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 
 rm -rf ${OUTPUT_DIR}/throughput_log*
-python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
-  ${EVAL_SCRIPT} $ARGS \
-  --model_name_or_path   ${FINETUNED_MODEL} \
-  --do_eval \
-  --output_dir ./tmp \
-  --per_device_eval_batch_size $BATCH_SIZE \
-  --dataset_name imagenet-1k \
-  --remove_unused_columns False \
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    path="ipex"
+    ARGS="$ARGS --use_ipex"
+    echo "### running with intel extension for pytorch"
+    mode="jit"
+    ARGS="$ARGS --jit_mode_eval"
+    echo "### running with jit mode"
+    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --do_eval \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE \
+        --dataset_name imagenet-1k \
+        --remove_unused_columns False
+else
+    echo "Running inference with torch.compile inductor backend."
+    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --inductor \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --do_eval \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE \
+        --dataset_name imagenet-1k \
+        --remove_unused_columns False
+fi
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
