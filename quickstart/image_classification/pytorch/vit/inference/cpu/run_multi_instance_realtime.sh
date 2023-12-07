@@ -22,9 +22,7 @@ ARGS=""
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-path="ipex"
-ARGS="$ARGS --use_ipex --benchmark --perf_begin_iter 10 --perf_run_iters 100 "
-echo "### running with intel extension for pytorch"
+ARGS="$ARGS --benchmark --perf_begin_iter 10 --perf_run_iters 100 "
 
 precision="fp32"
 if [[ "$1" == "bf16" ]]
@@ -70,11 +68,6 @@ if [ -z "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-mode="jit"
-ARGS="$ARGS --jit_mode_eval"
-echo "### running with jit mode"
-
-
 export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -87,14 +80,34 @@ FINETUNED_MODEL=${FINETUNED_MODEL:-"google/vit-base-patch16-224"}
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/image-classification/run_image_classification.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/latency_log*
-python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
-  ${EVAL_SCRIPT} $ARGS \
-  --model_name_or_path   ${FINETUNED_MODEL} \
-  --do_eval \
-  --output_dir ./tmp \
-  --per_device_eval_batch_size $BATCH_SIZE \
-  --dataset_name imagenet-1k \
-  --remove_unused_columns False \
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    path="ipex"
+    ARGS="$ARGS --use_ipex"
+    echo "### running with intel extension for pytorch"
+    mode="jit"
+    ARGS="$ARGS --jit_mode_eval"
+    echo "### running with jit mode"
+    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --do_eval \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE \
+        --dataset_name imagenet-1k \
+        --remove_unused_columns False
+else
+    echo "Running inference with torch.compile inductor backend."
+    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --inductor \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --do_eval \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE \
+        --dataset_name imagenet-1k \
+        --remove_unused_columns False
+fi
 
 CORES_PER_INSTANCE=${OMP_NUM_THREADS}
 TOTAL_CORES=`expr $CORES \* $SOCKETS`
