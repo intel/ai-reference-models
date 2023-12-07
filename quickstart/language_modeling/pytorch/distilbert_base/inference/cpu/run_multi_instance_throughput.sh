@@ -22,8 +22,7 @@ ARGS=""
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-path="ipex"
-ARGS="$ARGS --use_ipex --benchmark --perf_begin_iter 10 --perf_run_iters 100"
+ARGS="$ARGS --benchmark --perf_begin_iter 10 --perf_run_iters 100"
 echo "### running with intel extension for pytorch"
 
 precision="fp32"
@@ -61,10 +60,6 @@ else
     exit 1
 fi
 
-mode="jit"
-ARGS="$ARGS --jit_mode_eval"
-echo "### running with jit mode"
-
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
   exit 1
@@ -82,15 +77,36 @@ EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/text-classification/
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 
 rm -rf ${OUTPUT_DIR}/throughput_log*
-python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
-  ${EVAL_SCRIPT} $ARGS \
-  --model_name_or_path   ${FINETUNED_MODEL} \
-  --task_name sst2 \
-  --do_eval \
-  --max_seq_length ${SEQUENCE_LENGTH} \
-  --output_dir ./tmp \
-  --per_device_eval_batch_size $BATCH_SIZE \
-  --dataloader_drop_last \
+
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    path="ipex"
+    mode="jit"
+    ARGS="$ARGS --jit_mode_eval"
+    echo "### running with jit mode"
+    python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --use_ipex \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --task_name sst2 \
+        --do_eval \
+        --max_seq_length ${SEQUENCE_LENGTH} \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE \
+        --dataloader_drop_last
+else
+    echo "Running inference with torch.compile inductor backend."
+    ARGS="$ARGS --inductor"
+    python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --task_name sst2 \
+        --do_eval \
+        --max_seq_length ${SEQUENCE_LENGTH} \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE \
+        --dataloader_drop_last
+fi
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {

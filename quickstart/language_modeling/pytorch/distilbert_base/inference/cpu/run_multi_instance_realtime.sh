@@ -22,8 +22,7 @@ ARGS=""
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-path="ipex"
-ARGS="$ARGS --use_ipex --benchmark --perf_begin_iter 500 --perf_run_iters 2000 "
+ARGS="$ARGS --benchmark --perf_begin_iter 500 --perf_run_iters 2000 "
 echo "### running with intel extension for pytorch"
 
 precision="fp32"
@@ -74,11 +73,6 @@ if [ -z "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-mode="jit"
-ARGS="$ARGS --jit_mode_eval"
-echo "### running with jit mode"
-
-
 export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -91,14 +85,34 @@ ARGS="$ARGS --use_share_weight --total_cores ${CORES_PER_NUMA} --cores_per_insta
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/text-classification/run_glue.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/latency_log*
-python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
-  ${EVAL_SCRIPT} $ARGS \
-  --model_name_or_path   ${FINETUNED_MODEL} \
-  --task_name sst2 \
-  --do_eval \
-  --max_seq_length ${SEQUENCE_LENGTH} \
-  --output_dir ./tmp \
-  --per_device_eval_batch_size $BATCH_SIZE \
+
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    path="ipex"
+    mode="jit"
+    ARGS="$ARGS --jit_mode_eval"
+    echo "### running with jit mode"
+    python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --use_ipex \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --task_name sst2 \
+        --do_eval \
+        --max_seq_length ${SEQUENCE_LENGTH} \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE
+else
+    echo "Running inference with torch.compile inductor backend."
+    ARGS="$ARGS --inductor"
+    python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --task_name sst2 \
+        --do_eval \
+        --max_seq_length ${SEQUENCE_LENGTH} \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE
+fi
 
 CORES_PER_INSTANCE=${OMP_NUM_THREADS}
 TOTAL_CORES=`expr $CORES \* $SOCKETS`
