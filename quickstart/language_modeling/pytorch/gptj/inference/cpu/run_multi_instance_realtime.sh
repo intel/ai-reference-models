@@ -21,8 +21,8 @@ ARGS=""
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 #export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
-
-ARGS="$ARGS  --benchmark --num-warmup 10 --num-iter 50  --token-latency"
+NUM_ITER=${NUM_ITER:-20}
+ARGS="$ARGS  --benchmark --num-warmup 10 --num-iter $NUM_ITER --token-latency"
 echo "### running with intel extension for pytorch"
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
