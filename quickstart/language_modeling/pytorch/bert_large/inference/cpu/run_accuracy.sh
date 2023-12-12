@@ -100,7 +100,7 @@ else
 fi
 
 
-accuracy=$(grep 'Results:' ${OUTPUT_DIR}/accuracy_log*|awk -F ' ' '{print $PRECISION2}' | awk -F ',' '{print $PRECISION}')
+accuracy=$(grep 'Results:' ${OUTPUT_DIR}/accuracy_log*|awk -F ' ' '{print $12}' | awk -F ',' '{print $1}')
 echo ""BERT";"f1";${precision}; ${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 
 
