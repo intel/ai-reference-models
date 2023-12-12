@@ -27,10 +27,11 @@ from utils import generate_dataset
 
 
 class TimeHistory(tf.keras.callbacks.Callback):
-    def __init__(self, batch_size):
+    def __init__(self, batch_size, warmup_steps):
         self.times = []
         self.throughput = []
         self.batch_size = batch_size
+        self.warmup_steps = warmup_steps
 
     def on_predict_batch_begin(self, batch, logs={}):
         tf_logging.warn('\n---> Start iteration {0}'.format(str(batch)))
@@ -38,9 +39,10 @@ class TimeHistory(tf.keras.callbacks.Callback):
 
     def on_predict_batch_end(self, batch, logs={}):
         tf_logging.warn('\n---> Stop iteration {0}'.format(str(batch)))
-        total_time = time.time() - self.epoch_time_start
-        self.times.append(total_time)
-        self.throughput.append(self.batch_size / total_time)
+        if ( batch >= self.warmup_steps):
+            total_time = time.time() - self.epoch_time_start
+            self.times.append(total_time)
+            self.throughput.append(self.batch_size / total_time)
 
     def on_test_batch_begin(self, batch, logs={}):
         self.epoch_time_start = time.time()
@@ -92,7 +94,10 @@ class eval_rgat:
         arg_parser.add_argument('-r', "--accuracy-only",
                                 help='For accuracy measurement only.',
                                 dest='accuracy_only', action='store_true')
-        
+
+        arg_parser.add_argument("--warmup-steps", type=int, default=10,
+                                help="number of warmup steps")
+
         arg_parser.add_argument('-s', "--steps", type=int, default=200,
                                 help="number of steps")
 
@@ -126,7 +131,7 @@ class eval_rgat:
         if (not self.args.accuracy_only):
             print("Benchmark")
 
-            time_callback = TimeHistory(self.args.batch_size)
+            time_callback = TimeHistory(self.args.batch_size, self.args.warmup_steps)
             model.predict(datasets["test"], batch_size=self.args.batch_size, callbacks=[time_callback], steps=self.args.steps)
 
             avg_time = sum(time_callback.times) / len(time_callback.times)
@@ -140,7 +145,7 @@ class eval_rgat:
         else:  # accuracy check
             print("Accuracy")
 
-            time_callback = TimeHistory(self.args.batch_size)
+            time_callback = TimeHistory(self.args.batch_size, self.args.warmup_steps)
             test_scores = model.evaluate(datasets["test"], batch_size=self.args.batch_size,
                                          callbacks=[time_callback])
             avg_time = sum(time_callback.times) / len(time_callback.times)

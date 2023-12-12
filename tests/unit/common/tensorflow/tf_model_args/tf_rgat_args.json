@@ -1,31 +1,31 @@
 [
   { "_comment": "rgat_fp32_accuracy",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=graph_networks --model-name=rgat --precision=fp32 --mode=inference --intelai-models=/workspace/intelai_models --batch-size 256 --socket-id 0 --accuracy-only  --verbose --graph-schema-path=/in_graph/saved_model.pbtxt --accuracy-only --data-location=/dataset --pretrained-model=model/",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=fp32 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/in_graph/saved_model.pbtxt --batch-size=256  --data-location=/dataset --accuracy-only --pretrained-model=model/ --steps=200",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=fp32 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/in_graph/saved_model.pbtxt --batch-size=256  --data-location=/dataset --accuracy-only --pretrained-model=model/ --warmup-steps=10 --steps=200",
     "cpuset": "0-111"},
 
   { "_comment": "rgat_inference_benchmark_fp32",
     "input": "run_tf_benchmark.py --framework tensorflow --use-case graph_networks --precision fp32 --mode inference --model-name rgat --batch-size 256 --graph-schema-path=/saved_model.pbtxt --data-location=/dataset --pretrained-model=model/ --intelai-models=/workspace/intelai_models --socket-id 0 --verbose",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=fp32 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/saved_model.pbtxt --data-location=/dataset --pretrained-model=model/ --batch-size=256 --steps=200",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=fp32 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/saved_model.pbtxt --data-location=/dataset --pretrained-model=model/ --batch-size=256 --warmup-steps=10 --steps=200",
     "cpuset": "0-111"},
 
     { "_comment": "rgat_bfloat16_accuracy",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=graph_networks --model-name=rgat --precision=bfloat16 --mode=inference --intelai-models=/workspace/intelai_models --batch-size 256 --socket-id 0 --accuracy-only  --verbose --graph-schema-path=/in_graph/saved_model.pbtxt --accuracy-only --data-location=/dataset --pretrained-model=model/",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=bfloat16 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/in_graph/saved_model.pbtxt --batch-size=256  --data-location=/dataset --accuracy-only --pretrained-model=model/ --steps=200",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=bfloat16 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/in_graph/saved_model.pbtxt --batch-size=256  --data-location=/dataset --accuracy-only --pretrained-model=model/ --warmup-steps=10 --steps=200",
     "cpuset": "0-111"},
 
   { "_comment": "rgat_inference_benchmark_bfloat16",
     "input": "run_tf_benchmark.py --framework tensorflow --use-case graph_networks --precision bfloat16 --mode inference --model-name rgat --batch-size 256 --graph-schema-path=/saved_model.pbtxt --data-location=/dataset --pretrained-model=model/ --intelai-models=/workspace/intelai_models --socket-id 0 --verbose",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=bfloat16 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/saved_model.pbtxt --data-location=/dataset --pretrained-model=model/ --batch-size=256 --steps=200",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=bfloat16 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/saved_model.pbtxt --data-location=/dataset --pretrained-model=model/ --batch-size=256 --warmup-steps=10 --steps=200",
     "cpuset": "0-111"},
 
     { "_comment": "rgat_fp16_accuracy",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=graph_networks --model-name=rgat --precision=fp16 --mode=inference --intelai-models=/workspace/intelai_models --batch-size 256 --socket-id 0 --accuracy-only  --verbose --graph-schema-path=/in_graph/saved_model.pbtxt --accuracy-only --data-location=/dataset --pretrained-model=model/",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=fp16 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/in_graph/saved_model.pbtxt --batch-size=256  --data-location=/dataset --accuracy-only --pretrained-model=model/ --steps=200",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=fp16 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/in_graph/saved_model.pbtxt --batch-size=256  --data-location=/dataset --accuracy-only --pretrained-model=model/ --warmup-steps=10 --steps=200",
     "cpuset": "0-111"},
 
   { "_comment": "rgat_inference_benchmark_fp16",
     "input": "run_tf_benchmark.py --framework tensorflow --use-case graph_networks --precision fp16 --mode inference --model-name rgat --batch-size 256 --graph-schema-path=/saved_model.pbtxt --data-location=/dataset --pretrained-model=model/ --intelai-models=/workspace/intelai_models --socket-id 0 --verbose",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=fp16 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/saved_model.pbtxt --data-location=/dataset --pretrained-model=model/ --batch-size=256 --steps=200",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_mag_dataset.py --precision=fp16 --num-inter-threads=1 --num-intra-threads=28 --graph-schema-path=/saved_model.pbtxt --data-location=/dataset --pretrained-model=model/ --batch-size=256 --warmup-steps=10 --steps=200",
     "cpuset": "0-111"}
 ]

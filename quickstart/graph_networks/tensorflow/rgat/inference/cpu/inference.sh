@@ -74,7 +74,7 @@ fi
 echo "STEPS: $STEPS"
 
 if [ -z "${WARMUP_STEPS}" ]; then
-  WARMUP_STEPS="warmup_steps=20"
+  WARMUP_STEPS="warmup_steps=10"
 else
   WARMUP_STEPS="warmup_steps=$WARMUP_STEPS"
 fi

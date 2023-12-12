@@ -58,6 +58,11 @@ class ModelInitializer(BaseModelInitializer):
             dest='pretrained_model', required=True)
 
         arg_parser.add_argument(
+            "--warmup-steps", dest='warmup_steps',
+            type=int, default=10,
+            help="number of warmup steps")
+
+        arg_parser.add_argument(
             "--steps", dest='steps',
             type=int, default=200,
             help="number of steps")
@@ -89,6 +94,7 @@ class ModelInitializer(BaseModelInitializer):
             " --batch-size=" + str(self.args.batch_size) + \
             " --graph-schema-path=" + str(self.args.graph_schema_path) + \
             " --pretrained-model=" + str(self.args.pretrained_model) + \
+            " --warmup-steps=" + str(self.args.warmup_steps) + \
             " --steps=" + str(self.args.steps)
 
         # if the data location directory is not empty, then include the arg

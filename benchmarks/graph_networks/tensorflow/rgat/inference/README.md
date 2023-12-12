@@ -24,7 +24,7 @@ tar -xf RGAT-pretrained-model.tar.gz
 
 3. ### Download and preprocess the dataset
 
-i. Create a virtual environment, activate and install the necesarry packages.
+i. Create a virtual environment, activate and install the necessary packages.
 ```
 pip install six wheel mock numpy packaging requests pyyaml
 pip install keras_preprocessing --no-deps

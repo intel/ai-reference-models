@@ -64,7 +64,7 @@ fi
 MODE="inference"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-BATCH_SIZE="${BATCH_SIZE:-"1000"}"
+BATCH_SIZE="${BATCH_SIZE:-"100"}"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
