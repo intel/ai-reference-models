@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # Copyright (c) 2023 Intel Corporation
 #
@@ -15,20 +14,15 @@
 # limitations under the License.
 #
 
-# setup.sh
-#  - install OS pkgs
-#  - should create virtual env & install pip  requirement.txt
-#  - git clones & applying patches
-
-set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
-python3 -m venv $PWD/venv
-. ./venv/bin/activate
-pip install -r requirements.txt
-
-git clone https://github.com/NVIDIA/DeepLearningExamples.git
-cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
-git checkout c481324031ecf0f70f8939516c02e16cac60446d
-git apply  ../../../../EnableBF16.patch
-cd -
-
+tensorflow
+intel-extension-for-tensorflow[xpu]
+git+https://github.com/NVIDIA/dllogger
+requests
+tqdm
+sentencepiece
+tensorflow_hub
+wget
+progressbar
+nltk
+tensorflow-addons
+horovod

@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
 #
 
 #!/bin/bash
@@ -23,13 +22,13 @@
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
 input_envs[PRECISION]=${PRECISION}
-input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 input_envs[DATASET_DIR]=${DATASET_DIR}
+input_envs[MULTI_TILE]=${MULTI_TILE}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
   env_param=${input_envs[$i]}
- 
+
   if [[ -z $env_param ]]; then
     echo "The required environment variable $var_name is not set" >&2
     exit 1
@@ -62,16 +61,47 @@ echo " OUTPUT_DIR: ${OUTPUT_DIR}"
 echo " PRECISION: ${PRECISION}"
 echo " BATCH_SIZE: $BATCH_SIZE"
 echo " EPOCHS: $EPOCHS"
-echo " STEPS_PER_EPOCH: $STEPS_PER_EPOCH" 
+echo " STEPS_PER_EPOCH: $STEPS_PER_EPOCH"
+echo " MULTI_TILE: $MULTI_TILE"
+
+mpi=""
+mpi_number="2"
+if [[ $MULTI_TILE == "True" ]];then
+    mpi="mpirun -np $mpi_number -prepend-rank -ppn $mpi_number "
+fi
+
+rm -fr $OUTPUT_DIR
 
 cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
 
-python main.py train \
+
+$mpi python main.py train \
 --data_dir $DATASET_DIR \
 --model_dir=$OUTPUT_DIR \
 --train_batch_size $BATCH_SIZE \
 --seed=0 --use_synthetic_data \
 --epochs $EPOCHS --steps_per_epoch $STEPS_PER_EPOCH \
 --log_every=1 --log_warmup_steps=1 \
-$AMP
+$AMP |& tee maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log
+
+if [[ $MULTI_TILE == "False" ]];then
+    result=$(cat maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log | grep train_throughput  | tail -n 1 | awk -F ' ' '{print $9}')
+    throughput=$result
+else
+    result=$(cat maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log | grep train_throughput  | tail -n 1 | awk -F ' ' '{print $10}')
+    throughput=$(echo "$result $mpi_number" |awk '{printf("%.2f", $1*$2)}')
+fi
+cd -
+
+yaml_content=$(cat <<EOF
+results:
+ - key: throughput
+   value: $throughput
+   unit: images/sec
+EOF
+)
+
+# Write the content to a YAML file
+echo "$yaml_content" >  ./results.yaml
+echo "YAML file created."
 
