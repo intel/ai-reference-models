@@ -195,8 +195,6 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet) | TensorFlow | Inference | Flex Series | [Int8](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/README_Flex_series.md) |
 | [ResNet 50 v1.5](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Inference | Flex Series |[Int8](/quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README_Flex_Series.md) |
 | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf)| TensorFlow | Inference | Flex Series| [Int8](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/README.md) |
-| [SSD-MobileNet](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | Flex Series | [Int8](/quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/README.md) |
-| [Yolo V4](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | Flex Series | [Int8](/quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md) |
 | [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/quickstart/image_recognition/tensorflow/efficientnet/inference/gpu/README.md) |
 | [MaskRCNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/quickstart/image_segmentation/tensorflow/maskrcnn/inference/gpu/README.md) | 
 | [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | TensorFlow | Inference | Flex Series | [FP16 FP32](/quickstart/generative-ai/tensorflow/stable_diffusion/inference/gpu/README.md) |
