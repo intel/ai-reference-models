@@ -47,7 +47,7 @@ mkdir -p ${OUTPUT_DIR}
 LOG=${OUTPUT_DIR}/dlrm_inference_accuarcy_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
-
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 ARGS=""
 export EXTRA_ARGS=" --synthetic_multi_hot_criteo_path $DATASET_DIR --test_auroc --snapshot-dir $WEIGHT_DIR"
 if [[ $PRECISION == "bf16" ]]; then
@@ -80,45 +80,29 @@ pip install memory_profiler
 export mrun_cmd="mprof run --python -o ${MEMLOG}"
 fi
 
+COMMON_ARGS=" --embedding_dim 128 \
+              --dense_arch_layer_sizes 512,256,128 \
+              --over_arch_layer_sizes 1024,1024,512,256,1 \
+              --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
+              --epochs 1 \
+              --pin_memory \
+              --mmap_mode \
+              --batch_size $BATCH_SIZE \
+              --interaction_type=dcn \
+              --dcn_num_layers=3 \
+              --dcn_low_rank_dim=512 \
+              --limit_val_batches 100 \
+              --log-freq 10 \
+              --inference-only \
+              $EXTRA_ARGS $ARGS "
+
 # Do not need to use launcher to bind memory for accuracy test
-TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
-    $mrun_cmd python $MODEL_SCRIPT \
-        --snapshot-dir $WEIGHT_DIR \
-        --embedding_dim 128 \
-        --dense_arch_layer_sizes 512,256,128 \
-        --over_arch_layer_sizes 1024,1024,512,256,1 \
-        --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
-        --epochs 1 \
-        --pin_memory \
-        --mmap_mode \
-        --batch_size $BATCH_SIZE \
-        --interaction_type=dcn \
-        --dcn_num_layers=3 \
-        --dcn_low_rank_dim=512 \
-        --ipex-merged-emb-cat \
-        --ipex-optimize \
-        --inference-only \
-        $ARGS $EXTRA_ARGS 2>&1 | tee $LOG_0
+  $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --ipex-optimize --jit --ipex-merged-emb-cat 2>&1 | tee $LOG_0
 else
-    echo "### running with torch.compile inductor backend"
-    $mrun_cmd python $MODEL_SCRIPT \
-        --snapshot-dir $WEIGHT_DIR \
-        --embedding_dim 128 \
-        --dense_arch_layer_sizes 512,256,128 \
-        --over_arch_layer_sizes 1024,1024,512,256,1 \
-        --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
-        --epochs 1 \
-        --pin_memory \
-        --mmap_mode \
-        --batch_size $BATCH_SIZE \
-        --interaction_type=dcn \
-        --dcn_num_layers=3 \
-        --dcn_low_rank_dim=512 \
-        --inductor \
-        --inference-only \
-        $ARGS $EXTRA_ARGS 2>&1 | tee $LOG_0
+  $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG_0
 fi
+wait
 
 if [[ $PLOTMEM == "true" ]]; then
 mprof plot ${MEMLOG} -o ${MEMPIC}

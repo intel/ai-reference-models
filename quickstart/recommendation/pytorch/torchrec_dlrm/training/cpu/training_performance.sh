@@ -20,6 +20,7 @@ if [ ! -e "${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/dlrm_main.py
     exit 1
 fi
 MODEL_SCRIPT=${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/dlrm_main.py
+export PREPROCESSED_CRITEO_1TB_CLICK_LOGS_DATASET_PATH=/pytorch/dlrm-v2-data/one_hot
 
 echo "PRECISION: ${PRECISION}"
 echo "OUTPUT_DIR: ${OUTPUT_DIR}"
@@ -58,61 +59,52 @@ if [[ $ENABLE_TORCH_PROFILE == "true" ]]; then
   ARGS="$ARGS --profile"
 fi
 
-export launcher_arg="-m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc"
+BATCH_SIZE=${BATCH_SIZE:-5120}
+if [[ $DIST == "1" ]]; then
+  source ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/training/cpu/distributed_setup.sh
+  launcher_arg=$launcher_dist_args
+  ARGS="$ARGS --ipex-dist-merged-emb-adagrad --distributed-training "
+  BATCH_SIZE=`expr $BATCH_SIZE \* 3`
+else
+  launcher_arg=" --node_id 0 "
+  ARGS="$ARGS --ipex-merged-emb-adagrad"
+fi
+
+export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc ${launcher_arg}"
 if [[ $PLOTMEM == "true" ]]; then
 pip install memory_profiler matplotlib
 export mrun_cmd="mprof run --python -o ${MEMLOG}"
 unset launcher_arg
 fi
 
+COMMON_ARGS=" --embedding_dim 128 \
+              --dense_arch_layer_sizes 512,256,128 \
+              --over_arch_layer_sizes 1024,1024,512,256,1 \
+              --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
+              --epochs 1 \
+              --pin_memory \
+              --mmap_mode \
+              --batch_size $BATCH_SIZE \
+              --interaction_type=dcn \
+              --dcn_num_layers=3 \
+              --dcn_low_rank_dim=512 \
+              --adagrad \
+              --learning_rate 0.005 \
+              --multi_hot_distribution_type uniform \
+              --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
+              --limit_train_batches 100 \
+              --log-freq 10 \
+              --benchmark \
+              $ARGS "
+
 LOG_0="${LOG}/throughput.log"
 
 BATCH_SIZE=${BATCH_SIZE:-32768}
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
-  $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
-      --embedding_dim 128 \
-      --dense_arch_layer_sizes 512,256,128 \
-      --over_arch_layer_sizes 1024,1024,512,256,1 \
-      --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
-      --epochs 1 \
-      --pin_memory \
-      --mmap_mode \
-      --batch_size $BATCH_SIZE \
-      --interaction_type=dcn \
-      --dcn_num_layers=3 \
-      --dcn_low_rank_dim=512 \
-      --adagrad \
-      --learning_rate 0.005 \
-      --multi_hot_distribution_type uniform \
-      --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
-      --limit_train_batches 100 \
-      --ipex-optimize \
-      --log-freq 10 \
-      --benchmark \
-      $ARGS 2>&1 | tee $LOG_0
+  $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --ipex-optimize 2>&1 | tee $LOG_0
 else
-  $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
-      --embedding_dim 128 \
-      --dense_arch_layer_sizes 512,256,128 \
-      --over_arch_layer_sizes 1024,1024,512,256,1 \
-      --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
-      --epochs 1 \
-      --pin_memory \
-      --mmap_mode \
-      --batch_size $BATCH_SIZE \
-      --interaction_type=dcn \
-      --dcn_num_layers=3 \
-      --dcn_low_rank_dim=512 \
-      --adagrad \
-      --learning_rate 0.005 \
-      --multi_hot_distribution_type uniform \
-      --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
-      --limit_train_batches 100 \
-      --inductor \
-      --log-freq 10 \
-      --benchmark \
-      $ARGS 2>&1 | tee $LOG_0
+  $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG_0
 fi
 wait
 

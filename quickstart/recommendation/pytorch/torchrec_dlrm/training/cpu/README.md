@@ -67,8 +67,26 @@ export PRECISION=<specify the precision to run>
 
 # Run a quickstart script (for example, bare metal performance)
 cd ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/training/cpu
+# normal Training
 bash training_performance.sh
+# Distributed training
+DIST=1 bash training_performance.sh
 ```
+
+## Distributed training advance setting
+The default behaviour for `DIST=1 bash training_performance.sh`
+(1) Will run 2 instance on numa node `0, 1` within non-SNC mode.
+(2) Will run n instance on socket 0 on sub numa node `0, 1, ..., n` with SNC-N mode. For example, will run 3 instance on socket 0, sub numa node `0, 1, 2` with SNC3.
+(3) You can further setting it by setting `NODE_LIST` and `NODE` and `PROC_PER_NODE`. For example, if you wish to run 4 instance on 2 nodes, and run on numa nodes `2, 3` for each nodes
+You can run
+```bash
+export NODE_LIST=2,3
+export NODE=2
+export PROC_PER_NODE=2
+DIST=1 bash training_performance.sh
+```
+Please remember to config your IP address in `hostfile1`, 1 address per line.
+
 
 <!--- 80. License -->
 ## License

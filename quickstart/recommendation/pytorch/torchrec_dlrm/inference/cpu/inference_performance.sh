@@ -49,6 +49,8 @@ else
   EXTRA_ARGS="$EXTRA_ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
 fi
 
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+
 ARGS=""
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --dtype bf16"
@@ -63,8 +65,10 @@ elif [[ $PRECISION == "fp16" ]]; then
     echo "running fp16 path"
     ARGS="$ARGS --dtype fp16"
 elif [[ $PRECISION == "int8" ]]; then
-    echo "prepare int8 weight"
-    bash ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/prepare_int8.sh
+    if [[ "0" == ${TORCH_INDUCTOR} ]];then
+      echo "prepare int8 weight"
+      bash ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/prepare_int8.sh
+    fi
     echo "running int8 path"
     ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"
 else
@@ -75,15 +79,12 @@ fi
 
 LOG_0="${LOG}/throughput.log"
 
-if [ -z "${BATCH_SIZE}" ]; then
-  BATCH_SIZE=512
-fi
 
-export launcher_arg="-m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc"
+export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc"
 if [[ $PLOTMEM == "true" ]]; then
 pip install memory_profiler matplotlib
 export mrun_cmd="mprof run --python -o ${MEMLOG}"
-unset launcher_arg
+unset launcher_cmd
 fi
 
 if [[ $ENABLE_TORCH_PROFILE == "true" ]]; then
@@ -97,51 +98,29 @@ NUMA_NODES_PER_SOCKETS=`expr $NUMA_NODES / $SOCKETS`
 CORES_PER_NUMA_NODE=`expr $CORES_PER_SOCKET / $NUMA_NODES_PER_SOCKETS`
 
 export OMP_NUM_THREADS=1
+COMMON_ARGS=" --embedding_dim 128 \
+              --dense_arch_layer_sizes 512,256,128 \
+              --over_arch_layer_sizes 1024,1024,512,256,1 \
+              --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
+              --epochs 1 \
+              --pin_memory \
+              --mmap_mode \
+              --batch_size $BATCH_SIZE \
+              --interaction_type=dcn \
+              --dcn_num_layers=3 \
+              --dcn_low_rank_dim=512 \
+              --limit_val_batches 100 \
+              --log-freq 10 \
+              --inference-only \
+              --benchmark \
+              --share-weight-instance=$CORES_PER_NUMA_NODE \
+              $EXTRA_ARGS $ARGS "
 
-TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
-    $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
-        --embedding_dim 128 \
-        --dense_arch_layer_sizes 512,256,128 \
-        --over_arch_layer_sizes 1024,1024,512,256,1 \
-        --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
-        --epochs 1 \
-        --pin_memory \
-        --mmap_mode \
-        --batch_size $BATCH_SIZE \
-        --interaction_type=dcn \
-        --dcn_num_layers=3 \
-        --dcn_low_rank_dim=512 \
-        --limit_val_batches 1000 \
-        --ipex-merged-emb-cat \
-        --ipex-optimize \
-        --log-freq 10 \
-        --jit \
-        --inference-only \
-        --benchmark \
-        --share-weight-instance=$CORES_PER_NUMA_NODE \
-        $EXTRA_ARGS $ARGS 2>&1 | tee $LOG_0
+  $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --ipex-optimize --jit --ipex-merged-emb-cat 2>&1 | tee $LOG_0
 else
-    echo "### running with torch.compile inductor backend"
-    $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
-        --embedding_dim 128 \
-        --dense_arch_layer_sizes 512,256,128 \
-        --over_arch_layer_sizes 1024,1024,512,256,1 \
-        --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
-        --epochs 1 \
-        --pin_memory \
-        --mmap_mode \
-        --batch_size $BATCH_SIZE \
-        --interaction_type=dcn \
-        --dcn_num_layers=3 \
-        --dcn_low_rank_dim=512 \
-        --limit_val_batches 1000 \
-        --inductor \
-        --log-freq 10 \
-        --inference-only \
-        --benchmark \
-        --share-weight-instance=$CORES_PER_NUMA_NODE \
-        $EXTRA_ARGS $ARGS 2>&1 | tee $LOG_0
+  $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG_0
 fi
 wait
 
