@@ -103,7 +103,7 @@ class eval_stable_diffusion:
             tf.config.optimizer.set_experimental_options({'auto_mixed_precision': True})
             print(tf.config.optimizer.get_experimental_options())
 
-        model = keras_cv.models.StableDiffusion(img_width=512, img_height=512)
+        model = keras_cv.models.StableDiffusionV2(img_width=512, img_height=512)
 
         if (not self.args.accuracy_only):
             print("Performance Benchmarking")
