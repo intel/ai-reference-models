@@ -82,10 +82,12 @@ fi
 
 # If OMP_NUM_THREADS env is not mentioned, then run with the default value
 if [ -z "${OMP_NUM_THREADS}" ]; then 
-  export OMP_NUM_THREADS=4
+  omp_num_threads=4
 else
-  export OMP_NUM_THREADS=${OMP_NUM_THREADS}
+  omp_num_threads=${OMP_NUM_THREADS}
 fi
+
+export OMP_NUM_THREADS=${omp_num_threads}
 
 #Set up env variable for bfloat32
 if [[ $PRECISION == "bfloat32" ]]; then
