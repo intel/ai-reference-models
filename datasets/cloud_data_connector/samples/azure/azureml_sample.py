@@ -43,8 +43,8 @@ ml_uploader: MLUploader = MLUploader(ml_client)
 
 # Training the model in local
 path = Path().resolve()
-training_script = f"{path}\\src\\main.py"
-training_data = f"{path}\\sample_data\\credit_card_clients.xls"
+training_script = f"{path}/src/main.py"
+training_data = f"{path}/sample_data/credit_card_clients.xls"
 _test_train_ratio=0.2
 _learning_rate=0.25
 _registered_model_name = "credit_defaults_model"
@@ -118,14 +118,14 @@ except Exception:
 
 #Environment
 # 
-dependencies_dir = f"{path}\\dependencies\\" 
+dependencies_dir = f"{path}/dependencies/" 
 custom_env_name =  "aml-scikit-learn"
 _environment_description = (
                             "Custom environment for Credit Card " 
                             "Defaults pipeline"
                         )
 _environment_tags = {"scikit-learn": "0.24.2"}
-_environment_conda_file = f"{dependencies_dir}\\conda.yml"
+_environment_conda_file = f"{dependencies_dir}/conda.yml"
 _environment_docker_image = "mcr.microsoft.com/azureml/openmpi3.1.2-ubuntu18.04:latest"
 
 pipeline_job_env: Environment = Environment(
