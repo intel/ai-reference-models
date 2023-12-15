@@ -67,6 +67,13 @@ else
 fi
 echo "STEPS: $STEPS"
 
+if [ -z "${WARMUP_STEPS}" ]; then
+  WARMUP_STEPS="warmup-steps=10"
+else
+  WARMUP_STEPS="warmup-steps=${WARMUP_STEPS}"
+fi
+echo "WARMUP_STEPS: ${WARMUP_STEPS}"
+
 # Get number of cores per socket line from lscpu
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
@@ -86,6 +93,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --numa-cores-per-instance=${CORES_PER_INSTANCE} \
   $@ \
   -- \
+  $WARMUP_STEPS \
   $STEPS \
 
 if [[ $? == 0 ]]; then

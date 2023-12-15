@@ -71,6 +71,9 @@ class eval_graphsage:
         arg_parser.add_argument('-s', "--steps", type=int, default=20,
                                 help="number of steps")
 
+        arg_parser.add_argument("--warmup-steps", type=int, default=20,
+                            help="number of warmup steps")
+
         # parse the arguments
         self.args = arg_parser.parse_args()
         # validate the arguements
@@ -79,6 +82,7 @@ class eval_graphsage:
     def run(self):
         data_location = self.args.data_location
         pretrained_model = self.args.pretrained_model
+        warmup_iter = self.args.warmup_steps
         data = dataloader.load_data(prefix=data_location+'/ppi')
         G = data[0]
         features = data[1]
@@ -130,7 +134,7 @@ class eval_graphsage:
         output_tensor = sess.graph.get_tensor_by_name('Sigmoid:0')
 
         total_time = 0
-        def infer(sess, size, output_tensor,minibatch,test):
+        def infer(sess, size, output_tensor,minibatch,warmup_iter,test):
             t_test = time.time()
             val_losses = []
             val_preds = []
@@ -140,22 +144,27 @@ class eval_graphsage:
             total_time = 0
             while not finished:
                 feed_dict_val, batch_labels, finished, _ = minibatch.incremental_node_val_feed_dict(size,iter_num,test=True)
+                if iter_num == 0:
+                    cur_warmup_step = 0
+                    while cur_warmup_step < warmup_iter:
+                        node_outs_val = sess.run([output_tensor],feed_dict=feed_dict_val)
+                        cur_warmup_step += 1
                 tf_logging.warn('\n---> Start iteration {0}'.format(str(iter_num)))
                 start_time = time.time()
                 node_outs_val = sess.run([output_tensor],feed_dict=feed_dict_val)
                 time_consume = time.time() - start_time
                 val_preds.append(node_outs_val[0])
                 labels.append(batch_labels)
-                iter_num += 1
                 total_time += time_consume
-            tf_logging.warn('\n---> Stop iteration {0}'.format(str(iter_num)))
+                tf_logging.warn('\n---> Stop iteration {0}'.format(str(iter_num)))
+                iter_num += 1
             val_preds = np.vstack(val_preds)
             labels = np.vstack(labels)
             f1_scores = utils.calc_f1(labels, val_preds)
             time_average = total_time / iter_num
             return f1_scores, (time.time() - t_test)/iter_num, time_average
 
-        test_f1_micro, duration,time_average = infer(sess,self.args.batch_size, output_tensor,minibatch,test=True)
+        test_f1_micro, duration,time_average = infer(sess,self.args.batch_size, output_tensor, minibatch, warmup_iter, test=True)
         if (not self.args.accuracy_only):
             print("Benchmark")
             print('Precision ', self.args.precision)

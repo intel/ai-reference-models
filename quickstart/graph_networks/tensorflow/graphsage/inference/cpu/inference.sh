@@ -66,6 +66,13 @@ else
 fi
 echo "STEPS: $STEPS"
 
+if [ -z "${WARMUP_STEPS}" ]; then
+  WARMUP_STEPS="warmup-steps=10"
+else
+  WARMUP_STEPS="warmup-steps=${WARMUP_STEPS}"
+fi
+echo "WARMUP_STEPS: ${WARMUP_STEPS}"
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=graphsage \
@@ -78,4 +85,5 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --batch-size ${BATCH_SIZE} \
   $@ \
   -- \
+  $WARMUP_STEPS \
   $STEPS \

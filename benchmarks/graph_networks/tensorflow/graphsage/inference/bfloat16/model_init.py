@@ -48,6 +48,11 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser = ArgumentParser(description='Parse args')
 
         arg_parser.add_argument(
+            "--warmup-steps", dest='warmup_steps',
+            type=int, default=10,
+            help="number of warmup steps")
+
+        arg_parser.add_argument(
             "--steps", dest='steps',
             type=int, default=20,
             help="number of steps")
@@ -83,6 +88,7 @@ class ModelInitializer(BaseModelInitializer):
             " --num-inter-threads=" + str(self.args.num_inter_threads) + \
             " --num-intra-threads=" + str(self.args.num_intra_threads) + \
             " --batch-size=" + str(self.args.batch_size) + \
+            " --warmup-steps=" + str(self.args.warmup_steps) + \
             " --steps=" + str(self.args.steps)
 
         if self.args.pretrained_model and os.listdir(self.args.pretrained_model):
