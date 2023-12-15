@@ -7,6 +7,7 @@ Azure samples are based on official documentation for Azure. On these samples Oa
 * [Azure CLi](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 * [Azure CLI for ML](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-configure-cli?view=azureml-api-2&tabs=public) extension
 
+
 Azure blob sample
 -----
 [Blob Sample doc](./docs/blob_sample.md)
