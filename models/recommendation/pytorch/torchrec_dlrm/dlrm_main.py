@@ -133,7 +133,15 @@ def fetch_batch(dataloader):
     try:
         batch = dataloader.dataset.load_batch()
     except:
-        batch = dataloader.source.dataset.batch_generator._generate_batch()
+        import torchrec
+        dataset = dataloader.source.dataset
+        if isinstance(dataset, torchrec.datasets.criteo.InMemoryBinaryCriteoIterDataPipe):
+            sample_list = list(range(dataset.batch_size))
+            dense = dataset.dense_arrs[0][sample_list, :]
+            sparse = [arr[sample_list, :] for arr in dataset.sparse_arrs][0] % dataset.hashes
+            labels = dataset.labels_arrs[0][sample_list, :]
+            return dataloader.func(dataset._np_arrays_to_batch(dense, sparse, labels))
+        batch = dataloader.func(dataloader.source.dataset.batch_generator._generate_batch())
     return batch
 
 def split_dense_input_and_label_for_ranks(batch):
