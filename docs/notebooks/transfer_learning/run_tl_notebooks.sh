@@ -17,18 +17,18 @@
 
 
 tf_notebooks=(
-    "docs/notebooks/transfer_learning/tf_image_classification/Image_Classification_Transfer_Learning.ipynb"
-    "docs/notebooks/transfer_learning/tfhub_bert/question_answering/BERT_Question_Answering.ipynb"
-    "docs/notebooks/transfer_learning/tfhub_bert/text_classification/BERT_Binary_Text_Classification.ipynb"
-    "docs/notebooks/transfer_learning/tfhub_bert/text_classification/BERT_Multi_Text_Classification.ipynb"
+    "docs/notebooks/transfer_learning/image_classification/tf_image_classification/Image_Classification_Transfer_Learning.ipynb"
+    "docs/notebooks/transfer_learning/question_answering/BERT_Question_Answering.ipynb"
+    "docs/notebooks/transfer_learning/text_classification/tfhub_bert_text_classification/BERT_Binary_Text_Classification.ipynb"
+    "docs/notebooks/transfer_learning/text_classification/tfhub_bert_text_classification/BERT_Multi_Text_Classification.ipynb"
 )
 
 pyt_notebooks=(
-    "docs/notebooks/transfer_learning/huggingface_image_classification/HuggingFace_Image_Classification_Transfer_Learning.ipynb"
-    "docs/notebooks/transfer_learning/pytorch_image_classification/PyTorch_Image_Classification_Transfer_Learning.ipynb"
-    "docs/notebooks/transfer_learning/pytorch_object_detection/PyTorch_Object_Detection_Transfer_Learning.ipynb"
-    "docs/notebooks/transfer_learning/pytorch_text_classification/PyTorch_Text_Classifier_fine_tuning.ipynb"
-    "docs/notebooks/transfer_learning/pytorch_text_generation/PyTorch_LLM_Instruction_Tuning.ipynb"
+    "docs/notebooks/transfer_learning/image_classification/huggingface_image_classification/HuggingFace_Image_Classification_Transfer_Learning.ipynb"
+    "docs/notebooks/transfer_learning/image_classification/pytorch_image_classification/PyTorch_Image_Classification_Transfer_Learning.ipynb"
+    "docs/notebooks/transfer_learning/object_detection/pytorch_object_detection/PyTorch_Object_Detection_Transfer_Learning.ipynb"
+    "docs/notebooks/transfer_learning/text_classification/pytorch_text_classification/PyTorch_Text_Classifier_fine_tuning.ipynb"
+    "docs/notebooks/transfer_learning/text_generation/pytorch_text_generation/PyTorch_LLM_Instruction_Tuning.ipynb"
 )
 
 if [[ $# -eq 0 ]] ; then
