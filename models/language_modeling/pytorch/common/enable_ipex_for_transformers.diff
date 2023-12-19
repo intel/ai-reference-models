@@ -988,7 +988,7 @@ index 474b92f..98aab97 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499..c7c1af6 100755
+index cf71499..b8a90d9 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,9 @@ from .utils import (
@@ -1174,7 +1174,7 @@ index cf71499..c7c1af6 100755
 +                    prepared_model(**example_batch)
 +                    converted_model = convert_pt2e(prepared_model)
 +                    torch.ao.quantization.move_exported_model_to_eval(converted_model)
-+                    with torch.cpu.amp.autocast(enabled=self.args.int8_bf16):
++                    with torch.cpu.amp.autocast(enabled=(self.args.bf16 or self.args.int8_bf16)):
 +                        if self.args.use_ipex:
 +                            print('[Info] Running torch.compile() with IPEX backend')
 +                            model = torch.compile(converted_model, backend="ipex")
