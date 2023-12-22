@@ -13,14 +13,14 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 ### Install dependencies
 ```
-pip install torchmetrics torch-fidelity pycocotools transformers==4.28.1
+pip install torchmetrics torch-fidelity pycocotools transformers==4.35.2 peft==0.6.2
 ```
 
 ### install model
 ```
 git clone https://github.com/huggingface/diffusers.git
 cd diffusers
-git checkout v0.16.0
+git checkout v0.23.1
 git apply ../diffusers.patch
 python setup.py install
 ```
@@ -50,23 +50,19 @@ preprocess the dataset, and do the model specific setup. Once all the setup is d
 the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have an enviornment variable set to point to an output directory.
 
-```
+```bash
 # Clone the model zoo repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
-# Install diffusers
 cd quickstart/diffusion/pytorch/stable_diffusion/inference/cpu/
-git clone https://github.com/huggingface/diffusers.git
-cd diffusers
-git checkout v0.16.0
-git apply ../diffusers.patch
-python setup.py install
-cd ..
+
 # Env vars
+export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<path to an output directory>
+
 # Run a quickstart script (for example, FP32 multi-instance realtime inference)
-bash inference_realtime.sh fp32
+bash inference_realtime.sh fp32 ipex-jit
 ```
 
 <!--- 80. License -->

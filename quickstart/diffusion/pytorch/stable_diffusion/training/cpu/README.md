@@ -13,14 +13,14 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 ### Install dependencies
 ```bash
-pip install torchmetrics torch-fidelity pycocotools transformers==4.28.1
+pip install torchmetrics torch-fidelity pycocotools transformers==4.35.2 peft==0.6.2
 ```
 
 ### install model
 ```bash
 git clone https://github.com/huggingface/diffusers.git
 cd diffusers
-git checkout v0.16.0
+git checkout v0.23.1
 python setup.py install
 ```
 
@@ -75,16 +75,15 @@ the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have an enviornment variable set to point to an output directory.
 
 ```bash
+# Clone the model zoo repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
-# Install diffusers
-cd quickstart/diffusion/pytorch/stable_diffusion/training/cpu
-git clone https://github.com/huggingface/diffusers.git
-cd diffusers
-git checkout v0.16.0
-python setup.py install
-cd ..
+cd quickstart/diffusion/pytorch/stable_diffusion/training/cpu/
+
+# Env vars
+export OUTPUT_DIR=<path to an output directory>
+
 # Run fine-tuning
 bash finetune.sh
 ```
