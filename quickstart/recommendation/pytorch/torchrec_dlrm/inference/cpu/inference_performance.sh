@@ -109,7 +109,7 @@ COMMON_ARGS=" --embedding_dim 128 \
               --interaction_type=dcn \
               --dcn_num_layers=3 \
               --dcn_low_rank_dim=512 \
-              --limit_val_batches 100 \
+              --limit_val_batches 300 \
               --log-freq 10 \
               --inference-only \
               --benchmark \

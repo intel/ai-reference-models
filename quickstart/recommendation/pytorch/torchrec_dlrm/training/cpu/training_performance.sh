@@ -92,7 +92,7 @@ COMMON_ARGS=" --embedding_dim 128 \
               --learning_rate 0.005 \
               --multi_hot_distribution_type uniform \
               --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
-              --limit_train_batches 100 \
+              --limit_train_batches 300 \
               --log-freq 10 \
               --benchmark \
               $ARGS "

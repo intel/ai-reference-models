@@ -927,13 +927,14 @@ def _train(
                 for i, g in enumerate(train_optimizer.param_groups):
                     logger.info(f"lr: {it} {i} {g['lr']:.6f}")
             samples, train_t = train_step(train_model, train_optimizer, iterator, it)
-            if enable_torch_profile:
-                p.step()
-            num_samples += samples
-            total_t += train_t
+            if it >= 100:
+                num_samples += samples
+                total_t += train_t
+                if enable_torch_profile:
+                    p.step()
 
-            if log_freq != 0 and it % log_freq == 0:
-                logger.info(f"avg training time per iter at ITER: {it}, {total_t/it} s")
+            if log_freq != 0 and it % log_freq == 0 and it > 100: 
+                logger.info(f"avg training time per iter at ITER: {it}, {total_t/ (it - 100)} s")
                 print_memory(f"memory usage at iter {it}")
 
             lr_scheduler.step()
@@ -978,7 +979,7 @@ def _share_weight_benchmark(
     print_memory("start to run throughput benchmark")
     stats = bench.benchmark(
         num_calling_threads=args.share_weight_instance,
-        num_warmup_iters=1,
+        num_warmup_iters=200,
         num_iters=args.limit_val_batches * args.share_weight_instance,
     )
     print(stats)
