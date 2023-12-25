@@ -48,7 +48,7 @@ if [ -z "${WEIGHT_PATH}" ]; then
   exit 1
 fi
 
-if [-z "${PRECISION}" ]; then
+if [ -z "${PRECISION}" ]; then
   echo "Please set PRECISION: int8, fp32, bf16, bf32"
   exit 1
 fi

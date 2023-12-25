@@ -267,7 +267,11 @@ class DLRM_Net(nn.Module):
             embs = local_ln_emb_sparse + ln_emb_dense
         for i in embs:
             n = ln[i]
-            sparse_grad = n >= self.sparse_dense_boundary and ext_dist.my_size > 1
+            
+            # TODO: the previous implementation uses sparse_grad = n >= self.sparse_dense_boundary and ext_dist.my_size > 1,
+            # making sparse_grad a numpy.bool_ instead of a python bool, which is unsupported in TorchInductor.
+            # Update the implementation to make sparse_grad a python bool.
+            sparse_grad = True if n >= self.sparse_dense_boundary and ext_dist.my_size > 1 else False
             if np_init_emb_weight:
                 W = np.random.uniform(
                         low=-np.sqrt(1 / n), high=np.sqrt(1 / n), size=(n, m)
@@ -852,7 +856,7 @@ def trace_model(args, dlrm, test_ld):
             prepare(dlrm, qconfig, example_inputs=(X, lS_o, lS_i), inplace=True)
             dlrm.load_qconf_summary(qconf_summary = args.int8_configure)
             convert(dlrm, inplace=True)
-        else:
+        elif args.ipex_interaction:
             if args.bf32:
                 ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
             dlrm = ipex.optimize(dlrm, dtype=torch.float, inplace=True, auto_kernel_selection=True)
@@ -1196,8 +1200,8 @@ def run():
                         with more than 24 CPU cores and at least 1 TB of memory.",
     )
     # training
-    parser.add_argument("--mini-batch-size", type=int, default=-1)
-    parser.add_argument("--local-batch-size", type=int, default=-1)
+    parser.add_argument("--mini-batch-size", type=int, default=1)
+    parser.add_argument("--local-batch-size", type=int, default=1)
     parser.add_argument("--nepochs", type=int, default=1)
     parser.add_argument("--learning-rate", type=float, default=0.01)
     parser.add_argument("--print-precision", type=int, default=5)
@@ -1255,7 +1259,11 @@ def run():
         global ipex
     ext_dist.init_distributed(backend=args.dist_backend)
     if args.mini_batch_size < 0:
-        args.mini_batch_size = args.local_batch_size * ext_dist.my_size
+        if ags.local_batch_size > 0:
+            args.mini_batch_size = args.local_batch_size * ext_dist.my_size
+        else
+            assert args.test_mini_batch_size > 0
+            args.mini_batch_size = args.test_mini_batch_size
 
     ### some basic setup ###
     np.random.seed(args.numpy_rand_seed)
