@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fc9411e..d5cf6fc 100644
+index fc9411e95..29f5c13fc 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -24,7 +24,7 @@ index fc9411e..d5cf6fc 100644
  try:
      from torch.utils.tensorboard import SummaryWriter
  except ImportError:
-@@ -265,6 +271,194 @@ def train(args, train_dataset, model, tokenizer):
+@@ -265,6 +271,202 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -116,11 +116,19 @@ index fc9411e..d5cf6fc 100644
 +            from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
 +            from torch._export import capture_pre_autograd_graph, dynamic_dim
 +            print('[Info] Running torch.compile() for INT8 quantization')
++            print('[Info] Running int8_bf16 is: {}'.format(args.int8_bf16))
 +            with torch.no_grad():
 +                exported_model = capture_pre_autograd_graph(
 +                    model,
 +                    (),
 +                    kwargs=torch_compile_inputs,
++                    constraints=[
++                        dynamic_dim(torch_compile_inputs["input_ids"], 0),
++                        dynamic_dim(torch_compile_inputs["attention_mask"], 0),
++                        dynamic_dim(torch_compile_inputs["token_type_ids"], 0),
++                        dynamic_dim(torch_compile_inputs["input_ids"], 0) == dynamic_dim(torch_compile_inputs["attention_mask"], 0),
++                        dynamic_dim(torch_compile_inputs["input_ids"], 0) == dynamic_dim(torch_compile_inputs["token_type_ids"], 0),
++                    ],
 +                )
 +                quantizer = X86InductorQuantizer()
 +                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
@@ -132,7 +140,7 @@ index fc9411e..d5cf6fc 100644
 +                    if args.ipex:
 +                        model = torch.compile(converted_model, backend="ipex")
 +                    else:
-+                        model = torch.compile(converted_model)
++                        model = torch.compile(converted_model, dynamic=True)
 +                    model(**torch_compile_inputs)
 +                    model(**torch_compile_inputs)
 +        else:
@@ -219,7 +227,7 @@ index fc9411e..d5cf6fc 100644
  
  def evaluate(args, model, tokenizer, prefix=""):
      dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
-@@ -278,6 +472,8 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -278,6 +480,8 @@ def evaluate(args, model, tokenizer, prefix=""):
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
  
@@ -228,7 +236,7 @@ index fc9411e..d5cf6fc 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -286,12 +482,47 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -286,12 +490,47 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
@@ -277,7 +285,18 @@ index fc9411e..d5cf6fc 100644
          batch = tuple(t.to(args.device) for t in batch)
  
          with torch.no_grad():
-@@ -320,7 +551,7 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -314,13 +553,17 @@ def evaluate(args, model, tokenizer, prefix=""):
+                     inputs.update(
+                         {"langs": (torch.ones(batch[0].shape, dtype=torch.int64) * args.lang_id).to(args.device)}
+                     )
+-            outputs = model(**inputs)
++            if args.inductor:
++                with torch.cpu.amp.autocast(enabled=args.bf16 or args.int8_bf16):
++                    outputs = model(**inputs)
++            else:
++                outputs = model(**inputs)
+ 
+         for i, feature_index in enumerate(feature_indices):
              eval_feature = features[feature_index.item()]
              unique_id = int(eval_feature.unique_id)
  
@@ -286,7 +305,7 @@ index fc9411e..d5cf6fc 100644
  
              # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
              # models only use two.
-@@ -671,7 +902,57 @@ def main():
+@@ -671,7 +914,57 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -344,7 +363,7 @@ index fc9411e..d5cf6fc 100644
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
          logger.warning(
-@@ -742,11 +1023,13 @@ def main():
+@@ -742,11 +1035,13 @@ def main():
      args.model_type = args.model_type.lower()
      config = AutoConfig.from_pretrained(
          args.config_name if args.config_name else args.model_name_or_path,
@@ -358,7 +377,7 @@ index fc9411e..d5cf6fc 100644
          cache_dir=args.cache_dir if args.cache_dir else None,
          use_fast=False,  # SquadDataset is not compatible with Fast tokenizers which have a smarter overflow handeling
      )
-@@ -824,7 +1107,7 @@ def main():
+@@ -824,7 +1119,7 @@ def main():
          for checkpoint in checkpoints:
              # Reload the model
              global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
@@ -368,7 +387,7 @@ index fc9411e..d5cf6fc 100644
  
              # Evaluate
 diff --git a/examples/pytorch/image-classification/run_image_classification.py b/examples/pytorch/image-classification/run_image_classification.py
-index e2ce9f1..2a7fc12 100644
+index e2ce9f1c5..2a7fc1201 100644
 --- a/examples/pytorch/image-classification/run_image_classification.py
 +++ b/examples/pytorch/image-classification/run_image_classification.py
 @@ -275,6 +275,7 @@ def main():
@@ -380,7 +399,7 @@ index e2ce9f1..2a7fc12 100644
          use_auth_token=True if model_args.use_auth_token else None,
      )
 diff --git a/examples/pytorch/question-answering/run_qa.py b/examples/pytorch/question-answering/run_qa.py
-index 9dc3b2c..0c21b2d 100755
+index 9dc3b2c81..0c21b2dd9 100755
 --- a/examples/pytorch/question-answering/run_qa.py
 +++ b/examples/pytorch/question-answering/run_qa.py
 @@ -322,6 +322,7 @@ def main():
@@ -392,7 +411,7 @@ index 9dc3b2c..0c21b2d 100755
      )
      tokenizer = AutoTokenizer.from_pretrained(
 diff --git a/examples/pytorch/text-classification/run_glue.py b/examples/pytorch/text-classification/run_glue.py
-index c14107d..fdc7d03 100755
+index c14107d89..fdc7d03f6 100755
 --- a/examples/pytorch/text-classification/run_glue.py
 +++ b/examples/pytorch/text-classification/run_glue.py
 @@ -360,6 +360,7 @@ def main():
@@ -426,7 +445,7 @@ index c14107d..fdc7d03 100755
      if training_args.do_predict:
          logger.info("*** Predict ***")
 diff --git a/src/transformers/activations.py b/src/transformers/activations.py
-index 587dc2e..b4e331e 100644
+index 587dc2e59..b4e331e28 100644
 --- a/src/transformers/activations.py
 +++ b/src/transformers/activations.py
 @@ -53,8 +53,7 @@ class NewGELUActivation(nn.Module):
@@ -440,7 +459,7 @@ index 587dc2e..b4e331e 100644
  class GELUActivation(nn.Module):
      """
 diff --git a/src/transformers/generation/utils.py b/src/transformers/generation/utils.py
-index ae12ae2..041fc2f 100644
+index ae12ae293..041fc2f23 100644
 --- a/src/transformers/generation/utils.py
 +++ b/src/transformers/generation/utils.py
 @@ -16,6 +16,8 @@
@@ -836,7 +855,7 @@ index ae12ae2..041fc2f 100644
      def beam_sample(
          self,
 diff --git a/src/transformers/modeling_utils.py b/src/transformers/modeling_utils.py
-index 0df8d7e..99d107a 100644
+index 0df8d7e25..99d107a81 100644
 --- a/src/transformers/modeling_utils.py
 +++ b/src/transformers/modeling_utils.py
 @@ -1831,7 +1831,10 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
@@ -852,7 +871,7 @@ index 0df8d7e..99d107a 100644
          # Save the model
          for shard_file, shard in shards.items():
 diff --git a/src/transformers/models/bert/modeling_bert.py b/src/transformers/models/bert/modeling_bert.py
-index ee7dcd5..5ead9c9 100755
+index ee7dcd5e4..5ead9c989 100755
 --- a/src/transformers/models/bert/modeling_bert.py
 +++ b/src/transformers/models/bert/modeling_bert.py
 @@ -346,6 +346,8 @@ class BertSelfAttention(nn.Module):
@@ -899,7 +918,7 @@ index ee7dcd5..5ead9c9 100755
              total_loss = masked_lm_loss + next_sentence_loss
  
 diff --git a/src/transformers/models/distilbert/modeling_distilbert.py b/src/transformers/models/distilbert/modeling_distilbert.py
-index 84db89e..3c4138e 100755
+index 84db89e0f..3c4138e33 100755
 --- a/src/transformers/models/distilbert/modeling_distilbert.py
 +++ b/src/transformers/models/distilbert/modeling_distilbert.py
 @@ -743,11 +743,11 @@ class DistilBertForSequenceClassification(DistilBertPreTrainedModel):
@@ -916,7 +935,7 @@ index 84db89e..3c4138e 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/models/gptj/modeling_gptj.py b/src/transformers/models/gptj/modeling_gptj.py
-index 1051a29..256ff66 100644
+index 1051a298d..256ff6671 100644
 --- a/src/transformers/models/gptj/modeling_gptj.py
 +++ b/src/transformers/models/gptj/modeling_gptj.py
 @@ -169,7 +169,7 @@ class GPTJAttention(nn.Module):
@@ -942,7 +961,7 @@ index 1051a29..256ff66 100644
          inputs_embeds: Optional[torch.FloatTensor] = None,
          labels: Optional[torch.LongTensor] = None,
 diff --git a/src/transformers/models/llama/modeling_llama.py b/src/transformers/models/llama/modeling_llama.py
-index 1ae0584..fe29d05 100755
+index 1ae058469..fe29d059b 100755
 --- a/src/transformers/models/llama/modeling_llama.py
 +++ b/src/transformers/models/llama/modeling_llama.py
 @@ -224,7 +224,7 @@ class LlamaAttention(nn.Module):
@@ -974,7 +993,7 @@ index 1ae0584..fe29d05 100755
          labels: Optional[torch.LongTensor] = None,
          use_cache: Optional[bool] = None,
 diff --git a/src/transformers/models/vit/modeling_vit.py b/src/transformers/models/vit/modeling_vit.py
-index 474b92f..98aab97 100644
+index 474b92f72..98aab97f0 100644
 --- a/src/transformers/models/vit/modeling_vit.py
 +++ b/src/transformers/models/vit/modeling_vit.py
 @@ -779,8 +779,8 @@ class ViTForImageClassification(ViTPreTrainedModel):
@@ -988,7 +1007,7 @@ index 474b92f..98aab97 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499..b8a90d9 100755
+index cf71499b0..b8a90d9b8 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,9 @@ from .utils import (
@@ -1335,7 +1354,7 @@ index cf71499..b8a90d9 100755
          observed_num_examples = 0
          # Main evaluation loop
 diff --git a/src/transformers/training_args.py b/src/transformers/training_args.py
-index 088eb06..2e00676 100644
+index 088eb06b7..2e0067671 100644
 --- a/src/transformers/training_args.py
 +++ b/src/transformers/training_args.py
 @@ -777,10 +777,121 @@ class TrainingArguments:
