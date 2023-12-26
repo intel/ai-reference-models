@@ -70,6 +70,8 @@ ResNet50 v1.5 Realtime Inference bf32:
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_bf32
     BATCH_SIZE: '1'
     PRECISION: bfloat32
+    CORES_PER_INSTANCE: '4'
+    OMP_NUM_THREADS: '4'
   shm_size: 8G
   privileged: true
   init: true
@@ -86,7 +88,8 @@ ResNet50 v1.5 Realtime Inference bf16:
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_bf16
     BATCH_SIZE: '1'
     PRECISION: bfloat16
-    OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '64'
+    OMP_NUM_THREADS: '64'
   shm_size: 8G
   privileged: true
   init: true
@@ -104,6 +107,7 @@ ResNet50 v1.5 Realtime Inference fp32:
     BATCH_SIZE: '1'
     PRECISION: fp32
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
   shm_size: 8G
   privileged: true
   init: true
@@ -121,6 +125,7 @@ ResNet50 v1.5 Realtime Inference int8:
     BATCH_SIZE: '1'
     PRECISION: int8
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
   shm_size: 8G
   privileged: true
   init: true
@@ -137,6 +142,8 @@ ResNet50 v1.5 Throughput bf32:
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/throughput_bf32
     BATCH_SIZE: '448'
     PRECISION: bfloat32
+    CORES_PER_INSTANCE: '64'
+    OMP_NUM_THREADS: '64'
   shm_size: 8G
   privileged: true
   init: true
@@ -153,6 +160,7 @@ ResNet50 v1.5 Throughput bf16:
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/throughput_bf16
     BATCH_SIZE: '80'
     PRECISION: bfloat16
+    CORES_PER_INSTANCE: '64'
     OMP_NUM_THREADS: '64'
   shm_size: 8G
   privileged: true
@@ -170,6 +178,7 @@ ResNet50 v1.5 Throughput fp32:
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/throughput_fp32
     BATCH_SIZE: '116'
     PRECISION: fp32
+    CORES_PER_INSTANCE: '64'
     OMP_NUM_THREADS: '64'
   shm_size: 8G
   privileged: true
@@ -188,6 +197,7 @@ ResNet50 v1.5 Throughput int8:
     BATCH_SIZE: '116'
     PRECISION: int8
     OMP_NUM_THREADS: '64'
+    CORES_PER_INSTANCE: '64'
   shm_size: 8G
   privileged: true
   init: true
@@ -205,6 +215,7 @@ ResNet50 v1.5 Weightsharing Inference bf16:
     BATCH_SIZE: '1'
     PRECISION: bfloat16
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
     KMP_BLOCKTIME: '1'
   shm_size: 8G
   privileged: true
@@ -223,6 +234,7 @@ ResNet50 v1.5 Weightsharing Inference int8:
     BATCH_SIZE: '1'
     PRECISION: int8
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
     KMP_BLOCKTIME: '1'
   shm_size: 8G
   privileged: true

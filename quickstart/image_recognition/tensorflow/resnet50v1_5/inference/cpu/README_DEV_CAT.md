@@ -60,6 +60,8 @@ export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export SCRIPT=<specify the script to run>
 export PRECISION=<specify the precision to run>
+export CORES_PER_INSTANCE=<specify the cores per instance. Default value is 4>
+export OMP_NUM_THREADS=<specify the number for OMP_NUM_THREADS. Default value is 4>
 
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
@@ -69,6 +71,8 @@ docker run --rm \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env PRECISION=${PRECISION} \
+  --env CORES_PER_INSTANCE=${CORES_PER_INSTANCE} \
+  --env OMP_NUM_THREADS=${OMP_NUM_THREADS} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   ${DOCKER_RUN_ENVS} \

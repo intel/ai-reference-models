@@ -31,7 +31,7 @@ services:
         no_proxy: ${no_proxy}
         OS: ${OS:-ubuntu}
         TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
-        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+        TF_BASE_TAG: ${TF_BASE_TAG:-centos-tf2.14-py310}
       dockerfile: docker/tf-cpu/tf-resnet50v1-5-inference/tf-resnet50v1-5-inference.Dockerfile-${OS:-ubuntu}
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
