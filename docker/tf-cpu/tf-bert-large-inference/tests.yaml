@@ -6,7 +6,8 @@ BERT-Large Realtime Inference fp32:
     OUTPUT_DIR: /output/tf-bert-large-inference/realtime_fp32
     BATCH_SIZE: '1'
     PRECISION: fp32
-    OMP_NUM_THREADS: '4'
+    OMP_NUM_THREADS: '64'
+    CORES_PER_INSTANCE: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
@@ -22,6 +23,7 @@ BERT-Large Weightsharing Inference fp32:
   env:
     TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0 
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/weightsharing_fp32
@@ -44,6 +46,7 @@ BERT-Large Throughput fp32:
     BATCH_SIZE: '128'
     PRECISION: fp32
     OMP_NUM_THREADS: '64'
+    CORES_PER_INSTANCE: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
@@ -95,6 +98,7 @@ BERT-Large Realtime Inference bf16:
     PRECISION: bfloat16
     LD_PRELOAD: /workspace/tcmalloc/install/lib/libtcmalloc.so.4
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
@@ -114,7 +118,8 @@ BERT-Large Weightsharing Inference bf16:
     PRECISION: bfloat16
     LD_PRELOAD: /workspace/tcmalloc/install/lib/libtcmalloc.so.4
     TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
-    OMP_NUM_THREADS: '4'
+    OMP_NUM_THREADS: '64'
+    CORES_PER_INSTANCE: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
@@ -133,6 +138,7 @@ BERT-Large Throughput bf16:
     BATCH_SIZE: '128'
     PRECISION: bfloat16
     OMP_NUM_THREADS: '64'
+    CORES_PER_INSTANCE: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
@@ -168,6 +174,7 @@ BERT-Large Realtime Inference int8:
     PRECISION: int8
     LD_PRELOAD: /workspace/tcmalloc/install/lib/libtcmalloc.so.4
     OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
@@ -187,7 +194,8 @@ BERT-Large Weightsharing Inference int8:
     PRECISION: int8
     LD_PRELOAD: /workspace/tcmalloc/install/lib/libtcmalloc.so.4
     TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
-    OMP_NUM_THREADS: '4'
+    OMP_NUM_THREADS: '64'
+    CORES_PER_INSTANCE: '64'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
@@ -205,7 +213,8 @@ BERT-Large Throughput int8:
     OUTPUT_DIR: /output/tf-bert-large-inference/throughput_int8
     BATCH_SIZE: '16'
     PRECISION: int8
-    OMP_NUM_THREADS: '64'
+    OMP_NUM_THREADS: '4'
+    CORES_PER_INSTANCE: '4'
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
   shm_size: 8G
   privileged: true
