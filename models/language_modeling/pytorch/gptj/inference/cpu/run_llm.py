@@ -439,7 +439,7 @@ def eval_func(traced_model):
     return acc
 
 
-if args.dtype in ["bf32", "fp16"] and args.jit:
+if args.dtype in ["bf32", "fp16"] and args.jit and not args.accuracy_only:
     input_ids = torch.ones(32).to(torch.long)
     attention_mask = torch.ones(len(input_ids))
     position_ids = torch.arange(len(input_ids))
