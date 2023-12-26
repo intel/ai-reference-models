@@ -70,6 +70,12 @@ else
   ARGS="$ARGS --ipex-merged-emb-adagrad"
 fi
 
+if [ -z "${ONE_HOT_DATASET_DIR}" ]; then
+  echo "DATASET_DIR are not set, will use dummy generated dataset and this cannot reflect the real performance number, we recomemend to use real data set"
+else
+  ARGS="$ARGS --in_memory_binary_criteo_path $ONE_HOT_DATASET_DIR "
+fi
+
 export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc ${launcher_arg}"
 if [[ $PLOTMEM == "true" ]]; then
 pip install memory_profiler matplotlib
@@ -94,7 +100,6 @@ COMMON_ARGS=" --embedding_dim 128 \
               --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
               --limit_train_batches 300 \
               --log-freq 10 \
-              --benchmark \
               $ARGS "
 
 LOG_0="${LOG}/throughput.log"

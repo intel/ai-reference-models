@@ -1143,6 +1143,7 @@ def construct_model(args):
     if args.ipex_optimize:
         # re-write crossnet with using nn.linear instead of only using torch.linear
         replace_crossnet(train_model.model)
+    print_memory("start replace emeddingbag ")
     replace_embeddingbag_collection(train_model.model, args)
     # embedding_optimizer = torch.optim.Adagrad if args.adagrad else torch.optim.SGD
     # This will apply the Adagrad optimizer in the backward pass for the embeddings (sparse_arch). This means that
@@ -1189,8 +1190,9 @@ def construct_model(args):
     if not args.inference_only:
         print_memory("start create optimizer ")
         assert args.adagrad
+        param = list(model.model.dense_arch.parameters()) + list(model.model.inter_arch.parameters()) + list(model.model.over_arch.parameters())
         optimizer = torch.optim.Adagrad(
-            model.parameters(),
+            param,
             lr=args.learning_rate,
             lr_decay=ADAGRAD_LR_DECAY,
             weight_decay=WEIGHT_DECAY,
@@ -1231,12 +1233,18 @@ def main(argv: List[str]) -> None:
             pass
 
     if args.multi_hot_sizes is not None:
+        if args.in_memory_binary_criteo_path is None:
+            logger.info("use dummy data")
+        else:
+            logger.info("use one hot real data set to generate multi-hot data per iter")
         assert (
             args.num_embeddings_per_feature is not None
             and len(args.multi_hot_sizes) == len(args.num_embeddings_per_feature)
             or args.num_embeddings_per_feature is None
             and len(args.multi_hot_sizes) == len(DEFAULT_CAT_NAMES)
         ), "--multi_hot_sizes must be a comma delimited list the same size as the number of embedding tables."
+    if args.synthetic_multi_hot_criteo_path is not None:
+        logger.info("use multi-hot real data set")
     assert (
         args.in_memory_binary_criteo_path is None
         or args.synthetic_multi_hot_criteo_path is None
@@ -1324,7 +1332,7 @@ def main(argv: List[str]) -> None:
     #     value=dist.get_world_size() * len(train_dataloader) * args.batch_size,
     # )
     if args.multi_hot_sizes is not None:
-        print_memory("start to create Multihot for dummy data ")
+        print_memory("start to create Multihot")
         multihot = Multihot(
             args.multi_hot_sizes,
             args.num_embeddings_per_feature,
@@ -1333,7 +1341,7 @@ def main(argv: List[str]) -> None:
             dist_type=args.multi_hot_distribution_type,
         )
         multihot.pause_stats_collection_during_val_and_test(model)
-        print_memory("start transfer to multihot dataloader for dummy data ")
+        print_memory("start transfer to multihot dataloader")
         if train_dataloader:
             train_dataloader = RestartableMap(
                 multihot.convert_to_multi_hot, train_dataloader

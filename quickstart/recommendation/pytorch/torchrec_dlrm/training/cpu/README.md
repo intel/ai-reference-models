@@ -46,7 +46,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
 ## Datasets
 
-Use random dataset.
+Use random dataset or follow the [MLCommons reference instructions](https://github.com/mlcommons/training/tree/00f04c57d589721aabce4618922780d29f73cf4e/recommendation_v2/torchrec_dlrm#create-the-synthetic-multi-hot-dataset) to create the 1TB Criteo dataset
 
 ## Quick Start Scripts
 
@@ -67,6 +67,9 @@ export PRECISION=<specify the precision to run>
 
 # Run a quickstart script (for example, bare metal performance)
 cd ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/training/cpu
+# we recommend to use real dataset to evaluate performance data since the performance will highly related with input data distribution
+# do not set ONE_HOT_DATASET_DIR will use dummy data
+export ONE_HOT_DATASET_DIR=<your one hot dataset dir>
 # normal Training
 bash training_performance.sh
 # Distributed training
