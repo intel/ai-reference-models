@@ -212,7 +212,7 @@ def main():
             ipex._set_compiler_backend("torchscript")
             pipe.text_encoder = torch.compile(pipe.text_encoder, backend="ipex")
             pipe.unet = torch.compile(pipe.unet, backend="ipex")
-            pipe.vae = torch.compile(pipe.vae, backend="ipex")
+            pipe.vae.decode = torch.compile(pipe.vae.decode, backend="ipex")
         else:
             raise ValueError("If you want to use torch.compile with ipex backend, --precision needs to be the following: fp32, bf16")
     # torch.compile with inductor backend
