@@ -123,7 +123,7 @@ args.dtype = "int8" if args.int8_bf16_mixed else args.dtype
 has_position_id = False
 if "llama" in args.model_name_or_path:
     user_model = LlamaForCausalLM.from_pretrained(
-        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit, return_dict=False,
+        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit
     )
     tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path)
     if hasattr(user_model.config, "num_key_value_heads"):
@@ -156,6 +156,12 @@ if args.dtype == "bf16" or args.dtype == "fp32":
                 print('[Info] Running torch.compile() BFloat16 with default backend')
                 user_model = torch.compile(user_model)
 elif args.dtype == "fp16":
+    user_model = ipex.optimize_transformers(
+        user_model.eval(),
+        quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into fp16
+        inplace=True,
+        deployment_mode=False,
+    )
     user_model = ipex.optimize(
         user_model.eval(),
         dtype=torch.half,
@@ -163,6 +169,12 @@ elif args.dtype == "fp16":
         auto_kernel_selection=True,
     )
 elif args.dtype == "bf32":
+    user_model = ipex.optimize_transformers(
+        user_model.eval(),
+        quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into bf32
+        inplace=True,
+        deployment_mode=False,
+    )
     ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
     user_model = ipex.optimize(
         user_model.eval(), torch.float, auto_kernel_selection=True
@@ -173,157 +185,78 @@ print("Data type of the model:", user_model.dtype)
 global_past_key_value = None
 if re.search("GPTJ", user_model.config.architectures[0], re.IGNORECASE):
     has_position_id = True
-    if args.dtype in ["fp32", "bf16", "int8"]:
-        beam_idx_tmp = torch.zeros(
-            (2048, int(args.batch_size * num_beams)), dtype=torch.long
-        ).contiguous()
-        global_past_key_value = [
-            (
-                torch.zeros(1, 0, 0, 1, dtype=torch.long).contiguous(),
-                torch.zeros(
-                    [
-                        1,
-                        user_model.config.num_attention_heads,
-                        1,
-                        int(
-                            user_model.config.hidden_size
-                            / user_model.config.num_attention_heads
-                        ),
-                    ]
-                ).contiguous(),
-                torch.zeros(
-                    [
-                        1,
-                        user_model.config.num_attention_heads,
-                        1,
-                        int(
-                            user_model.config.hidden_size
-                            / user_model.config.num_attention_heads
-                        ),
-                    ]
-                ).contiguous(),
-                beam_idx_tmp,
-            )
-            for i in range(user_model.config.num_hidden_layers)
-        ]
-    else:
-        global_past_key_value = tuple(
-            [
-                (
-                    torch.zeros(
-                        [
-                            1,
-                            int(user_model.config.n_head),
-                            1,
-                            int(user_model.config.n_embd / user_model.config.n_head),
-                        ]
+    beam_idx_tmp = torch.zeros(
+        (2048, int(args.batch_size * num_beams)), dtype=torch.long
+    ).contiguous()
+    global_past_key_value = [
+        (
+            torch.zeros(1, 0, 0, 1, dtype=torch.long).contiguous(),
+            torch.zeros(
+                [
+                    1,
+                    user_model.config.num_attention_heads,
+                    1,
+                    int(
+                        user_model.config.hidden_size
+                        / user_model.config.num_attention_heads
                     ),
-                    torch.zeros(
-                        [
-                            1,
-                            int(user_model.config.n_head),
-                            1,
-                            int(user_model.config.n_embd / user_model.config.n_head),
-                        ]
+                ]
+            ).contiguous(),
+            torch.zeros(
+                [
+                    1,
+                    user_model.config.num_attention_heads,
+                    1,
+                    int(
+                        user_model.config.hidden_size
+                        / user_model.config.num_attention_heads
                     ),
-                )
-                for i in range(user_model.config.n_layer)
-            ]
+                ]
+            ).contiguous(),
+            beam_idx_tmp,
         )
+        for i in range(user_model.config.num_hidden_layers)
+    ]
+
 elif re.search("llama", user_model.config.architectures[0], re.IGNORECASE):
     has_position_id = True
-    if args.dtype in ["fp32", "bf16", "int8"]:
-        beam_idx_tmp = torch.zeros(
-            (2048, int(args.batch_size * num_beams)), dtype=torch.long
-        ).contiguous()
-        global_past_key_value = [
-            (
-                torch.zeros(1, 0, 0, 1, dtype=torch.long).contiguous(),
-                torch.zeros(
-                    [
-                        1,
-                        user_model.config.num_attention_heads,
-                        1,
-                        int(
-                            user_model.config.hidden_size
-                            / user_model.config.num_attention_heads
-                        ),
-                    ]
-                ).contiguous(),
-                torch.zeros(
-                    [
-                        1,
-                        user_model.config.num_attention_heads,
-                        1,
-                        int(
-                            user_model.config.hidden_size
-                            / user_model.config.num_attention_heads
-                        ),
-                    ]
-                ).contiguous(),
-                beam_idx_tmp,
-            )
-            for i in range(user_model.config.num_hidden_layers)
-        ]
-    else:
-        global_past_key_value = tuple(
-            [
-                (
-                    torch.zeros(
-                        [
-                            1,
-                            int(user_model.config.num_attention_heads),
-                            1,
-                            int(
-                                user_model.config.hidden_size
-                                / user_model.config.num_attention_heads
-                            ),
-                        ]
+    beam_idx_tmp = torch.zeros(
+        (2048, int(args.batch_size * num_beams)), dtype=torch.long
+    ).contiguous()
+    global_past_key_value = [
+        (
+            torch.zeros(1, 0, 0, 1, dtype=torch.long).contiguous(),
+            torch.zeros(
+                [
+                    1,
+                    user_model.config.num_attention_heads,
+                    1,
+                    int(
+                        user_model.config.hidden_size
+                        / user_model.config.num_attention_heads
                     ),
-                    torch.zeros(
-                        [
-                            1,
-                            int(user_model.config.num_attention_heads),
-                            1,
-                            int(
-                                user_model.config.hidden_size
-                                / user_model.config.num_attention_heads
-                            ),
-                        ]
+                ]
+            ).contiguous(),
+            torch.zeros(
+                [
+                    1,
+                    user_model.config.num_attention_heads,
+                    1,
+                    int(
+                        user_model.config.hidden_size
+                        / user_model.config.num_attention_heads
                     ),
-                )
-                for i in range(user_model.config.num_hidden_layers)
-            ]
+                ]
+            ).contiguous(),
+            beam_idx_tmp,
         )
-elif re.search("bloom", user_model.config.architectures[0], re.IGNORECASE):
-    has_position_id = False
-    global_past_key_value = tuple(
-        [
-            (
-                torch.zeros(
-                    [
-                        1,
-                        int(user_model.config.n_head),
-                        1,
-                        int(user_model.config.hidden_size / user_model.config.n_head),
-                    ]
-                ),
-                torch.zeros(
-                    [
-                        1,
-                        int(user_model.config.n_head),
-                        1,
-                        int(user_model.config.hidden_size / user_model.config.n_head),
-                    ]
-                ),
-            )
-            for i in range(user_model.config.n_layer)
-        ]
-    )
+        for i in range(user_model.config.num_hidden_layers)
+    ]
+
 
 
 if global_past_key_value == None:
-    print("This scirpt only supports llama gptj and bloom.")
+    print("This scirpt only supports llama gptj.")
     exit(0)
 
 
@@ -359,11 +292,7 @@ class Evaluator:
             )
             pad_len = self.pad_max - input_ids.shape[0]
             last_ind.append(input_ids.shape[0] - 1)
-            if args.dtype in ["bf32", "fp16"]:
-                attention_mask = torch.ones(len(input_ids) + 1)
-                attention_mask[0] = 0
-            else:
-                attention_mask = torch.ones(len(input_ids))
+            attention_mask = torch.ones(len(input_ids))
             position_ids = torch.arange(len(input_ids))
             input_ids = pad(input_ids, (0, pad_len), value=self.pad_val)
             input_ids_padded.append(input_ids)
@@ -511,7 +440,35 @@ def eval_func(traced_model):
 
 
 if args.dtype in ["bf32", "fp16"] and args.jit:
-    generate_kwargs["jit"] = True
+    input_ids = torch.ones(32).to(torch.long)
+    attention_mask = torch.ones(len(input_ids))
+    position_ids = torch.arange(len(input_ids))
+    last_ind = input_ids.shape[0] - 1
+    example_inputs = (
+        {
+            "input_ids": input_ids.unsqueeze(0),
+            "attention_mask": attention_mask.unsqueeze(0),
+            "position_ids": position_ids.unsqueeze(0),
+            "past_key_values": tuple(global_past_key_value),
+        }
+        if has_position_id
+        else {
+            "input_ids": input_ids.unsqueeze(0),
+            "attention_mask": attention_mask.unsqueeze(0),
+            "past_key_values": tuple(global_past_key_value),
+        }
+    )
+    with torch.no_grad(), torch.cpu.amp.autocast(
+        enabled=amp_enabled, dtype=amp_dtype
+    ):
+        trace_graph = torch.jit.trace(
+            user_model.eval(),
+            example_kwarg_inputs=example_inputs,
+            strict=False,
+            check_trace=False,
+        )
+        trace_graph = torch.jit.freeze(trace_graph.eval())
+        setattr(user_model, "trace_graph", trace_graph)
 
 # generate promt
 if args.benchmark:
@@ -530,11 +487,8 @@ if args.benchmark:
     print("---- Prompt size:", input_size)
 
     if args.token_latency:
-        if args.dtype in ["bf32", "fp16"]:
-            generate_kwargs["token_latency"] = True
-        else:
-            if not hasattr(user_model.config, "token_latency"):
-                user_model.config.token_latency = True
+        if not hasattr(user_model.config, "token_latency"):
+            user_model.config.token_latency = True
     prompt = [prompt] * args.batch_size
 
 if args.dtype == "int8" and args.ipex:
@@ -731,11 +685,7 @@ if args.accuracy_only:
         or args.dtype == "fp16"
     ):
         input_ids = torch.ones(32).to(torch.long)
-        if args.dtype in ["bf32", "fp16"]:
-            attention_mask = torch.ones(len(input_ids) + 1)
-            attention_mask[0] = 0
-        else:
-            attention_mask = torch.ones(len(input_ids))
+        attention_mask = torch.ones(len(input_ids))
         position_ids = torch.arange(len(input_ids))
         last_ind = input_ids.shape[0] - 1
         example_inputs = (
