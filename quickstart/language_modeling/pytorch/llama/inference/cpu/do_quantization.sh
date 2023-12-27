@@ -55,6 +55,21 @@ else
     exit 1
 fi
 
+path=${3:-ipex}
+
+if [[ "$path" == "ipex" ]]
+then
+    ARGS="$ARGS --ipex "
+    echo "### do calibration for ipex"
+elif [[ "$path" == "inductor" ]]
+then
+    ARGS="$ARGS --inductor "
+    echo "### do calibration for inductor"
+else
+    echo "The specified backend '$3' is unsupported."
+    echo "Supported Backends:[ipex, inductor]"
+    exit 1
+fi
 
 mode="jit"
 ARGS="$ARGS --jit --profile"
