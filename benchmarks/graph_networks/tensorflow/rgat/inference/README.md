@@ -41,7 +41,7 @@ python download_and_preprocess_data.py --dataset ogbn_mag --graph_schema_dir <di
 
 ### Run on Linux
 
-Install the Intel-optimized TensorFlow along with model dependencies under [requirements.txt](../../../../../models/graph_networks/tensorflow/rgat/inference/requirements.txt)
+Install the Intel-optimized TensorFlow along with model dependencies under [requirements.txt](../../../../../models/graph_networks/tensorflow/rgat/inference/requirements.txt). NOTE that the scripts assume TensorFlow is already installed in the runtime environment.
 
 ```
 # cd to your model zoo directory

@@ -1765,8 +1765,22 @@ function rgat() {
       if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
+        curr_dir=${pwd}
+
+        infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
+        benchmarks_patch_path=${infer_dir}/tfgnn_legacy_keras.patch
+        echo "patch path: $benchmarks_patch_path"
+
         # Installing tensorflow_gnn from it's main branch
-        python3 -m pip install git+https://github.com/tensorflow/gnn.git@main
+        # python3 -m pip install git+https://github.com/tensorflow/gnn.git@main
+        cd /tmp
+        rm -rf gnn
+        git clone https://github.com/tensorflow/gnn.git
+        cd gnn
+        git apply $benchmarks_patch_path
+        pip install .
+        cd ${curr_dir}
+
 
         if [ ${NUM_INTER_THREADS} != "None" ]; then
           CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
@@ -1791,14 +1805,15 @@ function stable_diffusion() {
     if [ ${MODE} == "inference" ]; then
       if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
         curr_dir=${pwd}
-        echo "Curr dir: "
-        echo ${curr_dir}
-
+        
         infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
-        benchmarks_patch_path=${infer_dir}/patch
-        echo "benchmarks_patch_path:"
-        echo ${benchmarks_patch_path}
-
+        if [[ $TF_USE_LEGACY_KERAS == "1" ]]; then
+          benchmarks_patch_path=${infer_dir}/patch_for_stockTF
+        else
+          benchmarks_patch_path=${infer_dir}/patch
+        fi
+        echo "patch path: ${benchmarks_patch_path}"
+        
         cd /tmp
         rm -rf keras-cv
         git clone https://github.com/keras-team/keras-cv.git
