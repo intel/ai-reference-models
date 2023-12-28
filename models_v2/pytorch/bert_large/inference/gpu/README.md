@@ -6,11 +6,11 @@ BERT Large Inference best known configurations with Intel® Extension for PyTorc
 
 | **Use Case** | **Framework** | **Model Repo** | **Branch/Commit/Tag** | **Optional Patch** |
 |:---:| :---: |:--------------:|:---------------------:|:------------------:|
-|  Inference   |    PyTorch    |       -        |           -           |         -          |
+|  Inference   |    PyTorch    |       https://github.com/huggingface/transformers/tree/main/src/transformers/models/bert        |           -           |         -          |
 
 # Pre-Requisite
-* Host has Intel® Data Center GPU Max
-* Host has installed latest Intel® Data Center GPU Max Series Drivers https://dgpu-docs.intel.com/driver/installation.html
+* Host has Intel® Data Center GPU Max & ARC
+* Host has installed latest Intel® Data Center GPU Max & ARC Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 
 # Prepare Dataset
 please follow below command to download checkpoints and dataset. 
@@ -30,9 +30,9 @@ if ! test -d ./squad_large_finetuned_checkpoint;then mkdir squad_large_finetuned
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=PVC` (PVC)                                                 |
+| **PLATFORM**                 | `export PLATFORM=PVC` (PVC or ARC)                                                 |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
-| **PRECISION** (optional)     |                  `export PRECISION=BF16` (BF16, FP32 and FP16 are supported for PVC) |
+| **PRECISION** (optional)     |                  `export PRECISION=BF16` (BF16, FP32 and FP16 are supported for PVC and FP16 for ARC) |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=-1`                             |
 6. Run `run_model.sh`

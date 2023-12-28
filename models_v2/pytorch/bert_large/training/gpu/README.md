@@ -6,11 +6,11 @@ BERT Large training best known configurations with Intel® Extension for PyTorch
 
 | **Use Case** | **Framework** | **Model Repo** | **Branch/Commit/Tag** | **Optional Patch** |
 |:---:| :---: |:--------------:|:---------------------:|:------------------:|
-|  Training   |    PyTorch    |       -        |           -           |         -          |
+|  Training   |    PyTorch    |       https://github.com/huggingface/transformers/tree/main/src/transformers/models/bert        |           -           |         -          |
 
 # Pre-Requisite
-* Host has Intel® Data Center GPU Max
-* Host has installed latest Intel® Data Center GPU Max Series Drivers https://dgpu-docs.intel.com/driver/installation.html
+* Host has Intel® Data Center GPU Max & Arc
+* Host has installed latest Intel® Data Center GPU Max & Arc Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 
 # Prepare Dataset
 ## Dataset: 
@@ -36,10 +36,10 @@ we are using  hdf5/hdf5_4320_shards_varlength as the our dataset.
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=PVC` (PVC)                                                 |
+| **PLATFORM**                 | `export PLATFORM=PVC` (PVC or ARC)                                                 |
 | **DATASET_DIR**                 | `export DATASET_DIR=`                                                                                  |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=16`                                |
-| **PRECISION** (optional)     |`export PRECISION=BF16` (BF16 FP8 FP32 and TF32 are supported for PVC)               |
+| **PRECISION** (optional)     |`export PRECISION=BF16` (BF16 FP8 FP32 and TF32 are supported for PVC and BF16 for ARC )               |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=20`                             |
 6. Run `run_model.sh`

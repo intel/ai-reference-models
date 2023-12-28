@@ -42,6 +42,14 @@ if [[ "${PLATFORM}" == "PVC" ]]; then
     NUM_ITERATIONS=${NUM_ITERATIONS:-10}
 elif [[ "${PLATFORM}" == "ATS-M" ]]; then
     echo "only support PVC for platform"
+elif [[ "${PLATFORM}" == "ARC" ]]; then
+    if [[ "${MULTI_TILE}" == "True" ]]; then
+	echo "Only support MULTI_TILE=False when in arc platform"
+	exit 1
+    fi
+    BATCH_SIZE=${BATCH_SIZE:-4}
+    PRECISION=${PRECISION:-BF16}
+    NUM_ITERATIONS=${NUM_ITERATIONS:-10}
 fi
 
 
