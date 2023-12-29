@@ -17,14 +17,22 @@ Stable Diffusion Inference using Intel® Extension for TensorFlow.
 ## Inference
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/tensorflow/stable_diffusion/inference/gpu`
-3. Run `setup.sh` this will install all the required dependencies & create virtual environment `venv`.
-4. Activate virtual env: `. ./venv/bin/activate`
-5. Setup required environment paramaters
+3. Create virtual environment `venv` and activate it:
+    ```
+    python3 -m venv venv
+    . ./venv/bin/activate
+    ```
+4. Run setup.sh
+    ```
+    ./setup.sh
+    ```
+5. Install [tensorflow and ITEX](https://pypi.org/project/intel-extension-for-tensorflow/)
+6. Setup required environment paramaters
 
     |   **Parameter**    |                   **export command**                    |
     |:-------------------------------------------------------:| :---: |
     |   **PRECISION**   |     `export PRECISION=fp16` (fp32 or fp16)      |
-6. Run `run_model.sh`
+7. Run `run_model.sh`
 
 ## Output
 

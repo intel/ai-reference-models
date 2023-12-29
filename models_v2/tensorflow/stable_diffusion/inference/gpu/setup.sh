@@ -16,15 +16,17 @@
 #
 
 set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
-python3 -m venv $PWD/venv
-. ./venv/bin/activate
+apt-get update && apt-get install -y python3-venv
 pip install -r requirements.txt
 
-git clone https://github.com/keras-team/keras-cv.git keras-cv
-cd ./keras-cv
-git reset --hard 66fa74b6a2a0bb1e563ae8bce66496b118b95200
-git apply ../patch
-pip install .
-cd -
-
+current_dir=$(pwd)
+if [ -d "keras-cv" ]; then
+  echo "Repository already exists. Skipping clone."
+else
+  git clone https://github.com/keras-team/keras-cv.git keras-cv
+  cd ./keras-cv
+  git reset --hard 66fa74b6a2a0bb1e563ae8bce66496b118b95200
+  git apply $current_dir/patch
+  pip install .
+  cd -
+fi
