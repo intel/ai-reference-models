@@ -1974,6 +1974,26 @@ function graphsage() {
 
 }
 
+function tiny-yolov4() {
+    if [ ${MODE} == "inference" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+        if [ ${NUM_INTER_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+        fi
+
+        if [ ${NUM_INTRA_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+        fi
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    fi
+}
+
 function yolov5() {
     if [ ${MODE} == "inference" ]; then
       if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
@@ -2076,6 +2096,8 @@ elif [ ${MODEL_NAME} == "rgat" ]; then
   rgat
 elif [ ${MODEL_NAME} == "stable_diffusion" ]; then
   stable_diffusion
+elif [ ${MODEL_NAME} == "tiny-yolov4" ]; then
+  tiny-yolov4
 elif [ ${MODEL_NAME} == "yolov5" ]; then
   yolov5
 else

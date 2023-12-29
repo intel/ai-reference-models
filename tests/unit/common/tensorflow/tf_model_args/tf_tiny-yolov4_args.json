@@ -1,0 +1,14 @@
+[
+    {
+      "_comment": "tiny-yolov4_inference_fp32",
+      "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=tiny-yolov4 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --num-train-steps=1 --benchmark-only --in-graph=/in_graph/tiny-yolov4.pb --data-location=/dataset --disable-tcmalloc=True",
+      "output": "python /workspace/intelai_models/inference/infer_detections.py --input-graph=/in_graph/tiny-yolov4.pb --data-location=/dataset/coco_val.record --batch-size=1",
+      "cpuset": "0-111"
+    },
+    {
+      "_comment": "tiny-yolov4_inference_bfloat16",
+      "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=tiny-yolov4 --precision=bfloat16 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --num-train-steps=1 --benchmark-only --in-graph=/in_graph/tiny-yolov4.pb --data-location=/dataset --disable-tcmalloc=True",
+      "output": "python /workspace/intelai_models/inference/infer_detections.py --input-graph=/in_graph/tiny-yolov4.pb --data-location=/dataset/coco_val.record --batch-size=1 --precision=bfloat16",
+      "cpuset": "0-111"
+    }
+]
