@@ -1134,6 +1134,7 @@ function ssd_mobilenet() {
     done
   fi
   CMD="${CMD} $(add_steps_args)"
+  CMD="${CMD} $(add_arg "--input-subgraph" ${INPUT_SUBGRAPH})"
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 

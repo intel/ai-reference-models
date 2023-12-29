@@ -52,6 +52,7 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
     PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb"
   elif [[ $PRECISION == "int8" ]]; then
     PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb"
+    INPUT_SUBGRAPH="${MODEL_DIR}/pretrained_model/ssdmobilenet_preprocess.pb"
   elif [[ $PRECISION == "bfloat16" ]]; then
     PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb"      
   else

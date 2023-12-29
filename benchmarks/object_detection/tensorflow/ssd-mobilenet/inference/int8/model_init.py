@@ -38,6 +38,8 @@ class ModelInitializer(BaseModelInitializer):
             "--steps", dest="steps",
             help="number of steps",
             type=int, default=50)
+        parser.add_argument(
+            "--input-subgraph", dest="input_subgraph", type=str, help="int8 graph")
         self.args = parser.parse_args(self.custom_args,
                                       namespace=self.args)
 
@@ -64,6 +66,7 @@ class ModelInitializer(BaseModelInitializer):
         self.command_prefix += " -g {0}".format(self.args.input_graph)
         self.command_prefix += " -i {0}".format(self.args.steps)
         self.command_prefix += " -w {0}".format(self.args.warmup_steps)
+        self.command_prefix += " -sg {0}".format(self.args.input_subgraph)
         self.command_prefix += " -a {0}".format(self.args.num_intra_threads)
         self.command_prefix += " -e {0}".format(self.args.num_inter_threads)
         if self.args.data_location:
