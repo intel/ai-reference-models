@@ -86,7 +86,13 @@ cpus=$(lscpu |grep 'CPU(s):' | head -1 | sed 's/[^0-9]//g')
 tpc=$(lscpu |grep 'Thread(s) per core:' |sed 's/[^0-9]//g')
 export OMP_NUM_THREADS=${cores_per_socket}
 
-source "${MODEL_DIR}/quickstart/language_modeling/tensorflow/gpt_j/inference/cpu/apply.sh"
+if [ -z "${TF_USE_LEGACY_KERAS}" ]; then
+  source "${MODEL_DIR}/quickstart/language_modeling/tensorflow/gpt_j/inference/cpu/apply.sh"
+else
+  echo "Legacy keras is used"
+  source "${MODEL_DIR}/quickstart/language_modeling/tensorflow/gpt_j/inference/cpu/apply_legacy_keras.sh"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 
 cores=$((cpus / tpc))
