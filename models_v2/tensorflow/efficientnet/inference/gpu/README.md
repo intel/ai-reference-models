@@ -15,19 +15,30 @@ EfficientNet Model Inference using Intel® Extension for TensorFlow.
   Driver https://dgpu-docs.intel.com/driver/installation.html
 * Install [Intel® Extension for TensorFlow](https://pypi.org/project/intel-extension-for-tensorflow/)
 
+# Run the model
 1. `git clone https://github.com/IntelAI/models.git`
-2. `cd models/models/image_recognition/tensorflow/efficientnet/inference/gpu_version2`
- Run `setup.sh` this will create virtual environment `venv`.
-   Setup required environment paramaters
+2. `cd models/models_v2/tensorflow/efficientnet/inference/gpu`
+3. Create virtual environment `venv` and activate it:
+    ```
+    python3 -m venv venv
+    . ./venv/bin/activate
+    ```
+4. Run setup.sh
+    ```
+    ./setup.sh
+    ```
+5. Install [tensorflow and ITEX](https://pypi.org/project/intel-extension-for-tensorflow/)
+6. Setup required environment paramaters (The precision is fp16 for all the efficientnet models).
  
 | **Parameter**             |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MODEL_NAME**          | `export MODEL_NAME=EfficientNetB0` (EfficientNetB0, EfficientNetB3 or EfficientNetB4) |
 | **BATCH_SIZE** (optional) |                               `export BATCH_SIZE=128`                                |
+7. Run `run_model.sh`
 
 ## Output
 
-Output will typicall looks like:
+Output will typically looks like:
 
 ```
 load data ......
