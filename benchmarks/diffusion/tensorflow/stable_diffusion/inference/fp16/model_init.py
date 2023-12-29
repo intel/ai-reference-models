@@ -53,6 +53,10 @@ class ModelInitializer(BaseModelInitializer):
             type=str, default='/tmp/stable_diffusion/',
             help='Specify the location of the '
             'output directory for saving original and generated images')
+        arg_parser.add_argument(
+            "--steps", dest='steps',
+            type=int, default=50,
+            help="number of steps for diffusion model")
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
@@ -72,6 +76,7 @@ class ModelInitializer(BaseModelInitializer):
             self.benchmark_command + \
             " --precision=" + str(self.args.precision) + \
             " --batch-size=" + str(self.args.batch_size) + \
+            " --steps=" + str(self.args.steps) + \
             " --output-dir=" + str(self.args.output_dir)
 
         # if the data location directory is not empty, then include the arg

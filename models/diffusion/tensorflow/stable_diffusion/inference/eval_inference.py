@@ -42,6 +42,9 @@ class eval_stable_diffusion:
                                 help='Specify the location of the data. ',
                                 dest="data_location", type=str, default=None)
         
+        arg_parser.add_argument('-s', "--steps", type=int, default=50,
+                                help="number of steps for diffusion model")
+        
         arg_parser.add_argument("-o", "--output-dir",
                                 help="Specify the location of the output " + \
                                      "directory for logs and saved model",
@@ -117,6 +120,7 @@ class eval_stable_diffusion:
                 "golden color, high quality, highly detailed, elegant, sharp focus, "
                 "concept art, character concepts, digital painting, mystery, adventure",
                 batch_size=self.args.batch_size,
+                num_steps=self.args.steps,
             )
             end = time.time()
 
@@ -183,7 +187,7 @@ class eval_stable_diffusion:
                 im.save(self.args.output_dir + "/original/" + row["image"].split('/')[-1])
 
                 print("Generating image with Stable Diffusion for the prompt: ", row["caption"])
-                generated_img = model.text_to_image(row["caption"], seed=2023)
+                generated_img = model.text_to_image(row["caption"], seed=2023, num_steps=self.args.steps)
                 generated_imgs.append(generated_img)
                 save_img = generated_img.reshape(generated_img.shape[1], generated_img.shape[2], generated_img.shape[3])
                 im = Image.fromarray(save_img)
