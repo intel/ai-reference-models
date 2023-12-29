@@ -42,9 +42,17 @@ Bert-Large Model Training using Intel® Extension for TensorFlow.
 1. If not already cloned, clone Intel® AI Reference Model repository
 `git clone https://github.com/IntelAI/models.git` 
 2. `cd models/models_v2/tensorflow/bert_large/training/gpu`
-3. Run `setup.sh` this will install all the required dependencies & create virtual environment `venv`.
-4. Activate virtual env: `. ./venv/bin/activate`
-5. If you want to run with Horovod in multi-tile (export MULTI_TILE=True), please install intel-optimization-for-horovod instead of horovod.
+3. Create virtual environment `venv` and activate it:
+    ```
+    python3 -m venv venv
+    . ./venv/bin/activate
+    ```
+4. Run setup.sh
+    ```
+    ./setup.sh
+    ```
+5. Install [tensorflow and ITEX](https://pypi.org/project/intel-extension-for-tensorflow/)
+6. If you want to run with Horovod in multi-tile (export MULTI_TILE=True), please install intel-optimization-for-horovod instead of horovod.
 `pip uninstall horovod && pip install intel-optimization-for-horovod`
 6. Setup required environment paramaters
 

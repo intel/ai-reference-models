@@ -1,0 +1,36 @@
+training-bf16:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE}
+  env:
+    PRECISION: "bf16"
+    DATASET: "/tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16"
+    MULTI_TILE: "False"
+training-tf32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE}
+  env:
+    PRECISION: "tf32"
+    DATASET: "/tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16"
+    MULTI_TILE: "False"
+training-fp32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE}
+  env:
+    PRECISION: "fp32"
+    DATASET: "/tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16"
+    MULTI_TILE: "False"
+training-bf16:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE}
+  env:
+    PRECISION: "bf16"
+    DATASET: "/tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16"
+    MULTI_TILE: "True"
+training-tf32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE}
+  env:
+    PRECISION: "tf32"
+    DATASET: "/tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16"
+    MULTI_TILE: "True"
+training-fp32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE}
+  env:
+    PRECISION: "fp32"
+    DATASET: "/tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16"
+    MULTI_TILE: "True"

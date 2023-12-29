@@ -21,19 +21,23 @@
 #  - git clones & applying patches
 
 set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
-python3 -m venv $PWD/venv
-. ./venv/bin/activate
+apt-get update && apt-get install -y python3-venv
 
-
-git clone https://github.com/titipata/pubmed_parser
-pip install ./pubmed_parser
+current_dir=$(pwd)
+if [ -d "pubmed_parser" ]; then
+  echo "Repository already exists. Skipping clone."
+else
+  git clone https://github.com/titipata/pubmed_parser
+  pip install ./pubmed_parser
+fi
 pip install -r requirements.txt
 
-rm -fr DeepLearningExamples
-git clone https://github.com/NVIDIA/DeepLearningExamples.git
-cd DeepLearningExamples/TensorFlow2/LanguageModeling/BERT
-cp ../../../../bert-large-itex-bf16.patch .
-git am --signoff < bert-large-itex-bf16.patch
-cd -
-
+if [ -d "DeepLearningExamples" ]; then
+  echo "Repository already exists. Skipping clone."
+else
+  git clone https://github.com/NVIDIA/DeepLearningExamples.git
+  cd DeepLearningExamples/TensorFlow2/LanguageModeling/BERT
+  cp $current_dir/bert-large-itex-bf16.patch .
+  git am --signoff < bert-large-itex-bf16.patch
+  cd -
+fi

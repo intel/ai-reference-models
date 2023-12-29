@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-tensorflow
-intel-extension-for-tensorflow[xpu]
 git+https://github.com/NVIDIA/dllogger
 requests
 tqdm
