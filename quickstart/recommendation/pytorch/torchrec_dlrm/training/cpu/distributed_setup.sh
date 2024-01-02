@@ -35,13 +35,13 @@ if [[ "0" == ${NODE_LIST} ]];then
     if [ $NUMA_NODES_PER_SOCKETS -eq 1 ]
     then 
         NODE_LIST="0,1"
-        PROC_PER_NODE=2
+        PROC_PER_NODE=${PROC_PER_NODE:-"2"}
     else
         for i in $(seq 1 `expr $NUMA_NODES_PER_SOCKETS - 1`)
         do
             NODE_LIST="${NODE_LIST},$i"
         done
-        PROC_PER_NODE=$NUMA_NODES_PER_SOCKETS
+        PROC_PER_NODE=${PROC_PER_NODE:-"$NUMA_NODES_PER_SOCKETS"}
     fi
 fi
 

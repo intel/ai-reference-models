@@ -20,7 +20,6 @@ if [ ! -e "${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/dlrm_main.py
     exit 1
 fi
 MODEL_SCRIPT=${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/dlrm_main.py
-export PREPROCESSED_CRITEO_1TB_CLICK_LOGS_DATASET_PATH=/pytorch/dlrm-v2-data/one_hot
 
 echo "PRECISION: ${PRECISION}"
 echo "OUTPUT_DIR: ${OUTPUT_DIR}"
@@ -66,7 +65,8 @@ if [[ $DIST == "1" ]]; then
   ARGS="$ARGS --ipex-dist-merged-emb-adagrad --distributed-training "
   BATCH_SIZE=`expr $BATCH_SIZE \* 3`
 else
-  launcher_arg=" --node_id 0 "
+  NODE_LIST=${NODE_LIST:-"0"}
+  launcher_arg=" --nodes-list $NODE_LIST "
   ARGS="$ARGS --ipex-merged-emb-adagrad"
 fi
 
@@ -83,6 +83,18 @@ export mrun_cmd="mprof run --python -o ${MEMLOG}"
 unset launcher_arg
 fi
 
+if [[ $CONVERGENCE == "1" ]]; then
+  export TOTAL_TRAINING_SAMPLES=4195197692
+  export VAL_FREQ=$((TOTAL_TRAINING_SAMPLES / (BATCH_SIZE * 20)))
+  ARGS="$ARGS --validation_auroc 0.80275 --validation_freq_within_epoch $VAL_FREQ --log-freq 100 --print_progress "
+  if [ -z "${ONE_HOT_DATASET_DIR}" ]; then
+    echo "CONVERGENCE test need set ONE_HOT_DATASET_DIR"
+    exit 1
+  fi
+else
+ ARGS="$ARGS --limit_train_batches 300 --log-freq 10 "
+fi
+
 COMMON_ARGS=" --embedding_dim 128 \
               --dense_arch_layer_sizes 512,256,128 \
               --over_arch_layer_sizes 1024,1024,512,256,1 \
@@ -95,11 +107,9 @@ COMMON_ARGS=" --embedding_dim 128 \
               --dcn_num_layers=3 \
               --dcn_low_rank_dim=512 \
               --adagrad \
-              --learning_rate 0.005 \
+              --learning_rate 0.004 \
               --multi_hot_distribution_type uniform \
               --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
-              --limit_train_batches 300 \
-              --log-freq 10 \
               $ARGS "
 
 LOG_0="${LOG}/throughput.log"

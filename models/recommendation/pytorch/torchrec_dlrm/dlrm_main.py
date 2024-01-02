@@ -267,6 +267,8 @@ def ipex_optimize(args, model, optimizer, dataloader):
         )
         if dtype == torch.bfloat16:
             model.sparse_arch.embedding_bag_collection.to_bfloat16_train()
+        # if dtype == torch.float16:
+        #     model.sparse_arch.embedding_bag_collection.to_float16_train()
     if args.dtype == 'bf32':
         ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
     return model, optimizer
@@ -423,7 +425,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument(
         "--seed",
         type=int,
-        default=None,
+        default=1696543516,
         help="Random seed for reproducibility.",
     )
     parser.add_argument(
@@ -618,6 +620,12 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="log-freq to print performance statistics.",
     )
     parser.add_argument(
+        "--log-freq-eval",
+        type=int,
+        default=0,
+        help="log-freq to print performance/auroc statistics for eval.",
+    )
+    parser.add_argument(
         "--snapshot-dir",
         type=str,
     )
@@ -694,11 +702,13 @@ def _evaluate(
     limit_batches = args.limit_val_batches
     print_progress = args.print_progress
     autocast_enabled, autocast_dtype = parse_autocast(args.dtype)
-    log_freq = args.log_freq
+    log_freq = args.log_freq_eval
     enable_torch_profile = args.profile
 
     benckmark_batch = fetch_batch(eval_dataloader)
     benckmark_batch.sparse_features = unpack(benckmark_batch.sparse_features)
+    if args.distributed_training and dist.get_world_size() > 1:
+        benckmark_batch = split_dense_input_and_label_for_ranks(benckmark_batch)
 
     def fetch_next(iterator, current_it):
         if args.benchmark:
@@ -710,6 +720,8 @@ def _evaluate(
                 next_batch = next(iterator)
             with record_function("unpack KeyJaggedTensor"):
                 next_batch.sparse_features = unpack(next_batch.sparse_features)
+        if args.distributed_training and dist.get_world_size() > 1:
+            next_batch = split_dense_input_and_label_for_ranks(next_batch)
             return next_batch
 
     def eval_step(model, iterator, current_it):
@@ -720,7 +732,23 @@ def _evaluate(
             t2 = time.time()
         return logits, batch.labels, t2 - t1
 
-        
+    def gather_output(label, pred):
+        my_rank = dist.get_rank()
+        my_size = dist.get_world_size()
+        if my_rank == 0:
+            label_list = [torch.empty_like(label) for _ in range(my_size)]
+            pred_list = [torch.empty_like(pred) for _ in range(my_size)]
+        else:
+            label_list = None
+            pred_list = None
+        dist.barrier()
+        dist.gather(label, label_list, dst=0)
+        dist.gather(pred, pred_list, dst=0)
+        if my_rank == 0:
+            return torch.cat(label_list), torch.cat(pred_list)
+        else:
+            return None, None
+
     pbar = tqdm(
         iter(int, 1),
         desc=f"Evaluating {stage} set",
@@ -770,6 +798,7 @@ def _evaluate(
                 logits, label, fw_t = eval_step(eval_model, iterator, it)
                 total_t += fw_t
                 if log_freq != 0 and it % log_freq == 0:
+                    assert not args.distributed_training
                     preds = [torch.cat(preds)]
                     labels = [torch.cat(labels)]
                     num_samples = labels[0].shape[0]
@@ -794,17 +823,29 @@ def _evaluate(
 
     preds = torch.cat(preds)
     labels = torch.cat(labels)
-    num_samples = labels.shape[0]
-    if not args.ipex_optimize:
-        auroc = auroc = auroc_computer(preds.squeeze().float(), labels.float())
-    else:
-        auroc = ipex._C.roc_auc_score(labels.float(), preds.squeeze().float())
+    if args.distributed_training and dist.get_world_size() > 1:
+        labels, preds = gather_output(labels, preds)
 
-    logger.info(f"AUROC over {stage} set: {auroc}.")
-    logger.info(f"Number of {stage} samples: {num_samples}")
-    logger.info(f"Throughput: {num_samples/total_t} fps")
-    logger.info(f"Final AUROC: {auroc} ")
+    is_rank_zero = args.distributed_training and dist.get_world_size() > 1 and dist.get_rank() == 0
+    if is_rank_zero or not args.distributed_training:
+        num_samples = labels.shape[0]
+        if not args.ipex_optimize:
+            auroc = auroc = auroc_computer(preds.squeeze().float(), labels.float())
+        else:
+            auroc = ipex._C.roc_auc_score(labels.float(), preds.squeeze().float())
+        logger.info(f"AUROC over {stage} set: {auroc}.")
+        logger.info(f"Number of {stage} samples: {num_samples}")
+        logger.info(f"Throughput: {num_samples/total_t} fps")
+        logger.info(f"Final AUROC: {auroc} ")
 
+    if args.distributed_training and dist.get_world_size() > 1:
+        dist.barrier()
+        if is_rank_zero:
+            bd_list = [auroc]
+        else:
+            bd_list = [None]
+        dist.broadcast_object_list(bd_list, src=0)
+        auroc = bd_list[0]
     return auroc
 
 
@@ -937,7 +978,7 @@ def _train(
                 logger.info(f"avg training time per iter at ITER: {it}, {total_t/ (it - 100)} s")
                 print_memory(f"memory usage at iter {it}")
 
-            lr_scheduler.step()
+            # lr_scheduler.step()
             pbar.update(1)
             if validation_freq and it % validation_freq == 0:
                 epoch_num = epoch + it / len(train_dataloader)
@@ -948,6 +989,8 @@ def _train(
                     epoch_num,
                     args
                 )
+                if isinstance(auroc_result, list):
+                    auroc_result = auroc_result[0]
                 if validation_auroc is not None and auroc_result >= validation_auroc:
                     logger.info("auc = {auroc_result} >= validation_auroc {validation_auroc}, stopped since success")
                     is_success = True
@@ -1116,7 +1159,7 @@ def construct_model(args):
     ]
 
     assert args.interaction_type == InteractionType.DCN
-    from ipex_optimized_model.model import IPEX_DLRM_DCN
+    from ipex_optimized_model.model import IPEX_DLRM_DCN, init_weight
     dcn_init_fn = IPEX_DLRM_DCN
     dlrm_model = dcn_init_fn(
         embedding_bag_collection=EmbeddingBagCollection(
@@ -1129,6 +1172,9 @@ def construct_model(args):
         dcn_low_rank_dim=args.dcn_low_rank_dim,
         dense_device=device,
     )
+    if args.validation_auroc:
+        # init weight to test convergence
+        init_weight(dlrm_model)
 
     train_model = DLRMTrain(dlrm_model)
     if args.test_auroc or args.calibration:
@@ -1261,6 +1307,9 @@ def main(argv: List[str]) -> None:
     device = torch.device('cpu')
 
     pprint(vars(args))
+    import numpy as np
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
     # logger.event(
     #     key=mllog_constants.GLOBAL_BATCH_SIZE,
     #     value=dist.get_world_size() * args.batch_size,

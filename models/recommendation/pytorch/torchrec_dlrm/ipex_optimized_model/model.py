@@ -25,6 +25,123 @@ from torchrec.modules.embedding_modules import EmbeddingBagCollection
 from typing import Dict, List, Optional, Tuple
 import intel_extension_for_pytorch as ipex
 from intel_extension_for_pytorch.nn.modules import MergedEmbeddingBagWithCat, MergedEmbeddingBagWithAdaGrad, DistMergeEmbeddingBagWithAdaGrad
+import numpy as np
+
+def _calculate_fan_in_and_fan_out(shape):
+    # numpy array version
+    dimensions = len(shape)
+    assert dimensions >= 2, "Fan in and fan out can not be computed for tensor with fewer than 2 dimensions"
+
+    num_input_fmaps = shape[1]
+    num_output_fmaps = shape[0]
+    receptive_field_size = 1
+    if len(shape) > 2:
+        # math.prod is not always available, accumulate the product manually
+        # we could use functools.reduce but that is not supported by TorchScript
+        for s in shape[2:]:
+            receptive_field_size *= s
+    fan_in = num_input_fmaps * receptive_field_size
+    fan_out = num_output_fmaps * receptive_field_size
+
+    return fan_in, fan_out
+
+def _calculate_correct_fan(shape, mode):
+    mode = mode.lower()
+    valid_modes = ['fan_in', 'fan_out']
+    if mode not in valid_modes:
+        raise ValueError("Mode {} not supported, please use one of {}".format(mode, valid_modes))
+
+    fan_in, fan_out = _calculate_fan_in_and_fan_out(shape)
+    return fan_in if mode == 'fan_in' else fan_out
+
+def calculate_gain(nonlinearity, param=None):
+    linear_fns = ['linear', 'conv1d', 'conv2d', 'conv3d', 'conv_transpose1d', 'conv_transpose2d', 'conv_transpose3d']
+    if nonlinearity in linear_fns or nonlinearity == 'sigmoid':
+        return 1
+    elif nonlinearity == 'tanh':
+        return 5.0 / 3
+    elif nonlinearity == 'relu':
+        return np.sqrt(2.0)
+    elif nonlinearity == 'leaky_relu':
+        if param is None:
+            negative_slope = 0.01
+        elif not isinstance(param, bool) and isinstance(param, int) or isinstance(param, float):
+            # True/False are instances of int, hence check above
+            negative_slope = param
+        else:
+            raise ValueError("negative_slope {} not a valid number".format(param))
+        return np.sqrt(2.0 / (1 + negative_slope ** 2))
+    elif nonlinearity == 'selu':
+        return 3.0 / 4  # Value found empirically (https://github.com/pytorch/pytorch/pull/50664)
+    else:
+        raise ValueError("Unsupported nonlinearity {}".format(nonlinearity))
+
+def xavier_norm_(shape: tuple, gain: float = 1.):
+    fan_in, fan_out = _calculate_fan_in_and_fan_out(shape)
+    std = gain * np.sqrt(2.0 / float(fan_in + fan_out))
+    mean = 0.0
+    d = np.random.normal(mean, std, size=shape).astype(np.float32)
+    return d
+
+def kaiming_uniform_(shape: tuple, a: float = 0,
+                     mode: str = 'fan_in',
+                     nonlinearity: str = 'leaky_relu'
+):
+    assert (0 not in shape), "Initializing zero-element tensors is a no-op"
+    fan = _calculate_correct_fan(shape, mode)
+    gain = calculate_gain(nonlinearity, a)
+    std = gain / np.sqrt(fan)
+    bound = np.sqrt(3.0) * std  # Calculate uniform bounds from standard deviation
+    return np.random.uniform(-bound, bound, size=shape)
+
+def init_weight(dlrm):
+    # Sparse Arch
+    for k, m in dlrm.sparse_arch.embedding_bag_collection.embedding_bags.items():
+        num_embeddings, embedding_dim = m.weight.shape
+        W = np.random.uniform(
+            low=-np.sqrt(1 / num_embeddings),
+            high=np.sqrt(1 / num_embeddings),
+            size=(num_embeddings, embedding_dim)).astype(np.float32)
+        with torch.no_grad():
+            m.weight.data = torch.tensor(W, requires_grad=True)
+    # Dense Arch
+    dense_mlp = dlrm.dense_arch.model._mlp
+    for layer in dense_mlp:
+        n, m = layer._linear.weight.shape
+        W = kaiming_uniform_((n, m), a=np.sqrt(5)).astype(np.float32)
+        with torch.no_grad():
+            layer._linear.weight.data = torch.tensor(W, requires_grad=True)
+            layer._linear.bias.data.zero_()
+    # LowRankCrossNet
+    crossnet = dlrm.inter_arch.crossnet
+    for w in crossnet.W_kernels:
+        m, n = w.shape
+        W = xavier_norm_((m, n))
+        with torch.no_grad():
+            w.data = torch.tensor(W, requires_grad=True)
+    for w in crossnet.V_kernels:
+        m, n = w.shape
+        W = xavier_norm_((m, n))
+        with torch.no_grad():
+            w.data = torch.tensor(W, requires_grad=True)
+    for b in crossnet.bias:
+        with torch.no_grad():
+            b.data.zero_()
+
+    # Over Arch
+    over_mlp = dlrm.over_arch.model[0]._mlp
+    for layer in over_mlp:
+        n, m = layer._linear.weight.shape
+        W = kaiming_uniform_((n, m), a=np.sqrt(5)).astype(np.float32)
+        with torch.no_grad():
+            layer._linear.weight.data = torch.tensor(W, requires_grad=True)
+            layer._linear.bias.data.zero_()
+    last_layer = dlrm.over_arch.model[1]
+    n, m = last_layer.weight.shape
+    W = kaiming_uniform_((n, m), a=np.sqrt(5)).astype(np.float32)
+    with torch.no_grad():
+        last_layer.weight.data = torch.tensor(W, requires_grad=True)
+        last_layer.bias.data.zero_()
 
 class _LowRankCrossNet(torch.nn.Module):
     def __init__(

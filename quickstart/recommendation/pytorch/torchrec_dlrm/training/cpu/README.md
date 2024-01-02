@@ -70,10 +70,14 @@ cd ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/training/cpu
 # we recommend to use real dataset to evaluate performance data since the performance will highly related with input data distribution
 # do not set ONE_HOT_DATASET_DIR will use dummy data
 export ONE_HOT_DATASET_DIR=<your one hot dataset dir>
-# normal Training
+# Normal Training
 bash training_performance.sh
 # Distributed training
 DIST=1 bash training_performance.sh
+# Convergence test for Normal Training
+CONVERGENCE=1 bash training_performance.sh
+# Convergence test for Distributed Training
+DIST=1 CONVERGENCE=1 bash training_performance.sh
 ```
 
 ## Distributed training advance setting
