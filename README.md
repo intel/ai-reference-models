@@ -211,6 +211,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | Max Series | [BFloat16](/quickstart/language_modeling/tensorflow/bert_large/training/gpu/README.md) |
 | [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf) | PyTorch | Inference | Max Series | [FP16](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/gpu/README.md) |
 | [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf) | PyTorch | Training | Max Series | [BFloat16](/quickstart/recommendation/pytorch/torchrec_dlrm/training/gpu/README.md) |
+| [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | PyTorch | Inference | Arc Series | [FP16 FP32](quickstart/generative-ai/pytorch/stable_diffusion/inference/gpu/WSL2_ARC_STABLE_DIFFUSION.md) |
 
 ## How to Contribute
 If you would like to add a new benchmarking script, please use [this guide](/Contribute.md).
