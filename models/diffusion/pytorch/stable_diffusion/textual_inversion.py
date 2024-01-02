@@ -789,10 +789,10 @@ def main():
         import intel_extension_for_pytorch as ipex
         if args.precision == "bf32":
             ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
-            # unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype, auto_kernel_selection=True)
+            unet = ipex.optimize(unet, dtype=weight_dtype, auto_kernel_selection=True)
             vae = ipex.optimize(vae, dtype=weight_dtype, auto_kernel_selection=True)
         else:
-            # unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype)
+            unet = ipex.optimize(unet, dtype=weight_dtype)
             vae = ipex.optimize(vae, dtype=weight_dtype)
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
