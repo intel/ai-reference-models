@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fc9411e..502f599 100644
+index fc9411e95..502f5996e 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -387,7 +387,7 @@ index fc9411e..502f599 100644
  
              # Evaluate
 diff --git a/examples/pytorch/image-classification/run_image_classification.py b/examples/pytorch/image-classification/run_image_classification.py
-index e2ce9f1..2a7fc12 100644
+index e2ce9f1c5..2a7fc1201 100644
 --- a/examples/pytorch/image-classification/run_image_classification.py
 +++ b/examples/pytorch/image-classification/run_image_classification.py
 @@ -275,6 +275,7 @@ def main():
@@ -399,7 +399,7 @@ index e2ce9f1..2a7fc12 100644
          use_auth_token=True if model_args.use_auth_token else None,
      )
 diff --git a/examples/pytorch/question-answering/run_qa.py b/examples/pytorch/question-answering/run_qa.py
-index 9dc3b2c..0c21b2d 100755
+index 9dc3b2c81..0c21b2dd9 100755
 --- a/examples/pytorch/question-answering/run_qa.py
 +++ b/examples/pytorch/question-answering/run_qa.py
 @@ -322,6 +322,7 @@ def main():
@@ -411,7 +411,7 @@ index 9dc3b2c..0c21b2d 100755
      )
      tokenizer = AutoTokenizer.from_pretrained(
 diff --git a/examples/pytorch/text-classification/run_glue.py b/examples/pytorch/text-classification/run_glue.py
-index c14107d..fdc7d03 100755
+index c14107d89..fdc7d03f6 100755
 --- a/examples/pytorch/text-classification/run_glue.py
 +++ b/examples/pytorch/text-classification/run_glue.py
 @@ -360,6 +360,7 @@ def main():
@@ -445,7 +445,7 @@ index c14107d..fdc7d03 100755
      if training_args.do_predict:
          logger.info("*** Predict ***")
 diff --git a/src/transformers/activations.py b/src/transformers/activations.py
-index 587dc2e..b4e331e 100644
+index 587dc2e59..b4e331e28 100644
 --- a/src/transformers/activations.py
 +++ b/src/transformers/activations.py
 @@ -53,8 +53,7 @@ class NewGELUActivation(nn.Module):
@@ -459,7 +459,7 @@ index 587dc2e..b4e331e 100644
  class GELUActivation(nn.Module):
      """
 diff --git a/src/transformers/generation/utils.py b/src/transformers/generation/utils.py
-index ae12ae2..041fc2f 100644
+index ae12ae293..041fc2f23 100644
 --- a/src/transformers/generation/utils.py
 +++ b/src/transformers/generation/utils.py
 @@ -16,6 +16,8 @@
@@ -855,7 +855,7 @@ index ae12ae2..041fc2f 100644
      def beam_sample(
          self,
 diff --git a/src/transformers/modeling_utils.py b/src/transformers/modeling_utils.py
-index 0df8d7e..99d107a 100644
+index 0df8d7e25..99d107a81 100644
 --- a/src/transformers/modeling_utils.py
 +++ b/src/transformers/modeling_utils.py
 @@ -1831,7 +1831,10 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
@@ -871,7 +871,7 @@ index 0df8d7e..99d107a 100644
          # Save the model
          for shard_file, shard in shards.items():
 diff --git a/src/transformers/models/bert/modeling_bert.py b/src/transformers/models/bert/modeling_bert.py
-index ee7dcd5..5ead9c9 100755
+index ee7dcd5e4..5ead9c989 100755
 --- a/src/transformers/models/bert/modeling_bert.py
 +++ b/src/transformers/models/bert/modeling_bert.py
 @@ -346,6 +346,8 @@ class BertSelfAttention(nn.Module):
@@ -918,10 +918,21 @@ index ee7dcd5..5ead9c9 100755
              total_loss = masked_lm_loss + next_sentence_loss
  
 diff --git a/src/transformers/models/distilbert/modeling_distilbert.py b/src/transformers/models/distilbert/modeling_distilbert.py
-index 84db89e..3c4138e 100755
+index 84db89e0f..653ca3c9b 100755
 --- a/src/transformers/models/distilbert/modeling_distilbert.py
 +++ b/src/transformers/models/distilbert/modeling_distilbert.py
-@@ -743,11 +743,11 @@ class DistilBertForSequenceClassification(DistilBertPreTrainedModel):
+@@ -216,8 +216,9 @@ class MultiHeadSelfAttention(nn.Module):
+         k = shape(self.k_lin(key))  # (bs, n_heads, k_length, dim_per_head)
+         v = shape(self.v_lin(value))  # (bs, n_heads, k_length, dim_per_head)
+ 
+-        q = q / math.sqrt(dim_per_head)  # (bs, n_heads, q_length, dim_per_head)
++
+         scores = torch.matmul(q, k.transpose(2, 3))  # (bs, n_heads, q_length, k_length)
++        scores = scores / math.sqrt(dim_per_head)  # (bs, n_heads, q_length, dim_per_head)
+         mask = (mask == 0).view(mask_reshp).expand_as(scores)  # (bs, n_heads, q_length, k_length)
+         scores = scores.masked_fill(
+             mask, torch.tensor(torch.finfo(scores.dtype).min)
+@@ -743,11 +744,11 @@ class DistilBertForSequenceClassification(DistilBertPreTrainedModel):
      )
      def forward(
          self,
@@ -935,7 +946,7 @@ index 84db89e..3c4138e 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/models/gptj/modeling_gptj.py b/src/transformers/models/gptj/modeling_gptj.py
-index 1051a29..256ff66 100644
+index 1051a298d..256ff6671 100644
 --- a/src/transformers/models/gptj/modeling_gptj.py
 +++ b/src/transformers/models/gptj/modeling_gptj.py
 @@ -169,7 +169,7 @@ class GPTJAttention(nn.Module):
@@ -961,7 +972,7 @@ index 1051a29..256ff66 100644
          inputs_embeds: Optional[torch.FloatTensor] = None,
          labels: Optional[torch.LongTensor] = None,
 diff --git a/src/transformers/models/llama/modeling_llama.py b/src/transformers/models/llama/modeling_llama.py
-index 1ae0584..fe29d05 100755
+index 1ae058469..fe29d059b 100755
 --- a/src/transformers/models/llama/modeling_llama.py
 +++ b/src/transformers/models/llama/modeling_llama.py
 @@ -224,7 +224,7 @@ class LlamaAttention(nn.Module):
@@ -993,7 +1004,7 @@ index 1ae0584..fe29d05 100755
          labels: Optional[torch.LongTensor] = None,
          use_cache: Optional[bool] = None,
 diff --git a/src/transformers/models/vit/modeling_vit.py b/src/transformers/models/vit/modeling_vit.py
-index 474b92f..98aab97 100644
+index 474b92f72..98aab97f0 100644
 --- a/src/transformers/models/vit/modeling_vit.py
 +++ b/src/transformers/models/vit/modeling_vit.py
 @@ -779,8 +779,8 @@ class ViTForImageClassification(ViTPreTrainedModel):
@@ -1007,7 +1018,7 @@ index 474b92f..98aab97 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499..b8a90d9 100755
+index cf71499b0..b8a90d9b8 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,9 @@ from .utils import (
@@ -1354,7 +1365,7 @@ index cf71499..b8a90d9 100755
          observed_num_examples = 0
          # Main evaluation loop
 diff --git a/src/transformers/training_args.py b/src/transformers/training_args.py
-index 088eb06..2e00676 100644
+index 088eb06b7..2e0067671 100644
 --- a/src/transformers/training_args.py
 +++ b/src/transformers/training_args.py
 @@ -777,10 +777,121 @@ class TrainingArguments:
