@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fc9411e95..97511c26c 100644
+index fc9411e95..21f1d3a43 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -12,17 +12,11 @@ index fc9411e95..97511c26c 100644
  
  import numpy as np
  import torch
-@@ -48,7 +51,36 @@ from transformers.data.metrics.squad_metrics import (
+@@ -48,7 +51,29 @@ from transformers.data.metrics.squad_metrics import (
  from transformers.data.processors.squad import SquadResult, SquadV1Processor, SquadV2Processor
  from transformers.trainer_utils import is_main_process
  
-+from intel_extension_for_pytorch.quantization.fp8 import (
-+    fp8_autocast,
-+    DelayedScaling,
-+    Format,
-+    prepare_fp8,
-+)
- 
+-
 +def trace_handler(prof):
 +    print(prof.key_averages().table(
 +        sort_by="self_cpu_time_total", row_limit=10))
@@ -49,7 +43,7 @@ index fc9411e95..97511c26c 100644
  try:
      from torch.utils.tensorboard import SummaryWriter
  except ImportError:
-@@ -265,6 +297,219 @@ def train(args, train_dataset, model, tokenizer):
+@@ -265,6 +290,219 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -133,10 +127,10 @@ index fc9411e95..97511c26c 100644
 +        model= prepare_fp8(model)
 +        if os.path.exists(args.fp8_config):
 +            model.load_state_dict(torch.load(args.fp8_config))
-+    elif args.use_jit:
++    elif args.use_jit: # fp32
++        model = ipex.optimize(model.eval(), dtype=torch.float32)# auto_kernel_selection=True)
 +        with torch.no_grad():
 +            model = torch.jit.trace(model, jit_inputs, strict=False)
-+            #model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True)) 
 +            model = torch.jit.freeze(model)
 +    # torch.compile() path
 +    if args.inductor:
@@ -150,20 +144,18 @@ index fc9411e95..97511c26c 100644
 +            print('[Info] Running torch.compile() for INT8 quantization')
 +            print('[Info] Running int8_bf16 is: {}'.format(args.int8_bf16))
 +            with torch.no_grad():
-+                constraints = None
++                dynamic_shapes = None
 +                if args.eval_batch_size != 1:
-+                    constraints = [
-+                        dynamic_dim(torch_compile_inputs["input_ids"], 0),
-+                        dynamic_dim(torch_compile_inputs["attention_mask"], 0),
-+                        dynamic_dim(torch_compile_inputs["token_type_ids"], 0),
-+                        dynamic_dim(torch_compile_inputs["input_ids"], 0) == dynamic_dim(torch_compile_inputs["attention_mask"], 0),
-+                        dynamic_dim(torch_compile_inputs["input_ids"], 0) == dynamic_dim(torch_compile_inputs["token_type_ids"], 0),
-+                    ]                    
++                    dynamic_shapes = {
++                        "input_ids": {0: torch.export.Dim("dim")},
++                        "attention_mask": {0: torch.export.Dim("dim")},
++                        "token_type_ids": {0: torch.export.Dim("dim")}
++                    }                    
 +                exported_model = capture_pre_autograd_graph(
 +                    model,
 +                    (),
 +                    kwargs=torch_compile_inputs,
-+                    constraints=constraints,
++                    dynamic_shapes=dynamic_shapes,
 +                )
 +                quantizer = X86InductorQuantizer()
 +                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
@@ -179,6 +171,8 @@ index fc9411e95..97511c26c 100644
 +                    model(**torch_compile_inputs)
 +                    model(**torch_compile_inputs)
 +        else:
++            if args.fp16_cpu:
++                torch._C._set_sdp_use_flash(False)
 +            with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
 +                if args.ipex:
 +                    print('[Info] Running torch.compile() with IPEX backend')
@@ -269,7 +263,7 @@ index fc9411e95..97511c26c 100644
  
  def evaluate(args, model, tokenizer, prefix=""):
      dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
-@@ -278,6 +523,8 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -278,6 +516,8 @@ def evaluate(args, model, tokenizer, prefix=""):
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
  
@@ -278,7 +272,7 @@ index fc9411e95..97511c26c 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -286,12 +533,63 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -286,12 +526,63 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
@@ -343,7 +337,7 @@ index fc9411e95..97511c26c 100644
          batch = tuple(t.to(args.device) for t in batch)
  
          with torch.no_grad():
-@@ -314,13 +612,20 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -314,13 +605,20 @@ def evaluate(args, model, tokenizer, prefix=""):
                      inputs.update(
                          {"langs": (torch.ones(batch[0].shape, dtype=torch.int64) * args.lang_id).to(args.device)}
                      )
@@ -366,7 +360,7 @@ index fc9411e95..97511c26c 100644
  
              # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
              # models only use two.
-@@ -671,7 +976,62 @@ def main():
+@@ -671,7 +969,68 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -425,11 +419,17 @@ index fc9411e95..97511c26c 100644
      args = parser.parse_args()
 +    if args.ipex:
 +        import intel_extension_for_pytorch as ipex
-+        global ipex
++        from intel_extension_for_pytorch.quantization.fp8 import (
++            fp8_autocast,
++            DelayedScaling,
++            Format,
++            prepare_fp8,
++        )
++        global ipex, fp8_autocast, DelayedScaling, Format, prepare_fp8
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
          logger.warning(
-@@ -742,11 +1102,13 @@ def main():
+@@ -742,11 +1101,13 @@ def main():
      args.model_type = args.model_type.lower()
      config = AutoConfig.from_pretrained(
          args.config_name if args.config_name else args.model_name_or_path,
@@ -443,7 +443,7 @@ index fc9411e95..97511c26c 100644
          cache_dir=args.cache_dir if args.cache_dir else None,
          use_fast=False,  # SquadDataset is not compatible with Fast tokenizers which have a smarter overflow handeling
      )
-@@ -824,7 +1186,7 @@ def main():
+@@ -824,7 +1185,7 @@ def main():
          for checkpoint in checkpoints:
              # Reload the model
              global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
@@ -1035,64 +1035,6 @@ index 84db89e0f..cb986d7ea 100755
          output_attentions: Optional[bool] = None,
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
-diff --git a/src/transformers/models/gptj/modeling_gptj.py b/src/transformers/models/gptj/modeling_gptj.py
-index 1051a298d..256ff6671 100644
---- a/src/transformers/models/gptj/modeling_gptj.py
-+++ b/src/transformers/models/gptj/modeling_gptj.py
-@@ -169,7 +169,7 @@ class GPTJAttention(nn.Module):
- 
-         if attention_mask is not None:
-             # Apply the attention mask
--            attn_weights = attn_weights + attention_mask
-+            attn_weights = torch.tensor(attn_weights) + torch.tensor(attention_mask)
- 
-         attn_weights = nn.functional.softmax(attn_weights, dim=-1)
-         attn_weights = attn_weights.to(value.dtype)
-@@ -829,10 +829,10 @@ class GPTJForCausalLM(GPTJPreTrainedModel):
-     def forward(
-         self,
-         input_ids: Optional[torch.LongTensor] = None,
--        past_key_values: Optional[Tuple[Tuple[torch.Tensor]]] = None,
-         attention_mask: Optional[torch.FloatTensor] = None,
--        token_type_ids: Optional[torch.LongTensor] = None,
-+        past_key_values: Optional[Tuple[Tuple[torch.Tensor]]] = None,
-         position_ids: Optional[torch.LongTensor] = None,
-+        token_type_ids: Optional[torch.LongTensor] = None,
-         head_mask: Optional[torch.FloatTensor] = None,
-         inputs_embeds: Optional[torch.FloatTensor] = None,
-         labels: Optional[torch.LongTensor] = None,
-diff --git a/src/transformers/models/llama/modeling_llama.py b/src/transformers/models/llama/modeling_llama.py
-index 1ae058469..fe29d059b 100755
---- a/src/transformers/models/llama/modeling_llama.py
-+++ b/src/transformers/models/llama/modeling_llama.py
-@@ -224,7 +224,7 @@ class LlamaAttention(nn.Module):
-                 raise ValueError(
-                     f"Attention mask should be of size {(bsz, 1, q_len, kv_seq_len)}, but is {attention_mask.size()}"
-                 )
--            attn_weights = attn_weights + attention_mask
-+            attn_weights = torch.tensor(attn_weights) + torch.tensor(attention_mask)
-             attn_weights = torch.max(attn_weights, torch.tensor(torch.finfo(attn_weights.dtype).min))
- 
-         # upcast attention to fp32
-@@ -474,7 +474,7 @@ class LlamaModel(LlamaPreTrainedModel):
-                 inputs_embeds.device
-             )
-             combined_attention_mask = (
--                expanded_attn_mask if combined_attention_mask is None else expanded_attn_mask + combined_attention_mask
-+                expanded_attn_mask if combined_attention_mask is None else torch.tensor(expanded_attn_mask) + torch.tensor(combined_attention_mask)
-             )
- 
-         return combined_attention_mask
-@@ -642,8 +642,8 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
-         self,
-         input_ids: torch.LongTensor = None,
-         attention_mask: Optional[torch.Tensor] = None,
--        position_ids: Optional[torch.LongTensor] = None,
-         past_key_values: Optional[List[torch.FloatTensor]] = None,
-+        position_ids: Optional[torch.LongTensor] = None,
-         inputs_embeds: Optional[torch.FloatTensor] = None,
-         labels: Optional[torch.LongTensor] = None,
-         use_cache: Optional[bool] = None,
 diff --git a/src/transformers/models/vit/modeling_vit.py b/src/transformers/models/vit/modeling_vit.py
 index 474b92f72..98aab97f0 100644
 --- a/src/transformers/models/vit/modeling_vit.py
@@ -1108,7 +1050,7 @@ index 474b92f72..98aab97f0 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499b0..3d5c53274 100755
+index cf71499b0..c5681d54c 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,29 @@ from .utils import (
@@ -1287,7 +1229,7 @@ index cf71499b0..3d5c53274 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -1415,6 +1486,69 @@ class Trainer:
+@@ -1415,6 +1486,70 @@ class Trainer:
              model = self.torch_jit_model_eval(model, dataloader, training)
              self.jit_compilation_time = round(time.time() - start_time, 4)
  
@@ -1334,6 +1276,7 @@ index cf71499b0..3d5c53274 100755
 +                    y = model(**example_batch)
 +                    y = model(**example_batch)
 +            elif self.args.fp16_cpu:
++                torch._C._set_sdp_use_flash(False)
 +                with torch.no_grad(), torch.cpu.amp.autocast(dtype=torch.half):
 +                    if self.args.use_ipex:
 +                        print('[Info] Running torch.compile() float16 with IPEX backend')
@@ -1357,7 +1300,7 @@ index cf71499b0..3d5c53274 100755
          # Note: in torch.distributed mode, there's no point in wrapping the model
          # inside a DistributedDataParallel as we'll be under `no_grad` anyways.
          if not training:
-@@ -1575,8 +1709,9 @@ class Trainer:
+@@ -1575,8 +1710,9 @@ class Trainer:
  
          # torch.compile() needs to be called after wrapping the model with FSDP or DDP
          # to ensure that it accounts for the graph breaks required by those wrappers
@@ -1369,7 +1312,7 @@ index cf71499b0..3d5c53274 100755
  
          return model
  
-@@ -1993,7 +2128,11 @@ class Trainer:
+@@ -1993,7 +2129,11 @@ class Trainer:
                          scale_after = self.scaler.get_scale()
                          optimizer_was_run = scale_before <= scale_after
                      else:
@@ -1382,7 +1325,7 @@ index cf71499b0..3d5c53274 100755
  
                      if optimizer_was_run and not self.deepspeed:
                          self.lr_scheduler.step()
-@@ -2714,7 +2853,10 @@ class Trainer:
+@@ -2714,7 +2854,10 @@ class Trainer:
              # loss gets scaled under gradient_accumulation_steps in deepspeed
              loss = self.deepspeed.backward(loss)
          else:
@@ -1394,7 +1337,7 @@ index cf71499b0..3d5c53274 100755
  
          return loss.detach()
  
-@@ -3085,7 +3227,60 @@ class Trainer:
+@@ -3085,7 +3228,60 @@ class Trainer:
          self._memory_tracker.stop_and_update_metrics(output.metrics)
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
@@ -1456,21 +1399,21 @@ index cf71499b0..3d5c53274 100755
      def evaluation_loop(
          self,
          dataloader: DataLoader,
-@@ -3133,7 +3328,12 @@ class Trainer:
+@@ -3133,7 +3329,12 @@ class Trainer:
              logger.info("  Num examples: Unknown")
          logger.info(f"  Batch size = {batch_size}")
  
 -        model.eval()
-+        try:
++        # For PT2 Quantization model, we've called move_exported_model_to_eval on the model
++        # and the training attribute of the model is set to True after the call.
++        # Calling .eval() again here will change the training attribute to False, causing re-compilation
++        # which is not the expected behavior.
++        if not (self.args.inductor and self.args.int8):
 +            model.eval()
-+        except:
-+            # Model after PT2 Quantization has not eval method
-+            # https://github.com/pytorch/pytorch/blob/b3ad29e269aa940c6f6947627b039191856b895e/torch/ao/quantization/quantize_pt2e.py#L110
-+            pass
  
          self.callback_handler.eval_dataloader = dataloader
          # Do this before wrapping.
-@@ -3158,6 +3358,20 @@ class Trainer:
+@@ -3158,6 +3359,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.
@@ -1657,3 +1600,4 @@ index 088eb06b7..887cfec22 100644
  
          if (
              self.framework == "pt"
+        
