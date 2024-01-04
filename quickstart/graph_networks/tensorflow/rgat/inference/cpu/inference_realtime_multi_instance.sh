@@ -87,6 +87,17 @@ else
   CORES_PER_INSTANCE=${CORES_PER_INSTANCE}
 fi
 
+# Setting environment variables
+# use legacy keras 2.x api, keras 3.x not yet supported
+export TF_USE_LEGACY_KERAS=1
+echo "TF_USE_LEGACY_KERAS=1"
+# Assume frozen weight for inference only to enable weight caching with SavedModel to improve perf
+export TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1
+echo "TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1"
+# set thread pinning+spinning config. currently pinning is none and spinning is enabled
+export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=rgat \

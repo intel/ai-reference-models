@@ -66,6 +66,25 @@ MODE="inference"
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 BATCH_SIZE="${BATCH_SIZE:-"100"}"
 
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  # Get number of cores per instance
+  CORES_PER_SOCKET=`lscpu | grep 'Core(s) per socket' | awk '{print $4}'`
+  SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+  NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+  CORES_PER_INSTANCE=`expr $CORES_PER_SOCKET \* $SOCKETS / $NUMAS`
+fi
+
+# Setting environment variables
+# use legacy keras 2.x api, keras 3.x not yet supported
+export TF_USE_LEGACY_KERAS=1
+echo "TF_USE_LEGACY_KERAS=1"
+# Assume frozen weight for inference only to enable weight caching with SavedModel to improve perf
+export TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1
+echo "TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1"
+export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=rgat \

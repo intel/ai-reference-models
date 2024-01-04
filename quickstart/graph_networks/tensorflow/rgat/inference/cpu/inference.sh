@@ -80,6 +80,21 @@ else
 fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
 
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+CORES_PER_INSTANCE="${CORES_PER_INSTANCE:="4"}"
+echo "CORES_PER_INSTANCE=${CORES_PER_INSTANCE}"
+
+# Setting environment variables
+# use legacy keras 2.x api, keras 3.x not yet supported
+export TF_USE_LEGACY_KERAS=1
+echo "TF_USE_LEGACY_KERAS=1"
+# Assume frozen weight for inference only to enable weight caching with SavedModel to improve perf
+export TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1
+echo "TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1"
+# set thread pinning+spinning config. currently pinning is none and spinning is enabled
+export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=rgat \
@@ -91,6 +106,9 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location ${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
+  --num-intra-threads=${CORES_PER_INSTANCE} \
+  --num-inter-threads=1 \
+  --numa-cores-per-instance=${CORES_PER_INSTANCE} \
   $@ \
   -- \
   $WARMUP_STEPS \
