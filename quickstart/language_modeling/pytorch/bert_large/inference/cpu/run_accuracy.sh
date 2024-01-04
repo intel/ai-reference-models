@@ -38,7 +38,7 @@ then
 elif [[ "$PRECISION" == "int8" || "$PRECISION" == "avx-int8" ]]
 then
     precision=int8
-    ARGS="$ARGS --int8"
+    ARGS="$ARGS --int8 --int8_bf16"
     echo "### running int8 mode"
 elif [[ "$PRECISION" == "bf32" ]]
 then
