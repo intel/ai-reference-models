@@ -139,7 +139,7 @@ if args.dtype == "bf16":
     autocast = True
 if args.dtype == "bf16" or args.dtype == "fp32":
     if args.ipex:
-        user_model = ipex.optimize_transformers(
+        user_model = ipex.llm.optimize(
             user_model.eval(),
             dtype=torch.bfloat16 if args.dtype == "bf16" else torch.float,
             inplace=True,
@@ -156,7 +156,7 @@ if args.dtype == "bf16" or args.dtype == "fp32":
                 print('[Info] Running torch.compile() BFloat16 with default backend')
                 user_model = torch.compile(user_model)
 elif args.dtype == "fp16":
-    user_model = ipex.optimize_transformers(
+    user_model = ipex.llm.optimize(
         user_model.eval(),
         quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into fp16
         inplace=True,
@@ -169,7 +169,7 @@ elif args.dtype == "fp16":
         auto_kernel_selection=True,
     )
 elif args.dtype == "bf32":
-    user_model = ipex.optimize_transformers(
+    user_model = ipex.llm.optimize(
         user_model.eval(),
         quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into bf32
         inplace=True,
@@ -510,7 +510,7 @@ if args.dtype == "int8" and args.ipex:
             break
         from intel_extension_for_pytorch.quantization import prepare, convert
 
-        user_model = ipex.optimize_transformers(
+        user_model = ipex.llm.optimize(
             user_model.eval(),
             dtype=amp_dtype,
             quantization_config=qconfig,
@@ -543,7 +543,7 @@ if args.dtype == "int8" and args.ipex:
         prepared_model.save_qconf_summary(qconf_summary=args.int8_qconfig)
         print("calibration Done!")
     else:
-        user_model = ipex.optimize_transformers(
+        user_model = ipex.llm.optimize(
             user_model.eval(),
             dtype=amp_dtype,
             quantization_config=qconfig,
