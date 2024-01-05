@@ -87,6 +87,10 @@ echo "NUMAS: $NUMAS"
 echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 
+echo "Configuring thread pinning and spinning settings"
+export TF_THREAD_PINNING_MODE=none,$((${CORES_PER_INSTANCE} - 1)),400
+echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=graphsage \
   --precision ${PRECISION} \

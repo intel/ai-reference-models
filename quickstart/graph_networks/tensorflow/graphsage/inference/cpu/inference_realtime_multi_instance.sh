@@ -78,6 +78,12 @@ echo "WARMUP_STEPS: ${WARMUP_STEPS}"
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
+echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
+
+echo "Configuring thread pinning and spinning settings"
+export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=graphsage \
