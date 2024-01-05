@@ -132,7 +132,7 @@ class eval_rgat:
             print("Benchmark")
 
             time_callback = TimeHistory(self.args.batch_size, self.args.warmup_steps)
-            model.predict(datasets["test"], batch_size=self.args.batch_size, callbacks=[time_callback], steps=self.args.steps)
+            model.predict(datasets["test"].repeat(), batch_size=self.args.batch_size, callbacks=[time_callback], steps=self.args.steps)
 
             avg_time = sum(time_callback.times) / len(time_callback.times)
             avg_throughput = sum(time_callback.throughput) / len(time_callback.throughput)
