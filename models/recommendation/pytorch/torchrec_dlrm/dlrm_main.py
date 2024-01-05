@@ -280,9 +280,14 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
     autocast, dtype = parse_autocast(args.dtype)
     if args.inductor:
         from torch._inductor import config as inductor_config
+        from torch._dynamo import config
+        config.error_on_recompile = True
         inductor_config.cpp_wrapper = True
+        inductor_config.cpp.enable_kernel_profile = True
         if args.inference_only:
             inductor_config.freezing = True
+            if not dtype == torch.int8:
+                model.eval()
         if dtype == torch.int8:
             assert args.inference_only
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
@@ -302,15 +307,23 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
                 prepared_model(dense, sparse)
                 converted_model = convert_pt2e(prepared_model)
                 torch.ao.quantization.move_exported_model_to_eval(converted_model)
+                print(converted_model.graph)
+                print("===========================")
+                converted_model.graph.print_tabular()
                 if args.ipex:
                     print('[Info] Running torch.compile() with IPEX backend')
+                    model(dense, sparse)
                     model = torch.compile(converted_model, backend="ipex")
                 else:
                     print('[Info] Running torch.compile() with default backend')
+                    model(dense, sparse)
                     model = torch.compile(converted_model)
+                model(dense, sparse)
+                model(dense, sparse)
         else:
             with torch.no_grad(), torch.cpu.amp.autocast(enabled=autocast, dtype=dtype):
                 print('[Info] Running torch.compile() with default backend')
+                model(dense, sparse)
                 model = torch.compile(model)
                 model(dense, sparse)
                 model(dense, sparse)
@@ -720,8 +733,8 @@ def _evaluate(
                 next_batch = next(iterator)
             with record_function("unpack KeyJaggedTensor"):
                 next_batch.sparse_features = unpack(next_batch.sparse_features)
-        if args.distributed_training and dist.get_world_size() > 1:
-            next_batch = split_dense_input_and_label_for_ranks(next_batch)
+            if args.distributed_training and dist.get_world_size() > 1:
+                next_batch = split_dense_input_and_label_for_ranks(next_batch)
             return next_batch
 
     def eval_step(model, iterator, current_it):
@@ -758,12 +771,8 @@ def _evaluate(
 
     logger.info(f"EVAL_START, EPOCH_NUM: {epoch_num}")
 
-    try:
+    if not (args.inductor and args.dtype == 'int8'):
         eval_model.eval()
-    except:
-        #   File "./pytorch/torch/ao/quantization/pt2e/utils.py", line 463, in _train
-        #     raise NotImplementedError("Calling train() is not supported yet.")
-        pass
 
     device = torch.device('cpu')
 
@@ -784,7 +793,7 @@ def _evaluate(
         import intel_extension_for_pytorch as ipex
 
     total_t = 0
-    it = 1
+    it = 0
     ctx1 = torch.no_grad()
     ctx2 = torch.cpu.amp.autocast(enabled=autocast_enabled, dtype=autocast_dtype)
     ctx3 = torch.profiler.profile(activities=[ProfilerActivity.CPU], schedule=prof_schedule, on_trace_ready=trace_handler)
@@ -796,25 +805,26 @@ def _evaluate(
         while True:
             try:
                 logits, label, fw_t = eval_step(eval_model, iterator, it)
-                total_t += fw_t
-                if log_freq != 0 and it % log_freq == 0:
-                    assert not args.distributed_training
-                    preds = [torch.cat(preds)]
-                    labels = [torch.cat(labels)]
-                    num_samples = labels[0].shape[0]
-                    if not args.ipex_optimize:
-                        auroc = auroc_computer(preds[0].squeeze().float(), labels[0].float())
-                    else:
-                        auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze().float())
+                if it > 100:
+                    if enable_torch_profile:
+                        p.step()
+                    total_t += fw_t
+                    if log_freq != 0 and it % log_freq == 0 and it > 100:
+                        assert not args.distributed_training
+                        preds = [torch.cat(preds)]
+                        labels = [torch.cat(labels)]
+                        num_samples = labels[0].shape[0] - 100 * args.batch_size
+                        if not args.ipex_optimize:
+                            auroc = auroc_computer(preds[0].squeeze().float(), labels[0].float())
+                        else:
+                            auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze().float())
 
-                    logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
+                        logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
                 pred = torch.sigmoid(logits)
                 preds.append(pred)
                 labels.append(label)
                 pbar.update(1)
                 it += 1
-                if enable_torch_profile:
-                    p.step()
             except StopIteration:
                 # Dataset traversal complete
                 break
@@ -828,7 +838,7 @@ def _evaluate(
 
     is_rank_zero = args.distributed_training and dist.get_world_size() > 1 and dist.get_rank() == 0
     if is_rank_zero or not args.distributed_training:
-        num_samples = labels.shape[0]
+        num_samples = labels.shape[0] - 100 * args.batch_size
         if not args.ipex_optimize:
             auroc = auroc = auroc_computer(preds.squeeze().float(), labels.float())
         else:
@@ -1012,6 +1022,7 @@ def _share_weight_benchmark(
     data_loader,
     args,
 ):
+    import contextlib
     from torch.utils import ThroughputBenchmark
     print_memory("start to init throughput benchmark")
     bench = ThroughputBenchmark(model)
@@ -1020,12 +1031,18 @@ def _share_weight_benchmark(
     print_memory("start to add input to throughput benchmark")
     bench.add_input(batch.dense_features, batch.sparse_features)
     print_memory("start to run throughput benchmark")
-    stats = bench.benchmark(
-        num_calling_threads=args.share_weight_instance,
-        num_warmup_iters=200,
-        num_iters=args.limit_val_batches * args.share_weight_instance,
-    )
-    print(stats)
+    ctx = contextlib.suppress()
+    if args.dtype == 'bf16':
+        ctx = torch.cpu.amp.autocast(enabled=True, dtype=torch.bfloat16)
+    if args.dtype == 'fp16':
+        ctx = torch.cpu.amp.autocast(enabled=True, dtype=torch.float16)
+    with ctx:
+        stats = bench.benchmark(
+            num_calling_threads=args.share_weight_instance,
+            num_warmup_iters=200,
+            num_iters=args.limit_val_batches * args.share_weight_instance,
+        )
+        print(stats)
     latency = stats.latency_avg_ms
     batch_size = batch.dense_features.shape[0]
     throughput = (1 / latency) * 1000 * batch_size * args.share_weight_instance
@@ -1066,13 +1083,14 @@ def train_val_test(
     results = TrainValTestResults()
 
     if args.inference_only:
-        if args.share_weight_instance > 0:
-            _share_weight_benchmark(
-                model.model,
-                val_dataloader,
-                args
-            )
-            exit()
+        with torch.no_grad():
+            if args.share_weight_instance > 0:
+                _share_weight_benchmark(
+                    model.model,
+                    val_dataloader,
+                    args
+                )
+                exit()
         # Mlperf is using val set to test auroc
         # https://github.com/mlcommons/inference/blob/master/recommendation/dlrm_v2/pytorch/python/multihot_criteo.py#L99-L107
         test_auroc = _evaluate(
@@ -1411,6 +1429,12 @@ def main(argv: List[str]) -> None:
 
     if args.inductor:
         print_memory("start StockPT ")
+        if args.dtype == 'bf16':
+            model.model.sparse_arch = model.model.sparse_arch.bfloat16()
+            model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.bfloat16()
+        if args.dtype == 'fp16':
+            model.model.sparse_arch = model.model.sparse_arch.half()
+            model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.half()
         model.model, optimizer = stock_pt_optimize(args, model.model, optimizer, test_dataloader)
 
     print_memory("start running model")
