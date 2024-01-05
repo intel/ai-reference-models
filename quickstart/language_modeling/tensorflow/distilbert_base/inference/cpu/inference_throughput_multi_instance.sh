@@ -74,9 +74,37 @@ fi
 BATCH_SIZE="${BATCH_SIZE:-"56"}"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
-_ht_status_spr
 _get_numa_cores_lists
 echo "Cores per node: ${cores_per_node}"
+
+# Setting environment variables
+echo "Advanced settings for improved performance: "
+echo "Setting TF_USE_ADVANCED_CPU_OPS to 1, to enhace the overall performance"
+export TF_USE_ADVANCED_CPU_OPS=1
+echo "TF_USE_ADVANCED_CPU_OPS = ${TF_USE_ADVANCED_CPU_OPS}"
+
+if [[ ${TF_USE_ADVANCED_CPU_OPS} == "1" ]]; then
+	if [[ $PRECISION == "bfloat16" ]]; then
+		echo "TF_USE_ADVANCED_CPU_OPS is on for bfloat16 precision"
+		export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Mean
+    export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=Mean
+		echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD = ${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD}"
+	elif [[ $PRECISION == "fp16" ]]; then
+		echo "TF_USE_ADVANCED_CPU_OPS is on for fp16 precision"
+		export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Mean
+		export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=Mean
+    export ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+		echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD = ${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD}"
+		echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE = ${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE}"
+    echo "ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX_FP16 = ${ONEDNN_MAX_CPU_ISA}"
+  fi
+fi
+
+echo "Configuring thread pinning and spinning settings"
+export TF_THREAD_PINNING_MODE=none,$((${cores_per_node} - 1)),400
+echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+
+_ht_status_spr
 _command python benchmarks/launch_benchmark.py \
          --model-name=distilbert_base \
          --precision=${PRECISION} \
