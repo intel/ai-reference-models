@@ -323,7 +323,6 @@ class Evaluator:
 
     @torch.no_grad()
     def evaluate(self, model):
-        model.eval()
         # The task is to predict the last word of the input.
         total, hit = 0, 0
         latency = 0
