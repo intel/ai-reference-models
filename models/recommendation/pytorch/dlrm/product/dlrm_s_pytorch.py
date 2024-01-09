@@ -1261,7 +1261,7 @@ def run():
     if args.mini_batch_size < 0:
         if ags.local_batch_size > 0:
             args.mini_batch_size = args.local_batch_size * ext_dist.my_size
-        else
+        else:
             assert args.test_mini_batch_size > 0
             args.mini_batch_size = args.test_mini_batch_size
 
