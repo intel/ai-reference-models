@@ -1,0 +1,7 @@
+datasets
+torchmetrics
+diffusers
+transformers
+accelerate
+pytorch-fid
+scipy==1.9.1
