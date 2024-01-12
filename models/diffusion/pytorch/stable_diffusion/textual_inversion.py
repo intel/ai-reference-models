@@ -791,11 +791,8 @@ def main():
         unet_input = torch.randn(1, 4, 64, 64).to(dtype=weight_dtype), torch.tensor(280), torch.randn(1, 77, 1024).to(dtype=weight_dtype)
         if args.precision == "bf32":
             ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
-            unet = ipex.optimize(unet, dtype=weight_dtype, sample_input=unet_input, auto_kernel_selection=True)
-            vae = ipex.optimize(vae, dtype=weight_dtype, sample_input=vae_input, auto_kernel_selection=True)
-        else:
-            unet = ipex.optimize(unet, dtype=weight_dtype, sample_input=unet_input)
-            vae = ipex.optimize(vae, dtype=weight_dtype, sample_input=vae_input)
+        unet = ipex.optimize(unet, dtype=weight_dtype, sample_input=unet_input, auto_kernel_selection=True)
+        vae = ipex.optimize(vae, dtype=weight_dtype, sample_input=vae_input, auto_kernel_selection=True)
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
