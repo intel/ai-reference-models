@@ -27,13 +27,13 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to either fp32, bfloat16, or fp16."
+  echo "Please set PRECISION to either fp32, bfloat16, fp16 or bfloat32."
   exit 1
 fi
 if [ $PRECISION != "fp32" ] && [ $PRECISION != "bfloat16" ] &&
-   [ $PRECISION != "fp16" ]; then
+   [ $PRECISION != "fp16" ] && [ $PRECISION != "bfloat32" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions is: fp32, bfloat16, fp16"
+  echo "Supported precisions is: fp32, bfloat16, fp16, bfloat32"
   exit 1
 fi
 
@@ -88,17 +88,41 @@ else
 fi
 
 # Setting environment variables
-# use legacy keras 2.x api, keras 3.x not yet supported
-export TF_USE_LEGACY_KERAS=1
-echo "TF_USE_LEGACY_KERAS=1"
-# Assume frozen weight for inference only to enable weight caching with SavedModel to improve perf
-export TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1
-echo "TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1"
-# set thread pinning+spinning config. currently pinning is none and spinning is enabled
-export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
-echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+if [ -z "${TF_USE_LEGACY_KERAS}" ]; then
+  # By default, setting TF_USE_LEGACY_KERAS=1 to use (legacy) Keras 2
+  export TF_USE_LEGACY_KERAS=1
+fi
+if [ -z "${TF_ONEDNN_ASSUME_FROZEN_WEIGHTS}" ]; then
+  # By default, setting TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1 to perform weight caching as we're using a SavedModel
+  export TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1
+fi
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  # By default, pinning is none and spinning is enabled
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+fi
+echo "TF_USE_LEGACY_KERAS=$TF_USE_LEGACY_KERAS"
+echo "TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=$TF_ONEDNN_ASSUME_FROZEN_WEIGHTS"
+echo "TF_THREAD_PINNING_MODE=$TF_THREAD_PINNING_MODE"
+
+if [[ $PRECISION == "fp16" ]]; then
+  export ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+  echo "ONEDNN_MAX_CPU_ISA=$ONEDNN_MAX_CPU_ISA"
+fi
+
+# Set up env variable for bfloat32
+if [[ $PRECISION == "bfloat32" ]]; then
+  export ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+  echo "ONEDNN_DEFAULT_FPMATH_MODE=$ONEDNN_DEFAULT_FPMATH_MODE"
+fi
+
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
+if [ -z "${OMP_NUM_THREADS}" ]; then
+  export OMP_NUM_THREADS=${CORES_PER_INSTANCE}
+fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=rgat \
   --precision ${PRECISION} \
