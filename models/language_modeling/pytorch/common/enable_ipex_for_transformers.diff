@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fc9411e95..502f5996e 100644
+index fc9411e95..d33abb678 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -24,7 +24,7 @@ index fc9411e95..502f5996e 100644
  try:
      from torch.utils.tensorboard import SummaryWriter
  except ImportError:
-@@ -265,6 +271,202 @@ def train(args, train_dataset, model, tokenizer):
+@@ -265,6 +271,205 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -118,17 +118,20 @@ index fc9411e95..502f5996e 100644
 +            print('[Info] Running torch.compile() for INT8 quantization')
 +            print('[Info] Running int8_bf16 is: {}'.format(args.int8_bf16))
 +            with torch.no_grad():
-+                exported_model = capture_pre_autograd_graph(
-+                    model,
-+                    (),
-+                    kwargs=torch_compile_inputs,
-+                    constraints=[
++                constraints = None
++                if args.eval_batch_size != 1:
++                    constraints = [
 +                        dynamic_dim(torch_compile_inputs["input_ids"], 0),
 +                        dynamic_dim(torch_compile_inputs["attention_mask"], 0),
 +                        dynamic_dim(torch_compile_inputs["token_type_ids"], 0),
 +                        dynamic_dim(torch_compile_inputs["input_ids"], 0) == dynamic_dim(torch_compile_inputs["attention_mask"], 0),
 +                        dynamic_dim(torch_compile_inputs["input_ids"], 0) == dynamic_dim(torch_compile_inputs["token_type_ids"], 0),
-+                    ],
++                    ]                    
++                exported_model = capture_pre_autograd_graph(
++                    model,
++                    (),
++                    kwargs=torch_compile_inputs,
++                    constraints=constraints,
 +                )
 +                quantizer = X86InductorQuantizer()
 +                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
@@ -140,7 +143,7 @@ index fc9411e95..502f5996e 100644
 +                    if args.ipex:
 +                        model = torch.compile(converted_model, backend="ipex")
 +                    else:
-+                        model = torch.compile(converted_model, dynamic=True)
++                        model = torch.compile(converted_model, dynamic=(args.eval_batch_size != 1))
 +                    model(**torch_compile_inputs)
 +                    model(**torch_compile_inputs)
 +        else:
@@ -227,7 +230,7 @@ index fc9411e95..502f5996e 100644
  
  def evaluate(args, model, tokenizer, prefix=""):
      dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
-@@ -278,6 +480,8 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -278,6 +483,8 @@ def evaluate(args, model, tokenizer, prefix=""):
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
  
@@ -236,7 +239,7 @@ index fc9411e95..502f5996e 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -286,12 +490,47 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -286,12 +493,47 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
@@ -285,7 +288,7 @@ index fc9411e95..502f5996e 100644
          batch = tuple(t.to(args.device) for t in batch)
  
          with torch.no_grad():
-@@ -314,13 +553,17 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -314,13 +556,17 @@ def evaluate(args, model, tokenizer, prefix=""):
                      inputs.update(
                          {"langs": (torch.ones(batch[0].shape, dtype=torch.int64) * args.lang_id).to(args.device)}
                      )
@@ -305,7 +308,7 @@ index fc9411e95..502f5996e 100644
  
              # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
              # models only use two.
-@@ -671,7 +914,57 @@ def main():
+@@ -671,7 +917,57 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -363,7 +366,7 @@ index fc9411e95..502f5996e 100644
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
          logger.warning(
-@@ -742,11 +1035,13 @@ def main():
+@@ -742,11 +1038,13 @@ def main():
      args.model_type = args.model_type.lower()
      config = AutoConfig.from_pretrained(
          args.config_name if args.config_name else args.model_name_or_path,
@@ -377,7 +380,7 @@ index fc9411e95..502f5996e 100644
          cache_dir=args.cache_dir if args.cache_dir else None,
          use_fast=False,  # SquadDataset is not compatible with Fast tokenizers which have a smarter overflow handeling
      )
-@@ -824,7 +1119,7 @@ def main():
+@@ -824,7 +1122,7 @@ def main():
          for checkpoint in checkpoints:
              # Reload the model
              global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
