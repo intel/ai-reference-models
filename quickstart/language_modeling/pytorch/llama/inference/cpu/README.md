@@ -1,10 +1,10 @@
 <!--- 0. Title -->
-# PyTorch LLaMA2 7B inference (generation)
+# PyTorch LLaMA2 7B/13B inference (generation)
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) inference (generation) using Intel-optimized PyTorch.
+This document has instructions for running [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) and [LLaMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) inference (generation) using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
@@ -43,7 +43,13 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   export OUTPUT_TOKEN=32 
   (32 is preferred, while you could set any other length)
   ```
-
+* Set FINETUNED_MODEL to llama2 7b or llama2 13b before running
+  ```
+  #Test llama2 7b
+  export FINETUNED_MODEL="meta-llama/Llama-2-7b-hf"
+  #Test llama2 13b
+  export FINETUNED_MODEL="meta-llama/Llama-2-13b-hf"
+  ```
 * About the BATCH_SIZE in scripts
   ```
   using BATCH_SIZE=1 for realtime mode
@@ -100,7 +106,7 @@ git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
 
-# Clone the Transformers repo in the llama 7b inference directory
+# Clone the Transformers repo in the llama 7b/13b inference directory
 cd <clone of the model zoo>/quickstart/language_modeling/pytorch/llama/inference/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
@@ -110,7 +116,9 @@ pip install -e ./
 cd ..
 
 #[optional] you may need to get access to llama2 weights from HF
-Apply the access in this page [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) with your huggingface account
+Apply the access in the pages with your huggingface account:
+- LLaMA2 7B : https://huggingface.co/meta-llama/Llama-2-7b-hf 
+- LLaMA2 13B : https://huggingface.co/meta-llama/Llama-2-13b-hf
 
 huggingface-cli login
 {your huggingface token}
@@ -118,6 +126,11 @@ huggingface-cli login
 
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
+
+#Test llama2 7b
+export FINETUNED_MODEL="meta-llama/Llama-2-7b-hf"
+#Test llama2 13b
+export FINETUNED_MODEL="meta-llama/Llama-2-13b-hf"
 
 # Run a quickstart script (for example, FP32 multi-instance realtime inference)
 bash run_multi_instance_realtime.sh fp32
