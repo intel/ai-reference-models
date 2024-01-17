@@ -45,6 +45,8 @@ def parse_args():
     parser.add_argument("--output_dir", type=str, default=None,help="output path")
     parser.add_argument("--seed", type=int, default=0, help="random seed")
     parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf32, bf16, fp16, int8-bf16, int8-fp32')
+    parser.add_argument('--calibration', action='store_true', default=False, help='doing calibration step for LCM int8')
+    parser.add_argument('--configure-dir', default='configure.json', type=str, metavar='PATH', help = 'path to LCM int8 configures, default file name is configure.json')
     parser.add_argument('--ipex', action='store_true', default=False, help='ipex')
     parser.add_argument('--jit', action='store_true', default=False, help='jit trace')
     parser.add_argument('--compile_ipex', action='store_true', default=False, help='compile with ipex backend')
@@ -131,6 +133,8 @@ def main():
 
     if args.compile_inductor:
         pipe.precision = torch.float32
+    elif args.model_name_or_path == "SimianLuo/LCM_Dreamshaper_v7" and args.precision == "int8-bf16":
+        pipe.precision = torch.float32
     else:
         pipe.precision = args.dtype
     if args.model_name_or_path == "stabilityai/stable-diffusion-2-1":
@@ -160,16 +164,65 @@ def main():
             pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=args.dtype, inplace=True)
             pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=args.dtype, inplace=True)
         elif args.precision == "int8-bf16" or args.precision == "int8-fp32":
-            pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=args.dtype, inplace=True, sample_input=text_encoder_input)
-            pipe.unet_highprecision = copy.deepcopy(pipe.unet)
-            pipe.unet_highprecision = ipex.optimize(pipe.unet_highprecision.eval(), dtype=args.dtype, inplace=True)
-            pipe.HIGH_PRECISION_STEPS = 5
-            from quantization_modules import load_int8_model, convert_to_fp32model
-            pipe.unet = load_int8_model(pipe.unet, args.int8_model_path)
-            pipe.unet = convert_to_fp32model(pipe.unet)
-            pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=args.dtype, inplace=True)
+            if args.model_name_or_path == "stabilityai/stable-diffusion-2-1":
+                pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=args.dtype, inplace=True, sample_input=text_encoder_input)
+                from quantization_modules import load_int8_model, convert_to_fp32model
+                pipe.unet = load_int8_model(pipe.unet, args.int8_model_path)
+                pipe.unet = convert_to_fp32model(pipe.unet)
+                pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=args.dtype, inplace=True)
+            else:
+                if not args.calibration:
+                    qconfig_mapping = ipex.quantization.default_static_qconfig_mapping
+                    pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig_mapping, input, inplace=True)
+                    pipe.unet.load_qconf_summary(qconf_summary=args.configure_dir)
+                    if args.precision == "int8-fp32":
+                        pipe.unet = ipex.quantization.convert(pipe.unet)
+                    else:
+                        with torch.cpu.amp.autocast():
+                            pipe.unet = ipex.quantization.convert(pipe.unet)
+                    print("running int8 evalation step\n")
         else:
             raise ValueError("--precision needs to be the following:: fp32, bf32, bf16, fp16, int8-bf16, int8-fp32")
+
+    if args.distributed:
+        import oneccl_bindings_for_pytorch
+        torch.distributed.init_process_group(backend=args.dist_backend,
+                                init_method=args.dist_url,
+                                world_size=args.world_size,
+                                rank=args.rank)
+        print("Rank and world size: ", torch.distributed.get_rank()," ", torch.distributed.get_world_size())              
+        # print("Create DistributedDataParallel in CPU")
+        # pipe = torch.nn.parallel.DistributedDataParallel(pipe)
+
+    if args.accuracy:
+        # prepare dataloader
+        val_coco = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
+                                    annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),
+                                    transform=transforms.Compose([transforms.Resize((512, 512)), transforms.PILToTensor(), ]))
+
+        if args.distributed:
+            val_sampler = torch.utils.data.distributed.DistributedSampler(val_coco, shuffle=False)
+        else:
+            val_sampler = None
+
+        val_dataloader = torch.utils.data.DataLoader(val_coco,
+                                                    batch_size=1,
+                                                    shuffle=False,
+                                                    num_workers=0,
+                                                    sampler=val_sampler)
+
+    if args.model_name_or_path == "SimianLuo/LCM_Dreamshaper_v7" and args.calibration:
+        print("runing LCM int8 calibration step\n")
+        qconfig_mapping = ipex.quantization.default_static_qconfig_mapping
+        pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig_mapping, input, inplace=True)
+        for i, (images, prompts) in enumerate(tqdm(val_dataloader)):
+            prompt = prompts[0][0]
+            pipe(prompt, generator=torch.manual_seed(args.seed))
+            if i == 9:
+                break
+        pipe.unet.save_qconf_summary(args.configure_dir)
+        print(".........calibration step done..........")
+        return
 
     # jit trace
     if args.jit:
@@ -183,17 +236,12 @@ def main():
                 pipe.traced_unet(*input)
                 # print(pipe.traced_unet.graph_for(input))
         elif args.precision == "int8-bf16":
-            with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
+            with torch.cpu.amp.autocast(), torch.no_grad():
                 pipe.traced_unet = torch.jit.trace(pipe.unet, input, strict=False)
                 pipe.traced_unet = torch.jit.freeze(pipe.traced_unet)
                 pipe.traced_unet(*input)
                 pipe.traced_unet(*input)
                 # print(pipe.traced_unet.graph_for(input))
-                pipe.unet_highprecision = torch.jit.trace(pipe.unet_highprecision, input, strict=False)
-                pipe.unet_highprecision = torch.jit.freeze(pipe.unet_highprecision)
-                pipe.unet_highprecision(*input)
-                pipe.unet_highprecision(*input)
-                # print(pipe.unet_highprecision.graph_for(input))
         elif args.precision == "int8-fp32":
             with torch.no_grad():
                 pipe.traced_unet = torch.jit.trace(pipe.unet, input, strict=False)
@@ -201,11 +249,6 @@ def main():
                 pipe.traced_unet(*input)
                 pipe.traced_unet(*input)
                 # print(pipe.traced_unet.graph_for(input))
-                pipe.unet_highprecision = torch.jit.trace(pipe.unet_highprecision, input, strict=False)
-                pipe.unet_highprecision = torch.jit.freeze(pipe.unet_highprecision)
-                pipe.unet_highprecision(*input)
-                pipe.unet_highprecision(*input)
-                # print(pipe.unet_highprecision.graph_for(input))
         else:
             with torch.no_grad():
                 pipe.traced_unet = torch.jit.trace(pipe.unet, input, strict=False)
@@ -244,17 +287,12 @@ def main():
                 pipe.unet(*input)
                 pipe.unet(*input)
         elif args.precision == "fp16":
+            torch._C._set_sdp_use_flash(False)
             with torch.cpu.amp.autocast(dtype=torch.half), torch.no_grad():
                 pipe.unet = torch.compile(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
         elif args.precision == "int8-fp32":
-            pipe.HIGH_PRECISION_STEPS = 5
-            pipe.unet_highprecision = copy.deepcopy(pipe.unet)
-            with torch.no_grad():
-                pipe.unet_highprecision = torch.compile(pipe.unet_highprecision)
-                pipe.unet_highprecision(*input)
-                pipe.unet_highprecision(*input)
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
             import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
             from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
@@ -272,12 +310,6 @@ def main():
                 pipe.traced_unet(*input)
                 pipe.traced_unet(*input)
         elif args.precision == "int8-bf16":
-            pipe.HIGH_PRECISION_STEPS = 5
-            pipe.unet_highprecision = copy.deepcopy(pipe.unet)
-            with torch.cpu.amp.autocast(), torch.no_grad():
-                pipe.unet_highprecision = torch.compile(pipe.unet_highprecision)
-                pipe.unet_highprecision(*input)
-                pipe.unet_highprecision(*input)
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
             import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
             from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
@@ -297,33 +329,6 @@ def main():
                 pipe.traced_unet(*input)
         else:
             raise ValueError("If you want to use torch.compile with inductor backend, --precision needs to be the following: fp32, bf16, int8-bf16, int8-fp32")
-
-    if args.distributed:
-        import oneccl_bindings_for_pytorch
-        torch.distributed.init_process_group(backend=args.dist_backend,
-                                init_method=args.dist_url,
-                                world_size=args.world_size,
-                                rank=args.rank)
-        print("Rank and world size: ", torch.distributed.get_rank()," ", torch.distributed.get_world_size())              
-        # print("Create DistributedDataParallel in CPU")
-        # pipe = torch.nn.parallel.DistributedDataParallel(pipe)
-
-    if args.accuracy:
-        # prepare dataloader
-        val_coco = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
-                                    annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),
-                                    transform=transforms.Compose([transforms.Resize((512, 512)), transforms.PILToTensor(), ]))
-
-        if args.distributed:
-            val_sampler = torch.utils.data.distributed.DistributedSampler(val_coco, shuffle=False)
-        else:
-            val_sampler = None
-
-        val_dataloader = torch.utils.data.DataLoader(val_coco,
-                                                    batch_size=1,
-                                                    shuffle=False,
-                                                    num_workers=0,
-                                                    sampler=val_sampler)
 
     # benchmark
     if args.benchmark:

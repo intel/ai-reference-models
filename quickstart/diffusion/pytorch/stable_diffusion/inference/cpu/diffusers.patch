@@ -1,3 +1,25 @@
+diff --git a/src/diffusers/models/transformer_2d.py b/src/diffusers/models/transformer_2d.py
+index 24abf54d..3fa7df5f 100644
+--- a/src/diffusers/models/transformer_2d.py
++++ b/src/diffusers/models/transformer_2d.py
+@@ -385,7 +385,7 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
+         # 3. Output
+         if self.is_input_continuous:
+             if not self.use_linear_projection:
+-                hidden_states = hidden_states.reshape(batch, height, width, inner_dim).permute(0, 3, 1, 2).contiguous()
++                hidden_states = hidden_states.reshape(batch, height, width, inner_dim).permute(0, 3, 1, 2).contiguous(memory_format=torch.channels_last)
+                 hidden_states = (
+                     self.proj_out(hidden_states, scale=lora_scale)
+                     if not USE_PEFT_BACKEND
+@@ -397,7 +397,7 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
+                     if not USE_PEFT_BACKEND
+                     else self.proj_out(hidden_states)
+                 )
+-                hidden_states = hidden_states.reshape(batch, height, width, inner_dim).permute(0, 3, 1, 2).contiguous()
++                hidden_states = hidden_states.reshape(batch, height, width, inner_dim).permute(0, 3, 1, 2).contiguous(memory_format=torch.channels_last)
+ 
+             output = hidden_states + residual
+         elif self.is_input_vectorized:
 diff --git a/src/diffusers/models/unet_2d_condition.py b/src/diffusers/models/unet_2d_condition.py
 index f248b243..27d4802d 100644
 --- a/src/diffusers/models/unet_2d_condition.py
@@ -13,10 +35,10 @@ index f248b243..27d4802d 100644
          cross_attention_kwargs: Optional[Dict[str, Any]] = None,
          added_cond_kwargs: Optional[Dict[str, torch.Tensor]] = None,
 diff --git a/src/diffusers/pipelines/latent_consistency_models/pipeline_latent_consistency_text2img.py b/src/diffusers/pipelines/latent_consistency_models/pipeline_latent_consistency_text2img.py
-index ff5eea2d..f5545648 100644
+index ff5eea2d..10ea4af1 100644
 --- a/src/diffusers/pipelines/latent_consistency_models/pipeline_latent_consistency_text2img.py
 +++ b/src/diffusers/pipelines/latent_consistency_models/pipeline_latent_consistency_text2img.py
-@@ -701,17 +701,24 @@ class LatentConsistencyModelPipeline(
+@@ -701,17 +701,33 @@ class LatentConsistencyModelPipeline(
          self._num_timesteps = len(timesteps)
          with self.progress_bar(total=num_inference_steps) as progress_bar:
              for i, t in enumerate(timesteps):
@@ -39,17 +61,26 @@ index ff5eea2d..f5545648 100644
 +                        encoder_hidden_states=prompt_embeds.to(dtype=self.precision),
 +                        timestep_cond=w_embedding.to(dtype=self.precision)
 +                    )['sample']
-+                else:
++                elif hasattr(self, 'precision'):
 +                    model_pred = self.unet(
 +                        latents.to(memory_format=torch.channels_last).to(dtype=self.precision),
 +                        t,
 +                        encoder_hidden_states=prompt_embeds.to(dtype=self.precision),
 +                        timestep_cond=w_embedding.to(dtype=self.precision)
 +                    )['sample']
++                else:
++                    model_pred = self.unet(
++                        latents,
++                        t,
++                        timestep_cond=w_embedding,
++                        encoder_hidden_states=prompt_embeds,
++                        cross_attention_kwargs=self.cross_attention_kwargs,
++                        return_dict=False,
++                    )[0]
  
                  # compute the previous noisy sample x_t -> x_t-1
                  latents, denoised = self.scheduler.step(model_pred, t, latents, **extra_step_kwargs, return_dict=False)
-@@ -733,6 +740,9 @@ class LatentConsistencyModelPipeline(
+@@ -733,6 +749,9 @@ class LatentConsistencyModelPipeline(
                          step_idx = i // getattr(self.scheduler, "order", 1)
                          callback(step_idx, t, latents)
  
@@ -60,10 +91,10 @@ index ff5eea2d..f5545648 100644
          if not output_type == "latent":
              image = self.vae.decode(denoised / self.vae.config.scaling_factor, return_dict=False)[0]
 diff --git a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-index 9911cbe7..a354405a 100644
+index 9911cbe7..98c7f2ab 100644
 --- a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 +++ b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-@@ -832,19 +832,30 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -832,19 +832,33 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
          self._num_timesteps = len(timesteps)
          with self.progress_bar(total=num_inference_steps) as progress_bar:
              for i, t in enumerate(timesteps):
@@ -81,28 +112,31 @@ index 9911cbe7..a354405a 100644
 -                    cross_attention_kwargs=self.cross_attention_kwargs,
 -                    return_dict=False,
 -                )[0]
-+                if hasattr(self, 'HIGH_PRECISION_STEPS') and (i < self.HIGH_PRECISION_STEPS or i > len(timesteps)-1 - self.HIGH_PRECISION_STEPS):
-+                    noise_pred = self.unet_highprecision(
++                if hasattr(self, 'traced_unet'):
++                    noise_pred = self.traced_unet(
 +                        latent_model_input.to(memory_format=torch.channels_last).to(dtype=self.precision),
 +                        t,
 +                        encoder_hidden_states=prompt_embeds.to(dtype=self.precision)
 +                    )['sample']
-+                elif hasattr(self, 'traced_unet'):
-+                    noise_pred = self.traced_unet(
++                elif hasattr(self, 'precision'):
++                    noise_pred = self.unet(
 +                        latent_model_input.to(memory_format=torch.channels_last).to(dtype=self.precision),
 +                        t,
 +                        encoder_hidden_states=prompt_embeds.to(dtype=self.precision)
 +                    )['sample']
 +                else:
 +                    noise_pred = self.unet(
-+                        latent_model_input.to(memory_format=torch.channels_last).to(dtype=self.precision),
++                        latent_model_input,
 +                        t,
-+                        encoder_hidden_states=prompt_embeds.to(dtype=self.precision)
-+                    )['sample']
++                        encoder_hidden_states=prompt_embeds,
++                        timestep_cond=timestep_cond,
++                        cross_attention_kwargs=self.cross_attention_kwargs,
++                        return_dict=False,
++                    )[0]
  
                  # perform guidance
                  if self.do_classifier_free_guidance:
-@@ -875,6 +886,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -875,6 +889,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
                          step_idx = i // getattr(self.scheduler, "order", 1)
                          callback(step_idx, t, latents)
  
