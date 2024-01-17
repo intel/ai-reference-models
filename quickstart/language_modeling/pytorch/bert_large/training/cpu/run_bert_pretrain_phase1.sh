@@ -75,6 +75,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         $ARGS \
         $params
 else
+    export TORCHINDUCTOR_FREEZING=1
     python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
         --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
         --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \

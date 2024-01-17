@@ -96,6 +96,8 @@ if [ ${WEIGHT_SHAREING} ]; then
 elif [[ "0" == ${TORCH_INDUCTOR} ]];then
   python -m intel_extension_for_pytorch.cpu.launch --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log" $EVAL_SCRIPT $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL}  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE  --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad --use_jit --ipex --int8_config ${INT8_CONFIG} 2>&1 | tee $LOG_0
 else
+  echo "Running Bert_Large inference with torch.compile() indutor backend enabled."
+  export TORCHINDUCTOR_FREEZING=1
   python -m intel_extension_for_pytorch.cpu.launch --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log" $EVAL_SCRIPT $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL}  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE  --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad --inductor --int8_config ${INT8_CONFIG} 2>&1 | tee $LOG_0
 fi
 

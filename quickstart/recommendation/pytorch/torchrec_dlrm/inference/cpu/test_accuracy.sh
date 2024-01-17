@@ -100,6 +100,7 @@ COMMON_ARGS=" --embedding_dim 128 \
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
   $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --ipex-optimize --jit --ipex-merged-emb-cat 2>&1 | tee $LOG_0
 else
+  export TORCHINDUCTOR_FREEZING=1
   $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG_0
 fi
 wait
