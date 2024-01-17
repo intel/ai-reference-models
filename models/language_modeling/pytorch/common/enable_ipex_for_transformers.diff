@@ -925,10 +925,10 @@ index ee7dcd5e4..5ead9c989 100755
              total_loss = masked_lm_loss + next_sentence_loss
  
 diff --git a/src/transformers/models/distilbert/modeling_distilbert.py b/src/transformers/models/distilbert/modeling_distilbert.py
-index 84db89e0f..653ca3c9b 100755
+index 84db89e0f..cb986d7ea 100755
 --- a/src/transformers/models/distilbert/modeling_distilbert.py
 +++ b/src/transformers/models/distilbert/modeling_distilbert.py
-@@ -216,8 +216,9 @@ class MultiHeadSelfAttention(nn.Module):
+@@ -216,12 +216,11 @@ class MultiHeadSelfAttention(nn.Module):
          k = shape(self.k_lin(key))  # (bs, n_heads, k_length, dim_per_head)
          v = shape(self.v_lin(value))  # (bs, n_heads, k_length, dim_per_head)
  
@@ -937,9 +937,14 @@ index 84db89e0f..653ca3c9b 100755
          scores = torch.matmul(q, k.transpose(2, 3))  # (bs, n_heads, q_length, k_length)
 +        scores = scores / math.sqrt(dim_per_head)  # (bs, n_heads, q_length, dim_per_head)
          mask = (mask == 0).view(mask_reshp).expand_as(scores)  # (bs, n_heads, q_length, k_length)
-         scores = scores.masked_fill(
-             mask, torch.tensor(torch.finfo(scores.dtype).min)
-@@ -743,11 +744,11 @@ class DistilBertForSequenceClassification(DistilBertPreTrainedModel):
+-        scores = scores.masked_fill(
+-            mask, torch.tensor(torch.finfo(scores.dtype).min)
+-        )  # (bs, n_heads, q_length, k_length)
++        scores = scores.masked_fill(mask, -float("inf"))  # (bs, n_heads, q_length, k_length)
+ 
+         weights = nn.functional.softmax(scores, dim=-1)  # (bs, n_heads, q_length, k_length)
+         weights = self.dropout(weights)  # (bs, n_heads, q_length, k_length)
+@@ -743,11 +742,11 @@ class DistilBertForSequenceClassification(DistilBertPreTrainedModel):
      )
      def forward(
          self,
