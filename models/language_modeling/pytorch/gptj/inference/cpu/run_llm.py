@@ -501,11 +501,13 @@ if args.dtype == "int8" and args.ipex:
             (input_ids, attention_mask, past_key_values, position_ids),
             last_ind,
         ) in enumerate(calib_dataloader):
-            example_inputs = (
-                (input_ids, attention_mask, position_ids, past_key_values)
-                if has_position_id
-                else (input_ids, attention_mask, past_key_values)
-            )
+            example_inputs = {
+                "input_ids": input_ids,
+                "attention_mask": attention_mask,
+                "past_key_values": past_key_values,
+            }
+            if has_position_id:
+                example_inputs["position_ids"] = position_ids
             break
         from intel_extension_for_pytorch.quantization import prepare, convert
 
@@ -517,7 +519,7 @@ if args.dtype == "int8" and args.ipex:
             deployment_mode=False,
         )
         prepared_model = prepare(
-            user_model.eval(), qconfig, example_inputs=example_inputs
+            user_model.eval(), qconfig, example_kwarg_inputs=example_inputs
         )
         with torch.no_grad():
             for i, (
