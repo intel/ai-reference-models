@@ -137,6 +137,7 @@ elif [[ "0" == ${TORCH_INDUCTOR} ]];then
       -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_accuracy_log_${PRECISION}.log
 else
     echo "Running RN50 inference with torch.compile inductor backend."
+    export TORCHINDUCTOR_FREEZING=1
     python -m intel_extension_for_pytorch.cpu.launch \
       --memory-allocator jemalloc \
       ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \

@@ -107,6 +107,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         --batch-size $BATCH_SIZE 
 else
     echo "### running with torch.compile inductor backend"
+    export TORCHINDUCTOR_FREEZING=1
     python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \
