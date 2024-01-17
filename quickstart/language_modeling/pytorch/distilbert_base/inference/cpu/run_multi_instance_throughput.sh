@@ -96,6 +96,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         --dataloader_drop_last
 else
     echo "Running inference with torch.compile inductor backend."
+    export TORCHINDUCTOR_FREEZING=1
     ARGS="$ARGS --inductor"
     python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
         ${EVAL_SCRIPT} $ARGS \

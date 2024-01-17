@@ -103,6 +103,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         --per_device_eval_batch_size $BATCH_SIZE
 else
     echo "Running inference with torch.compile inductor backend."
+    export TORCHINDUCTOR_FREEZING=1
     ARGS="$ARGS --inductor"
     python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
