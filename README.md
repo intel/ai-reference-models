@@ -95,6 +95,13 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [RNN-T](https://arxiv.org/abs/2007.15188)            | PyTorch | Training  | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/rnnt/training/cpu/README.md) | [RNN-T dataset](/quickstart/language_modeling/pytorch/rnnt/training/cpu/download_dataset.sh) |
 | [RoBERTa base](https://arxiv.org/abs/1907.11692)     | PyTorch | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/roberta_base/inference/cpu/README.md) | [RoBERTa Base SQuAD 2.0](https://huggingface.co/deepset/roberta-base-squad2) |
 | [T5](https://arxiv.org/abs/1910.10683)     | PyTorch | Inference | [FP32 Int8](/quickstart/language_modeling/pytorch/t5/inference/cpu/README.md) |  |
+| [BLOOM](https://huggingface.co/bigscience/bloom) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/bloom/inference/cpu/README.md) | |
+| [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/gptj/inference/cpu/README.md) | |
+| [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/llama/inference/cpu/README.md) | |
+| [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Training | [FP32 FP16 BFloat16 BF32](/quickstart/language_modeling/pytorch/llama/training/cpu/README.md) | |
+| [LLAMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/llama/inference/cpu/README.md) | |
+| [ChatGLMv3 6B](https://huggingface.co/THUDM/chatglm3-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/chatglm/inference/cpu/README.md) | |
+
 
 ### Language Translation
 
