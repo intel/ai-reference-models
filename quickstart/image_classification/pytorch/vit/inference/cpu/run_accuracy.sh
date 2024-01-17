@@ -87,6 +87,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         --remove_unused_columns False
 else
     echo "Running inference with torch.compile inductor backend."
+    export TORCHINDUCTOR_FREEZING=1
     python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \

@@ -111,6 +111,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         -w 50 \
         -b $BATCH_SIZE
 else
+    export TORCHINDUCTOR_FREEZING=1
     python -m intel_extension_for_pytorch.cpu.launch \
         --memory-allocator jemalloc \
         --ninstances 1 \

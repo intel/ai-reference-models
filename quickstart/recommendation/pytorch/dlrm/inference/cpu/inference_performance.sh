@@ -94,6 +94,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         $ARGS |tee $LOG_0
 else
     echo "### running with torch.compile inductor backend"
+    export TORCHINDUCTOR_FREEZING=1
     python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
         --data-set=terabyte \

@@ -103,6 +103,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
       --test-mini-batch-size=16384 --ipex-merged-emb \
       $ARGS |tee $LOG_0
 else
+    export TORCHINDUCTOR_FREEZING=1
     python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
       --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
       --data-set=terabyte \
