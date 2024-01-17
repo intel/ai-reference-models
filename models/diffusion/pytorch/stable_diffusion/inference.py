@@ -28,7 +28,7 @@ from tqdm import tqdm
 
 import torch
 from PIL import Image
-from diffusers import StableDiffusionPipeline
+from diffusers import DiffusionPipeline
 from torchmetrics.image.fid import FrechetInceptionDistance
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
@@ -105,7 +105,7 @@ def main():
             args.rank = int(os.environ["RANK"])
 
     # load model
-    pipe = StableDiffusionPipeline.from_pretrained(args.model_name_or_path)
+    pipe = DiffusionPipeline.from_pretrained(args.model_name_or_path)
 
     # data type
     if args.precision == "fp32":
@@ -129,7 +129,12 @@ def main():
     else:
         raise ValueError("--precision needs to be the following: fp32, bf32, bf16, fp16, int8-bf16, int8-fp32")
 
-    input = torch.randn(2, 4, 96, 96).to(memory_format=torch.channels_last), torch.tensor(921), torch.randn(2, 77, 1024)
+    if args.model_name_or_path == "stabilityai/stable-diffusion-2-1":
+        input = torch.randn(2, 4, 96, 96).to(memory_format=torch.channels_last), torch.tensor(921), torch.randn(2, 77, 1024)
+    elif args.model_name_or_path == "SimianLuo/LCM_Dreamshaper_v7":
+        input = torch.randn(1, 4, 96, 96).to(memory_format=torch.channels_last), torch.tensor(921), torch.randn(1, 77, 768), torch.randn(1, 256)
+    else:
+         raise ValueError("This script currently only supports stabilityai/stable-diffusion-2-1 and SimianLuo/LCM_Dreamshaper_v7.")
 
     # ipex
     if args.ipex:

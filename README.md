@@ -171,6 +171,9 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | Model                                           | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | ----------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
 | [Stable Diffusion](https://keras.io/guides/keras_cv/generate_images_with_stable_diffusion/) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/diffusion/tensorflow/stable_diffusion/inference/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
+| [Stable Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1) | PyTorch | Inference | [FP32 BFloat16 FP16 BFloat32 Int8-FP32 Int8-BFloat16](/quickstart/diffusion/pytorch/stable_diffusion/inference/cpu/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
+| [Stable Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1) | PyTorch | Training | [FP32 BFloat16 FP16 BFloat32](/quickstart/diffusion/pytorch/stable_diffusion/training/cpu/README.md) | [cat images](https://huggingface.co/datasets/diffusers/cat_toy_example)
+| [Latent Consistency Models(LCM)](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7) | PyTorch | Inference | [FP32 BFloat16 FP16 BFloat32](quickstart/diffusion/pytorch/LCM/inference/cpu/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
 
 ### Shot Boundary Detection
 
