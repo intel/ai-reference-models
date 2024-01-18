@@ -148,24 +148,48 @@ source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 export FI_PROVIDER_PATH=$oneccl_bindings_for_pytorch_path/lib/prov
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --memory-allocator tcmalloc \
-    --distributed \
-    --nnodes ${NNODES} \
-    --hostfile ${HOSTFILE} \
-    --logical_cores_for_ccl --ccl_worker_count 8 \
-    ${MODEL_DIR}/models/image_recognition/pytorch/common/train.py \
-    $ARGS \
-    --epochs $TRAINING_EPOCHS \
-    --warmup-epochs 2  \
-    --ipex \
-    -j 0 \
-    -b $LOCAL_BATCH_SIZE \
-    --seed 2020 \
-    --dist-backend ccl \
-    --base-op=LARS \
-    --base-lr 10.5 \
-    --weight-decay 0.00005 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+  python -m intel_extension_for_pytorch.cpu.launch \
+      --memory-allocator tcmalloc \
+      --distributed \
+      --nnodes ${NNODES} \
+      --hostfile ${HOSTFILE} \
+      --logical_cores_for_ccl --ccl_worker_count 8 \
+      ${MODEL_DIR}/models/image_recognition/pytorch/common/train.py \
+      $ARGS \
+      --epochs $TRAINING_EPOCHS \
+      --warmup-epochs 2  \
+      --ipex \
+      -j 0 \
+      -b $LOCAL_BATCH_SIZE \
+      --seed 2020 \
+      --dist-backend ccl \
+      --base-op=LARS \
+      --base-lr 10.5 \
+      --weight-decay 0.00005 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
+else
+  export TORCHINDUCTOR_FREEZING=1
+  python -m intel_extension_for_pytorch.cpu.launch \
+      --memory-allocator tcmalloc \
+      --distributed \
+      --nnodes ${NNODES} \
+      --hostfile ${HOSTFILE} \
+      --logical_cores_for_ccl --ccl_worker_count 8 \
+      ${MODEL_DIR}/models/image_recognition/pytorch/common/train.py \
+      $ARGS \
+      --epochs $TRAINING_EPOCHS \
+      --warmup-epochs 2  \
+      --inductor \
+      -j 0 \
+      -b $LOCAL_BATCH_SIZE \
+      --seed 2020 \
+      --dist-backend ccl \
+      --base-op=LARS \
+      --base-lr 10.5 \
+      --weight-decay 0.00005 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
+fi
+
 # For the summary of results
 wait
 
