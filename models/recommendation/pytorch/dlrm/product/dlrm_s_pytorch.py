@@ -1200,8 +1200,8 @@ def run():
                         with more than 24 CPU cores and at least 1 TB of memory.",
     )
     # training
-    parser.add_argument("--mini-batch-size", type=int, default=1)
-    parser.add_argument("--local-batch-size", type=int, default=1)
+    parser.add_argument("--mini-batch-size", type=int, default=-1)
+    parser.add_argument("--local-batch-size", type=int, default=-1)
     parser.add_argument("--nepochs", type=int, default=1)
     parser.add_argument("--learning-rate", type=float, default=0.01)
     parser.add_argument("--print-precision", type=int, default=5)
@@ -1260,6 +1260,7 @@ def run():
     ext_dist.init_distributed(backend=args.dist_backend)
     if args.mini_batch_size < 0:
         if ags.local_batch_size > 0:
+            assert ext_dist.my_size > 1
             args.mini_batch_size = args.local_batch_size * ext_dist.my_size
         else:
             assert args.test_mini_batch_size > 0
