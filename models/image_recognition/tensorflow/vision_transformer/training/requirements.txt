@@ -1,3 +1,0 @@
-transformers==4.35.2
-numpy==1.26.0
-tensorflow==2.15.0

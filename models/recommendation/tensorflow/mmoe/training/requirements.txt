@@ -1,3 +1,0 @@
-deepctr
-pandas
-scikit-learn
