@@ -1,4 +1,0 @@
-# Python dependencies required for download demo data
-numpy
-six
-h5py
