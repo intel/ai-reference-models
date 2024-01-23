@@ -1259,7 +1259,7 @@ def run():
         global ipex
     ext_dist.init_distributed(backend=args.dist_backend)
     if args.mini_batch_size < 0:
-        if ags.local_batch_size > 0:
+        if args.local_batch_size > 0:
             assert ext_dist.my_size > 1
             args.mini_batch_size = args.local_batch_size * ext_dist.my_size
         else:
