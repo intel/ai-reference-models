@@ -22,6 +22,7 @@
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
 input_envs[DATASET_DIR]=${DATASET_DIR}
+input_envs[WEIGHT_DIR]=${WEIGHT_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
 
@@ -39,40 +40,47 @@ OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
 
 if [[ "${PLATFORM}" == "PVC" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-65536}
-    PRECISION=${PRECISION:-BF16}
+    PRECISION=${PRECISION:-FP16}
 elif [[ "${PLATFORM}" == "ATS-M" ]]; then
     echo "Only support PVC for platform"
-    exit 1
 fi
 
 
 
-if [[ ! -d "${DATASET_DIR}" ]]; then
+if [[ -z "${DATASET_DIR}" ]]; then
+  echo "Using Dummy data since environment variable DATASET_DIR has not been set"
+  DATASET_DIR="--dummy"
+else
+  if [[ ! -d "${DATASET_DIR}" ]]; then
     echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
     exit 1
+  fi
 fi
 
+# known issue
+if [[ "${MULTI_TILE}" == "True" ]]; then
+    export ZE_FLAT_DEVICE_HIERARCHY=COMPOSITE
+fi
 
 
 echo 'Running with parameters:'
 echo " PLATFORM: ${PLATFORM}"
-echo " DATASET_PATH: ${DATASET_DIR}"
+echo " WEIGHT_DIR: ${WEIGHT_DIR}"
+echo " DATASET_DIR: ${DATASET_DIR}"
 echo " OUTPUT_DIR: ${OUTPUT_DIR}"
 echo " PRECISION: ${PRECISION}"
 echo " BATCH_SIZE: ${BATCH_SIZE}"
 echo " MULTI_TILE: ${MULTI_TILE}"
 
-if [[ "${PRECISION}" == "BF16" ]]; then
-    flag="-bf16 true"
+if [[ "${PRECISION}" == "FP16" ]]; then
+    flag="-fp16 true"
 elif [[ "${PRECISION}" == "FP32" ]]; then
-    flag="-bf16 false"
-elif [[ "${PRECISION}" == "TF32" ]]; then
-    flag="-bf16 false -tf32 true"
+    flag="-fp16 false"
 else
-    echo -e "Invalid input! Only FP32 BF16 and TF32 are supported."
+    echo -e "Invalid input! Only FP32 FP16 are supported."
     exit 1
 fi
-echo "Dlrmv2 ${PRECISION} Training plain MultiTile=${MULTI_TILE} BS=${BATCH_SIZE}"
+echo "Dlrmv2 ${PRECISION} inference plain MultiTile=${MULTI_TILE} BS=${BATCH_SIZE}"
 
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
@@ -98,13 +106,13 @@ if [[ ${MULTI_TILE} == "False" ]]; then
 	echo -e "do not support MULTI_TILE=False"
 	exit 1
 else
-    rm ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log
-    bash cmd_distributed_terabyte_train.sh -d ${DATASET_DIR} ${flag} 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log
-    python ../../../../../models/common/pytorch/parse_result.py -t ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
-    throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
-    throughput_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
-    acc=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep Accuracy | awk -F ' ' '{print $3}')
-    acc_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep Accuracy | awk -F ' ' '{print $2}')
+    rm ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf_raw.log
+    bash cmd_distributed_terabyte_test.sh -d ${DATASET_DIR} -m ${WEIGHT_DIR} ${flag} 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf_raw.log
+    python ../../../../../models/common/pytorch/parse_result.py -t ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf_raw.log -b ${BATCH_SIZE}
+    throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
+    throughput_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
+    acc=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf.log | grep Accuracy | awk -F ' ' '{print $3}')
+    acc_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf.log | grep Accuracy | awk -F ' ' '{print $2}')
 fi
 
 yaml_content=$(cat <<EOF
