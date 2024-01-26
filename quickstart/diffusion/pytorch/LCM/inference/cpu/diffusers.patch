@@ -1,3 +1,16 @@
+diff --git a/src/diffusers/models/unet_2d_blocks.py b/src/diffusers/models/unet_2d_blocks.py
+index e404cef2..ada3d1a3 100644
+--- a/src/diffusers/models/unet_2d_blocks.py
++++ b/src/diffusers/models/unet_2d_blocks.py
+@@ -2321,7 +2321,7 @@ class CrossAttnUpBlock2D(nn.Module):
+                     b2=self.b2,
+                 )
+ 
+-            hidden_states = torch.cat([hidden_states, res_hidden_states], dim=1)
++            hidden_states = torch.cat([hidden_states.to(memory_format=torch.channels_last), res_hidden_states.to(memory_format=torch.channels_last)], dim=1)
+ 
+             if self.training and self.gradient_checkpointing:
+ 
 diff --git a/src/diffusers/models/unet_2d_condition.py b/src/diffusers/models/unet_2d_condition.py
 index f248b243..27d4802d 100644
 --- a/src/diffusers/models/unet_2d_condition.py
