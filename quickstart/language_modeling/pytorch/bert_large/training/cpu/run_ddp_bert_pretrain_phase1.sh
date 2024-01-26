@@ -81,6 +81,7 @@ else
         $ARGS \
         $params \
     2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase1_${precision}.log
+fi
 # For the summary of results
 wait
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_phase1_${precision}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
