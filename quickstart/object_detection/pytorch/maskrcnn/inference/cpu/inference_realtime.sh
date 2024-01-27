@@ -38,33 +38,43 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-if [[ "$1" == *"avx"* ]]; then
+if [ -z  "${PRECISION}" ]; then
+  echo "The PRECISION is not set"
+  exit 1
+fi
+
+if [ -z  "${MODE}" ]; then
+  echo "The MODE is not set"
+  exit 1
+fi
+
+if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
 ARGS=""
 
-if [[ "$1" == "bf16" ]]; then
+if [[ "$PRECISION" == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "### running bf16 datatype"
-elif [[ "$1" == "bf32" ]]; then
+elif [[ "$PRECISION" == "bf32" ]]; then
     ARGS="$ARGS --bf32"
     echo "### running bf32 datatype"
-elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]; then
+elif [[ "$PRECISION" == "fp32" || "$PRECISION" == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
 else
-    echo "The specified precision '$1' is unsupported."
+    echo "The specified precision '$PRECISION' is unsupported."
     echo "Supported precisions are: fp32, avx-fp32, bf16, and bf32."
     exit 1
 fi
 
-if [[ "$2" == "jit" ]]; then
+if [[ "$MODE" == "jit" ]]; then
     ARGS="$ARGS --jit"
     echo "### running jit mode"
-elif [[ "$2" == "imperative" ]]; then
+elif [[ "$MODE" == "imperative" ]]; then
     echo "### running imperative mode"
 else
-    echo "The specified mode '$2' is unsupported."
+    echo "The specified mode '$MODE' is unsupported."
     echo "Supported mode are: imperative and jit."
     exit 1
 fi
@@ -75,8 +85,8 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 export TRAIN=0
 
-PRECISION=$1
-BATCH_SIZE=1
+# If BATCH_SIZE not set, runs with default batch size
+BATCH_SIZE=${BATCH_SIZE:-1}
 
 rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime*
 
@@ -137,6 +147,6 @@ END   {
     sum = sum / i;
     printf("%.3f ms", sum);
 }')
-  echo ""maskrcnn";"latency";$1;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-  echo ""maskrcnn";"p99_latency";$1;${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log
+  echo ""maskrcnn";"latency";$PRECISION;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+  echo ""maskrcnn";"p99_latency";$PRECISION;${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log
 fi

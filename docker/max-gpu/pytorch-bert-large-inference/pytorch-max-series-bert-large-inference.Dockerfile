@@ -19,20 +19,21 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="xpu-max"
+ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG PYT_BASE_TAG="2.1.10-xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-WORKDIR /workspace/pytorch-max-series-bert-large-inference
+USER root
 
-COPY quickstart/language_modeling/pytorch/bert_large/inference/gpu/README.md README.md
-COPY models/language_modeling/pytorch/bert_large/inference/gpu models/language_modeling/pytorch/bert_large/inference/gpu
+WORKDIR /workspace/pytorch-max-series-bert-large-inference/models
 
-RUN cd /workspace/pytorch-max-series-bert-large-inference/models/language_modeling/pytorch/bert_large/inference/gpu && \
-    pip install -r requirements.txt 
+COPY models_v2/pytorch/bert_large/inference/gpu .
+COPY models_v2/common/parse_result.py common/parse_result.py 
 
-COPY quickstart/language_modeling/pytorch/bert_large/inference/gpu/fp16_inference_plain_format.sh quickstart/fp16_inference_plain_format.sh
+RUN python -m pip install -r requirements.txt 
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
+
+USER $USER

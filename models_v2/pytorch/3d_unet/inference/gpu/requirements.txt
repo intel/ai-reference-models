@@ -1,0 +1,7 @@
+batchgenerators==0.23
+SimpleITK
+pandas
+tqdm
+absl-py
+nnunet==1.7.1
+pybind11==2.11.1

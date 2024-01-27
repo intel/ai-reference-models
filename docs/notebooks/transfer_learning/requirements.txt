@@ -1,7 +1,9 @@
-Pillow~=10.0.1 # upgraded to fix CVEs
+accelerate>=0.20.1
+Pillow~=10.2.0 # upgraded to fix CVEs
 PyYAML~=6.0
 charset-normalizer~=3.1.0
 datasets~=2.12.0
+fsspec~=2023.9.2
 gin-config~=0.5.0
 intel-extension-for-pytorch==1.13.100
 intel-tensorflow==2.12.0
@@ -12,7 +14,7 @@ ipywidgets~=8.0.6
 jmespath~=1.0.1
 matplotlib-inline~=0.1.6
 matplotlib~=3.7.1
-notebook~=6.5.4
+notebook~=7.0.7
 numpy~=1.23.5
 opencv-python~=4.7.0.72
 pandas~=2.0.1
@@ -24,9 +26,10 @@ sentencepiece~=0.1.99
 tensorflow-addons~=0.20.0
 tensorflow-datasets~=4.9.2
 tensorflow-hub~=0.13.0
+tf-models-official
 torch==1.13.1
 torchvision==0.14.1
-transformers~=4.30.0
+transformers~=4.36.0
 urllib3~=2.0.2
 wget~=3.2
 evaluate==0.4.0

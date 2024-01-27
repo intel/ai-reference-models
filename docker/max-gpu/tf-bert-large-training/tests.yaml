@@ -1,0 +1,30 @@
+single-tile-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    DATA_DIR: /local_dateset/bert_small_data/bert-large-training/
+    RESULTS_DIR: /tmp
+    DATATYPE: bf16
+    MULTI_TILE: 'False'
+  volumes:
+    - src: /local_dateset/bert_small_data/bert-large-training/
+      dst: /local_dateset/bert_small_data/bert-large-training/
+    - src: /dev/dri/by-path
+      dst: /dev/dri/by-path
+multi-tile-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    DATA_DIR: /local_dateset/bert_small_data/bert-large-training/
+    RESULTS_DIR: /tmp
+    DATATYPE: bf16
+    MULTI_TILE: 'True'
+  volumes:
+    - src: /local_dateset/bert_small_data/bert-large-training/
+      dst: /local_dateset/bert_small_data/bert-large-training/
+    - src: /dev/dri/by-path
+      dst: /dev/dri/by-path

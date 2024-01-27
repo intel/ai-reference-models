@@ -33,42 +33,48 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
+if [ -z "${PRECISION}" ]; then
+  echo "The required environment variable PRECISION has not been set"
+  echo "Please set PRECISION to fp32, avx-fp32, bf32 or bf16."
+  exit 1
+fi
+
 MODEL_CONFIG=${5:-"${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/configs/rnnt.toml"}
 RESULT_DIR=${6:-"${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/results"}
 CHECKPOINT=${7:-"none"}
 CREATE_LOGFILE=${8:-"true"}
 CUDNN_BENCHMARK=${9:-"true"}
 NUM_GPUS=${10:-0}
-PRECISION=${11:-"fp32"}
+PRECISION=${PRECISION:-"fp32"}
 EPOCHS=${12:-1}
 SEED=${13:-2021}
-BATCH_SIZE=${14:-64}
+BATCH_SIZE=${BATCH_SIZE:-64}
 EVAL_BATCH_SIZE=${15:-2}
 LEARNING_RATE=${16:-"0.001"}
 LEARNING_RATE_WARMUP=${17:-"8000"}
 GRADIENT_ACCUMULATION_STEPS=${18:-1}
 LAUNCH_OPT=${LAUNCH_OPT:-"none"}
 
-if [[ $1 == "avx-fp32" ]]; then
+if [[ $PRECISION == "avx-fp32" ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
 PREC=""
-if [ "$1" = "bf16" ]; then
+if [ "$PRECISION" = "bf16" ]; then
     PREC="--bf16"
     precision="bf16"
     echo "### running bf16 datatype"
-elif [ "$1" = "fp32" ] ; then
+elif [ "$PRECISION" = "fp32" ] ; then
     PREC="--fp32"
     precision="fp32"
     echo "### running fp32 datatype"
-elif [ "$1" = "bf32" ]; then
+elif [ "$PRECISION" = "bf32" ]; then
     PREC="--bf32"
     precision="bf32"
     echo "### running bf32 datatype"
 else
-    echo "The specified precision '${1}' is unsupported."
-    echo "Supported precisions now are: fp32, bf16 and bf32"
+    echo "The specified precision '$PRECISION' is unsupported."
+    echo "Supported precisions now are: fp32, avx-fp32, bf16 and bf32"
 fi
 
 IPEX="--ipex"
@@ -111,7 +117,7 @@ CMD+=" --warmup=$WARMUP"
 CMD+=" $PROFILE"
 # TODO: FP32 is still under development. For current validation,
 # in FP32, it only runs 100 iterations. NUM_STEPS is disabled in FP32.
-if [ "$1" = "fp32" ] ; then
+if [ "$PRECISION" = "fp32" ] ; then
     CMD+=" --num_steps=100"
 elif [[ ! -z "${NUM_STEPS}" ]]; then
     CMD+=" --num_steps=$NUM_STEPS"

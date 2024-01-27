@@ -8,7 +8,11 @@ the ImageNet dataset (if a real dataset is being used) and an output directory w
 
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>
+<<<<<<<< HEAD:quickstart/image_recognition/tensorflow/resnet50/inference/cpu/.docs/docker.md
+PRECISION=<set the precision to "int8" or "fp32">
+========
 PRECISION=<set the precision to "int8" or "fp32" or "bfloat16" or "bfloat32">
+>>>>>>>> r3.1:quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/docker.md
 OUTPUT_DIR=<directory where log files will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>

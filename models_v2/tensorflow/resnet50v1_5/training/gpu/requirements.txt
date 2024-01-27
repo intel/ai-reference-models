@@ -1,0 +1,7 @@
+gin 
+gin-config 
+tfa-nightly 
+tensorflow-model-optimization 
+tensorflow-datasets
+protobuf==3.20.3
+pyyaml

@@ -8,7 +8,11 @@ and an output directory.
 
 ```
 DATASET_DIR=<path to the dataset>
+<<<<<<<< HEAD:quickstart/image_recognition/tensorflow/densenet169/inference/cpu/.docs/docker.md
+PRECISION=fp32
+========
 PRECISION=<set the precision to "int8" or "fp32">
+>>>>>>>> r3.1:quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/.docs/docker.md
 OUTPUT_DIR=<directory where log files will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>

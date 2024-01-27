@@ -48,6 +48,11 @@ if [ -z "${WEIGHT_PATH}" ]; then
   exit 1
 fi
 
+if [ -z "${PRECISION}" ]; then
+  echo "Please set PRECISION: int8, fp32, bf16, bf32"
+  exit 1
+fi
+
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}/dlrm_inference_accuracy_log
 
@@ -81,16 +86,31 @@ numa_cmd="numactl -C 0-$((CORES-1))  "
 echo "will run on core 0-$((CORES-1)) on socket 0" 
 
 export OMP_NUM_THREADS=$CORES
-python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
---raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
---data-set=terabyte \
---memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
---arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
---arch-sparse-feature-size=128 --max-ind-range=40000000 \
---numpy-rand-seed=727  --inference-only --ipex-interaction \
---print-freq=100 --print-time --mini-batch-size=2048 --test-mini-batch-size=16384 \
---test-freq=2048 --print-auc $ARGS \
---load-model=${WEIGHT_PATH} | tee $LOG
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
+    --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+    --data-set=terabyte \
+    --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+    --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+    --arch-sparse-feature-size=128 --max-ind-range=40000000 \
+    --numpy-rand-seed=727  --inference-only --ipex-interaction \
+    --print-freq=100 --print-time --mini-batch-size=2048 --test-mini-batch-size=16384 \
+    --test-freq=2048 --print-auc $ARGS \
+    --load-model=${WEIGHT_PATH} | tee $LOG
+else
+  echo "### running with torch.compile inductor backend"
+  python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
+    --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+    --data-set=terabyte \
+    --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+    --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+    --arch-sparse-feature-size=128 --max-ind-range=40000000 \
+    --numpy-rand-seed=727  --inference-only --inductor \
+    --print-freq=100 --print-time --mini-batch-size=2048 --test-mini-batch-size=16384 \
+    --test-freq=2048 --print-auc $ARGS \
+    --load-model=${WEIGHT_PATH} | tee $LOG
+fi
 
 accuracy=$(grep 'Accuracy:' $LOG |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
 echo ""dlrm";"auc";${PRECISION};16384;${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log

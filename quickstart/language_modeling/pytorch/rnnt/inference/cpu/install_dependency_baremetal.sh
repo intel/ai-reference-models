@@ -23,15 +23,18 @@ if [ ! -e "${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu/infe
   exit 1
 fi
 
-
 dir=$(pwd)
 cd ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu
 pip install -r requirements.txt
 pip install unidecode inflect
+pip install librosa==0.9.1
 
 # warp-transducer:
 git clone https://github.com/HawkAaron/warp-transducer
 cd warp-transducer
+git checkout master
+git apply ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/inference/cpu/enable_warprnnt_c++17.diff
+rm -rf build
 mkdir build; cd build
 cmake .. 
 make 

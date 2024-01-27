@@ -19,35 +19,37 @@
 ARGS="--benchmark"
 precision=fp32
 
-if [[ "$1" == *"avx"* ]]; then
+if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
-if [[ "$1" == "bf16" ]]
+if [[ "$PRECISION" == "bf16" ]]
 then
     precision=bf16
     ARGS="$ARGS --bf16"
     echo "### running bf16 mode"
-elif [[ "$1" == "fp16" ]]
+elif [[ "$PRECISION" == "fp16" ]]
 then
     precision=fp16
     ARGS="$ARGS --fp16_cpu"
     echo "### running fp16 mode"
 
-elif [[ "$1" == "bf32" ]]
+elif [[ "$PRECISION" == "bf32" ]]
 then
     precision=bf32
     ARGS="$ARGS --bf32"
     echo "### running bf32 mode"
-elif [[ "$1" == "int8" || "$1" == "avx-int8" ]]
+elif [[ "$PRECISION" == "int8" || "$PRECISION" == "avx-int8" ]]
 then
     precision=int8
-    ARGS="$ARGS --int8"
+    ARGS="$ARGS --int8 --int8_bf16"
     echo "### running int8 mode"
-elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]
+elif [[ "$PRECISION" == "fp32" || "$PRECISION" == "avx-fp32" ]]
 then
     precision=fp32
     echo "### running fp32 mode"
+else
+    echo "Please set PRECISION to : fp32, int8, bf32, bf26, avx-int8 or avx-fp32"
 fi
 
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000";
@@ -61,6 +63,7 @@ work_space=${work_space:-${OUTPUT_DIR}}
 
 rm -rf ${OUTPUT_DIR}/throughput_log*
 
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [ ${WEIGHT_SHAREING} ]; then
   CORES=`lscpu | grep Core | awk '{print $4}'`
   SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -84,12 +87,14 @@ if [ ${WEIGHT_SHAREING} ]; then
     ARGS="$ARGS --num_streams $STREAM_PER_INSTANCE"
     ARGS="$ARGS --instance_number $numa_node_i"
 
-    numactl -C $start_core_i-$end_core_i --membind=$numa_node_i python ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter 15 --use_jit --perf_run_iters 40 --int8_config ${INT8_CONFIG} \
+    numactl -C $start_core_i-$end_core_i --membind=$numa_node_i python ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter 15 --use_jit --ipex --perf_run_iters 40 --int8_config ${INT8_CONFIG} \
     2>&1 | tee ${LOG_i} &
   done
   wait
+elif [[ "0" == ${TORCH_INDUCTOR} ]];then
+  python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter 15 --use_jit --ipex --perf_run_iters 40 --int8_config ${INT8_CONFIG}
 else
-  python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter 15 --use_jit --perf_run_iters 40 --int8_config ${INT8_CONFIG}
+  python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter 15 --inductor --perf_run_iters 40 --int8_config ${INT8_CONFIG}
 fi
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '

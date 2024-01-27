@@ -74,8 +74,17 @@ MODE="inference"
   
 # If cores per instance env is not mentioned, then the workload will run with the default value.
 if [ -z "${CORES_PER_INSTANCE}" ]; then
-  CORES_PER_INSTANCE="socket"
-  echo "Runs an instance per ${CORES_PER_INSTANCE}"
+  # Get number of cores per instance
+  CORES_PER_SOCKET=`lscpu | grep 'Core(s) per socket' | awk '{print $4}'`
+  SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+  NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+  CORES_PER_INSTANCE=`expr $CORES_PER_SOCKET \* $SOCKETS / $NUMAS`
+  NUM_INSTANCES=`expr $cores_per_socket / $CORES_PER_NUMA`
+
+  echo "CORES_PER_SOCKET: $CORES_PER_SOCKET"
+  echo "SOCKETS: $SOCKETS"
+  echo "NUMAS: $NUMAS"
+  echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
 fi
 
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
@@ -83,10 +92,12 @@ cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
 # If OMP_NUM_THREADS env is not mentioned, then run with the default value
 if [ -z "${OMP_NUM_THREADS}" ]; then 
-  export OMP_NUM_THREADS=4
+  omp_num_threads=4
 else
-  export OMP_NUM_THREADS=${OMP_NUM_THREADS}
+  omp_num_threads=${OMP_NUM_THREADS}
 fi
+
+export OMP_NUM_THREADS=${omp_num_threads}
 
 #Set up env variable for bfloat32
 if [[ $PRECISION == "bfloat32" ]]; then
@@ -117,6 +128,12 @@ else
 fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
 
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  echo "TF_THREAD_PINNING_MODE is not set. Default configuration of thread pinning and spinning settings"
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+  echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+fi
+
 # Remove old log file
 rm -rf  ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log
 
@@ -132,7 +149,9 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
-  --data-num-intra-threads ${cores_per_socket} --data-num-inter-threads 1 \
+  --num-cores=${CORES_PER_INSTANCE} \
+  --num-intra-threads ${CORES_PER_INSTANCE} --num-inter-threads 1 \
+  --data-num-intra-threads ${CORES_PER_INSTANCE} --data-num-inter-threads 1 \
   $@ \
   -- \
   $WARMUP_STEPS \

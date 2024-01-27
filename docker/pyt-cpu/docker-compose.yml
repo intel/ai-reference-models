@@ -17,8 +17,8 @@
 #
 version: '3'
 services:
-  spr-bert-large-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-spr-bert-large-inference
+  bert-large-inference:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-language-modeling-bert-large-inference
     pull_policy: always
     build:
       context: ../../
@@ -26,13 +26,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-bert-large-inference/pytorch-spr-bert-large-inference.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/bert-large-inference/pytorch-bert-large-inference.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-maskrcnn-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-spr-maskrcnn-inference
+  maskrcnn-inference:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-object-detection-maskrcnn-inference
     pull_policy: always
     build:
       context: ../../
@@ -40,13 +40,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-maskrcnn-inference/pytorch-spr-maskrcnn-inference.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/maskrcnn-inference/pytorch-maskrcnn-inference.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-maskrcnn-training:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-spr-maskrcnn-training
+  maskrcnn-training:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-object-detection-maskrcnn-training
     pull_policy: always
     build:
       context: ../../
@@ -54,13 +54,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-maskrcnn-training/pytorch-spr-maskrcnn-training.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/maskrcnn-training/pytorch-maskrcnn-training.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-resnet50-training:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-training
+  resnet50-training:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-pytorch-image-recognition-resnet50-training
     pull_policy: always
     build:
       context: ../../
@@ -68,13 +68,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-resnet50-training/pytorch-spr-resnet50-training.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/resnet50-training/pytorch-resnet50-training.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-resnet50-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnet50-inference
+  resnet50-inference:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-pytorch-image-recognition-resnet50-inference
     pull_policy: always
     build:
       context: ../../
@@ -82,13 +82,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-resnet50-inference/pytorch-spr-resnet50-inference.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/resnet50-inference/pytorch-resnet50-inference.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-ssd-resnet34-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-inference
+  ssd-resnet34-inference:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-object-detection-ssd-resnet34-inference
     pull_policy: always
     build:
       context: ../../
@@ -96,13 +96,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-ssd-resnet34-inference/pytorch-spr-ssd-resnet34-inference.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/ssd-resnet34-inference/pytorch-ssd-resnet34-inference.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-ssd-resnet34-training:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-ssd-resnet34-training
+  ssd-resnet34-training:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-object-detection-ssd-resnet34-training
     pull_policy: always
     build:
       context: ../../
@@ -110,13 +110,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-ssd-resnet34-training/pytorch-spr-ssd-resnet34-training.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/ssd-resnet34-training/pytorch-ssd-resnet34-training.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-resnext-32x16d-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnext-32x16d-inference
+  resnext-32x16d-inference:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-resnext-32x16d-inference
     pull_policy: always
     build:
       context: ../../
@@ -124,13 +124,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-resnext-32x16d-inference/pytorch-resnext-32x16d-inference.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/resnext-32x16d-inference/pytorch-resnext-32x16d-inference.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-dlrm-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-inference
+  dlrm-inference:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-recommendation-dlrm-inference
     pull_policy: always
     build:
       context: ../../
@@ -138,13 +138,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-dlrm-inference/pytorch-spr-dlrm-inference.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/dlrm-inference/pytorch-dlrm-inference.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-dlrm-training:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-training
+  dlrm-training:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-recommendation-dlrm-training
     pull_policy: always
     build:
       context: ../../
@@ -152,13 +152,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-dlrm-training/pytorch-spr-dlrm-training.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/dlrm-training/pytorch-dlrm-training.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-rnnt-training:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-rnnt-training
+  rnnt-training:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-language-modeling-rnnt-training
     pull_policy: always
     build:
       context: ../../
@@ -166,13 +166,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-rnnt-training/pytorch-spr-rnnt-training.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/rnnt-training/pytorch-rnnt-training.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-rnnt-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-rnnt-inference
+  rnnt-inference:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-language-modeling-rnnt-inference
     pull_policy: always
     build:
       context: ../../
@@ -180,13 +180,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-rnnt-inference/pytorch-spr-rnnt-inference.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/rnnt-inference/pytorch-rnnt-inference.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-distilbert-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-distilbert-inference
+  distilbert-inference:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-language-modeling-distilbert-inference
     pull_policy: always
     build:
       context: ../../
@@ -194,13 +194,13 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-distilbert-inference/pytorch-spr-distilbert-inference.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/distilbert-inference/pytorch-distilbert-inference.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  spr-bert-large-training:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-bert-large-training
+  bert-large-training:
+    image: ${BASE_IMAGE:-intel/intel-optimized-pytorch}-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-pyt-language-modeling-bert-large-training
     pull_policy: always
     build:
       context: ../../
@@ -208,8 +208,8 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${BASE_TAG:-2.0.0-pip-base}
-      dockerfile: docker/pyt-cpu/spr-bert-large-training/pytorch-spr-bert-large-training.Dockerfile
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-optimized-pytorch}
+        BASE_TAG: ${BASE_TAG:-2.1-pip-base}
+      dockerfile: docker/pyt-cpu/bert-large-training/pytorch-bert-large-training.Dockerfile-${OS:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"

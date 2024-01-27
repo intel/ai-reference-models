@@ -1,2 +1,2 @@
 tensorboardX
-transformers==4.30.0 # fixed for Snyk scans to avoid vulnerability
+transformers==4.36.0 # fixed for Snyk scans to avoid vulnerability

@@ -219,9 +219,14 @@ class BaseModelInitializer(object):
             if len(core_list) == 0:
                 continue
 
-            prefix = ("{0}OMP_NUM_THREADS={1} "
-                      "numactl --localalloc --physcpubind={2}").format(
-                ld_preload_prefix, len(core_list), ",".join(core_list))
+            if "OMP_NUM_THREADS" in os.environ:
+                prefix = ("{0}OMP_NUM_THREADS={1} "
+                          "numactl --localalloc --physcpubind={2}").format(
+                              ld_preload_prefix, os.environ["OMP_NUM_THREADS"], ",".join(core_list))
+            else:
+                prefix = ("{0}OMP_NUM_THREADS={1} "
+                          "numactl --localalloc --physcpubind={2}").format(
+                              ld_preload_prefix, len(core_list), ",".join(core_list))
             instance_logfile = log_filename_format.format("instance" + str(instance_num))
 
             unique_command = cmd

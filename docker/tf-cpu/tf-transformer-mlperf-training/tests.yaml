@@ -1,0 +1,34 @@
+Transformer Bfloat16  training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-translation-tf-transformer-mlperf-training
+  cmd: /bin/bash quickstart/training.sh
+  env:
+    DATASET_DIR: /tf_dataset/dataset/transformer_uniform_data
+    OUTPUT_DIR: /output/tf-transformer-mlperf-training/bf16
+    PRECISION: bfloat16
+    BATCH_SIZE: '12000'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/dataset/transformer_uniform_data
+    dst: /tf_dataset/dataset/transformer_uniform_data
+  - src: $PWD/output/tf-transformer-mlperf-training/bf16
+    dst: /output/tf-transformer-mlperf-training/bf16
+Transformer FP32 training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-translation-tf-transformer-mlperf-training
+  cmd: /bin/bash quickstart/training.sh
+  env:
+    DATASET_DIR: /tf_dataset/dataset/transformer_uniform_data
+    OUTPUT_DIR: /output/tf-transformer-mlperf-training/fp32
+    PRECISION: fp32
+    BATCH_SIZE: '5200'
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/dataset/transformer_uniform_data
+    dst: /tf_dataset/dataset/transformer_uniform_data
+  - src: $PWD/output/tf-transformer-mlperf-training/fp32
+    dst: /output/tf-transformer-mlperf-training/fp32

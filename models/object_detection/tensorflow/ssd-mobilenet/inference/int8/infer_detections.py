@@ -119,8 +119,12 @@ class model_infer:
     arg_parser.add_argument('-w', "--warmup_iter",
                             help='For accuracy measurement only.',
                             dest='warmup_iter', default=200, type=int)
+                            
     arg_parser.add_argument('--onednn-graph', dest='onednn_graph',
                             help='enable OneDNN Graph', action='store_true')
+
+    arg_parser.add_argument('-sg', '--input-subgraph', dest='input_subgraph',
+                            help='int8 subgraph')
 
     # parse the arguments
     self.args = arg_parser.parse_args()
@@ -150,7 +154,7 @@ class model_infer:
       self.input_images, self.bbox, self.label, self.image_id = self.get_input()
     self.data_sess = tf.compat.v1.Session(graph=data_graph, config=self.config)
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = self.args.input_subgraph
     preprocess_graph = tf.Graph()
     with preprocess_graph.as_default():
       graph_def = tf.compat.v1.GraphDef()

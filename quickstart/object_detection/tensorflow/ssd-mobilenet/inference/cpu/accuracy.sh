@@ -52,6 +52,7 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
     PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb"
   elif [[ $PRECISION == "int8" ]]; then
     PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb"
+    INPUT_SUBGRAPH="${MODEL_DIR}/pretrained_model/ssdmobilenet_preprocess.pb"
   elif [[ $PRECISION == "bfloat16" ]]; then
     PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb"      
   else
@@ -87,7 +88,6 @@ if [ -z "${BATCH_SIZE}"]; then
 fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
-_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name ssd-mobilenet \
   --precision ${PRECISION} \

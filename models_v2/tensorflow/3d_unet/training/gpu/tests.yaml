@@ -1,0 +1,25 @@
+training-fp32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/3d_unet-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "float32"
+    DATASET_DIR: "/tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training"  
+    MULTI_TILE: "False"
+training-bfloat16:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/3d_unet-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "bfloat16"
+    DATASET_DIR: "/tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training"  
+    MULTI_TILE: "False"
+training-fp32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/3d_unet-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "float32"
+    DATASET_DIR: "/tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training"  
+    MULTI_TILE: "True"
+training-bfloat16:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/3d_unet-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "bfloat16"
+    DATASET_DIR: "/tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training"  
+    MULTI_TILE: "True"
+

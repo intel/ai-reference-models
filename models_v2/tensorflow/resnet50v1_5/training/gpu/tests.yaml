@@ -1,0 +1,24 @@
+inference-bf16:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/resnet50v1_5-training/run_test.sh ${CONFIG_FILE} ${IS_LKG_DROP} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    MULTI_TILE: "False"
+    CONFIG_FILE: "configure/itex_bf16.yaml"
+    DATASET_DIR: "/tf_dataset/dataset/TF_Imagenet_FullData/"
+inference-fp32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/resnet50v1_5-training/run_test.sh ${CONFIG_FILE} ${IS_LKG_DROP} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    MULTI_TILE: "False"
+    CONFIG_FILE: "configure/itex_fp32.yaml"
+    DATASET_DIR: "/tf_dataset/dataset/TF_Imagenet_FullData/" 
+inference-bf16:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/resnet50v1_5-training/run_test.sh ${CONFIG_FILE} ${IS_LKG_DROP} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    MULTI_TILE: "True"
+    CONFIG_FILE: "hvd_configure/itex_bf16_lars.yaml"
+    DATASET_DIR: "/tf_dataset/dataset/TF_Imagenet_FullData/"
+inference-fp32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/resnet50v1_5-training/run_test.sh ${CONFIG_FILE} ${IS_LKG_DROP} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    MULTI_TILE: "True"
+    CONFIG_FILE: "hvd_configure/itex_fp32_lars.yaml"
+    DATASET_DIR: "/tf_dataset/dataset/TF_Imagenet_FullData/" 

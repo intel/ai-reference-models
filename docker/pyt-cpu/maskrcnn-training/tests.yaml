@@ -1,0 +1,44 @@
+fp32-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-maskrcnn-training
+  cmd: quickstart/training.sh fp32
+  env:
+    PRECISION: fp32
+    BATCH_SIZE: '112'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+avx-fp32-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-maskrcnn-training
+  cmd: quickstart/training.sh avx-fp32
+  env:
+    PRECISION: avx-fp32
+    BATCH_SIZE: '112'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+bf16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-maskrcnn-training
+  cmd: quickstart/training.sh bf16
+  env:
+    PRECISION: bf16
+    BATCH_SIZE: '112'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco
+bf32-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-maskrcnn-training
+  cmd: quickstart/training.sh bf32
+  env:
+    PRECISION: bf32
+    BATCH_SIZE: '112'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/coco
+  volumes:
+    - src: /pytorch/coco
+      dst: /pytorch/coco

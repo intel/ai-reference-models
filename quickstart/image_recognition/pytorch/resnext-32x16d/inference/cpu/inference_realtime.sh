@@ -32,11 +32,12 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, avx-fp32, int8, avx-int8, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, int8, avx-int8, bf32 or bf16."
   exit 1
 fi
 
-BATCH_SIZE=1
+# If BATCH_SIZE is not set, it will use default batch size
+BATCH_SIZE=${BATCH_SIZE-1}
 
 rm -rf ${OUTPUT_DIR}/resnext101_latency_log*
 
@@ -61,7 +62,7 @@ elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "running fp32 path"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32, bf16, int8, and avx-int8"
+    echo "Supported precisions are: fp32, avx-fp32, bf16, int8, and avx-int8, bf32"
     exit 1
 fi
 
@@ -109,7 +110,6 @@ if [[ ${PLATFORM} == "linux" ]]; then
     TOTAL_CORES=`expr $CORES \* $SOCKETS`
     INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
     INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
-
     throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/resnext101_latency_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
     BEGIN {
             sum = 0;

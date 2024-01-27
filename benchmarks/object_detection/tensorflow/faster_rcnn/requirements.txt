@@ -1,7 +1,0 @@
-Cython
-contextlib2
-pillow>=9.3.0
-lxml
-jupyter
-matplotlib
-pycocotools

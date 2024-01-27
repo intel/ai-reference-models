@@ -110,7 +110,6 @@ if [[ $PRECISION == "bfloat32" ]]; then
 fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
-_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=bert_large \
   --precision ${PRECISION} \

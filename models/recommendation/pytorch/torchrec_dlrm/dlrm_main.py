@@ -34,6 +34,7 @@ from typing import List, Optional
 import time
 
 import torch
+import torch.distributed as dist
 print(f"torch version {torch.__version__}")
 import torchmetrics as metrics
 from pyre_extensions import none_throws
@@ -48,8 +49,6 @@ from torchrec.optim.keyed import CombinedOptimizer, KeyedOptimizerWrapper
 from torchrec.optim.optimizers import in_backward_optimizer_filter
 from tqdm import tqdm
 from jit_trace_able_utils import unpack, SparseArchTraceAbleWrapper
-import intel_extension_for_pytorch as ipex
-print(f"IPEX version {ipex.__version__}")
 
 # OSS import
 try:
@@ -100,8 +99,23 @@ def load_snapshot(model, snapshot_dir):
     snapshot.restore(app_state={"model": model})
 
 def trace_handler(prof):
+    import os
+    try:
+        profile_dir = os.environ["PROFLIE_DIR"]
+    except:
+        profile_dir = "./"
     print(prof.key_averages().table(sort_by="self_cpu_time_total"))
-    prof.export_chrome_trace(f"{prof._mode}-{prof._dtype}-dlrm_trace_step{prof.step_num}.json")
+    try:
+        my_size = dist.get_world_size()
+    except:
+        my_size = 1
+    if my_size > 1:
+        my_rank = dist.get_rank()
+        trace_dir = f"{profile_dir}/rank_{my_rank}_{prof._mode}-{prof._dtype}-dlrm_trace_step{prof.step_num}.json"
+    else:
+        trace_dir = f"{profile_dir}/{prof._mode}-{prof._dtype}-dlrm_trace_step{prof.step_num}.json"
+    print(trace_dir)
+    prof.export_chrome_trace(trace_dir)
 
 prof_schedule=torch.profiler.schedule(
     wait=10,
@@ -119,7 +133,25 @@ def fetch_batch(dataloader):
     try:
         batch = dataloader.dataset.load_batch()
     except:
-        batch = dataloader.source.dataset.batch_generator._generate_batch()
+        import torchrec
+        dataset = dataloader.source.dataset
+        if isinstance(dataset, torchrec.datasets.criteo.InMemoryBinaryCriteoIterDataPipe):
+            sample_list = list(range(dataset.batch_size))
+            dense = dataset.dense_arrs[0][sample_list, :]
+            sparse = [arr[sample_list, :] for arr in dataset.sparse_arrs][0] % dataset.hashes
+            labels = dataset.labels_arrs[0][sample_list, :]
+            return dataloader.func(dataset._np_arrays_to_batch(dense, sparse, labels))
+        batch = dataloader.func(dataloader.source.dataset.batch_generator._generate_batch())
+    return batch
+
+def split_dense_input_and_label_for_ranks(batch):
+    my_rank = dist.get_rank()
+    my_size = dist.get_world_size()
+    local_bs = int(batch.dense_features.shape[0] / my_size)
+    start = local_bs * my_rank
+    end = start + local_bs
+    batch.dense_features = batch.dense_features[start:end]
+    batch.labels = batch.labels[start:end]
     return batch
 
 def parse_autocast(dtype: str):
@@ -177,15 +209,26 @@ def convert_int8(args, model, dataloader):
 
 def ipex_optimize(args, model, optimizer, dataloader):
     example_batch = fetch_batch(dataloader)
+    if args.distributed_training and dist.get_world_size() > 1:
+        example_batch = split_dense_input_and_label_for_ranks(example_batch)
     example_batch.sparse_features = unpack(example_batch.sparse_features)
     dense, sparse = example_batch.dense_features, example_batch.sparse_features
     autocast, dtype = parse_autocast(args.dtype)
-    auto_kernel_selection = True if args.dtype == 'bf32' else False
+    auto_kernel_selection = True
     import intel_extension_for_pytorch as ipex
     if dtype == torch.int8:
         assert args.inference_only
         with torch.no_grad():
-            model = convert_int8(args, model, dataloader)
+            if args.int8_prepare or args.calibration:
+                    model = convert_int8(args, model, dataloader)
+                    torch.jit.save(model, args.int8_model_dir)
+                    print(f"save int8 model to {args.int8_model_dir}")
+                    exit()
+            else:
+                # just run JIT, since we load optimized INT8 model
+                print_memory("int8 jit optimize")
+                model(dense, sparse)
+                model(dense, sparse)            
     elif args.inference_only:
         with torch.no_grad():
             model = ipex.optimize(
@@ -217,9 +260,68 @@ def ipex_optimize(args, model, optimizer, dataloader):
             linear_bn_folding=False,
             conv_bn_folding=False
         )
-        pass
+        if dtype == torch.bfloat16:
+            model.sparse_arch.embedding_bag_collection.to_bfloat16_train()
+        # if dtype == torch.float16:
+        #     model.sparse_arch.embedding_bag_collection.to_float16_train()
     if args.dtype == 'bf32':
         ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+    return model, optimizer
+
+def stock_pt_optimize(args, model, optimizer, dataloader):
+    example_batch = fetch_batch(dataloader)
+    example_batch.sparse_features = unpack(example_batch.sparse_features)
+    dense, sparse = example_batch.dense_features, example_batch.sparse_features
+    autocast, dtype = parse_autocast(args.dtype)
+    if args.inductor:
+        from torch._inductor import config as inductor_config
+        from torch._dynamo import config
+        config.error_on_recompile = True
+        inductor_config.cpp_wrapper = True
+        inductor_config.cpp.enable_kernel_profile = True
+        if args.inference_only:
+            inductor_config.freezing = True
+            if not dtype == torch.int8:
+                model.eval()
+        if dtype == torch.int8:
+            assert args.inference_only
+            from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
+            import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
+            from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
+            from torch._export import capture_pre_autograd_graph, dynamic_dim
+            print('[Info] Running torch.compile() INT8 quantization')
+            with torch.no_grad():
+                example_inputs = (dense, sparse)
+                exported_model = capture_pre_autograd_graph(
+                    model,
+                    example_inputs
+                )
+                quantizer = X86InductorQuantizer()
+                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
+                prepared_model = prepare_pt2e(exported_model, quantizer)
+                prepared_model(dense, sparse)
+                converted_model = convert_pt2e(prepared_model)
+                torch.ao.quantization.move_exported_model_to_eval(converted_model)
+                print(converted_model.graph)
+                print("===========================")
+                converted_model.graph.print_tabular()
+                if args.ipex:
+                    print('[Info] Running torch.compile() with IPEX backend')
+                    model(dense, sparse)
+                    model = torch.compile(converted_model, backend="ipex")
+                else:
+                    print('[Info] Running torch.compile() with default backend')
+                    model(dense, sparse)
+                    model = torch.compile(converted_model)
+                model(dense, sparse)
+                model(dense, sparse)
+        else:
+            with torch.no_grad(), torch.cpu.amp.autocast(enabled=autocast, dtype=dtype):
+                print('[Info] Running torch.compile() with default backend')
+                model(dense, sparse)
+                model = torch.compile(model)
+                model(dense, sparse)
+                model(dense, sparse)
     return model, optimizer
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
@@ -264,6 +366,12 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "--limit_test_batches",
         type=int,
         default=None,
+        help="number of test batches",
+    )
+    parser.add_argument(
+        "--warmup_batches",
+        type=int,
+        default=100,
         help="number of test batches",
     )
     parser.add_argument(
@@ -331,7 +439,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument(
         "--seed",
         type=int,
-        default=None,
+        default=1696543516,
         help="Random seed for reproducibility.",
     )
     parser.add_argument(
@@ -476,6 +584,11 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="Whether optimize model by ipex.optimize",
     )
     parser.add_argument(
+        "--ipex",
+        action="store_true",
+        help="Whether optimize model with dynamo + ipex backend",
+    )
+    parser.add_argument(
         "--dtype",
         type=str,
         choices=["fp32", "bf16", "fp16", "int8", "bf32"],
@@ -510,6 +623,12 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="log-freq to print performance statistics.",
     )
     parser.add_argument(
+        "--log-freq-eval",
+        type=int,
+        default=0,
+        help="log-freq to print performance/auroc statistics for eval.",
+    )
+    parser.add_argument(
         "--snapshot-dir",
         type=str,
     )
@@ -539,6 +658,26 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         default=0,
         help="if value > 0, will use pytorch throughputbenchmark to share weight with `value` instance",
     )
+    parser.add_argument(
+        "--inductor",
+        action="store_true",
+        help="whether use torch.compile()",
+    )
+    parser.add_argument(
+        "--distributed-training",
+        action="store_true",
+        help="whether train dlrm distributed",
+    )
+    parser.add_argument(
+        "--ipex-dist-merged-emb-adagrad",
+        action="store_true",
+        help="whether use ipex customer op for distributed merged embedding",
+    )
+    parser.add_argument(
+        "--ipex-merged-emb-adagrad",
+        action="store_true",
+        help="whether use ipex customer op for merged embedding with adagrad",
+    )
     return parser.parse_args(argv)
 
 
@@ -566,11 +705,13 @@ def _evaluate(
     limit_batches = args.limit_val_batches
     print_progress = args.print_progress
     autocast_enabled, autocast_dtype = parse_autocast(args.dtype)
-    log_freq = args.log_freq
+    log_freq = args.log_freq_eval
     enable_torch_profile = args.profile
 
     benckmark_batch = fetch_batch(eval_dataloader)
     benckmark_batch.sparse_features = unpack(benckmark_batch.sparse_features)
+    if args.distributed_training and dist.get_world_size() > 1:
+        benckmark_batch = split_dense_input_and_label_for_ranks(benckmark_batch)
 
     def fetch_next(iterator, current_it):
         if args.benchmark:
@@ -582,6 +723,8 @@ def _evaluate(
                 next_batch = next(iterator)
             with record_function("unpack KeyJaggedTensor"):
                 next_batch.sparse_features = unpack(next_batch.sparse_features)
+            if args.distributed_training and dist.get_world_size() > 1:
+                next_batch = split_dense_input_and_label_for_ranks(next_batch)
             return next_batch
 
     def eval_step(model, iterator, current_it):
@@ -592,7 +735,23 @@ def _evaluate(
             t2 = time.time()
         return logits, batch.labels, t2 - t1
 
-        
+    def gather_output(label, pred):
+        my_rank = dist.get_rank()
+        my_size = dist.get_world_size()
+        if my_rank == 0:
+            label_list = [torch.empty_like(label) for _ in range(my_size)]
+            pred_list = [torch.empty_like(pred) for _ in range(my_size)]
+        else:
+            label_list = None
+            pred_list = None
+        dist.barrier()
+        dist.gather(label, label_list, dst=0)
+        dist.gather(pred, pred_list, dst=0)
+        if my_rank == 0:
+            return torch.cat(label_list), torch.cat(pred_list)
+        else:
+            return None, None
+
     pbar = tqdm(
         iter(int, 1),
         desc=f"Evaluating {stage} set",
@@ -602,7 +761,9 @@ def _evaluate(
 
     logger.info(f"EVAL_START, EPOCH_NUM: {epoch_num}")
 
-    eval_model.eval()
+    if not (args.inductor and args.dtype == 'int8'):
+        eval_model.eval()
+
     device = torch.device('cpu')
 
     iterator = itertools.islice(iter(eval_dataloader), limit_batches)
@@ -615,9 +776,14 @@ def _evaluate(
 
     preds = []
     labels = []
-    auroc = metrics.AUROC(compute_on_step=False, task='binary').to(device)
+
+    if not args.ipex_optimize:
+        auroc_computer = metrics.AUROC(task='binary').to(device)
+    else:
+        import intel_extension_for_pytorch as ipex
+
     total_t = 0
-    it = 1
+    it = 0
     ctx1 = torch.no_grad()
     ctx2 = torch.cpu.amp.autocast(enabled=autocast_enabled, dtype=autocast_dtype)
     ctx3 = torch.profiler.profile(activities=[ProfilerActivity.CPU], schedule=prof_schedule, on_trace_ready=trace_handler)
@@ -629,20 +795,26 @@ def _evaluate(
         while True:
             try:
                 logits, label, fw_t = eval_step(eval_model, iterator, it)
-                total_t += fw_t
-                if log_freq != 0 and it % log_freq == 0:
-                    preds = [torch.cat(preds)]
-                    labels = [torch.cat(labels)]
-                    num_samples = labels[0].shape[0]
-                    auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze().float())
-                    logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
+                if it > args.warmup_batches:
+                    if enable_torch_profile:
+                        p.step()
+                    total_t += fw_t
+                    if log_freq != 0 and it % log_freq == 0 and it > args.warmup_batches:
+                        assert not args.distributed_training
+                        preds = [torch.cat(preds)]
+                        labels = [torch.cat(labels)]
+                        num_samples = labels[0].shape[0] - args.warmup_batches * args.batch_size
+                        if not args.ipex_optimize:
+                            auroc = auroc_computer(preds[0].squeeze().float(), labels[0].float())
+                        else:
+                            auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze().float())
+
+                        logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
                 pred = torch.sigmoid(logits)
                 preds.append(pred)
                 labels.append(label)
                 pbar.update(1)
                 it += 1
-                if enable_torch_profile:
-                    p.step()
             except StopIteration:
                 # Dataset traversal complete
                 break
@@ -651,14 +823,29 @@ def _evaluate(
 
     preds = torch.cat(preds)
     labels = torch.cat(labels)
-    num_samples = labels.shape[0]
-    auroc = ipex._C.roc_auc_score(labels.float(), preds.squeeze().float())
+    if args.distributed_training and dist.get_world_size() > 1:
+        labels, preds = gather_output(labels, preds)
 
-    logger.info(f"AUROC over {stage} set: {auroc}.")
-    logger.info(f"Number of {stage} samples: {num_samples}")
-    logger.info(f"Throughput: {num_samples/total_t} fps")
-    logger.info(f"Final AUROC: {auroc} ")
+    is_rank_zero = args.distributed_training and dist.get_world_size() > 1 and dist.get_rank() == 0
+    if is_rank_zero or not args.distributed_training:
+        num_samples = labels.shape[0] - args.warmup_batches * args.batch_size
+        if not args.ipex_optimize:
+            auroc = auroc = auroc_computer(preds.squeeze().float(), labels.float())
+        else:
+            auroc = ipex._C.roc_auc_score(labels.float(), preds.squeeze().float())
+        logger.info(f"AUROC over {stage} set: {auroc}.")
+        logger.info(f"Number of {stage} samples: {num_samples}")
+        logger.info(f"Throughput: {num_samples/total_t} fps")
+        logger.info(f"Final AUROC: {auroc} ")
 
+    if args.distributed_training and dist.get_world_size() > 1:
+        dist.barrier()
+        if is_rank_zero:
+            bd_list = [auroc]
+        else:
+            bd_list = [None]
+        dist.broadcast_object_list(bd_list, src=0)
+        auroc = bd_list[0]
     return auroc
 
 
@@ -706,6 +893,8 @@ def _train(
 
     benckmark_batch = fetch_batch(train_dataloader)
     benckmark_batch.sparse_features = unpack(benckmark_batch.sparse_features)
+    if args.distributed_training and dist.get_world_size() > 1:
+        benckmark_batch = split_dense_input_and_label_for_ranks(benckmark_batch)
 
     def fetch_next(iterator, current_it):
         if args.benchmark:
@@ -717,6 +906,8 @@ def _train(
                 next_batch = next(iterator)
             with record_function("unpack KeyJaggedTensor"):
                 next_batch.sparse_features = unpack(next_batch.sparse_features)
+            if args.distributed_training and dist.get_world_size() > 1:
+                next_batch = split_dense_input_and_label_for_ranks(next_batch)
             return next_batch
 
     def train_step(model, opt, iterator, current_it):
@@ -777,16 +968,17 @@ def _train(
                 for i, g in enumerate(train_optimizer.param_groups):
                     logger.info(f"lr: {it} {i} {g['lr']:.6f}")
             samples, train_t = train_step(train_model, train_optimizer, iterator, it)
-            if enable_torch_profile:
-                p.step()
-            num_samples += samples
-            total_t += train_t
+            if it >= args.warmup_batches:
+                num_samples += samples
+                total_t += train_t
+                if enable_torch_profile:
+                    p.step()
 
-            if log_freq != 0 and it % log_freq == 0:
-                logger.info(f"avg training time per iter at ITER: {it}, {total_t/it} s")
+            if log_freq != 0 and it % log_freq == 0 and it > args.warmup_batches: 
+                logger.info(f"avg training time per iter at ITER: {it}, {total_t/ (it - args.warmup_batches)} s")
                 print_memory(f"memory usage at iter {it}")
 
-            lr_scheduler.step()
+            # lr_scheduler.step()
             pbar.update(1)
             if validation_freq and it % validation_freq == 0:
                 epoch_num = epoch + it / len(train_dataloader)
@@ -797,6 +989,8 @@ def _train(
                     epoch_num,
                     args
                 )
+                if isinstance(auroc_result, list):
+                    auroc_result = auroc_result[0]
                 if validation_auroc is not None and auroc_result >= validation_auroc:
                     logger.info("auc = {auroc_result} >= validation_auroc {validation_auroc}, stopped since success")
                     is_success = True
@@ -818,6 +1012,7 @@ def _share_weight_benchmark(
     data_loader,
     args,
 ):
+    import contextlib
     from torch.utils import ThroughputBenchmark
     print_memory("start to init throughput benchmark")
     bench = ThroughputBenchmark(model)
@@ -826,12 +1021,18 @@ def _share_weight_benchmark(
     print_memory("start to add input to throughput benchmark")
     bench.add_input(batch.dense_features, batch.sparse_features)
     print_memory("start to run throughput benchmark")
-    stats = bench.benchmark(
-        num_calling_threads=args.share_weight_instance,
-        num_warmup_iters=100,
-        num_iters=args.limit_val_batches * args.share_weight_instance,
-    )
-    print(stats)
+    ctx = contextlib.suppress()
+    if args.dtype == 'bf16':
+        ctx = torch.cpu.amp.autocast(enabled=True, dtype=torch.bfloat16)
+    if args.dtype == 'fp16':
+        ctx = torch.cpu.amp.autocast(enabled=True, dtype=torch.float16)
+    with ctx:
+        stats = bench.benchmark(
+            num_calling_threads=args.share_weight_instance,
+            num_warmup_iters=200,
+            num_iters=args.limit_val_batches * args.share_weight_instance,
+        )
+        print(stats)
     latency = stats.latency_avg_ms
     batch_size = batch.dense_features.shape[0]
     throughput = (1 / latency) * 1000 * batch_size * args.share_weight_instance
@@ -872,13 +1073,14 @@ def train_val_test(
     results = TrainValTestResults()
 
     if args.inference_only:
-        if args.share_weight_instance > 0:
-            _share_weight_benchmark(
-                model.model,
-                val_dataloader,
-                args
-            )
-            exit()
+        with torch.no_grad():
+            if args.share_weight_instance > 0:
+                _share_weight_benchmark(
+                    model.model,
+                    val_dataloader,
+                    args
+                )
+                exit()
         # Mlperf is using val set to test auroc
         # https://github.com/mlcommons/inference/blob/master/recommendation/dlrm_v2/pytorch/python/multihot_criteo.py#L99-L107
         test_auroc = _evaluate(
@@ -943,49 +1145,13 @@ def train_val_test(
 
     return results
 
-
-def main(argv: List[str]) -> None:
-    """
-    Trains, validates, and tests a Deep Learning Recommendation Model (DLRM)
-    (https://arxiv.org/abs/1906.00091). The DLRM model contains both data parallel
-    components (e.g. multi-layer perceptrons & interaction arch) and model parallel
-    components (e.g. embedding tables). The DLRM model is pipelined so that dataloading,
-    data-parallel to model-parallel comms, and forward/backward are overlapped. Can be
-    run with either a random dataloader or an in-memory Criteo 1 TB click logs dataset
-    (https://ailab.criteo.com/download-criteo-1tb-click-logs-dataset/).
-
-    Args:
-        argv (List[str]): command line args.
-
-    Returns:
-        None.
-    """
-
-    args = parse_args(argv)
-    for name, val in vars(args).items():
-        try:
-            vars(args)[name] = list(map(int, val.split(",")))
-        except (ValueError, AttributeError):
-            pass
-
-    if args.multi_hot_sizes is not None:
-        assert (
-            args.num_embeddings_per_feature is not None
-            and len(args.multi_hot_sizes) == len(args.num_embeddings_per_feature)
-            or args.num_embeddings_per_feature is None
-            and len(args.multi_hot_sizes) == len(DEFAULT_CAT_NAMES)
-        ), "--multi_hot_sizes must be a comma delimited list the same size as the number of embedding tables."
-    assert (
-        args.in_memory_binary_criteo_path is None
-        or args.synthetic_multi_hot_criteo_path is None
-    ), "--in_memory_binary_criteo_path and --synthetic_multi_hot_criteo_path are mutually exclusive CLI arguments."
-    assert (
-        args.multi_hot_sizes is None or args.synthetic_multi_hot_criteo_path is None
-    ), "--multi_hot_sizes is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
-    assert (
-        args.multi_hot_distribution_type is None
-        or args.synthetic_multi_hot_criteo_path is None
-    ), "--multi_hot_distribution_type is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
+def construct_model(args):
+    if args.dtype == "int8" and not args.int8_prepare and not args.calibration and args.jit:
+        assert args.inference_only
+        print(f"loading int8 model from {args.int8_model_dir}")
+        model = torch.jit.load(args.int8_model_dir)
+        print_memory("int8 loading finished")
+        return DLRMTrain(model), None, None
 
     device: torch.device = torch.device("cpu")
     backend = "gloo"
@@ -1028,54 +1194,24 @@ def main(argv: List[str]) -> None:
         )
         for feature_idx, feature_name in enumerate(DEFAULT_CAT_NAMES)
     ]
-    sharded_module_kwargs = {}
-    if args.over_arch_layer_sizes is not None:
-        sharded_module_kwargs["over_arch_layer_sizes"] = args.over_arch_layer_sizes
 
-    print_memory("start init dlrm ")
-    if args.interaction_type == InteractionType.ORIGINAL:
-        dlrm_model = DLRM(
-            embedding_bag_collection=EmbeddingBagCollection(
-                tables=eb_configs, device=torch.device("meta")
-            ),
-            dense_in_features=len(DEFAULT_INT_NAMES),
-            dense_arch_layer_sizes=args.dense_arch_layer_sizes,
-            over_arch_layer_sizes=args.over_arch_layer_sizes,
-            dense_device=device,
-        )
-    elif args.interaction_type == InteractionType.DCN:
-        if args.ipex_optimize:
-            from ipex_optimized_model.model import IPEX_DLRM_DCN
-            dcn_init_fn = IPEX_DLRM_DCN
-        else:
-            dcn_init_fn = DLRM_DCN
-        dlrm_model = dcn_init_fn(
-            embedding_bag_collection=EmbeddingBagCollection(
-                tables=eb_configs, device=torch.device("cpu")
-            ),
-            dense_in_features=len(DEFAULT_INT_NAMES),
-            dense_arch_layer_sizes=args.dense_arch_layer_sizes,
-            over_arch_layer_sizes=args.over_arch_layer_sizes,
-            dcn_num_layers=args.dcn_num_layers,
-            dcn_low_rank_dim=args.dcn_low_rank_dim,
-            dense_device=device,
-        )
-    elif args.interaction_type == InteractionType.PROJECTION:
-        dlrm_model = DLRM_Projection(
-            embedding_bag_collection=EmbeddingBagCollection(
-                tables=eb_configs, device=torch.device("meta")
-            ),
-            dense_in_features=len(DEFAULT_INT_NAMES),
-            dense_arch_layer_sizes=args.dense_arch_layer_sizes,
-            over_arch_layer_sizes=args.over_arch_layer_sizes,
-            interaction_branch1_layer_sizes=args.interaction_branch1_layer_sizes,
-            interaction_branch2_layer_sizes=args.interaction_branch2_layer_sizes,
-            dense_device=device,
-        )
-    else:
-        raise ValueError(
-            "Unknown interaction option set. Should be original, dcn, or projection."
-        )
+    assert args.interaction_type == InteractionType.DCN
+    from ipex_optimized_model.model import IPEX_DLRM_DCN, init_weight
+    dcn_init_fn = IPEX_DLRM_DCN
+    dlrm_model = dcn_init_fn(
+        embedding_bag_collection=EmbeddingBagCollection(
+            tables=eb_configs, device=torch.device("cpu")
+        ),
+        dense_in_features=len(DEFAULT_INT_NAMES),
+        dense_arch_layer_sizes=args.dense_arch_layer_sizes,
+        over_arch_layer_sizes=args.over_arch_layer_sizes,
+        dcn_num_layers=args.dcn_num_layers,
+        dcn_low_rank_dim=args.dcn_low_rank_dim,
+        dense_device=device,
+    )
+    if args.validation_auroc:
+        # init weight to test convergence
+        init_weight(dlrm_model)
 
     train_model = DLRMTrain(dlrm_model)
     if args.test_auroc or args.calibration:
@@ -1084,12 +1220,13 @@ def main(argv: List[str]) -> None:
         load_snapshot(train_model, args.snapshot_dir)
     
     from ipex_optimized_model.model import replace_crossnet, replace_embeddingbag_collection
-    replace_crossnet(train_model.model)
-    if args.inference_only and args.ipex_merged_emb_cat:
-        replace_embeddingbag_collection(train_model.model)
-    else:
-        for emb in train_model.model.sparse_arch.embedding_bag_collection.embedding_bags.values():
-            emb.sparse = True
+    # change the crossnet and embeddingbag-collection for ipex
+    # we do not integrate this part in IPEX_DLRM_DCN because this will change the paramter names
+    # and will impact the loading for checkpoint, so we do this after loading snapshot
+    if args.ipex_optimize:
+        # re-write crossnet with using nn.linear instead of only using torch.linear
+        replace_crossnet(train_model.model)
+    replace_embeddingbag_collection(train_model.model, args)
     # embedding_optimizer = torch.optim.Adagrad if args.adagrad else torch.optim.SGD
     # This will apply the Adagrad optimizer in the backward pass for the embeddings (sparse_arch). This means that
     # the optimizer update will be applied in the backward pass, in this case through a fused op.
@@ -1134,26 +1271,73 @@ def main(argv: List[str]) -> None:
     optimizer,  lr_scheduler = None, None
     if not args.inference_only:
         print_memory("start create optimizer ")
-        if args.adagrad:
-            optimizer = torch.optim.Adagrad(
-                model.parameters(),
-                lr=args.learning_rate,
-                lr_decay=ADAGRAD_LR_DECAY,
-                weight_decay=WEIGHT_DECAY,
-                initial_accumulator_value=ADAGRAD_INIT_ACC,
-                eps=ADAGRAD_EPS,
-            )
-        else:
-            optimizer = torch.optim.SGD(
-                model.parameters(),
-                lr=args.learning_rate,
-                weight_decay=WEIGHT_DECAY,
-            )
+        assert args.adagrad
+        optimizer = torch.optim.Adagrad(
+            model.parameters(),
+            lr=args.learning_rate,
+            lr_decay=ADAGRAD_LR_DECAY,
+            weight_decay=WEIGHT_DECAY,
+            initial_accumulator_value=ADAGRAD_INIT_ACC,
+            eps=ADAGRAD_EPS,
+        )
 
         lr_scheduler = LRPolicyScheduler(
             optimizer, args.lr_warmup_steps, args.lr_decay_start, args.lr_decay_steps
         )
 
+def main(argv: List[str]) -> None:
+    """
+    Trains, validates, and tests a Deep Learning Recommendation Model (DLRM)
+    (https://arxiv.org/abs/1906.00091). The DLRM model contains both data parallel
+    components (e.g. multi-layer perceptrons & interaction arch) and model parallel
+    components (e.g. embedding tables). The DLRM model is pipelined so that dataloading,
+    data-parallel to model-parallel comms, and forward/backward are overlapped. Can be
+    run with either a random dataloader or an in-memory Criteo 1 TB click logs dataset
+    (https://ailab.criteo.com/download-criteo-1tb-click-logs-dataset/).
+
+    Args:
+        argv (List[str]): command line args.
+
+    Returns:
+        None.
+    """
+
+    args = parse_args(argv)
+    if args.ipex_optimize:
+        import intel_extension_for_pytorch as ipex
+        print(f"IPEX version {ipex.__version__}")
+    for name, val in vars(args).items():
+        try:
+            vars(args)[name] = list(map(int, val.split(",")))
+        except (ValueError, AttributeError):
+            pass
+
+    if args.multi_hot_sizes is not None:
+        assert (
+            args.num_embeddings_per_feature is not None
+            and len(args.multi_hot_sizes) == len(args.num_embeddings_per_feature)
+            or args.num_embeddings_per_feature is None
+            and len(args.multi_hot_sizes) == len(DEFAULT_CAT_NAMES)
+        ), "--multi_hot_sizes must be a comma delimited list the same size as the number of embedding tables."
+    assert (
+        args.in_memory_binary_criteo_path is None
+        or args.synthetic_multi_hot_criteo_path is None
+    ), "--in_memory_binary_criteo_path and --synthetic_multi_hot_criteo_path are mutually exclusive CLI arguments."
+    assert (
+        args.multi_hot_sizes is None or args.synthetic_multi_hot_criteo_path is None
+    ), "--multi_hot_sizes is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
+    assert (
+        args.multi_hot_distribution_type is None
+        or args.synthetic_multi_hot_criteo_path is None
+    ), "--multi_hot_distribution_type is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
+
+    backend = "gloo"
+    device = torch.device('cpu')
+
+    pprint(vars(args))
+    import numpy as np
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
     # logger.event(
     #     key=mllog_constants.OPT_NAME,
     #     value=mllog_constants.ADAGRAD if args.adagrad else mllog_constants.SGD,
@@ -1191,6 +1375,40 @@ def main(argv: List[str]) -> None:
     #     value=args.lr_decay_steps,
     # )
 
+    if args.num_embeddings_per_feature is not None:
+        args.num_embeddings = None
+
+    # Sets default limits for random dataloader iterations when left unspecified.
+    if (
+        args.in_memory_binary_criteo_path is None
+        and args.synthetic_multi_hot_criteo_path is None
+    ):
+        for split in ["train", "val", "test"]:
+            attr = f"limit_{split}_batches"
+            if getattr(args, attr) is None:
+                setattr(args, attr, 10)
+
+    sharded_module_kwargs = {}
+    if args.over_arch_layer_sizes is not None:
+        sharded_module_kwargs["over_arch_layer_sizes"] = args.over_arch_layer_sizes
+
+    if args.distributed_training:
+        import oneccl_bindings_for_pytorch
+        def env2int(env_list, default=-1):
+            for e in env_list:
+                val = int(os.environ.get(e, -1))
+                if val >= 0:
+                    return val
+            return default
+        rank = env2int(
+            ["PMI_RANK", "OMPI_COMM_WORLD_RANK", "MV2_COMM_WORLD_RANK", "RANK"], 0
+        )
+        world_size = env2int(os.environ["W_SIZE"])
+        os.environ["WORLD_SIZE"] = os.environ["W_SIZE"]
+        dist.init_process_group("ccl", world_size=world_size, rank=rank)
+
+    print_memory("start init dlrm ")
+    model, optimizer, lr_scheduler = construct_model(args)
     print_memory("start create dataloader ")
 
     # only create 1 multi-hot sample to save memory
@@ -1237,6 +1455,50 @@ def main(argv: List[str]) -> None:
     if args.ipex_optimize:
         print_memory("start ipex_optimize ")
         model.model, optimizer = ipex_optimize(args, model.model, optimizer, test_dataloader)
+
+    if args.distributed_training and dist.get_world_size() > 1:
+        from torch.nn.parallel import DistributedDataParallel as DDP
+        model.model.dense_arch = DDP(model.model.dense_arch, gradient_as_bucket_view=True, broadcast_buffers=False, find_unused_parameters=True)
+        model.model.inter_arch = DDP(model.model.inter_arch, gradient_as_bucket_view=True, broadcast_buffers=False, find_unused_parameters=True)
+        model.model.over_arch = DDP(model.model.over_arch, gradient_as_bucket_view=True, broadcast_buffers=False, find_unused_parameters=True)
+
+    if args.inductor:
+        def randomrize_crossnet_bias(bias):
+            r"""
+            the bias is initialized as all zeros and in inductor will create 1 bias for all 3 bias since they are same:
+            crossnet init:
+                self.bias: torch.nn.ParameterList = torch.nn.ParameterList(
+                    [
+                        torch.nn.Parameter(torch.nn.init.zeros_(torch.empty(in_features)))
+                        for i in range(self._num_layers)
+                    ]
+                )
+            inductor process:
+                def allocate(name):
+                    for constant_name, value in self.constants.items():
+                        if (
+                            not data.is_mkldnn
+                            and data.size() == value.size()
+                            and data.stride() == value.stride()
+                            and data.dtype == value.dtype
+                            and data.device == value.device
+                            and torch.eq(data, value).all()
+                        ):
+                            return constant_name
+            But in real world, they should be different (load from pre-trained weight), so we randomrize the bias here
+            """
+            with torch.no_grad():
+                for b in bias:
+                    b.data = torch.randn_like(b)
+        randomrize_crossnet_bias(model.model.inter_arch.crossnet.bias)
+        print_memory("start StockPT ")
+        if args.dtype == 'bf16':
+            model.model.sparse_arch = model.model.sparse_arch.bfloat16()
+            # model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.bfloat16()
+        if args.dtype == 'fp16':
+            model.model.sparse_arch = model.model.sparse_arch.half()
+            # model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.half()
+        model.model, optimizer = stock_pt_optimize(args, model.model, optimizer, test_dataloader)
 
     print_memory("start running model")
     train_val_test(

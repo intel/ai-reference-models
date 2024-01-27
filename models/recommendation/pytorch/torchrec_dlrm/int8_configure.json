@@ -19,9 +19,9 @@
                 "input_tensor_infos": [
                     {
                         "id": 7,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             313710.8125
                         ],
@@ -31,9 +31,9 @@
                     },
                     {
                         "id": 8,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             306.2494812011719
                         ],
@@ -43,9 +43,9 @@
                     },
                     {
                         "id": 9,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             135.24298095703125
                         ],
@@ -55,9 +55,9 @@
                     },
                     {
                         "id": 10,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             58.20223617553711
                         ],
@@ -67,9 +67,9 @@
                     },
                     {
                         "id": 11,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             158.9283905029297
                         ],
@@ -79,9 +79,9 @@
                     },
                     {
                         "id": 12,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             0.015685785561800003
                         ],
@@ -91,9 +91,9 @@
                     },
                     {
                         "id": 13,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             55.723880767822266
                         ],
@@ -103,9 +103,9 @@
                     },
                     {
                         "id": 14,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             12.078180313110352
                         ],
@@ -115,9 +115,9 @@
                     },
                     {
                         "id": 15,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             0.31440040469169617
                         ],
@@ -127,9 +127,9 @@
                     },
                     {
                         "id": 16,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             313715.65625
                         ],
@@ -139,9 +139,9 @@
                     },
                     {
                         "id": 17,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             24061.390625
                         ],
@@ -151,9 +151,9 @@
                     },
                     {
                         "id": 18,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             3178.567626953125
                         ],
@@ -163,9 +163,9 @@
                     },
                     {
                         "id": 19,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             0.07058604061603546
                         ],
@@ -175,9 +175,9 @@
                     },
                     {
                         "id": 20,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             17.317106246948242
                         ],
@@ -187,9 +187,9 @@
                     },
                     {
                         "id": 21,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             93.62061309814453
                         ],
@@ -199,9 +199,9 @@
                     },
                     {
                         "id": 22,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1.2078055143356323
                         ],
@@ -211,9 +211,9 @@
                     },
                     {
                         "id": 23,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             0.023528680205345154
                         ],
@@ -223,9 +223,9 @@
                     },
                     {
                         "id": 24,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             7.113068580627441
                         ],
@@ -235,9 +235,9 @@
                     },
                     {
                         "id": 25,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             0.10195761173963547
                         ],
@@ -247,9 +247,9 @@
                     },
                     {
                         "id": 26,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             313715.28125
                         ],
@@ -259,9 +259,9 @@
                     },
                     {
                         "id": 27,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             313715.65625
                         ],
@@ -271,9 +271,9 @@
                     },
                     {
                         "id": 28,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             313715.03125
                         ],
@@ -283,9 +283,9 @@
                     },
                     {
                         "id": 29,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             4628.4443359375
                         ],
@@ -295,9 +295,9 @@
                     },
                     {
                         "id": 30,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             101.72232055664062
                         ],
@@ -307,9 +307,9 @@
                     },
                     {
                         "id": 31,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             0.45003268122673035
                         ],
@@ -319,9 +319,9 @@
                     },
                     {
                         "id": 32,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             0.26678285002708435
                         ],
@@ -331,9 +331,9 @@
                     },
                     {
                         "id": 33,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             3011.6708984375
                         ],
@@ -343,9 +343,9 @@
                     },
                     {
                         "id": 34,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             2007.7806396484375
                         ],
@@ -355,9 +355,9 @@
                     },
                     {
                         "id": 35,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -367,9 +367,9 @@
                     },
                     {
                         "id": 36,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             2007.7806396484375
                         ],
@@ -379,9 +379,9 @@
                     },
                     {
                         "id": 37,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             6023.341796875
                         ],
@@ -391,9 +391,9 @@
                     },
                     {
                         "id": 38,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -403,9 +403,9 @@
                     },
                     {
                         "id": 39,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -415,9 +415,9 @@
                     },
                     {
                         "id": 40,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -427,9 +427,9 @@
                     },
                     {
                         "id": 41,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -439,9 +439,9 @@
                     },
                     {
                         "id": 42,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             7027.232421875
                         ],
@@ -451,9 +451,9 @@
                     },
                     {
                         "id": 43,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             3011.6708984375
                         ],
@@ -463,9 +463,9 @@
                     },
                     {
                         "id": 44,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             8031.12255859375
                         ],
@@ -475,9 +475,9 @@
                     },
                     {
                         "id": 45,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -487,9 +487,9 @@
                     },
                     {
                         "id": 46,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             6023.341796875
                         ],
@@ -499,9 +499,9 @@
                     },
                     {
                         "id": 47,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             9035.0126953125
                         ],
@@ -511,9 +511,9 @@
                     },
                     {
                         "id": 48,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             5019.45166015625
                         ],
@@ -523,9 +523,9 @@
                     },
                     {
                         "id": 49,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -535,9 +535,9 @@
                     },
                     {
                         "id": 50,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -547,9 +547,9 @@
                     },
                     {
                         "id": 51,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -559,9 +559,9 @@
                     },
                     {
                         "id": 52,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             12046.68359375
                         ],
@@ -571,9 +571,9 @@
                     },
                     {
                         "id": 53,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             100389.03125
                         ],
@@ -583,9 +583,9 @@
                     },
                     {
                         "id": 54,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             27105.037109375
                         ],
@@ -595,9 +595,9 @@
                     },
                     {
                         "id": 55,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             10038.9033203125
                         ],
@@ -607,9 +607,9 @@
                     },
                     {
                         "id": 56,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             3011.6708984375
                         ],
@@ -619,9 +619,9 @@
                     },
                     {
                         "id": 57,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -631,9 +631,9 @@
                     },
                     {
                         "id": 58,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
                             1003.8903198242188
                         ],
@@ -659,7 +659,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0007458091131411493
+                            0.0008381635998375714
                         ],
                         "zero_point": [
                             0
@@ -849,7 +849,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0007534330943599343
+                            0.0008294559083878994
                         ],
                         "zero_point": [
                             0
@@ -2091,7 +2091,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x1553761a7640>",
+                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
                 "op_type_is_module": false,
                 "fqn": "dense_arch.model._mlp.0",
                 "input_tensor_infos": [
@@ -2734,7 +2734,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x1553761a7640>",
+                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
                 "op_type_is_module": false,
                 "fqn": "dense_arch.model._mlp.1",
                 "input_tensor_infos": [
@@ -3121,7 +3121,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x1553761a7640>",
+                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
                 "op_type_is_module": false,
                 "fqn": "dense_arch.model._mlp.2",
                 "input_tensor_infos": [
@@ -3189,11 +3189,22 @@
         ]
     },
     "inter_arch": {
+        "q_op_infos": {},
+        "nonq_op_infos": {},
+        "layer_output_infos": [
+            {
+                "id": 71,
+                "orig_dtype": "torch.float32",
+                "inf_dtype": "torch.qint8"
+            }
+        ]
+    },
+    "inter_arch:crossnet": {
         "q_op_infos": {
             "0": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
-                "fqn": "inter_arch.V_linears.0",
+                "fqn": "inter_arch.crossnet.V_linears.0",
                 "input_tensor_infos": [
                     {
                         "id": 59,
@@ -4278,7 +4289,7 @@
             "1": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
-                "fqn": "inter_arch.W_linears.0",
+                "fqn": "inter_arch.crossnet.W_linears.0",
                 "input_tensor_infos": [
                     {
                         "id": 60,
@@ -11243,9 +11254,9 @@
                 }
             },
             "2": {
-                "op_type": "<method 'add' of 'torch._C._TensorBase' objects>",
+                "op_type": "<method 'add' of 'torch._C.TensorBase' objects>",
                 "op_type_is_module": false,
-                "fqn": "inter_arch",
+                "fqn": "inter_arch.crossnet",
                 "input_tensor_infos": [
                     {
                         "id": 62,
@@ -11309,7 +11320,7 @@
             "3": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
-                "fqn": "inter_arch.V_linears.1",
+                "fqn": "inter_arch.crossnet.V_linears.1",
                 "input_tensor_infos": [
                     {
                         "id": 63,
@@ -12394,7 +12405,7 @@
             "4": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
-                "fqn": "inter_arch.W_linears.1",
+                "fqn": "inter_arch.crossnet.W_linears.1",
                 "input_tensor_infos": [
                     {
                         "id": 64,
@@ -19359,9 +19370,9 @@
                 }
             },
             "5": {
-                "op_type": "<method 'add' of 'torch._C._TensorBase' objects>",
+                "op_type": "<method 'add' of 'torch._C.TensorBase' objects>",
                 "op_type_is_module": false,
-                "fqn": "inter_arch",
+                "fqn": "inter_arch.crossnet",
                 "input_tensor_infos": [
                     {
                         "id": 66,
@@ -19425,7 +19436,7 @@
             "6": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
-                "fqn": "inter_arch.V_linears.2",
+                "fqn": "inter_arch.crossnet.V_linears.2",
                 "input_tensor_infos": [
                     {
                         "id": 67,
@@ -20510,7 +20521,7 @@
             "7": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
-                "fqn": "inter_arch.W_linears.2",
+                "fqn": "inter_arch.crossnet.W_linears.2",
                 "input_tensor_infos": [
                     {
                         "id": 68,
@@ -27475,9 +27486,9 @@
                 }
             },
             "8": {
-                "op_type": "<method 'add' of 'torch._C._TensorBase' objects>",
+                "op_type": "<method 'add' of 'torch._C.TensorBase' objects>",
                 "op_type_is_module": false,
-                "fqn": "inter_arch",
+                "fqn": "inter_arch.crossnet",
                 "input_tensor_infos": [
                     {
                         "id": 70,
@@ -27535,8 +27546,8 @@
         },
         "nonq_op_infos": {
             "0": {
-                "op_type": "<method 'mul' of 'torch._C._TensorBase' objects>",
-                "fqn": "inter_arch",
+                "op_type": "<method 'mul' of 'torch._C.TensorBase' objects>",
+                "fqn": "inter_arch.crossnet",
                 "input_tensor_infos": [
                     {
                         "id": 59,
@@ -27558,8 +27569,8 @@
                 ]
             },
             "1": {
-                "op_type": "<method 'mul' of 'torch._C._TensorBase' objects>",
-                "fqn": "inter_arch",
+                "op_type": "<method 'mul' of 'torch._C.TensorBase' objects>",
+                "fqn": "inter_arch.crossnet",
                 "input_tensor_infos": [
                     {
                         "id": 59,
@@ -27581,8 +27592,8 @@
                 ]
             },
             "2": {
-                "op_type": "<method 'mul' of 'torch._C._TensorBase' objects>",
-                "fqn": "inter_arch",
+                "op_type": "<method 'mul' of 'torch._C.TensorBase' objects>",
+                "fqn": "inter_arch.crossnet",
                 "input_tensor_infos": [
                     {
                         "id": 59,
@@ -27612,12 +27623,12 @@
             }
         ]
     },
-    "inter_arch:V_linears": {
+    "inter_arch:crossnet:V_linears": {
         "q_op_infos": {},
         "nonq_op_infos": {},
         "layer_output_infos": []
     },
-    "inter_arch:W_linears": {
+    "inter_arch:crossnet:W_linears": {
         "q_op_infos": {},
         "nonq_op_infos": {},
         "layer_output_infos": []
@@ -29836,7 +29847,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x1553761a7640>",
+                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
                 "op_type_is_module": false,
                 "fqn": "over_arch.model.0._mlp.0",
                 "input_tensor_infos": [
@@ -32015,7 +32026,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x1553761a7640>",
+                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
                 "op_type_is_module": false,
                 "fqn": "over_arch.model.0._mlp.1",
                 "input_tensor_infos": [
@@ -33170,7 +33181,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x1553761a7640>",
+                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
                 "op_type_is_module": false,
                 "fqn": "over_arch.model.0._mlp.2",
                 "input_tensor_infos": [
@@ -33813,7 +33824,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x1553761a7640>",
+                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
                 "op_type_is_module": false,
                 "fqn": "over_arch.model.0._mlp.3",
                 "input_tensor_infos": [

@@ -47,13 +47,10 @@ The folder that contains the `val` directory should be set as the
 > Note: The `avx-int8` and `avx-fp32` precisions run the same scripts as `int8` and `fp32`, except that the
 > `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
 > otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
-
-Follow the instructions to setup your bare metal environment on either Linux or Windows systems. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
-Ensure that you have a clone of the [Model Zoo Github repository](https://github.com/IntelAI/models).
-```
-git clone https://github.com/IntelAI/models.git
-```
+* Set ENV to use AMX:
+  ```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  ```
 
 ## Run on Linux
 
@@ -71,12 +68,15 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
   IOMP should be installed in your conda env. Set the following environment variables.
   ```
+  pip install packaging intel-openmp
   export LD_PRELOAD=<path to the intel-openmp directory>/lib/libiomp5.so:$LD_PRELOAD
   ```
 
-* Set ENV to use AMX if you are using SPR
+* Follow the instructions to setup your bare metal environment on either Linux or Windows systems. Once all the setup is done,
+  the Intel® AI Reference Models can be used to run a [quickstart script](#quick-start-scripts).
+  Ensure that you have a clone of the [Intel® AI Reference Models Github repository](https://github.com/IntelAI/models).
   ```
-  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  git clone https://github.com/IntelAI/models.git
   ```
 
 * Run the model:
@@ -84,12 +84,19 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   cd models
 
   # Set environment variables
-  export DATASET_DIR=<path_to_Imagenet_Dataset>
   export OUTPUT_DIR=<path to the directory where log files will be written>
-  export PRECISION=<precision to run>
+  export PRECISION=<select precision to run: fp32, avx-fp32, int8, avx-int8, bf32 or bf16>
+
+  # Optional environment variable:
+  export BATCH_SIZE=<set a value for batch size else it will run with the default value>
 
   # Run a quickstart script 
-  bash quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/inference_realtime.sh
+  ./quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/<quickstart_script.sh>
+
+  # Set `DATASET_DIR` only for running the `accuracy.sh` script:
+  set DATASET_DIR=<path to the Imagenet Dataset>
+
+  ./quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/accuracy.sh
   ```
 
 ## Run on Windows
@@ -99,13 +106,20 @@ Using Windows CMD.exe, run:
 ```
 cd models
 
-# Env vars
-set DATASET_DIR=<path to the Imagenet Dataset>
-set OUTPUT_DIR=<path to the directory where log files will be written>
-set PRECISION=<precision to run>
+# Set environment variables
+export OUTPUT_DIR=<path to the directory where log files will be written>
+export PRECISION=<select precision to run: fp32, avx-fp32, int8, avx-int8, bf32 or bf16>
 
-#Run a quickstart script for fp32 precision(FP32 inference_realtime or inference_throughput or accuracy)
-bash quickstart\image_recognition\pytorch\resnext-32x16d\inference\cpu\inference_realtime.sh
+# Optional environment variable:
+export BATCH_SIZE=<set a value for batch size else it will run with the default value>
+
+# Run a quickstart script 
+bash quickstart\image_recognition\pytorch\resnext-32x16d\inference\cpu\<quickstart_script.sh>
+
+# Set `DATASET_DIR` only for running the `accuracy.sh` script:
+set DATASET_DIR=<path to the Imagenet Dataset>
+
+bash quickstart\image_recognition\pytorch\resnext-32x16d\inference\cpu\accuracy.sh
 ```
 
 <!--- 80. License -->

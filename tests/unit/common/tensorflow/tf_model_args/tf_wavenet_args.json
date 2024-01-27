@@ -1,6 +1,0 @@
-[
-  { "_comment": "FP32 benchmark command",
-    "input": "run_tf_benchmark.py --framework tensorflow --use-case text_to_speech --precision fp32 --mode inference --model-name wavenet --num-cores 1 --checkpoint /checkpoints --intelai-models . --model-source-dir . --socket-id 0 --verbose --checkpoint_name=model.ckpt-99 --sample=8510",
-    "output": "numactl --physcpubind=0-0 --membind=0 python generate.py /checkpoints/model.ckpt-99 --num_inter_threads=1 --num_intra_threads=1 --sample=8510",
-    "cpuset": "0-111"}
-]

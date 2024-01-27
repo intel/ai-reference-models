@@ -22,7 +22,6 @@ if [ ! -e "${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train
   exit 1
 fi
 
-
 dir=$(pwd)
 cd ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu
 
@@ -30,15 +29,17 @@ pip install -r requirements.txt
 pip install unidecode inflect
 pip install --upgrade pip
 pip install librosa sox
-yum install -y libsndfile
+pip install librosa==0.9.1 protobuf==3.20.3 numpy==1.23.4
 
 # warp-transducer:
 cd ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu
 git clone https://github.com/HawkAaron/warp-transducer
 cd warp-transducer
 git checkout master
-git apply ../enable_warprnnt_c++17.diff
-mkdir build; cd build
+git apply ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu/enable_warprnnt_c++17.diff
+rm -rf build
+mkdir build 
+cd build
 cmake .. 
 make 
 cd ../pytorch_binding

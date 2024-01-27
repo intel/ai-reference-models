@@ -200,6 +200,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # if we find an optimized model, then we will use that path
         if os.path.isdir(optimized_model_dir):
             intelai_models = optimized_model_dir
+
         return intelai_models
 
     def get_env_vars(self, benchmark_scripts, use_case, intelai_models,

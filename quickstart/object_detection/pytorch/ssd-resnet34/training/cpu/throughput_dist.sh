@@ -72,7 +72,7 @@ export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
 PRECISION=$1
-BATCH_SIZE=224
+BATCH_SIZE=${BATCH_SIZE:-224}
 
 rm -rf ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_throughput_dist*
 

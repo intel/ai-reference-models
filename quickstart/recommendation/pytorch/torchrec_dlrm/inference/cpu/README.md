@@ -39,6 +39,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
   ```
 
+* [optional] Compile model with PyTorch Inductor backend
+  ```shell
+  export TORCH_INDUCTOR=1
+  ```
+
 ## Datasets
 The dataset can be downloaded and preprocessed by following https://github.com/mlcommons/training/tree/master/recommendation_v2/torchrec_dlrm#create-the-synthetic-multi-hot-dataset.
 We also provided a preprocessed scripts based on the instruction above. `preprocess_raw_dataset.sh`.

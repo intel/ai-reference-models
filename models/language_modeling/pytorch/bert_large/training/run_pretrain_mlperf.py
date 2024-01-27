@@ -16,7 +16,6 @@
 """
 Fine-tuning the library models for masked language modeling (BERT, ALBERT, RoBERTa...)
 on a text file or a dataset without using HuggingFace Trainer.
-
 Here is the full list of checkpoints on the hub that can be fine-tuned by this script:
 https://huggingface.co/models?filter=masked-lm
 """
@@ -86,7 +85,6 @@ try:
 
 except ImportError as e:
     oneccl_bindings_for_pytorch = False
-import intel_extension_for_pytorch as ipex
 
 
 logger = logging.getLogger(__name__)
@@ -396,6 +394,8 @@ def parse_args():
                         help="Total batch size for training.")
 
     parser.add_argument("--profile", action="store_true", help="Whether to enable profiling")
+    parser.add_argument("--ipex", action="store_true", default=False)
+    parser.add_argument("--inductor", action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -589,6 +589,9 @@ def calc_accuracy(outputs, masked_lm_labels, next_sentence_label, args):
 
 def main():
     args = parse_args()
+    if args.ipex:
+        print('Using ipex')
+        import intel_extension_for_pytorch as ipex
     status = 'aborted'  # later set to 'success' if termination criteria met
     device, args = setup_training(args)
     total_batch_size = global_batch_size(args) 
@@ -606,13 +609,21 @@ def main():
     model, optimizer, lr_scheduler, checkpoint, global_step = prepare_model_and_optimizer(args, device)
     model.train()
     if args.bf32:
-        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
-        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, auto_kernel_selection=True)
+        if args.ipex:
+            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+            model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, auto_kernel_selection=True)
     elif args.fp16:
-        scaler = torch.cpu.amp.GradScaler()
-        model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, weights_prepack=True, fuse_update_step=False)
+        if args.ipex:
+            scaler = torch.cpu.amp.GradScaler()
+            model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, weights_prepack=True, fuse_update_step=False)
     else:
-        model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float32)
+        if args.ipex:
+            model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float32)
+    with torch.cpu.amp.autocast(enabled=args.bf16):
+        if args.inductor:
+            print('[Info] Running training steps torch.compile() with default backend')
+            model = torch.compile(model)
+
     worker_seeds, shuffling_seeds = utils.setup_seeds(args.seed, args.num_epochs_to_generate_seeds_for, device)
     worker_seed = worker_seeds[args.local_rank]
 

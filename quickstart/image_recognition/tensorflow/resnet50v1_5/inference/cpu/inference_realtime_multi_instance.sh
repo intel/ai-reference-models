@@ -109,6 +109,12 @@ echo "WARMUP_STEPS: $WARMUP_STEPS"
 export TF_ENABLE_MKL_NATIVE_FORMAT=1 
 export TF_ONEDNN_ENABLE_FAST_CONV=1 
 
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  echo "TF_THREAD_PINNING_MODE is not set. Default configuration of thread pinning and spinning settings"
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+  echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+fi
+
 # Remove old log file
 rm -rf  ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log
 
@@ -124,6 +130,8 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
+  --num-cores=${CORES_PER_INSTANCE} \
+  --num-intra-threads ${CORES_PER_INSTANCE} --num-inter-threads 1 \
   --data-num-intra-threads ${CORES_PER_INSTANCE} --data-num-inter-threads 1 \
   $@ \
   -- \

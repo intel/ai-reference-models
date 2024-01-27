@@ -1,0 +1,138 @@
+diff --git a/keras_cv/models/object_detection/predict_utils.py b/keras_cv/models/object_detection/predict_utils.py
+index 8eb6e10..48fb78d 100644
+--- a/keras_cv/models/object_detection/predict_utils.py
++++ b/keras_cv/models/object_detection/predict_utils.py
+@@ -15,13 +15,13 @@
+ import tensorflow as tf
+ 
+ try:
+-    from keras.src.engine.training import _minimum_control_deps
+-    from keras.src.engine.training import reduce_per_replica
+-    from keras.src.utils import tf_utils
++    from tf_keras.src.engine.training import _minimum_control_deps
++    from tf_keras.src.engine.training import reduce_per_replica
++    from tf_keras.src.utils import tf_utils
+ except ImportError:
+-    from keras.engine.training import _minimum_control_deps
+-    from keras.engine.training import reduce_per_replica
+-    from keras.utils import tf_utils
++    from tf_keras.engine.training import _minimum_control_deps
++    from tf_keras.engine.training import reduce_per_replica
++    from tf_keras.utils import tf_utils
+ 
+ 
+ def make_predict_function(model, force=False):
+diff --git a/keras_cv/models/stable_diffusion/diffusion_model.py b/keras_cv/models/stable_diffusion/diffusion_model.py
+index 25b5241..599f136 100644
+--- a/keras_cv/models/stable_diffusion/diffusion_model.py
++++ b/keras_cv/models/stable_diffusion/diffusion_model.py
+@@ -303,6 +303,22 @@ class CrossAttention(keras.layers.Layer):
+         self.head_size = head_size
+         self.out_proj = keras.layers.Dense(num_heads * head_size)
+ 
++
++    def naive_scaled_dot_product_attention(self, query, key, value):
++        i_dtype = query.dtype
++        atten_scores = tf.matmul(query, key, transpose_b=True)
++        atten_scores = tf.multiply(atten_scores, tf.cast(self.scale, i_dtype))
++        atten_probs = tf.nn.softmax(atten_scores)
++        # `atten_output` = [B, N, F, H]
++        atten_output = tf.matmul(atten_probs, value)
++        # `atten_output` = [B, F, N, H]
++        atten_output  = tf.transpose(a=atten_output, perm=[0, 2, 1, 3])
++        return atten_output
++
++
++    def sdp(self, q, k, v):
++        return self.naive_scaled_dot_product_attention(q, k, v)
++
+     def call(self, inputs):
+         inputs, context = inputs
+         context = inputs if context is None else context
+@@ -316,17 +332,10 @@ class CrossAttention(keras.layers.Layer):
+         )
+ 
+         q = tf.transpose(q, (0, 2, 1, 3))  # (bs, num_heads, time, head_size)
+-        k = tf.transpose(k, (0, 2, 3, 1))  # (bs, num_heads, head_size, time)
++        k = tf.transpose(k, (0, 2, 1, 3))  # (bs, num_heads, head_size, time)
+         v = tf.transpose(v, (0, 2, 1, 3))  # (bs, num_heads, time, head_size)
+ 
+-        score = td_dot(q, k) * self.scale
+-        weights = keras.activations.softmax(
+-            score
+-        )  # (bs, num_heads, time, time)
+-        attn = td_dot(weights, v)
+-        attn = tf.transpose(
+-            attn, (0, 2, 1, 3)
+-        )  # (bs, time, num_heads, head_size)
++        attn = self.sdp(q, k, v)
+         out = tf.reshape(
+             attn, (-1, inputs.shape[1], self.num_heads * self.head_size)
+         )
+@@ -352,10 +361,7 @@ class GEGLU(keras.layers.Layer):
+     def call(self, inputs):
+         x = self.dense(inputs)
+         x, gate = x[..., : self.output_dim], x[..., self.output_dim :]
+-        tanh_res = keras.activations.tanh(
+-            gate * 0.7978845608 * (1 + 0.044715 * (gate**2))
+-        )
+-        return x * 0.5 * gate * (1 + tanh_res)
++        return x * tf.keras.activations.gelu(gate, approximate=True)
+ 
+ 
+ def td_dot(a, b):
+diff --git a/keras_cv/models/stable_diffusion/stable_diffusion.py b/keras_cv/models/stable_diffusion/stable_diffusion.py
+index 5ef7471..bafe9c5 100644
+--- a/keras_cv/models/stable_diffusion/stable_diffusion.py
++++ b/keras_cv/models/stable_diffusion/stable_diffusion.py
+@@ -207,18 +207,21 @@ class StableDiffusionBase:
+ 
+         # Iterative reverse diffusion stage
+         timesteps = tf.range(1, 1000, 1000 // num_steps)
++        t_embs_lst = self._get_timesteps_embedding(timesteps, batch_size)
++        contexts = tf.concat((unconditional_context, context), 0)
++
+         alphas, alphas_prev = self._get_initial_alphas(timesteps)
+         progbar = keras.utils.Progbar(len(timesteps))
+         iteration = 0
+         for index, timestep in list(enumerate(timesteps))[::-1]:
+             latent_prev = latent  # Set aside the previous latent vector
+-            t_emb = self._get_timestep_embedding(timestep, batch_size)
+-            unconditional_latent = self.diffusion_model.predict_on_batch(
+-                [latent, t_emb, unconditional_context]
+-            )
+-            latent = self.diffusion_model.predict_on_batch(
+-                [latent, t_emb, context]
+-            )
++            latents = tf.concat((latent, latent), 0)
++            t_embs = t_embs_lst[index]
++
++            pred_latent = self.diffusion_model.predict_on_batch(
++                [latents, t_embs, contexts])
++            unconditional_latent, latent = tf.split(pred_latent, 2)
++
+             latent = unconditional_latent + unconditional_guidance_scale * (
+                 latent - unconditional_latent
+             )
+@@ -303,6 +306,21 @@ class StableDiffusionBase:
+         if self._tokenizer is None:
+             self._tokenizer = SimpleTokenizer()
+         return self._tokenizer
++    def _get_timesteps_embedding(
++        self, timesteps, batch_size, dim=320, max_period=10000
++    ):
++        half = dim // 2
++        freqs = tf.math.exp(
++            -math.log(max_period) * tf.range(0, half, dtype=tf.float32) / half
++        )
++        # timesteps shape: [num_steps]
++        args = tf.cast(tf.reshape(timesteps, [-1, 1]), dtype=tf.float32) * freqs
++        # embeddings shape:(steps, half)
++        embeddings = tf.concat([tf.math.cos(args), tf.math.sin(args)], axis=1)
++        embeddings = tf.expand_dims(embeddings, axis=1)
++
++        #  2 is to concatenate the embedding of two forward pass
++        return tf.repeat(embeddings, batch_size * 2, axis=1)
+ 
+     def _get_timestep_embedding(
+         self, timestep, batch_size, dim=320, max_period=10000
