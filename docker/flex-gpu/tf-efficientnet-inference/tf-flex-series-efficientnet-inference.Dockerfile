@@ -19,20 +19,31 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG BASE_TAG="xpu"
+<<<<<<<< HEAD:docker/max-gpu/pytorch-resnet50v1-5-inference/pytorch-max-series-resnet50v1-5-inference.Dockerfile
+ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG BASE_TAG="xpu-max"
 
 FROM ${BASE_IMAGE}:${BASE_TAG}
 
-WORKDIR /workspace/tf-flex-series-efficientnet-inference
+WORKDIR /workspace/pytorch-max-series-resnet50v1-5-inference
+COPY quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README_Max_Series.md README.md
+COPY models/image_recognition/pytorch/resnet50v1_5/inference/gpu models/image_recognition/pytorch/resnet50v1_5/inference/gpu
+COPY quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/inference_block_format.sh quickstart/inference_block_format.sh
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
+COPY LICENSE licenses/LICENSE
+COPY third_party licenses/third_party
+========
+ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
+ARG TF_BASE_TAG="xpu"
 
-RUN pip install pillow 
+FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
-COPY models/image_recognition/tensorflow/efficientnet/inference/gpu/predict.py models/image_recognition/tensorflow/efficientnet/inference/gpu/predict.py 
-COPY quickstart/image_recognition/tensorflow/efficientnet/inference/gpu/batch_inference.sh quickstart/batch_inference.sh
+WORKDIR /workspace/tf-flex-series-efficientnet-inference/models
+
+RUN pip install pillow
+
+COPY models_v2/tensorflow/efficientnet/inference/gpu . 
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
+>>>>>>>> r3.1:docker/flex-gpu/tf-efficientnet-inference/tf-flex-series-efficientnet-inference.Dockerfile

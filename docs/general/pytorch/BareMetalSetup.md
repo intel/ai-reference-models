@@ -6,11 +6,23 @@ Prepare the environment, you may create a Python virtual enviromment `virtualenv
     # Install torch,torchvision
     python -m pip install torch torchvision
 
-## The following components are required by some PyTorch workloads. Only build them if indicated in the documentation for that workload.
+## Install generic dependencies
+Make sure the following components are installed in your environment :
 
     # Requirements:
     gcc >= 5
     Cmake >= 3.19.6
+    build-essential 
+    ca-certificates 
+    git 
+    wget 
+    make 
+    cmake 
+    autoconf 
+    bzip2 
+    tar
+    numactl 
+    libegl1-mesa 
 
 ### Install jemalloc
     Install jemalloc either using conda or from source
@@ -40,7 +52,8 @@ Prepare the environment, you may create a Python virtual enviromment `virtualenv
 ### Build torch-ccl 
     cd ..
     git clone https://github.com/intel-innersource/frameworks.ai.pytorch.torch-ccl.git
-    cd frameworks.ai.pytorch.torch-ccl && git checkout public_master
+    # torch-ccl branch refer to https://github.com/intel-innersource/frameworks.ai.pytorch.ipex-cpu/blob/cpu-device/dependency_version.yml
+    cd frameworks.ai.pytorch.torch-ccl && git checkout $target_branch
     git submodule sync 
     git submodule update --init --recursive
     python setup.py install 

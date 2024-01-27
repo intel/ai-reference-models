@@ -1,0 +1,26 @@
+inference-int8:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/resnet50v1_5-inference/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "int8"
+    DATASET_DIR: "/tf_dataset/dataset/TF_Imagenet_FullData/"
+inference-float32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/resnet50v1_5-inference/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "float32"
+    DATASET_DIR: "/tf_dataset/dataset/TF_Imagenet_FullData/"  
+inference-bfloat16:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/resnet50v1_5-inference/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "bfloat16"
+    DATASET_DIR: "/tf_dataset/dataset/TF_Imagenet_FullData/"  
+inference-float16:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/resnet50v1_5-inference/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "float16"
+    DATASET_DIR: "/tf_dataset/dataset/TF_Imagenet_FullData/"
+inference-tensorfloat32:
+  cmd: bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/resnet50v1_5-inference/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "tensorfloat32"
+    DATASET_DIR: "/tf_dataset/dataset/TF_Imagenet_FullData/"
+

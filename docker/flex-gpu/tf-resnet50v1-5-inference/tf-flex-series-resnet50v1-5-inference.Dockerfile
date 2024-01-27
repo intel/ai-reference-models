@@ -19,12 +19,12 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG BASE_TAG="gpu"
+ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
+ARG TF_BASE_TAG="xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
-WORKDIR /workspace/tf-flex-series-resnet50v1-5-inference
+WORKDIR /workspace/tf-flex-series-resnet50v1-5-inference/models
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
@@ -34,22 +34,7 @@ ARG MODEL_URL
 RUN mkdir -p pretrained_models && \ 
     wget ${MODEL_URL} -O pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
     
-    
-COPY benchmarks/common benchmarks/common
-COPY benchmarks/image_recognition/__init__.py benchmarks/image_recognition/__init__.py
-COPY benchmarks/image_recognition/tensorflow/__init__.py benchmarks/image_recognition/tensorflow/__init__.py
-COPY benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
-COPY benchmarks/image_recognition/tensorflow/resnet50v1_5/inference benchmarks/image_recognition/tensorflow/resnet50v1_5/inference
-COPY benchmarks/launch_benchmark.py benchmarks/launch_benchmark.py
-COPY models/common models/common
-COPY models/image_recognition/tensorflow/resnet50v1_5 models/image_recognition/tensorflow/resnet50v1_5
-COPY quickstart/common quickstart/common
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/README_Flex_series.md README.md
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/batch_inference.sh quickstart/batch_inference.sh
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/online_inference.sh  quickstart/online_inference.sh
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/accuracy.sh quickstart/accuracy.sh
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/flex_multi_card_batch_inference.sh quickstart/flex_multi_card_batch_inference.sh
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/flex_multi_card_online_inference.sh quickstart/flex_multi_card_online_inference.sh
+COPY models_v2/tensorflow/resnet50v1_5/inference/gpu .
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

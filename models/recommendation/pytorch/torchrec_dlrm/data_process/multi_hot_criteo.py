@@ -331,6 +331,6 @@ class MultiHotCriteoIterDataPipe(IterableDataset):
         if sample_list is None:
             sample_list = list(range(self.batch_size))
         dense = self.dense_arrs[0][sample_list, :]
-        sparse = [arr[sample_list, :] for arr in self.sparse_arrs[0]]
+        sparse = [arr[sample_list, :] % self.hashes[i] for i, arr in enumerate(self.sparse_arrs[0])]
         labels = self.labels_arrs[0][sample_list, :]
         return self._np_arrays_to_batch(dense, sparse, labels)

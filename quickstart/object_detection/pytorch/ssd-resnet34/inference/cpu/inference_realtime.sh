@@ -38,26 +38,31 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-if [[ "$1" == *"avx"* ]]; then
+if [ -z "${PRECISION}" ]; then
+  echo "PRECISION is not set"
+  exit 1
+fi
+
+if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
 ARGS=""
-if [[ "$1" == "int8" || "$1" == "avx-int8" ]]; then
+if [[ "$PRECISION" == "int8" || "$PRECISION" == "avx-int8" ]]; then
     ARGS="$ARGS --int8"
     ARGS="$ARGS --seed 1 --threshold 0.2 --configure ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/pytorch_default_recipe_ssd_configure.json"
     export DNNL_GRAPH_CONSTANT_CACHE=1
     echo "### running int8 datatype"
-elif [[ "$1" == "bf16" ]]; then
+elif [[ "$PRECISION" == "bf16" ]]; then
     ARGS="$ARGS --autocast"
     echo "### running bf16 datatype"
-elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]; then
+elif [[ "$PRECISION" == "fp32" || "$PRECISION" == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
-elif [[ "$1" == "bf32" ]]; then
+elif [[ "$PRECISION" == "bf32" ]]; then
     ARGS="$ARGS --bf32"
     echo "### running bf32 datatype"
 else
-    echo "The specified precision '$1' is unsupported."
+    echo "The specified precision '$PRECISION' is unsupported."
     echo "Supported precisions are: fp32, avx-fp32, bf16, int8, bf32, and avx-int8"
     exit 1
 fi
@@ -67,8 +72,8 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-PRECISION=$1
-BATCH_SIZE=1
+# Runs with default value when BATCH_SIZE is not set:
+BATCH_SIZE=${BATCH_SIZE:- 1}
 
 rm -rf ${OUTPUT_DIR}/latency_log*
 
@@ -151,5 +156,5 @@ END   {
     sum = sum / i;
     printf("%.3f ms", sum);
 }')
-echo ""SSD-RN34";"latency";$1; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-echo ""SSD-RN34";"p99_latency";$1; ${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""SSD-RN34";"latency";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""SSD-RN34";"p99_latency";$PRECISION; ${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log

@@ -1,0 +1,34 @@
+SSD-ResNet34 FP32 Training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-training
+  cmd: /bin/bash quickstart/training.sh -a 56 --verbose -e 1 
+  env:
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34/coco_training_yang
+    OUTPUT_DIR: /output/tf-ssd-resnet34-training/fp32
+    PRECISION: fp32
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    BATCH_SIZE: '896'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/dataset/ssd-resnet34/coco_training_yang
+    dst: /tf_dataset/dataset/ssd-resnet34/coco_training_yang
+  - src: $PWD/output/tf-ssd-resnet34-training/fp32
+    dst: /output/tf-ssd-resnet34-training/fp32
+SSD-ResNet34 BF16 Training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-training
+  cmd: /bin/bash quickstart/training.sh -a 56 --verbose -e 1
+  env:
+    DATASET_DIR: /tf_dataset/dataset/ssd-resnet34/coco_training_yang
+    OUTPUT_DIR: /output/tf-ssd-resnet34-training/bf16
+    PRECISION: bfloat16
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
+    BATCH_SIZE: '896'
+  shm_size: 8G
+  privileged: true
+  init: true
+  volumes:
+  - src: /tf_dataset/dataset/ssd-resnet34/coco_training_yang
+    dst: /tf_dataset/dataset/ssd-resnet34/coco_training_yang
+  - src: $PWD/output/tf-ssd-resnet34-training/bf16
+    dst: /output/tf-ssd-resnet34-training/bf16

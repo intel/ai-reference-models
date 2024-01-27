@@ -1,52 +1,64 @@
 batch-170-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
-  cmd: quickstart/batch_inference.sh
+  cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
-    PRECISION : int8
-    GPU_TYPE: flex_series
+    PRECISION: int8
+    TEST_MODE: inference
+    FLEX_GPU_TYPE: flex_170
+    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+    BATCH_SIZE: '1024'
     OUTPUT_DIR: /tmp
 online-170-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
-  cmd: quickstart/online_inference.sh
+  cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
-    PRECISION : int8
-    GPU_TYPE: flex_series
-    OUTPUT_DIR: /tmp
-batch-140-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
-  cmd: quickstart/flex_multi_card_batch_inference.sh
-  ipc: host
-  device: /dev/dri
-  cap_add: SYS_NICE
-  env:
-    PRECISION : int8
-    GPU_TYPE: flex_series
-    BATCH_SIZE: '256'
-    OUTPUT_DIR: /tmp
-batch-140-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
-  cmd: quickstart/flex_multi_card_online_inference.sh
-  ipc: host
-  device: /dev/dri
-  cap_add: SYS_NICE
-  env:
-    PRECISION : int8
-    GPU_TYPE: flex_series
+    PRECISION: int8
+    TEST_MODE: inference
+    FLEX_GPU_TYPE: flex_170
+    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
     BATCH_SIZE: '1'
     OUTPUT_DIR: /tmp
-170-accuracy:
+batch-140-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
-  cmd: quickstart/accuracy.sh
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env:
+    PRECISION : int8
+    TEST_MODE: inference
+    FLEX_GPU_TYPE: flex_140
+    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+    BATCH_SIZE: '256'
+    OUTPUT_DIR: /tmp
+online-140-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env:
+    PRECISION : int8
+    TEST_MODE: inference
+    FLEX_GPU_TYPE: flex_140
+    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+    BATCH_SIZE: '1'
+    OUTPUT_DIR: /tmp
+accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
+  cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
-    PRECISION : int8
-    GPU_TYPE: flex_series
+    PRECISION: int8
+    TEST_MODE: accuracy
+    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+    DATASET_DIR: /local_dateset/TF_Imagenet_FullData/
     OUTPUT_DIR: /tmp
   volumes:
-    - src: /tf_dataset/dataset/TF_Imagenet_FullData
-      dst: /tf_dataset/dataset/TF_Imagenet_FullData
+    - src: /local_dateset/TF_Imagenet_FullData/
+      dst: /local_dateset/TF_Imagenet_FullData/

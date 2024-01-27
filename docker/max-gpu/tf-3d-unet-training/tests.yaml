@@ -1,0 +1,35 @@
+single-tile-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-3d-unet-training
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: bfloat16
+    BATCH_SIZE: '1'
+    MULTI_TILE: 'False'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /local_dateset/datasets/3dunet/preprocessed
+  volumes:
+    - src: /local_dateset/datasets/3dunet/preprocessed
+      dst: /local_dateset/datasets/3dunet/preprocessed
+    - src: /dev/dri/by-path
+      dst: /dev/dri/by-path
+    - src: /tmp
+      dst: /tmp
+multi-tile-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-3d-unet-training
+  cmd: bash run_model.sh
+  device: /dev/dri
+  env:
+    PRECISION: bfloat16
+    BATCH_SIZE: '1'
+    MULTI_TILE: 'True'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /local_dateset/datasets/3dunet/preprocessed
+  volumes:
+    - src: /local_dateset/datasets/3dunet/preprocessed
+      dst: /local_dateset/datasets/3dunet/preprocessed
+    - src: /dev/dri/by-path
+      dst: /dev/dri/by-path
+    - src: /tmp
+      dst: /tmp

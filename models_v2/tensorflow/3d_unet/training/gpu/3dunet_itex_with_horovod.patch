@@ -1,0 +1,155 @@
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/dataset/transforms.py b/TensorFlow/Segmentation/UNet_3D_Medical/dataset/transforms.py
+index 15e6244f..e31de05c 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/dataset/transforms.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/dataset/transforms.py
+@@ -12,7 +12,7 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
+ 
+ 
+ def apply_transforms(x, y, mean, stdev, transforms):
+@@ -48,7 +48,7 @@ class CenterCrop:
+ 
+     def __call__(self, x, y, mean, stdev):
+         shape = x.get_shape()
+-        delta = [(shape[i].value - self.shape[i]) // 2 for i in range(len(self.shape))]
++        delta = [(shape[i] - self.shape[i]) // 2 for i in range(len(self.shape))]
+         x = x[
+             delta[0]:delta[0] + self.shape[0],
+             delta[1]:delta[1] + self.shape[1],
+@@ -72,9 +72,9 @@ class RandomCrop3D:
+     def __call__(self, x, y, mean, stdev):
+         shape = x.get_shape()
+         min = tf.constant(self.margins, dtype=tf.float32)
+-        max = tf.constant([shape[0].value - self.shape[0] - self.margins[0],
+-                           shape[1].value - self.shape[1] - self.margins[1],
+-                           shape[2].value - self.shape[2] - self.margins[2]], dtype=tf.float32)
++        max = tf.constant([shape[0] - self.shape[0] - self.margins[0],
++                           shape[1] - self.shape[1] - self.margins[1],
++                           shape[2] - self.shape[2] - self.margins[2]], dtype=tf.float32)
+         center = tf.random_uniform((len(self.shape),), minval=min, maxval=max)
+         center = tf.cast(center, dtype=tf.int32)
+         x = x[center[0]:center[0] + self.shape[0],
+@@ -165,7 +165,7 @@ class RandomBrightnessCorrection:
+ 
+     def __call__(self, x, y, mean, stdev):
+         mask = tf.math.greater(x, 0)
+-        size = x.get_shape()[-1].value if self._per_channel else 1
++        size = x.get_shape()[-1] if self._per_channel else 1
+         augment = tf.random_uniform([]) > self._threshold
+         correction = tf.random_uniform([size],
+                                        minval=self._alpha_range[0],
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/model/layers.py b/TensorFlow/Segmentation/UNet_3D_Medical/model/layers.py
+index bd981651..746f3112 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/model/layers.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/model/layers.py
+@@ -12,13 +12,20 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++import tensorflow_addons as tfa
+ 
+ 
+ def _normalization(inputs, name, mode):
+     training = mode == tf.estimator.ModeKeys.TRAIN
+ 
+     if name == 'instancenorm':
++        return tfa.layers.InstanceNormalization(
++            center=True,
++            scale=True,
++            epsilon=1e-6,
++            )(inputs)
++
+         gamma_initializer = tf.constant_initializer(1.0)
+         return tf.contrib.layers.instance_norm(
+             inputs,
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/model/losses.py b/TensorFlow/Segmentation/UNet_3D_Medical/model/losses.py
+index 26eff0bb..c1e1fd19 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/model/losses.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/model/losses.py
+@@ -16,6 +16,8 @@ import tensorflow as tf
+ 
+ 
+ def make_loss(params, y_true, y_pred):
++    y_true = tf.cast(y_true, tf.float32)
++    y_pred = tf.cast(y_pred, tf.float32)
+     if params.loss == 'dice':
+         return _dice(y_true, y_pred)
+     if params.loss == 'ce':
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/model/model_fn.py b/TensorFlow/Segmentation/UNet_3D_Medical/model/model_fn.py
+index 9837d588..f3886cef 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/model/model_fn.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/model/model_fn.py
+@@ -15,7 +15,7 @@
+ import os
+ 
+ import horovod.tensorflow as hvd
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
+ 
+ from model.unet3d import Builder
+ from model.losses import make_loss, eval_dice, total_dice
+@@ -59,11 +59,13 @@ def unet_3d(features, labels, mode, params):
+     except KeyError:
+         amp_envar = False
+ 
++    '''
+     if params.use_amp and not amp_envar:
+         optimizer = tf.train.experimental.enable_mixed_precision_graph_rewrite(
+             optimizer,
+             loss_scale='dynamic'
+         )
++    '''
+ 
+     with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+         train_op = optimizer.minimize(loss, global_step=global_step)
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/runtime/hooks.py b/TensorFlow/Segmentation/UNet_3D_Medical/runtime/hooks.py
+index 576b6f5b..4b145013 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/runtime/hooks.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/runtime/hooks.py
+@@ -15,7 +15,7 @@
+ import time
+ 
+ import numpy as np
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
+ import horovod.tensorflow as hvd
+ 
+ 
+@@ -102,7 +102,7 @@ def process_performance_stats(timestamps, batch_size, mode):
+     n = np.sqrt(len(timestamps_ms))
+     throughput_imgps = (1000.0 * batch_size / timestamps_ms).mean()
+ 
+-    stats = [("throughput_{}".format(mode), str(throughput_imgps)),
++    stats = [("[Summary of all {} ranks] total_throughput_{}".format(hvd.size(), mode), str(throughput_imgps)),
+              ('latency_{}:'.format(mode), str(latency_ms))]
+     for ci, lvl in zip(["90%:", "95%:", "99%:"],
+                        [1.645, 1.960, 2.576]):
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/runtime/setup.py b/TensorFlow/Segmentation/UNet_3D_Medical/runtime/setup.py
+index a1bd4cdc..72516ad7 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/runtime/setup.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/runtime/setup.py
+@@ -53,11 +53,17 @@ def build_estimator(params, model_dir):
+     if params.use_xla:
+         config.graph_options.optimizer_options.global_jit_level = tf.OptimizerOptions.ON_1
+ 
++    gpus = tf.config.experimental.list_physical_devices('XPU')
++    for gpu in gpus:
++        tf.config.experimental.set_memory_growth(gpu, True)
++    if gpus:
++        tf.config.experimental.set_visible_devices(gpus[hvd.local_rank()], 'XPU')
+     config.gpu_options.allow_growth = True
+     config.gpu_options.visible_device_list = str(hvd.local_rank())
+ 
+     if params.use_amp:
+-        config.graph_options.rewrite_options.auto_mixed_precision = 1
++        policy = tf.keras.mixed_precision.Policy("mixed_bfloat16")
++        tf.keras.mixed_precision.set_global_policy(policy)
+ 
+     checkpoint_steps = (params.max_steps // hvd.size()) if hvd.rank() == 0 else None
+     checkpoint_steps = checkpoint_steps if not params.benchmark else None

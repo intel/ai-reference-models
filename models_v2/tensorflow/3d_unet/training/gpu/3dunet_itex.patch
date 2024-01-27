@@ -1,0 +1,493 @@
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/dataset/data_loader.py b/TensorFlow/Segmentation/UNet_3D_Medical/dataset/data_loader.py
+index cd088808..2235ce4c 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/dataset/data_loader.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/dataset/data_loader.py
+@@ -14,7 +14,7 @@
+ 
+ import os
+ 
+-import horovod.tensorflow as hvd
++#import horovod.tensorflow as hvd
+ import numpy as np
+ import tensorflow as tf
+ 
+@@ -91,7 +91,7 @@ class Dataset:
+ 
+         ds = tf.data.TFRecordDataset(filenames=self._train)
+ 
+-        ds = ds.shard(hvd.size(), hvd.rank())
++        #ds = ds.shard(hvd.size(), hvd.rank())
+         ds = ds.cache()
+         ds = ds.shuffle(buffer_size=self._batch_size * 8, seed=self._seed)
+         ds = ds.repeat()
+@@ -216,7 +216,7 @@ class Dataset:
+ 
+ def main():
+     from time import time
+-    hvd.init()
++    #hvd.init()
+ 
+     dataset = Dataset(data_dir='/data/BraTS19_tfrecord', batch_size=3)
+ 
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/dataset/transforms.py b/TensorFlow/Segmentation/UNet_3D_Medical/dataset/transforms.py
+index 15e6244f..e31de05c 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/dataset/transforms.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/dataset/transforms.py
+@@ -12,7 +12,7 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
+ 
+ 
+ def apply_transforms(x, y, mean, stdev, transforms):
+@@ -48,7 +48,7 @@ class CenterCrop:
+ 
+     def __call__(self, x, y, mean, stdev):
+         shape = x.get_shape()
+-        delta = [(shape[i].value - self.shape[i]) // 2 for i in range(len(self.shape))]
++        delta = [(shape[i] - self.shape[i]) // 2 for i in range(len(self.shape))]
+         x = x[
+             delta[0]:delta[0] + self.shape[0],
+             delta[1]:delta[1] + self.shape[1],
+@@ -72,9 +72,9 @@ class RandomCrop3D:
+     def __call__(self, x, y, mean, stdev):
+         shape = x.get_shape()
+         min = tf.constant(self.margins, dtype=tf.float32)
+-        max = tf.constant([shape[0].value - self.shape[0] - self.margins[0],
+-                           shape[1].value - self.shape[1] - self.margins[1],
+-                           shape[2].value - self.shape[2] - self.margins[2]], dtype=tf.float32)
++        max = tf.constant([shape[0] - self.shape[0] - self.margins[0],
++                           shape[1] - self.shape[1] - self.margins[1],
++                           shape[2] - self.shape[2] - self.margins[2]], dtype=tf.float32)
+         center = tf.random_uniform((len(self.shape),), minval=min, maxval=max)
+         center = tf.cast(center, dtype=tf.int32)
+         x = x[center[0]:center[0] + self.shape[0],
+@@ -165,7 +165,7 @@ class RandomBrightnessCorrection:
+ 
+     def __call__(self, x, y, mean, stdev):
+         mask = tf.math.greater(x, 0)
+-        size = x.get_shape()[-1].value if self._per_channel else 1
++        size = x.get_shape()[-1] if self._per_channel else 1
+         augment = tf.random_uniform([]) > self._threshold
+         correction = tf.random_uniform([size],
+                                        minval=self._alpha_range[0],
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/main.py b/TensorFlow/Segmentation/UNet_3D_Medical/main.py
+index cefabd23..be9c793e 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/main.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/main.py
+@@ -17,13 +17,67 @@ import logging
+ 
+ import numpy as np
+ import tensorflow as tf
+-import horovod.tensorflow as hvd
++#import horovod.tensorflow as hvd
+ 
+ from dataset.data_loader import Dataset, CLASSES
+ from runtime.hooks import get_hooks, ProfilingHook, TrainingHook
+ from runtime.arguments import PARSER
+-from runtime.setup import prepare_model_dir, build_estimator, set_flags, get_logger
+-
++from runtime.setup import prepare_model_dir, build_estimator, set_flags#, get_logger
++
++import sys
++from tensorflow.core.protobuf import config_pb2
++from tensorflow.python.training.session_run_hook import SessionRunArgs
++from tensorflow.python.training import training_util
++from tensorflow.python.platform import gfile
++from tensorflow.python.client import timeline
++from datetime import datetime
++
++class LoggerHook(tf.estimator.SessionRunHook):
++  """ Logs runtime. """
++  def __init__(self, batch_size, run_profile):
++    self.batch_size = batch_size
++    self.run_profile = run_profile
++
++  def begin(self):
++    self._step = 0
++    self._total_duration = 0
++    self._warmup = 2
++    self._global_step_tensor = training_util._get_or_create_global_step_read()
++
++  def before_run(self, run_context):
++    self._start_time = datetime.now()
++    opts = config_pb2.RunOptions(trace_level=config_pb2.RunOptions.FULL_TRACE)
++    requests = {"global_step": self._global_step_tensor}
++    if self.run_profile:
++      return SessionRunArgs(requests, options=opts)
++    else:
++      return SessionRunArgs(requests)
++
++  def after_run(self, run_context, run_values):
++    self._step += 1
++    duration = datetime.now() - self._start_time
++    ms = duration.total_seconds() * 1000.00
++    if self._step > self._warmup:
++      self._total_duration += ms
++      if self._step % 1 == 0:
++        print("Current step: %d, time in ms: %.2f" %(self._step, ms), flush=True)
++    else:
++      print("Warmup step: %d, time in ms: %.2f" %(self._step, ms), flush=True)
++    sys.stdout.flush()
++    if self._step == 4 and self.run_profile:
++      with gfile.Open('timeline-3dunet-train-bf16.json', "w") as f:
++        trace = timeline.Timeline(run_values.run_metadata.step_stats)
++        f.write(trace.generate_chrome_trace_format())
++
++  def end(self, run_context):
++    print("self._step: %d" %self._step, flush=True)
++    print("Total time spent (after warmup): %.2f ms" %(self._total_duration), flush=True)
++    print("Time spent per iteration (after warmup): %.2f ms" %(self._total_duration/(self._step - self._warmup)), flush=True)
++    time_takes = self._total_duration / (self._step - self._warmup)
++    if self.batch_size == 1:
++      print("Latency is %.3f ms" % (time_takes), flush=True)
++    print("Throughput is %.3f samples/sec" % (self.batch_size * 1000 / time_takes), flush=True)
++    sys.stdout.flush()
+ 
+ def parse_evaluation_results(result):
+     data = {CLASSES[i]: result[CLASSES[i]] for i in range(len(CLASSES))}
+@@ -34,10 +88,10 @@ def parse_evaluation_results(result):
+ 
+ def main():
+     tf.get_logger().setLevel(logging.ERROR)
+-    hvd.init()
++    #hvd.init()
+     params = PARSER.parse_args()
+     model_dir = prepare_model_dir(params)
+-    logger = get_logger(params)
++    #logger = get_logger(params)
+ 
+     dataset = Dataset(data_dir=params.data_dir,
+                       batch_size=params.batch_size,
+@@ -47,10 +101,12 @@ def main():
+ 
+     estimator = build_estimator(params=params, model_dir=model_dir)
+ 
+-    max_steps = params.max_steps // (1 if params.benchmark else hvd.size())
++    max_steps = params.max_steps #// (1 if params.benchmark else hvd.size())
+ 
+     if 'train' in params.exec_mode:
+-        training_hooks = get_hooks(params, logger)
++        training_hooks = []
++        my_hook = LoggerHook(params.batch_size, False)
++        training_hooks.append(my_hook)
+         estimator.train(
+             input_fn=dataset.train_fn,
+             steps=max_steps,
+@@ -59,12 +115,13 @@ def main():
+     if 'evaluate' in params.exec_mode:
+         result = estimator.evaluate(input_fn=dataset.eval_fn, steps=dataset.eval_size)
+         data = parse_evaluation_results(result)
+-        if hvd.rank() == 0:
+-            logger.log(step=(), data=data)
++        if True: #hvd.rank() == 0:
++            #logger.log(step=(), data=data)
++            print(data)
+ 
+     if 'predict' == params.exec_mode:
+-        inference_hooks = get_hooks(params, logger)
+-        if hvd.rank() == 0:
++        inference_hooks = get_hooks(params)
++        if True: #hvd.rank() == 0:
+             count = 1 if not params.benchmark else 2 * params.warmup_steps * params.batch_size // dataset.test_size
+             predictions = estimator.predict(
+                 input_fn=lambda: dataset.test_fn(count=count,
+@@ -76,14 +133,12 @@ def main():
+                     np.save(os.path.join(params.model_dir, "vol_{}.npy".format(idx)), volume)
+ 
+     if 'debug_train' == params.exec_mode:
+-        hooks = [hvd.BroadcastGlobalVariablesHook(0)]
+-        if hvd.rank() == 0:
++        hooks = [] #[hvd.BroadcastGlobalVariablesHook(0)]
++        if True: #hvd.rank() == 0:
+             hooks += [TrainingHook(log_every=params.log_every,
+-                                   logger=logger,
+                                    tensor_names=['total_loss_ref:0']),
+                       ProfilingHook(warmup_steps=params.warmup_steps,
+-                                    global_batch_size=hvd.size() * params.batch_size,
+-                                    logger=logger,
++                                    global_batch_size=params.batch_size,#hvd.size() * params.batch_size,
+                                     mode='train')]
+ 
+         estimator.train(
+@@ -92,10 +147,9 @@ def main():
+             hooks=hooks)
+ 
+     if 'debug_predict' == params.exec_mode:
+-        if hvd.rank() == 0:
++        if True: #hvd.rank() == 0:
+             hooks = [ProfilingHook(warmup_steps=params.warmup_steps,
+                                    global_batch_size=params.batch_size,
+-                                   logger=logger,
+                                    mode='inference')]
+             count = 2 * params.warmup_steps
+             predictions = estimator.predict(input_fn=lambda: dataset.synth_predict_fn(count=count),
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/model/layers.py b/TensorFlow/Segmentation/UNet_3D_Medical/model/layers.py
+index bd981651..0bbafd4f 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/model/layers.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/model/layers.py
+@@ -12,13 +12,19 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++import tensorflow_addons as tfa
+ 
+ 
+ def _normalization(inputs, name, mode):
+     training = mode == tf.estimator.ModeKeys.TRAIN
+ 
+     if name == 'instancenorm':
++        return tfa.layers.InstanceNormalization(
++            center=True,
++            scale=True,
++            epsilon=1e-6,
++            )(inputs)
+         gamma_initializer = tf.constant_initializer(1.0)
+         return tf.contrib.layers.instance_norm(
+             inputs,
+@@ -32,6 +38,7 @@ def _normalization(inputs, name, mode):
+             trainable=True,
+             data_format='NHWC',
+             scope=None)
++        
+ 
+     if name == 'groupnorm':
+         return tf.contrib.layers.group_norm(inputs=inputs,
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/model/losses.py b/TensorFlow/Segmentation/UNet_3D_Medical/model/losses.py
+index 26eff0bb..c1e1fd19 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/model/losses.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/model/losses.py
+@@ -16,6 +16,8 @@ import tensorflow as tf
+ 
+ 
+ def make_loss(params, y_true, y_pred):
++    y_true = tf.cast(y_true, tf.float32)
++    y_pred = tf.cast(y_pred, tf.float32)
+     if params.loss == 'dice':
+         return _dice(y_true, y_pred)
+     if params.loss == 'ce':
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/model/model_fn.py b/TensorFlow/Segmentation/UNet_3D_Medical/model/model_fn.py
+index 9837d588..e53d2aa7 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/model/model_fn.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/model/model_fn.py
+@@ -14,8 +14,9 @@
+ 
+ import os
+ 
+-import horovod.tensorflow as hvd
+-import tensorflow as tf
++#import horovod.tensorflow as hvd
++import tensorflow.compat.v1 as tf
++import tensorflow as tf2
+ 
+ from model.unet3d import Builder
+ from model.losses import make_loss, eval_dice, total_dice
+@@ -23,8 +24,12 @@ from dataset.data_loader import CLASSES
+ 
+ 
+ def unet_3d(features, labels, mode, params):
++    #features = tf.cast(features, tf.bfloat16)
++    #tf2.keras.mixed_precision.set_global_policy('mixed_bfloat16')
++    #with tf.compat.v1.tpu.bfloat16_scope():
+ 
+     logits = Builder(n_classes=4, normalization=params.normalization, mode=mode)(features)
++    #logits = tf.cast(logits, tf.float32)
+ 
+     if mode == tf.estimator.ModeKeys.PREDICT:
+         prediction = tf.argmax(input=logits, axis=-1, output_type=tf.dtypes.int32)
+@@ -50,7 +55,7 @@ def unet_3d(features, labels, mode, params):
+     global_step = tf.compat.v1.train.get_or_create_global_step()
+ 
+     optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=params.learning_rate)
+-    optimizer = hvd.DistributedOptimizer(optimizer)
++    #optimizer = hvd.DistributedOptimizer(optimizer)
+ 
+     # NGC has TF_ENABLE_AUTO_MIXED_PRECISION enabled by default. We cannot use
+     # both graph_rewrite and envar, so if we're not in NGC we do graph_rewrite
+@@ -58,13 +63,13 @@ def unet_3d(features, labels, mode, params):
+         amp_envar = int(os.environ['TF_ENABLE_AUTO_MIXED_PRECISION']) == 1
+     except KeyError:
+         amp_envar = False
+-
++    '''
+     if params.use_amp and not amp_envar:
+         optimizer = tf.train.experimental.enable_mixed_precision_graph_rewrite(
+             optimizer,
+             loss_scale='dynamic'
+         )
+-
++    '''
+     with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+         train_op = optimizer.minimize(loss, global_step=global_step)
+ 
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/runtime/hooks.py b/TensorFlow/Segmentation/UNet_3D_Medical/runtime/hooks.py
+index 576b6f5b..03d476d6 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/runtime/hooks.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/runtime/hooks.py
+@@ -15,43 +15,40 @@
+ import time
+ 
+ import numpy as np
+-import tensorflow as tf
+-import horovod.tensorflow as hvd
++import tensorflow.compat.v1 as tf
++#import horovod.tensorflow as hvd
++import sys
+ 
+ 
+-def get_hooks(params, logger):
++def get_hooks(params):
+     if 'train' in params.exec_mode:
+-        hooks = [hvd.BroadcastGlobalVariablesHook(0)]
+-        if hvd.rank() == 0:
++        hooks = []#[hvd.BroadcastGlobalVariablesHook(0)]
++        if True:#hvd.rank() == 0:
+             if params.benchmark:
+                 hooks += [ProfilingHook(warmup_steps=params.warmup_steps,
+-                                        global_batch_size=hvd.size() * params.batch_size,
+-                                        logger=logger,
++                                        global_batch_size=params.batch_size, #hvd.size() * params.batch_size,
+                                         mode='train')]
+             else:
+                 hooks += [TrainingHook(log_every=params.log_every,
+-                                       logger=logger,
+                                        tensor_names=['total_loss_ref:0'])]
+         return hooks
+ 
+     elif 'predict' == params.exec_mode:
+         hooks = []
+-        if hvd.rank() == 0:
++        if True: #hvd.rank() == 0:
+             if params.benchmark:
+                 hooks += [ProfilingHook(warmup_steps=params.warmup_steps,
+                                         global_batch_size=params.batch_size,
+-                                        logger=logger,
+                                         mode='test')]
+             return hooks
+ 
+ 
+ class ProfilingHook(tf.estimator.SessionRunHook):
+-    def __init__(self, warmup_steps, global_batch_size, logger, mode):
++    def __init__(self, warmup_steps, global_batch_size, mode):
+         self._warmup_steps = warmup_steps
+         self._global_batch_size = global_batch_size
+         self._step = 0
+         self._timestamps = []
+-        self._logger = logger
+         self._mode = mode
+ 
+     def before_run(self, run_context):
+@@ -65,15 +62,16 @@ class ProfilingHook(tf.estimator.SessionRunHook):
+                                           self._global_batch_size,
+                                           self._mode)
+ 
+-        self._logger.log(step=(), data={metric: float(value) for (metric, value) in stats})
+-        self._logger.flush()
++        #self._logger.log(step=(), data={metric: float(value) for (metric, value) in stats})
++        #self._logger.flush()
++        print({metric: float(value) for (metric, value) in stats})
++        sys.stdout.flush()
+ 
+ 
+ class TrainingHook(tf.estimator.SessionRunHook):
+-    def __init__(self, log_every, logger, tensor_names):
++    def __init__(self, log_every, tensor_names):
+         self._log_every = log_every
+         self._step = 0
+-        self._logger = logger
+         self._tensor_names = tensor_names
+ 
+     def before_run(self, run_context):
+@@ -88,11 +86,15 @@ class TrainingHook(tf.estimator.SessionRunHook):
+                   run_values):
+         if self._step % self._log_every == 0:
+             for i in range(len(self._tensor_names)):
+-                self._logger.log(step=(self._step,), data={self._tensor_names[i]: str(run_values.results[i])})
++                #self._logger.log(step=(self._step,), data={self._tensor_names[i]: str(run_values.results[i])})
++                print('current step = %d'%self._step, end=' ')
++                print({self._tensor_names[i]: str(run_values.results[i])})
++                
+         self._step += 1
+ 
+     def end(self, session):
+-        self._logger.flush()
++        #self._logger.flush()
++        sys.stdout.flush()
+ 
+ 
+ def process_performance_stats(timestamps, batch_size, mode):
+diff --git a/TensorFlow/Segmentation/UNet_3D_Medical/runtime/setup.py b/TensorFlow/Segmentation/UNet_3D_Medical/runtime/setup.py
+index a1bd4cdc..2de6b151 100644
+--- a/TensorFlow/Segmentation/UNet_3D_Medical/runtime/setup.py
++++ b/TensorFlow/Segmentation/UNet_3D_Medical/runtime/setup.py
+@@ -16,10 +16,10 @@ import os
+ import pickle
+ import shutil
+ 
+-import dllogger as logger
++#import dllogger as logger
+ import tensorflow as tf
+-import horovod.tensorflow as hvd
+-from dllogger import StdOutBackend, Verbosity, JSONStreamBackend
++#import horovod.tensorflow as hvd
++#from dllogger import StdOutBackend, Verbosity, JSONStreamBackend
+ 
+ from model.model_fn import unet_3d
+ 
+@@ -38,7 +38,7 @@ def set_flags():
+ 
+ def prepare_model_dir(params):
+     model_dir = os.path.join(params.model_dir, "model_chckpt")
+-    model_dir = model_dir if (hvd.rank() == 0 and not params.benchmark) else None
++    model_dir = model_dir if (not params.benchmark) else None#if (hvd.rank() == 0 and not params.benchmark) else None
+     if model_dir is not None:
+         os.makedirs(model_dir, exist_ok=True)
+         if ('train' in params.exec_mode) and (not params.resume_training):
+@@ -49,17 +49,23 @@ def prepare_model_dir(params):
+ 
+ def build_estimator(params, model_dir):
+     config = tf.compat.v1.ConfigProto(gpu_options=tf.compat.v1.GPUOptions(), allow_soft_placement=True)
++    #config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
++
+ 
+     if params.use_xla:
+         config.graph_options.optimizer_options.global_jit_level = tf.OptimizerOptions.ON_1
+ 
+     config.gpu_options.allow_growth = True
+-    config.gpu_options.visible_device_list = str(hvd.local_rank())
++    #config.gpu_options.visible_device_list = '0'#str(hvd.local_rank())
+ 
++    
+     if params.use_amp:
+-        config.graph_options.rewrite_options.auto_mixed_precision = 1
++        #config.graph_options.rewrite_options.auto_mixed_precision = 1
++        policy = tf.keras.mixed_precision.Policy("mixed_bfloat16")
++        tf.keras.mixed_precision.set_global_policy(policy)
++    
+ 
+-    checkpoint_steps = (params.max_steps // hvd.size()) if hvd.rank() == 0 else None
++    checkpoint_steps = params.max_steps #(params.max_steps // hvd.size()) if hvd.rank() == 0 else None
+     checkpoint_steps = checkpoint_steps if not params.benchmark else None
+     run_config = tf.estimator.RunConfig(
+         save_summary_steps=params.max_steps,
+@@ -73,12 +79,13 @@ def build_estimator(params, model_dir):
+         config=run_config,
+         params=params)
+ 
+-
++'''
+ def get_logger(params):
+     backends = []
+-    if hvd.rank() == 0:
++    if True: #hvd.rank() == 0:
+         backends += [StdOutBackend(Verbosity.VERBOSE)]
+         if params.log_dir:
+             backends += [JSONStreamBackend(Verbosity.VERBOSE, params.log_dir)]
+     logger.init(backends=backends)
+     return logger
++'''
+\ No newline at end of file

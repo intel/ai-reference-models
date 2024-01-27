@@ -1,0 +1,28 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2c570e0..61942de 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,6 +4,7 @@ ELSE()
+     cmake_minimum_required(VERSION 2.8)
+ ENDIF()
+ 
++set(CMAKE_CXX_STANDARD 17)
+ project(rnnt_release)
+ 
+ IF (NOT APPLE)
+diff --git a/pytorch_binding/setup.py b/pytorch_binding/setup.py
+index ad960ea..0fc23f3 100644
+--- a/pytorch_binding/setup.py
++++ b/pytorch_binding/setup.py
+@@ -8,10 +8,7 @@
+ 
+ 
+ extra_compile_args = ['-fPIC']
+-if LooseVersion(torch.__version__) >= LooseVersion("1.5.0"):
+-    extra_compile_args += ['-std=c++14']
+-else:
+-    extra_compile_args += ['-std=c++11']
++extra_compile_args += ['-std=c++17']
+ warp_rnnt_path = "../build"
+ 
+ if torch.cuda.is_available() or "CUDA_HOME" in os.environ:

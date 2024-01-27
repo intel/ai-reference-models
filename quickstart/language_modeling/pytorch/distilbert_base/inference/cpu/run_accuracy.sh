@@ -21,48 +21,40 @@ ARGS=""
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-path="ipex"
-ARGS="$ARGS --use_ipex"
-echo "### running with intel extension for pytorch"
-
 precision="fp32"
-if [[ "$1" == "bf16" ]]
+if [[ "$PRECISION" == "bf16" ]]
 then
     precision="bf16"
     ARGS="$ARGS --bf16"
     echo "### running bf16 mode"
-elif [[ "$1" == "fp16" ]]
+elif [[ "$PRECISION" == "fp16" ]]
 then
     precision=fp16
     ARGS="$ARGS --fp16_cpu"
     echo "### running fp16 mode"
-elif [[ "$1" == "fp32" ]]
+elif [[ "$PRECISION" == "fp32" ]]
 then
     echo "### running fp32 mode"
-elif [[ "$1" == "bf32" ]]
+elif [[ "$PRECISION" == "bf32" ]]
 then
     precision="bf32"
     ARGS="$ARGS --bf32 --auto_kernel_selection"
     echo "### running bf32 mode"
-elif [[ "$1" == "int8-fp32" ]]
+elif [[ "$PRECISION" == "int8-fp32" ]]
 then
     precision="int8-fp32"
     ARGS="$ARGS --int8 --int8_config configure.json"
     echo "### running int8-fp32 mode"
-elif [[ "$1" == "int8-bf16" ]]
+elif [[ "$PRECISION" == "int8-bf16" ]]
 then
     precision="int8-bf16"
     ARGS="$ARGS --bf16 --int8 --int8_config configure.json"
     echo "### running int8-bf16 mode"
 else
-    echo "The specified precision '$1' is unsupported."
+    echo "The specified precision '$PRECISION' is unsupported."
     echo "Supported precisions are: fp32, bf32, bf16, int8-fp32, int8-bf16"
     exit 1
 fi
-
-mode="jit"
-ARGS="$ARGS --jit_mode_eval"
-echo "### running with jit mode"
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
@@ -80,14 +72,35 @@ FINETUNED_MODEL=${FINETUNED_MODEL:-"distilbert-base-uncased-finetuned-sst-2-engl
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/text-classification/run_glue.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/accuracy_log*
-python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
-  ${EVAL_SCRIPT} $ARGS \
-  --model_name_or_path   ${FINETUNED_MODEL} \
-  --task_name sst2 \
-  --do_eval \
-  --max_seq_length ${SEQUENCE_LENGTH} \
-  --output_dir ./tmp \
-  --per_device_eval_batch_size $BATCH_SIZE \
+
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    path="ipex"
+    echo "### running with intel extension for pytorch"
+    mode="jit"
+    ARGS="$ARGS --jit_mode_eval"
+    echo "### running with jit mode"
+    python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --use_ipex \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --task_name sst2 \
+        --do_eval \
+        --max_seq_length ${SEQUENCE_LENGTH} \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE
+else
+    echo "Running inference with torch.compile inductor backend."
+    ARGS="$ARGS --inductor"
+    python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
+        ${EVAL_SCRIPT} $ARGS \
+        --model_name_or_path   ${FINETUNED_MODEL} \
+        --task_name sst2 \
+        --do_eval \
+        --max_seq_length ${SEQUENCE_LENGTH} \
+        --output_dir ./tmp \
+        --per_device_eval_batch_size $BATCH_SIZE
+fi
 
 accuracy=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_accuracy" |sed -e 's/.*= //;s/[^0-9.]//g')
 f1=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_f1" |sed -e 's/.*= //;s/[^0-9.]//g')

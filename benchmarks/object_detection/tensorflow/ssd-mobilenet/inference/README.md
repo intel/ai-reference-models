@@ -111,6 +111,10 @@ export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
 export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
 
+# Int8 Subgraph model (Int8 Accuracy only)
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/ssdmobilenet_preprocess.pb
+export INPUT_SUBGRAPH=$(pwd)/ssdmobilenet_preprocess.pb
+
 # Int8 Pretrained model for OneDNN Graph (Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point)
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/ssd_mb_itex_int8.pb
 export PRETRAINED_MODEL=$(pwd)/ssd_mb_itex_int8.pb

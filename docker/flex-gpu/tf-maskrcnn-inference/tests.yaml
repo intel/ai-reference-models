@@ -1,42 +1,32 @@
-170-online-inference:
+170-fp16-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-flex-gpu-maskrcnn-inference
-  cmd: quickstart/inference.sh
-  ipc: host
-  device: /dev/dri
-  env:
-    BATCH_SIZE: '1'
-    PRECISION: fp16
-    GPU_TYPE: flex_170
-    DATASET_DIR: /dataset/maskrcnn/coco
-    OUTPUT_DIR: /tmp
-  volumes:
-    - src: /dataset/maskrcnn/coco
-      dst: /dataset/maskrcnn/coco
-170-batch-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-flex-gpu-maskrcnn-inference
-  cmd: quickstart/inference.sh
+  cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
     BATCH_SIZE: '16'
-    PRECISION: fp16
+    PRECISION: float16
     GPU_TYPE: flex_170
-    DATASET_DIR: /dataset/maskrcnn/coco
+    DATASET_DIR: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
     OUTPUT_DIR: /tmp
   volumes:
-    - src: /dataset/maskrcnn/coco
-      dst: /dataset/maskrcnn/coco
+    - src: ${DATASET_DIR:-/tf_dataset/dataset/coco_dataset/COCO2017_training_data/}
+      dst: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
+    - src: /tmp
+      dst: /tmp
 140-online-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-flex-gpu-maskrcnn-inference
-  cmd: quickstart/inference.sh
+  cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
     BATCH_SIZE: '1'
-    PRECISION: fp16
+    PRECISION: float16
     GPU_TYPE: flex_140
-    DATASET_DIR: /dataset/maskrcnn/coco
+    DATASET_DIR: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
     OUTPUT_DIR: /tmp
   volumes:
-    - src: /dataset/maskrcnn/coco
-      dst: /dataset/maskrcnn/coco
+    - src: ${DATASET_DIR:-/tf_dataset/dataset/coco_dataset/COCO2017_training_data/}
+      dst: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
+    - src: /tmp
+      dst: /tmp
