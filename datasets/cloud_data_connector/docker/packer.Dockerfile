@@ -1,7 +1,11 @@
+<<<<<<<< HEAD:models/aidd/__init__.py
+# Copyright (c) 2022 Intel Corporation
+========
 #
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2023 Intel Corporation
+>>>>>>>> r3.1:datasets/cloud_data_connector/docker/packer.Dockerfile
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

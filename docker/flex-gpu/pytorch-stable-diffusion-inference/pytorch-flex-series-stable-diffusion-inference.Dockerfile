@@ -19,28 +19,36 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="xpu-flex"
+ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG PYT_BASE_TAG="2.1.10-xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-WORKDIR /home/user/workspace/pytorch-flex-series-stable-diffusion-inference 
+USER root
 
-RUN apt-get update && \
-    apt-get install -y parallel 
-RUN apt-get install -y pciutils
+WORKDIR /workspace/pytorch-flex-series-stable-diffusion-inference/models
 
+ENV DEBIAN_FRONTEND=noninteractive
 ARG PY_VERSION=3.10
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing \
+    apt-get install -y --no-install-recommends \
     build-essential \
-    python${PY_VERSION}-dev
+    python${PY_VERSION}-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN pip install diffusers pytorch-fid transformers
+RUN python -m pip install datasets \
+            torchmetrics \
+            diffusers \
+            transformers \
+            accelerate \
+            pytorch-fid \
+            scipy==1.9.1
 
-COPY models/generative-ai/pytorch/stable_diffusion/inference/gpu models/generative-ai/pytorch/stable_diffusion/inference/gpu 
-COPY quickstart/generative-ai/pytorch/stable_diffusion/inference/gpu/online_inference.sh quickstart/online_inference.sh 
+COPY models_v2/pytorch/stable_diffusion/inference/gpu .
+COPY models_v2/common common
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
+
+USER $USER

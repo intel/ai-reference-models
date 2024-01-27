@@ -14,15 +14,12 @@ DATASET=$5
 mkdir -p ${OUTPUT_DIR}
 
 if [[ "${is_lkg_drop}" == "true" ]]; then
-  #export PATH=${WORKSPACE}/miniconda3/bin:$PATH
-  #source ${WORKSPACE}/pytorch_setup/setvars.sh
-  #source ${WORKSPACE}/pytorch_setup/compiler/latest/env/vars.sh
-  #source ${WORKSPACE}/pytorch_setup/mkl/latest/env/vars.sh
-  #source ${WORKSPACE}/pytorch_setup/tbb/latest/env/vars.sh
-  #source ${WORKSPACE}/pytorch_setup/mpi/latest/env/vars.sh
   source ${WORKSPACE}/pytorch_setup/bin/activate pytorch
-  #conda activate pytorch
 fi
 
+export LD_PRELOAD="${WORKSPACE}/jemalloc/lib/libjemalloc.so":"${WORKSPACE}/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD 
+export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+
 # Run script
-OUTPUT_DIR=${OUTPUT_DIR} DATASET_DIR=${DATASET} ./quickstart/image_recognition/pytorch/resnet50/inference/cpu/${PRECISION}/${SCRIPT}
+OUTPUT_DIR=${OUTPUT_DIR} DATASET_DIR=${DATASET} PRECISION=${PRECISION} ./quickstart/image_recognition/pytorch/resnet50/inference/cpu/${SCRIPT}

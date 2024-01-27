@@ -21,7 +21,22 @@
 version: '3'
 services: 
   tf-resnet50v1-5-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        OS: ${OS:-ubuntu}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-centos-tf2.14-py310}
+      dockerfile: docker/tf-cpu/tf-resnet50v1-5-inference/tf-resnet50v1-5-inference.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-3d-unet-mlperf-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
     pull_policy: always
     build:
       context: ../../
@@ -31,6 +46,163 @@ services:
         no_proxy: ${no_proxy}
         TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
         TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
-      dockerfile: docker/tf-cpu/tf-resnet50v1-5-inference/tf-resnet50v1-5-inference.Dockerfile
+      dockerfile: docker/tf-cpu/tf-3d-unet-mlperf-inference/tf-3d-unet-mlperf-inference.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-distilbert-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-distilbert-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-distilbert-inference/tf-distilbert-inference.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-bert-large-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-bert-large-inference/tf-bert-large-inference.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-bert-large-pretraining:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-pretraining
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-bert-large-pretraining/tf-bert-large-pretraining.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-dien-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-recommendation-tf-dien-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-dien-inference/tf-dien-inference.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-mobilenet-v1-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-mobilenet-v1-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-mobilenet-v1-inference/tf-mobilenet-v1-inference.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-resnet50v1-5-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-resnet50v1-5-training/tf-resnet50v1-5-training.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-ssd-resnet34-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+        TF_MODELS_BRANCH: ${TF_MODELS_BRANCH:-f505cec}
+        TF_BENCHMARKS_BRANCH: ${TF_BENCHMARKS_BRANCH:-509b9d2}
+      dockerfile: docker/tf-cpu/tf-ssd-resnet34-inference/tf-ssd-resnet34-inference.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-ssd-resnet34-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-object-detection-tf-ssd-resnet34-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-ssd-resnet34-training/tf-ssd-resnet34-training.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-transformer-mlperf-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-translation-tf-transformer-mlperf-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-transformer-mlperf-inference/tf-transformer-mlperf-inference.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-transformer-mlperf-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-translation-tf-transformer-mlperf-training
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+      dockerfile: docker/tf-cpu/tf-transformer-mlperf-training/tf-transformer-mlperf-training.Dockerfile-${OS:-ubuntu}
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-ssd-mobilenet-inference:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-centos}-object-detection-tf-ssd-mobilenet-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ""
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+        TF_MODELS_BRANCH: ${TF_MODELS_BRANCH:-7a9934d}
+      dockerfile: docker/tf-cpu/tf-ssd-mobilenet-inference/tf-ssd-mobilenet-inference.Dockerfile-${OS:-centos}
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"

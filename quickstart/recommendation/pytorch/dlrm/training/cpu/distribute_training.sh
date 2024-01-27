@@ -103,18 +103,35 @@ LOCAL_BATCH_SIZE=$((BATCHSIZE / NODE))
 LOCAL_BATCH_SIZE=$((LOCAL_BATCH_SIZE / 2))
 
 LOG_0="${LOG}/socket.log"
-python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --logical_core_for_ccl --ccl_worker_count $NUM_CCL_WORKER --distributed --hostfile $HOSTFILE --nnodes $NODE \
-$MODEL_SCRIPT \
-  --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
-  --data-set=terabyte \
-  --memory-map --mlperf-bin-loader --mlperf-bin-shuffle --round-targets=True --learning-rate=18.0 \
-  --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
-  --arch-sparse-feature-size=128 --max-ind-range=40000000 \
-  --numpy-rand-seed=${seed_num} --print-auc --mlperf-auc-threshold=0.8025 \
-  --lr-num-warmup-steps=8000   --lr-decay-start-step=70000 --lr-num-decay-steps=30000\
-  --local-batch-size=${LOCAL_BATCH_SIZE} --print-freq=100 --print-time --ipex-interaction \
-  --test-mini-batch-size=65536 --ipex-merged-emb --should-test --test-freq 6400\
-  $ARGS |tee $LOG_0
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --logical_core_for_ccl --ccl_worker_count $NUM_CCL_WORKER --distributed --hostfile $HOSTFILE --nnodes $NODE \
+    $MODEL_SCRIPT \
+      --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+      --data-set=terabyte \
+      --memory-map --mlperf-bin-loader --mlperf-bin-shuffle --round-targets=True --learning-rate=18.0 \
+      --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+      --arch-sparse-feature-size=128 --max-ind-range=40000000 \
+      --numpy-rand-seed=${seed_num} --print-auc --mlperf-auc-threshold=0.8025 \
+      --lr-num-warmup-steps=8000   --lr-decay-start-step=70000 --lr-num-decay-steps=30000\
+      --local-batch-size=${LOCAL_BATCH_SIZE} --print-freq=100 --print-time --ipex-interaction \
+      --test-mini-batch-size=65536 --ipex-merged-emb --should-test --test-freq 6400\
+      $ARGS |tee $LOG_0
+else
+    export TORCHINDUCTOR_FREEZING=1
+    python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --logical_core_for_ccl --ccl_worker_count $NUM_CCL_WORKER --distributed --hostfile $HOSTFILE --nnodes $NODE \
+    $MODEL_SCRIPT \
+      --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+      --data-set=terabyte \
+      --memory-map --mlperf-bin-loader --mlperf-bin-shuffle --round-targets=True --learning-rate=18.0 \
+      --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+      --arch-sparse-feature-size=128 --max-ind-range=40000000 \
+      --numpy-rand-seed=${seed_num} --print-auc --mlperf-auc-threshold=0.8025 \
+      --lr-num-warmup-steps=8000   --lr-decay-start-step=70000 --lr-num-decay-steps=30000\
+      --local-batch-size=${LOCAL_BATCH_SIZE} --print-freq=100 --print-time \
+      --test-mini-batch-size=65536 --should-test --test-freq 6400 --inductor\ 
+      $ARGS |tee $LOG_0
+
 wait
 
 throughput=$(grep 'Throughput:' ${LOG}/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '

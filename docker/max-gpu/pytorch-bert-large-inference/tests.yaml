@@ -1,19 +1,120 @@
-fp16-batch-inference:
+# single-tile-fp16-inference:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: FP16
+#     BATCH_SIZE: '256'
+#     PLATFORM: Max
+#     OUTPUT_DIR: /tmp
+#     MULTI_TILE: 'False'
+#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
+#     DATASET_DIR: /dataset/squad_dir
+#   volumes:
+#     - src: /dataset/squad_dir
+#       dst: /dataset/squad_dir
+#     - src: /dataset/squad_large_finetuned_checkpoint
+#       dst: /dataset/squad_large_finetuned_checkpoint
+#     - src: /tmp
+#       dst: /tmp
+# multi-tile-fp16-inference:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: FP16
+#     BATCH_SIZE: '256'
+#     PLATFORM: Max
+#     OUTPUT_DIR: /tmp
+#     MULTI_TILE: 'True'
+#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
+#     DATASET_DIR: /dataset/squad_dir
+#   volumes:
+#     - src: /dataset/squad_dir
+#       dst: /dataset/squad_dir
+#     - src: /dataset/squad_large_finetuned_checkpoint
+#       dst: /dataset/squad_large_finetuned_checkpoint
+#     - src: /tmp
+#       dst: /tmp
+# single-tile-bf16-inference:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: BF16
+#     BATCH_SIZE: '256'
+#     PLATFORM: Max
+#     OUTPUT_DIR: /tmp
+#     MULTI_TILE: 'False'
+#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
+#     DATASET_DIR: /dataset/squad_dir
+#   volumes:
+#     - src: /dataset/squad_dir
+#       dst: /dataset/squad_dir
+#     - src: /dataset/squad_large_finetuned_checkpoint
+#       dst: /dataset/squad_large_finetuned_checkpoint
+#     - src: /tmp
+#       dst: /tmp
+# multi-tile-bf16-inference:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: BF16
+#     BATCH_SIZE: '256'
+#     PLATFORM: Max
+#     OUTPUT_DIR: /tmp
+#     MULTI_TILE: 'True'
+#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
+#     DATASET_DIR: /dataset/squad_dir
+#   volumes:
+#     - src: /dataset/squad_dir
+#       dst: /dataset/squad_dir
+#     - src: /dataset/squad_large_finetuned_checkpoint
+#       dst: /dataset/squad_large_finetuned_checkpoint
+#     - src: /tmp
+#       dst: /tmp
+# single-tile-fp32-inference:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: FP32
+#     BATCH_SIZE: '256'
+#     PLATFORM: Max
+#     OUTPUT_DIR: /tmp
+#     MULTI_TILE: 'False'
+#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
+#     DATASET_DIR: /dataset/squad_dir
+#   volumes:
+#     - src: /dataset/squad_dir
+#       dst: /dataset/squad_dir
+#     - src: /dataset/squad_large_finetuned_checkpoint
+#       dst: /dataset/squad_large_finetuned_checkpoint
+#     - src: /tmp
+#       dst: /tmp
+multi-tile-fp32-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
-  cmd: quickstart/fp16_inference_plain_format.sh
+  cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
-    PRECISION: FP16
-    BATCH_SIZE: '64'
+    PRECISION: FP32
+    BATCH_SIZE: '256'
+    PLATFORM: Max
     OUTPUT_DIR: /tmp
-    NUM_OAM: '4'
+    MULTI_TILE: 'True'
     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
-    DATASET_DIR: /dataset/bert_squad
+    DATASET_DIR: /dataset/squad_dir
   volumes:
-    - src: /dataset/bert_squad
-      dst: /dataset/bert_squad
+    - src: /dataset/squad_dir
+      dst: /dataset/squad_dir
     - src: /dataset/squad_large_finetuned_checkpoint
       dst: /dataset/squad_large_finetuned_checkpoint
-
-      
+    - src: /tmp
+      dst: /tmp

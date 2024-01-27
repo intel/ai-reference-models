@@ -195,7 +195,7 @@ def main_worker(args):
         print("Using global batch size: ", int(args.local_batch_size * args.world_size))
         print("Create DistributedDataParallel in CPU")
         model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True, broadcast_buffers=False,
-                                                                 gradient_as_bucket_view=True, bucket_cap_mb=50)
+                                                                 gradient_as_bucket_view=False, bucket_cap_mb=50)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -270,8 +270,6 @@ def main_worker(args):
         scaler = torch.cpu.amp.GradScaler()
     else:
         scaler = None
-    # Train mode
-    model.train()
 
     if args.ipex:
         if args.bf16:
@@ -308,6 +306,9 @@ def main_worker(args):
             len(train_loader),
             [batch_time, data_time, losses, top1, top5],
             prefix="Epoch: [{}]".format(epoch))
+
+        # Train mode
+        model.train()
 
         start = time.time()
         for i, (images, target) in enumerate(train_loader):

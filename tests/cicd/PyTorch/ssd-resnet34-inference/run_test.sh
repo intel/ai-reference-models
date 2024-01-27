@@ -14,27 +14,27 @@ DATASET=$5
 mkdir -p ${OUTPUT_DIR}
 
 if [[ "${is_lkg_drop}" == "true" ]]; then
-  #export PATH=${WORKSPACE}/miniconda3/bin:$PATH
-  #source ${WORKSPACE}/pytorch_setup/setvars.sh
-  #source ${WORKSPACE}/pytorch_setup/compiler/latest/env/vars.sh
-  #source ${WORKSPACE}/pytorch_setup/mkl/latest/env/vars.sh
-  #source ${WORKSPACE}/pytorch_setup/tbb/latest/env/vars.sh
-  #source ${WORKSPACE}/pytorch_setup/mpi/latest/env/vars.sh
   source ${WORKSPACE}/pytorch_setup/bin/activate pytorch
-  #conda activate pytorch
 fi
 
-# run model specific dependencies:
-pip install matplotlib Pillow defusedxml
-pip install pycocotools-fix
+export LD_PRELOAD="${WORKSPACE}/jemalloc/lib/libjemalloc.so":"${WORKSPACE}/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD 
+export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+
+# Install dependenicies:
+./quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/setup.sh
 
 # Download Pretrained Model:
-export CHECKPOINT_DIR=$(pwd)/tests/cicd/PyTorch/ssd-resnet34-inference/
+export CHECKPOINT_DIR=$(pwd)/tests/cicd/PyTorch/ssd-resnet34-inference/${PRECISION}
 ./quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/download_model.sh
 
 # Download dataset
-export DATASET_DIR=$(pwd)/tests/cicd/PyTorch/ssd-resnet34-inference/
-./quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/download_dataset.sh
+if [ -z ${DATASET} ];then
+  export DATASET_DIR=$(pwd)/tests/cicd/PyTorch/ssd-resnet34-inference/
+  ./quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/download_dataset.sh
+else
+  DATASET_DIR=${DATASET}
+fi
 
 # Run script
-OUTPUT_DIR=${OUTPUT_DIR} CHECKPOINT_DIR=${CHECKPOINT_DIR} DATASET_DIR=${DATASET_DIR} ./quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/${SCRIPT} ${PRECISION}
+OUTPUT_DIR=${OUTPUT_DIR} CHECKPOINT_DIR=${CHECKPOINT_DIR} DATASET_DIR=${DATASET_DIR} PRECISION=${PRECISION} ./quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/${SCRIPT}

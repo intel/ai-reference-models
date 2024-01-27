@@ -47,7 +47,7 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, avx-fp32, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, bf32 or bf16."
   exit 1
 fi
 
@@ -89,25 +89,44 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-BATCH_SIZE=128
+BATCH_SIZE=${BATCH_SIZE:-128}
 
 rm -rf ./resnet50_training_log_*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --memory-allocator jemalloc \
-    --ninstances 1 \
-    --ncore_per_instance ${CORES_PER_INSTANCE} \
-    --log_path=${OUTPUT_DIR} \
-    --log_file_prefix="./resnet50_training_log_${PRECISION}" \
-    ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
-    $ARGS \
-    --ipex \
-    -j 0 \
-    --seed 2020 \
-    --epochs $TRAINING_EPOCHS \
-    --train-no-eval \
-    -w 50 \
-    -b $BATCH_SIZE
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --memory-allocator jemalloc \
+        --ninstances 1 \
+        --ncore_per_instance ${CORES_PER_INSTANCE} \
+        --log_path=${OUTPUT_DIR} \
+        --log_file_prefix="./resnet50_training_log_${PRECISION}" \
+        ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+        $ARGS \
+        --ipex \
+        -j 0 \
+        --seed 2020 \
+        --epochs $TRAINING_EPOCHS \
+        --train-no-eval \
+        -w 50 \
+        -b $BATCH_SIZE
+else
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --memory-allocator jemalloc \
+        --ninstances 1 \
+        --ncore_per_instance ${CORES_PER_INSTANCE} \
+        --log_path=${OUTPUT_DIR} \
+        --log_file_prefix="./resnet50_training_log_${PRECISION}" \
+        ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+        $ARGS \
+        --inductor \
+        -j 0 \
+        --seed 2020 \
+        --epochs $TRAINING_EPOCHS \
+        --train-no-eval \
+        -w 50 \
+        -b $BATCH_SIZE
+fi
 
 # For the summary of results
 wait

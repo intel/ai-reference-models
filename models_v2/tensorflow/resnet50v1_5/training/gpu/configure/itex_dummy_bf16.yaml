@@ -1,0 +1,74 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2023 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+
+# Training configuration for ResNet trained on ImageNet on TPUs.
+# Takes ~4 minutes, 30 seconds seconds per epoch for a v3-32.
+# Reaches > 76.1% within 90 epochs.
+# Note: This configuration uses a scaled per-replica batch size based on the number of devices.
+runtime:
+  distribution_strategy: 'mirrored'
+  num_gpus: 1
+train_dataset:
+  name: 'imagenet2012'
+  data_dir: None
+  builder: 'synthetic'
+  split: 'train'
+  one_hot: False
+  image_size: 224
+  num_classes: 1000
+  num_examples: 1281167
+  batch_size: 256
+  use_per_replica_batch_size: True
+  mean_subtract: False
+  standardize: False
+  dtype: 'bfloat16'
+validation_dataset:
+  name: 'imagenet2012'
+  data_dir: None
+  builder: 'synthetic'
+  split: 'validation'
+  one_hot: False
+  image_size: 224
+  num_classes: 1000
+  num_examples: 50000
+  batch_size: 256
+  use_per_replica_batch_size: True
+  mean_subtract: False
+  standardize: False
+  dtype: 'bfloat16'
+model:
+  name: 'resnet'
+  model_params:
+    rescale_inputs: True
+  optimizer:
+    name: 'momentum'
+    momentum: 0.9
+    decay: 0.9
+    epsilon: 0.001
+    moving_average_decay: 0.
+    lookahead: False
+  loss:
+    label_smoothing: 0.1
+train:
+  callbacks:
+    enable_checkpoint_and_export: True
+  resume_checkpoint: True
+  epochs: 1
+evaluation:
+  epochs_between_evals: 1

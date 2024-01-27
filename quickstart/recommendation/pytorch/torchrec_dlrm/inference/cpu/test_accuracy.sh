@@ -45,23 +45,23 @@ mkdir -p ${OUTPUT_DIR}
 LOG=${OUTPUT_DIR}/dlrm_inference_accuarcy_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
-
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 ARGS=""
 if [[ $PRECISION == "bf16" ]]; then
-    ARGS="$ARGS --dtype bf16 --ipex-merged-emb-cat"
+    ARGS="$ARGS --dtype bf16 "
     echo "running bf16 path"
 elif [[ $PRECISION == "fp32" ]]; then
     echo "running fp32 path"
-    ARGS="$ARGS --dtype fp32 --ipex-merged-emb-cat"
+    ARGS="$ARGS --dtype fp32"
 elif [[ $PRECISION == "bf32" ]]; then
     echo "running bf32 path"
-    ARGS="$ARGS --dtype bf32 --ipex-merged-emb-cat"
+    ARGS="$ARGS --dtype bf32"
 elif [[ $PRECISION == "fp16" ]]; then
     echo "running fp16 path"
-    ARGS="$ARGS --dtype fp16 --ipex-merged-emb-cat"
+    ARGS="$ARGS --dtype fp16"
 elif [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
-    ARGS="$ARGS --dtype int8 --ipex-merged-emb-cat --int8-configure-dir ${INT8_CONFIG}"
+    ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
     echo "Supported PRECISIONs are: fp32, bf32, fp16, bf16, int8"
@@ -76,25 +76,29 @@ pip install memory_profiler
 export mrun_cmd="mprof run --python -o ${MEMLOG}"
 fi
 
+COMMON_ARGS=" --embedding_dim 128 \
+              --dense_arch_layer_sizes 512,256,128 \
+              --over_arch_layer_sizes 1024,1024,512,256,1 \
+              --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
+              --epochs 1 \
+              --pin_memory \
+              --mmap_mode \
+              --batch_size $BATCH_SIZE \
+              --interaction_type=dcn \
+              --dcn_num_layers=3 \
+              --dcn_low_rank_dim=512 \
+              --limit_val_batches 100 \
+              --log-freq 10 \
+              --inference-only \
+              $EXTRA_ARGS $ARGS "
+
 # Do not need to use launcher to bind memory for accuracy test
-$mrun_cmd python $MODEL_SCRIPT \
-    --snapshot-dir $WEIGHT_DIR \
-    --embedding_dim 128 \
-    --dense_arch_layer_sizes 512,256,128 \
-    --over_arch_layer_sizes 1024,1024,512,256,1 \
-    --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
-    --epochs 1 \
-    --pin_memory \
-    --mmap_mode \
-    --batch_size $BATCH_SIZE \
-    --interaction_type=dcn \
-    --dcn_num_layers=3 \
-    --dcn_low_rank_dim=512 \
-    --ipex-optimize \
-    --inference-only \
-    --synthetic_multi_hot_criteo_path $DATASET_DIR \
-    --test_auroc \
-    $ARGS 2>&1 | tee $LOG_0
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+  $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --ipex-optimize --jit --ipex-merged-emb-cat 2>&1 | tee $LOG_0
+else
+  $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG_0
+fi
+wait
 
 if [[ $PLOTMEM == "true" ]]; then
 mprof plot ${MEMLOG} -o ${MEMPIC}

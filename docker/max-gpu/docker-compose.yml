@@ -26,9 +26,10 @@ services:
       args:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
-        no_proxy: ${no_proxy}
-        BASE_IMAGE: ${REGISTRY}/aiops/mlops
-        BASE_TAG: xpu-max
+        no_proxy: ""
+        NO_PROXY: ""
+        PYT_BASE_IMAGE: ${PYT_BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        PYT_BASE_TAG: ${PYT_BASE_TAG:-2.1.10-xpu}   
       dockerfile: docker/max-gpu/pytorch-resnet50v1-5-inference/pytorch-max-series-resnet50v1-5-inference.Dockerfile
     command: >
       sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
@@ -36,9 +37,7 @@ services:
     pull_policy: always
   pytorch-resnet50v1-5-training:
     build:
-      args:
-        VOC_LABELS_URL: ${VOC_LABELS_URL:-https://drive.google.com/uc?id=1q1sXhKIxniInw3WASnEDKYMqPMuiDDvc}   
-      dockerfile: docker/max-gpu/pytorch-bert-large-inference/pytorch-max-series-bert-large-inference.Dockerfile
+      dockerfile: docker/max-gpu/pytorch-resnet50v1-5-training/pytorch-max-series-resnet50v1-5-training.Dockerfile
     extends: pytorch-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
   pytorch-bert-large-inference:
@@ -54,8 +53,10 @@ services:
   tf-resnet50v1-5-inference:
     build:
       args:
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-tensorflow}
-        BASE_TAG: ${BASE_TAG:-xpu}   
+        TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-extension-for-tensorflow}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.14.0.1-xpu}  
+        NO_PROXY: ""
+        no_proxy: ""
         INT8_MODEL_URL: ${INT8_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
         FP16_MODEL_URL: ${FP16_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1.pb}
         FP32_MODEL_URL: ${FP32_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1.pb}
@@ -81,6 +82,16 @@ services:
       dockerfile: docker/max-gpu/tf-bert-large-training/tf-max-series-bert-large-training.Dockerfile
     extends: tf-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
+  tf-maskrcnn-training:
+    build:
+      dockerfile: docker/max-gpu/tf-maskrcnn-training/tf-max-series-maskrcnn-training.Dockerfile
+    extends: tf-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-maskrcnn-training
+  tf-3d-unet-training:
+    build:
+      dockerfile: docker/max-gpu/tf-3d-unet-training/tf-max-series-3d-unet-training.Dockerfile
+    extends: tf-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-3d-unet-training
   pytorch-dlrm-inference:
     build:
       dockerfile: docker/max-gpu/pytorch-dlrm-inference/pytorch-max-series-dlrm-inference.Dockerfile
@@ -91,3 +102,26 @@ services:
       dockerfile: docker/max-gpu/pytorch-dlrm-training/pytorch-max-series-dlrm-training.Dockerfile
     extends: pytorch-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-training
+  pytorch-distilbert-inference:
+    build:
+      dockerfile: docker/max-gpu/pytorch-distilbert-inference/pytorch-max-series-distilbert-inference.Dockerfile
+    extends: pytorch-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-distilbert-inference
+  pytorch-stable-diffusion-inference:
+    build:
+      dockerfile: docker/max-gpu/pytorch-stable-diffusion-inference/pytorch-max-series-stable-diffusion-inference.Dockerfile
+    extends: pytorch-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-stable-diffusion-inference
+  pytorch-gpt-j-6b-mlperf-inference:
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ''
+        NO_PROXY: ''
+        BASE_IMAGE: intel/oneapi-basekit
+        BASE_TAG: ${BASE_TAG:-2023.1.0-devel-ubuntu22.04}
+        PYTHON: python3.9
+      dockerfile: docker/max-gpu/pytorch-gpt-j-6b-mlperf-inference/pytorch-max-series-gpt-j-6b-mlperf-inference.Dockerfile
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference

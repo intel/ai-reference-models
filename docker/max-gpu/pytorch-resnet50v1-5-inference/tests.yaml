@@ -1,11 +1,75 @@
-int8-batch-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
-  cmd: quickstart/inference_block_format.sh
+bf16-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
-    PRECISION: int8
+    PRECISION: BF16
     NUM_ITERATIONS: '500'
     BATCH_SIZE: '1024'
     OUTPUT_DIR: /tmp
-    NUM_OAM: '4'
+    MULTI_TILE: 'True'
+    PLATFORM: 'Max'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: FP16
+    NUM_ITERATIONS: '500'
+    BATCH_SIZE: '1024'
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'True'
+    PLATFORM: 'Max'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp32-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: FP32
+    NUM_ITERATIONS: '500'
+    BATCH_SIZE: '1024'
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'True'
+    PLATFORM: 'Max'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+tf32-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: TF32
+    NUM_ITERATIONS: '500'
+    BATCH_SIZE: '1024'
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'True'
+    PLATFORM: 'Max'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: INT8
+    NUM_ITERATIONS: '500'
+    BATCH_SIZE: '1024'
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'True'
+    PLATFORM: 'Max'
+  volumes:
+    - src: /tmp
+      dst: /tmp

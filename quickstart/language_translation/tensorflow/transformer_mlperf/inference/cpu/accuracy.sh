@@ -83,7 +83,6 @@ fi
 export TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1 
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
-_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name transformer_mlperf \
   --precision ${PRECISION} \

@@ -32,7 +32,7 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, avx-fp32, int8, avx-int8, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, int8, bf32, avx-int8, or bf16."
   exit 1
 fi
 
@@ -46,7 +46,7 @@ ARGS=""
 ARGS="$ARGS -e -a resnet50 ../ --dummy"
 
 # default value, you can fine-tune it to get perfect performance.
-BATCH_SIZE=112
+BATCH_SIZE=${BATCH_SIZE:-112}
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -57,27 +57,27 @@ if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
     echo "running int8 path"
     NUMA_NODES=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
     CORES_PER_NODE=`expr $TOTAL_CORES / $NUMA_NODES`
-    BATCH_SIZE=`expr $CORES_PER_NODE \* 8`
+    BATCH_SIZE=${BATCH_SIZE:-`expr $CORES_PER_NODE \* 8`}
     ARGS="$ARGS --int8 --configure-dir ${MODEL_DIR}/models/image_recognition/pytorch/common/resnet50_configure_sym.json"
 elif [[ $PRECISION == "bf16" ]]; then
-    BATCH_SIZE=68
+    BATCH_SIZE=${BATCH_SIZE:-68}
     ARGS="$ARGS --bf16 --jit"
     echo "running bf16 path"
 elif [[ $PRECISION == "bf32" ]]; then
-    BATCH_SIZE=68
+    BATCH_SIZE=${BATCH_SIZE:-68}
     ARGS="$ARGS --bf32 --jit"
     echo "running bf32 path"
 elif [[ $PRECISION == "fp16" ]]; then
-    BATCH_SIZE=68
+    BATCH_SIZE=${BATCH_SIZE:-68}
     ARGS="$ARGS --fp16 --jit"
     echo "running fp16 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
-    BATCH_SIZE=64
+    BATCH_SIZE=${BATCH_SIZE:-64}
     ARGS="$ARGS --jit"
     echo "running fp32 path"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32, bf16, int8, and avx-int8"
+    echo "Supported precisions are: fp32, avx-fp32, bf16, int8, bf32, and avx-int8"
     exit 1
 fi
 
@@ -91,6 +91,7 @@ if [ ${WEIGHT_SHAREING} ]; then
   weight_sharing=true
 fi
 
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [ "$weight_sharing" = true ]; then
     CORES=`lscpu | grep Core | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -126,7 +127,7 @@ if [ "$weight_sharing" = true ]; then
     done
     wait
 
-else
+elif [[ "0" == ${TORCH_INDUCTOR} ]];then
     python -m intel_extension_for_pytorch.cpu.launch \
 	--memory-allocator jemalloc \
 	--throughput_mode \
@@ -135,6 +136,19 @@ else
         ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
         $ARGS \
         --ipex \
+        --seed 2020 \
+        -j 0 \
+        -b $BATCH_SIZE
+else
+    echo "Running RN50 inference with torch.compile inductor backend."
+    python -m intel_extension_for_pytorch.cpu.launch \
+	--memory-allocator jemalloc \
+	--throughput_mode \
+        --log_path=${OUTPUT_DIR} \
+        --log_file_prefix="./resnet50_throughput_log_${PRECISION}" \
+        ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+        $ARGS \
+        --inductor \
         --seed 2020 \
         -j 0 \
         -b $BATCH_SIZE

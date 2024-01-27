@@ -15,36 +15,36 @@
 # limitations under the License.
 #
 
-MODEL_DIR=${MODEL_DIR-../../../../../..}
+MODEL_DIR=${MODEL_DIR-$PWD}
 
 #export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 ARGS="--benchmark"
 precision=fp32
-batch_size=28
+batch_size=${batch_size:-28}
 
-if [[ "$1" == *"avx"* ]]; then
+if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
-if [[ "$1" == "bf16" ]]
+if [[ "$PRECISION" == "bf16" ]]
 then
     ARGS="$ARGS --bf16"
     precision=bf16
-    batch_size=128
+    batch_size=${batch_size:-128}
     echo "### running bf16 mode"
-elif [[ $1 == "bf32" ]]; then
+elif [[ $PRECISION == "bf32" ]]; then
     echo "### running BF32 mode"
     ARGS="$ARGS --bf32"
     precision=bf32
-elif [[ $1 == "fp16" ]]; then
+elif [[ $PRECISION == "fp16" ]]; then
     echo "### running FP16 mode"
     ARGS="$ARGS --fp16"
     precision=fp16
-elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "### running FP32 mode"
 
 else
-    echo "The specified precision '$1' is unsupported."
+    echo "The specified precision '$PRECISION' is unsupported."
     echo "Supported precisions are: fp32, bf32 avx-fp32, bf16"
     exit 1
 fi
@@ -61,16 +61,32 @@ NUM_RANKS=1
 LBS=$(( batch_size / NUM_RANKS ))
 params="--train_batch_size=$LBS     --learning_rate=3.5e-4     --opt_lamb_beta_1=0.9     --opt_lamb_beta_2=0.999     --warmup_proportion=0.0     --warmup_steps=0.0     --start_warmup_step=0     --max_steps=13700     --phase2    --max_predictions_per_seq=76      --do_train     --skip_checkpoint     --train_mlm_accuracy_window_size=0     --target_mlm_accuracy=0.720     --weight_decay_rate=0.01     --max_samples_termination=4500000     --eval_iter_start_samples=150000 --eval_iter_samples=150000     --eval_batch_size=16  --gradient_accumulation_steps=1     --log_freq=0 "
 
-python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
-    --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
-    --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
-    --model_type 'bert' \
-    --model_name_or_path ${PRETRAINED_MODEL} \
-    --benchmark \
-    --dense_seq_output \
-    --output_dir $OUTPUT_DIR/model_save \
-    $ARGS \
-    $params \
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+        --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
+        --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+        --model_type 'bert' \
+        --model_name_or_path ${PRETRAINED_MODEL} \
+        --benchmark \
+        --ipex \
+        --dense_seq_output \
+        --output_dir $OUTPUT_DIR/model_save \
+        $ARGS \
+        $params
+else
+    python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+        --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
+        --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+        --model_type 'bert' \
+        --model_name_or_path ${PRETRAINED_MODEL} \
+        --benchmark \
+        --inductor \
+        --dense_seq_output \
+        --output_dir $OUTPUT_DIR/model_save \
+        $ARGS \
+        $params
+fi
     
 
 
