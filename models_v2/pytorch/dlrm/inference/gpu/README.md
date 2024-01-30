@@ -66,7 +66,7 @@ you can get the checkpoints by running the command
 | **DATASET_DIR**              |                               `export DATASET_DIR=`                                  |
 | **CKPT_DIR**                 |                               `export CKPT_DIR=`                                     |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=32768`                                |
-| **PRECISION** (optional)     |                               `export PRECISION=fp16` (fp16 and fp32 for Flex)                               |
+| **PRECISION** (optional)     |                               `export PRECISION=fp16` (fp16 for Flex)                               |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=20`                             |
 8. Run `run_model.sh`

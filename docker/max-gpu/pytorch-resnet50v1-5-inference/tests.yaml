@@ -1,5 +1,5 @@
 bf16-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
@@ -14,7 +14,7 @@ bf16-inference:
     - src: /tmp
       dst: /tmp
 fp16-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
@@ -29,7 +29,7 @@ fp16-inference:
     - src: /tmp
       dst: /tmp
 fp32-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
@@ -44,7 +44,7 @@ fp32-inference:
     - src: /tmp
       dst: /tmp
 tf32-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
@@ -59,7 +59,7 @@ tf32-inference:
     - src: /tmp
       dst: /tmp
 int8-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri

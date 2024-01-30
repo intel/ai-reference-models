@@ -45,7 +45,7 @@ export OUTPUT_DIR=<path to output directory>
 export SCRIPT=run_model.sh
 export DATASET_DIR=<path to dataset directory>
 
-IMAGE=intel/recommendation:pytorch-flex-gpu-distilbert-inference
+IMAGE=intel/language-modeling:pytorch-flex-gpu-distilbert-inference
 DOCKER_ARGS="--rm -it"
 
 docker run \
