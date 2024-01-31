@@ -458,6 +458,11 @@ def main_worker(ngpus_per_node, args):
                 if args.gpu is not None:
                     # best_acc1 may be from a checkpoint from a different GPU
                     best_acc1 = best_acc1.to(args.gpu)
+                
+                #TODO: best_acc1 is changed between float and tesnor on xpu in different case. why?
+                if torch.is_tensor(best_acc1):
+                    best_acc1 = best_acc1.to("cpu")
+                
                 model.load_state_dict(checkpoint['state_dict'])
                 optimizer.load_state_dict(checkpoint['optimizer'])
                 scheduler.load_state_dict(checkpoint['scheduler'])
