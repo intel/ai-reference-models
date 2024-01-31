@@ -980,6 +980,9 @@ def main():
     end = time.time()
     print("\ntime_to_train(s): {:.2f}".format((end - start)))
 
+    loss = loss.detach().item()
+    print(f"Loss: {loss}")
+
     throughput = (args.max_train_steps * args.gradient_accumulation_steps - args.warmup_iterations) / (train_time)
     print("Throughput: {:.5f}".format(throughput))
 
@@ -1031,7 +1034,7 @@ def main():
     if not args.train_no_eval and accelerator.is_main_process:
         # run test
         pipe = StableDiffusionPipeline.from_pretrained(args.output_dir)
-        prompt = "a yellow <cat-toy> robot at the beach, high quality"
+        prompt = "a lovely <dicoo> in red dress and hat, in the snowly and brightly night, with many brighly buildings."
         image = pipe(prompt, num_inference_steps=50, guidance_scale=7.5, generator=torch.manual_seed(args.seed)).images[0]
         filename = "output_" + args.precision + ".png"
         image.save(filename)

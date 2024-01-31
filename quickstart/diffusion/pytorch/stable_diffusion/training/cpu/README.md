@@ -25,13 +25,6 @@ git checkout v0.23.1
 python setup.py install
 ```
 
-### download dataset
-We will use some cat images: https://huggingface.co/datasets/diffusers/cat_toy_example .
-Let's first download it locally:
-```bash
-python download_dataset.py
-```
-
 ### Install Stable Diffusion fine-tuning dependencies
 ```bash
 pip install -r requirements.txt

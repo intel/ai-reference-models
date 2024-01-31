@@ -65,7 +65,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 PRECISION=$1
 
 export MODEL_NAME="stabilityai/stable-diffusion-2-1"
-export DATA_DIR="./cat"
+export DATA_DIR="./dicoo"
 
 << EOF
 #oneCCL settings
@@ -123,9 +123,10 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --pretrained_model_name_or_path=$MODEL_NAME \
     --train_data_dir=$DATA_DIR \
     --learnable_property="object" \
-    --placeholder_token="\"<cat-toy>\"" --initializer_token="toy" \
+    --placeholder_token="\"<dicoo>\"" --initializer_token="toy" \
     --resolution=512 \
     --train_batch_size=1 \
+    --seed=7 \
     --gradient_accumulation_steps=1 \
     --max_train_steps=200 \
     --learning_rate=2.0e-03 --scale_lr \
