@@ -24,21 +24,20 @@ ARG TF_BASE_TAG="2.14.0.1-xpu"
 
 FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    ca-certificates \
-    intel-oneapi-mpi-devel=2021.11.0-49493  \
-    intel-oneapi-ccl=2021.11.2-5 \
-    && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        intel-oneapi-mpi-devel=2021.11.0-49493  \
+        intel-oneapi-ccl=2021.11.2-5 && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace/tf-max-series-3d-unet-training/models
 
 RUN python -m pip install tfa-nightly \
-                   git+https://github.com/NVIDIA/dllogger.git 
+        git+https://github.com/NVIDIA/dllogger.git 
 
 COPY models_v2/tensorflow/3d_unet/training/gpu .
 

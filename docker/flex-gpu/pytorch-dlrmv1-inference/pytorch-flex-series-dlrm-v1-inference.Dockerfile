@@ -30,16 +30,16 @@ USER root
 WORKDIR /workspace/pytorch-flex-series-dlrm-v1-inference/models
 
 RUN python -m pip install future \
-                    numpy \
-                    onnx \
-                    pydot \
-                    scikit-learn \
-                    tqdm \
-                    torchrec-nightly \
-                    torchx-nightly \
-                    lark-parser \
-                    scikit-learn \
-                    tensorboard 
+        numpy \
+        onnx \
+        pydot \
+        scikit-learn \
+        tqdm \
+        torchrec-nightly \
+        torchx-nightly \
+        lark-parser \
+        scikit-learn \
+        tensorboard 
 
 COPY models_v2/pytorch/dlrm/inference/gpu .
 COPY models_v2/common common

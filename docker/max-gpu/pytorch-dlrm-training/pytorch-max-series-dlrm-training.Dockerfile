@@ -19,25 +19,24 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="xpu-max"
+ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG PYT_BASE_TAG="2.1.10-xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
+
+USER root
 
 WORKDIR /workspace/pytorch-max-series-dlrm-training
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing numactl 
     
-RUN curl -fsSL https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB | apt-key add -
-RUN echo "deb [trusted=yes] https://apt.repos.intel.com/oneapi all main " > /etc/apt/sources.list.d/oneAPI.list
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    ca-certificates \
-    intel-oneapi-mpi-devel=2021.10.0-49371 \
-    intel-oneapi-ccl=2021.10.0-49084 \
-    && \
+    apt-get install -y --no-install-recommends \
+    	ca-certificates \
+      	curl \
+     	numactl \
+      	intel-oneapi-ccl=2021.11.2-5 \
+      	intel-oneapi-mpi-devel=2021.11.0-49493 && \
     rm -rf /var/lib/apt/lists/*
 
 COPY models/recommendation/pytorch/torchrec_dlrm/training/gpu models/recommendation/pytorch/torchrec_dlrm/training/gpu
@@ -50,3 +49,12 @@ RUN pip install -e git+https://github.com/mlperf/logging#egg=mlperf-logging
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
+
+ENV LD_LIBRARY_PATH=/opt/intel/oneapi/ccl/2021.11/lib/:/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.11/lib:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.11/lib:/opt/intel/oneapi/ccl/2021.11/lib/
+ENV PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/bin:/opt/intel/oneapi/mpi/2021.11/bin:$PATH
+ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.11
+ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.11
+ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
+
+USER $USER

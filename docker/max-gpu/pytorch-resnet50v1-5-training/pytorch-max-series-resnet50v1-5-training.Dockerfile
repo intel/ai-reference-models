@@ -26,13 +26,14 @@ FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 USER root
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    ca-certificates \
-    curl \
-    intel-oneapi-mpi-devel=2021.11.0-49493  \
-    intel-oneapi-ccl=2021.11.2-5 \
-    && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        intel-oneapi-mpi-devel=2021.11.0-49493  \
+        intel-oneapi-ccl=2021.11.2-5 && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace/pytorch-max-series-resnet50v1-5-training/models

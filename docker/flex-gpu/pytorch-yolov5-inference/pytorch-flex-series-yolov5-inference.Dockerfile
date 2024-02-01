@@ -19,26 +19,30 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="xpu-flex"
+ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG PYT_BASE_TAG="2.1.10-xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-WORKDIR /home/user/workspace/pytorch-flex-series-yolov5-inference 
+USER root 
 
-RUN apt-get update && \
-    apt-get install -y parallel 
-RUN apt-get install -y pciutils
+WORKDIR /workspace/pytorch-flex-series-yolov5-inference 
 
-# RUN sudo apt-get update && \
-RUN apt-get install -y --no-install-recommends --fix-missing numactl ffmpeg libsm6 libxext6
+ENV DEBIAN_FRONTEND=noninteractive
 
 ARG PY_VERSION=3.10
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing \
-    build-essential \
-    python${PY_VERSION}-dev
+RUN apt-get update && \ 
+    apt-get install -y --no-install-recommends \ 
+        build-essential \
+        ffmpeg \ 
+        libsm6 \ 
+        libxext6 \ 
+        numactl \ 
+        parallel \ 
+        pciutils \ 
+        python${PY_VERSION}-dev && \ 
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip install \
     matplotlib>=3.2.2 \
@@ -58,3 +62,5 @@ COPY quickstart/object_detection/pytorch/yolov5/inference/gpu/inference.sh quick
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
+
+USER $USER

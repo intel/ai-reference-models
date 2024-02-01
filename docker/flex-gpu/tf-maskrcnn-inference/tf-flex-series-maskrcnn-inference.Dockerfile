@@ -26,11 +26,13 @@ FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
 WORKDIR /workspace/tf-flex-series-maskrcnn-inference/models
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      numactl \
-      parallel \
-      pciutils && \
+    	numactl \
+      	parallel \
+      	pciutils && \
     rm -rf /var/lib/apt/lists/*
     
 RUN python -m pip install opencv-python-headless pycocotools 
