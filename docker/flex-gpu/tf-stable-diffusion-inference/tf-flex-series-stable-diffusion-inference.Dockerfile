@@ -51,8 +51,11 @@ FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
 WORKDIR /workspace/tf-flex-series-stable-diffusion-inference/models
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing git
+    apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY models_v2/tensorflow/stable_diffusion/inference/gpu/ .
 
