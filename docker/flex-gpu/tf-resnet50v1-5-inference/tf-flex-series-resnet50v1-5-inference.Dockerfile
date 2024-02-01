@@ -26,8 +26,11 @@ FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
 WORKDIR /workspace/tf-flex-series-resnet50v1-5-inference/models
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
+    apt-get install -y --no-install-recommends parallel pciutils numactl && \
+    rm -rf /var/lib/apt/lists/*
 
 ARG MODEL_URL
 
