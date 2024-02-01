@@ -26,6 +26,8 @@ FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 USER root
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 WORKDIR /workspace/pytorch-max-series-bert-large-inference/models
 
 COPY models_v2/pytorch/bert_large/inference/gpu .

@@ -19,24 +19,23 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG BASE_TAG="gpu"
+ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
+ARG TF_BASE_TAG="xpu"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
-RUN apt-get update && \
-    apt-get install -y parallel
-RUN apt-get install -y pciutils
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing numactl
+ENV DEBIAN_FRONTEND=noninteractive
 
 ARG PY_VERSION=3.10
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing \
-    build-essential \
-    python${PY_VERSION}-dev
+    apt-get install -y --no-install-recommends \
+        parallel \
+        pciutils \
+        numactl \
+        build-essential \
+        python${PY_VERSION}-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 # Note pycocotools has to be install after the other requirements
 RUN pip install \
@@ -46,8 +45,8 @@ RUN pip install \
         lxml \
         matplotlib \
         numpy>=1.17.4 \
-        'pillow>=9.3.0' && \
-    pip install pycocotools
+        'pillow>=9.3.0' \
+        pycocotools
 
 WORKDIR /workspace/tf-flex-series-ssd-mobilenet-inference
 

@@ -33,8 +33,8 @@ ARG PY_VERSION=3.10
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    build-essential \
-    python${PY_VERSION}-dev && \
+        build-essential \
+        python${PY_VERSION}-dev && \
     rm -rf /var/lib/apt/lists/*
 
 RUN python -m pip install datasets \

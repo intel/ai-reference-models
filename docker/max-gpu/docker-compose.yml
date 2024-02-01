@@ -32,9 +32,11 @@ services:
         PYT_BASE_TAG: ${PYT_BASE_TAG:-2.1.10-xpu}   
       dockerfile: docker/max-gpu/pytorch-resnet50v1-5-inference/pytorch-max-series-resnet50v1-5-inference.Dockerfile
     command: >
-      sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+      sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__);print(ipex.xpu.is_available())'"
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
     pull_policy: always
+    devices:
+      - /dev/dri:/dev/dri
   pytorch-resnet50v1-5-training:
     build:
       dockerfile: docker/max-gpu/pytorch-resnet50v1-5-training/pytorch-max-series-resnet50v1-5-training.Dockerfile
@@ -62,9 +64,11 @@ services:
         FP32_MODEL_URL: ${FP32_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1.pb}
       dockerfile: docker/max-gpu/tf-resnet50v1-5-inference/tf-max-series-resnet50v1-5-inference.Dockerfile
     command: >
-      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__);from tensorflow.python.client import device_lib; print(device_lib.list_local_devices())'"
     extends: pytorch-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-inference
+    devices:
+      - /dev/dri:/dev/dri
   tf-resnet50v1-5-training:
     build: 
       dockerfile: docker/max-gpu/tf-resnet50v1-5-training/tf-max-series-resnet50v1-5-training.Dockerfile
@@ -112,16 +116,16 @@ services:
       dockerfile: docker/max-gpu/pytorch-stable-diffusion-inference/pytorch-max-series-stable-diffusion-inference.Dockerfile
     extends: pytorch-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-stable-diffusion-inference
-  pytorch-gpt-j-6b-mlperf-inference:
-    build:
-      context: ../../
-      args:
-        http_proxy: ${http_proxy}
-        https_proxy: ${https_proxy}
-        no_proxy: ''
-        NO_PROXY: ''
-        BASE_IMAGE: intel/oneapi-basekit
-        BASE_TAG: ${BASE_TAG:-2023.1.0-devel-ubuntu22.04}
-        PYTHON: python3.9
-      dockerfile: docker/max-gpu/pytorch-gpt-j-6b-mlperf-inference/pytorch-max-series-gpt-j-6b-mlperf-inference.Dockerfile
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference
+  # pytorch-gpt-j-6b-mlperf-inference:
+  #   build:
+  #     context: ../../
+  #     args:
+  #       http_proxy: ${http_proxy}
+  #       https_proxy: ${https_proxy}
+  #       no_proxy: ''
+  #       NO_PROXY: ''
+  #       BASE_IMAGE: intel/oneapi-basekit
+  #       BASE_TAG: ${BASE_TAG:-2023.1.0-devel-ubuntu22.04}
+  #       PYTHON: python3.9
+  #     dockerfile: docker/max-gpu/pytorch-gpt-j-6b-mlperf-inference/pytorch-max-series-gpt-j-6b-mlperf-inference.Dockerfile
+  #   image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-max-gpu-gptj-6b-inference

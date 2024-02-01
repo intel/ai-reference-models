@@ -38,6 +38,8 @@ ARG TF_BASE_TAG="xpu"
 
 FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 WORKDIR /workspace/tf-flex-series-efficientnet-inference/models
 
 RUN pip install pillow

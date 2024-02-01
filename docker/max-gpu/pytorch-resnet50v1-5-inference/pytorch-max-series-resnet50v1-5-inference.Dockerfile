@@ -45,6 +45,8 @@ FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 USER root
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 WORKDIR /workspace/pytorch-max-series-resnet50v1-5-inference/models
 
 COPY models_v2/pytorch/resnet50v1_5/inference/gpu .
