@@ -506,10 +506,13 @@ def main_worker(gpu, ngpus_per_node, args):
                     quantizer = X86InductorQuantizer()
                     quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
                     prepared_model = prepare_pt2e(exported_model, quantizer)
-                    for i, (images, _) in enumerate(val_loader):
-                        images = images.contiguous(memory_format=torch.channels_last)
-                        prepared_model(images)
-                        if i==4: break
+                    if val_loader:
+                        for i, (images, _) in enumerate(val_loader):
+                            images = images.contiguous(memory_format=torch.channels_last)
+                            prepared_model(images)
+                            if i==4: break
+                    else:
+                        prepared_model(x)
                     converted_model = convert_pt2e(prepared_model)
                     torch.ao.quantization.move_exported_model_to_eval(converted_model)
                     if args.ipex:
