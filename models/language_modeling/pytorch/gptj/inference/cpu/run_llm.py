@@ -104,6 +104,31 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+def trace_handler(prof):
+    print(prof.key_averages().table(
+        sort_by="self_cpu_time_total", row_limit=10))
+    import datetime
+    now = datetime.datetime.now()
+    log_path = os.path.join(os.getcwd(), "gptj_profiling_{}_step_{}.json".format(now.strftime("%Y%m%d%H%M%S"), str(prof.step_num)))
+    prof.export_chrome_trace(log_path)
+
+profile_ctx = torch.profiler.profile(
+    activities=[
+        torch.profiler.ProfilerActivity.CPU,
+    ],
+    schedule=torch.profiler.schedule(
+        wait=0,
+        warmup=0,
+        active=1,
+        repeat=1),
+    on_trace_ready=trace_handler,
+    record_shapes=True,
+    profile_memory=True,
+    with_stack=True,
+    with_flops=True,
+    with_modules=True
+)
+
 # beam search = 4
 num_beams = 4
 generate_kwargs = dict(do_sample=False, temperature=0.9, num_beams=num_beams)
@@ -589,17 +614,7 @@ elif args.dtype == "int8" and args.inductor:
 def benchmark_warmup(prompt):
     # start
     if args.profile:
-
-        def trace_handler(prof):
-            print(
-                prof.key_averages().table(sort_by="self_cpu_time_total", row_limit=-1)
-            )
-
-        with torch.profiler.profile(
-            activities=[torch.profiler.ProfilerActivity.CPU],
-            schedule=torch.profiler.schedule(wait=1, warmup=3, active=1),
-            on_trace_ready=trace_handler,
-        ) as prof:
+        with profile_ctx as prof:
             for i in range(5):
                 input_ids = tokenizer(prompt, return_tensors="pt").input_ids
                 output = user_model.generate(
