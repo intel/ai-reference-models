@@ -287,9 +287,8 @@ def main_worker(gpu, ngpus_per_node, args):
         import intel_extension_for_pytorch as ipex
     elif args.inductor:
         args.jit = False
-    # for ipex path, always convert model to channels_last for bf16, fp32.
-    # TODO: int8 path: https://jira.devtools.intel.com/browse/MFDNN-6103
-    if args.ipex and not args.int8:
+    # for ipex path, always convert model to channels_last for bf16, fp32, int8.
+    if args.ipex:
         model = model.to(memory_format=torch.channels_last)
     if args.inductor:
         model = model.to(memory_format=torch.channels_last)
@@ -467,7 +466,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     model = ipex.optimize(model, dtype=torch.bfloat16, inplace=True)
                     print("running bfloat16 evalation step\n")
                 elif args.fp16:
-                    model = ipex.optimize(model, dtype=torch.half, conv_bn_folding=False, auto_kernel_selection=True, inplace=True)
+                    model = ipex.optimize(model, dtype=torch.half, inplace=True)
                     print("running float16 evalation step\n")
                 else:
                     model = ipex.optimize(model, dtype=torch.float32, inplace=True)
@@ -507,7 +506,10 @@ def main_worker(gpu, ngpus_per_node, args):
                     quantizer = X86InductorQuantizer()
                     quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
                     prepared_model = prepare_pt2e(exported_model, quantizer)
-                    prepared_model(x)
+                    for i, (images, _) in enumerate(val_loader):
+                        images = images.contiguous(memory_format=torch.channels_last)
+                        prepared_model(images)
+                        if i==4: break
                     converted_model = convert_pt2e(prepared_model)
                     torch.ao.quantization.move_exported_model_to_eval(converted_model)
                     if args.ipex:
@@ -564,8 +566,8 @@ def main_worker(gpu, ngpus_per_node, args):
 
         if args.ipex and args.fp16:
             scaler = torch.cpu.amp.GradScaler()
-            model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, fuse_update_step=False)
-        
+            model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, fuse_update_step=False)
+
         if args.inductor:
             with torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16, dtype=torch.half if args.fp16 else torch.bfloat16):
                 if args.ipex:
