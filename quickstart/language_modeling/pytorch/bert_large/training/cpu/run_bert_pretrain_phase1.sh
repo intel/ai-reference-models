@@ -40,12 +40,16 @@ elif [[ $PRECISION == "fp16" ]]; then
     echo "### running FP16 mode"
     ARGS="$ARGS --fp16"
     precision=fp16
+elif [[ $PRECISION == "fp8" ]]; then
+    echo "### running FP8 mode"
+    ARGS="$ARGS --fp8"
+    precision=fp8
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "### running FP32 mode"
 
 else
     echo "The specified precision '$PRECISION' is unsupported."
-    echo "Supported precisions are: fp32, bf32, avx-fp32, bf16"
+    echo "Supported precisions are: fp32, bf32, avx-fp32, bf16, fp8"
     exit 1
 fi
 

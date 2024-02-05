@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fc9411e95..2579f42b8 100644
+index fc9411e95..4490b0e53 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -12,19 +12,44 @@ index fc9411e95..2579f42b8 100644
  
  import numpy as np
  import torch
-@@ -48,7 +51,10 @@ from transformers.data.metrics.squad_metrics import (
+@@ -48,7 +51,36 @@ from transformers.data.metrics.squad_metrics import (
  from transformers.data.processors.squad import SquadResult, SquadV1Processor, SquadV2Processor
  from transformers.trainer_utils import is_main_process
  
--
++from intel_extension_for_pytorch.quantization.fp8 import (
++    fp8_autocast,
++    DelayedScaling,
++    Format,
++    prepare_fp8,
++)
+ 
 +def trace_handler(prof):
 +    print(prof.key_averages().table(
-+        sort_by="self_cpu_time_total", row_limit=-1))
-+    prof.export_chrome_trace("./log/test_trace_" + str(prof.step_num) + ".json")
++        sort_by="self_cpu_time_total", row_limit=10))
++    import datetime
++    now = datetime.datetime.now()
++    log_path = os.path.join(os.getcwd(), "bert_profiling_{}_step_{}.json".format(now.strftime("%Y%m%d%H%M%S"), str(prof.step_num)))
++    prof.export_chrome_trace(log_path)
++profile_ctx = torch.profiler.profile(
++        activities=[
++            torch.profiler.ProfilerActivity.CPU,
++        ],
++        schedule=torch.profiler.schedule(
++            wait=0,
++            warmup=20,
++            active=20,
++            repeat=1),
++        on_trace_ready=trace_handler,
++        record_shapes=True,
++        profile_memory=True,
++        with_stack=True,
++        with_flops=True,
++        with_modules=True
++    )
  try:
      from torch.utils.tensorboard import SummaryWriter
  except ImportError:
-@@ -265,6 +271,205 @@ def train(args, train_dataset, model, tokenizer):
+@@ -265,6 +297,214 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -87,7 +112,7 @@ index fc9411e95..2579f42b8 100644
 +                model = torch.jit.trace(model, jit_inputs, strict=False)
 +                model = torch.jit.freeze(model)
 +                #model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
-+                print(model.graph)
++                # print(model.graph)
 +    elif args.fp16_cpu:
 +        if args.ipex:
 +            model = ipex.optimize(model, dtype=torch.half, conv_bn_folding=False, auto_kernel_selection=True, weights_prepack=True)
@@ -101,6 +126,10 @@ index fc9411e95..2579f42b8 100644
 +        with torch.no_grad():
 +             model = torch.jit.trace(model, jit_inputs, strict=False)
 +        model = torch.jit.freeze(model)
++    elif args.fp8:
++        model= prepare_fp8(model)
++        if os.path.exists(args.fp8_config):
++            model.load_state_dict(torch.load(args.fp8_config))
 +    elif args.use_jit:
 +        with torch.no_grad():
 +            model = torch.jit.trace(model, jit_inputs, strict=False)
@@ -193,6 +222,8 @@ index fc9411e95..2579f42b8 100644
 +    #        ) as prof:
 +
 +    with tqdm(total=total_steps, desc="Evaluating") as pbar:
++        if args.profile:
++            prof = profile_ctx.__enter__()
 +        for epoch in range(test_epoches + 1):
 +            for it, batch in enumerate(eval_dataloader):
 +                if epoch * steps_per_epoch + it >= total_steps:
@@ -220,17 +251,20 @@ index fc9411e95..2579f42b8 100644
 +                    # print("output[0] size is: {}".format(outputs[0].size()))
 +                    # print("output[1] size is: {}".format(outputs[1].size()))
 +                    # print("outputs is: {}".format(outputs))
-+                    #prof.step()
++                    if args.profile:
++                        prof.step()
 +                    time_end = time.time()
 +                    if epoch * steps_per_epoch + it > args.perf_begin_iter:
 +                        total_time +=(time_end - time_start)
 +                        timeBuff.append(time_end - time_start)
 +                    pbar.update(1)
++        if args.profile:
++            profile_ctx.__exit__(None, None, None)
 +
  
  def evaluate(args, model, tokenizer, prefix=""):
      dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
-@@ -278,6 +483,8 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -278,6 +518,8 @@ def evaluate(args, model, tokenizer, prefix=""):
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
  
@@ -239,31 +273,47 @@ index fc9411e95..2579f42b8 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -286,12 +493,47 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -286,12 +528,63 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
 +    if args.do_calibration:
-+        import intel_extension_for_pytorch as ipex
-+        from intel_extension_for_pytorch.quantization import prepare
-+        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
-+        qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
-+        dumpy_tensor = torch.ones((args.eval_batch_size, 384), dtype=torch.long)
-+        jit_inputs=(dumpy_tensor, dumpy_tensor, dumpy_tensor)
-+        ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
-+        prepared_model = prepare(model, qconfig, example_inputs=jit_inputs, inplace=False)
-+        for step, batch in enumerate(eval_dataloader):
-+            print("calibration step: {}".format(step))
-+            batch = {
-+                "input_ids": batch[0],
-+                "attention_mask": batch[1],
-+                "token_type_ids": batch[2],
-+            }
-+            prepared_model(**batch)
-+            if step == args.calibration_iters -1:
-+                print("calibration finished, quantization info saved on file {}".format(args.int8_config))
-+                prepared_model.save_qconf_summary(qconf_summary = args.int8_config)
-+                exit()
++        if args.fp8:
++            with fp8_autocast(enabled=False, calibrating=True, fp8_recipe=DelayedScaling(fp8_format=Format.E4M3, amax_history_len=1024)):
++                for step, batch in enumerate(eval_dataloader):
++                    print("calibration step: {}".format(step))
++                    batch = {
++                        "input_ids": batch[0],
++                        "attention_mask": batch[1],
++                        "token_type_ids": batch[2],
++                    }
++
++                    _ = model(**batch)
++                    if step == args.calibration_iters -1:
++                        torch.save(model.state_dict(), args.fp8_config)
++                        print("calibration finished, FP8 quantization info saved on file {}".format(args.fp8_config))
++                        exit()
++        else:
++            import intel_extension_for_pytorch as ipex
++            from intel_extension_for_pytorch.quantization import prepare
++            from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
++            qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
++            dumpy_tensor = torch.ones((args.eval_batch_size, 384), dtype=torch.long)
++            jit_inputs=(dumpy_tensor, dumpy_tensor, dumpy_tensor)
++            ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
++            prepared_model = prepare(model, qconfig, example_inputs=jit_inputs, inplace=False)
++            for step, batch in enumerate(eval_dataloader):
++                print("calibration step: {}".format(step))
++                batch = {
++                    "input_ids": batch[0],
++                    "attention_mask": batch[1],
++                    "token_type_ids": batch[2],
++                }
++                prepared_model(**batch)
++                if step == args.calibration_iters -1:
++                    print("calibration finished, quantization info saved on file {}".format(args.int8_config))
++                    prepared_model.save_qconf_summary(qconf_summary = args.int8_config)
++                    exit()
 +    if args.benchmark:
 +        if args.use_share_weight:
 +            threads = []
@@ -288,13 +338,16 @@ index fc9411e95..2579f42b8 100644
          batch = tuple(t.to(args.device) for t in batch)
  
          with torch.no_grad():
-@@ -314,13 +556,17 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -314,13 +607,20 @@ def evaluate(args, model, tokenizer, prefix=""):
                      inputs.update(
                          {"langs": (torch.ones(batch[0].shape, dtype=torch.int64) * args.lang_id).to(args.device)}
                      )
 -            outputs = model(**inputs)
 +            if args.inductor:
 +                with torch.cpu.amp.autocast(enabled=args.bf16 or args.int8_bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
++                    outputs = model(**inputs)
++            elif args.fp8:
++                with fp8_autocast(enabled=True, calibrating=False, fp8_recipe=DelayedScaling(fp8_format=Format.E4M3, amax_history_len=1024)):
 +                    outputs = model(**inputs)
 +            else:
 +                outputs = model(**inputs)
@@ -308,7 +361,7 @@ index fc9411e95..2579f42b8 100644
  
              # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
              # models only use two.
-@@ -671,7 +917,57 @@ def main():
+@@ -671,7 +971,62 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -338,6 +391,10 @@ index fc9411e95..2579f42b8 100644
 +                        help='use int8 bf16 mix precision')
 +    parser.add_argument("--int8_config", type=str, default="config.json", 
 +                        help="quantization config file for int8 mode")
++    parser.add_argument('--fp8', dest='fp8', action='store_true',
++                        help='use FP8')
++    parser.add_argument("--fp8_config", type=str, default="fp8_state_dict.pt",
++                        help="FP8 state file for FP8 mode")
 +    parser.add_argument("--do_calibration", action='store_true',
 +                        help="Enable calibration process")
 +    parser.add_argument("--calibration_iters", type=int, default=100,
@@ -358,7 +415,8 @@ index fc9411e95..2579f42b8 100644
 +                        help='use intel pytorch extension')
 +    parser.add_argument('--inductor', action='store_true', default=False,
 +                        help='using torch.compile() inductor backend')
-+
++    parser.add_argument('--profile', action='store_true', default=False,
++                        help='profile')
      args = parser.parse_args()
 +    if args.ipex:
 +        import intel_extension_for_pytorch as ipex
@@ -366,7 +424,7 @@ index fc9411e95..2579f42b8 100644
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
          logger.warning(
-@@ -742,11 +1038,13 @@ def main():
+@@ -742,11 +1097,13 @@ def main():
      args.model_type = args.model_type.lower()
      config = AutoConfig.from_pretrained(
          args.config_name if args.config_name else args.model_name_or_path,
@@ -380,7 +438,7 @@ index fc9411e95..2579f42b8 100644
          cache_dir=args.cache_dir if args.cache_dir else None,
          use_fast=False,  # SquadDataset is not compatible with Fast tokenizers which have a smarter overflow handeling
      )
-@@ -824,7 +1122,7 @@ def main():
+@@ -824,7 +1181,7 @@ def main():
          for checkpoint in checkpoints:
              # Reload the model
              global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
@@ -462,7 +520,7 @@ index 587dc2e59..b4e331e28 100644
  class GELUActivation(nn.Module):
      """
 diff --git a/src/transformers/generation/utils.py b/src/transformers/generation/utils.py
-index ae12ae293..041fc2f23 100644
+index ae12ae293..e6a08d367 100644
 --- a/src/transformers/generation/utils.py
 +++ b/src/transformers/generation/utils.py
 @@ -16,6 +16,8 @@
@@ -512,7 +570,7 @@ index ae12ae293..041fc2f23 100644
              if synced_gpus:
                  # Under synced_gpus the `forward` call must continue until all gpus complete their sequence.
                  # The following logic allows an early break if all peers finished generating their sequence
-@@ -2243,19 +2255,93 @@ class GenerationMixin:
+@@ -2243,19 +2255,95 @@ class GenerationMixin:
  
              # prepare model inputs
              model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
@@ -529,7 +587,7 @@ index ae12ae293..041fc2f23 100644
 -                continue  # don't waste resources running the code we don't need
 -
 -            next_token_logits = outputs.logits[:, -1, :]
-+            if re.search("GPTJ", self.config.architectures[0]) or re.search("llama", self.config.architectures[0], re.IGNORECASE) or re.search("bloom", self.config.architectures[0], re.IGNORECASE):
++            if re.search("GPTJ", self.config.architectures[0]) or re.search("llama", self.config.architectures[0], re.IGNORECASE) or re.search("bloom", self.config.architectures[0], re.IGNORECASE) or re.search("chatglm", self.config.architectures[0], re.IGNORECASE):
 +                if self.jit == False:
 +                    outputs = self(
 +                        **model_inputs,
@@ -558,7 +616,9 @@ index ae12ae293..041fc2f23 100644
 +                            model_inputs["position_ids"] = model_inputs["position_ids"][:1,:]
 +                        elif re.search("bloom", self.config.architectures[0], re.IGNORECASE):
 +                            model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.hidden_size/self.config.n_head)]), torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.hidden_size/self.config.n_head)])) for i in range(self.config.n_layer)])
-+                        model_inputs["attention_mask"] = model_inputs["attention_mask"][:1,:]
++                        elif re.search("chatglm", self.config.architectures[0], re.IGNORECASE):
++                            model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)]), torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)])) for i in range(self.config.num_layers)])
++                            model_inputs["position_ids"] = model_inputs["position_ids"][:1,:]
 +                        model_inputs["input_ids"] = model_inputs["input_ids"][:1,:]
 +                        model_inputs["attention_mask"] = torch.cat([torch.zeros(1, 1), model_inputs["attention_mask"]], dim=-1)
 +                    else:
@@ -619,7 +679,7 @@ index ae12ae293..041fc2f23 100644
  
              # pre-process distribution
              next_tokens_scores = logits_processor(input_ids, next_token_logits)
-@@ -2302,6 +2388,7 @@ class GenerationMixin:
+@@ -2302,6 +2390,7 @@ class GenerationMixin:
                  )
  
              # stop when each sentence is finished, or if we exceed the maximum length
@@ -627,7 +687,7 @@ index ae12ae293..041fc2f23 100644
              if unfinished_sequences.max() == 0 or stopping_criteria(input_ids, scores):
                  if not synced_gpus:
                      break
-@@ -2313,7 +2400,7 @@ class GenerationMixin:
+@@ -2313,7 +2402,7 @@ class GenerationMixin:
  
          if return_dict_in_generate:
              if self.config.is_encoder_decoder:
@@ -636,7 +696,7 @@ index ae12ae293..041fc2f23 100644
                      sequences=input_ids,
                      scores=scores,
                      encoder_attentions=encoder_attentions,
-@@ -2323,14 +2410,19 @@ class GenerationMixin:
+@@ -2323,14 +2412,19 @@ class GenerationMixin:
                      decoder_hidden_states=decoder_hidden_states,
                  )
              else:
@@ -658,7 +718,7 @@ index ae12ae293..041fc2f23 100644
  
      def sample(
          self,
-@@ -2733,6 +2825,7 @@ class GenerationMixin:
+@@ -2733,6 +2827,7 @@ class GenerationMixin:
          ['Wie alt bist du?']
          ```"""
          # init values
@@ -666,7 +726,7 @@ index ae12ae293..041fc2f23 100644
          logits_processor = logits_processor if logits_processor is not None else LogitsProcessorList()
          stopping_criteria = stopping_criteria if stopping_criteria is not None else StoppingCriteriaList()
          if max_length is not None:
-@@ -2795,6 +2888,7 @@ class GenerationMixin:
+@@ -2795,6 +2890,7 @@ class GenerationMixin:
  
          this_peer_finished = False  # used by synced_gpus only
          while True:
@@ -674,7 +734,7 @@ index ae12ae293..041fc2f23 100644
              if synced_gpus:
                  # Under synced_gpus the `forward` call must continue until all gpus complete their sequence.
                  # The following logic allows an early break if all peers finished generating their sequence
-@@ -2806,19 +2900,132 @@ class GenerationMixin:
+@@ -2806,19 +2902,134 @@ class GenerationMixin:
                      break
  
              model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
@@ -691,7 +751,7 @@ index ae12ae293..041fc2f23 100644
 -                continue  # don't waste resources running the code we don't need
 -
 -            next_token_logits = outputs.logits[:, -1, :]
-+            if re.search("GPTJ", self.config.architectures[0]) or re.search("llama", self.config.architectures[0], re.IGNORECASE):
++            if re.search("GPTJ", self.config.architectures[0]) or re.search("llama", self.config.architectures[0], re.IGNORECASE) or re.search("chatglm", self.config.architectures[0], re.IGNORECASE):
 +                if self.jit == False:
 +                    outputs = self(
 +                        **model_inputs,
@@ -716,6 +776,8 @@ index ae12ae293..041fc2f23 100644
 +                            model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)]), torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)])) for i in range(self.config.n_layer)])
 +                        elif re.search("llama", self.config.architectures[0], re.IGNORECASE):
 +                            model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)]), torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)])) for i in range(self.config.num_hidden_layers)])
++                        elif re.search("chatglm", self.config.architectures[0], re.IGNORECASE):
++                            model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)]), torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)])) for i in range(self.config.num_layers)])
 +
 +                        model_inputs["attention_mask"] = model_inputs["attention_mask"][:1,:]
 +                        model_inputs["input_ids"] = model_inputs["input_ids"][:1,:]
@@ -820,7 +882,7 @@ index ae12ae293..041fc2f23 100644
              # hack: adjust tokens for Marian. For Marian we have to make sure that the `pad_token_id`
              # cannot be generated both before and after the `nn.functional.log_softmax` operation.
              next_token_logits = self.adjust_logits_during_generation(next_token_logits, cur_len=cur_len)
-@@ -2887,6 +3094,7 @@ class GenerationMixin:
+@@ -2887,6 +3098,7 @@ class GenerationMixin:
  
              # increase cur_len
              cur_len = cur_len + 1
@@ -828,7 +890,7 @@ index ae12ae293..041fc2f23 100644
  
              if beam_scorer.is_done or stopping_criteria(input_ids, scores):
                  if not synced_gpus:
-@@ -2910,7 +3118,7 @@ class GenerationMixin:
+@@ -2910,7 +3122,7 @@ class GenerationMixin:
                  sequence_outputs["sequence_scores"] = None
  
              if self.config.is_encoder_decoder:
@@ -837,7 +899,7 @@ index ae12ae293..041fc2f23 100644
                      sequences=sequence_outputs["sequences"],
                      sequences_scores=sequence_outputs["sequence_scores"],
                      scores=scores,
-@@ -2922,7 +3130,7 @@ class GenerationMixin:
+@@ -2922,7 +3134,7 @@ class GenerationMixin:
                      decoder_hidden_states=decoder_hidden_states,
                  )
              else:
@@ -846,7 +908,7 @@ index ae12ae293..041fc2f23 100644
                      sequences=sequence_outputs["sequences"],
                      sequences_scores=sequence_outputs["sequence_scores"],
                      scores=scores,
-@@ -2931,7 +3139,9 @@ class GenerationMixin:
+@@ -2931,7 +3143,9 @@ class GenerationMixin:
                      hidden_states=decoder_hidden_states,
                  )
          else:
@@ -858,10 +920,25 @@ index ae12ae293..041fc2f23 100644
      def beam_sample(
          self,
 diff --git a/src/transformers/modeling_utils.py b/src/transformers/modeling_utils.py
-index 0df8d7e25..99d107a81 100644
+index 0df8d7e25..d14c9eede 100644
 --- a/src/transformers/modeling_utils.py
 +++ b/src/transformers/modeling_utils.py
-@@ -1831,7 +1831,10 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
+@@ -298,8 +298,13 @@ def shard_checkpoint(
+     current_block_size = 0
+     total_size = 0
+ 
++    import io
+     for key, weight in state_dict.items():
+-        weight_size = weight.numel() * dtype_byte_size(weight.dtype)
++        if isinstance(weight, io.BytesIO):
++            # FP8 has extra state with io.BytesIO
++            weight_size = weight.seek(0, io.SEEK_END)
++        else:
++            weight_size = weight.numel() * dtype_byte_size(weight.dtype)
+ 
+         # If this weight is going to tip up over the maximal size, we split.
+         if current_block_size + weight_size > max_shard_size:
+@@ -1831,7 +1836,10 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
                  and is_main_process
                  and reg.fullmatch(filename_no_suffix) is not None
              ):
@@ -1026,20 +1103,40 @@ index 474b92f72..98aab97f0 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499b0..b681d82de 100755
+index cf71499b0..3d5c53274 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
-@@ -158,6 +158,9 @@ from .utils import (
+@@ -158,6 +158,29 @@ from .utils import (
  )
  from .utils.generic import ContextManagers
  
 +def trace_handler(prof):
 +    print(prof.key_averages().table(
-+        sort_by="self_cpu_time_total", row_limit=-1))
++        sort_by="self_cpu_time_total", row_limit=10))
++    import datetime
++    now = datetime.datetime.now()
++    log_path = os.path.join(os.getcwd(), "vit_profiling_{}_step_{}.json".format(now.strftime("%Y%m%d%H%M%S"), str(prof.step_num)))
++    prof.export_chrome_trace(log_path)
++profile_ctx = torch.profiler.profile(
++        activities=[
++            torch.profiler.ProfilerActivity.CPU,
++        ],
++        schedule=torch.profiler.schedule(
++            wait=0,
++            warmup=20,
++            active=20,
++            repeat=1),
++        on_trace_ready=trace_handler,
++        record_shapes=True,
++        profile_memory=True,
++        with_stack=True,
++        with_flops=True,
++        with_modules=True
++    )
  
  _is_native_cpu_amp_available = is_torch_greater_or_equal_than_1_10
  
-@@ -336,7 +339,7 @@ class Trainer:
+@@ -336,7 +359,7 @@ class Trainer:
          self.hp_name = None
          self.deepspeed = None
          self.is_in_train = False
@@ -1048,7 +1145,7 @@ index cf71499b0..b681d82de 100755
          # memory metrics - must set up as early as possible
          self._memory_tracker = TrainerMemoryTracker(self.args.skip_memory_metrics)
          self._memory_tracker.start()
-@@ -606,7 +609,7 @@ class Trainer:
+@@ -606,7 +629,7 @@ class Trainer:
                          "but SageMaker Model Parallelism < 1.10 does not support FP16 in trainer."
                      )
  
@@ -1057,7 +1154,7 @@ index cf71499b0..b681d82de 100755
              if args.half_precision_backend == "auto":
                  if args.device == torch.device("cpu"):
                      if args.fp16:
-@@ -621,7 +624,7 @@ class Trainer:
+@@ -621,7 +644,7 @@ class Trainer:
              logger.info(f"Using {args.half_precision_backend} half precision backend")
  
          self.do_grad_scaling = False
@@ -1066,7 +1163,7 @@ index cf71499b0..b681d82de 100755
              # deepspeed and SageMaker Model Parallel manage their own half precision
              if args.half_precision_backend == "cuda_amp":
                  self.use_cuda_amp = True
-@@ -645,7 +648,7 @@ class Trainer:
+@@ -645,7 +668,7 @@ class Trainer:
                          self.scaler = torch.cuda.amp.GradScaler()
              elif args.half_precision_backend == "cpu_amp":
                  self.use_cpu_amp = True
@@ -1075,7 +1172,7 @@ index cf71499b0..b681d82de 100755
              else:
                  if not is_apex_available():
                      raise ImportError(
-@@ -695,7 +698,7 @@ class Trainer:
+@@ -695,7 +718,7 @@ class Trainer:
          self._memory_tracker.stop_and_update_metrics()
  
          # torch.compile
@@ -1084,7 +1181,7 @@ index cf71499b0..b681d82de 100755
              raise RuntimeError("Using torch.compile requires PyTorch 2.0 or higher.")
  
      def add_callback(self, callback):
-@@ -1323,15 +1326,45 @@ class Trainer:
+@@ -1323,15 +1346,45 @@ class Trainer:
          return model
  
      def torch_jit_model_eval(self, model, dataloader, training=False):
@@ -1130,7 +1227,7 @@ index cf71499b0..b681d82de 100755
                      if version.parse(version.parse(torch.__version__).base_version) >= version.parse("1.14.0"):
                          if isinstance(example_batch, dict):
                              jit_model = torch.jit.trace(jit_model, example_kwarg_inputs=example_batch, strict=False)
-@@ -1361,6 +1394,7 @@ class Trainer:
+@@ -1361,6 +1414,7 @@ class Trainer:
          return model
  
      def ipex_optimize_model(self, model, training=False, dtype=torch.float32):
@@ -1138,7 +1235,7 @@ index cf71499b0..b681d82de 100755
          if not is_ipex_available():
              raise ImportError(
                  "Using IPEX but IPEX is not installed or IPEX's version does not match current PyTorch, please refer"
-@@ -1372,22 +1406,39 @@ class Trainer:
+@@ -1372,22 +1426,39 @@ class Trainer:
          if not training:
              model.eval()
              dtype = torch.bfloat16 if not self.is_in_train and self.args.bf16_full_eval else dtype
@@ -1185,7 +1282,7 @@ index cf71499b0..b681d82de 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -1415,6 +1466,69 @@ class Trainer:
+@@ -1415,6 +1486,69 @@ class Trainer:
              model = self.torch_jit_model_eval(model, dataloader, training)
              self.jit_compilation_time = round(time.time() - start_time, 4)
  
@@ -1255,7 +1352,7 @@ index cf71499b0..b681d82de 100755
          # Note: in torch.distributed mode, there's no point in wrapping the model
          # inside a DistributedDataParallel as we'll be under `no_grad` anyways.
          if not training:
-@@ -1575,8 +1689,9 @@ class Trainer:
+@@ -1575,8 +1709,9 @@ class Trainer:
  
          # torch.compile() needs to be called after wrapping the model with FSDP or DDP
          # to ensure that it accounts for the graph breaks required by those wrappers
@@ -1267,7 +1364,7 @@ index cf71499b0..b681d82de 100755
  
          return model
  
-@@ -1993,7 +2108,11 @@ class Trainer:
+@@ -1993,7 +2128,11 @@ class Trainer:
                          scale_after = self.scaler.get_scale()
                          optimizer_was_run = scale_before <= scale_after
                      else:
@@ -1280,7 +1377,7 @@ index cf71499b0..b681d82de 100755
  
                      if optimizer_was_run and not self.deepspeed:
                          self.lr_scheduler.step()
-@@ -2714,7 +2833,10 @@ class Trainer:
+@@ -2714,7 +2853,10 @@ class Trainer:
              # loss gets scaled under gradient_accumulation_steps in deepspeed
              loss = self.deepspeed.backward(loss)
          else:
@@ -1292,10 +1389,11 @@ index cf71499b0..b681d82de 100755
  
          return loss.detach()
  
-@@ -3085,6 +3207,54 @@ class Trainer:
+@@ -3085,7 +3227,60 @@ class Trainer:
          self._memory_tracker.stop_and_update_metrics(output.metrics)
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
+-
 +   
 +    def benchmark_evaluate(self, model, dataloader):
 +        steps_per_epoch = len(dataloader)
@@ -1315,6 +1413,8 @@ index cf71499b0..b681d82de 100755
 +        #   on_trace_ready=trace_handler
 +        # ) as prof:
 +        with tqdm(total=total_steps, desc="Evaluating") as pbar:
++            if self.args.profile:
++                prof = profile_ctx.__enter__()
 +            for epoch in range(test_epoches + 1):
 +                for it, batch in enumerate(dataloader):
 +                    if epoch * steps_per_epoch + it >= total_steps:
@@ -1344,10 +1444,14 @@ index cf71499b0..b681d82de 100755
 +                        if epoch * steps_per_epoch + it > self.args.perf_begin_iter:
 +                            timeBuff.append(end-start)
 +                        pbar.update(1)
- 
++                        if self.args.profile:
++                            prof.step()
++            if self.args.profile:
++                profile_ctx.__exit__(None, None, None)
      def evaluation_loop(
          self,
-@@ -3133,7 +3303,12 @@ class Trainer:
+         dataloader: DataLoader,
+@@ -3133,7 +3328,12 @@ class Trainer:
              logger.info("  Num examples: Unknown")
          logger.info(f"  Batch size = {batch_size}")
  
@@ -1361,7 +1465,7 @@ index cf71499b0..b681d82de 100755
  
          self.callback_handler.eval_dataloader = dataloader
          # Do this before wrapping.
-@@ -3158,6 +3333,20 @@ class Trainer:
+@@ -3158,6 +3358,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.
@@ -1383,7 +1487,7 @@ index cf71499b0..b681d82de 100755
          observed_num_examples = 0
          # Main evaluation loop
 diff --git a/src/transformers/training_args.py b/src/transformers/training_args.py
-index 088eb06b7..2e0067671 100644
+index 088eb06b7..887cfec22 100644
 --- a/src/transformers/training_args.py
 +++ b/src/transformers/training_args.py
 @@ -777,10 +777,121 @@ class TrainingArguments:
@@ -1508,7 +1612,18 @@ index 088eb06b7..2e0067671 100644
      fp16_opt_level: str = field(
          default="O1",
          metadata={
-@@ -1253,17 +1364,17 @@ class TrainingArguments:
+@@ -963,7 +1074,9 @@ class TrainingArguments:
+     label_smoothing_factor: float = field(
+         default=0.0, metadata={"help": "The label smoothing epsilon to apply (zero means no label smoothing)."}
+     )
+-
++    profile: bool = field(
++        default=False, metadata={"help": "enable profile"}
++    )
+     default_optim = "adamw_hf"
+     # XXX: enable when pytorch==2.0.1 comes out - we want to give it time to get all the bugs sorted out
+     # if is_torch_available() and version.parse(version.parse(torch.__version__).base_version) >= version.parse("2.1.0"):
+@@ -1253,17 +1366,17 @@ class TrainingArguments:
              if version.parse(version.parse(torch.__version__).base_version) == version.parse("2.0.0") and self.fp16:
                  raise ValueError("--optim adamw_torch_fused with --fp16 requires PyTorch>2.0")
  
