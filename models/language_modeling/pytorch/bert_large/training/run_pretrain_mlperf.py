@@ -86,6 +86,12 @@ try:
 except ImportError as e:
     oneccl_bindings_for_pytorch = False
 
+from intel_extension_for_pytorch.quantization.fp8 import (
+    fp8_autocast,
+    DelayedScaling,
+    Format,
+    prepare_fp8,
+)
 
 logger = logging.getLogger(__name__)
 MODEL_CONFIG_CLASSES = list(MODEL_MAPPING.keys())
@@ -353,6 +359,10 @@ def parse_args():
                         default=False,
                         action='store_true',
                         help="Enale BFloat32 training")
+    parser.add_argument("--fp8",
+                        default=False,
+                        action='store_true',
+                        help="Enale FP8 training")
     parser.add_argument("--benchmark", action="store_true", help="Whether to enable benchmark")
     parser.add_argument("--weight_decay", type=float, default=0.0, help="Weight decay to use.")
     parser.add_argument("--num_train_epochs", type=int, default=3, help="Total number of training epochs to perform.")
@@ -616,13 +626,17 @@ def main():
         if args.ipex:
             scaler = torch.cpu.amp.GradScaler()
             model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, weights_prepack=True, fuse_update_step=False)
-    else:
+    elif args.bf16:
         if args.ipex:
             model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float32)
-    with torch.cpu.amp.autocast(enabled=args.bf16):
-        if args.inductor:
-            print('[Info] Running training steps torch.compile() with default backend')
-            model = torch.compile(model)
+    elif args.fp8:
+        if args.ipex:
+            model, optimizer = prepare_fp8(model, optimizer)
+    if not args.fp8:
+        with torch.cpu.amp.autocast(enabled=args.bf16):
+            if args.inductor:
+                print('[Info] Running training steps torch.compile() with default backend')
+                model = torch.compile(model)
 
     worker_seeds, shuffling_seeds = utils.setup_seeds(args.seed, args.num_epochs_to_generate_seeds_for, device)
     worker_seed = worker_seeds[args.local_rank]
@@ -749,6 +763,10 @@ def main():
                     with torch.cpu.amp.autocast():
                         outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                              labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
+                elif args.fp8:
+                    with fp8_autocast(enabled=True, calibrating=False, fp8_recipe=DelayedScaling(fp8_format=Format.E4M3)):
+                        outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
+                                labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
                 else:
                     outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                              labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
