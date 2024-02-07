@@ -11,7 +11,7 @@ This document provides links to step-by-step instructions on how to leverage ref
 
 ## Optimized Workloads
 
-The table below provides links to run each workload in a docker container. The containers are optimized for Linux*. 
+The table below provides links to run each workload in a docker container. The containers were validated on a host running Linux*.
 
 
 | Model                            | Framework                  | Mode and Documentation     |
