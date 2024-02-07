@@ -156,7 +156,7 @@ def main():
             pipe.unet = ipex.optimize(pipe.unet.eval(), inplace=True, auto_kernel_selection=True)
             pipe.vae = ipex.optimize(pipe.vae.eval(), inplace=True, auto_kernel_selection=True)
         elif args.precision == "bf16" or args.precision == "fp16":
-            pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=args.dtype, inplace=True, sample_input=text_encoder_input)
+            # pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=args.dtype, inplace=True, sample_input=text_encoder_input)
             pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=args.dtype, inplace=True)
             pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=args.dtype, inplace=True)
         elif args.precision == "int8-bf16" or args.precision == "int8-fp32":
