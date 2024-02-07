@@ -34,45 +34,50 @@ then
     precision="calibration"
     ARGS="$ARGS --dtype 'int8' --do-calibration --int8-qconfig '${OUTPUT_DIR}/qconfig.json' "
     echo "### running calibration to get qconfig"
+
+    if [[ "$2" == "default" ]]
+    then
+        ARGS="$ARGS --ipex_static_quantize "
+        echo "### ipex_static_quantize"
+    elif [[ "$2" == "sq" ]]
+    then
+        ARGS="$ARGS --ipex_smooth_quant "
+        echo "###  ipex_smooth_quant"
+    else
+        echo "The specified precision '$2' is unsupported."
+        echo "Supported precisions are: default, sq"
+        exit 1
+    fi
+
+    path=${3:-ipex}
+
+    if [[ "$path" == "ipex" ]]
+    then
+        ARGS="$ARGS --ipex "
+        echo "### do calibration for ipex"
+    elif [[ "$path" == "inductor" ]]
+    then
+        ARGS="$ARGS --inductor "
+        echo "### do calibration for inductor"
+    else
+        echo "The specified backend '$3' is unsupported."
+        echo "Supported Backends:[ipex, inductor]"
+        exit 1
+    fi
+    mode="jit"
+    ARGS="$ARGS --jit"
+    echo "### running with jit mode"
+elif [[ "$1" == "fp8" ]]
+then
+    ARGS="--output_dir ${OUTPUT_DIR}  --lambada"
+    precision="fp8"
+    ARGS="$ARGS --dtype 'fp8' --do-calibration --fp8-config '${OUTPUT_DIR}/fp8_state_dict.pt' "
+    echo "### running calibration for fp8"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported [calibration]"
+    echo "Supported [calibration, fp8]"
     exit 1
 fi
-
-if [[ "$2" == "default" ]]
-then
-    ARGS="$ARGS --ipex_static_quantize "
-    echo "### ipex_static_quantize"
-elif [[ "$2" == "sq" ]]
-then
-    ARGS="$ARGS --ipex_smooth_quant "
-    echo "###  ipex_smooth_quant"
-else
-    echo "The specified precision '$2' is unsupported."
-    echo "Supported precisions are: default, sq"
-    exit 1
-fi
-
-path=${3:-ipex}
-
-if [[ "$path" == "ipex" ]]
-then
-    ARGS="$ARGS --ipex "
-    echo "### do calibration for ipex"
-elif [[ "$path" == "inductor" ]]
-then
-    ARGS="$ARGS --inductor "
-    echo "### do calibration for inductor"
-else
-    echo "The specified backend '$3' is unsupported."
-    echo "Supported Backends:[ipex, inductor]"
-    exit 1
-fi
-
-mode="jit"
-ARGS="$ARGS --jit"
-echo "### running with jit mode"
 
 
 FINETUNED_MODEL=${FINETUNED_MODEL:-"'EleutherAI/gpt-j-6b'"}
