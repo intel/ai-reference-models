@@ -11,13 +11,13 @@ This document provides links to step-by-step instructions on how to leverage ref
 
 ## Optimized Workloads
 
-The table below provides links to run each workload in a docker container. The containers are optimized for Linux*. 
+The table below provides links to run each workload in a docker container. The containers were validated on a host running Linux*.
 
 | Model                            | Framework                  | Mode | Precisions | 
 | ----------------------------|     ---------- | ------------------- | ------------ |
 | [3D-UNet](https://arxiv.org/abs/1606.06650) | TensorFlow | [Training](../../models_v2/tensorflow/3d_unet/training/gpu/CONTAINER.md) | BF16 |
 | [BERT Large](https://arxiv.org/pdf/1810.04805.pdf)                                           | PyTorch | [Inference](../../models_v2/pytorch/bert_large/inference/gpu/CONTAINER.md) | FP16, BF16 and FP32 | 
-| [BERT Large](https://arxiv.org/pdf/1810.04805.pdf)                                           | PyTorch | [Training](../../models_v2/pytorch/bert_large/training/gpu) | BF16,TF32 and FP32 |
+| [BERT Large](https://arxiv.org/pdf/1810.04805.pdf)                                           | PyTorch | [Training](../../models_v2/pytorch/bert_large/training/gpu/CONTAINER.md) | BF16,TF32 and FP32 |
 | [BERT Large](https://arxiv.org/pdf/1810.04805.pdf)                                           | TensorFlow | [Inference](../../quickstart/language_modeling/tensorflow/bert_large/inference/gpu/DEVCATALOG.md) | FP16,FP32 |
 | [BERT Large](https://arxiv.org/pdf/1810.04805.pdf)                                           | TensorFlow | [Training](../../models_v2/tensorflow/bert_large/training/gpu/CONTAINER.md) | BF16 |
 | [DistilBERT](https://arxiv.org/abs/1910.01108) | PyTorch | [Inference](../../models_v2/pytorch/distilbert/inference/gpu/CONTAINER_MAX.md) | FP16,BF16 and FP32 |
