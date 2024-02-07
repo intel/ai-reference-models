@@ -1,16 +1,25 @@
-diff --git a/src/diffusers/models/unet_2d_blocks.py b/src/diffusers/models/unet_2d_blocks.py
-index e404cef2..ada3d1a3 100644
---- a/src/diffusers/models/unet_2d_blocks.py
-+++ b/src/diffusers/models/unet_2d_blocks.py
-@@ -2321,7 +2321,7 @@ class CrossAttnUpBlock2D(nn.Module):
-                     b2=self.b2,
+diff --git a/src/diffusers/models/transformer_2d.py b/src/diffusers/models/transformer_2d.py
+index 24abf54d..3fa7df5f 100644
+--- a/src/diffusers/models/transformer_2d.py
++++ b/src/diffusers/models/transformer_2d.py
+@@ -385,7 +385,7 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
+         # 3. Output
+         if self.is_input_continuous:
+             if not self.use_linear_projection:
+-                hidden_states = hidden_states.reshape(batch, height, width, inner_dim).permute(0, 3, 1, 2).contiguous()
++                hidden_states = hidden_states.reshape(batch, height, width, inner_dim).permute(0, 3, 1, 2).contiguous(memory_format=torch.channels_last)
+                 hidden_states = (
+                     self.proj_out(hidden_states, scale=lora_scale)
+                     if not USE_PEFT_BACKEND
+@@ -397,7 +397,7 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
+                     if not USE_PEFT_BACKEND
+                     else self.proj_out(hidden_states)
                  )
+-                hidden_states = hidden_states.reshape(batch, height, width, inner_dim).permute(0, 3, 1, 2).contiguous()
++                hidden_states = hidden_states.reshape(batch, height, width, inner_dim).permute(0, 3, 1, 2).contiguous(memory_format=torch.channels_last)
  
--            hidden_states = torch.cat([hidden_states, res_hidden_states], dim=1)
-+            hidden_states = torch.cat([hidden_states.to(memory_format=torch.channels_last), res_hidden_states.to(memory_format=torch.channels_last)], dim=1)
- 
-             if self.training and self.gradient_checkpointing:
- 
+             output = hidden_states + residual
+         elif self.is_input_vectorized:
 diff --git a/src/diffusers/models/unet_2d_condition.py b/src/diffusers/models/unet_2d_condition.py
 index f248b243..27d4802d 100644
 --- a/src/diffusers/models/unet_2d_condition.py
@@ -82,10 +91,10 @@ index ff5eea2d..10ea4af1 100644
          if not output_type == "latent":
              image = self.vae.decode(denoised / self.vae.config.scaling_factor, return_dict=False)[0]
 diff --git a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-index 9911cbe7..52623a37 100644
+index 9911cbe7..98c7f2ab 100644
 --- a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 +++ b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-@@ -832,19 +832,39 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -832,19 +832,33 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
          self._num_timesteps = len(timesteps)
          with self.progress_bar(total=num_inference_steps) as progress_bar:
              for i, t in enumerate(timesteps):
@@ -103,13 +112,7 @@ index 9911cbe7..52623a37 100644
 -                    cross_attention_kwargs=self.cross_attention_kwargs,
 -                    return_dict=False,
 -                )[0]
-+                if hasattr(self, 'HIGH_PRECISION_STEPS') and (i < self.HIGH_PRECISION_STEPS or i > len(timesteps)-1 - self.HIGH_PRECISION_STEPS):
-+                    noise_pred = self.unet_highprecision(
-+                        latent_model_input.to(memory_format=torch.channels_last).to(dtype=self.precision),
-+                        t,
-+                        encoder_hidden_states=prompt_embeds.to(dtype=self.precision)
-+                    )['sample']
-+                elif hasattr(self, 'traced_unet'):
++                if hasattr(self, 'traced_unet'):
 +                    noise_pred = self.traced_unet(
 +                        latent_model_input.to(memory_format=torch.channels_last).to(dtype=self.precision),
 +                        t,
@@ -133,7 +136,7 @@ index 9911cbe7..52623a37 100644
  
                  # perform guidance
                  if self.do_classifier_free_guidance:
-@@ -875,6 +895,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -875,6 +889,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
                          step_idx = i // getattr(self.scheduler, "order", 1)
                          callback(step_idx, t, latents)
  
