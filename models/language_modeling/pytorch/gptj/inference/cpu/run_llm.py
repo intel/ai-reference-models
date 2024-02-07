@@ -38,6 +38,12 @@ from torch.utils.data import DataLoader
 import intel_extension_for_pytorch as ipex
 from intel_extension_for_pytorch.quantization import convert, prepare
 
+from intel_extension_for_pytorch.quantization.fp8 import (
+    fp8_autocast,
+    DelayedScaling,
+    Format,
+    prepare_fp8,
+)
 
 parser = argparse.ArgumentParser("LLM generation script", add_help=False)
 parser.add_argument(
@@ -58,8 +64,8 @@ parser.add_argument(
 parser.add_argument(
     "--dtype",
     type=str,
-    choices=["fp32", "bf16", "fp16", "int8", "bf32"],
-    help="bf16 or fp32 or fp16 or int8 or bf32",
+    choices=["fp32", "bf16", "fp16", "int8", "bf32", "fp8"],
+    help="bf16 or fp32 or fp16 or int8 or bf32 or fp8",
     default="fp32",
 )
 parser.add_argument(
@@ -81,6 +87,7 @@ parser.add_argument(
 parser.add_argument("--quantized_model_path", default="./best_model.pt")
 parser.add_argument("--do-calibration", action="store_true")
 parser.add_argument("--int8-qconfig", nargs="?", default="./qconfig.json")
+parser.add_argument("--fp8-config", nargs="?", default="./fp8_state_dict.pt")
 parser.add_argument("--lambada", action="store_true")
 parser.add_argument("--accuracy_only", action="store_true")
 parser.add_argument("--benchmark", action="store_true")
@@ -367,18 +374,32 @@ class Evaluator:
             pad_len = self.pad_max - last_ind - 1
             start = time.time()
             if has_position_id:
-                outputs = model(
-                    input_ids,
-                    attention_mask=attention_mask,
-                    position_ids=position_ids,
-                    past_key_values=past_key_values,
-                )
+                if args.dtype == "fp8":
+                    outputs = model(
+                        input_ids,
+                        attention_mask=attention_mask,
+                        position_ids=position_ids,
+                        # fp8 does not use llm.optimize, don't use past_key_values
+                    )
+                else:
+                    outputs = model(
+                        input_ids,
+                        attention_mask=attention_mask,
+                        position_ids=position_ids,
+                        past_key_values=past_key_values,
+                    )
             else:
-                outputs = model(
-                    input_ids,
-                    attention_mask=attention_mask,
-                    past_key_values=past_key_values,
-                )
+                if args.dtype == "fp8":
+                    outputs = model(
+                        input_ids,
+                        attention_mask=attention_mask,
+                    )
+                else:
+                    outputs = model(
+                        input_ids,
+                        attention_mask=attention_mask,
+                        past_key_values=past_key_values,
+                    )
 
             latency += time.time() - start
 
@@ -609,7 +630,50 @@ elif args.dtype == "int8" and args.inductor:
                 user_model = torch.compile(converted_model)
             user_model(**encoded_input)
             user_model(**encoded_input)
+elif args.dtype == "fp8":
+    if args.do_calibration:
+        example_inputs = None
+        for i, (
+            (input_ids, attention_mask, past_key_values, position_ids),
+            last_ind,
+        ) in enumerate(calib_dataloader):
+            example_inputs = {
+                "input_ids": input_ids,
+                "attention_mask": attention_mask,
+                "past_key_values": past_key_values,
+            }
+            if has_position_id:
+                example_inputs["position_ids"] = position_ids
+            break
 
+        prepared_model = prepare_fp8(user_model)
+        prepared_model.eval()
+        with fp8_autocast(enabled=False, calibrating=True, fp8_recipe=DelayedScaling(fp8_format=Format.E4M3, amax_history_len=1024)):
+            with torch.no_grad():
+                for i, (
+                    (input_ids, attention_mask, past_key_values, position_ids),
+                    last_ind,
+                ) in enumerate(calib_dataloader):
+                    if i == 8:
+                        break
+                    if has_position_id:
+                        prepared_model(
+                            input_ids,
+                            attention_mask=attention_mask,
+                            position_ids=position_ids,
+                        )
+                    else:
+                        prepared_model(
+                            input_ids,
+                            attention_mask=attention_mask,
+                        )
+            torch.save(prepared_model.state_dict(), args.fp8_config)
+            print("calibration Done!")
+    else:
+        user_model= prepare_fp8(user_model)
+        if os.path.exists(args.fp8_config):
+            user_model.load_state_dict(torch.load(args.fp8_config))
+        print("model quantization - Done!")
 
 def benchmark_warmup(prompt):
     # start
@@ -729,5 +793,28 @@ if args.accuracy_only:
             )
             user_model = torch.jit.freeze(user_model.eval())
 
-    with torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
-        eval_func(user_model)
+    if args.dtype == "fp8":
+        input_ids = torch.ones(32).to(torch.long)
+        attention_mask = torch.ones(len(input_ids))
+        position_ids = torch.arange(len(input_ids))
+        last_ind = input_ids.shape[0] - 1
+        example_inputs = (
+            {
+                "input_ids": input_ids.unsqueeze(0),
+                "attention_mask": attention_mask.unsqueeze(0),
+                "position_ids": position_ids.unsqueeze(0),
+                "past_key_values": tuple(global_past_key_value),
+            }
+            if has_position_id
+            else {
+                "input_ids": input_ids.unsqueeze(0),
+                "attention_mask": attention_mask.unsqueeze(0),
+                "past_key_values": tuple(global_past_key_value),
+            }
+        )
+
+        with fp8_autocast(enabled=True, calibrating=False, fp8_recipe=DelayedScaling(fp8_format=Format.E4M3, amax_history_len=1024)):
+            eval_func(user_model)
+    else:
+        with torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
+            eval_func(user_model)

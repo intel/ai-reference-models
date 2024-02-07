@@ -58,9 +58,14 @@ then
     precision="int8-bf16"
     ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
     echo "### running int8-bf16 mode"
+elif [[ "$1" == "fp8" ]]
+then
+    precision="fp8"
+    ARGS="$ARGS --dtype 'fp8' --fp8-config '${OUTPUT_DIR}/fp8_state_dict.pt'"
+    echo "### running fp8 mode"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf32, bf16, fp16, int8-fp32, int8-bf16"
+    echo "Supported precisions are: fp32, bf32, bf16, fp16, int8-fp32, int8-bf16, fp8"
     exit 1
 fi
 
@@ -80,14 +85,15 @@ TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
     path="ipex"
     mode="jit"
-    ARGS="$ARGS --jit"
-    echo "### running with jit mode"
+    if [[ "$1" != "fp8" ]];then
+        ARGS="$ARGS --jit --ipex"
+        echo "### running with jit mode"
+    fi
     if [[ "$1" == "int8-bf16" || "$1" == "int8-fp32" ]];then
         ARGS="$ARGS --ipex_smooth_quant"
     fi
     python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./GPT-J_${precision}_accuracy_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
-        --ipex \
         --model-name-or-path   ${FINETUNED_MODEL}
 else
     echo "### running with torch.compile inductor backend"
