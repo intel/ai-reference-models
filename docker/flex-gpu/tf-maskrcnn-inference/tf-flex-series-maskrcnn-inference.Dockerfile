@@ -11,13 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ============================================================================
-#
-# THIS IS A GENERATED DOCKERFILE.
-#
-# This file was assembled from multiple pieces, whose use is documented
-# throughout. Please refer to the TensorFlow dockerfiles documentation
-# for more information.
 
 ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
 ARG TF_BASE_TAG="xpu"
@@ -30,9 +23,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    	numactl \
-      	parallel \
-      	pciutils && \
+        numactl \
+        parallel \
+        pciutils && \
     rm -rf /var/lib/apt/lists/*
     
 RUN python -m pip install opencv-python-headless pycocotools 

@@ -11,13 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ============================================================================
-#
-# THIS IS A GENERATED DOCKERFILE.
-#
-# This file was assembled from multiple pieces, whose use is documented
-# throughout. Please refer to the TensorFlow dockerfiles documentation
-# for more information.
 
 ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
 ARG PYT_BASE_TAG="2.1.10-xpu"
@@ -32,11 +25,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    	ca-certificates \
-      	curl \
-     	numactl \
-      	intel-oneapi-ccl=2021.11.2-5 \
-      	intel-oneapi-mpi-devel=2021.11.0-49493 && \
+        ca-certificates \
+        curl \
+        numactl \
+        intel-oneapi-ccl=2021.11.2-5 \
+        intel-oneapi-mpi-devel=2021.11.0-49493 && \
     rm -rf /var/lib/apt/lists/*
 
 COPY models/recommendation/pytorch/torchrec_dlrm/training/gpu models/recommendation/pytorch/torchrec_dlrm/training/gpu
