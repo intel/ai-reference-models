@@ -4,8 +4,45 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running BERT Large inference using
+This document has instructions for running BERT Large inference on baremetal using
 Intel-optimized TensorFlow.
+
+<!-- 20. Environment setup on baremetal -->
+## Setup on baremetal
+
+* Create a virtual environment `venv-tf`:
+```
+python -m venv venv-tf
+source venv-tf/bin/activate
+```
+
+* Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/)
+```
+# Install Intel Optimized TensorFlow
+pip install intel-tensorflow
+```
+
+* Note: For kernel version 5.16, AVX512_CORE_AMX is turned on by default. If the kernel version < 5.16 , please set the following environment variable for AMX environment: 
+  ```bash
+  DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  # To run VNNI, please set 
+  DNNL_MAX_CPU_ISA=AVX512_CORE_BF16
+  ```
+
+* Clone [Intel AI Reference Models repository](https://github.com/IntelAI/models)
+  ```bash
+  git clone https://github.com/IntelAI/models
+  ```
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| `inference_realtime.sh` | Runs multi instance realtime inference for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, int8, bfloat16 and bfloat32) to compute latency. Waits for all instances to complete, then prints a summarized throughput value. |
+| `inference_realtime_weight_sharing.sh` | Runs multi instance realtime inference with weight sharing for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, int8, bfloat16 and bfloat32) to compute latency for weight sharing. Waits for all instances to complete, then prints a summarized throughput value. |
+| `inference_throughput.sh` | Runs multi instance batch inference for BERT large (SQuAD) using 1 instance per socket with batch size 128 (for precisions: fp32, int8 or bfloat16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value. |
+| `accuracy.sh` | Measures BERT large (SQuAD) inference accuracy for the specified precision (fp32, int8 or bfloat16 and bfloat32). |
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -23,57 +60,51 @@ wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -P wwm_unc
 ```
 Set the `DATASET_DIR` to point to that directory when running BERT Large inference using the SQuAD data.
 
-<!--- 40. Quick Start Scripts -->
-## Quick Start Scripts
+<!--- 50. Baremetal -->
+## Pre-Trained Model
 
-| Script name | Description |
-|-------------|-------------|
-| `profile.sh` | This script runs inference in profile mode with a default `batch_size=32`. |
-| `inference.sh` | Runs realtime inference using a default `batch_size=1` for the specified precision (fp32, bfloat16 or fp16). To run inference for throughtput, set `BATCH_SIZE` environment variable. |
-| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, bfloat16 and fp16) to compute latency. Waits for all instances to complete, then prints a summarized throughput value. |
-| `inference_realtime_weightsharing.sh` | Runs multi instance realtime inference with weight sharing for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32 and bfloat16) to compute latency for weight sharing. Waits for all instances to complete, then prints a summarized throughput value. |
-| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference for BERT large (SQuAD) using 1 instance per socket with batch size 128 (for precisions: fp32, bfloat16 and fp16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value. |
-| `accuracy.sh` | Measures BERT large (SQuAD) inference accuracy for the specified precision (fp32, bfloat16 and fp16). |
+Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
+```bash
+# INT8:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/per_channel_opt_int8_bf16_bert.pb
 
-<!-- 60. Docker -->
-## Docker
+#FP32 and BFloat32:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/fp32_bert_squad.pb
 
-The BERT Large inference model container includes the scripts and libraries
-needed to run BERT Large inference. To run one of the quickstart scripts
-using this container, you'll need to provide volume mounts for the
-dataset and an output directory where log files will be written.
-
-The snippet below shows how to run a quickstart script:
-```
-DATASET_DIR=<path to the dataset being used>
-OUTPUT_DIR=<directory where log files will be saved>
-export PRECISION=<specify the precision to run: fp32, bfloat16 or fp16>
-# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
-export BATCH_SIZE=<customized batch size value>
-
-docker run \
-  --env DATASET_DIR=${DATASET_DIR} \
-  --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env BATCH_SIZE=${BATCH_SIZE} \
-  --env PRECISION=${PRECISION}
-  --env http_proxy=${http_proxy} \
-  --env https_proxy=${https_proxy} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --privileged --init -t \
-  intel/language-modeling:tf-latest-bert-large-inference \
-  /bin/bash ./quickstart/<SCRIPT NAME>.sh
+#BFloat16:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/optimized_bf16_bert.pb
 ```
 
-If you are new to docker and are running into issues with the container,
-see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
-for troubleshooting tips.
+## Download checkpoints:
+```bash
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/bert_large_checkpoints.zip
+unzip bert_large_checkpoints.zip
+export CHECKPOINT_DIR=$(pwd)/bert_large_checkpoints
+```
 
-<!-- 61. Advanced Options -->
-### Advanced Options
+## Run the model
 
-See the [Advanced Options for Model Packages and Containers](/quickstart/common/tensorflow/ModelPackagesAdvancedOptions.md)
-document for more advanced use cases.
+Set environment variables to specify the dataset directory, precision to run, path to pretrained files and an output directory.
+```
+# Navigate to the models directory
+cd models
+
+# Set the required environment vars
+export PRECISION=<specify the precision to run: int8, fp32 , bfloat32 and bfloat16>
+export DATASET_DIR=<path to the dataset>
+export OUTPUT_DIR=<directory where log files will be written>
+export PRETRAINED_MODEL=<path to the downloaded pre-trained model>
+export CHECKPOINT_DIR=<path to the downloaded checkpoints folder>
+
+#Optional envs
+export BATCH_SIZE=<customized batch size value, otherwise it will run with the default value>
+export OMP_NUM_THREADS=<customized value for omp_num_threads, otherwise it will run with the default value>
+export CORES_PER_INSTANCE=<customized value for cores_per_instance, otherwise it will run with the default value>
+
+Run the script:
+./quickstart/language_modeling/tensorflow/bert_large/inference/cpu/<script_name.sh>
+```
+
 <!--- 80. License -->
 ## License
 
