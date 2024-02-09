@@ -10,26 +10,17 @@ Intel-optimized TensorFlow.
 <!-- 20. Environment setup on baremetal -->
 ## Setup on baremetal
 
-* Create and activate virtual environment.
-  ```bash
-  virtualenv -p python <virtualenv_name>
-  source <virtualenv_name>/bin/activate
-  ```
+* Create a virtual environment `venv-tf`:
+```
+python -m venv venv-tf
+source venv-tf/bin/activate
+```
 
-* Install git, numactl and wget, if not installed already
-  ```bash
-  yum update -y && yum install -y git numactl wget
-  ```
-
-* Install Intel Tensorflow
-  ```bash
-  pip install intel-tensorflow==2.11.dev202242
-  ```
-
-* Install the keras version that works with the above tensorflow version:
-  ```bash
-  pip install keras-nightly==2.11.0.dev2022092907
-  ```
+* Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/)
+```
+# Install Intel Optimized TensorFlow
+pip install intel-tensorflow
+```
 
 * Note: For kernel version 5.16, AVX512_CORE_AMX is turned on by default. If the kernel version < 5.16 , please set the following environment variable for AMX environment: 
   ```bash
@@ -38,7 +29,7 @@ Intel-optimized TensorFlow.
   DNNL_MAX_CPU_ISA=AVX512_CORE_BF16
   ```
 
-* Clone [Intel Model Zoo repository](https://github.com/IntelAI/models)
+* Clone [Intel AI Reference Models repository](https://github.com/IntelAI/models)
   ```bash
   git clone https://github.com/IntelAI/models
   ```
@@ -83,7 +74,7 @@ an output directory.
 cd models
 
 # Install pre-requisites for the model:
-./quickstart/language_translation/tensorflow/transformer_mlperf/inference/cpu/setup_spr.sh
+./quickstart/language_translation/tensorflow/transformer_mlperf/inference/cpu/setup.sh
 
 # Set the required environment vars
 export PRECISION=<specify the precision to run: int8, fp32, bfloat16 or bfloat32>

@@ -1,70 +1,67 @@
 <!--- 0. Title -->
-# ResNet50 v1.5 training
+# TensorFlow ResNet50 v1.5 Training
 
 <!-- 10. Description -->
+## Description
 
-This document has instructions for running ResNet50 v1.5 training
-using Intel-optimized TensorFlow.
+This document has instructions for running ResNet50 v1.5 training using
+Intel-optimized TensorFlow.
 
+## Enviromnment setup
 
-<!--- 30. Datasets -->
-## Datasets
+* Create a virtual environment `venv-tf`:
+```
+python -m venv venv-tf
+source venv-tf/bin/activate
+```
 
-Note that the ImageNet dataset is used in these ResNet50 v1.5 examples.
-Download and preprocess the ImageNet dataset using the [instructions here](https://github.com/IntelAI/models/blob/master/datasets/imagenet/README.md).
-After running the conversion script you should have a directory with the
-ImageNet dataset in the TF records format.
+* Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/)
+```
+# Install Intel Optimized TensorFlow
+pip install intel-tensorflow
+```
 
-Set the `DATASET_DIR` to point to this directory when running ResNet50 v1.5.
+>Note: For kernel version 5.16, AVX512_CORE_AMX is turned on by default. If the kernel version < 5.16 , please set the following environment variable for AMX environment: DNNL_MAX_CPU_ISA=AVX512_CORE_AMX. To run VNNI, please set DNNL_MAX_CPU_ISA=AVX512_CORE_BF16.
+* Clone [Intel AI Reference Models repository](https://github.com/IntelAI/models) if you haven't already cloned it.
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
-| [`training_demo.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/training_demo.sh) | Executes a short run using small batch sizes and a limited number of steps to demonstrate the training flow |
-| [`training_1_epoch.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/training_1_epoch.sh) | Executes a test run that trains the model for 1 epoch and saves checkpoint files to an output directory. |
-| [`training_full.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/training_full.sh) | Trains the model using the full dataset and runs until convergence (90 epochs) and saves checkpoint files to an output directory. Note that this will take a considerable amount of time. |
-| [`multi_instance_training_demo.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training_demo.sh) | Uses mpirun to execute 2 processes with 1 process per socket with a batch size of 256 for 50 steps. |
-| [`multi_instance_training.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh) | Uses mpirun to execute 1 processes with 1 process per socket with a batch size of 1024 for the specified precision (fp32, bfloat16 or fp16). Checkpoint files and logs for each instance are saved to the output directory.|
+| [`multi_instance_training.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh) | Uses mpirun to execute 1 processes with 1 process per socket with a batch size of 1024 for the specified precision (fp32 or bfloat16 or bfloat32 or fp16). Checkpoint files and logs for each instance are saved to the output directory.|
 
-## Docker
+<!--- 30. Datasets -->
+## Datasets
 
-The model container `<docker image>` includes the scripts
-and libraries needed to run <model name> <mode>. To run one of the model
-inference quickstart scripts using this container, you'll need to provide volume mounts for
-the ImageNet dataset (if a real dataset is being used) and an output directory where
-checkpoint files will be written.
+Download and preprocess the ImageNet dataset using the [instructions here](https://github.com/IntelAI/models/tree/master/datasets/imagenet#imagenet-dataset-scripts).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
+
+Set the `DATASET_DIR` to point to the TF records directory when running ResNet50 v1.5 (if needed).
+
+## Run the model
+
+After finishing the setup above, set environment variables for the path to your DATASET_DIR for ImageNet and an OUTPUT_DIR where log files and checkpoints will be written. Navigate to your AI Reference Models  directory and then run a quickstart script.
+
+# cd to your AI Reference Models  directory
 
 ```
-DATASET_DIR=<path to the preprocessed imagenet dataset>
-PRECISION=<set the precision to "fp32", "bfloat16" or "fp16">
-OUTPUT_DIR=<directory where log files will be written>
-# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
-export BATCH_SIZE=<customized batch size value>
+# Set the required environment vars
+export PRECISION=<specify the precision to run: fp32 or bfloat16 or bfloat32 or fp16>
+export OUTPUT_DIR=<directory where log files will be written>
+export DATASET_DIR=<set path to the dataset directory>
 
-docker run \
-  --env DATASET_DIR=${DATASET_DIR} \
-  --env PRECISION=${PRECISION} \
-  --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env BATCH_SIZE=${BATCH_SIZE} \
-  --env http_proxy=${http_proxy} \
-  --env https_proxy=${https_proxy} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --privileged --init -t \
-  <docker image> \
-  /bin/bash quickstart/<script name>.sh
+# Optional env vars
+export BATCH_SIZE=<set batch size value else it will run with default value>
 ```
 
-If you are new to docker and are running into issues with the container,
-see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
-for troubleshooting tips.
+Navigate to the models directory to run any of the available benchmarks.
+```
+cd models
 
-<!-- 61. Advanced Options -->
-
-See the [Advanced Options for Model Packages and Containers](/quickstart/common/tensorflow/ModelPackagesAdvancedOptions.md)
-document for more advanced use cases.
+./quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh
+```
 
 <!--- 80. License -->
 ## License
