@@ -29,7 +29,7 @@ services:
         no_proxy: ""
         NO_PROXY: ""
         PYT_BASE_IMAGE: ${PYT_BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        PYT_BASE_TAG: ${PYT_BASE_TAG:-2.1.10-xpu}
+        PYT_BASE_TAG: ${PYT_BASE_TAG:-2.1.10-xpu-pip-base}
       dockerfile: docker/flex-gpu/pytorch-stable-diffusion-inference/pytorch-flex-series-stable-diffusion-inference.Dockerfile
     command: >
       sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__);print(ipex.xpu.is_available())'"

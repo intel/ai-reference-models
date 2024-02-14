@@ -17,8 +17,6 @@ ARG PYT_BASE_TAG="2.1.10-xpu"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-USER root
-
 WORKDIR /workspace/pytorch-flex-series-stable-diffusion-inference/models
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -42,5 +40,3 @@ COPY models_v2/common common
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
-
-USER $USER
