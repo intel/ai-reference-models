@@ -13,11 +13,9 @@
 # limitations under the License.
 
 ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYT_BASE_TAG="2.1.10-xpu"
+ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
-
-USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -30,5 +28,3 @@ RUN python -m pip install -r requirements.txt
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
-
-USER $USER

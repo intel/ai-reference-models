@@ -13,12 +13,11 @@
 # limitations under the License.
 
 ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYT_BASE_TAG="2.1.10-xpu"
+ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
-USER root
 
 WORKDIR /workspace/pytorch-flex-series-dlrm-v1-inference/models
 
@@ -40,4 +39,3 @@ COPY models_v2/common common
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
 
-USER $USER
