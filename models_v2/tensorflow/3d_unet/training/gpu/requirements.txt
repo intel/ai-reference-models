@@ -15,4 +15,4 @@
 #
 
 tfa-nightly
-git+https://github.com/NVIDIA/dllogger.git
+git+https://github.com/NVIDIA/dllogger
