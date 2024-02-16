@@ -37,6 +37,11 @@ services:
     pull_policy: always
     devices:
       - /dev/dri:/dev/dri
+  pytorch-resnet50v1-5-inference:
+    build:
+      dockerfile: docker/flex-gpu/pytorch-resnet50v1-5-inference/pytorch-flex-series-resnet50v1-5-inference.Dockerfile
+    extends: pytorch-stable-diffusion-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
   tf-resnet50v1-5-inference:
     build:
       args:
