@@ -20,7 +20,7 @@ The table below provides links to run each workload in a docker container. The c
 | [DLRM-v1](https://arxiv.org/abs/1906.00091) | PyTorch | [ FP16 Inference](../../models_v2/pytorch/dlrm/inference/gpu/CONTAINER.md) | 
 | [EfficientNet](https://arxiv.org/abs/1905.11946) B0,B3,B4 | TensorFlow | [FP16 Inference](../../models_v2/tensorflow/efficientnet/inference/gpu/CONTAINER.md) |
 | [Mask R-CNN](https://arxiv.org/abs/1703.06870) | TensorFlow | [FP16 Inference](../../models_v2/tensorflow/maskrcnn/inference/gpu/CONTAINER.md) |
-| [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | PyTorch | [INT8 Inference](../../quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/DEVCATALOG_FLEX.md) | 
+| [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | PyTorch | [INT8 Inference](../../models_v2/pytorch//resnet50v1_5/inference/gpu/CONTAINER_FLEX.md) | 
 | [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | TensorFlow | [INT8 Inference](../../models_v2/tensorflow/resnet50v1_5/inference/gpu/CONTAINER_FLEX.md) | 
 | [SSD-MobileNet v1](https://arxiv.org/pdf/1704.04861.pdf) | TensorFlow | [INT8 Inference](../../quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/DEVCATALOG.md) | 
 | [SSD-MobileNet v1](https://arxiv.org/pdf/1704.04861.pdf) | PyTorch | [INT8 Inference](../../quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/DEVCATALOG.md) | 
@@ -33,6 +33,5 @@ The table below provides links to run each workload in a docker container. The c
 
 **Note**: 
 * SSD-MobileNetv1, and YOLOv4 models are supported on older Intel® Extension for TensorFlow* v2.12 and Intel® Extension for PyTorch* 1.13.120+xpu versions. 
-* ResNet50 v1.5(PyTorch) and YOLOv5 models are supported on older Intel® Extension for PyTorch* 2.0.110+xpu versions.
 * Stable Diffusion for Arc GPU was validated on PyTorch* 2.0.110+xpu version.
 * The other models in the list are validated on Intel® Extension for TensorFlow* v2.14 and Intel® Extension for PyTorch* 2.1.10+xpu versions.
