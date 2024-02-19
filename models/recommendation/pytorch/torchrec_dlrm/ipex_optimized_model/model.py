@@ -23,8 +23,6 @@ from torchrec.models.dlrm import SparseArch, InteractionDCNArch, DLRM_DCN
 from torchrec.modules.embedding_modules import EmbeddingBagCollection
 
 from typing import Dict, List, Optional, Tuple
-import intel_extension_for_pytorch as ipex
-from intel_extension_for_pytorch.nn.modules import MergedEmbeddingBagWithCat, MergedEmbeddingBagWithAdaGrad, DistMergeEmbeddingBagWithAdaGrad
 import numpy as np
 
 def _calculate_fan_in_and_fan_out(shape):
@@ -176,6 +174,36 @@ def replace_crossnet(dlrm):
     dlrm.inter_arch.crossnet = new_crossnet
     del(crossnet)
 
+class SparseArchCatDenseIPEX(SparseArch):
+
+    def forward(
+        self,
+        embedded_dense_features,
+        sparse_features,
+    ) -> torch.Tensor:
+        """
+        Args:
+            embedded_dense_features: the output of DenseArch.
+            sparse_features: the indices/offsets for F embeddingbags in embedding_bag_collection
+
+        Returns:
+            torch.Tensor: tensor of shape B X (F + 1) X D.
+        """
+        (B, _) = embedded_dense_features.shape
+        embedding_bag_collection = self.embedding_bag_collection
+        indices = tuple([sf['values'] for _, sf in sparse_features.items()])
+        offsets = tuple([sf['offsets'] for _, sf in sparse_features.items()])
+        if 'MergedEmbeddingBagWithCat' ==  embedding_bag_collection.__class__.__name__:
+            return embedding_bag_collection(indices, offsets, embedded_dense_features)
+        elif 'DistMergeEmbeddingBagWithAdaGrad' ==  embedding_bag_collection.__class__.__name__:
+            embedded_sparse_features = embedding_bag_collection(indices, offsets)
+            return torch.cat((embedded_dense_features.unsqueeze(1), embedded_sparse_features), dim=1).reshape(B, -1)
+        elif 'MergedEmbeddingBagWithAdaGrad' ==  embedding_bag_collection.__class__.__name__:
+            embedded_sparse_features = embedding_bag_collection(indices, offsets)
+        to_cat = [embedded_dense_features] + list(embedded_sparse_features)
+        out = torch.cat(to_cat, dim=1)
+        return out
+
 class SparseArchCatDense(SparseArch):
 
     def forward(
@@ -195,30 +223,23 @@ class SparseArchCatDense(SparseArch):
         embedding_bag_collection = self.embedding_bag_collection
         indices = tuple([sf['values'] for _, sf in sparse_features.items()])
         offsets = tuple([sf['offsets'] for _, sf in sparse_features.items()])
-        if isinstance(embedding_bag_collection, MergedEmbeddingBagWithCat):
-            return embedding_bag_collection(indices, offsets, embedded_dense_features)
-        elif isinstance(embedding_bag_collection, DistMergeEmbeddingBagWithAdaGrad):
-            embedded_sparse_features = embedding_bag_collection(indices, offsets)
-            return torch.cat((embedded_dense_features.unsqueeze(1), embedded_sparse_features), dim=1).reshape(B, -1)
-        elif isinstance(embedding_bag_collection, MergedEmbeddingBagWithAdaGrad):
-            embedded_sparse_features = embedding_bag_collection(indices, offsets)
-        else:
-            embedded_sparse_features: List[torch.Tensor] = []
-            for i, embedding_bag in enumerate(embedding_bag_collection.embedding_bags.values()):
-                for feature_name in embedding_bag_collection._feature_names[i]:
-                    f = sparse_features[feature_name]
-                    res = embedding_bag(
-                        f['values'],
-                        f['offsets'],
-                        per_sample_weights=None,
-                    )
-                    embedded_sparse_features.append(res)
+        embedded_sparse_features: List[torch.Tensor] = []
+        for i, embedding_bag in enumerate(embedding_bag_collection.embedding_bags.values()):
+            for feature_name in embedding_bag_collection._feature_names[i]:
+                f = sparse_features[feature_name]
+                res = embedding_bag(
+                    f['values'],
+                    f['offsets'],
+                    per_sample_weights=None,
+                )
+                embedded_sparse_features.append(res)
         to_cat = [embedded_dense_features] + list(embedded_sparse_features)
         out = torch.cat(to_cat, dim=1)
         return out
 
 def replace_embeddingbag_collection(dlrm, args):
     if args.ipex_optimize:
+        from intel_extension_for_pytorch.nn.modules import MergedEmbeddingBagWithCat, MergedEmbeddingBagWithAdaGrad, DistMergeEmbeddingBagWithAdaGrad
         new_collection = None
         collection = list(dlrm.sparse_arch.embedding_bag_collection.embedding_bags.values())
         if args.inference_only and args.ipex_merged_emb_cat:
@@ -291,6 +312,7 @@ class IPEX_DLRM_DCN(DLRM_DCN):
         over_arch_layer_sizes: List[int],
         dcn_num_layers: int,
         dcn_low_rank_dim: int,
+        use_ipex: False,
         dense_device: Optional[torch.device] = None,
     ) -> None:
         # initialize DLRM
@@ -308,7 +330,10 @@ class IPEX_DLRM_DCN(DLRM_DCN):
         num_sparse_features: int = len(self.sparse_arch.sparse_feature_names)
 
         embedding_bag_collection = self.sparse_arch.embedding_bag_collection
-        self.sparse_arch = SparseArchCatDense(embedding_bag_collection)
+        if use_ipex:
+            self.sparse_arch = SparseArchCatDenseIPEX(embedding_bag_collection)
+        else:
+            self.sparse_arch = SparseArchCatDense(embedding_bag_collection)
 
         crossnet = self.inter_arch.crossnet
         self.inter_arch = InteractionDCNArchWithoutCat(

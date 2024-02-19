@@ -1208,6 +1208,7 @@ def construct_model(args):
         dcn_num_layers=args.dcn_num_layers,
         dcn_low_rank_dim=args.dcn_low_rank_dim,
         dense_device=device,
+        use_ipex=args.ipex_optimize,
     )
     if args.validation_auroc:
         # init weight to test convergence
