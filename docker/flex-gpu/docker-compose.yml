@@ -92,6 +92,11 @@ services:
       dockerfile: docker/flex-gpu/pytorch-distilbert-inference/pytorch-flex-series-distilbert-inference.Dockerfile
     extends: pytorch-stable-diffusion-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-flex-gpu-distilbert-inference
+  pytorch-swin-transformer-inference:
+    build:
+      dockerfile: docker/flex-gpu/pytorch-swin-transformer-inference/pytorch-flex-series-swin-transformer-inference.Dockerfile
+    extends: pytorch-stable-diffusion-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-swin-transformer-inference
   tf-wide-deep-large-inference:
     build:
       dockerfile: docker/flex-gpu/tf-wide-deep-large-inference/tf-flex-series-wide-deep-large-inference.Dockerfile
