@@ -1,0 +1,21 @@
+fp16-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-generation-pytorch-flex-gpu-fast-pitch-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env: 
+    BATCH_SIZE: '8'
+    DATASET_DIR: /local_dateset/datasets/Cosim_test/dataset/fastpitch/LJSpeech-1.1
+    PRECISION: FP16
+    NUM_ITERATIONS: '100'
+    CKPT_DIR: /local_dateset/datasets/Cosim_test/checkpoints/fastpitch/pretrained_models/
+    MULTI_TILE: 'False'
+    PLATFORM: 'Flex'
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /local_dateset/datasets/Cosim_test/dataset/fastpitch/LJSpeech-1.1
+      dst: /local_dateset/datasets/Cosim_test/dataset/fastpitch/LJSpeech-1.1
+    - src: /local_dateset/datasets/Cosim_test/checkpoints/fastpitch/pretrained_models/
+      dst: /local_dateset/datasets/Cosim_test/checkpoints/fastpitch/pretrained_models/
+    - src: /tmp
+      dst: /tmp
