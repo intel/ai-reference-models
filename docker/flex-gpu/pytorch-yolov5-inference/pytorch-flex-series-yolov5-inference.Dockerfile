@@ -11,49 +11,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# ============================================================================
 
 ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYT_BASE_TAG="2.1.10-xpu"
+ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-USER root 
-
-WORKDIR /workspace/pytorch-flex-series-yolov5-inference 
-
-ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /workspace/pytorch-flex-series-yolov5-inference/models
 
 ARG PY_VERSION=3.10
 
-RUN apt-get update && \ 
-    apt-get install -y --no-install-recommends \ 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        parallel \
+        pciutils \
+        numactl \
+        ffmpeg \
+        libsm6 \
+        libxext6 \
         build-essential \
-        ffmpeg \ 
-        libsm6 \ 
-        libxext6 \ 
-        numactl \ 
-        parallel \ 
-        pciutils \ 
-        python${PY_VERSION}-dev && \ 
+        python${PY_VERSION}-dev && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install \
-    matplotlib>=3.2.2 \
-    numpy>=1.18.5 \
-    opencv-python>=4.1.1 \
-    Pillow>=7.1.2 \
-    PyYAML>=5.3.1 \
-    requests>=2.23.0 \
-    scipy>=1.4.1 \
-    tqdm>=4.64.0 \
-    protobuf==3.20.1 \
-    pandas>=1.1.4 \
-    seaborn>=0.11.0
+COPY models_v2/pytorch/yolov5/inference/gpu .
+COPY models_v2/common common
 
-COPY models/object_detection/pytorch/yolov5/inference/gpu models/object_detection/pytorch/yolov5/inference/gpu
-COPY quickstart/object_detection/pytorch/yolov5/inference/gpu/inference.sh quickstart/inference.sh
+RUN pip install -r requirements.txt
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
-
-USER $USER
