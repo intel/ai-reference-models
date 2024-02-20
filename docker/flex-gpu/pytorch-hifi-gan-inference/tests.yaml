@@ -1,0 +1,21 @@
+170-fp16-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-generation-pytorch-flex-gpu-hifi-gan-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: FP16
+    BATCH_SIZE: '8'
+    NUM_ITERATIONS: '50'
+    PLATFORM: Flex
+    MULTI_TILE: 'False'
+    DATASET_DIR: /local_dateset/datasets/Cosim_test/dataset/hifi-gan/test_files
+    CKPT_DIR: /local_dateset/datasets/Cosim_test/checkpoints/hifi-gan
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /local_dateset/datasets/Cosim_test/dataset/hifi-gan/test_files
+      dst: /local_dateset/datasets/Cosim_test/dataset/hifi-gan/test_files
+    - src: /local_dateset/datasets/Cosim_test/checkpoints/hifi-gan
+      dst: /local_dateset/datasets/Cosim_test/checkpoints/hifi-gan
+    - src: /tmp
+      dst: /tmp
