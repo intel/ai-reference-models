@@ -29,6 +29,7 @@ The table below provides links to run each workload in a docker container. The c
 | [SSD-MobileNet v1](https://arxiv.org/pdf/1704.04861.pdf) | PyTorch | [INT8 Inference](../../quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/DEVCATALOG.md) | 
 | [Stable Diffusion](https://arxiv.org/abs/2112.10752) | PyTorch | [Flex GPU FP16 Inference](../../models_v2/pytorch/stable_diffusion/inference/gpu/CONTAINER_FLEX.md) and [Arc GPU FP16,FP32 Inference](../../quickstart/generative-ai/pytorch/stable_diffusion/inference/gpu/WSL2_ARC_STABLE_DIFFUSION.md) |
 | [Stable Diffusion](https://arxiv.org/abs/2112.10752) | TensorFlow | [FP32,FP16 Inference](../../models_v2/tensorflow/stable_diffusion/inference/gpu/CONTAINER.md) | 
+| [UNet++](https://arxiv.org/abs/1807.10165) | PyTorch | [FP16 Inference](../../models_v2/pytorch/unetpp/inference/gpu/CONTAINER.md) |
 | [Swin Transformer](https://arxiv.org/abs/2103.14030) | PyTorch | [FP16 Inference](../../models_v2/pytorch/swin-transformer/inference/gpu/CONTAINER.md) |
 | [Wide and Deep](https://arxiv.org/abs/1606.07792) | TensorFlow | [FP16 Inference](../../models_v2/tensorflow/wide_deep_large_ds/inference/gpu/CONTAINER.md) |
 | [YOLO v4](https://arxiv.org/pdf/1704.04861.pdf) | PyTorch | [INT8 Inference](../../quickstart/object_detection/pytorch/yolov4/inference/gpu/DEVCATALOG.md) |
