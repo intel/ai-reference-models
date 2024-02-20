@@ -1,0 +1,5 @@
+opencv-python
+termcolor==1.1.0 
+yacs==0.1.8
+Pillow
+requests
