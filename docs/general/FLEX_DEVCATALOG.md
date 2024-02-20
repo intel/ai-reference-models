@@ -37,6 +37,6 @@ The table below provides links to run each workload in a docker container. The c
 
 
 **Note**: 
-* SSD-MobileNetv1, and YOLOv4 models are supported on older Intel® Extension for TensorFlow* v2.12 and Intel® Extension for PyTorch* 1.13.120+xpu versions. 
+* SSD-MobileNet v1, and YOLO v4 models are supported on older Intel® Extension for TensorFlow* v2.12 and Intel® Extension for PyTorch* 1.13.120+xpu versions. 
 * Stable Diffusion for Arc GPU was validated on PyTorch* 2.0.110+xpu version.
 * The other models in the list are validated on Intel® Extension for TensorFlow* v2.14 and Intel® Extension for PyTorch* 2.1.10+xpu versions.
