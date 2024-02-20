@@ -92,6 +92,11 @@ services:
       dockerfile: docker/flex-gpu/pytorch-distilbert-inference/pytorch-flex-series-distilbert-inference.Dockerfile
     extends: pytorch-stable-diffusion-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-flex-gpu-distilbert-inference
+  pytorch-fast-pitch-inference:
+    build:
+      dockerfile: docker/flex-gpu/pytorch-fast-pitch-inference/pytorch-flex-series-fast-pitch-inference.Dockerfile
+    extends: pytorch-stable-diffusion-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-generation-pytorch-flex-gpu-fast-pitch-inference
   pytorch-swin-transformer-inference:
     build:
       dockerfile: docker/flex-gpu/pytorch-swin-transformer-inference/pytorch-flex-series-swin-transformer-inference.Dockerfile
