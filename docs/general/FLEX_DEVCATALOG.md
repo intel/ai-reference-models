@@ -19,6 +19,7 @@ The table below provides links to run each workload in a docker container. The c
 | [DistilBERT](https://arxiv.org/abs/1910.01108) | PyTorch | [FP16 and FP32  Inference](../../models_v2/pytorch/distilbert/inference/gpu/CONTAINER_FLEX.md) |
 | [DLRM-v1](https://arxiv.org/abs/1906.00091) | PyTorch | [ FP16 Inference](../../models_v2/pytorch/dlrm/inference/gpu/CONTAINER.md) | 
 | [EfficientNet](https://arxiv.org/abs/1905.11946) B0,B3,B4 | TensorFlow | [FP16 Inference](../../models_v2/tensorflow/efficientnet/inference/gpu/CONTAINER.md) |
+| [HiFi-GAN](https://arxiv.org/abs/2010.05646) | PyTorch | [FP16 Inference](../../models_v2/pytorch/hifi_gan/inference/gpu/CONTAINER.md) |
 | [FastPitch](https://arxiv.org/abs/2006.06873) | PyTorch | [FP16 Inference](../../models_v2/pytorch/fastpitch/inference/gpu/CONTAINER.md) |
 | [Mask R-CNN](https://arxiv.org/abs/1703.06870) | TensorFlow | [FP16 Inference](../../models_v2/tensorflow/maskrcnn/inference/gpu/CONTAINER.md) |
 | [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | PyTorch | [INT8 Inference](../../models_v2/pytorch//resnet50v1_5/inference/gpu/CONTAINER_FLEX.md) | 
