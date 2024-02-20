@@ -1,0 +1,4 @@
+# YOLOv5 requirements no deps
+# Usage: pip install --no-deps -r requirements-no-deps.txt
+
+torchvision==0.11.1
