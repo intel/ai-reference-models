@@ -22,6 +22,7 @@ The table below provides links to run each workload in a docker container. The c
 | [HiFi-GAN](https://arxiv.org/abs/2010.05646) | PyTorch | [FP16 Inference](../../models_v2/pytorch/hifi_gan/inference/gpu/CONTAINER.md) |
 | [FastPitch](https://arxiv.org/abs/2006.06873) | PyTorch | [FP16 Inference](../../models_v2/pytorch/fastpitch/inference/gpu/CONTAINER.md) |
 | [Mask R-CNN](https://arxiv.org/abs/1703.06870) | TensorFlow | [FP16 Inference](../../models_v2/tensorflow/maskrcnn/inference/gpu/CONTAINER.md) |
+| [QuartzNet](https://arxiv.org/abs/1910.10261) | PyTorch | [FP16 Inference](../../models_v2/pytorch/quartznet/inference/gpu/CONTAINER.md) |
 | [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | PyTorch | [INT8 Inference](../../models_v2/pytorch//resnet50v1_5/inference/gpu/CONTAINER_FLEX.md) | 
 | [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | TensorFlow | [INT8 Inference](../../models_v2/tensorflow/resnet50v1_5/inference/gpu/CONTAINER_FLEX.md) | 
 | [SSD-MobileNet v1](https://arxiv.org/pdf/1704.04861.pdf) | TensorFlow | [INT8 Inference](../../quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/DEVCATALOG.md) | 

@@ -92,6 +92,11 @@ services:
       dockerfile: docker/flex-gpu/pytorch-distilbert-inference/pytorch-flex-series-distilbert-inference.Dockerfile
     extends: pytorch-stable-diffusion-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-flex-gpu-distilbert-inference
+  pytorch-quartznet-inference:
+    build:
+      dockerfile: docker/flex-gpu/pytorch-quartznet-inference/pytorch-flex-series-quartznet-inference.Dockerfile
+    extends: pytorch-stable-diffusion-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-flex-gpu-quartznet-inference
   pytorch-hifi-gan-inference:
     build:
       dockerfile: docker/flex-gpu/pytorch-hifi-gan-inference/pytorch-flex-series-hifi-gan-inference.Dockerfile
