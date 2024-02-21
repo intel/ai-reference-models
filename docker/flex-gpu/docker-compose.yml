@@ -74,7 +74,7 @@ services:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-flex-gpu-yolov5-inference
   pytorch-dlrm-v1-inference:
     build:
-      dockerfile: docker/flex-gpu/pytorch-dlrmv1-inference/pytorch-flex-series-dlrm-v1-inference.Dockerfile
+      dockerfile: docker/flex-gpu/pytorch-dlrm-v1-inference/pytorch-flex-series-dlrm-v1-inference.Dockerfile
     extends: pytorch-stable-diffusion-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-flex-gpu-dlrm-v1-inference
   tf-stable-diffusion-inference:

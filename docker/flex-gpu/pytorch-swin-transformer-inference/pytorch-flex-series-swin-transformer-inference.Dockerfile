@@ -24,8 +24,10 @@ COPY models_v2/common common
 
 COPY models_v2/pytorch/swin-transformer/inference/gpu .
 
-RUN python -m pip install -r requirements.txt 
-RUN python -m pip install -r requirements-no-deps.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt 
+RUN python -m pip install --no-cache-dir -r requirements-no-deps.txt
+
+RUN python -m pip install --no-cache-dir --upgrade pip 
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

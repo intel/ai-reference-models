@@ -36,6 +36,8 @@ RUN python -m pip install future \
 COPY models_v2/pytorch/dlrm/inference/gpu .
 COPY models_v2/common common
 
+RUN python -m pip install --upgrade pip Pillow==10.2.0 \
+        jinja2==3.1.3 
+
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
-

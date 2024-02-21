@@ -22,11 +22,13 @@ WORKDIR /workspace/pytorch-flex-series-fast-pitch-inference/models
 COPY models_v2/pytorch/fastpitch/inference/gpu .
 COPY models_v2/common common
 
-RUN python -m pip install -r requirements.txt
-RUN python -m pip install git+https://github.com/NVIDIA/dllogger.git \
+RUN python -m pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir git+https://github.com/NVIDIA/dllogger.git \
         triton \
         pydantic spacy \
         tensorboard
+
+RUN python -m pip install --no-cache-dir --upgrade pip
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
