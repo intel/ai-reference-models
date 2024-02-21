@@ -37,7 +37,10 @@ RUN apt-get update && \
 COPY models_v2/pytorch/yolov5/inference/gpu .
 COPY models_v2/common common
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN python -m pip install --no-cache-dir --upgrade pip \
+        protobuf==4.21.6
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

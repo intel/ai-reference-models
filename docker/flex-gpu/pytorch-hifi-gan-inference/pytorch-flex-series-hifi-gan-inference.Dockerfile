@@ -28,7 +28,9 @@ RUN apt-get update && \
 COPY models_v2/pytorch/hifi_gan/inference/gpu .
 COPY models_v2/common common
 
-RUN python -m pip install -r requirements.txt 
+RUN python -m pip install --no-cache-dir -r requirements.txt 
+
+RUN python -m pip install --no-cache-dir --upgrade pip
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

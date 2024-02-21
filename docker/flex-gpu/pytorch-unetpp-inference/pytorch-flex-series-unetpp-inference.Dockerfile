@@ -24,12 +24,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY models_v2/pytorch/unetpp/inference/gpu .
 COPY models_v2/common common
 
-RUN python -m pip install -r requirements.txt 
+RUN python -m pip install --no-cache-dir -r requirements.txt 
 
-RUN python -m pip install pretrainedmodels==0.7.4 \
+RUN python -m pip install --no-cache-dir pretrainedmodels==0.7.4 \
         efficientnet-pytorch==0.7.1 \
         timm==0.4.12 \
         segmentation-models-pytorch 
+
+RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.2.0 \
+        jinja2==3.1.3 
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
