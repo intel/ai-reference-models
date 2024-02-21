@@ -33,7 +33,9 @@ RUN apt update && \
         python${PY_VERSION}-dev && \
     rm -rf /var/lib/apt/lists/*
 
-RUN python -m pip install -r requirements.txt 
+RUN python -m pip install --no-cache-dir -r requirements.txt 
+
+RUN python -m pip install --no-cache-dir --upgrade pip
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

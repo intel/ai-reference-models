@@ -24,8 +24,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y python3-dev && \
     rm -rf /var/lib/apt/lists/*
 
-RUN python -m pip install transformers==4.25.1 \
-        gitpython==3.1.30 \
+RUN python -m pip install --no-cache-dir transformers==4.36.0 \
+        gitpython==3.1.41 \
         tensorboard>=1.14.0 \
         tensorboardX==1.8 \
         psutil==5.6.6 \
@@ -34,6 +34,9 @@ RUN python -m pip install transformers==4.25.1 \
 
 COPY models_v2/pytorch/distilbert/inference/gpu .
 COPY models_v2/common/parse_result.py common/parse_result.py 
+
+RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.2.0 \
+        jinja2==3.1.3
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
