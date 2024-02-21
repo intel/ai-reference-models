@@ -27,107 +27,74 @@ python ./benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_down
 | [`inference_online.sh`](/quickstart/recommendation/tensorflow/wide_deep/inference/cpu/inference_online.sh) | Runs wide & deep model inference online mode (batch size = 1)|
 | [`inference_batch.sh`](/quickstart/recommendation/tensorflow/wide_deep/inference/cpu/inference_batch.sh) | Runs wide & deep model inference in batch mode (batch size = 1024)|
 
-<!--- 50. AI Tools -->
-## Run the model
+### Software requirements:
+Install [tensorflow](https://pypi.org/project/tf_nightly/)
 
-Setup your environment using the instructions below, depending on if you are
-using [AI Tools](/docs/general/tensorflow/AITools.md):
-
-<table>
-  <tr>
-    <th>Setup using AI Tools on Linux</th>
-    <th>Setup without AI Tools on Linux</th>
-    <th>Setup without AI Tools on Windows</th>
-  </tr>
-  <tr>
-    <td>
-      <p>To run using AI Tools on Linux you will need:</p>
-      <ul>
-        <li>git
-        <li>numactl
-        <li>wget
-        <li>Activate the `tensorflow` conda environment
-        <pre>conda activate tensorflow</pre>
-      </ul>
-    </td>
-    <td>
-      <p>To run without AI Tools on Linux you will need:</p>
-      <ul>
-        <li>Python 3
-        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
-        <li>git
-        <li>numactl
-        <li>wget
-        <li>A clone of the AI Reference Models repo<br />
-        <pre>git clone https://github.com/IntelAI/models.git</pre>
-      </ul>
-    </td>
-    <td>
-      <p>To run without AI Tools on Windows you will need:</p>
-      <ul>
-        <li><a href="/docs/general/Windows.md">Intel AI Reference Models on Windows Systems prerequisites</a>
-        <li>git
-        <li>A clone of the AI Reference Models repo<br />
-        <pre>git clone https://github.com/IntelAI/models.git</pre>
-      </ul>
-    </td>
-  </tr>
-</table>
-
-After you've completed the setup above, download and extract the pretrained
+### Pretrained Model
+Download and extract the pretrained
 model. If you run on Windows, please use a browser to download the pretrained model using the link below.
 Set the directory path to the `PRETRAINED_MODEL` environment variable.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/wide_deep_fp32_pretrained_model.tar.gz
-tar -xzvf wide_deep_fp32_pretrained_model.tar.gz
-export PRETRAINED_MODEL=$(pwd)/wide_deep_fp32_pretrained_model
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/wide_and_deep.h5
+export PRETRAINED_MODEL=$(pwd)/
 ```
 
-Wide & Deep inference also uses code from the [TensorFlow models repo](https://github.com/tensorflow/models).
-Clone the repo using the PR in the snippet below and save the directory path
-to the `TF_MODELS_DIR` environment variable.
-```
-# We going to use a branch based on older version of the tensorflow model repo.
-# Since, we need to to use logs utils on that branch, which were removed from
-# the latest master
-git clone https://github.com/tensorflow/models.git tensorflow-models
-cd tensorflow-models
-git fetch origin pull/7461/head:wide-deep-tf2
-git checkout wide-deep-tf2
-```
-
+### Run benchmark on Linux
+Install the Latest TensorFlow along with model dependencies under requirements.txt.
 Set the environment variables and run quickstart script on either Linux or Windows systems. See the list of quickstart scripts for details on the different options.
-
-### Run on Linux
 ```
 # cd to your AI Reference Models directory
 cd models
 
+export TF_USE_LEGACY_KERAS=0
 export DATASET_DIR=<path to the Wide & Deep dataset directory>
 export PRECISION=fp32
 export OUTPUT_DIR=<path to the directory where log files will be written>
 export PRETRAINED_MODEL=<pretrained model directory>
-export TF_MODELS_DIR=<path to tensorflow-models directory>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
-./quickstart/recommendation/tensorflow/wide_deep/inference/cpu/fp32/<script name>.sh
+# Install model specific dependencies:
+pip install -r benchmarks/recommendation/tensorflow/wide_deep/inference/requirements.txt
+
+# Run the quickstart scripts
+./quickstart/recommendation/tensorflow/wide_deep/inference/cpu/<script name>.sh
 ```
-### Run on Windows
+
+### Run accuracy on Linux
+```
+# cd to your AI Reference Models directory
+cd models
+
+export TF_USE_LEGACY_KERAS=0
+export DATASET_DIR=<path to the Wide & Deep dataset directory>
+export PRECISION=fp32
+export OUTPUT_DIR=<path to the directory where log files will be written>
+export PRETRAINED_MODEL=<pretrained model directory>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
+# Install model specific dependencies:
+pip install -r benchmarks/recommendation/tensorflow/wide_deep/inference/requirements.txt
+
+./quickstart/recommendation/tensorflow/wide_deep/inference/cpu/accuracy.sh
+```
+
+### Run benchmark on Windows
 Using cmd.exe, run:
 ```
 # cd to your AI Reference Models directory
 cd models
 
+set TF_USE_LEGACY_KERAS=0
 set PRETRAINED_MODEL=<pretrained model directory>
 set DATASET_DIR=<path to the Wide & Deep dataset directory>
 set PRECISION=fp32
 set OUTPUT_DIR=<directory where log files will be written>
-set TF_MODELS_DIR=<path to tensorflow-models directory>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 set BATCH_SIZE=<customized batch size value>
-
-bash quickstart\recommendation\tensorflow\wide_deep\inference\cpu\fp32\<script name>.sh
+# Install model specific dependencies:
+pip install -r benchmarks\recommendation\tensorflow\wide_deep\inference\requirements.txt
+bash quickstart\recommendation\tensorflow\wide_deep\inference\cpu\<script name>.sh
 ```
 > Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
 As an example, if the dataset location on Windows is `D:\<user>\widedeep_dataset`, convert the Windows path to Unix as shown:

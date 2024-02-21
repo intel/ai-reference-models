@@ -1,11 +1,16 @@
 [
   { "_comment": "wide_deep_small_fp32_batch_inference",
-    "input": "run_tf_benchmark.py --framework tensorflow --use-case recommendation --precision fp32 --mode inference --model-name wide_deep --batch-size 1024 --data-location /dataset --checkpoint /checkpoints --intelai-models . --verbose",
-    "output": "OMP_NUM_THREADS=1 numactl --cpunodebind=0 --membind=0  python inference/fp32/wide_deep_inference.py --data_dir=/dataset --model_dir=/checkpoints --batch_size=1024",
+  "input": "run_tf_benchmark.py --framework tensorflow --use-case=recommendation --precision fp32 --mode inference --model-name=wide_deep --batch-size=1024 --data-location=/dataset --pretrained-model=model/ --intelai-models=/workspace/intelai_models --socket-id 0 --verbose",
+  "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/wide_deep_inference.py --precision=fp32 --num-inter-threads=1 --num-intra-threads=28 --data-location=/dataset --pretrained-model=model/ --batch-size=1024",
     "cpuset": "0-111"},
 
-  { "_comment": "wide_deep_small_fp32_online_inference",
-    "input": "run_tf_benchmark.py --framework tensorflow --use-case recommendation --precision fp32 --mode inference --model-name wide_deep --data-location /dataset --checkpoint /checkpoints --intelai-models /workspace/models --verbose",
-    "output": "OMP_NUM_THREADS=1 numactl --cpunodebind=0 --membind=0 python inference/fp32/wide_deep_inference.py --data_dir=/dataset --model_dir=/checkpoints --batch_size=1",
+  {"_comment": "wide_deep_small_fp32_online_inference",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case=recommendation --precision fp32 --mode inference --model-name=wide_deep --batch-size=1 --data-location=/dataset --pretrained-model=model/ --intelai-models=/workspace/intelai_models --socket-id 0 --verbose",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/wide_deep_inference.py --precision=fp32 --num-inter-threads=1 --num-intra-threads=28 --data-location=/dataset --pretrained-model=model/ --batch-size=1",
+    "cpuset": "0-111"},
+
+    { "_comment": "wide_deep_fp32_accuracy",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep --precision=fp32 --mode=inference --intelai-models=/workspace/intelai_models --batch-size 256 --socket-id 0 --accuracy-only  --verbose --accuracy-only --data-location=/dataset --pretrained-model=model/",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/wide_deep_inference.py --precision=fp32 --num-inter-threads=1 --num-intra-threads=28 --batch-size=256  --data-location=/dataset --accuracy-only --pretrained-model=model/",
     "cpuset": "0-111"}
 ]

@@ -1843,8 +1843,11 @@ function stable_diffusion() {
 # Wide & Deep model
 function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
-      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
+      CMD="${CMD} $(add_arg "--pretrained-model" ${PRETRAINED_MODEL})"
+      if [ ${NOINSTALL} != "True" ]; then
+        echo "Installing requirements"
+        python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/requirements.txt"
+      fi
       CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
