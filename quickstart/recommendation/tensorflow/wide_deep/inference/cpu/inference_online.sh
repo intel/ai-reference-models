@@ -17,9 +17,9 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
-echo 'MODEL_DIR='$MODEL_DIR
-echo 'OUTPUT_DIR='$OUTPUT_DIR
-echo 'DATASET_DIR='$DATASET_DIR
+# echo 'MODEL_DIR='$MODEL_DIR
+#echo 'OUTPUT_DIR='$OUTPUT_DIR
+#echo 'DATASET_DIR='$DATASET_DIR
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -29,17 +29,15 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
-# Check for TF_MODELS_DIR
-if [ -d "/tensorflow/models" ]; then # if true assume running in docker
-   TF_MODELS_DIR=/tensorflow/models
-elif [ -z ${TF_MODELS_DIR} ]; then
-    echo "Please set TF_MODELS_DIR or run in docker mode." >&2
-    exit 1
+if [ -z "${DATASET_DIR}" ]; then
+  echo "The required environment variable DATASET_DIR has not been set"
+  exit 1
+elif [ ! -d "${DATASET_DIR}" ]; then
+  echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
+  exit 1
 fi
 
-echo 'TF_MODELS_DIR='$TF_MODELS_DIR
-
-if [ -z "${PRECISION}"]; then
+if [[ -z "${PRECISION}" ]]; then
   PRECISION=fp32
   echo "Running with default precision ${PRECISION}"
 fi
@@ -50,50 +48,16 @@ if [[ $PRECISION != "fp32" ]]; then
   exit 1
 fi
 
-
 if [ -z "${PRETRAINED_MODEL}" ]; then
-  # If the env var is not set, we might be running as part of a workload container
-  pretrained_model_dir="pretrained_model/wide_deep_fp32_pretrained_model"
-  if [ ! -d "${pretrained_model_dir}" ]; then
-    if [ -f pretrained_model/wide_deep_fp32_pretrained_model.tar.gz ]; then
-      tar -C pretrained_model/ -xvf pretrained_model/wide_deep_fp32_pretrained_model.tar.gz
-    else
-      echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the pretrained model directory."
-      exit 1
-    fi
-  fi
-  CHECKPOINT_DIR="${MODEL_DIR}/${pretrained_model_dir}"
-else
-  if [ ! -d "${PRETRAINED_MODEL}" ]; then
-    echo "The PRETRAINED_MODEL directory (${PRETRAINED_MODEL}) does not exist."
-    exit 1
-  else
-    CHECKPOINT_DIR=${PRETRAINED_MODEL}
-  fi
+  echo "Please set the PRETRAINED_MODEL environment variable to point to the directory containing the pretrained model."
+  exit 1
+elif [[ ! -d "${PRETRAINED_MODEL}" ]]; then
+  echo "The directory specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
 fi
 
 # Create an array of input directories that are expected and then verify that they exist
-declare -A input_dirs
-input_dirs[CHECKPOINT_DIR]=${CHECKPOINT_DIR}
-input_dirs[DATASET_DIR]=${DATASET_DIR}
-
-for i in "${!input_dirs[@]}"; do
-  var_name=$i
-  dir_path=${input_dirs[$i]}
- 
-  if [[ -z $dir_path ]]; then
-    echo "The required environment variable $var_name is empty" >&2
-    exit 1
-  fi
-
-  if [[ ! -d $dir_path ]]; then
-    echo "The $var_name path '$dir_path' does not exist" >&2
-    exit 1
-  fi
-done
-
-# If batch size env is not mentioned, then the workload will run with the default batch size.
-if [ -z "${BATCH_SIZE}"]; then
+if [[ -z "${BATCH_SIZE}" ]]; then
   BATCH_SIZE="1"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
@@ -101,12 +65,10 @@ fi
 source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --framework tensorflow \
-      --model-source-dir ${TF_MODELS_DIR} \
       --precision ${PRECISION} \
       --mode inference \
       --model-name wide_deep \
       --batch-size ${BATCH_SIZE} \
       --data-location ${DATASET_DIR} \
-      --checkpoint ${CHECKPOINT_DIR} \
       --output-dir ${OUTPUT_DIR} \
       $@
