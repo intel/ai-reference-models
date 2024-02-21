@@ -71,4 +71,5 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --batch-size ${BATCH_SIZE} \
       --data-location ${DATASET_DIR} \
       --output-dir ${OUTPUT_DIR} \
+      --accuracy-only \
       $@
