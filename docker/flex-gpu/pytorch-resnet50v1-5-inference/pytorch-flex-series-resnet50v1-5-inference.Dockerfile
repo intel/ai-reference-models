@@ -24,7 +24,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends parallel pciutils numactl && \
     rm -rf /var/lib/apt/lists/*
 
-RUN python -m pip install pillow
+RUN python -m pip install --no-cache-dir --upgrade pip pillow
 
 COPY models_v2/pytorch/resnet50v1_5/inference/gpu .
 COPY models_v2/common common
