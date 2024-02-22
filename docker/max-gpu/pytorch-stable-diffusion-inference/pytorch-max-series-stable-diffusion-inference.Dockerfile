@@ -34,10 +34,14 @@ RUN python -m pip install datasets \
             transformers \
             accelerate \
             pytorch-fid \
-            scipy==1.9.1
+            scipy==1.10.0
 
 COPY models_v2/pytorch/stable_diffusion/inference/gpu .
 COPY models_v2/common common
+
+RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.2.0 \
+        jinja2==3.1.3 \
+        aiohttp==3.9.2
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
