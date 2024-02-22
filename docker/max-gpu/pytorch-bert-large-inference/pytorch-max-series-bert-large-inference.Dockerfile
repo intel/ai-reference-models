@@ -24,7 +24,10 @@ WORKDIR /workspace/pytorch-max-series-bert-large-inference/models
 COPY models_v2/pytorch/bert_large/inference/gpu .
 COPY models_v2/common/parse_result.py common/parse_result.py 
 
-RUN python -m pip install -r requirements.txt 
+RUN python -m pip install --no-cache-dir -r requirements.txt 
 
+RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.2.0 \
+        jinja2==3.1.3 
+        
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
