@@ -73,7 +73,7 @@ services:
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
         TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
-        TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
+        TF_BASE_TAG: ${TF_BASE_TAG:-centos-tf2.14-py310}
       dockerfile: docker/tf-cpu/tf-bert-large-inference/tf-bert-large-inference.Dockerfile-${OS:-ubuntu}
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
