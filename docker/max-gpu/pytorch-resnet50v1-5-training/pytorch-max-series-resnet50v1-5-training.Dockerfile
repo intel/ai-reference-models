@@ -29,7 +29,7 @@ RUN apt-get update && \
 
 WORKDIR /workspace/pytorch-max-series-resnet50v1-5-training/models
 
-RUN python -m pip install pillow
+RUN python -m pip install --no-cache-dir pillow
 
 COPY models_v2/pytorch/resnet50v1_5/training/gpu .
 COPY models_v2/common common
@@ -40,6 +40,9 @@ ENV PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/bin:/opt/intel/oneapi/m
 ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.11
 ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.11
 ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
+
+RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.2.0 \
+        jinja2==3.1.3 
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
