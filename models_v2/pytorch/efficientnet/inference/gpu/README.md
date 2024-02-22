@@ -60,7 +60,7 @@
 # Prerequisites
 
 Hardware:
-* [Intel® Data Center GPU Flex Series]
+* [Intel® Data Center GPU Flex Series] 170
 
 Software:
 * Intel® Data Center GPU Flex Series [Driver]
@@ -73,14 +73,14 @@ Software:
 
 Pull pre-built image with the sample:
 ```
-docker pull intel/image-recognition:pytorch-flex-gpu-efficientnet
+docker pull intel/image-recognition:pytorch-flex-gpu-efficientnet-inference
 ```
 or build it locally:
 ```
 docker build \
   $(env | grep -E '(_proxy=|_PROXY)' | sed 's/^/--build-arg /') \
   -f docker/flex-gpu/pytorch-efficientnet-inference/pytorch-flex-series-efficientnet-inference.Dockerfile \
-  -t intel/image-recognition:pytorch-flex-gpu-efficientnet .
+  -t intel/image-recognition:pytorch-flex-gpu-efficientnet-inference .
 ```
 
 Run sample as follows:
@@ -97,13 +97,13 @@ Run sample as follows:
     --cap-add SYS_NICE \
     --device /dev/dri/ \
     -e MODEL_NAME=efficientnet_b0 \
-    -e PLATFORM=ATS-M \
+    -e PLATFORM=Flex \
     -e NUM_ITERATIONS=32 \
     -e NUM_IMAGES=${BATCH_SIZE} \
     -e BATCH_SIZE=${BATCH_SIZE} \
     -e OUTPUT_DIR=/tmp/output \
     -v /tmp/output:/tmp/output \
-    intel/image-recognition:pytorch-flex-gpu-efficientnet \
+    intel/image-recognition:pytorch-flex-gpu-efficientnet-inference \
       /bin/bash -c "./run_model.sh --dummy"
   ```
 
@@ -120,7 +120,7 @@ Run sample as follows:
     --cap-add SYS_NICE \
     --device /dev/dri/ \
     -e MODEL_NAME=efficientnet_b0 \
-    -e PLATFORM=ATS-M \
+    -e PLATFORM=Flex \
     -e NUM_ITERATIONS=1 \
     -e NUM_IMAGES=50000 \
     -e BATCH_SIZE=${BATCH_SIZE} \
@@ -128,7 +128,7 @@ Run sample as follows:
     -v /tmp/output:/tmp/output \
     -e DATASET_DIR=/dataset \
     -v $DATASET_DIR:/dataset \
-    intel/image-recognition:pytorch-flex-gpu-efficientnet \
+    intel/image-recognition:pytorch-flex-gpu-efficientnet-inference \
       /bin/bash -c "./run_model.sh"
   ```
 
@@ -169,7 +169,7 @@ Mind the following `docker run` arguments:
      * **NOTE**: Accuracy will be approximately zero when using dummy data
      ```
      export MODEL_NAME=efficientnet_b0
-     export PLATFORM=ATS-M
+     export PLATFORM=Flex
      export BATCH_SIZE=1
      export NUM_ITERATIONS=32
      export NUM_IMAGES=${BATCH_SIZE}
@@ -183,7 +183,7 @@ Mind the following `docker run` arguments:
     * **NOTE**: Performance results (throughput and latency measurements) may be impacted due to data handling overhead
     ```
     export MODEL_NAME=efficientnet_b0
-    export PLATFORM=ATS-M
+    export PLATFORM=Flex
     export BATCH_SIZE=1
     export NUM_ITERATIONS=1
     export NUM_IMAGES=50000

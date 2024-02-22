@@ -135,9 +135,9 @@ while [ : ]; do
         echo "  --output-dir     [OUTPUT_DIR]    : Location to write output to. Required"
         echo "  --platform       [PLATFORM]      : Platform that inference is being ran on (default: '${PLATFORM}')"
         echo "                                     * CPU"
-        echo "                                     * ATS-M"
+        echo "                                     * Flex"
         echo "                                     * CUDA"
-        echo "                                     * PVC"
+        echo "                                     * Max"
         echo "  --precision      [PRECISION]     : Precision to use for the model (default: '${PRECISION}')"
         echo "                                     * bf16"
         echo "                                     * fp16"
@@ -190,14 +190,14 @@ fi
 
 # Check multi-tile is only specified on valid platforms.
 if [[ "${MULTI_TILE}" == "True" ]]; then
-    if [[ "${PLATFORM}" == "PVC" ]]; then
+    if [[ "${PLATFORM}" == "Max" ]]; then
         echo "Streams will be round-robin scheduled across multiple tiles"
         if [ $((STREAMS%2)) -ne 0 ]; then
         echo "WARNING: can't schedule evenly odd number of streams ($STREAMS) across tiles"
     fi
     fi
-    if [[ "${PLATFORM}" == "ATS-M" ]]; then
-        echo "ERROR: ATS-M does not support multitile"
+    if [[ "${PLATFORM}" == "Flex" ]]; then
+        echo "ERROR: Flex does not support multitile"
         exit 1
     fi
     if [[ "${PLATFORM}" == "CUDA" ]]; then
@@ -318,13 +318,13 @@ _perf_args="--pretrained --channels-last --no-grad"
 mkdir -p $OUTPUT_DIR
 
 # Set environment variables
-if [[ ${PLATFORM} == "ATS-M" ]]; then
+if [[ ${PLATFORM} == "Flex" ]]; then
     export IGC_EnableDPEmulation=1
     export CFESingleSliceDispatchCCSMode=1
     export IPEX_ONEDNN_LAYOUT=1
     export IPEX_LAYOUT_OPT=1
-elif [[ ${PLATFORM} == "PVC" ]]; then
-    # Currently its an assumption that PCV uses these.
+elif [[ ${PLATFORM} == "Max" ]]; then
+    # Currently its an assumption that Max GPU uses these.
     export IGC_EnableDPEmulation=1
     export CFESingleSliceDispatchCCSMode=1
     export IPEX_ONEDNN_LAYOUT=1
