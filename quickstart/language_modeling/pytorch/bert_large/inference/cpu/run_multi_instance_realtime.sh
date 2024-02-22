@@ -16,9 +16,10 @@
 # limitations under the License.
 #
 
+ARGS=${ARGS:-""}
 
 #export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
-ARGS="--benchmark"
+ARGS="$ARGS --benchmark"
 precision=fp32
 
 if [[ "$PRECISION" == *"avx"* ]]; then
