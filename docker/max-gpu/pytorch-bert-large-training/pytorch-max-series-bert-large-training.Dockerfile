@@ -32,7 +32,7 @@ WORKDIR /workspace/pytorch-max-series-bert-large-training/models
 COPY models_v2/pytorch/bert_large/training/gpu .
 COPY models_v2/common common
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 ENV LD_LIBRARY_PATH=/opt/intel/oneapi/ccl/2021.11/lib/:/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.11/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.11/lib:/opt/intel/oneapi/ccl/2021.11/lib/
@@ -40,6 +40,9 @@ ENV PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/bin:/opt/intel/oneapi/m
 ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.11
 ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.11
 ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
+
+RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.2.0 \
+        jinja2==3.1.3
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

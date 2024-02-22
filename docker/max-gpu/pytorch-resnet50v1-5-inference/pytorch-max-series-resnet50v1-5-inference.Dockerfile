@@ -24,5 +24,8 @@ WORKDIR /workspace/pytorch-max-series-resnet50v1-5-inference/models
 COPY models_v2/pytorch/resnet50v1_5/inference/gpu .
 COPY models_v2/common common 
 
+RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.2.0 \
+        jinja2==3.1.3 
+
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
