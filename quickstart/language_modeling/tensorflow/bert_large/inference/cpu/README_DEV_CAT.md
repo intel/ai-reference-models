@@ -67,8 +67,8 @@ export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export SCRIPT=<specify the script to run>
 export PRECISION=<specify the precision to run>
-export CORES_PER_INSTANCE=<specify the cores per instance. Default value is 4>
-export OMP_NUM_THREADS=<specify the number for OMP_NUM_THREADS. Default value is 4>
+export CORES_PER_INSTANCE=<specify the cores per instance. Otherwise, script assigns a default value>
+export OMP_NUM_THREADS=<specify the number for OMP_NUM_THREADS. Otherwise, script assigns a default value>
 
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
