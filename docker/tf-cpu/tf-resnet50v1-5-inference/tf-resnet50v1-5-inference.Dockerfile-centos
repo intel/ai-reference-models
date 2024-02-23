@@ -36,5 +36,10 @@ COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inferenc
 COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_multi_instance.sh quickstart/inference_realtime.sh
 COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_weightsharing.sh quickstart/inference_realtime_weightsharing.sh
 
+RUN python -m pip install pillow==10.2.0 \
+        cryptography==42.0.4 \
+        setuptools==65.5.1 \
+        werkzeug==3.0.1
+        
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
