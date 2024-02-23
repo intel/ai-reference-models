@@ -31,5 +31,7 @@ RUN apt-get update && \
 
 RUN python3 -m pip install -r requirements.txt
 
+RUN pip install --no-cache-dir --upgrade pip
+
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
