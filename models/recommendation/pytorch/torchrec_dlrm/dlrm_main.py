@@ -1491,7 +1491,10 @@ def main(argv: List[str]) -> None:
             with torch.no_grad():
                 for b in bias:
                     b.data = torch.randn_like(b)
-        randomrize_crossnet_bias(model.model.inter_arch.crossnet.bias)
+        
+        if not (args.test_auroc and args.snapshot_dir):
+            # do not need to randomrize bias while loading from pre-trained weight
+            randomrize_crossnet_bias(model.model.inter_arch.crossnet.bias)
         print_memory("start StockPT ")
         if args.dtype == 'bf16':
             model.model.sparse_arch = model.model.sparse_arch.bfloat16()
