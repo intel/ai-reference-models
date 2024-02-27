@@ -55,7 +55,7 @@ The scripts will download the dataset automatically. It uses nateraw/parti-promp
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=Max` (Max or Flex or ARC)                                                 |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max or Flex or Arc)                                                 |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=1`                                |
 | **PRECISION** (optional)     |           `export PRECISION=fp16` (fp16 and fp32 are supported for all platform)|
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |

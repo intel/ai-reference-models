@@ -40,9 +40,9 @@ if [[ "${PLATFORM}" == "Max" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-256}
     PRECISION=${PRECISION:-BF16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-20}
-elif [[ "${PLATFORM}" == "ARC" ]]; then
+elif [[ "${PLATFORM}" == "Arc" ]]; then
     if [[ "${MULTI_TILE}" == "True" ]]; then
-        echo "ARC not support multitile"
+        echo "Arc not support multitile"
         exit 1
     fi
     BATCH_SIZE=${BATCH_SIZE:-256}
