@@ -38,9 +38,9 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   pip install cpm-kernels
   ```
 
-* Modify the config.json
+* Modify the config.json and tokenizer_config.json
   ```
-  sed -i "s/\"torch_dtype\":\ \"float16\"/\"torch_dtype\":\ \"float32\"/g" ~/.cache/huggingface/hub/models--THUDM--chatglm3-6b/snapshots/b098244a71fbe69ce149682d9072a7629f7e908c/config.json
+  bash prepare.sh
   ```
 
 * Set INPUT_TOKEN before running the model
