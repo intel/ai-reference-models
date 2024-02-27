@@ -48,6 +48,15 @@ if [[ ! -f ${LABELS_FILE} ]]; then
   https://raw.githubusercontent.com/tensorflow/models/v2.3.0/research/inception/inception/data/imagenet_2012_validation_synset_labels.txt
 fi
 
+# Extract training and validation tar files
+cd $IMAGENET_HOME
+for f in *.tar; do
+  d=`basename $f .tar`
+  mkdir $d
+  tar xf $f -C $d
+done
+
+cd ${WORKDIR}
 # Download `imagenet_to_gcs.py` script from the Intel model zoo repo to convert the dataset files to TF records
 if [[ ! -f "${WORKDIR}/imagenet_to_gcs.py" ]]; then
     wget https://raw.githubusercontent.com/IntelAI/models/master/datasets/imagenet/imagenet_to_gcs.py -O ${WORKDIR}/imagenet_to_gcs.py
@@ -86,11 +95,9 @@ python3 ${WORKDIR}/imagenet_to_gcs.py \
 
 # Combine the two folders in tf-records together
 cd $IMAGENET_HOME/tf_records
-if [[ ${DATASET} == "training" ]]; then
-  mv train/* $IMAGENET_HOME/tf_records
-  rm -rf train
-fi
-mv validation/* $IMAGENET_HOME/tf_records
+mv train/* ./
+mv validation/* ./
+rm -rf train
 rm -rf validation
 
 cd ${WORKDIR}
