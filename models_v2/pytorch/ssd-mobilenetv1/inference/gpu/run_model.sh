@@ -39,16 +39,16 @@ done
 
 OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
 
-if [[ "${PLATFORM}" == "ARC" ]]; then
+if [[ "${PLATFORM}" == "Arc" ]]; then
     if [[ "${MULTI_TILE}" == "True" ]]; then
-	echo "ARC not support multitile"
+	echo "Arc not support multitile"
 	exit 1
     fi
     BATCH_SIZE=${BATCH_SIZE:-256}
     PRECISION=${PRECISION:-INT8}
     NUM_ITERATIONS=${NUM_ITERATIONS:-500}
 else
-    echo "Only support ARC for platform"
+    echo "Only support Arc for platform"
     exit 1
 fi
 

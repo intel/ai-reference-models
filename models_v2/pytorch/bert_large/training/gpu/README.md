@@ -12,7 +12,7 @@ BERT Large training best known configurations with Intel® Extension for PyTorch
 * Host has one of the following GPUs:
   * **Arc Series** - [Intel® Arc™ A-Series Graphics](https://ark.intel.com/content/www/us/en/ark/products/series/227957/intel-arc-a-series-graphics.html)
   * **Max Series** - [Intel® Data Center GPU Max Series](https://ark.intel.com/content/www/us/en/ark/products/series/232874/intel-data-center-gpu-max-series.html)
-* Host has installed latest Intel® Data Center GPU Max & ARC Series Drivers https://dgpu-docs.intel.com/driver/installation.html
+* Host has installed latest Intel® Data Center GPU Max & Arc Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 * The following Intel® oneAPI Base Toolkit components are required:
   - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
   - Intel® oneAPI Math Kernel Library (oneMKL) (Placeholder MKLROOT as its installation path)
@@ -57,10 +57,10 @@ we are using  hdf5/hdf5_4320_shards_varlength as the our dataset.
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=Max` (Max or ARC)                                                 |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                 |
 | **DATASET_DIR**                 | `export DATASET_DIR=`                                                                                  |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=16`                                |
-| **PRECISION** (optional)     |`export PRECISION=BF16` (BF16 FP8 FP32 and TF32 are supported for Max and BF16 for ARC )               |
+| **PRECISION** (optional)     |`export PRECISION=BF16` (BF16 FP8 FP32 and TF32 are supported for Max and BF16 for Arc )               |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=20`                             |
 6. Run `run_model.sh`
