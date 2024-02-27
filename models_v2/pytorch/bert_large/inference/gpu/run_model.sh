@@ -55,7 +55,7 @@ if [[ "${PLATFORM}" == "Max" ]]; then
     NUM_ITERATIONS=${NUM_ITERATIONS:--1}
 elif [[ "${PLATFORM}" == "Flex" ]]; then
     echo "only support Max for platform"
-elif [[ "${PLATFORM}" == "ARC" ]]; then
+elif [[ "${PLATFORM}" == "Arc" ]]; then
     if [[ "${MULTI_TILE}" == "True" ]]; then
         echo "Only support MULTI_TILE=False when in arc platform"
         exit 1

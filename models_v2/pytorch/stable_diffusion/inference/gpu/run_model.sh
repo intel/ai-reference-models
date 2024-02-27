@@ -45,9 +45,9 @@ elif [[ "${PLATFORM}" == "Flex" ]]; then
     fi
     BATCH_SIZE=${BATCH_SIZE:-1}
     PRECISION=${PRECISION:-fp16}
-elif [[ "${PLATFORM}" == "ARC" ]]; then
+elif [[ "${PLATFORM}" == "Arc" ]]; then
     if [[ "${MULTI_TILE}" == "True" ]]; then
-        echo "ARC not support multitile"
+        echo "Arc not support multitile"
         exit 1
     fi
     BATCH_SIZE=${BATCH_SIZE:-1}

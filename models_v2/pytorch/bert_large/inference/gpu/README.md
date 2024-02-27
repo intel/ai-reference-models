@@ -12,7 +12,7 @@ BERT Large Inference best known configurations with Intel® Extension for PyTorc
 * Host has one of the following GPUs:
   * **Arc Series** - [Intel® Arc™ A-Series Graphics](https://ark.intel.com/content/www/us/en/ark/products/series/227957/intel-arc-a-series-graphics.html)
   * **Max Series** - [Intel® Data Center GPU Max Series](https://ark.intel.com/content/www/us/en/ark/products/series/232874/intel-data-center-gpu-max-series.html)
-* Host has installed latest Intel® Data Center GPU Max & ARC Series Drivers https://dgpu-docs.intel.com/driver/installation.html
+* Host has installed latest Intel® Data Center GPU Max & Arc Series Drivers https://dgpu-docs.intel.com/driver/installation.html
 * The following Intel® oneAPI Base Toolkit components are required:
   - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
   - Intel® oneAPI Math Kernel Library (oneMKL) (Placeholder MKLROOT as its installation path)
@@ -83,11 +83,11 @@ BERT_WEIGHT=<path_to_BERT_WEIGHT_directory>/squad_large_finetuned_checkpoint
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=Max` (Max or ARC)                                                 |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                 |
 | **BERT_WEIGHT**              | `export BERT_WEIGHT=<path_to_BERT_WEIGHT_directory>/squad_large_finetuned_checkpoint` |
 | **DATASET_DIR**              | `export DATASET_DIR=<path/to/dataset>`                  |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
-| **PRECISION** (optional)     |                  `export PRECISION=BF16` (BF16, FP32 and FP16 are supported for Max and FP16 for ARC) |
+| **PRECISION** (optional)     |                  `export PRECISION=BF16` (BF16, FP32 and FP16 are supported for Max and FP16 for Arc) |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=-1`                             |
 8. Run `run_model.sh`

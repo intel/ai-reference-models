@@ -71,12 +71,12 @@ Download from [this URL](https://drive.google.com/drive/folders/1pKn-RifvJGWiOx0
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=False` (False)                                             |
-| **PLATFORM**                 | `export PLATFORM=ARC` (ARC)                                                   |
+| **PLATFORM**                 | `export PLATFORM=Arc` (Arc)                                                   |
 | **DATASET_DIR**              |                               `export DATASET_DIR=` (the dir path to voc2007 in dataset)|
 | **WEIGHT_DIR**              |                               `export WEIGHT_DIR=` (contain .pth files)                             |
 | **LABEL_DIR**              |                               `export LABEL_DIR=` (contain .txt files)                            |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
-| **PRECISION**      |                               `export PRECISION=INT8` (INT8, FP16 and FP32 for ARC)  |
+| **PRECISION**      |                               `export PRECISION=INT8` (INT8, FP16 and FP32 for Arc)  |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=500`                             |
 | **DATASET_DIR** (optional)   |                               `export DATASET_DIR=--dummy`                           |
