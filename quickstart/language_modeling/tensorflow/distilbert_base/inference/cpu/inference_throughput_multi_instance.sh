@@ -107,6 +107,7 @@ export TF_THREAD_PINNING_MODE=none,$((${cores_per_node} - 1)),400
 echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
 
 _ht_status_spr
+_get_numa_cores_lists
 _command python benchmarks/launch_benchmark.py \
          --model-name=distilbert_base \
          --precision=${PRECISION} \
