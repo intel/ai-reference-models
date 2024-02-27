@@ -56,7 +56,7 @@ ImageNet is recommended, the download link is https://image-net.org/challenges/L
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=PVC` (Max or Flex or ARC)                                                 |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max or Flex or Arc)                                                 |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=1024`                                |
 | **PRECISION** (optional)     |`export PRECISION=INT8` (INT8,FP32, FP16 for all platform, BF16 and TF32 only for Max)  |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |

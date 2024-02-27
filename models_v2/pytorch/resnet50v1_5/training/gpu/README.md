@@ -55,10 +55,10 @@ ImageNet is recommended, the download link is https://image-net.org/challenges/L
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **MULTI_TILE**               | `export MULTI_TILE=False` (True or False)                                            |
-| **PLATFORM**                 | `export PLATFORM=Max` (Max or ARC)                                                 |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                 |
 | **DATASET_DIR**              |                               `export DATASET_DIR=`                                  |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
-| **PRECISION**  (optional)    | `export PRECISION=BF16` (BF16 or TF32 or FP32 for Max and BF16 or FP32 for ARC )    |
+| **PRECISION**  (optional)    | `export PRECISION=BF16` (BF16 or TF32 or FP32 for Max and BF16 or FP32 for Arc )    |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=20`                             |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 6. Run `run_model.sh`
