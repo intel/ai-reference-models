@@ -51,7 +51,7 @@ Tensorflow requires conversion of the dataset to [TFRecord] format.
    ```
    python3 -m venv tf_env
    source tf_env/bin/activate
-   pip install --upgrade pip==19.3.1
+   pip install --upgrade pip
    pip install intel-tensorflow
    pip install -I urllib3
    pip install wget
