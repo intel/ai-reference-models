@@ -75,6 +75,7 @@ if [ -z "${BATCH_SIZE}" ]; then
 fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_numa_cores_lists
 _command python benchmarks/launch_benchmark.py \
          --model-name=distilbert_base \
          --precision=${PRECISION} \
@@ -85,7 +86,7 @@ _command python benchmarks/launch_benchmark.py \
          --accuracy-only \
          --batch-size=${BATCH_SIZE} \
          --output-dir=${OUTPUT_DIR} \
-         --num-intra-threads=${cores_per_socket} \
+         --num-intra-threads=${cores_per_node} \
          --num-inter-threads=1 \
          --warmup-steps=${WARMUP_STEPS} \
          $@
