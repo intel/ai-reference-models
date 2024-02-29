@@ -26,7 +26,7 @@ Refer to instructions [here](README.md#dataset) to download and prepare the data
 ### Set up Docker Image
 
 ```
-docker pull intel/recommendation:pytorch-max-gpu-distilbert-inference
+docker pull intel/language-modeling:pytorch-max-gpu-distilbert-inference
 ```
 
 ### Run Docker Image
