@@ -12,31 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-<<<<<<<< HEAD:docker/flex-gpu/pytorch-stable-diffusion-inference/pytorch-flex-series-stable-diffusion-inference.Dockerfile
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="xpu-flex"
-
-FROM ${BASE_IMAGE}:${BASE_TAG}
-
-WORKDIR /home/user/workspace/pytorch-flex-series-stable-diffusion-inference 
-
-RUN apt-get update && \
-    apt-get install -y parallel 
-RUN apt-get install -y pciutils
-
-ARG PY_VERSION=3.10
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing \
-    build-essential \
-    python${PY_VERSION}-dev
-
-RUN pip install diffusers pytorch-fid transformers
-
-COPY models/generative-ai/pytorch/stable_diffusion/inference/gpu models/generative-ai/pytorch/stable_diffusion/inference/gpu 
-COPY quickstart/generative-ai/pytorch/stable_diffusion/inference/gpu/online_inference.sh quickstart/online_inference.sh 
-
-========
 ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
 ARG TF_BASE_TAG="xpu"
 
@@ -63,6 +38,5 @@ RUN git clone https://github.com/keras-team/keras-cv.git && \
 
 RUN python -m pip install scikit-image scipy==1.11.1
 
->>>>>>>> r3.1:docker/flex-gpu/tf-stable-diffusion-inference/tf-flex-series-stable-diffusion-inference.Dockerfile
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
