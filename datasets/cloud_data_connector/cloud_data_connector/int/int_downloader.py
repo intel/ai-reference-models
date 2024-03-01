@@ -17,18 +17,7 @@
 #
 from abc import ABCMeta, abstractmethod 
 
-#
 
-<<<<<<<< HEAD:benchmarks/recommendation/tensorflow/dien/training/bfloat16/model_init.py
-from recommendation.tensorflow.dien.training.dien_model_init import DienModelInitializer
-
-
-class ModelInitializer(DienModelInitializer):
-    """Model initializer for DIEN bf16 Training"""
-
-    def __init__(self, args, custom_args=[], platform_util=None):
-        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
-========
 class IntDownloader(metaclass=ABCMeta):
     
     def __init__(self, connector: object):
@@ -37,4 +26,3 @@ class IntDownloader(metaclass=ABCMeta):
     @abstractmethod 
     def download(self, container_obj: object, data_file: object, destiny: object) -> object:
         pass
->>>>>>>> r3.1:datasets/cloud_data_connector/cloud_data_connector/int/int_downloader.py
