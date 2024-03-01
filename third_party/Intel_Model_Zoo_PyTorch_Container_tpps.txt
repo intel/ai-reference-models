@@ -93,8 +93,6 @@ Third party programs and their corresponding required notices and/or license ter
    tensorboard
    Copyright 2017 The TensorFlow Authors.  All rights reserved.
 
-   QuartzNet
-
    efficientnet-pytorch
 
     
@@ -6629,9 +6627,6 @@ contributors.
 
     spacy
     Copyright (C) 2016-2023 ExplosionAI GmbH, 2016 spaCy GmbH, 2015 Matthew Honnibal
-
-    HiFi-Gan
-    Copyright (c) 2020 Jungil Kong
 
     Unet++
     Copyright (c) 2019, Pavel Iakubovskii
