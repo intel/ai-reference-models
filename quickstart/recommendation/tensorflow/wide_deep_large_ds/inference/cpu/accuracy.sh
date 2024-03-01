@@ -35,28 +35,11 @@ if [ ! -f "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-<<<<<<<< HEAD:quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/batch_inference.sh
-# If precision env is not mentioned, then the workload will run with the default precision.
-if [ -z "${PRECISION}"]; then
-  PRECISION=fp32
-  echo "Running with default precision ${PRECISION}"
-fi
-
-if [[ $PRECISION != "fp32" ]]; then
-  echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precision is fp32."
-  exit 1
-fi
-
-if [ -z "${PRETRAINED_MODEL}" ]; then
-  PRETRAINED_MODEL="${MODEL_DIR}/mlperf_gnmt_fp32_pretrained_model.pb"
-========
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
   echo "Please set PRECISION to fp32 or int8"
   exit 1
 fi
->>>>>>>> r3.1:quickstart/recommendation/tensorflow/wide_deep_large_ds/inference/cpu/accuracy.sh
 
 if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]]; then
   echo "The specified precision '${PRECISION}' is unsupported."
@@ -85,28 +68,9 @@ fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-<<<<<<<< HEAD:quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/batch_inference.sh
-  BATCH_SIZE="32"
-  echo "Running with default batch size of ${BATCH_SIZE}"
-fi
-
-source "${MODEL_DIR}/quickstart/common/utils.sh"
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-  --model-name mlperf_gnmt \
-  --framework tensorflow \
-  --precision ${PRECISION} \
-  --mode inference \
-  --batch-size ${BATCH_SIZE} \
-  --socket-id 0 \
-  --data-location ${DATASET_DIR} \
-  --in-graph ${PRETRAINED_MODEL} \
-  --output-dir ${OUTPUT_DIR} \
-  --benchmark-only
-========
   BATCH_SIZE="1000"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
->>>>>>>> r3.1:quickstart/recommendation/tensorflow/wide_deep_large_ds/inference/cpu/accuracy.sh
 
 # Run wide and deep large dataset inference
 source "$MODEL_DIR/quickstart/common/utils.sh"
