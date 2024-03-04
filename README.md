@@ -199,6 +199,8 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [HiFi-GAN](https://arxiv.org/pdf/2010.05646.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/hifi_gan/inference/gpu/README.md) | 
 | [QuartzNet](https://arxiv.org/pdf/1910.10261.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/quartznet/inference/gpu/README.md) | 
 | [UNet++](https://arxiv.org/pdf/1807.10165.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/unetpp/inference/gpu/README.md) | 
+| [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Inference | Max Series | [FP16 BF16 FP32](/models_v2/pytorch/rnnt/inference/gpu/README.md) |
+| [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Training | Max Series | [FP32 BF16 TF32](/models_v2/pytorch/rnnt/training/gpu/README.md) |
 
 ## How to Contribute
 If you would like to add a new benchmarking script, please use [this guide](/CONTRIBUTING.md).
