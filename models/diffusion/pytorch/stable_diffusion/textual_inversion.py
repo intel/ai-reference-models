@@ -776,6 +776,7 @@ def main():
         num_cycles=args.lr_num_cycles,
     )
 
+    text_encoder.train()
     # Prepare everything with our `accelerator`.
     text_encoder, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
         text_encoder, optimizer, train_dataloader, lr_scheduler
@@ -982,6 +983,9 @@ def main():
 
     throughput = (args.max_train_steps * args.gradient_accumulation_steps - args.warmup_iterations) / (train_time)
     print("Throughput: {:.5f}".format(throughput))
+
+    loss = loss.detach().item()
+    print(f"Loss: {loss}")
 
     # Create the pipeline using the trained modules and save it.
     accelerator.wait_for_everyone()
