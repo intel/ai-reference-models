@@ -24,7 +24,7 @@
 * Please download [BraTS 2019](https://www.med.upenn.edu/cbica/brats2019/data.html) separately and unzip the dataset.
 
 ## Prepare data file
-* Download the data file from https://github.com/mlcommons/inference/tree/master/vision/medical_imaging/3d-unet-brats19/folds, put them under the folder models_v2/pytorch/3d_unet/inference/gpu/folds 
+* Download the data file from https://github.com/mlcommons/inference/tree/master/vision/medical_imaging/3d-unet-brats19/folds, put them under the folder models_v2/pytorch/3d_unet/inference/gpu/3d-unet/folds 
 
 ## Inference
 1. `git clone https://github.com/IntelAI/models.git`
