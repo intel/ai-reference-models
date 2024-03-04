@@ -1,0 +1,108 @@
+# tf32-batch-single-tile-training:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-training
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: TF32
+#     BATCH_SIZE: '512'
+#     DATASET_DIR: /var/LibriSpeech
+#     PLATFORM: 'Max'
+#     MULTI_TILE: 'False'
+#     OUTPUT_DIR: /localdisk
+#   volumes:
+#     - src: /var/LibriSpeech
+#       dst: /var/LibriSpeech
+#     - src: /localdisk
+#       dst: /localdisk
+# tf32-batch-multi-tile-training:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-training
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: TF32
+#     BATCH_SIZE: '512'
+#     DATASET_DIR: /var/LibriSpeech
+#     PLATFORM: 'Max'
+#     MULTI_TILE: 'True'
+#     OUTPUT_DIR: /localdisk
+#   volumes:
+#     - src: /var/LibriSpeech
+#       dst: /var/LibriSpeech
+#     - src: /localdisk
+#       dst: /localdisk
+#     - src: /dev/dri
+#       dst: /dev/dri
+# bf16-batch-single-tile-training:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-training
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: BF16
+#     BATCH_SIZE: '512'
+#     DATASET_DIR: /var/LibriSpeech
+#     PLATFORM: 'Max'
+#     MULTI_TILE: 'False'
+#     OUTPUT_DIR: /localdisk
+#   volumes:
+#     - src: /var/LibriSpeech
+#       dst: /var/LibriSpeech
+#     - src: /localdisk
+#       dst: /localdisk
+# bf16-batch-multi-tile-training:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-training
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: BF16
+#     BATCH_SIZE: '512'
+#     DATASET_DIR: /var/LibriSpeech
+#     PLATFORM: 'Max'
+#     MULTI_TILE: 'True'
+#     OUTPUT_DIR: /localdisk
+#   volumes:
+#     - src: /var/LibriSpeech
+#       dst: /var/LibriSpeech
+#     - src: /localdisk
+#       dst: /localdisk
+#     - src: /dev/dri
+#       dst: /dev/dri
+# fp32-batch-single-tile-training:
+#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-training
+#   cmd: bash run_model.sh
+#   ipc: host
+#   device: /dev/dri
+#   env:
+#     PRECISION: FP32
+#     BATCH_SIZE: '512'
+#     DATASET_DIR: /var/LibriSpeech
+#     PLATFORM: 'Max'
+#     MULTI_TILE: 'False'
+#     OUTPUT_DIR: /localdisk
+#   volumes:
+#     - src: /var/LibriSpeech
+#       dst: /var/LibriSpeech
+#     - src: /localdisk
+#       dst: /localdisk
+fp32-batch-multi-tile-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-training
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: FP32
+    BATCH_SIZE: '512'
+    DATASET_DIR: /var/LibriSpeech
+    PLATFORM: 'Max'
+    MULTI_TILE: 'True'
+    OUTPUT_DIR: /localdisk
+  volumes:
+    - src: /var/LibriSpeech
+      dst: /var/LibriSpeech
+    - src: /localdisk
+      dst: /localdisk
+    - src: /dev/dri
+      dst: /dev/dri

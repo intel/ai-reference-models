@@ -1,0 +1,120 @@
+fp16-batch-single-tile-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: FP16
+    BATCH_SIZE: '512'
+    DATASET_DIR: /var/LibriSpeech
+    WEIGHT_DIR: /var/rnnt_inference_weights
+    PLATFORM: 'Max'
+    MULTI_TILE: 'False'
+    OUTPUT_DIR: /localdisk
+  volumes:
+    - src: /var/LibriSpeech
+      dst: /var/LibriSpeech
+    - src: /var/rnnt_inference_weights
+      dst: /var/rnnt_inference_weights
+    - src: /localdisk
+      dst: /localdisk
+fp16-batch-multi-tile-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: FP16
+    BATCH_SIZE: '512'
+    DATASET_DIR: /var/LibriSpeech
+    WEIGHT_DIR: /var/rnnt_inference_weights
+    PLATFORM: 'Max'
+    MULTI_TILE: 'True'
+    OUTPUT_DIR: /localdisk
+  volumes:
+    - src: /var/LibriSpeech
+      dst: /var/LibriSpeech
+    - src: /var/rnnt_inference_weights
+      dst: /var/rnnt_inference_weights
+    - src: /localdisk
+      dst: /localdisk
+bf16-batch-single-tile-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: BF16
+    BATCH_SIZE: '512'
+    DATASET_DIR: /var/LibriSpeech
+    WEIGHT_DIR: /var/rnnt_inference_weights
+    PLATFORM: 'Max'
+    MULTI_TILE: 'False'
+    OUTPUT_DIR: /localdisk
+  volumes:
+    - src: /var/LibriSpeech
+      dst: /var/LibriSpeech
+    - src: /var/rnnt_inference_weights
+      dst: /var/rnnt_inference_weights
+    - src: /localdisk
+      dst: /localdisk
+bf16-batch-multi-tile-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: BF16
+    BATCH_SIZE: '512'
+    DATASET_DIR: /var/LibriSpeech
+    WEIGHT_DIR: /var/rnnt_inference_weights
+    PLATFORM: 'Max'
+    MULTI_TILE: 'True'
+    OUTPUT_DIR: /localdisk
+  volumes:
+    - src: /var/LibriSpeech
+      dst: /var/LibriSpeech
+    - src: /var/rnnt_inference_weights
+      dst: /var/rnnt_inference_weights
+    - src: /localdisk
+      dst: /localdisk
+fp32-batch-single-tile-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: FP32
+    BATCH_SIZE: '512'
+    DATASET_DIR: /var/LibriSpeech
+    WEIGHT_DIR: /var/rnnt_inference_weights
+    PLATFORM: 'Max'
+    MULTI_TILE: 'False'
+    OUTPUT_DIR: /localdisk
+  volumes:
+    - src: /var/LibriSpeech
+      dst: /var/LibriSpeech
+    - src: /var/rnnt_inference_weights
+      dst: /var/rnnt_inference_weights
+    - src: /localdisk
+      dst: /localdisk
+fp32-batch-multi-tile-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: FP32
+    BATCH_SIZE: '512'
+    DATASET_DIR: /var/LibriSpeech
+    WEIGHT_DIR: /var/rnnt_inference_weights
+    PLATFORM: 'Max'
+    MULTI_TILE: 'True'
+    OUTPUT_DIR: /localdisk
+  volumes:
+    - src: /var/LibriSpeech
+      dst: /var/LibriSpeech
+    - src: /var/rnnt_inference_weights
+      dst: /var/rnnt_inference_weights
+    - src: /localdisk
+      dst: /localdisk
