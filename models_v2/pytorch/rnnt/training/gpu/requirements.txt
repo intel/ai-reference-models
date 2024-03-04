@@ -1,0 +1,12 @@
+pandas
+tqdm
+ascii-graph
+wrapt
+librosa
+toml
+soundfile
+ipdb
+sox
+tensorboard
+Unidecode
+inflect
