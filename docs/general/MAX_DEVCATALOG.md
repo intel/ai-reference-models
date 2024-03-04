@@ -28,6 +28,8 @@ The table below provides links to run each workload in a docker container. The c
 | [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | PyTorch | [Training](../../models_v2/pytorch/resnet50v1_5/training/gpu/CONTAINER.md) | BF16,FP32 and TF32 | 
 | [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | TensorFlow | [Training](../../models_v2/tensorflow/resnet50v1_5/training/gpu/CONTAINER.md) |  BF16 | 
 | [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | TensorFlow | [Inference](../../quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/DEVCATALOG_MAX.md) | INT8,FP16,FP32 | 
+| [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | [Inference](../../models_v2/pytorch/rnnt/inference/gpu/CONTAINER.md) |
+| [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | [Training](../../models_v2/pytorch/rnnt/training/gpu/CONTAINER.md) |
 | [Stable Diffusion](https://arxiv.org/abs/2112.10752) | PyTorch | [Inference](../../models_v2/pytorch/stable_diffusion/inference/gpu/CONTAINER_MAX.md) | FP16 |
 
 **Note**: 
