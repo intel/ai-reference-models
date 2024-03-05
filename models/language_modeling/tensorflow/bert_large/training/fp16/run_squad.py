@@ -213,7 +213,7 @@ flags.DEFINE_bool(
     "           Be careful this flag will crash model with incompatible TF.")
 
 flags.DEFINE_bool(
-    "amp", False,
+    "amp", True,
     "[Optional] If true, use grappler Auto Mixed Precision pass instead of the Keras Mixed Policy to enable float16 training.")
 
 
@@ -674,25 +674,13 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
-    if bert_config.precision == "fp16" and not bert_config.amp:
-      with tf.compat.v1.tpu.float16_scope():
-        (start_logits, end_logits) = create_model(
-            bert_config=bert_config,
-            is_training=is_training,
-            input_ids=input_ids,
-            input_mask=input_mask,
-            segment_ids=segment_ids,
-            use_one_hot_embeddings=use_one_hot_embeddings)
-      start_logits = tf.cast(start_logits, tf.float32)
-      end_logits = tf.cast(end_logits, tf.float32)
-    else :
-        (start_logits, end_logits) = create_model(
-            bert_config=bert_config,
-            is_training=is_training,
-            input_ids=input_ids,
-            input_mask=input_mask,
-            segment_ids=segment_ids,
-            use_one_hot_embeddings=use_one_hot_embeddings)
+    (start_logits, end_logits) = create_model(
+        bert_config=bert_config,
+        is_training=is_training,
+        input_ids=input_ids,
+        input_mask=input_mask,
+        segment_ids=segment_ids,
+        use_one_hot_embeddings=use_one_hot_embeddings)
 
     tvars = tf.compat.v1.trainable_variables()
 
