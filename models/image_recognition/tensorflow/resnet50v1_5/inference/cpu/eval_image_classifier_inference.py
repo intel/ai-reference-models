@@ -28,6 +28,7 @@ from tensorflow.core.protobuf import rewriter_config_pb2
 
 import datasets
 import numpy as np
+import os
 
 from tensorflow.python.platform import tf_logging
 
@@ -128,6 +129,12 @@ class eval_classifier_optimized_graph:
     dtype = self.args.data_type
     print("*** Run inference using data type:", dtype, "***")
 
+    tf_xla_enabled = False
+    if "TF_XLA_FLAGS" in os.environ:
+        tf_xla_flags = os.environ["TF_XLA_FLAGS"].split(sep=" ")
+        tf_xla_enabled = "--tf_xla_auto_jit=2" in tf_xla_flags and \
+                         "--tf_xla_cpu_global_jit" in tf_xla_flags
+
     data_config = tf.compat.v1.ConfigProto()
     data_config.intra_op_parallelism_threads = self.args.data_num_intra_threads
     data_config.inter_op_parallelism_threads = self.args.data_num_inter_threads
@@ -145,6 +152,8 @@ class eval_classifier_optimized_graph:
       infer_config.graph_options.rewrite_options.auto_mixed_precision = (
                     rewriter_config_pb2.RewriterConfig.ON)
 
+    if tf_xla_enabled:
+        infer_config.graph_options.rewrite_options.remapping = rewriter_config_pb2.RewriterConfig.OFF
 
     data_graph = tf.Graph()
     with data_graph.as_default():

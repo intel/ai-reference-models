@@ -47,7 +47,7 @@ from tensorflow.python.training.experimental import loss_scale as ls
 from tensorflow.python.framework import smart_cond
 
 
-def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_steps=1, amp=False, use_tpu=False, use_multi_cpu=0):
+def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_steps=1, amp=True, use_tpu=False, use_multi_cpu=0):
   """Creates an optimizer training op."""
   global_step = tf.compat.v1.train.get_or_create_global_step()
   learning_rate = tf.constant(value=init_lr, shape=[], dtype=tf.float32)
