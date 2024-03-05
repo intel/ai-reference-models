@@ -142,6 +142,7 @@ def inference(
         jit=False,
         iterations=-1,
         iter_warmup=-1,
+        accuracy=False,
         enable_profiling=False
 ):
     # convert to a torch.device for efficiency
@@ -182,21 +183,24 @@ def inference(
 
     print("Throughput: {:.3f} fps".format((iterations * ims_per_patch) / (inference_timer.total_time * num_devices)))  
 
-    predictions = _accumulate_predictions_from_multiple_gpus(predictions)
-    if not is_main_process():
+    if accuracy:
+        predictions = _accumulate_predictions_from_multiple_gpus(predictions)
+        if not is_main_process():
+            return
+
+        if output_folder:
+            torch.save(predictions, os.path.join(output_folder, "predictions.pth"))
+
+        extra_args = dict(
+            box_only=box_only,
+            iou_types=iou_types,
+            expected_results=expected_results,
+            expected_results_sigma_tol=expected_results_sigma_tol,
+        )
+
+        return evaluate(dataset=dataset,
+                        predictions=predictions,
+                        output_folder=output_folder,
+                        **extra_args)
+    else:
         return
-
-    if output_folder:
-        torch.save(predictions, os.path.join(output_folder, "predictions.pth"))
-
-    extra_args = dict(
-        box_only=box_only,
-        iou_types=iou_types,
-        expected_results=expected_results,
-        expected_results_sigma_tol=expected_results_sigma_tol,
-    )
-
-    return evaluate(dataset=dataset,
-                    predictions=predictions,
-                    output_folder=output_folder,
-                    **extra_args)
