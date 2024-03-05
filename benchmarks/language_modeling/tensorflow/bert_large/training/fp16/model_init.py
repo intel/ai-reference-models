@@ -100,7 +100,7 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument('--optimized-softmax', help=' [Experimental] Use optimized softmax for inner layers.',
                                 dest="optimized_softmax", default="False")
         arg_parser.add_argument('--amp', help=' Use grappler AMP for Float16 training.',
-                                dest="amp", default="False")
+                                dest="amp", default="True")
         arg_parser.add_argument('--mpi_workers_sync_gradients',
                                 help='Set to True for Syncing horovod gradients, False otherwise',
                                 dest="mpi_workers_sync_gradients", default="False")
