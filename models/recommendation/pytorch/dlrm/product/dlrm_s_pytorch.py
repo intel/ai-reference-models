@@ -1746,6 +1746,9 @@ def run():
 
     # profiling
     print_training_performance()
+    # workaround oneccl bad termination issue.
+    if ext_dist.my_size > 1:
+        ext_dist.dist.destroy_process_group()
 
     if args.enable_profiling:
         time_stamp = str(datetime.datetime.now()).replace(" ", "_")
