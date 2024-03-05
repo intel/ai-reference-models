@@ -74,6 +74,7 @@ def main():
                         help='number of total iterations to run')
     parser.add_argument('--iter-warmup', default=-1, type=int, metavar='N',
                         help='number of warm-up iterations to run')
+    parser.add_argument('--accuracy', action='store_true', default=False, help='test accuracy')
     parser.add_argument("--enable-profiling", action="store_true", default=False)
 
     args = parser.parse_args()
@@ -143,6 +144,7 @@ def main():
             jit=args.jit,
             iterations=args.iterations,
             iter_warmup=args.iter_warmup,
+            accuracy=args.accuracy,
             enable_profiling=args.enable_profiling
         )
         synchronize()
