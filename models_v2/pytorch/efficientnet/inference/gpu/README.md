@@ -88,7 +88,7 @@ Run sample as follows:
 
   * Running with dummy data is recommended for performance benchmarking (throughput and latency measurements)
   * Use higher `NUM_ITERATIONS` and lower `NUM_IMAGES` values (e.g. use `NUM_IMAGES=$BATCH_SIZE`) for more precise performance results
-  * **NOTE**: Accuracy will be approximately zero when using dummy data
+  * **NOTE**: Accuracy will be zero when using dummy data
   ```
   mkdir -p /tmp/output && rm -f /tmp/output/* && chmod -R 777 /tmp/output
   export BATCH_SIZE=1
@@ -166,7 +166,7 @@ Mind the following `docker run` arguments:
 
      * Running with dummy data is recommended for performance benchmarking (throughput and latency measurements)
      * Use higher `NUM_ITERATIONS` and lower `NUM_IMAGES` values (e.g. use `NUM_IMAGES=$BATCH_SIZE`) for more precise performance results
-     * **NOTE**: Accuracy will be approximately zero when using dummy data
+     * **NOTE**: Accuracy will be zero when using dummy data
      ```
      export MODEL_NAME=efficientnet_b0
      export PLATFORM=Flex
@@ -205,7 +205,7 @@ Other arguments and/or environment variables are optional and should be used acc
 
 | Argument           | Environment variable | Valid Values      | Purpose                                                               |
 | ------------------ | -------------------- | ----------------- | --------------------------------------------------------------------- |
-| `--amp`            | `AMP`                | `yes`             | Use AMP on model convertion to the desired precision (default: `yes`) |
+| `--amp`            | `AMP`                | `yes`             | Use AMP on model conversion to the desired precision (default: `yes`) |
 |                    |                      | `no`              |                                                                       |
 | `--arch`           | `MODEL_NAME`         | `efficientnet_b0` | Torchvision model to run (default: `efficientnet_b0`)                 |
 |                    |                      | `efficientnet_b1` |                                                                       |

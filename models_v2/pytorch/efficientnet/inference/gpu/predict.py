@@ -222,13 +222,13 @@ def do_warmup(model, ds):
                     # compute output
                     for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
                         outputs += [model(images)]
+                        torch.xpu.synchronize(args.device)
                 else:
                     with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=True):
                         # compute output
                         for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
                             outputs += [model(images)]
-
-                torch.xpu.synchronize(args.device)
+                            torch.xpu.synchronize(args.device)
             else:
                 if args.gpu:
                     try:
@@ -237,20 +237,29 @@ def do_warmup(model, ds):
                     except:
                         pass
                     images = images.cuda(args.device, non_blocking=args.non_blocking)
+                if args.no_amp:
+                    if args.fp16:
+                        images = images.to(dtype=torch.float16)
+                    elif args.bf16:
+                        images = images.to(dtype=torch.bfloat16)
                 if args.jit_trace:
                     # compute output
                     for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
                         outputs += [model(images)]
+                        if args.gpu:
+                            torch.cuda.synchronize(args.device)
                 else:
                     with torch.autocast(enabled=use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=autocast_dtype, cache_enabled=True):
                         # compute output
                         for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
                             outputs += [model(images)]
-                if args.gpu:
-                    torch.cuda.synchronize(args.device)
+                            if args.gpu:
+                                torch.cuda.synchronize(args.device)
     io_utils.write_info('Completed {0} warmup batches'.format(len(outputs)))
 
-def do_perf_benchmarking(model, ds):
+    return use_autocast, autocast_dtype, model
+
+def do_perf_benchmarking(model, ds, use_autocast, autocast_dtype):
     ds_batches = len(ds)
     total_batches = ds_batches * args.batch_streaming
     print_frequency = max([1, total_batches // args.status_prints])
@@ -259,9 +268,6 @@ def do_perf_benchmarking(model, ds):
     profiling = os.environ.get('PROFILE', 'OFF').upper() in ['1', 'Y', 'ON', 'YES', 'TRUE']
     if profiling:
         io_utils.write_info('Using profiling')
-
-    # Final config of the model
-    use_autocast, autocast_dtype, model = inference_config(model)
 
     # Safe the model before doing perf
     if args.save:
@@ -322,15 +328,14 @@ def do_perf_benchmarking(model, ds):
                         # compute output
                         for batch_repeat_index in range(args.batch_streaming):
                             outputs += [model(images)]
+                            torch.xpu.synchronize(args.device)
                     else:
                         with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=True):
                             start_time = time.time()
                             # compute output
                             for batch_repeat_index in range(args.batch_streaming):
                                 outputs += [model(images)]
-
-                    # sync for time measurement
-                    torch.xpu.synchronize(args.device)
+                                torch.xpu.synchronize(args.device)
                     duration_eval = (time.time() - start_time) / args.batch_streaming
 
                 if profiling:
@@ -369,16 +374,17 @@ def do_perf_benchmarking(model, ds):
                         # compute output
                         for batch_repeat_index in range(args.batch_streaming):
                             outputs += [model(images)]
+                            if args.gpu:
+                                torch.cuda.synchronize(args.device)
                     else:
                         with torch.autocast(enabled=use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=autocast_dtype, cache_enabled=True):
                             start_time = time.time()
                             # compute output
                             for batch_repeat_index in range(args.batch_streaming):
                                 outputs += [model(images)]
+                                if args.gpu:
+                                    torch.cuda.synchronize(args.device)
 
-                    if args.gpu:
-                        # sync for time measurement
-                        torch.cuda.synchronize(args.device)
                     duration_eval = (time.time() - start_time) / args.batch_streaming
 
                 if profiling:
@@ -477,11 +483,11 @@ def predict(instance, input_args):
         model = quantize_model(model)
 
     # Do warmup on the model and sync processes afterwards
-    do_warmup(model, validation_loader_inf)
+    use_autocast, autocast_dtype, model = do_warmup(model, validation_loader_inf)
     barrier_utils.do_ipc_sync(args.barrier, 'warmup', args.terminate_if_sync_fail)
 
     # Do inference benchmarking
-    batches_tested, throughput, latency, top1, top5, throughput_overhead, latency_overhead = do_perf_benchmarking(model, validation_loader_inf)
+    batches_tested, throughput, latency, top1, top5, throughput_overhead, latency_overhead = do_perf_benchmarking(model, validation_loader_inf, use_autocast, autocast_dtype)
     summary_utils.write_results(batches_tested, throughput, latency, top1, top5, throughput_overhead, latency_overhead)
 
 def main():
