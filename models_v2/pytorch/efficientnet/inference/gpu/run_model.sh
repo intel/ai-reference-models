@@ -287,6 +287,9 @@ elif [[ ${PRECISION} == "int8" ]]; then
     #_dtype_args="--int8 1 --asymmetric-quantization --perchannel-weight 1"
     echo "ERROR: Precision '${PRECISION}' is not supported yet for model '${MODEL_NAME}'"
     exit 1
+else
+    echo "ERROR: Unknown precision '${PRECISION}' for model '${MODEL_NAME}'"
+    exit 1
 fi
 
 # Specify if AMP should be used
@@ -302,9 +305,9 @@ fi
 # Specify if JIT should be used
 if [[ ${JIT} == "none" ]]; then
     _jit_arg=""
-elif [[ ${JIT} == "trace" ]]; then # Only specifiable through environment variables.
+elif [[ ${JIT} == "trace" ]]; then
     _jit_arg="--jit-trace"
-elif [[ ${JIT} == "script" ]]; then # Only specifiable through environment variables.
+elif [[ ${JIT} == "script" ]]; then
     _jit_arg="--jit-script"
 else
     echo "ERROR: Invalid valid entered for 'JIT': ${JIT}"

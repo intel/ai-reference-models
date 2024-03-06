@@ -13,6 +13,7 @@
 # limitations under the License.
 
 # system modules
+import copy
 import torch
 import io
 import os
@@ -22,35 +23,117 @@ import numpy as np
 import io_utils
 from arguments_utils import args
 
+# Group metric keys per operation to perform when combining results
+# calculate min, max, average and stdev of a random value
+op_avg = [
+    'accuracy-top1',
+    'accuracy-top5',
+    'latency',
+    'latency-with-overhead'
+]
+# error out if values are different
+op_same = [
+    'total-batches-tested',
+    'total-images-tested',
+    'uniq-batches-tested',
+    'uniq-images-tested',
+    'warmup-batches'
+]
+# calculate total min, max, average and stdev of random value
+# total means to multiple on a number of streams, i.e. =min(arr)*len(arr)
+op_total_avg = [
+    'throughput',
+    'throughput-with-overhead'
+]
+
+# Write single result
 def write_results(batches_tested, throughput, latency, top1, top5, throughput_overhead, latency_overhead):
     output_dict = {
-        'SAME:Model': '{0}'.format(args.arch),
-        'SAME:Framework': 'PyTorch',
-        'SAME:Streams': args.total_instances,
-        'SAME:Batchsize': args.batch_size,
-        'SAME:Total Batches Tested': batches_tested,
-        'SAME:Unique Batches Tested': batches_tested // args.batch_streaming,
-        'SAME:Total Images Tested': batches_tested * args.batch_size,
-        'SAME:Unique Images Tested': args.batch_size * (batches_tested // args.batch_streaming),
-        'SAME:Warmup Batches': args.warm_up,
-        'SAME:Data Type': args.dtype_str,
-        'SAME:AMP': 'no' if args.no_amp else 'yes',
-        'SAME:JIT': 'trace' if args.jit_trace else 'script' if args.jit_script else 'no',
-        'MAX:Latency (ms)': float(latency),
-        'MAX:Latency with Overhead (ms)': float(latency_overhead),
-        'SUM_MIN:Throughput (img/s)': float(throughput),
-        'SUM_MIN:Throughput with Overhead (img/s)': float(throughput_overhead),
-        'MIN:Top1 Accuracy (%)': float(top1),
-        'MIN:Top5 Accuracy (%)': float(top5),
-        'SAME:Device': args.device,
-        'AND:Pass': True
+        'config': {
+            'workload': {
+                'model': {
+                    'name': '{0}'.format(args.arch),
+                    'streams': args.total_instances,
+                    'precision': args.dtype_str,
+                    'batch-size': args.batch_size,
+                    'device': args.device,
+                    'amp': 'false' if args.no_amp else 'true',
+                    'jit': 'trace' if args.jit_trace else 'script' if args.jit_script else 'no',
+                },
+            },
+            'system': {
+                'system-1': {
+                    'software': {}
+                }
+            }
+        },
+        'results': {
+            'metrics': {
+                'throughput': {
+                    'avg': float(throughput),
+                    'min': float(throughput),
+                    'max': float(throughput),
+                    'stddev': 0.0,
+                    'units': 'images/s'
+                    },
+                'throughput-with-overhead': {
+                    'avg': float(throughput_overhead),
+                    'min': float(throughput_overhead),
+                    'max': float(throughput_overhead),
+                    'stddev': 0.0,
+                    'units': 'images/s'
+                },
+                'accuracy-top1': {
+                    'avg': float(top1),
+                    'min': float(top1),
+                    'max': float(top1),
+                    'stddev': 0.0,
+                    'units': '%'
+                },
+                'accuracy-top5': {
+                    'avg': float(top5),
+                    'min': float(top5),
+                    'max': float(top5),
+                    'stddev': 0.0,
+                    'units': '%'
+                },
+                'latency': {
+                    'avg': float(latency),
+                    'min': float(latency),
+                    'max': float(latency),
+                    'stddev': 0.0,
+                    'units': 'ms'
+                },
+                'latency-with-overhead': {
+                    'avg':float(latency_overhead),
+                    'min':float(latency_overhead),
+                    'max':float(latency_overhead),
+                    'stddev': 0.0,
+                    'units': 'ms'
+                },
+                'total-batches-tested': { 'total': batches_tested },
+                'total-images-tested': { 'total': batches_tested * args.batch_size },
+                'uniq-batches-tested': { 'total': batches_tested // args.batch_streaming },
+                'uniq-images-tested': { 'total': args.batch_size * (batches_tested // args.batch_streaming) },
+                'warmup-batches': { 'total': args.warm_up },
+            }
+        }
     }
-    output_dict['SAME:Framework Metadata'] = {}
-    output_dict['SAME:Framework Metadata']['torch_version'] = str(torch.__version__)
+    _pytorch = {
+        'name': 'PyTorch',
+        'version': str(torch.__version__)
+    }
+
+    output_dict['config']['system']['system-1']['software']['pytorch'] = _pytorch
     if args.xpu:
         import intel_extension_for_pytorch as ipex
-        output_dict['SAME:Framework Metadata']['ipex_version'] = str(ipex.__version__)
-        output_dict['SAME:Framework Metadata']['has_onemkl'] = ipex.xpu.has_onemkl()
+        _ipex = {
+            'name': 'IPEX',
+            'version': str(ipex.__version__),
+            'has_onemkl': ipex.xpu.has_onemkl()
+        }
+        output_dict['config']['system']['system-1']['software']['ipex'] = _ipex
+
     io_utils.write_json('{0}/results_{1}.json'.format(args.output_dir, args.instance), output_dict)
 
 def show_test_conditions():
@@ -97,104 +180,100 @@ def show_test_conditions():
     io_utils.stdout_helper('    status prints:      {0}'.format(args.status_prints))
     io_utils.stdout_helper(' --------------------------- end inference arguments ---------------------------')
 
-def combine_results():
-    pre_processed_summary = {}
-    io_utils.write_info('Combining results...')
-    results = []
+def get_valid_results_list():
+    results_list = []
     for root, dirs, files in os.walk(args.output_dir):
-        for file in files:
-            if 'results_' in file and '.json' in file:
-                results += [root + os.sep + file]
-    io_utils.write_info('Found {0} results to combine'.format(len(results)))
-    if len(results) < args.total_instances:
-        io_utils.write_info('Number of found results ({0}) to combine is less than expected ({1})'.format(len(results), args.total_instances))
-        if 'AND' not in pre_processed_summary:
-            pre_processed_summary['AND'] = {}
-        pre_processed_summary['AND']['Pass'] = False
+        for instance in range(1, args.total_instances + 1):
+            file = 'results_{0}.json'.format(instance)
+            if file in files:
+                results_list += [root + os.sep + file]
+        break
+    io_utils.write_info('Found {0} results to combine'.format(len(results_list)))
 
-    for result_path in results:
-        result = io_utils.read_json(result_path)
-        for key in result:
-            split_key = key.split(':')
-            if len(split_key) != 2:
-                io_utils.write_warning('Key "{0}" in "{1}" does not match required format of [TYPE]:[NAME]'.format(key, result_path))
-                io_utils.write_warning('Key "{0}" will be ignored'.format(key))
-                continue
-            allowed_key_types = ['AVG', 'SAME', 'SUM', 'SUM_MIN', 'SUM_MAX', 'MIN', 'MAX', 'AND', 'OR']
-            if split_key[0] not in allowed_key_types:
-                io_utils.write_warning('Key "{0}" in "{1}" does has a valid type'.format(key, result_path))
-                io_utils.write_warning('Valid types are: {0}'.format(', '.join(allowed_key_types)))
-                io_utils.write_warning('Key "{0}" will be ignored'.format(key))
-                continue
-            if len(split_key[1]) == 0:
-                io_utils.write_warning('Key "{0}" in "{1}" cannot have a name of length zero'.format(key, result_path))
-                io_utils.write_warning('Key "{0}" will be ignored'.format(key))
-                continue
-            key_type = split_key[0]
-            key_name = split_key[1]
-            value = result[key]
+    return results_list
 
-            if key_type not in pre_processed_summary:
-                pre_processed_summary[key_type] = {}
-
-            if key_type in ['AVG', 'SUM', 'SUM_MIN', 'SUM_MAX', 'MIN', 'MAX']:
-                if key_name not in pre_processed_summary[key_type]:
-                    pre_processed_summary[key_type][key_name] = []
-                pre_processed_summary[key_type][key_name] += [float(value)]
-            elif key_type == 'SAME':
-                pre_processed_summary[key_type][key_name] = value
-            elif key_type == 'AND':
-                if key_name not in pre_processed_summary[key_type]:
-                    pre_processed_summary[key_type][key_name] = True
-                pre_processed_summary[key_type][key_name] &= value
-            elif key_type == 'OR':
-                if key_name not in pre_processed_summary[key_type]:
-                    pre_processed_summary[key_type][key_name] = False
-                pre_processed_summary[key_type][key_name] |= value
-
-    summary = {}
-    for key_type in pre_processed_summary:
-        for key in pre_processed_summary[key_type]:
-            if key_type == 'AVG':
-                summary[key] = sum(pre_processed_summary[key_type][key]) / len(pre_processed_summary[key_type][key])
-                summary[key + ' - STDEV'] = np.std(np.array(pre_processed_summary[key_type][key], dtype=np.float64))
-            elif key_type == 'SAME':
-                summary[key] = pre_processed_summary[key_type][key]
-            elif key_type == 'SUM':
-                summary[key] = sum(pre_processed_summary[key_type][key])
-                summary[key + ' - STDEV'] = np.std(np.array(pre_processed_summary[key_type][key], dtype=np.float64))
-            elif key_type == 'SUM_MIN':
-                summary[key] = min(pre_processed_summary[key_type][key]) * len(pre_processed_summary[key_type][key])
-                summary[key + ' - STDEV'] = np.std(np.array(pre_processed_summary[key_type][key], dtype=np.float64))
-            elif key_type == 'SUM_MAX':
-                summary[key] = max(pre_processed_summary[key_type][key]) * len(pre_processed_summary[key_type][key])
-                summary[key + ' - STDEV'] = np.std(np.array(pre_processed_summary[key_type][key], dtype=np.float64))
-            elif key_type == 'MIN':
-                summary[key] = min(pre_processed_summary[key_type][key])
-                summary[key + ' - STDEV'] = np.std(np.array(pre_processed_summary[key_type][key], dtype=np.float64))
-            elif key_type == 'MAX':
-                summary[key] = max(pre_processed_summary[key_type][key])
-                summary[key + ' - STDEV'] = np.std(np.array(pre_processed_summary[key_type][key], dtype=np.float64))
-            elif key_type in ['AND', 'OR']:
-                summary[key] = pre_processed_summary[key_type][key]
-
-    io_utils.write_json(args.output_dir + os.sep + 'results.json', summary)
-    io_utils.write_info('Wrote {0}'.format(args.output_dir + os.sep + 'results.json'))
-
+def write_yaml_summary(summary):
     yaml_file = io.open(args.output_dir + os.sep + 'results.yaml', 'w')
+
     yaml_output = []
     yaml_output += ['']
     yaml_output += ['results:']
     yaml_output += [' - key: throughput']
-    yaml_output += ['   value: {0}'.format(summary['Throughput (img/s)'])]
+    yaml_output += ['   value: {0}'.format(summary['results']['metrics']['throughput']['avg'])]
     yaml_output += ['   unit: img/s']
     yaml_output += [' - key: latency']
-    yaml_output += ['   value: {0}'.format(summary['Latency (ms)'])]
+    yaml_output += ['   value: {0}'.format(summary['results']['metrics']['latency']['avg'])]
     yaml_output += ['   unit: ms']
     yaml_output += [' - key: accuracy']
-    yaml_output += ['   value: {0}'.format(summary['Top1 Accuracy (%)'])]
+    yaml_output += ['   value: {0}'.format(summary['results']['metrics']['accuracy-top1']['avg'])]
     yaml_output += ['   unit: percents']
     yaml_output += ['']
+
     yaml_file.write('\n'.join(yaml_output))
     yaml_file.close()
+    io_utils.write_info('Wrote {0}'.format(args.output_dir + os.sep + 'results.yaml'))
+
+def combine_results():
+    io_utils.write_info('Combining results...')
+    result_list = get_valid_results_list()
+
+    status = 'passed'
+    summary = {}
+    to_avg = {}
+
+    if len(result_list) < args.total_instances:
+        io_utils.write_warning('Number of found results ({0}) to combine is less than expected ({1})'.format(len(result_list), args.total_instances))
+        # Marking overall summary as belonging to failing case
+        status = 'failed'
+
+    for result_path in result_list:
+        result = io_utils.read_json(result_path)
+        if not summary:
+            summary = copy.deepcopy(result)
+            continue
+        if summary['config'] != result['config']:
+            io_utils.write_warning('Incompatible config: {0}'.format(result_path))
+            # Marking overall summary as belonging to failing case
+            status = 'failed'
+            continue
+        if summary['results'].keys() != result['results'].keys():
+            io_utils.write_warning('Different set of keys in config: {0}'.format(result_path))
+            # Marking overall summary as belonging to failing case
+            status = 'failed'
+        for key in result['results']['metrics']:
+            if key in op_same:
+                if summary['results']['metrics'][key] != result['results']['metrics'][key]:
+                    io_utils.write_warning('Mismatched metric value(s) while expecting the same: key={0}, config={1}'.format(key, result_path))
+                    # Marking overall summary as belonging to failing case
+                    status = 'failed'
+            elif key in op_avg or key in op_total_avg:
+                if key not in to_avg:
+                    to_avg[key] = [summary['results']['metrics'][key]['avg']]
+                to_avg[key].append(result['results']['metrics'][key]['avg'])
+            else:
+                # We should not be here, that's a bug: we forgot to classify a key
+                io_utils.write_warning('BUG: unclassified key: key={0}, config={1}'.format(key, result_path))
+                status = 'failed'
+
+    # calculating min/max/sums/stddev
+    for key in to_avg:
+        nstreams = len(to_avg[key])
+        summary['results']['metrics'][key]['min'] = min(to_avg[key])
+        summary['results']['metrics'][key]['max'] = max(to_avg[key])
+        summary['results']['metrics'][key]['avg'] = np.mean(np.array(to_avg[key], dtype=np.float64))
+        summary['results']['metrics'][key]['stddev'] = np.std(np.array(to_avg[key], dtype=np.float64))
+        if key in op_total_avg:
+            summary['results']['metrics'][key]['min'] *= nstreams
+            summary['results']['metrics'][key]['max'] *= nstreams
+            summary['results']['metrics'][key]['avg'] *= nstreams
+            summary['results']['metrics'][key]['stddev'] *= nstreams
+
+
+    # setting overall status
+    summary['results']['metrics']['status'] = status
+
+    io_utils.write_json(args.output_dir + os.sep + 'results.json', summary)
+    io_utils.write_info('Wrote {0}'.format(args.output_dir + os.sep + 'results.json'))
+
+    write_yaml_summary(summary)
     io_utils.write_info('Wrote {0}'.format(args.output_dir + os.sep + 'results.yaml'))
