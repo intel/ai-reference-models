@@ -35,8 +35,6 @@ services:
       sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__);print(ipex.xpu.is_available())'"
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
     pull_policy: always
-    devices:
-      - /dev/dri:/dev/dri
   pytorch-resnet50v1-5-training:
     build:
       dockerfile: docker/max-gpu/pytorch-resnet50v1-5-training/pytorch-max-series-resnet50v1-5-training.Dockerfile
