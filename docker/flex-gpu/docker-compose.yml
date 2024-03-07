@@ -53,8 +53,6 @@ services:
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__);from tensorflow.python.client import device_lib; print(device_lib.list_local_devices())'"
     extends: pytorch-stable-diffusion-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
-    devices:
-      - /dev/dri:/dev/dri
   tf-ssd-mobilenet-inference:
     build:
       args:
