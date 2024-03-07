@@ -86,7 +86,7 @@ for (( i = $SOCKETS; i < 2*$SOCKETS; i++ )); do  # pin CCL workers to HT
 done
 
 export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
-
+EOF
 
 #DDP settings
 export TORCH_CPP_LOG_LEVEL=INFO
@@ -103,12 +103,13 @@ export PSM3_RV_MR_CACHE_SIZE=8192
 export PSM3_KASSIST_MODE=none
 #export PSM3_NIC='irdma*
 export FI_PSM3_CONN_TIMEOUT=100
-EOF
+export PSM3_HAL=sockets
+
 
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
-export FI_PROVIDER_PATH=$oneccl_bindings_for_pytorch_path/lib/prov
+#export FI_PROVIDER_PATH=$oneccl_bindings_for_pytorch_path/lib/prov
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator jemalloc \
     --distributed \
