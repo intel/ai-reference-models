@@ -184,7 +184,6 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [YOLO V5](https://arxiv.org/pdf/2108.11539.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/yolov5/inference/gpu/README.md) | 
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | Max Series, Arc Series | [BFloat16 FP32 FP16](/models_v2/pytorch/bert_large/inference/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Training  | Max Series, Arc Series | [BFloat16 FP32 TF32](/models_v2/pytorch/bert_large/training/gpu/README.md) |
-| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Inference | Max Series | [FP32 FP16](/quickstart/language_modeling/tensorflow/bert_large/inference/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | Max Series | [BFloat16 TF32 FP32](/models_v2/tensorflow/bert_large/training/gpu/README.md) |
 | [DLRM v2](https://arxiv.org/abs/1906.00091) | PyTorch | Training | Max Series | [FP32 TF32 BF16](/models_v2/pytorch/torchrec_dlrm/training/gpu/README.md)
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | PyTorch | Inference | Max Series | [FP16 INT8 FP32](/models_v2/pytorch/3d_unet/inference/gpu/README.md) |
@@ -195,8 +194,6 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Training | Max Series | [FP32 BFloat16](/models_v2/tensorflow/maskrcnn/training/gpu/README.md) | 
 | [Swin Transformer](https://arxiv.org/pdf/2103.14030.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/swin-transformer/inference/gpu/README.md) |
 | [FastPitch](https://arxiv.org/pdf/1703.06870.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/fastpitch/inference/gpu/README.md) | 
-| [HiFi-GAN](https://arxiv.org/pdf/2010.05646.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/hifi_gan/inference/gpu/README.md) | 
-| [QuartzNet](https://arxiv.org/pdf/1910.10261.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/quartznet/inference/gpu/README.md) | 
 | [UNet++](https://arxiv.org/pdf/1807.10165.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/unetpp/inference/gpu/README.md) | 
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Inference | Max Series | [FP16 BF16 FP32](/models_v2/pytorch/rnnt/inference/gpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Training | Max Series | [FP32 BF16 TF32](/models_v2/pytorch/rnnt/training/gpu/README.md) |
