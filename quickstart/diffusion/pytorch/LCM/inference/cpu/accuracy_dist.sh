@@ -44,12 +44,6 @@ if [ "$1" == "bf16" ]; then
 elif [ "$1" == "fp16" ]; then
     ARGS="$ARGS --precision=fp16"
     echo "### running fp16 datatype"
-elif [ "$1" == "int8-bf16" ]; then
-    ARGS="$ARGS --precision=int8-bf16 --configure-dir=conv_and_linear138.json"
-    echo "### running int8-bf16 datatype"
-elif [ "$1" == "int8-fp32" ]; then
-    ARGS="$ARGS --precision=int8-fp32 --configure-dir=conv_and_linear138.json"
-    echo "### running int8-fp32 datatype"  
 elif [ "$1" == "bf32" ]; then
     ARGS="$ARGS --precision=bf32"
     echo "### running bf32 datatype"
@@ -57,7 +51,7 @@ elif [ "$1" == "fp32" ]; then
     echo "### running fp32 datatype"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf32, fp16, bf16, int8-bf16, int8-fp32"
+    echo "Supported precisions are: fp32, bf32, fp16, bf16"
     exit 1
 fi
 
@@ -118,7 +112,7 @@ for (( i = $SOCKETS; i < 2*$SOCKETS; i++ )); do  # pin CCL workers to HT
 done
 
 export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
-# EOF
+EOF
 
 #DDP settings
 export TORCH_CPP_LOG_LEVEL=INFO
@@ -135,8 +129,7 @@ export PSM3_RV_MR_CACHE_SIZE=8192
 export PSM3_KASSIST_MODE=none
 #export PSM3_NIC='irdma*
 export FI_PSM3_CONN_TIMEOUT=100
-EOF
-# export PSM3_HAL=sockets
+export PSM3_HAL=sockets
 
 rm -rf ${OUTPUT_DIR}/LCM_${PRECISION}_dist_inference_accuracy*
 
