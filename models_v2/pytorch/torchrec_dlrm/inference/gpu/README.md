@@ -11,9 +11,15 @@ DLRM v2 Inference best known configurations with Intel® Extension for PyTorch.
 # Pre-Requisite
 * Host has 4 Intel® Data Center GPU Max and two tiles for each.
 * Host has installed latest Intel® Data Center GPU Max Series Drivers https://dgpu-docs.intel.com/driver/installation.html
-* Host has installed [Intel® Extension for PyTorch](https://intel.github.io/intel-extension-for-pytorch/xpu/latest/)
+* The following Intel® oneAPI Base Toolkit components are required:
+  - Intel® oneAPI DPC++ Compiler (Placeholder DPCPPROOT as its installation path)
+  - Intel® oneAPI Math Kernel Library (oneMKL) (Placeholder MKLROOT as its installation path)
+  - Intel® oneAPI MPI Library
+  - Intel® oneAPI TBB Library
 
-# prepare Dataset
+  Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
+
+# Prepare Dataset
 After downloading and uncompressing the [Criteo 1TB Click Logs dataset](consisting of 24 files from day 0 to day 23), process the raw tsv files into the proper format for training by running ./scripts/process_Criteo_1TB_Click_Logs_dataset.sh with necessary command line arguments.
 
 Example usage:
@@ -40,20 +46,40 @@ and the folder will be used as the parameter WEIGHT_DIR later
 ## Inference
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/pytorch/torchrec_dlrm/inference/gpu`
-3. Run `setup.sh` this will install all the required dependencies & create virtual environment `venv`.
-4. Activate virtual env: `. ./venv/bin/activate`
-5. Setup required environment paramaters
+3. Create virtual environment `venv` and activate it:
+    ```
+    python3 -m venv venv
+    . ./venv/bin/activate
+    ```
+4. Run setup.sh
+    ```
+    ./setup.sh
+    ```
+5. Install the latest GPU versions of [torch, torchvision and intel_extension_for_pytorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation):
+  ```
+  python -m pip install torch==<torch_version> torchvision==<torchvision_version> intel-extension-for-pytorch==<ipex_version> --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
+  ```
+6. Set environment variables for Intel® oneAPI Base Toolkit: 
+    Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
+    ```bash
+    source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mkl/latest/env/vars.sh
+    source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
+    source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
+    ```
+7. Setup required environment paramaters
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
-| **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=PVC` (PVC)                                                 |
+| **MULTI_TILE**               | `export MULTI_TILE=True` (True)                                             |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max)                                                 |
 | **WEIGHT_DIR**               | `export WEIGHT_DIR=`                                                                 |
 | **DATASET_DIR**              |                               `export DATASET_DIR=`                                  |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=32768`                              |
-| **PRECISION** (optional)     |        `export PRECISION=FP16` (FP16 and FP32 are supported for PVC)                 |
+| **PRECISION** (optional)     |        `export PRECISION=FP16` (FP16 and FP32 are supported for Max)                 |
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
-6. Run `run_model.sh`
+8. Run `run_model.sh`
 
 ## Output
 
