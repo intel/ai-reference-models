@@ -38,17 +38,26 @@ The folder that contains the `val` directory should be set as the
 
 | Script name | Description |
 |-------------|-------------|
-| [`inference_realtime.sh`](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_realtime.sh) | Runs inference using synthetic data (batch_size=1) for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, or bf32). |
-| [`inference_throughput.sh`](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_throughput.sh) | Runs inference to get the throughput using synthetic data for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, or bf32). |
-| [`accuracy.sh`](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/accuracy.sh) | Measures the model accuracy (batch_size=128) for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, or bf32). |
+| [`inference_realtime.sh`](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_realtime.sh) | Runs inference using synthetic data (batch_size=1) for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, fp16, or bf32). |
+| [`inference_throughput.sh`](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_throughput.sh) | Runs inference to get the throughput using synthetic data for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, fp16, or bf32). |
+| [`accuracy.sh`](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/accuracy.sh) | Measures the model accuracy (batch_size=128) for the specified precision (fp32, avx-fp32, int8, avx-int8, bf16, fp16, or bf32). |
 
 > Note: The `avx-int8` and `avx-fp32` precisions run the same scripts as `int8` and `fp32`, except that the
 > `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
 > otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
-* Set ENV to use AMX:
-  ```
-  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
-  ```
+
+* Set ENV for fp16 to leverage AMX if you are using a supported platform
+
+```bash
+    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+```
+
+* Set ENV for bf16/fp16/int8 to leverage AVX2_VNNI_2 if you are using a supported platform
+
+```bash
+    export DNNL_MAX_CPU_ISA=AVX2_VNNI_2
+```
+For more detailed information about `DNNL_MAX_CPU_ISA` of oneDNN, see oneDNN [link](https://oneapi-src.github.io/oneDNN/index.html).
 
 ## Run the Model on Bare Metal
 
@@ -83,7 +92,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
     #### Set the environment variables
     ```bash
     export OUTPUT_DIR=<path to the directory where log files will be written>
-    export PRECISION=<select one precision: fp32, avx-fp32, int8, bf32, avx-int8, or bf16>
+    export PRECISION=<select one precision: fp32, avx-fp32, int8, bf32, avx-int8, bf16 or fp16>
 
     # Optional environemnt variables:
     export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>
