@@ -96,16 +96,16 @@ services:
       dockerfile: docker/max-gpu/tf-3d-unet-training/tf-max-series-3d-unet-training.Dockerfile
     extends: tf-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-3d-unet-training
-  pytorch-dlrm-inference:
+  pytorch-dlrmv2-inference:
     build:
-      dockerfile: docker/max-gpu/pytorch-dlrm-inference/pytorch-max-series-dlrm-inference.Dockerfile
+      dockerfile: docker/max-gpu/pytorch-dlrmv2-inference/pytorch-max-series-dlrmv2-inference.Dockerfile
     extends: pytorch-resnet50v1-5-inference
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-inference
-  pytorch-dlrm-training:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrmv2-inference
+  pytorch-dlrmv2-training:
     build:
-      dockerfile: docker/max-gpu/pytorch-dlrm-training/pytorch-max-series-dlrm-training.Dockerfile
+      dockerfile: docker/max-gpu/pytorch-dlrmv2-training/pytorch-max-series-dlrmv2-training.Dockerfile
     extends: pytorch-resnet50v1-5-inference
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-training
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrmv2-training
   pytorch-distilbert-inference:
     build:
       dockerfile: docker/max-gpu/pytorch-distilbert-inference/pytorch-max-series-distilbert-inference.Dockerfile

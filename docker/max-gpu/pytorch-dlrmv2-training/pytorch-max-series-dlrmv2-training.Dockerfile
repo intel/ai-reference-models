@@ -11,37 +11,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# ============================================================================
 
 ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYT_BASE_TAG="2.1.10-xpu"
+ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-USER root
-
-WORKDIR /workspace/pytorch-max-series-dlrm-training
-    
 ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /workspace/pytorch-max-series-dlrmv2-training/models
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
-        numactl \
-        intel-oneapi-ccl=2021.11.2-5 \
-        intel-oneapi-mpi-devel=2021.11.0-49493 && \
+        intel-oneapi-mpi-devel=2021.11.0-49493  \
+        intel-oneapi-ccl=2021.11.2-5 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY models/recommendation/pytorch/torchrec_dlrm/training/gpu models/recommendation/pytorch/torchrec_dlrm/training/gpu
-COPY quickstart/recommendation/pytorch/torchrec_dlrm/training/gpu/multi_card_distributed_train.sh quickstart/multi_card_distributed_train.sh 
+COPY models_v2/pytorch/torchrec_dlrm/training/gpu .
+COPY models_v2/common common
 
-RUN cd models/recommendation/pytorch/torchrec_dlrm/training/gpu && \
-    pip install -r requirements.txt && \
-    cd -
-RUN pip install -e git+https://github.com/mlperf/logging#egg=mlperf-logging
+RUN python -m pip install -r requirements.txt 
 
-COPY LICENSE licenses/LICENSE
-COPY third_party licenses/third_party
+RUN python -m pip install --upgrade pip jinja2==3.1.3 \
+        certifi==2023.7.22 \
+        pyarrow==14.0.1  \
+        requests==2.31.0 \
+        urllib3==1.26.18 
 
 ENV LD_LIBRARY_PATH=/opt/intel/oneapi/ccl/2021.11/lib/:/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.11/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.11/lib:/opt/intel/oneapi/ccl/2021.11/lib/
@@ -50,4 +48,5 @@ ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.11
 ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.11
 ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
 
-USER $USER
+COPY LICENSE licenses/LICENSE
+COPY third_party licenses/third_party
