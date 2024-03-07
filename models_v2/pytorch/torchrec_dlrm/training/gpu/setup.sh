@@ -22,6 +22,7 @@
 
 set -e
 apt-get update && apt-get install -y python3-venv protobuf-compiler
-python3 -m venv $PWD/venv
-. ./venv/bin/activate
+
 pip install -r requirements.txt
+
+cp -r ../../../../common .

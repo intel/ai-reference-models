@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # Copyright (c) 2023 Intel Corporation
 #
@@ -14,15 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+"""Consts for ddp-dlrm-terabyte training."""
 
-# setup.sh
-#  - install OS pkgs
-#  - should create virtual env & install pip  requirement.txt
-#  - git clones & applying patches
+ACC = {
+    "type": "total",
+    "pattern": r"AUROC over test set: (\d+.\d+)",
+    "unit": "AUROC",
+    "number_of_partials": 2
+}
 
-set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
 
-pip install -r requirements.txt
+PERF = {
+    "type": "max",
+    "pattern": r"avg training time per iter at ITER: 45, (\d+.\d+) s",
+    "inverse": True,
+    "multiply": False,
+    "use_batch_size": True,
+    "unit": "samples/s",
+}
 
-cp -r ../../../../common .
+FUNCTIONAL = {
+    "pattern": r"avg training time per iter at ITER: 45, (\d+.\d+) s",
+}

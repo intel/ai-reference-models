@@ -25,6 +25,7 @@ input_envs[DATASET_DIR]=${DATASET_DIR}
 input_envs[WEIGHT_DIR]=${WEIGHT_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
+input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -36,32 +37,22 @@ for i in "${!input_envs[@]}"; do
   fi
 done
 
-OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
-
-if [[ "${PLATFORM}" == "PVC" ]]; then
+if [[ "${PLATFORM}" == "Max" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-65536}
     PRECISION=${PRECISION:-FP16}
-elif [[ "${PLATFORM}" == "ATS-M" ]]; then
-    echo "Only support PVC for platform"
+elif [[ "${PLATFORM}" == "Flex" ]]; then
+    echo "Only support Max for platform"
 fi
 
-
-
-if [[ -z "${DATASET_DIR}" ]]; then
-  echo "Using Dummy data since environment variable DATASET_DIR has not been set"
-  DATASET_DIR="--dummy"
-else
-  if [[ ! -d "${DATASET_DIR}" ]]; then
+if [[ ! -d "${DATASET_DIR}" ]]; then
     echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
     exit 1
-  fi
 fi
 
 # known issue
 if [[ "${MULTI_TILE}" == "True" ]]; then
     export ZE_FLAT_DEVICE_HIERARCHY=COMPOSITE
 fi
-
 
 echo 'Running with parameters:'
 echo " PLATFORM: ${PLATFORM}"
@@ -101,18 +92,18 @@ sum_log_analysis() {
     cat ${1}"_t0.log" ${1}"_t1.log" |grep "Error" |awk '{if(a[$1]){a[$1]=a[$1]";"$2}else{a[$1]=$2}}END{for(i in a)print $1" " a[i]}' >> $2
 }
 
-modelname=dlrm-terabyte
+modelname=ddp-dlrm-terabyte
 if [[ ${MULTI_TILE} == "False" ]]; then
 	echo -e "do not support MULTI_TILE=False"
 	exit 1
 else
-    rm ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf_raw.log
-    bash cmd_distributed_terabyte_test.sh -d ${DATASET_DIR} -m ${WEIGHT_DIR} ${flag} 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf_raw.log
-    python ../../../../../models/common/pytorch/parse_result.py -t ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf_raw.log -b ${BATCH_SIZE}
-    throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
-    throughput_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
-    acc=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf.log | grep Accuracy | awk -F ' ' '{print $3}')
-    acc_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_inf.log | grep Accuracy | awk -F ' ' '{print $2}')
+    rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_raw.log
+    bash cmd_distributed_terabyte_test.sh -d ${DATASET_DIR} -m ${WEIGHT_DIR} ${flag} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_raw.log
+    python common/parse_result.py -m $modelname --ddp -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_raw.log -b ${BATCH_SIZE}
+    throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
+    throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
+    acc=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep Accuracy | awk -F ' ' '{print $3}')
+    acc_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep Accuracy | awk -F ' ' '{print $2}')
 fi
 
 yaml_content=$(cat <<EOF
@@ -127,5 +118,5 @@ EOF
 )
 
 # Write the content to a YAML file
-echo "$yaml_content" >  ./results.yaml
+echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
 echo "YAML file created."
