@@ -118,7 +118,7 @@ for (( i = $SOCKETS; i < 2*$SOCKETS; i++ )); do  # pin CCL workers to HT
 done
 
 export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
-# EOF
+EOF
 
 #DDP settings
 export TORCH_CPP_LOG_LEVEL=INFO
@@ -135,8 +135,7 @@ export PSM3_RV_MR_CACHE_SIZE=8192
 export PSM3_KASSIST_MODE=none
 #export PSM3_NIC='irdma*
 export FI_PSM3_CONN_TIMEOUT=100
-EOF
-# export PSM3_HAL=sockets
+export PSM3_HAL=sockets
 
 rm -rf ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_dist_inference_accuracy*
 
