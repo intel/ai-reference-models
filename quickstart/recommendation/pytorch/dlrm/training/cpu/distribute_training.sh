@@ -94,6 +94,8 @@ export CCL_ALLREDUCE=rabenseifner
 # export FI_PROVIDER_PATH=/usr/lib64/libfabric
 # export CCL_MNIC_NAME=irdma-cvl01tf2,irdma-cvl02tf2,irdma-cvl11tf2,irdma-cvl12tf2
 # export CCL_MNIC_COUNT=2
+export FI_PROVIDER=psm3
+export PSM3_HAL=sockets
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
 CORES_PER_INSTANCE=$CORES
