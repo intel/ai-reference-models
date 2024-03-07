@@ -70,6 +70,8 @@ export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
+export FI_PROVIDER=psm3
+export PSM3_HAL=sockets
 
 PRECISION=$1
 BATCH_SIZE=${BATCH_SIZE:-224}
