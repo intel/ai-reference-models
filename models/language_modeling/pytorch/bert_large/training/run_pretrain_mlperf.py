@@ -74,9 +74,6 @@ from transformers import (
 )
 
 from schedulers import LinearWarmUpScheduler, LinearWarmupPolyDecayScheduler
-#from lamb import Lamb
-from intel_extension_for_pytorch.optim._lamb import Lamb
-
 try:
     if torch.__version__[:6] >= '1.12.0':
         import oneccl_bindings_for_pytorch
@@ -85,13 +82,6 @@ try:
 
 except ImportError as e:
     oneccl_bindings_for_pytorch = False
-
-from intel_extension_for_pytorch.quantization.fp8 import (
-    fp8_autocast,
-    DelayedScaling,
-    Format,
-    prepare_fp8,
-)
 
 logger = logging.getLogger(__name__)
 MODEL_CONFIG_CLASSES = list(MODEL_MAPPING.keys())
@@ -503,7 +493,13 @@ def prepare_model_and_optimizer(args, device):
     optimizer_grouped_parameters = [
         {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': args.weight_decay_rate},
         {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}]
-    optimizer = Lamb(optimizer_grouped_parameters, lr=args.learning_rate,  betas=(args.opt_lamb_beta_1, args.opt_lamb_beta_2), fused=True)
+
+    if args.ipex:
+        from intel_extension_for_pytorch.optim._lamb import Lamb
+        optimizer = Lamb(optimizer_grouped_parameters, lr=args.learning_rate,  betas=(args.opt_lamb_beta_1, args.opt_lamb_beta_2), fused=True)
+    else:
+        from lamb import Lamb
+        optimizer = Lamb(optimizer_grouped_parameters, lr=args.learning_rate,  betas=(args.opt_lamb_beta_1, args.opt_lamb_beta_2))
 
     if args.warmup_steps == 0:
         warmup_steps = int(args.max_steps * args.warmup_proportion)
@@ -602,6 +598,12 @@ def main():
     if args.ipex:
         print('Using ipex')
         import intel_extension_for_pytorch as ipex
+        from intel_extension_for_pytorch.quantization.fp8 import (
+             fp8_autocast,
+             DelayedScaling,
+             Format,
+             prepare_fp8,
+         )
     status = 'aborted'  # later set to 'success' if termination criteria met
     device, args = setup_training(args)
     total_batch_size = global_batch_size(args) 
