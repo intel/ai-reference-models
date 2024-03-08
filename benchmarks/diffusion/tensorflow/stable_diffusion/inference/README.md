@@ -15,7 +15,7 @@ Install the Intel-optimized TensorFlow along with model dependencies under [requ
 ```
 # cd to your model zoo directory
 cd models
-export PRECISION=<set the precision to "fp32" or "bfloat16" or "fp16">
+export PRECISION=<set the precision to "fp32" or "bfloat32" or "bfloat16" or "fp16"">
 export OUTPUT_DIR=<path to the directory where i) log files will be saved and ii) (only in case of accuracy run) original & generated images will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
@@ -23,19 +23,19 @@ export BATCH_SIZE=<customized batch size value>
 
 ### Inference
 1. `inference.sh`
-Runs single-instance realtime inference (`batch_size=1`) with the specified precision (`fp32`, `bfloat16`, or `fp16`).
+Runs single-instance realtime inference (`batch_size=1`) with the specified precision (`fp32`, `bfloat32`, `bfloat16`, or `fp16`).
 ```
 ./quickstart/diffusion/tensorflow/stable_diffusion/inference/cpu/inference.sh
 ```
 
 2. `inference_realtime_multi_instance.sh`
-Runs multi-instance realtime inference (`batch_size=1`) using 4 cores per instance with the specified precision (fp32, bfloat16, or fp16). Waits for all instances to complete, then prints a summarized throughput value.
+Runs multi-instance realtime inference (`batch_size=1`) using 4 cores per instance with the specified precision (fp32, bfloat32, bfloat16, or fp16). Waits for all instances to complete, then prints a summarized throughput value.
 ```
 ./quickstart/diffusion/tensorflow/stable_diffusion/inference/cpu/inference_realtime_multi_instance.sh
 ```
 
 3. `inference_throughput_multi_instance.sh`
-Runs multi instance batch inference using 1 socket per instance with the specified precision (fp32, bfloat16, or fp16) with 200 steps. Waits for all instances to complete, then prints a summarized throughput value.
+Runs multi instance batch inference using 1 socket per instance with the specified precision (fp32, bfloat32, bfloat16, or fp16) with 200 steps. Waits for all instances to complete, then prints a summarized throughput value.
 ```
 ./quickstart/diffusion/tensorflow/stable_diffusion/inference/cpu/inference_throughput_multi_instance.sh
 ```
