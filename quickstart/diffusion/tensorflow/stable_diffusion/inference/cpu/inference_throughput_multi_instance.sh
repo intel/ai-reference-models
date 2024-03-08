@@ -17,24 +17,6 @@
 
 MODELS=${MODELS-$PWD}
 
-# Setting environment variables
-if [ -z "${TF_PATTERN_ALLOW_CTRL_DEPENDENCIES}" ]; then
-  echo "TF_PATTERN_ALLOW_CTRL_DEPENDENCIES is not set. By default, setting TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1 to allow control dependencies for fusions"
-  export TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1
-fi
-if [ -z "${TF_USE_LEGACY_KERAS}" ]; then
-  echo "TF_USE_LEGACY_KERAS is not set. By default, setting TF_USE_LEGACY_KERAS=1 to use Keras 2"
-  export TF_USE_LEGACY_KERAS=1
-fi
-if [ -z "${TF_USE_ADVANCED_CPU_OPS}" ]; then
-  echo "TF_USE_ADVANCED_CPU_OPS is not set. By default, setting TF_USE_ADVANCED_CPU_OPS=1 to enhace the overall performance"
-  export TF_USE_ADVANCED_CPU_OPS=1
-fi
-if [ -z "${TF_ONEDNN_ASSUME_FROZEN_WEIGHTS}" ]; then
-  echo "TF_ONEDNN_ASSUME_FROZEN_WEIGHTS is not set. By default, setting TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1 to perform weight caching as we're using a SavedModel"
-  export TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1
-fi
-
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -45,23 +27,14 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to either fp32, bfloat16, or fp16."
+  echo "Please set PRECISION to either fp32, bfloat32, bfloat16, or fp16."
   exit 1
 fi
-if [ $PRECISION != "fp32" ] && [ $PRECISION != "bfloat16" ] &&
-   [ $PRECISION != "fp16" ]; then
+if [ $PRECISION != "fp32" ] && [ $PRECISION != "bfloat32" ] &&
+   [ $PRECISION != "bfloat16" ] && [ $PRECISION != "fp16" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions is: fp32, bfloat16, fp16"
+  echo "Supported precisions is: fp32, bfloat32, bfloat16, and fp16."
   exit 1
-fi
-if [ $PRECISION == "bfloat16" ]; then
-  echo "Moving Gelu op to INFERLIST as we're using bfloat16 precision"
-  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Gelu
-fi
-if [ $PRECISION == "fp16" ]; then
-  echo "Adding Gelu,Mean,Sum,SquaredDifference op to INFERLIST as we're using fp16 precision"
-  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Gelu,Mean,Sum,SquaredDifference
-  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=Mean,Sum,SquaredDifference
 fi
 
 MODE="inference"
@@ -87,13 +60,75 @@ if [ -z "${CORES_PER_INSTANCE}" ]; then
   echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
 fi
 
-if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
-  echo "TF_THREAD_PINNING_MODE is not set. Default configuration of thread pinning and spinning settings"
-  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
-  echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
+if [ -z "${OMP_NUM_THREADS}" ]; then 
+  export OMP_NUM_THREADS=${CORES_PER_INSTANCE}
 fi
 
+printf '=%.0s' {1..100}
+printf "\nSummary of environment variable settings:\n"
+# Setting environment variables
+if [ -z "${TF_PATTERN_ALLOW_CTRL_DEPENDENCIES}" ]; then
+  # By default, setting TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1 to allow control dependencies to enable more fusions"
+  export TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1
+fi
+if [ -z "${TF_USE_LEGACY_KERAS}" ]; then
+  # By default, setting TF_USE_LEGACY_KERAS=1 to use (legacy) Keras 2
+  export TF_USE_LEGACY_KERAS=1
+fi
+if [ -z "${TF_USE_ADVANCED_CPU_OPS}" ]; then
+  # By default, setting TF_USE_ADVANCED_CPU_OPS=1 to enhace the overall performance
+  export TF_USE_ADVANCED_CPU_OPS=1
+fi
+if [ -z "${TF_ONEDNN_ASSUME_FROZEN_WEIGHTS}" ]; then
+  # By default, setting TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1 to perform weight caching as we're using a SavedModel
+  export TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=1
+fi
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  # By default, pinning is none and spinning is enabled
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+fi
+
+echo "TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=$TF_PATTERN_ALLOW_CTRL_DEPENDENCIES"
+echo "TF_USE_LEGACY_KERAS=$TF_USE_LEGACY_KERAS"
+echo "TF_USE_ADVANCED_CPU_OPS=$TF_USE_ADVANCED_CPU_OPS"
+echo "TF_ONEDNN_ASSUME_FROZEN_WEIGHTS=$TF_ONEDNN_ASSUME_FROZEN_WEIGHTS"
+echo "TF_THREAD_PINNING_MODE=$TF_THREAD_PINNING_MODE"
+
+if [[ $PRECISION == "bfloat16" ]] && [[ "${TF_USE_ADVANCED_CPU_OPS}" == "1" ]]; then
+  if [ -z "${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD}" ]; then
+    # Moving Gelu op to INFERLIST as we're using bfloat16 precision
+    export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Gelu
+  fi
+  echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=$TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD"
+fi
+if [[ $PRECISION == "fp16" ]]; then
+  if [[ -z "${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD}" ]] && [[ -z "${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE}" ]]; then
+    if [[ "${TF_USE_ADVANCED_CPU_OPS}" == "1" ]]; then
+      # Adding Gelu,Mean,Sum,SquaredDifference op to INFERLIST
+      export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Gelu,Mean,Sum,SquaredDifference
+    else
+      # Adding Mean,Sum,SquaredDifference op to INFERLIST
+      export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Mean,Sum,SquaredDifference
+    fi
+    export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=Mean,Sum,SquaredDifference
+  fi
+  echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=$TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD"
+  echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=$TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE"
+  export ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+  echo "ONEDNN_MAX_CPU_ISA=$ONEDNN_MAX_CPU_ISA"
+fi
+# Set up env variable for bfloat32
+if [[ $PRECISION == "bfloat32" ]]; then
+  export ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+  echo "ONEDNN_DEFAULT_FPMATH_MODE=$ONEDNN_DEFAULT_FPMATH_MODE"
+fi
+printf '=%.0s' {1..100}
+printf '\n'
+
 source "${MODELS}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODELS}/benchmarks/launch_benchmark.py \
   --model-name=stable_diffusion \
   --precision ${PRECISION} \
