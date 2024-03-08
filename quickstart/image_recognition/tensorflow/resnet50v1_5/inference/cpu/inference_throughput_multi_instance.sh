@@ -66,10 +66,6 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-# System envirables
-export TF_ENABLE_MKL_NATIVE_FORMAT=1
-export TF_ONEDNN_ENABLE_FAST_CONV=1
-
 MODE="inference"
   
 # If cores per instance env is not mentioned, then the workload will run with the default value.
@@ -92,12 +88,8 @@ cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
 # If OMP_NUM_THREADS env is not mentioned, then run with the default value
 if [ -z "${OMP_NUM_THREADS}" ]; then 
-  omp_num_threads=4
-else
-  omp_num_threads=${OMP_NUM_THREADS}
+  export OMP_NUM_THREADS=${CORES_PER_INSTANCE}
 fi
-
-export OMP_NUM_THREADS=${omp_num_threads}
 
 #Set up env variable for bfloat32
 if [[ $PRECISION == "bfloat32" ]]; then
@@ -128,11 +120,16 @@ else
 fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
 
+printf '=%.0s' {1..100}
+printf "\nSummary of environment variable settings:\n"
+# Setting environment variables
 if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
-  echo "TF_THREAD_PINNING_MODE is not set. Default configuration of thread pinning and spinning settings"
+  # By default, pinning is none and spinning is enabled
   export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
-  echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
 fi
+echo "TF_THREAD_PINNING_MODE=$TF_THREAD_PINNING_MODE"
+printf '=%.0s' {1..100}
+printf '\n'
 
 # Remove old log file
 rm -rf  ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log

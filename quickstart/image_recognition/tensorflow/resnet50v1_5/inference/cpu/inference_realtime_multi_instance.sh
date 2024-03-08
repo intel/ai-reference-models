@@ -75,11 +75,9 @@ if [ -z "${CORES_PER_INSTANCE}" ]; then
   echo "Running with default ${CORES_PER_INSTANCE} cores per instance"
 fi
 
-# If OMP_NUM_THREADS env is not mentioned, Get number of cores per instance
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
 if [ -z "${OMP_NUM_THREADS}" ]; then 
-  export OMP_NUM_THREADS=4
-else
-  export OMP_NUM_THREADS=${OMP_NUM_THREADS}
+  export OMP_NUM_THREADS=${CORES_PER_INSTANCE}
 fi
 
 #Set up env variable for bfloat32
@@ -105,15 +103,16 @@ else
 fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
 
-# System envirables   
-export TF_ENABLE_MKL_NATIVE_FORMAT=1 
-export TF_ONEDNN_ENABLE_FAST_CONV=1 
-
+printf '=%.0s' {1..100}
+printf "\nSummary of environment variable settings:\n"
+# Setting environment variables
 if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
-  echo "TF_THREAD_PINNING_MODE is not set. Default configuration of thread pinning and spinning settings"
+  # By default, pinning is none and spinning is enabled
   export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
-  echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
 fi
+echo "TF_THREAD_PINNING_MODE=$TF_THREAD_PINNING_MODE"
+printf '=%.0s' {1..100}
+printf '\n'
 
 # Remove old log file
 rm -rf  ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log
