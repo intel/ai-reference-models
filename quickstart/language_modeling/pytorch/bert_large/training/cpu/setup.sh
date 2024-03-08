@@ -16,7 +16,7 @@
 #
 
 # Install dependency
-pip install tensorboard
+pip install tensorboardX
 pip install datasets==1.11.0 accelerate tfrecord intel-openmp faiss-cpu tfrecord
 pip install --upgrade huggingface_hub
 pip install h5py
