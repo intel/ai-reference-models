@@ -43,11 +43,11 @@ mkdir -p ${OUTPUT_DIR}
 
 ARGS=""
 PRECISION="fp32"
-if [ "$1" == "bf16" ]; then
+if [ "$1" = "bf16" ]; then
   ARGS="$ARGS --precision bf16"
   PRECISION="bf16"
   echo "### running bf16 datatype"
-elif [ "$1" == "fp32" ]; then
+elif [ "$1" = "fp32" ]; then
   ARGS="$ARGS --precision fp32"
   echo "### running fp32 datatype"
 else
@@ -78,7 +78,7 @@ elif [[ ${PLATFORM} == "windows" ]]; then
   CORES="${NUMBER_OF_PROCESSORS}"
 fi
 
-BATCH_SIZE=`expr $CORES \* 4`
+BATCH_SIZE=${BATCH_SIZE:-$(expr $CORES \* 4)}
 
 python ${MULTI_INSTANCE_ARGS} \
   ${MODEL_DIR}/models/image_recognition/pytorch/common/inference.py \
