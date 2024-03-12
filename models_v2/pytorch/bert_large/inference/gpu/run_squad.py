@@ -614,7 +614,12 @@ def evaluate(args, model, tokenizer, prefix=""):
     all_results = []
 
     jit_model = None
-    jit_trace_path = os.path.join(hub, args.model_type + "_" + args.model_name_or_path.split("_")[1] + "_trace_" + args.dtype + ".zip")
+    jit_trace_path = os.path.join(
+        hub,
+        args.model_type + "_" +
+        args.model_name_or_path.rsplit("/", 1)[-1] + "_trace_" + 
+        args.dtype + ".zip"
+    )
 
     do_profiling = os.environ.get("PROFILE", "OFF").upper() in ["1", "Y", "ON", "YES", "TRUE"]
 

@@ -22,6 +22,7 @@ BERT Large training best known configurations with Intel® Extension for PyTorch
 
   Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
 
+
 # Prepare Dataset
 ## Dataset: 
 Please refer to https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/bert/implementations/pytorch-22.09#download-and-prepare-the-data
@@ -50,7 +51,7 @@ we are using  hdf5/hdf5_4320_shards_varlength as the our dataset.
     ```
 5. Install the latest GPU versions of [torch, torchvision and intel_extension_for_pytorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation):
     ```
-    python -m pip install torch==<torch_version> torchvision==<torchvvision_version> intel-extension-for-pytorch==<ipex_version> --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
+    python -m pip install torch==<torch_version> torchvision==<torchvision_version> intel-extension-for-pytorch==<ipex_version> --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
     ```
 6. Setup required environment paramaters
 
@@ -59,9 +60,9 @@ we are using  hdf5/hdf5_4320_shards_varlength as the our dataset.
 | **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
 | **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                 |
 | **DATASET_DIR**                 | `export DATASET_DIR=`                                                                                  |
+| **OUTPUT_DIR**               |                               `export OUTPUT_DIR=$PWD`                               |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=16`                                |
 | **PRECISION** (optional)     |`export PRECISION=BF16` (BF16 FP8 FP32 and TF32 are supported for Max and BF16 for Arc )               |
-| **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=20`                             |
 6. Run `run_model.sh`
 
