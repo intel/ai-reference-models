@@ -67,7 +67,7 @@ BERT_WEIGHT=<path_to_BERT_WEIGHT_directory>/squad_large_finetuned_checkpoint
     ```
 5. Install the latest GPU versions of [torch, torchvision and intel_extension_for_pytorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation):
     ```
-    python -m pip install torch==<torch_version> torchvision==<torchvvision_version> intel-extension-for-pytorch==<ipex_version> --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
+    python -m pip install torch==<torch_version> torchvision==<torchvision_version> intel-extension-for-pytorch==<ipex_version> --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
     ```
 6. Set environment variables for Intel® oneAPI Base Toolkit: 
     Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
@@ -86,9 +86,9 @@ BERT_WEIGHT=<path_to_BERT_WEIGHT_directory>/squad_large_finetuned_checkpoint
 | **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                 |
 | **BERT_WEIGHT**              | `export BERT_WEIGHT=<path_to_BERT_WEIGHT_directory>/squad_large_finetuned_checkpoint` |
 | **DATASET_DIR**              | `export DATASET_DIR=<path/to/dataset>`                  |
+| **OUTPUT_DIR**               |                               `export OUTPUT_DIR=$PWD`                               |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
 | **PRECISION** (optional)     |                  `export PRECISION=BF16` (BF16, FP32 and FP16 are supported for Max and FP16 for Arc) |
-| **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=-1`                             |
 8. Run `run_model.sh`
 
