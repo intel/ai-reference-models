@@ -14,14 +14,13 @@
 # limitations under the License.
 #
 
-
 MODEL_DIR=${MODEL_DIR-$PWD}
-
+echo $MODEL_DIR
 if [ ! -e "${MODEL_DIR}/models/image_recognition/pytorch/common/inference.py" ]; then
-  echo "Could not find the script of inference.py. Please set environment variable '\${MODEL_DIR}'."
-  echo "From which the inference.py exist at the: \${MODEL_DIR}/models/image_recognition/pytorch/common/inference.py"
-  exit 1
-fi
+    echo "Could not find the script of inference.py. Please set environment variable '\${MODEL_DIR}'."
+    echo "From which the inference.py exist at the: \${MODEL_DIR}/models/image_recognition/pytorch/common/inference.py"
+    exit 1
+fi 
 
 if [ -z "${DATASET_DIR}" ]; then
   echo "The required environment variable DATASET_DIR has not been set"
@@ -43,11 +42,11 @@ mkdir -p ${OUTPUT_DIR}
 
 ARGS=""
 PRECISION="fp32"
-if [ "$1" == "bf16" ]; then
+if [ "$PRECISION" = "bf16" ]; then
   ARGS="$ARGS --precision bf16"
   PRECISION="bf16"
   echo "### running bf16 datatype"
-elif [ "$1" == "fp32" ]; then
+elif [ "$PRECISION" = "fp32" ]; then
   ARGS="$ARGS --precision fp32"
   echo "### running fp32 datatype"
 else
@@ -78,8 +77,9 @@ elif [[ ${PLATFORM} == "windows" ]]; then
   CORES="${NUMBER_OF_PROCESSORS}"
 fi
 
-BATCH_SIZE=`expr $CORES \* 4`
+BATCH_SIZE=${BATCH_SIZE:-$(expr $CORES \* 4)}
 
+echo "this is where the inference actually runs presumably" 
 python ${MULTI_INSTANCE_ARGS} \
   ${MODEL_DIR}/models/image_recognition/pytorch/common/inference.py \
   --data_path ${DATASET_DIR} \

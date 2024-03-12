@@ -1,0 +1,139 @@
+- name: resnet50v1_5 tensorflow inference
+  ai-type: image_recognition
+  model-name: resnet50v1_5
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location: 
+  data-download: Get the Imagenet dataset by following the instructions at "https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md"
+
+  resnet50v1_5:
+    - precision: fp32
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://zenodo.org/record/2535873/files/resnet50_v1.pb
+
+    - precision: bfloat32
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://zenodo.org/record/2535873/files/resnet50_v1.pb
+
+    - precision: fp16
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://zenodo.org/record/2535873/files/resnet50_v1.pb
+
+    - precision: int8
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh", "inference_realtime_weightsharing.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bias_resnet50.pb
+
+    - precision: bfloat16
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh", "inference_realtime_weightsharing.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bf16_resnet50_v1.pb
+
+
+- name: ssd-mobilenet tensorflow inference
+  ai-type: object_detection
+  model-name: ssd-mobilenet
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location: 
+  data-download: To get the dataset, please refer to the page "https://github.com/IntelAI/models/tree/master/datasets/coco/README.md"
+
+  ssd-mobilenet:
+    - precision: fp32
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+
+    - precision: bfloat16
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+
+    - precision: bfloat32
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+
+    - precision: int8
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
+
+- name: mobilenet_v1 tensorflow inference
+  ai-type: image_recognition
+  model-name: mobilenet_v1
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: Get the Imagenet dataset by following the instructions at "https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md"
+
+  mobilenet_v1:
+    - precision: fp32
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
+
+    - precision: bfloat16
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
+
+    - precision: bfloat32
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
+
+    - precision: int8
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenetv1_int8_pretrained_model.pb
+
+- name: mobilenet_v2 tensorflow inference
+  ai-type: image_recognition
+  model-name: mobilenet_v2
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: Get the Imagenet dataset by following the instructions at "https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md"
+
+  mobilenet_v1:
+    - precision: fp32
+      script: ["inference_throughput_multi_instance.sh", "", "",  "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
+
+    - precision: bfloat16
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
+
+    - precision: int8
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenetv1_int8_pretrained_model.pb
+
+
+# reference: https://github.com/intel-innersource/frameworks.ai.models.intel-models/tree/mahathi/update_rm_jupyter_notebook/benchmarks/image_recognition/tensorflow/densenet169/inference 
+- name: densenet169 tensorflow inference
+  ai-type: image_recognition
+  model-name: densenet169
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: Get the Imagenet dataset by following the instructions at "https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md"
+
+  densenet169:
+  - precision: fp32
+    script: ["online_inference.sh", "batch_inference.sh",  "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/densenet169_fp32_pretrained_model.pb
+  
+# reference: https://github.com/intel-innersource/frameworks.ai.models.intel-models/blob/mahathi/update_rm_jupyter_notebook/benchmarks/image_recognition/tensorflow/inceptionv3/inference/README.md
+- name: inceptionv3 tensorflow inference
+  ai-type: image_recognition
+  model-name: inceptionv3 
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: Get the Imagenet dataset by following the instructions at "https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md"
+
+  inceptionv3:
+  - precision: fp32
+    script: ["online_inference.sh", "batch_inference.sh",  "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_fp32_pretrained_model.pb
+
+
+
+
