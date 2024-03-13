@@ -11,7 +11,7 @@ The [pretrained-model](https://huggingface.co/distilbert-base-uncased-finetuned-
 We use a part of Stanford Sentiment Treebank corpus for our task. Specifically, the validation split present in the SST2 dataset in the hugging face [repository](https://huggingface.co/datasets/sst2). It contains 872 labeled English sentences. Instructions to get the frozen graph and dataset are given below:
 
 ```
-Download Frozen graph (FP32 - The FP32 frozen graph should used for FP32, BFloat16 and FP16):
+Download Frozen graph (FP32 - The FP32 frozen graph should used for FP32, BFloat32, BFloat16 and FP16):
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/distilbert_frozen_graph_fp32_final.pb
 
 Download Frozen graph for INT8:
@@ -38,7 +38,7 @@ Set the required Environment variables:
 
 export BATCH_SIZE=<set to required batch size>
 export IN_GRAPH=<path to downloaded frozen graph>
-export PRECISION=<set precision fp32, fp16, bfloat16 or int8>
+export PRECISION=<set precision fp32, fp16, bfloat16, bfloat32 or int8>
 export DATASET_DIR=<path to the downloaded dataset directory>
 export WARMUP_STEPS=<set to required warmup steps>
 export OUTPUT_DIR=<directory to store log files of the run>
