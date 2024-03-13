@@ -17,8 +17,6 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
-CORES_PER_INSTANCE="socket"
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -40,24 +38,25 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, fp16, bfloat16 or int8"
+  echo "Please set PRECISION to fp32, fp16, bfloat32, bfloat16 or int8"
   exit 1
 fi
 
 if [ -z "${WARMUP_STEPS}" ]; then
-  echo "Setting WARMUP_STEPS to 10"
-  WARMUP_STEPS="10"
+  echo "Setting WARMUP_STEPS to 20"
+  WARMUP_STEPS="20"
 fi
 
 if [ -z "${STEPS}" ]; then
-  echo "Setting STEPS to 50"
-  STEPS=50
+  echo "Setting STEPS to 100"
+  STEPS=100
 fi
 
 if [ $PRECISION != "fp32" ] && [ $PRECISION != "int8" ] &&
-   [ $PRECISION != "bfloat16" ] && [ $PRECISION != "fp16"]; then
+   [ $PRECISION != "bfloat16" ] && [ $PRECISION != "fp16" ] &&
+   [ $PRECISION != "bfloat32" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32, fp16, bfloat16 and int8"
+  echo "Supported precisions are: fp32, fp16, bfloat32, bfloat16 and int8"
   exit 1
 fi
 
@@ -73,39 +72,71 @@ else
 fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-BATCH_SIZE="${BATCH_SIZE:-"56"}"
-
-source "${MODEL_DIR}/quickstart/common/utils.sh"
-_get_numa_cores_lists
-echo "Cores per node: ${cores_per_node}"
-
-# Setting environment variables
-echo "Advanced settings for improved performance: "
-echo "Setting TF_USE_ADVANCED_CPU_OPS to 1, to enhace the overall performance"
-export TF_USE_ADVANCED_CPU_OPS=1
-echo "TF_USE_ADVANCED_CPU_OPS = ${TF_USE_ADVANCED_CPU_OPS}"
-
-if [[ ${TF_USE_ADVANCED_CPU_OPS} == "1" ]]; then
-	if [[ $PRECISION == "bfloat16" ]]; then
-		echo "TF_USE_ADVANCED_CPU_OPS is on for bfloat16 precision"
-		export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Mean
-    export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=Mean
-		echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD = ${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD}"
-	elif [[ $PRECISION == "fp16" ]]; then
-		echo "TF_USE_ADVANCED_CPU_OPS is on for fp16 precision"
-		export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Mean
-		export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=Mean
-    export ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
-		echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD = ${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD}"
-		echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE = ${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE}"
-    echo "ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX_FP16 = ${ONEDNN_MAX_CPU_ISA}"
-  fi
+if [[ $PRECISION == "bfloat16" ]]; then
+  BATCH_SIZE="${BATCH_SIZE:-"198"}"
+elif [[ $PRECISION == "int8" ]]; then
+  BATCH_SIZE="${BATCH_SIZE:-"110"}"
+else 
+  BATCH_SIZE="${BATCH_SIZE:-"56"}"
 fi
 
-echo "Configuring thread pinning and spinning settings"
-export TF_THREAD_PINNING_MODE=none,$((${cores_per_node} - 1)),400
-echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  # Get number of cores per instance
+  CORES_PER_SOCKET=`lscpu | grep 'Core(s) per socket' | awk '{print $4}'`
+  SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+  NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+  CORES_PER_INSTANCE=`expr $CORES_PER_SOCKET \* $SOCKETS / $NUMAS`
 
+  echo "CORES_PER_SOCKET: $CORES_PER_SOCKET"
+  echo "SOCKETS: $SOCKETS"
+  echo "NUMAS: $NUMAS"
+  echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
+fi
+
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
+if [ -z "${OMP_NUM_THREADS}" ]; then 
+  export OMP_NUM_THREADS=${CORES_PER_INSTANCE}
+fi
+# Setting environment variables
+if [ -z "${TF_USE_ADVANCED_CPU_OPS}" ]; then
+  # By default, setting TF_USE_ADVANCED_CPU_OPS=1 to enhace the overall performance
+  export TF_USE_ADVANCED_CPU_OPS=1
+fi
+
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  # By default, pinning is none and spinning is enabled
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+fi
+
+printf '=%.0s' {1..100}
+printf "\nSummary of environment variable settings:\n"
+echo "TF_USE_ADVANCED_CPU_OPS=$TF_USE_ADVANCED_CPU_OPS"
+echo "TF_THREAD_PINNING_MODE=$TF_THREAD_PINNING_MODE"
+
+if [[ $PRECISION == "bfloat16" || $PRECISION == "fp16" ]]; then
+  if [[ -z "${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD}" ]] && [[ -z "${TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE}" ]]; then
+      # Adding Mean op to INFERLIST
+    export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=Mean
+    export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=Mean
+  fi
+  echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD=$TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_ADD"
+  echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=$TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE"
+  if [[ $PRECISION == "fp16" ]]; then
+    export ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+    echo "ONEDNN_MAX_CPU_ISA=$ONEDNN_MAX_CPU_ISA"
+  fi
+fi
+# Set up env variable for bfloat32
+if [[ $PRECISION == "bfloat32" ]]; then
+  export ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+  echo "ONEDNN_DEFAULT_FPMATH_MODE=$ONEDNN_DEFAULT_FPMATH_MODE"
+fi
+printf '=%.0s' {1..100}
+printf '\n'
+
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _get_numa_cores_lists
 _command python benchmarks/launch_benchmark.py \
@@ -118,7 +149,7 @@ _command python benchmarks/launch_benchmark.py \
          --benchmark-only \
          --batch-size=${BATCH_SIZE} \
          --output-dir=${OUTPUT_DIR} \
-         --num-intra-threads=${cores_per_socket} \
+         --num-intra-threads=${CORES_PER_INSTANCE} \
          --num-inter-threads=1 \
          --numa-cores-per-instance=${CORES_PER_INSTANCE} \
          --warmup-steps=${WARMUP_STEPS} \

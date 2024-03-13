@@ -18,9 +18,6 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-
-
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -41,14 +38,15 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, fp16, bfloat16 or int8"
+  echo "Please set PRECISION to fp32, fp16, bfloat32, bfloat16 or int8"
   exit 1
 fi
 
 if [ $PRECISION != "fp32" ] && [ $PRECISION != "int8" ] &&
-   [ $PRECISION != "bfloat16" ] && [ $PRECISION != "fp16"]; then
+   [ $PRECISION != "bfloat16" ] &&  [ $PRECISION != "bfloat32"] &&
+   [ $PRECISION != "fp16"]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32, fp16, bfloat16 and int8"
+  echo "Supported precisions are: fp32, fp16, bfloat16 , bfloat32 and int8"
   exit 1
 fi
 
@@ -74,6 +72,50 @@ if [ -z "${BATCH_SIZE}" ]; then
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  # Get number of cores per instance
+  CORES_PER_SOCKET=`lscpu | grep 'Core(s) per socket' | awk '{print $4}'`
+  SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+  NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+  CORES_PER_INSTANCE=`expr $CORES_PER_SOCKET \* $SOCKETS / $NUMAS`
+
+  echo "CORES_PER_SOCKET: $CORES_PER_SOCKET"
+  echo "SOCKETS: $SOCKETS"
+  echo "NUMAS: $NUMAS"
+  echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
+fi
+
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
+if [ -z "${OMP_NUM_THREADS}" ]; then 
+  export OMP_NUM_THREADS=${CORES_PER_INSTANCE}
+fi
+
+# Setting environment variables
+if [ -z "${TF_USE_ADVANCED_CPU_OPS}" ]; then
+  # By default, setting TF_USE_ADVANCED_CPU_OPS=1 to enhace the overall performance
+  export TF_USE_ADVANCED_CPU_OPS=1
+fi
+
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  # By default, pinning is none and spinning is enabled
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+fi
+
+printf '=%.0s' {1..100}
+printf "\nSummary of environment variable settings:\n"
+echo "TF_USE_ADVANCED_CPU_OPS=$TF_USE_ADVANCED_CPU_OPS"
+echo "TF_THREAD_PINNING_MODE=$TF_THREAD_PINNING_MODE"
+
+# Set up env variable for bfloat32
+if [[ $PRECISION == "bfloat32" ]]; then
+  export ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+  echo "ONEDNN_DEFAULT_FPMATH_MODE=$ONEDNN_DEFAULT_FPMATH_MODE"
+fi
+printf '=%.0s' {1..100}
+printf '\n'
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _get_numa_cores_lists
 _command python benchmarks/launch_benchmark.py \
@@ -86,7 +128,7 @@ _command python benchmarks/launch_benchmark.py \
          --accuracy-only \
          --batch-size=${BATCH_SIZE} \
          --output-dir=${OUTPUT_DIR} \
-         --num-intra-threads=${cores_per_node} \
+         --num-intra-threads=${CORES_PER_INSTANCE} \
          --num-inter-threads=1 \
          --warmup-steps=${WARMUP_STEPS} \
          $@
