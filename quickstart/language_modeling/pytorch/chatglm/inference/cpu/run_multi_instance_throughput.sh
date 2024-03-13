@@ -197,9 +197,9 @@ first_token_thp=($(awk -v output_token=$OUTPUT_TOKEN -v total=$latency -v batch=
     }
 '))
 
-echo ""ChatGLM";throughput;"total-latency";${precision};${BATCH_SIZE}; ${latency} " |tee -a ${OUTPUT_DIR}/summary.log
-echo ""ChatGLM";throughput;"first-token-latency";${precision};${BATCH_SIZE}; ${first_latency} " |tee -a ${OUTPUT_DIR}/summary.log
-echo ""ChatGLM";throughput;"rest-token-latency";${precision};${BATCH_SIZE}; ${rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
-echo ""ChatGLM";throughput;"P90-rest-token-latency";${precision};${BATCH_SIZE}; ${P90_rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
-echo ""ChatGLM";throughput;"token_per_sec";${precision};${BATCH_SIZE}; ${token_per_sec} " |tee -a ${OUTPUT_DIR}/summary.log
-echo ""ChatGLM";throughput;"first_token_thp";${precision};${BATCH_SIZE}; ${first_token_thp} " |tee -a ${OUTPUT_DIR}/summary.log
+echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};throughput;"total-latency";${precision};${BATCH_SIZE}; ${latency} " |tee -a ${OUTPUT_DIR}/summary.log
+echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};throughput;"first-token-latency";${precision};${BATCH_SIZE}; ${first_latency} " |tee -a ${OUTPUT_DIR}/summary.log
+echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};throughput;"rest-token-latency";${precision};${BATCH_SIZE}; ${rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
+echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};throughput;"P90-rest-token-latency";${precision};${BATCH_SIZE}; ${P90_rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
+echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};throughput;"token_per_sec";${precision};${BATCH_SIZE}; ${token_per_sec} " |tee -a ${OUTPUT_DIR}/summary.log
+echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};throughput;"first_token_thp";${precision};${BATCH_SIZE}; ${first_token_thp} " |tee -a ${OUTPUT_DIR}/summary.log
