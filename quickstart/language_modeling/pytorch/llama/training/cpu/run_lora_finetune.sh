@@ -101,5 +101,5 @@ train_loss=($(grep -i 'train_loss' ${OUTPUT_DIR}/training_log_${precision}_${mod
             }
         }
     '))
-echo ""LLaMa";training throughput;"train_samples_per_second";${precision};${BATCH_SIZE}; ${train_samples_per_second} " |tee -a ${OUTPUT_DIR}/summary.log
-echo ""LLaMa";training throughput;"train_loss";${precision};${BATCH_SIZE}; ${train_loss} " |tee -a ${OUTPUT_DIR}/summary.log
+echo "${FINETUNED_MODEL};training throughput;"train_samples_per_second";${precision};${BATCH_SIZE}; ${train_samples_per_second} " |tee -a ${OUTPUT_DIR}/summary.log
+echo "${FINETUNED_MODEL};training throughput;"train_loss";${precision};${BATCH_SIZE}; ${train_loss} " |tee -a ${OUTPUT_DIR}/summary.log
