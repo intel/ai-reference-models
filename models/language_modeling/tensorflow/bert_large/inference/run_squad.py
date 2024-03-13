@@ -618,6 +618,7 @@ def _check_is_max_context(doc_spans, cur_span_index, position):
 
 def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
                  use_one_hot_embeddings):
+  
   """Creates a classification model."""
   model = modeling.BertModel(
       config=bert_config,
@@ -1354,6 +1355,14 @@ def do_benchmark():
     print("Using grappler auto-mixed precision")
     config.graph_options.rewrite_options.auto_mixed_precision = (
               rewriter_config_pb2.RewriterConfig.ON)
+  tf_xla_enabled = False
+  if "TF_XLA_FLAGS" in os.environ:
+      tf_xla_flags = os.environ["TF_XLA_FLAGS"].split(sep=" ")
+      tf_xla_enabled = "--tf_xla_auto_jit=2" in tf_xla_flags and \
+                        "--tf_xla_cpu_global_jit" in tf_xla_flags
+  if tf_xla_enabled:
+    config.graph_options.rewrite_options.remapping = \
+        rewriter_config_pb2.RewriterConfig.OFF
   graph_def = tf.compat.v1.GraphDef()
   with open(FLAGS.input_graph, "rb") as f:
     graph_def.ParseFromString(f.read())

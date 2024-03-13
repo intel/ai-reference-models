@@ -107,6 +107,12 @@ unzip bert_large_checkpoints.zip
 export CHECKPOINT_DIR=$(pwd)/bert_large_checkpoints
 ```
 
+### Run with XLA enabled
+To run BERT Large with XLA enabled, set TF_XLA_FLAGS="--tf_xla_auto_jit=2 --tf_xla_cpu_global_jit" with the quickstart scripts.
+```
+eg: TF_XLA_FLAGS="--tf_xla_auto_jit=2 --tf_xla_cpu_global_jit" ./quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference.sh
+```
+
 ### Run on Linux
 
 Set environment variables to specify the dataset directory, precision to run, path to pretrained files and an output directory.
