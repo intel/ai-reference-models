@@ -64,7 +64,7 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 if [[ $PRECISION == "int8" ]]; then
-    num_inter_threads=" --num-inter-threads 1 "
+    num_inter_threads=" --num-inter-threads 2 "
 else
     num_inter_threads=" --num-inter-threads 3 "
 fi
