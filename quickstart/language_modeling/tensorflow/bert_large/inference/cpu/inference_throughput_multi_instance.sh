@@ -29,7 +29,9 @@ if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
   echo "Please set PRECISION to int8, fp32, bfloat32, bfloat16 or fp16."
   exit 1
-elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "fp16" ] && [ ${PRECISION} != "bfloat32" ]; then
+elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] &&
+     [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "fp16" ] &&
+     [ ${PRECISION} != "bfloat32" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
   echo "Supported precisions are: int8, fp32, bfloat32, bfloat16 and fp16"
   exit 1
@@ -87,18 +89,19 @@ fi
 
 MODE="inference"
 
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_numa_cores_lists
+echo "Cores per node: ${cores_per_node}"
+
 # If cores per instance env is not mentioned, then the workload will run with the default value.
 if [ -z "${CORES_PER_INSTANCE}" ]; then
-  CORES_PER_INSTANCE="socket"
-  echo "Runs an instance per ${CORES_PER_INSTANCE}"
+  CORES_PER_INSTANCE=${cores_per_node}
+  echo "Runs an instance per ${CORES_PER_INSTANCE} cores."
 fi
 
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-cores_per_socket="${cores_per_socket//[[:blank:]]/}"
-
 # If OMP_NUM_THREADS env is not mentioned, then run with the default value
-if [ -z "${OMP_NUM_THREADS}" ]; then 
-  export OMP_NUM_THREADS=${cores_per_socket}
+if [ -z "${OMP_NUM_THREADS}" ]; then
+  export OMP_NUM_THREADS=${CORES_PER_INSTANCE}
 else
   export OMP_NUM_THREADS=${OMP_NUM_THREADS}
 fi
@@ -115,7 +118,22 @@ if [[ $PRECISION == "bfloat32" ]]; then
   PRECISION="fp32"
 fi
 
-source "${MODEL_DIR}/quickstart/common/utils.sh"
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  echo "TF_THREAD_PINNING_MODE is not set. Setting it to the following default value:"
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+  echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+fi
+
+if [ $PRECISION == "fp16" ]; then
+  # Set environment variables needed to get best performance for fp16
+  echo "Adding _FusedMatMul and _MklLayerNorm ops to AMP ALLOWLIST when running FP16."
+  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD=_FusedMatMul,_MklLayerNorm
+  echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD=$TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD"
+
+  export ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+  echo "ONEDNN_MAX_CPU_ISA=$ONEDNN_MAX_CPU_ISA"
+fi
+
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=bert_large \
@@ -129,6 +147,9 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
+  --num-cores=${CORES_PER_INSTANCE} \
+  --num-intra-threads ${CORES_PER_INSTANCE} \
+  --num-inter-threads 1 \
   --checkpoint ${CHECKPOINT_DIR} \
   --benchmark-only \
   $@ \
