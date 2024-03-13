@@ -83,7 +83,7 @@ index 25b5241..d3e8803 100644
 +    def sdp(self, q, k, v):
 +        try:
 +            from intel_extension_for_tensorflow.python.ops.multi_head_attention import scaled_dot_product_attention
-+            output = scaled_dot_product_attention(q, k, v, use_fast_attention=True)
++            output = scaled_dot_product_attention(q, k, v, use_fast_attention=True, is_training=False)
 +        except ImportError:
 +            output = self.naive_scaled_dot_product_attention(q, k, v)
 +        return output
