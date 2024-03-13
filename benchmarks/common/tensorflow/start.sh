@@ -269,35 +269,37 @@ elif [[ $MODEL_NAME == "bert_large" && $MODE == "training" && $MPI_NUM_PROCESSES
 fi
 
 # If we are running in a container, call the container_init.sh files
-if _running-in-container ; then
-  # For running inside a real CentOS container
-  if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
-    # Next if block only applies to CentOS 8. Please see here:
-    # https://forums.centos.org/viewtopic.php?f=54&t=78708
-    if [[ ! ${OS_VERSION} =~ "8".* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]] && [[ ${OS_PLATFORM} != *"Red Hat"* ]]; then
-      sed -i '/^mirrorlist=/s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Linux-*
-      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
-      yum clean all
-      yum distro-sync -y
-    fi
-    if [[ $INSTALL_NUMACTL == "True" ]]; then
-      yum update -y
-      yum install -y numactl
-    fi
-  elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
-    if [[ $INSTALL_NUMACTL == "True" ]]; then
-      zypper update -y
-      zypper install -y numactl
-    fi
-  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
-    # For ubuntu, run the container_init.sh scripts
-    if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
-      # Call the framework's container_init.sh, if it exists and we are running on ubuntu
-      INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
-    fi
-    # Call the model specific container_init.sh, if it exists
-    if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
-      ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
+if [[ ${NOINSTALL} != "True" ]]; then
+  if _running-in-container ; then
+    # For running inside a real CentOS container
+    if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
+      # Next if block only applies to CentOS 8. Please see here:
+      # https://forums.centos.org/viewtopic.php?f=54&t=78708
+      if [[ ! ${OS_VERSION} =~ "8".* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]] && [[ ${OS_PLATFORM} != *"Red Hat"* ]]; then
+        sed -i '/^mirrorlist=/s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Linux-*
+        sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
+        yum clean all
+        yum distro-sync -y
+      fi
+      if [[ $INSTALL_NUMACTL == "True" ]]; then
+        yum update -y
+        yum install -y numactl
+      fi
+    elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
+      if [[ $INSTALL_NUMACTL == "True" ]]; then
+        zypper update -y
+        zypper install -y numactl
+      fi
+    elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
+      # For ubuntu, run the container_init.sh scripts
+      if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
+        # Call the framework's container_init.sh, if it exists and we are running on ubuntu
+        INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+      fi
+      # Call the model specific container_init.sh, if it exists
+      if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
+        ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
+      fi
     fi
   fi
 fi
