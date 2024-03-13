@@ -100,5 +100,5 @@ fi
 
 accuracy=$(cat ${OUTPUT_DIR}/LLaMa_${precision}_accuracy* | grep "Accuracy:" |sed -e 's/.*= //;s/[^0-9.]//g')
 
-echo ""LLaMa";"accuracy";${precision};${BATCH_SIZE};${accuracy}" | tee -a ${WORK_SPACE}/summary.log
+echo "${FINETUNED_MODEL};"accuracy";${precision};${BATCH_SIZE};${accuracy}" | tee -a ${WORK_SPACE}/summary.log
 
