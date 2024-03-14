@@ -69,6 +69,9 @@ if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
   exit 1
 fi
+if [ -n "$REVISION" ]; then
+    ARGS="$ARGS --revision $REVISION"
+fi
 
 FINETUNED_MODEL=${FINETUNED_MODEL:-"'THUDM/chatglm3-6b'"}
 

@@ -20,8 +20,11 @@ if [ -z "$TRANSFORMERS_CACHE" ]; then
 else
     echo "TRANSFORMERS_CACHE is set to: $TRANSFORMERS_CACHE"
 fi
-
-huggingface-cli download "THUDM/chatglm3-6b" "config.json" "tokenizer_config.json"
+CLI_ARGS=""
+if [ -n "$REVISION" ]; then
+    CLI_ARGS="--revision $REVISION"
+fi
+huggingface-cli download "THUDM/chatglm3-6b" "config.json" "tokenizer_config.json" ${CLI_ARGS}
 directory=${TRANSFORMERS_CACHE}/models--THUDM--chatglm3-6b/snapshots/
 
 latest_dir=$(ls -td ${directory}/*/ | head -n1)
