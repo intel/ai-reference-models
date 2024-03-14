@@ -89,4 +89,5 @@ python -m intel_extension_for_pytorch.cpu.launch \
 wait
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/stable_diffusion_finetune_log_${PRECISION}* |sed -e 's/.*Throughput//;s/[^0-9.]//g')
-echo ""stable_diffusion";"finetune";"throughput";$1;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+loss=$(grep 'Loss:' ${OUTPUT_DIR}/stable_diffusion_finetune_log_${PRECISION}* |sed -e 's/.*Loss//;s/[^0-9a-z.]//g')
+echo ""stable_diffusion";"finetune";"throughput";"loss";$1;${throughput};${loss}" | tee -a ${OUTPUT_DIR}/summary.log
