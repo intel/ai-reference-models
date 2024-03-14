@@ -48,6 +48,7 @@ parser.add_argument(
     required=True,
     help="path to model  or model name in HF hub",
 )
+parser.add_argument("--revision", default=None, type=str, help="Specify a specific commit version of the model",)
 parser.add_argument(
     "--device",
     type=str,
@@ -120,19 +121,31 @@ def get_memory_usage(name, args):
 device = torch.device(args.device)
 args.dtype = "int8" if args.int8_bf16_mixed else args.dtype
 
+# amp autocast
+if args.dtype == "bf16":
+    amp_enabled = True
+    amp_dtype = torch.bfloat16
+elif args.dtype == "fp16":
+    amp_enabled = True
+    amp_dtype = torch.half
+else:
+    amp_enabled = True if args.int8_bf16_mixed else False
+    amp_dtype = torch.bfloat16 if args.int8_bf16_mixed else torch.float
+
+
 has_position_id = False
 if "llama" in args.model_name_or_path:
     user_model = LlamaForCausalLM.from_pretrained(
-        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit
+        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit, revision=args.revision,
     )
-    tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path)
+    tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path, revision=args.revision,)
     if hasattr(user_model.config, "num_key_value_heads"):
         del user_model.config.num_key_value_heads
 else:
     user_model = AutoModelForCausalLM.from_pretrained(
-        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit, trust_remote_code=True
+        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit, trust_remote_code=True, revision=args.revision,
     )
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, trust_remote_code=True, revision=args.revision,)
 get_memory_usage("Host", args)
 autocast = False
 if args.dtype == "bf16":
@@ -405,18 +418,6 @@ class Evaluator:
         return acc, lantecy
 
 
-# amp autocast
-if args.dtype == "bf16":
-    amp_enabled = True
-    amp_dtype = torch.bfloat16
-elif args.dtype == "fp16":
-    amp_enabled = True
-    amp_dtype = torch.half
-else:
-    amp_enabled = True if args.int8_bf16_mixed else False
-    amp_dtype = torch.bfloat16 if args.int8_bf16_mixed else torch.float
-
-
 if args.lambada:
     full_dataset = load_dataset(args.dataset)
     dataset = full_dataset["validation"]
@@ -634,7 +635,7 @@ def benchmark_warmup(prompt):
             activities=[torch.profiler.ProfilerActivity.CPU],
             schedule=torch.profiler.schedule(wait=1, warmup=3, active=1),
             on_trace_ready=trace_handler,
-        ) as prof:
+        ) as prof, torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
             for i in range(5):
                 input_ids = tokenizer(prompt, return_tensors="pt").input_ids
                 output = user_model.generate(
