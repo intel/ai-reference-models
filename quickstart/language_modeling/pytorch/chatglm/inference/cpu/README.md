@@ -38,6 +38,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   pip install cpm-kernels
   ```
 
+* [Optional] Specify a specific commit version of the model
+  ```
+  export REVISION=9addbe01105ca1939dd60a0e5866a1812be9daea
+  ```
+
 * Modify the config.json and tokenizer_config.json
   ```
   bash prepare.sh

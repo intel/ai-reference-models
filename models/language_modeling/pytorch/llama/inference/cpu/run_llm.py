@@ -144,17 +144,28 @@ def get_memory_usage(name, args):
 device = torch.device(args.device)
 args.dtype = "int8" if args.int8_bf16_mixed else args.dtype
 
+# amp autocast
+if args.dtype == "bf16":
+    amp_enabled = True
+    amp_dtype = torch.bfloat16
+elif args.dtype == "fp16":
+    amp_enabled = True
+    amp_dtype = torch.half
+else:
+    amp_enabled = True if args.int8_bf16_mixed else False
+    amp_dtype = torch.bfloat16 if args.int8_bf16_mixed else torch.float
+
 has_position_id = False
 if "llama" in args.model_name_or_path:
     user_model = LlamaForCausalLM.from_pretrained(
-        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit
+        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit,
     )
     tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path)
     if hasattr(user_model.config, "num_key_value_heads"):
         del user_model.config.num_key_value_heads
 else:
     user_model = AutoModelForCausalLM.from_pretrained(
-        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit
+        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit,
     )
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
 get_memory_usage("Host", args)
@@ -396,17 +407,6 @@ class Evaluator:
         return acc, lantecy
 
 
-# amp autocast
-if args.dtype == "bf16":
-    amp_enabled = True
-    amp_dtype = torch.bfloat16
-elif args.dtype == "fp16":
-    amp_enabled = True
-    amp_dtype = torch.half
-else:
-    amp_enabled = True if args.int8_bf16_mixed else False
-    amp_dtype = torch.bfloat16 if args.int8_bf16_mixed else torch.float
-
 
 if args.lambada:
     full_dataset = load_dataset(args.dataset)
@@ -614,7 +614,7 @@ def benchmark_warmup(prompt):
     # start
     if args.profile:
 
-        with profile_ctx as prof:
+        with profile_ctx as prof, torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
             for i in range(5):
                 input_ids = tokenizer(prompt, return_tensors="pt").input_ids
                 output = user_model.generate(
