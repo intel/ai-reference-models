@@ -52,7 +52,7 @@ The jupyter notebook runs on Ubuntu distribution for Linux.
    git clone https://github.com/IntelAI/models.git
    ```
 2. Launch the Jupyter notebook server: `jupyter notebook --ip=0.0.0.0`
-3. Follow the instructions to open the URL with the token in your browser, something like this: ` http://127.0.0.1:8888/tree?token=677d3ab5efd636530e9a695fb749511c6b669ad015cdb7ad`
+3. Follow the instructions to open the URL with the token in your browser, something like this: ` http://127.0.0.1:8888/tree?token=<token>`
 4. Browse to the `models/notebooks/` folder
 5. Click the AI_Reference_Models notebook file - [AI_Reference_Models.ipynb](https://github.com/IntelAI/models/notebooks/AI_Reference_Models.ipnyb).
 6. Read the instructions and run through each notebook cell, in order, ending with a display of the analysis results. Note that some cells prompt you for input, such as selecting the model number you'd like to run.

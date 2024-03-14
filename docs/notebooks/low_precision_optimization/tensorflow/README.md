@@ -91,16 +91,16 @@ Steps:
 (tensorflow) xxx@yyy:$ [I 09:48:12.622 NotebookApp] Serving notebooks from local directory: 
 ...
 [I 09:48:12.622 NotebookApp] Jupyter Notebook 6.1.4 is running at:
-[I 09:48:12.622 NotebookApp] http://yyy:8888/?token=146761d9317552c43e0d6b8b6b9e1108053d465f6ca32fca
-[I 09:48:12.622 NotebookApp]  or http://127.0.0.1:8888/?token=146761d9317552c43e0d6b8b6b9e1108053d465f6ca32fca
+[I 09:48:12.622 NotebookApp] http://yyy:8888/?token=<token>
+[I 09:48:12.622 NotebookApp]  or http://127.0.0.1:8888/?token=<token>
 [I 09:48:12.622 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
 [C 09:48:12.625 NotebookApp] 
     
     To access the notebook, open this file in a browser:
         ...
     Or copy and paste one of these URLs:
-        http://yyy:8888/?token=146761d9317552c43e0d6b8b6b9e1108053d465f6ca32fca
-     or http://127.0.0.1:8888/?token=146761d9317552c43e0d6b8b6b9e1108053d465f6ca32fca
+        http://yyy:8888/?token=<token>
+     or http://127.0.0.1:8888/?token=<token>
 [I 09:48:26.128 NotebookApp] Kernel started: bc5b0e60-058b-4a4f-8bad-3f587fc080fd, name: python3
 ```
 
