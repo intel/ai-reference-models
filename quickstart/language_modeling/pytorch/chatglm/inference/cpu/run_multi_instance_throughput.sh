@@ -75,6 +75,9 @@ if [ -z "${INPUT_TOKEN}" ]; then
   echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 64 128 512 1024 2016 ), e.g. export INPUT_TOKEN=1024"
   exit 1
 fi
+if [ -n "$REVISION" ]; then
+    ARGS="$ARGS --revision $REVISION"
+fi
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
