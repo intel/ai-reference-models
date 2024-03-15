@@ -82,8 +82,8 @@ ADAGRAD_EPS = 1e-8
 WEIGHT_DECAY = 0
 
 import logging
+logging.basicConfig(level=logging.INFO)
 logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(1)
 
 class InteractionType(Enum):
     ORIGINAL = "original"
@@ -1285,6 +1285,7 @@ def construct_model(args):
         lr_scheduler = LRPolicyScheduler(
             optimizer, args.lr_warmup_steps, args.lr_decay_start, args.lr_decay_steps
         )
+    return model, optimizer, lr_scheduler
 
 def main(argv: List[str]) -> None:
     """
