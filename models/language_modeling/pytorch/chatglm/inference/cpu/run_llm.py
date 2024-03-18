@@ -393,12 +393,14 @@ class Evaluator:
                     attention_mask=attention_mask,
                     position_ids=position_ids,
                     past_key_values=past_key_values,
+                    return_last_logit=torch.tensor(True),
                 )
             else:
                 outputs = model(
                     input_ids,
                     attention_mask=attention_mask,
                     past_key_values=past_key_values,
+                    return_last_logit=torch.tensor(True),
                 )
 
             latency += time.time() - start
