@@ -39,6 +39,8 @@ export TORCH_INDUCTOR=1
 | BF16        | bash inference_throughput.sh bf16 ipex-jit | bash inference_realtime.sh bf16 ipex-jit | bash accuracy.sh bf16 ipex-jit |
 | BF32        | bash inference_throughput.sh bf32 ipex-jit | bash inference_realtime.sh bf32 ipex-jit | bash accuracy.sh bf32 ipex-jit |
 | FP16        | bash inference_throughput.sh fp16 ipex-jit | bash inference_realtime.sh fp16 ipex-jit | bash accuracy.sh fp16 ipex-jit |
+| INT8-BF16        | bash inference_throughput.sh int8-bf16 ipex-jit | bash inference_realtime.sh int8-bf16 ipex-jit | bash accuracy.sh int8-bf16 ipex-jit |
+| INT8-FP32        | bash inference_throughput.sh int8-fp32 ipex-jit | bash inference_realtime.sh int8-fp32 ipex-jit | bash accuracy.sh int8-fp32 ipex-jit |
 
 
 ## Run the model
