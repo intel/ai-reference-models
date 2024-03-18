@@ -18,10 +18,17 @@ import torch
 import io
 import os
 import numpy as np
+import sys
 
 # sample modules
 import io_utils
 from arguments_utils import args
+try:
+    import js_sysinfo
+except Exception as e:
+    print('fatal: ' + str(e), file=sys.stderr)
+    print('fatal: set PYTHONPATH to the location of js_sysinfo.py')
+    sys.exit(1)
 
 # Group metric keys per operation to perform when combining results
 # calculate min, max, average and stdev of a random value
@@ -61,11 +68,7 @@ def write_results(batches_tested, throughput, latency, top1, top5, throughput_ov
                     'jit': 'trace' if args.jit_trace else 'script' if args.jit_script else 'no',
                 },
             },
-            'system': {
-                'system-1': {
-                    'software': {}
-                }
-            }
+            'system': js_sysinfo.get_system_config(all=True, quiet=True),
         },
         'results': {
             'metrics': {
@@ -119,21 +122,6 @@ def write_results(batches_tested, throughput, latency, top1, top5, throughput_ov
             }
         }
     }
-    _pytorch = {
-        'name': 'PyTorch',
-        'version': str(torch.__version__)
-    }
-
-    output_dict['config']['system']['system-1']['software']['pytorch'] = _pytorch
-    if args.xpu:
-        import intel_extension_for_pytorch as ipex
-        _ipex = {
-            'name': 'IPEX',
-            'version': str(ipex.__version__),
-            'has_onemkl': ipex.xpu.has_onemkl()
-        }
-        output_dict['config']['system']['system-1']['software']['ipex'] = _ipex
-
     io_utils.write_json('{0}/results_{1}.json'.format(args.output_dir, args.instance), output_dict)
 
 def show_test_conditions():

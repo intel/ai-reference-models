@@ -160,6 +160,10 @@ Mind the following `docker run` arguments:
     python3 -m pip install -r requirements.txt
     ```
 1. Install [Intel® Extension for PyTorch]
+1. Add path to common python modules in the repo:
+   ```
+   export PYTHONPATH=$(pwd)/../../../../common
+   ```
 1. Setup required environment variables and run the sample with `./run_model.sh`:
 
    * With dummy data:
