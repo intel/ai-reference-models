@@ -23,3 +23,4 @@ set -e
 apt-get update && apt-get install -y python3-venv pciutils numactl
 
 pip install -r requirements.txt
+export PYTHONPATH=$(realpath $0)/../../../../common
