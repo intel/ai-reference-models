@@ -1,7 +1,5 @@
 # Overview
 
-This folder contains common Python utilities and modules which can be reused across project.
-
 [js_merge.py]: js_merge.py
 [js_sysinfo.py]: js_sysinfo.py
 [parse_result.py]: parse_result.py
@@ -11,6 +9,14 @@ This folder contains common Python utilities and modules which can be reused acr
 [lshw]: https://github.com/lyonel/lshw
 [svr-info]: https://github.com/intel/svr-info
 [PyTorch]: https://pytorch.org/
+
+This folder contains common Python utilities and modules which can be reused across project.
+
+| Utility           | Description                                           |
+| ----------------- | ----------------------------------------------------- |
+| [js_merge.py]     | Tool to merge few JSON files together                 |
+| [js_sysinfo.py]   | Tool to dump system information in JSON format        |
+| [parse_result.py] | Sample results parser (view file for cmdline options) |
 
 # js_merge.py
 
