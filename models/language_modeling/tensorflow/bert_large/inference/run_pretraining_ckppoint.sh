@@ -1,6 +1,14 @@
 date
+<<<<<<< HEAD
 export BERT_BASE_DIR=/nfs/site/home/jojimonv/Tensorflow/Models/Intel/BERT/uncased_L-12_H-768_A-12
 export GLUE_DIR=/nfs/site/home/jojimonv/Tensorflow/Models/Intel/BERT/glue/glue_data
+=======
+
+if [ -z "${BERT_BASE_DIR}" ]; then
+  echo "Please set the required bert directory as instructed."
+  exit 1
+
+>>>>>>> 42a042130 (Update cpu workloads (#2044))
 export TF_CPP_MIN_VLOG_LEVEL=0
 export MKL_DNN_VERBOSE=0
 
