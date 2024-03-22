@@ -14,6 +14,7 @@
 
 # system modules
 import copy
+import datetime
 import torch
 import io
 import os
@@ -56,6 +57,9 @@ op_total_avg = [
 # Write single result
 def write_results(batches_tested, throughput, latency, top1, top5, throughput_overhead, latency_overhead):
     output_dict = {
+        # 'schema' points to json-schema output is compliant to
+        # TBD for now, need to replace with URL of the schema
+        'schema': 'TBD',
         'config': {
             'workload': {
                 'model': {
@@ -71,47 +75,51 @@ def write_results(batches_tested, throughput, latency, top1, top5, throughput_ov
             'system': js_sysinfo.get_system_config(all=True, quiet=True),
         },
         'results': {
+            'metadata': {
+                'date': datetime.datetime.now().isoformat(),
+                'tester': ''
+            },
             'metrics': {
                 'throughput': {
                     'avg': float(throughput),
                     'min': float(throughput),
                     'max': float(throughput),
-                    'stddev': 0.0,
+                    'stdev': 0.0,
                     'units': 'images/s'
                     },
                 'throughput-with-overhead': {
                     'avg': float(throughput_overhead),
                     'min': float(throughput_overhead),
                     'max': float(throughput_overhead),
-                    'stddev': 0.0,
+                    'stdev': 0.0,
                     'units': 'images/s'
                 },
                 'accuracy-top1': {
                     'avg': float(top1),
                     'min': float(top1),
                     'max': float(top1),
-                    'stddev': 0.0,
+                    'stdev': 0.0,
                     'units': '%'
                 },
                 'accuracy-top5': {
                     'avg': float(top5),
                     'min': float(top5),
                     'max': float(top5),
-                    'stddev': 0.0,
+                    'stdev': 0.0,
                     'units': '%'
                 },
                 'latency': {
                     'avg': float(latency),
                     'min': float(latency),
                     'max': float(latency),
-                    'stddev': 0.0,
+                    'stdev': 0.0,
                     'units': 'ms'
                 },
                 'latency-with-overhead': {
                     'avg':float(latency_overhead),
                     'min':float(latency_overhead),
                     'max':float(latency_overhead),
-                    'stddev': 0.0,
+                    'stdev': 0.0,
                     'units': 'ms'
                 },
                 'total-batches-tested': { 'total': batches_tested },
