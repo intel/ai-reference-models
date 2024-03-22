@@ -429,19 +429,19 @@ def get_gpu_info(card, **kwargs):
 
         res |= {
             'frequency.min': {
-                'value': read_sysfs_file(card + '/gt_min_freq_mhz', **kwargs),
+                'value': int(read_sysfs_file(card + '/gt_min_freq_mhz', **kwargs)),
                 'units': 'MHz'
             }
         }
         res |= {
             'frequency.max': {
-                'value': read_sysfs_file(card + '/gt_max_freq_mhz', **kwargs),
+                'value': int(read_sysfs_file(card + '/gt_max_freq_mhz', **kwargs)),
                 'units': 'MHz'
             }
         }
         res |= {
             'frequency.boost': {
-                'value': read_sysfs_file(card + '/gt_boost_freq_mhz', **kwargs),
+                'value': int(read_sysfs_file(card + '/gt_boost_freq_mhz', **kwargs)),
                 'units': 'MHz'
             }
         }
@@ -537,9 +537,11 @@ def get_cpu_info(**kwargs):
                 if 'configuration' in cpu_info:
                     for c in cpu_info['configuration']:
                         if c == 'cores':
-                            cpu_res['configuration'] |= { 'cores.total': cpu_info['configuration'][c] }
+                            cpu_res['configuration'] |= { 'cores.total': int(cpu_info['configuration'][c]) }
                         elif c == 'enabledcores':
-                            cpu_res['configuration'] |= { 'cores.enabled': cpu_info['configuration'][c] }
+                            cpu_res['configuration'] |= { 'cores.enabled': int(cpu_info['configuration'][c]) }
+                        elif c == 'threads':
+                            cpu_res['configuration'] |= { c: int(cpu_info['configuration'][c]) }
                         else:
                             cpu_res['configuration'] |= { c: cpu_info['configuration'][c] }
 
@@ -653,6 +655,7 @@ def get_system_config(**kwargs):
     if is_docker():
         res = {
             'docker0': {
+                'baremetal': 'baremetal0',
                 'docker': {}, # a placeholder to amend later
                 'software': get_software(**kwargs)
             }
@@ -670,6 +673,12 @@ def get_system_config(**kwargs):
 def js_sysinfo(**kwargs):
     res = {}
     files = {}
+
+    # 'schema' points to json-schema output is compliant to
+    # TBD for now, need to replace with URL of the schema
+    res |= { 'schema': 'TBD' }
+    # adding empty 'config' here to enforce it to be dumped before 'files'
+    res |= { 'config': {} }
 
     if enabled('svrinfo', **kwargs):
         files |= get_svrinfo(**kwargs)
