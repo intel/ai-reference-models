@@ -35,6 +35,9 @@ import torch
 from torch.nn.functional import pad
 from torch.utils.data import DataLoader
 
+import intel_extension_for_pytorch as ipex
+from intel_extension_for_pytorch.quantization import convert, prepare
+
 
 parser = argparse.ArgumentParser("LLM generation script", add_help=False)
 parser.add_argument(
@@ -45,12 +48,7 @@ parser.add_argument(
     required=True,
     help="path to model  or model name in HF hub",
 )
-parser.add_argument(
-    "--revision",
-    default=None,
-    type=str,
-    help="Specify a specific commit version of the model",
-)
+parser.add_argument("--revision", default=None, type=str, help="Specify a specific commit version of the model",)
 parser.add_argument(
     "--device",
     type=str,
@@ -107,10 +105,6 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-if args.ipex:
-    import intel_extension_for_pytorch as ipex
-    from intel_extension_for_pytorch.quantization import convert, prepare
-
 # beam search = 4
 num_beams = 4
 generate_kwargs = dict(do_sample=False, temperature=0.9, num_beams=num_beams)
@@ -142,32 +136,20 @@ else:
 has_position_id = False
 if "llama" in args.model_name_or_path:
     user_model = LlamaForCausalLM.from_pretrained(
-        args.model_name_or_path,
-        low_cpu_mem_usage=True,
-        torchscript=args.jit,
-        revision=args.revision,
+        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit, revision=args.revision,
     )
-    tokenizer = LlamaTokenizer.from_pretrained(
-        args.model_name_or_path,
-        revision=args.revision,
-    )
+    tokenizer = LlamaTokenizer.from_pretrained(args.model_name_or_path, revision=args.revision,)
     if hasattr(user_model.config, "num_key_value_heads"):
         del user_model.config.num_key_value_heads
 else:
     user_model = AutoModelForCausalLM.from_pretrained(
-        args.model_name_or_path,
-        low_cpu_mem_usage=True,
-        torchscript=args.jit,
-        trust_remote_code=True,
-        revision=args.revision,
+        args.model_name_or_path, low_cpu_mem_usage=True, torchscript=args.jit, trust_remote_code=True, revision=args.revision,
     )
-    tokenizer = AutoTokenizer.from_pretrained(
-        args.model_name_or_path,
-        trust_remote_code=True,
-        revision=args.revision,
-    )
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, trust_remote_code=True, revision=args.revision,)
 get_memory_usage("Host", args)
-
+autocast = False
+if args.dtype == "bf16":
+    autocast = True
 if args.dtype == "bf16" or args.dtype == "fp32":
     if args.ipex:
         user_model = ipex.llm.optimize(
@@ -178,51 +160,38 @@ if args.dtype == "bf16" or args.dtype == "fp32":
         )
     if args.inductor:
         from torch._inductor import config as inductor_config
-
         inductor_config.cpp_wrapper = True
-        with torch.no_grad(), torch.cpu.amp.autocast(
-            enabled=amp_enabled, dtype=amp_dtype
-        ):
+        with torch.no_grad(), torch.cpu.amp.autocast(enabled=autocast):
             if args.ipex:
-                print("[Info] Running torch.compile() with IPEX backend")
-                user_model.forward = torch.compile(
-                    user_model.forward, dynamic=True, backend="ipex"
-                )
+                print('[Info] Running torch.compile() with IPEX backend')
+                user_model = torch.compile(user_model, backend="ipex")
             else:
-                print("[Info] Running torch.compile() BFloat16 with default backend")
-                user_model.forward = torch.compile(user_model.forward, dynamic=True)
+                print('[Info] Running torch.compile() BFloat16 with default backend')
+                user_model = torch.compile(user_model)
 elif args.dtype == "fp16":
-    if args.ipex:
-        user_model = ipex.llm.optimize(
-            user_model.eval(),
-            dtype=torch.half,
-            inplace=True,
-            deployment_mode=True if args.jit and (not args.accuracy_only) else False,
-        )
-    if args.inductor:
-        from torch._inductor import config as inductor_config
-
-        inductor_config.cpp_wrapper = True
-        with torch.no_grad(), torch.cpu.amp.autocast(
-            enabled=amp_enabled, dtype=amp_dtype
-        ):
-            if args.ipex:
-                print("[Info] Running torch.compile() with IPEX backend")
-                user_model.forward = torch.compile(
-                    user_model.forward, dynamic=True, backend="ipex"
-                )
-            else:
-                print("[Info] Running torch.compile() BFloat16 with default backend")
-                user_model.forward = torch.compile(user_model.forward, dynamic=True)
-elif args.dtype == "bf32":
-    ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
     user_model = ipex.llm.optimize(
         user_model.eval(),
-        dtype=torch.float,
+        quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into fp16
         inplace=True,
-        deployment_mode=True if args.jit and (not args.accuracy_only) else False,
+        deployment_mode=False,
     )
-
+    user_model = ipex.optimize(
+        user_model.eval(),
+        dtype=torch.half,
+        conv_bn_folding=False,
+        auto_kernel_selection=True,
+    )
+elif args.dtype == "bf32":
+    user_model = ipex.llm.optimize(
+        user_model.eval(),
+        quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into bf32
+        inplace=True,
+        deployment_mode=False,
+    )
+    ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+    user_model = ipex.optimize(
+        user_model.eval(), torch.float, auto_kernel_selection=True
+    )
 get_memory_usage("IPEX", args)
 print("Data type of the model:", user_model.dtype)
 
@@ -377,29 +346,26 @@ class Evaluator:
             attention_mask_padded.append(attention_mask)
             position_ids = pad(position_ids, (0, pad_len), value=self.pad_val)
             position_ids_padded.append(position_ids)
-        if args.inductor:
-            return ((torch.vstack(input_ids_padded)), torch.tensor(last_ind))
+        if has_position_id:
+            return (
+                (
+                    torch.vstack(input_ids_padded),
+                    torch.vstack(attention_mask_padded),
+                    tuple(global_past_key_value),
+                    torch.vstack(position_ids_padded),
+                ),
+                torch.tensor(last_ind),
+            )
         else:
-            if has_position_id:
-                return (
-                    (
-                        torch.vstack(input_ids_padded),
-                        torch.vstack(attention_mask_padded),
-                        tuple(global_past_key_value),
-                        torch.vstack(position_ids_padded),
-                    ),
-                    torch.tensor(last_ind),
-                )
-            else:
-                return (
-                    (
-                        torch.vstack(input_ids_padded),
-                        torch.vstack(attention_mask_padded),
-                        tuple(global_past_key_value),
-                        None,
-                    ),
-                    torch.tensor(last_ind),
-                )
+            return (
+                (
+                    torch.vstack(input_ids_padded),
+                    torch.vstack(attention_mask_padded),
+                    tuple(global_past_key_value),
+                    None,
+                ),
+                torch.tensor(last_ind),
+            )
 
     @torch.no_grad()
     def evaluate(self, model):
@@ -413,73 +379,45 @@ class Evaluator:
             collate_fn=self.collate_batch,
         )
 
-        if args.inductor:
-            for i, ((input_ids), last_ind) in enumerate(test_dataloader):
-                label = input_ids[torch.arange(len(last_ind)), last_ind]
-                input_ids[torch.arange(len(last_ind)), last_ind] = self.pad_val
-                pad_len = self.pad_max - last_ind - 1
-                start = time.time()
+        for i, (
+            (input_ids, attention_mask, past_key_values, position_ids),
+            last_ind,
+        ) in enumerate(test_dataloader):
+            label = input_ids[torch.arange(len(last_ind)), last_ind]
+            input_ids[torch.arange(len(last_ind)), last_ind] = self.pad_val
+            pad_len = self.pad_max - last_ind - 1
+            start = time.time()
+            if has_position_id:
                 outputs = model(
                     input_ids,
+                    attention_mask=attention_mask,
+                    position_ids=position_ids,
+                    past_key_values=past_key_values,
+                    return_last_logit=torch.tensor(True),
                 )
-                latency += time.time() - start
-                if isinstance(outputs, tuple):
-                    res = outputs[0]
-                else:
-                    res = outputs["logits"]
-                last_token_logits = res[torch.arange(len(last_ind)), -2 - pad_len, :]
+            else:
+                outputs = model(
+                    input_ids,
+                    attention_mask=attention_mask,
+                    past_key_values=past_key_values,
+                    return_last_logit=torch.tensor(True),
+                )
 
-                pred = last_token_logits.argmax(dim=-1)
-                total += label.size(0)
-                hit += (pred == label).sum().item()
-                if i % 50 == 0:
-                    print(hit / total)
-                    print("Processed minibatch:", i)
+            latency += time.time() - start
 
-            acc = hit / total
-            print(acc)
-            lantecy = latency / len(self.dataset)
-            return acc, lantecy
-        else:
-            for i, (
-                (input_ids, attention_mask, past_key_values, position_ids),
-                last_ind,
-            ) in enumerate(test_dataloader):
-                label = input_ids[torch.arange(len(last_ind)), last_ind]
-                input_ids[torch.arange(len(last_ind)), last_ind] = self.pad_val
-                pad_len = self.pad_max - last_ind - 1
-                start = time.time()
-                if has_position_id:
-                    outputs = model(
-                        input_ids,
-                        attention_mask=attention_mask,
-                        position_ids=position_ids,
-                        past_key_values=past_key_values,
-                    )
-                else:
-                    outputs = model(
-                        input_ids,
-                        attention_mask=attention_mask,
-                        past_key_values=past_key_values,
-                    )
+            last_token_logits = outputs[0][torch.arange(len(last_ind)), -2 - pad_len, :]
 
-                latency += time.time() - start
+            pred = last_token_logits.argmax(dim=-1)
+            total += label.size(0)
+            hit += (pred == label).sum().item()
+            if i % 50 == 0:
+                print(hit / total)
+                print("Processed minibatch:", i)
 
-                last_token_logits = outputs[0][
-                    torch.arange(len(last_ind)), -2 - pad_len, :
-                ]
-
-                pred = last_token_logits.argmax(dim=-1)
-                total += label.size(0)
-                hit += (pred == label).sum().item()
-                if i % 50 == 0:
-                    print(hit / total)
-                    print("Processed minibatch:", i)
-
-            acc = hit / total
-            print(acc)
-            lantecy = latency / len(self.dataset)
-            return acc, lantecy
+        acc = hit / total
+        print(acc)
+        lantecy = latency / len(self.dataset)
+        return acc, lantecy
 
 
 if args.lambada:
@@ -529,24 +467,59 @@ def calib_func(prepared_model):
 
 
 def eval_func(traced_model):
-    print("Evaluating LLM")
+    print('Evaluating LLM')
     acc, latency = evaluator.evaluate(traced_model)
     print("Accuracy:", acc)
     print("Latency (sec):", latency)
     return acc
 
 
-# input prompt
-current_path = pathlib.Path(__file__).parent.resolve()
-with open(str(current_path) + "/prompt.json") as f:
-    prompt_pool = json.load(f)
-if args.prompt is not None:
-    prompt = args.prompt
-elif args.input_tokens in prompt_pool:
-    prompt = prompt_pool[args.input_tokens]
-else:
-    raise SystemExit("[ERROR] Plese use --prompt if want to use custom input.")
+if args.dtype in ["bf32", "fp16"] and args.jit and not args.accuracy_only:
+    input_ids = torch.ones(32).to(torch.long)
+    attention_mask = torch.ones(len(input_ids))
+    position_ids = torch.arange(len(input_ids))
+    last_ind = input_ids.shape[0] - 1
+    example_inputs = (
+        {
+            "input_ids": input_ids.unsqueeze(0),
+            "attention_mask": attention_mask.unsqueeze(0),
+            "position_ids": position_ids.unsqueeze(0),
+            "past_key_values": tuple(global_past_key_value),
+            "return_last_logit": torch.tensor(True),
+        }
+        if has_position_id
+        else {
+            "input_ids": input_ids.unsqueeze(0),
+            "attention_mask": attention_mask.unsqueeze(0),
+            "past_key_values": tuple(global_past_key_value),
+            "return_last_logit": torch.tensor(True),
+        }
+    )
+    with torch.no_grad(), torch.cpu.amp.autocast(
+        enabled=amp_enabled, dtype=amp_dtype
+    ):
+        trace_graph = torch.jit.trace(
+            user_model.eval(),
+            example_kwarg_inputs=example_inputs,
+            strict=False,
+            check_trace=False,
+        )
+        trace_graph = torch.jit.freeze(trace_graph.eval())
+        setattr(user_model, "trace_graph", trace_graph)
+
+# generate promt
 if args.benchmark:
+    # input prompt
+    current_path = pathlib.Path(__file__).parent.resolve()
+    with open(str(current_path) + "/prompt.json") as f:
+        prompt_pool = json.load(f)
+    if args.prompt is not None:
+        prompt = args.prompt
+    elif args.input_tokens in prompt_pool:
+        prompt = prompt_pool[args.input_tokens]
+    else:
+        raise SystemExit("[ERROR] Plese use --prompt if want to use custom input.")
+
     input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
     print("---- Prompt size:", input_size)
 
@@ -558,7 +531,7 @@ if args.benchmark:
 if args.dtype == "int8" and args.ipex:
     qconfig = ipex.quantization.default_static_qconfig_mapping
     if args.ipex_smooth_quant:
-        qconfig = ipex.quantization.get_smooth_quant_qconfig_mapping(alpha=0.75)
+        qconfig = ipex.quantization.get_smooth_quant_qconfig_mapping()
 
     if args.do_calibration:
         example_inputs = None
@@ -620,16 +593,12 @@ if args.dtype == "int8" and args.ipex:
         print("model quantization - Done!")
 elif args.dtype == "int8" and args.inductor:
     from torch._inductor import config as inductor_config
-
     inductor_config.cpp_wrapper = True
     from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
     import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
-    from torch.ao.quantization.quantizer.x86_inductor_quantizer import (
-        X86InductorQuantizer,
-    )
+    from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
     from torch._export import capture_pre_autograd_graph, dynamic_dim
-
-    print("[Info] Running torch.compile() INT8 quantization")
+    print('[Info] Running torch.compile() INT8 quantization')
     with torch.no_grad():
         encoded_input = tokenizer(prompt, return_tensors="pt")
         print("encoded_input is: {}".format(encoded_input), flush=True)
@@ -646,13 +615,11 @@ elif args.dtype == "int8" and args.inductor:
         torch.ao.quantization.move_exported_model_to_eval(converted_model)
         with torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
             if args.ipex:
-                print("[Info] Running torch.compile() with IPEX backend")
-                user_model = torch.compile(
-                    converted_model, dynamic=True, backend="ipex"
-                )
+                print('[Info] Running torch.compile() with IPEX backend')
+                user_model = torch.compile(converted_model, backend="ipex")
             else:
-                print("[Info] Running torch.compile() with default backend")
-                user_model = torch.compile(converted_model, dynamic=True)
+                print('[Info] Running torch.compile() with default backend')
+                user_model = torch.compile(converted_model)
             user_model(**encoded_input)
             user_model(**encoded_input)
 
@@ -670,9 +637,7 @@ def benchmark_warmup(prompt):
             activities=[torch.profiler.ProfilerActivity.CPU],
             schedule=torch.profiler.schedule(wait=1, warmup=3, active=1),
             on_trace_ready=trace_handler,
-        ) as prof, torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(
-            enabled=amp_enabled, dtype=amp_dtype
-        ):
+        ) as prof, torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
             for i in range(5):
                 input_ids = tokenizer(prompt, return_tensors="pt").input_ids
                 output = user_model.generate(
@@ -749,46 +714,45 @@ if args.benchmark:
         benchmark_evaluate(prompt)
 
 if args.accuracy_only:
-    if not args.inductor:
-        if args.dtype == "int8" or args.int8_bf16_mixed:
-            user_model = user_model.trace_graph
+    if args.dtype == "int8" or args.int8_bf16_mixed:
+        user_model = user_model.trace_graph
 
-        if args.jit and (
-            args.dtype == "bf16"
-            or args.dtype == "fp32"
-            or args.dtype == "bf32"
-            or args.dtype == "fp16"
+    if args.jit and (
+        args.dtype == "bf16"
+        or args.dtype == "fp32"
+        or args.dtype == "bf32"
+        or args.dtype == "fp16"
+    ):
+        input_ids = torch.ones(32).to(torch.long)
+        attention_mask = torch.ones(len(input_ids))
+        position_ids = torch.arange(len(input_ids))
+        last_ind = input_ids.shape[0] - 1
+        example_inputs = (
+            {
+                "input_ids": input_ids.unsqueeze(0),
+                "attention_mask": attention_mask.unsqueeze(0),
+                "position_ids": position_ids.unsqueeze(0),
+                "past_key_values": tuple(global_past_key_value),
+                "return_last_logit": torch.tensor(True),
+            }
+            if has_position_id
+            else {
+                "input_ids": input_ids.unsqueeze(0),
+                "attention_mask": attention_mask.unsqueeze(0),
+                "past_key_values": tuple(global_past_key_value),
+                "return_last_logit": torch.tensor(True),
+            }
+        )
+        with torch.no_grad(), torch.cpu.amp.autocast(
+            enabled=amp_enabled, dtype=amp_dtype
         ):
-            input_ids = torch.ones(32).to(torch.long)
-            attention_mask = torch.ones(len(input_ids))
-            position_ids = torch.arange(len(input_ids))
-            last_ind = input_ids.shape[0] - 1
-            example_inputs = (
-                {
-                    "input_ids": input_ids.unsqueeze(0),
-                    "attention_mask": attention_mask.unsqueeze(0),
-                    "position_ids": position_ids.unsqueeze(0),
-                    "past_key_values": tuple(global_past_key_value),
-                    "return_last_logit": torch.tensor(True),
-                }
-                if has_position_id
-                else {
-                    "input_ids": input_ids.unsqueeze(0),
-                    "attention_mask": attention_mask.unsqueeze(0),
-                    "past_key_values": tuple(global_past_key_value),
-                    "return_last_logit": torch.tensor(True),
-                }
+            user_model = torch.jit.trace(
+                user_model.eval(),
+                example_kwarg_inputs=example_inputs,
+                strict=False,
+                check_trace=False,
             )
-            with torch.no_grad(), torch.cpu.amp.autocast(
-                enabled=amp_enabled, dtype=amp_dtype
-            ):
-                user_model = torch.jit.trace(
-                    user_model.eval(),
-                    example_kwarg_inputs=example_inputs,
-                    strict=False,
-                    check_trace=False,
-                )
-                user_model = torch.jit.freeze(user_model.eval())
+            user_model = torch.jit.freeze(user_model.eval())
 
     with torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
         eval_func(user_model)
