@@ -1,0 +1,51 @@
+[
+  {
+    "_comment": "yolov5_inference_fp32",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=yolov5 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --in-graph=/in_graph/yolov5s.pb --data-location=/dataset --disable-tcmalloc=True",
+    "output": "python /workspace/intelai_models/inference/detect.py --weights=/in_graph/yolov5s.pb --source=/dataset --bs=1 --precision=fp32",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "yolov5_inference_bfloat16",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=yolov5 --precision=bfloat16 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --in-graph=/in_graph/yolov5s.pb --data-location=/dataset --disable-tcmalloc=True",
+    "output": "python /workspace/intelai_models/inference/detect.py --weights=/in_graph/yolov5s.pb --source=/dataset --bs=1 --precision=bfloat16",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "yolov5_inference_fp16",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=yolov5 --precision=fp16 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --in-graph=/in_graph/yolov5s.pb --data-location=/dataset --disable-tcmalloc=True",
+    "output": "python /workspace/intelai_models/inference/detect.py --weights=/in_graph/yolov5s.pb --source=/dataset --bs=1 --precision=fp16",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "yolov5_inference_int8",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=yolov5 --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --in-graph=/in_graph/inc_yolov5_int8.pb --data-location=/dataset --disable-tcmalloc=True",
+    "output": "python /workspace/intelai_models/inference/detect.py --weights=/in_graph/inc_yolov5_int8.pb --source=/dataset --bs=1 --precision=int8",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "yolov5_accuracy_fp32",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=yolov5 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only --in-graph=/in_graph/yolov5s.pb --data-location=/dataset --disable-tcmalloc=True",
+    "output": "python /workspace/intelai_models/inference/validate.py --weights=/in_graph/yolov5s.pb --source=/dataset --precision=fp32",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "yolov5_accuracy_fp16",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=yolov5 --precision=fp16 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only --in-graph=/in_graph/yolov5s.pb --data-location=/dataset --disable-tcmalloc=True",
+    "output": "python /workspace/intelai_models/inference/validate.py --weights=/in_graph/yolov5s.pb --source=/dataset --precision=fp16",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "yolov5_accuracy_bfloat16",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=yolov5 --precision=bfloat16 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only --in-graph=/in_graph/yolov5s.pb --data-location=/dataset --disable-tcmalloc=True",
+    "output": "python /workspace/intelai_models/inference/validate.py --weights=/in_graph/yolov5s.pb --source=/dataset --precision=bfloat16",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "yolov5_accuracy_int8",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=yolov5 --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only --in-graph=/in_graph/inc_yolov5_int8.pb --data-location=/dataset --disable-tcmalloc=True",
+    "output": "python /workspace/intelai_models/inference/validate.py --weights=/in_graph/inc_yolov5_int8.pb --source=/dataset --precision=int8",
+    "cpuset": "0-111"
+  }
+]
+  
