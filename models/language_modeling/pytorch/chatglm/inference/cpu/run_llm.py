@@ -733,12 +733,14 @@ if args.accuracy_only:
                 "attention_mask": attention_mask.unsqueeze(0),
                 "position_ids": position_ids.unsqueeze(0),
                 "past_key_values": tuple(global_past_key_value),
+                "return_last_logit": torch.tensor(True),
             }
             if has_position_id
             else {
                 "input_ids": input_ids.unsqueeze(0),
                 "attention_mask": attention_mask.unsqueeze(0),
                 "past_key_values": tuple(global_past_key_value),
+                "return_last_logit": torch.tensor(True),
             }
         )
         with torch.no_grad(), torch.cpu.amp.autocast(
