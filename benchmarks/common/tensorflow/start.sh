@@ -1943,24 +1943,45 @@ function graphsage() {
 }
 
 function yolov5() {
-    if [ ${MODE} == "inference" ]; then
-      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
-        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+  if [ ${MODE} == "inference" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
-        if [ ${NUM_INTER_THREADS} != "None" ]; then
-          CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
-        fi
-
-        if [ ${NUM_INTRA_THREADS} != "None" ]; then
-          CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
-        fi
-        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
-        CMD=${CMD} run_model
-      else
-        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
-        exit 1
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
       fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
     fi
+  fi
+  if [ ${MODE} == "inference" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+
+      if [ ${INSTANCES_JSON} != "None" ]; then
+        CMD="${CMD} $(add_arg "--instances-json" ${INSTANCES_JSON})"
+      fi
+
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+  fi
 }
 
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}

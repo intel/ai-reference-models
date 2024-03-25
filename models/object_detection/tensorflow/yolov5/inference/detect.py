@@ -56,7 +56,11 @@ def run(
     data_loader = DataLoader(dataset, batch_size=bs, collate_fn=LoadImagesAndLabels.collate_fn)
 
     # Run inference
+<<<<<<< HEAD
     model.warmup(imgsz=(bs, 3, imgsz, imgsz))  # warmup
+=======
+    #model.warmup(imgsz=(bs, 3, *imgsz))  # warmup
+>>>>>>> be0e7cd1b ([Tensorflow] Enable bfloat16, fp16, and int8 for Yolo V5 (#1790))
     seen = 0
     dt = (Profile(), Profile(), Profile())
 
@@ -64,7 +68,11 @@ def run(
 
     for batch in data_loader:
         b_count += 1
+<<<<<<< HEAD
         if seen + bs > total_images:
+=======
+        if seen + bs >= total_images:
+>>>>>>> be0e7cd1b ([Tensorflow] Enable bfloat16, fp16, and int8 for Yolo V5 (#1790))
             break
         im, labels, paths, shapes = batch
         out_strs = ['image ']*bs
