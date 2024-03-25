@@ -1,3 +1,12 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2023 Intel Corporation
+#
+# AGPL-3.0 license
+#
+
+
 # YOLOv5 🚀 by Ultralytics, AGPL-3.0 license
 """
 Common modules
@@ -326,7 +335,7 @@ class Concat(nn.Module):
 
 class DetectMultiBackend(nn.Module):
     # YOLOv5 MultiBackend class for python inference on various backends
-    def __init__(self, weights, device=torch.device('cpu'), dnn=False, data=None, fp16=False, fuse=True):
+    def __init__(self, weights, precision, device=torch.device('cpu'), dnn=False, data=None, fp16=False, fuse=True, bs=1):
         # Usage:
         #   PyTorch:              weights = *.pt
         #   TorchScript:                    *.torchscript
@@ -443,6 +452,14 @@ class DetectMultiBackend(nn.Module):
         elif pb:  # GraphDef https://www.tensorflow.org/guide/migrate#a_graphpb_or_graphpbtxt
             LOGGER.info(f'Loading {w} for TensorFlow GraphDef inference...')
             import tensorflow as tf
+            tf.compat.v1.disable_eager_execution()
+            from tensorflow.core.protobuf import rewriter_config_pb2
+            from tensorflow.compat.v1 import ConfigProto
+            infer_config = ConfigProto()
+            if precision == "bfloat16":
+                infer_config.graph_options.rewrite_options.auto_mixed_precision_onednn_bfloat16 = rewriter_config_pb2.RewriterConfig.ON
+            elif precision == "fp16":
+                infer_config.graph_options.rewrite_options.auto_mixed_precision = rewriter_config_pb2.RewriterConfig.ON
 
             def wrap_frozen_graph(gd, inputs, outputs):
                 x = tf.compat.v1.wrap_function(lambda: tf.compat.v1.import_graph_def(gd, name=''), [])  # wrapped
@@ -455,11 +472,29 @@ class DetectMultiBackend(nn.Module):
                     name_list.append(node.name)
                     input_list.extend(node.input)
                 return sorted(f'{x}:0' for x in list(set(name_list) - set(input_list)) if not x.startswith('NoOp'))
-
-            gd = tf.Graph().as_graph_def()  # TF GraphDef
+            
+            """ gd = tf.Graph().as_graph_def()  # TF GraphDef
             with open(w, 'rb') as f:
-                gd.ParseFromString(f.read())
-            frozen_func = wrap_frozen_graph(gd, inputs='x:0', outputs=gd_outputs(gd))
+                gd.ParseFromString(f.read()) """
+
+            with tf.Graph().as_default() as graph:
+                new_input = tf.compat.v1.placeholder(tf.float32, shape=[None, 640, 640, 3], name='new_input')
+                gd = tf.Graph().as_graph_def()  # TF GraphDef
+                with open(w, 'rb') as f:
+                    gd.ParseFromString(f.read())
+                tf.import_graph_def(
+                    gd,  # Your GraphDef
+                    input_map={'x:0': new_input},  # Redirect original input to `new_input`
+                    name=""
+                )
+            output_tensor = graph.get_tensor_by_name(gd_outputs(gd)[0])
+
+            infer_sess = tf.compat.v1.Session(graph=graph, config=infer_config)
+
+            # frozen_func = wrap_frozen_graph(gd, inputs='x:0', outputs=gd_outputs(gd))
+            
+            # infer_sess = tf.compat.v1.Session(graph=frozen_func.graph, config=infer_config)
+
         elif tflite or edgetpu:  # https://www.tensorflow.org/lite/guide/python#install_tensorflow_lite_for_python
             try:  # https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
                 from tflite_runtime.interpreter import Interpreter, load_delegate
@@ -575,7 +610,12 @@ class DetectMultiBackend(nn.Module):
             if self.saved_model:  # SavedModel
                 y = self.model(im, training=False) if self.keras else self.model(im)
             elif self.pb:  # GraphDef
-                y = self.frozen_func(x=self.tf.constant(im))
+                # y = self.frozen_func(x=self.tf.constant(im))
+                # print(type(im))
+                # print(im.shape)
+                # print(self.infer_sess.graph.get_tensor_by_name('x:0').shape)
+                # y = self.infer_sess.run(self.frozen_func.outputs[0], feed_dict={self.frozen_func.inputs[0].name: im})
+                y = self.infer_sess.run(self.output_tensor, feed_dict={self.new_input: im})
             else:  # Lite or Edge TPU
                 input = self.input_details[0]
                 int8 = input['dtype'] == np.uint8  # is TFLite quantized uint8 model
