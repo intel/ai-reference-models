@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2023 Intel Corporation
+# Copyright (c) 2023-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@
 #  - git clones & applying patches
 
 set -e
-apt-get update && apt-get install -y python3-venv
+apt-get update && apt-get install -y python3-venv pciutils numactl
+export PYTHONPATH=$(realpath $0)/../../../../common
 
 pip install -r requirements.txt
 
-cp -r ../../../../common .

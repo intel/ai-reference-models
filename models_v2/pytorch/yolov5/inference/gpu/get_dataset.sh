@@ -1,5 +1,4 @@
-#
-# Copyright (c) 2023 Intel Corporation
+# Copyright (c) 2023-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,24 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-"""Consts for dlrm-terabyte-jit inference."""
 
-ACC = {
-    "type": "total",
-    "pattern": r"accuracy (\d+.\d+) %",
-    "unit": "accuracy",
-}
+#!/bin/bash
 
-PERF = {
-    "type": "total",
-    "pattern": r"Throughput:\s*(\d+.\d+)",
-    "inverse": False,
-    "multiply": False,
-    "use_batch_size": False,
-    "unit": "inst/s",
-}
+set -e
 
-FUNCTIONAL = {
-    "pattern": r"Throughput:\s*(\d+.\d+)"
-}
+# --- Setup For Script Execution ---
+home_directory=$(pwd)
+
+# --- Setup For Script Execution ---
+if [ ! -f "${home_directory}/val2017.zip" ]; then
+  echo "Downloading coco validation set."
+  wget http://images.cocodataset.org/zips/val2017.zip
+else
+  echo "Coco validation set is already downloaded."
+fi
+echo "Coco dataset is ready for use."
+
