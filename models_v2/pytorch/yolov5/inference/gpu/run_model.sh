@@ -1,7 +1,4 @@
-#
-# -*- coding: utf-8 -*-
-#
-# Copyright (c) 2023 Intel Corporation
+# Copyright (c) 2023-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,104 +11,325 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# SPDX-License-Identifier: EPL-2.0
-#
 
 #!/bin/bash
 
-# Create an array of input directories that are expected and then verify that they exist
-declare -A input_envs
-input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
-input_envs[MULTI_TILE]=${MULTI_TILE}
-input_envs[PLATFORM]=${PLATFORM}
+# Specify default arguments
 
-for i in "${!input_envs[@]}"; do
-  var_name=$i
-  env_param=${input_envs[$i]}
+[[ "${AMP}" == "" ]]            && AMP="no"
+[[ "${BATCH_SIZE}" == "" ]]     && BATCH_SIZE=1
+[[ "${DATASET_DIR}" == "" ]]    && DATASET_DIR=""
+[[ "${DUMMY}" == "" ]]          && DUMMY="no"
+[[ "${LOAD_PATH}" == "" ]]      && LOAD_PATH=""
+[[ "${JIT}" == "" ]]            && JIT="trace"
+[[ "${MODEL_NAME}" == "" ]]     && MODEL_NAME="yolov5m"
+[[ "${MULTI_TILE}" == "" ]]     && MULTI_TILE="False"
+[[ "${NUM_IMAGES}" == "" ]]     && NUM_IMAGES=1
+[[ "${NUM_ITERATIONS}" == "" ]] && NUM_ITERATIONS=100
+[[ "${PRECISION}" == "" ]]      && PRECISION="fp16"
+[[ "${SAVE_PATH}" == "" ]]      && SAVE_PATH=""
+[[ "${STATUS_PRINTS}" == "" ]]  && STATUS_PRINTS=10
+[[ "${STREAMS}" == "" ]]        && STREAMS=1
 
-  if [[ -z $env_param ]]; then
-    echo "The required environment variable $var_name is not set" >&2
-    exit 1
-  fi
+./get_model.sh
+
+# Process CLI arguments as overides for environment variables
+VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,load:,jit:,multi-tile,num-images:,num-iterations:,output-dir:,platform:,precision:,proxy:,save:,status-prints:,streams: -- "$@")
+if [[ $? -ne 0 ]]; then
+    exit 1;
+fi
+eval set -- "$VALID_ARGS"
+while [ : ]; do
+  case "$1" in
+    --amp)
+        AMP="$2"
+        shift 2
+        ;;
+    --batch-size)
+        BATCH_SIZE=$2
+        shift 2
+        ;;
+    --data)
+        DATASET_DIR="$2"
+        shift 2
+        ;;
+    --dummy)
+        DUMMY="yes"
+        shift 1
+        ;;
+    --jit)
+        JIT="$2"
+        shift 2
+        ;;
+    --load)
+        LOAD_PATH="$2"
+        shift 2
+        ;;
+    --multi-tile)
+        MULTI_TILE="True"
+        shift 1
+        ;;
+    --num-images)
+        NUM_IMAGES=$2
+        shift 2
+        ;;
+    --num-iterations)
+        NUM_ITERATIONS=$2
+        shift 2
+        ;;
+    --output-dir)
+        OUTPUT_DIR=$2
+        shift 2
+        ;;
+    --platform)
+        PLATFORM=$2
+        shift 2
+        ;;
+    --precision)
+        PRECISION=$2
+        shift 2
+        ;;
+    --proxy)
+        PROXY=$2
+        shift 2
+        ;;
+    --save)
+        SAVE_PATH="$2"
+        shift 2
+        ;;
+    --status-prints)
+        STATUS_PRINTS=$2
+        shift 2
+        ;;
+    --streams)
+        STREAMS=$2
+        shift 2
+        ;;
+    -h | --help)
+        echo "Usage: $(basename $0)"
+        echo "  --amp            [AMP]           : Use AMP on model conversion (default: '${AMP}')"
+        echo "                                     * no"
+        echo "                                     * yes"
+        echo "  --batch-size     [BATCH_SIZE]    : Batch size to use (default: '${BATCH_SIZE}')"
+        echo "  --data           [DATASET_DIR]   : Location to load images from (default: '${DATASET_DIR}')"
+        echo "  --dummy                          : Use randomly generated dummy dataset in place of '--data' argument (default: disabled)"
+        echo "  --load           [LOAD_PATH]     : If specified model will be loaded from this saved location (default: disabled)"
+        echo "  --jit            [JIT]           : JIT method to use (default: '${JIT}')"
+        echo "                                     * none"
+        echo "                                     * script"
+        echo "                                     * trace"
+        echo "  --multi-tile                     : Run benchmark in multi-tile configuration (default: '${MULTI_TILE}')"
+        echo "  --num-images     [NUM_IMAGES]    : Number of images to load (default: '${NUM_IMAGES}')"
+        echo "  --num-iterations [NUM_ITERATIONS]: Number of times to test each batch (default: '${NUM_ITERATIONS}')"
+        echo "  --output-dir     [OUTPUT_DIR]    : Location to write output to. Required"
+        echo "  --platform       [PLATFORM]      : Platform that inference is being ran on (default: '${PLATFORM}')"
+        echo "                                     * CPU"
+        echo "                                     * Flex"
+        echo "                                     * CUDA"
+        echo "                                     * Max"
+        echo "  --precision      [PRECISION]     : Precision to use for the model (default: '${PRECISION}')"
+        echo "                                     * bf16"
+        echo "                                     * fp16"
+        echo "                                     * fp32"
+        echo "                                     * int8"
+        echo "  --proxy          [PROXY]         : System proxy. Required to download models"
+        echo "  --save           [SAVE_PATH]     : If specified model will be saved to this saved location (default: disabled)"
+        echo "  --status-prints  [STATUS_PRINTS] : Total number of status messages to display during inference benchmarking (default: '${STATUS_PRINTS}')"
+        echo "  --streams        [STREAMS]       : Number of parallel streams to do inference on (default: '${STREAMS}')"
+        echo "                                     Will be truncated to a multiple of BATCH_SIZE"
+        echo "                                     If less than BATCH_SIZE will be increased to BATCH_SIZE"
+        echo ""
+        echo "NOTE: Arguments may also be specified through command line variables using the name in '[]'."
+        echo "      For example 'export MODEL_NAME=yolov5m'."
+        echo "NOTE: Both arguments and their values are case sensitive."
+        exit 0
+        ;;
+    --) shift;
+        break
+        ;;
+  esac
 done
 
-OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
-if [[ "${PLATFORM}" == "Max" ]]; then
-    echo "Only support Flex for platform"    
-elif [[ "${PLATFORM}" == "Flex" ]]; then
-    BATCH_SIZE=${BATCH_SIZE:-32}
-    PRECISION=${PRECISION:-fp16}
-    if [[ "${PRECISION}" != fp16 ]]; then
-      echo "YOLOv5 inference currently supports only fp16 precision"
-      exit 1
+# Check data set is configured if specified/required.
+if [[ ${DUMMY} == "yes" ]]; then
+    if [[ -z "${DATASET_DIR}" ]]; then
+        # Dummy data requested and no dataset provided. OK case.
+        _dataset_args="--dummy"
+    else
+        # Ambiguous case. Terminate.
+        echo "ERROR: Cannot handle simultaneous usage of '--dummy'/'DUMMY' and '--data'/'DATASET_DIR'."
+        exit 1
     fi
-    NUM_ITERATIONS=${NUM_ITERATIONS:-500}
+else
+    if [[ -z "${DATASET_DIR}" ]]; then
+        # Ambiguous case. Terminate.
+        echo "ERROR: Dataset must be provided or dummy data must be enabled:"
+        echo "ERROR: add '--dummy' or '--data [DATASET_DIR]'."
+        exit 1
+
+    else
+        if [[ -s "${DATASET_DIR}" ]]; then
+            # Actual dataset provided. OK case.
+            _dataset_args="--data ${DATASET_DIR}"
+        else
+            echo "ERROR: The requested dataset '${DATASET_DIR}' does not exist!"
+            exit 1
+        fi
+    fi
+
 fi
 
+# Check multi-tile is only specified on valid platforms.
+if [[ "${MULTI_TILE}" == "True" ]]; then
+    if [[ "${PLATFORM}" == "Max" ]]; then
+        echo "Streams will be round-robin scheduled across multiple tiles"
+        if [ $((STREAMS%2)) -ne 0 ]; then
+        echo "WARNING: can't schedule evenly odd number of streams ($STREAMS) across tiles"
+    fi
+    fi
+    if [[ "${PLATFORM}" == "Flex" ]]; then
+        echo "ERROR: Flex does not support multitile"
+        exit 1
+    fi
+    if [[ "${PLATFORM}" == "CUDA" ]]; then
+        echo "ERROR: multitile is not implemented for CUDA"
+        exit 1
+    fi
+fi
 
+# Show test configuration
 echo 'Running with parameters:'
-echo " PLATFORM: ${PLATFORM}"
-echo " OUTPUT_DIR: ${OUTPUT_DIR}"
-echo " PRECISION: ${PRECISION}"
-echo " BATCH_SIZE: ${BATCH_SIZE}"
+echo " AMP:            ${AMP}"
+echo " BATCH_SIZE:     ${BATCH_SIZE}"
+echo " DATASET_DIR:    ${DATASET_DIR}"
+echo " DUMMY:          ${DUMMY}"
+echo " JIT:            ${JIT}"
+echo " LOAD_PATH:      ${LOAD_PATH}"
+echo " MODEL_NAME:     ${MODEL_NAME}"
+echo " MULTI_TILE:     ${MULTI_TILE}"
 echo " NUM_ITERATIONS: ${NUM_ITERATIONS}"
-echo " MULTI_TILE: ${MULTI_TILE}"
+echo " NUM_IMAGES:     ${NUM_IMAGES}"
+echo " OUTPUT_DIR:     ${OUTPUT_DIR}"
+echo " SAVE_PATH:      ${SAVE_PATH}"
+echo " STATUS_PRINTS:  ${STATUS_PRINTS}"
+echo " STREAMS:        ${STREAMS}"
+echo " PLATFORM:       ${PLATFORM}"
+echo " PRECISION:      ${PRECISION}"
+echo " PROXY:          ${PROXY}"
 
-echo "Yolo V5 ${PRECISION} inference  MultiTile=${MULTI_TILE} BS=${BATCH_SIZE} Iter=${NUM_ITERATIONS}"
+# Set system proxies if requested.
+if [[ "${PROXY}" != "" ]]; then
+    export http_proxy=${PROXY}
+    export https_proxy=${PROXY}
+fi
+
+# known issue for multitile
+if [[ "${MULTI_TILE}" == "True" ]]; then
+    export ZE_FLAT_DEVICE_HIERARCHY=COMPOSITE
+fi
+
+# Configure save and load params
+_save_load_args=""
+if [[ ${LOAD_PATH} != "" ]]; then
+    _save_load_args="${_save_load_args} --load ${LOAD_PATH}"
+fi
+if [[ ${SAVE_PATH} != "" ]]; then
+    _save_load_args="${_save_load_args} --save ${SAVE_PATH}"
+fi
+
+# Specify image dimensions for model
+if [[ ${MODEL_NAME} == "yolov5m" ]]; then
+    _img_width=640
+    _img_height=640
+
+else
+    echo "ERROR: Model architecture '${MODEL_NAME}' is not supported yet"
+    exit 1
+fi
+
+# Specify data type
+if [[ ${PRECISION} == "fp32" ]]; then
+    _dtype_args=""
+elif [[ ${PRECISION} == "fp16" ]]; then
+    _dtype_args="--fp16 1"
+elif [[ ${PRECISION} == "bf16" ]]; then
+    _dtype_args="--bf16 1"
+elif [[ ${PRECISION} == "int8" ]]; then
+    #_dtype_args="--int8 1 --asymmetric-quantization --perchannel-weight 1"
+    echo "ERROR: Precision '${PRECISION}' is not supported yet for model '${MODEL_NAME}'"
+    exit 1
+else
+    echo "ERROR: Unknown precision '${PRECISION}' for model '${MODEL_NAME}'"
+fi
+
+# Specify if AMP should be used
+if [[ ${AMP} == "no" ]]; then
+    _amp_arg="--no-amp"
+elif [[ ${AMP} == "yes" ]]; then
+    _amp_arg=""
+else
+    echo "ERROR: Invalid valid entered for 'AMP': ${AMP}"
+    exit 1
+fi
+
+# Specify if JIT should be used
+if [[ ${JIT} == "none" ]]; then
+    _jit_arg=""
+elif [[ ${JIT} == "trace" ]]; then 
+    _jit_arg="--jit-trace"
+elif [[ ${JIT} == "script" ]]; then 
+    _jit_arg="--jit-script"
+else
+    echo "ERROR: Invalid valid entered for 'JIT': ${JIT}"
+    exit 1
+fi
+
+# General perf args
+_perf_args="--no-grad"
 
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
 
-wget https://raw.githubusercontent.com/ultralytics/yolov5/master/data/images/zidane.jpg
+# Set environment variables
+if [[ ${PLATFORM} == "Flex" ]]; then
+    export IGC_EnableDPEmulation=1
+    export CFESingleSliceDispatchCCSMode=1
+    export IPEX_ONEDNN_LAYOUT=1
+    export IPEX_LAYOUT_OPT=1
+elif [[ ${PLATFORM} == "Max" ]]; then
+    # Currently its an assumption that Max GPU uses these.
+    export IGC_EnableDPEmulation=1
+    export CFESingleSliceDispatchCCSMode=1
+    export IPEX_ONEDNN_LAYOUT=1
+    export IPEX_LAYOUT_OPT=1
+fi
+export PROFILE="OFF"
 
-sum_log_analysis() {
-    if [ -f $2 ]; then
-        rm -f $2
-    fi
-    if diff /dev/null ${1}_t0.log |tail -l | grep '^\\ No newline' > /dev/null;then echo >> ${1}_t0.log; fi
-    if diff /dev/null ${1}_t1.log |tail -l | grep '^\\ No newline' > /dev/null;then echo >> ${1}_t1.log; fi
-    bs=$(cat ${1}_t1.log |grep Batch |awk '{print $3}')
-    echo -e "Batch Size: $bs" >$2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Performance" |awk -v tag=$(cat ${1}"_t0.log" ${1}"_t1.log" |grep "Performance" |awk '{sum+=$2} END {printf "%.4f\n",sum}') '{if ( $2=="None" ) {sum="None";nextfile}else  sum=tag} ;END{print "Sum "$1" "sum " "$3}' >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Performance" |awk -v tag=$(cat ${1}"_t0.log" ${1}"_t1.log" |grep "Performance" |awk 'BEGIN {min=1234567890123} {if ($2 <min) {min=$2}}END {printf "%.4f\n",min}') '{if ( $2=="None" ) {min="None";nextfile}else  min=tag} ;END{print "Min "$1" "min " "$3}' >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Latency" |awk '{if ( $2=="N/A" ){avg="N/A";nextfile}else avg=((sum+=$2/2))};END{print "Avg "$1" "avg " "$3}'  >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Accuracy" |awk -v avg=$(cat ${1}"_t0.log" ${1}"_t1.log" |grep "Accuracy" |awk '{sum+=$3}END{printf "%.4f\n",sum/NR}') '{if ( $3=="None" || $2=="N/A" || $3=="nan" || $3=="N/A"){avg="None";nextfile}else avg=avg};END{print "Avg "$1" "$2 " "avg}' >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Functional" | awk -v fail=$(cat ${1}"_t0.log" ${1}"_t1.log" |grep "Functional" |awk '{for(i=1;i<=NF;++i) if($i=="fail") ++sum}END{print sum}') '{if ( fail >= 1 ) tag="fail ";else tag="pass"};END{print $1" "tag}'  >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Error" |awk '{if(a[$1]){a[$1]=a[$1]";"$2}else{a[$1]=$2}}END{for(i in a)print $1" " a[i]}' >> $2
-}
+export PYTHONPATH=$PWD:$PWD/yolov5$PYTHONPATH
+# Start inference script with numactl
+echo "Starting inference..."
+#TODO: Set ZE_AFFINITY_MASK for multiple tiles.
+numactl --cpunodebind=0 --membind=0 python3 predict.py \
+    ${_dataset_args} \
+    --batch-size ${BATCH_SIZE} \
+    --status-prints ${STATUS_PRINTS} \
+    --max-val-dataset-size ${NUM_IMAGES} \
+    --batch-streaming ${NUM_ITERATIONS} \
+    --width ${_img_width} --height ${_img_height} \
+    ${_dtype_args} ${_amp_arg} ${_jit_arg} ${_perf_args} ${_save_load_args} \
+    --warm-up 3 \
+    --output-dir ${OUTPUT_DIR} \
+    --total-instances ${STREAMS} \
+    --terminate-if-sync-fail \
+    2>&1 | tee ${OUTPUT_DIR}/output_raw.log
+predict_exit_code=${PIPESTATUS[0]}
+echo "Inference complete"
 
+echo "Output directory contents:"
+ls ${OUTPUT_DIR}
 
-modelname=yolov5
-
-if [[ ${MULTI_TILE} == "False" ]]; then
-    rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    python detect.py --source zidane.jpg  --benchmark 1 --dummy 1 --bs ${BATCH_SIZE} --iters ${NUM_ITERATIONS}  --half 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
-    throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $2}')
-    throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $3}')
-    latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Latency | awk -F ' ' '{print $2}')
-    acc=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Accuracy | awk -F ' ' '{print $3}')
-    acc_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Accuracy | awk -F ' ' '{print $2}')
-else
-    echo "Only support MULTI_TILE=False"
+if [ $predict_exit_code -ne 0 ]; then
+    echo "ERROR: Model scripts terminated with non-zero exit code: $predict_exit_code"
     exit 1
 fi
-
-yaml_content=$(cat <<EOF
-results:
- - key: throughput
-   value: $throughput
-   unit: $throughput_unit
- - key: latency
-   value: $latency
-   unit: s
- - key: accuracy
-   value: $acc
-   unit: $acc_unit
-EOF
-)
-
-# Write the content to a YAML file
-echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
-echo "YAML file created."
+exit 0
