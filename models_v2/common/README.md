@@ -1,5 +1,6 @@
 # Overview
 
+[benchmark.py]: benchmark.py
 [js_merge.py]: js_merge.py
 [js_sysinfo.py]: js_sysinfo.py
 [parse_result.py]: parse_result.py
@@ -12,11 +13,53 @@
 
 This folder contains common Python utilities and modules which can be reused across project.
 
-| Utility           | Description                                           |
-| ----------------- | ----------------------------------------------------- |
-| [js_merge.py]     | Tool to merge few JSON files together                 |
-| [js_sysinfo.py]   | Tool to dump system information in JSON format        |
-| [parse_result.py] | Sample results parser (view file for cmdline options) |
+| Utility           | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| [benchmark.py]    | Tool to benchmark application given in cmdline arguments |
+| [js_merge.py]     | Tool to merge few JSON files together                    |
+| [js_sysinfo.py]   | Tool to dump system information in JSON format           |
+| [parse_result.py] | Sample results parser (view file for cmdline options)    |
+
+# benchmark.py
+
+> [!NOTE]
+> Tool requires elevated privileges (root).
+
+Usage:
+```
+benchmark [-h] [--indent INDENT] --output_dir OUTPUT_DIR --profile PROFILE app-cmdline
+```
+
+Tool benchmarks application given on the command line with `app-cmdline` arguments. `app-cmdline` is considered by the tool as a template with parameters specified with `{param}` notation. Tool performs parameters substitution at runtime taking parameter values from CSV profile given with `--profile` argument or from the predefined parameters list (see table below). Thus, tool executes as many benchmark tests as defined in the CSV profile.
+
+Tool generates outputs in the directory given with `--output_dir` option. Outputs layout is as follows:
+```
+.
+├── profile.csv               # copy of profile
+├── sysinfo.json              # baremetal sysinfo description
+├── test_{i}                  # output directory of i-th test
+│   ├── test.csv              # test csv definition (i-th line from profile.csv)
+│   ├── results.json          # results output from the test complying with the schema
+│   └── *                     # whatever other output files test produces
+└── results_test_{i}.json     # ultimate report for i-th test
+```
+
+Note that each test execution of `app-cmdline` must produce outputs to `test_{i}` folder and one of the outputs must be `results.json` file. Use predefined `output_dir` parameter on `app-cmdline` to specify path to `test_{i}` output directory (don't confuse this parameter with `--output_dir` option).
+
+During the run tool collects system information and amends it to each test results description. Tool requires elevated privileges.
+
+Predefined template parameters:
+| Parameter    | Description                                       |
+| ------------ | ------------------------------------------------- |
+| `output_dir` | Directory where `app-cmdline` should write output |
+
+Options:
+| Option                |                                 |
+| --------------------- | ------------------------------- |
+| `-h`, `--help`        | Show this help message and exit |
+| `--indent INDENT`     | Indent for json.dump()          |
+| `-o, --output OUTPUT` | File to store output            |
+| `--profile PROFILE`   | Profile with tests list         |
 
 # js_merge.py
 
@@ -39,6 +82,9 @@ Options:
 | `--indent INDENT` | Indent for json.dump()          |
 
 # js_sysinfo.py
+
+> [!NOTE]
+> Running with elevated privileges (root) recommended.
 
 Usage:
 ```
