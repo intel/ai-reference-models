@@ -1,0 +1,16 @@
+model_name,batch_size,num_images,streams,num_iterations,precision
+efficientnet_b0,1,1,1,16384,fp16
+efficientnet_b0,4,4,1,4096,fp16
+efficientnet_b0,16,16,1,1024,fp16
+efficientnet_b0,64,64,1,256,fp16
+efficientnet_b0,128,128,1,128,fp16
+efficientnet_b0,256,256,1,64,fp16
+efficientnet_b0,1,1,2,8192,fp16
+efficientnet_b0,4,4,2,2048,fp16
+efficientnet_b0,16,16,2,512,fp16
+efficientnet_b0,64,64,2,128,fp16
+efficientnet_b0,128,128,2,64,fp16
+efficientnet_b0,1,1,4,4096,fp16
+efficientnet_b0,4,4,4,1024,fp16
+efficientnet_b0,16,16,4,256,fp16
+efficientnet_b0,64,64,4,64,fp16

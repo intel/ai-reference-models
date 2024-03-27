@@ -70,6 +70,8 @@ def write_results(batches_tested, throughput, latency, top1, top5, throughput_ov
                     'device': args.device,
                     'amp': 'false' if args.no_amp else 'true',
                     'jit': 'trace' if args.jit_trace else 'script' if args.jit_script else 'no',
+                    'dummy': 'true' if args.dummy else 'false',
+                    'framework': 'PyTorch'
                 },
             },
             'system': js_sysinfo.get_system_config(all=True, quiet=True),
@@ -251,18 +253,18 @@ def combine_results():
                 io_utils.write_warning('BUG: unclassified key: key={0}, config={1}'.format(key, result_path))
                 status = 'failed'
 
-    # calculating min/max/sums/stddev
+    # calculating min/max/sums/stdev
     for key in to_avg:
         nstreams = len(to_avg[key])
         summary['results']['metrics'][key]['min'] = min(to_avg[key])
         summary['results']['metrics'][key]['max'] = max(to_avg[key])
         summary['results']['metrics'][key]['avg'] = np.mean(np.array(to_avg[key], dtype=np.float64))
-        summary['results']['metrics'][key]['stddev'] = np.std(np.array(to_avg[key], dtype=np.float64))
+        summary['results']['metrics'][key]['stdev'] = np.std(np.array(to_avg[key], dtype=np.float64))
         if key in op_total_avg:
             summary['results']['metrics'][key]['min'] *= nstreams
             summary['results']['metrics'][key]['max'] *= nstreams
             summary['results']['metrics'][key]['avg'] *= nstreams
-            summary['results']['metrics'][key]['stddev'] *= nstreams
+            summary['results']['metrics'][key]['stdev'] *= nstreams
 
 
     # setting overall status

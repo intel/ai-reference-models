@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# System modules
 import argparse
 import glob
 import io
@@ -670,7 +671,7 @@ def get_system_config(**kwargs):
         }
     return res
 
-def js_sysinfo(**kwargs):
+def get_sysinfo(**kwargs):
     res = {}
     files = {}
 
@@ -696,7 +697,7 @@ def js_sysinfo(**kwargs):
 
     return res
 
-if __name__ == '__main__':
+def get_parser():
     parser = argparse.ArgumentParser(
         prog='js_sysinfo',
           description='Dump system information according to JSON schema',
@@ -719,17 +720,16 @@ if __name__ == '__main__':
     group1.add_argument('-o', '--output', action="store", type=str, default='', help='File to store output')
     group1.add_argument('--indent', default=None, help='indent for json.dump()')
 
-    args = parser.parse_args()
+    return parser
+
+if __name__ == '__main__':
+    args = get_parser().parse_args()
+
+    indent = int(args.indent) if args.indent and args.indent.isdecimal() else args.indent
+    sysinfo = get_sysinfo(**vars(args))
 
     if args.output == '':
-        file = sys.stdout
+        json.dump(sysinfo, sys.stdout, indent=indent)
     else:
-        file = open(args.output, 'w')
-
-    json.dump(
-        js_sysinfo(**vars(args)),
-        file,
-        indent=(int(args.indent) if args.indent and args.indent.isdecimal() else args.indent))
-
-    if file != sys.stdout:
-        file.close()
+        with open(args.output, 'w') as f:
+            json.dump(sysinfo, f, indent=indent)

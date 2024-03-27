@@ -26,6 +26,7 @@
 [ILSVRC2012_img_val.tar]: https://image-net.org/data/ILSVRC/2012/ILSVRC2012_img_val.tar
 [ILSVRC2012_devkit_t12.tar.gz]: https://image-net.org/data/ILSVRC/2012/ILSVRC2012_devkit_t12.tar.gz
 [get_dataset.sh]: get_dataset.sh
+[benchmark.sh]: benchmark.sh
 
 [EfficientNet] Inference using [Intel® Extension for Pytorch]. Sample uses EfficientNet [model implementations from torchvision][EfficientNet Model]:
 
@@ -259,3 +260,34 @@ results:
    value: 76.06
    unit: percents
 ```
+
+## Performance Benchmarking
+
+[benchmark.sh] script can be used to benchmark EfficientNet performance for the [predefined use cases](profiles/README.md). The [benchmark.sh] script is a tiny EfficientNet specific wrapper on top of [benchmark.py](/models_v2/common/benchmark.py) script. The workflow for running a benchmark is as follows:
+
+* (optional) Specify path to [svr-info](https://github.com/intel/svr-info):
+  ```
+  export PATH_TO_SVR_INFO=/path/to/svrinfo
+  ```
+
+* Specify path to output benchmark results (folder must be creatable/writable under `root`):
+  ```
+  export OUTPUT_DIR=/opt/output
+  ```
+
+* Run the benchmark script (assumes ``intel/image-recognition:pytorch-flex-gpu-efficientnet`` has already been pulled or built locally):
+  ```
+  sudo \
+    PATH=$PATH_TO_SVR_INFO:$PATH \
+    IMAGE=intel/image-recognition:pytorch-flex-gpu-efficientnet-inference \
+    OUTPUT_DIR=$OUTPUT_DIR \
+    PROFILE=$(pwd)/models_v2/pytorch/efficientnet/inference/gpu/profiles/b0.bf16.csv \
+    PYTHONPATH=$(pwd)/models_v2/common \
+    $(env | grep -E '(_proxy=|_PROXY)' | sed 's/^//') \
+      $(pwd)/models_v2/pytorch/efficientnet/inference/gpu/benchmark.sh
+  ```
+
+* Final output will be written to ``$OUTPUT_DIR``.
+
+> [!NOTE]
+> Additonal arguments that arent specified in the benchmark profile (``b0.bf16.csv`` in the example above) can be specified through environment variables as described in previous sections.
