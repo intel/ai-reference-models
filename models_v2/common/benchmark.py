@@ -21,10 +21,12 @@ import pathlib
 import shutil
 import subprocess
 import sys
+import json
 
 # Custom modules
 import js_merge
 import js_sysinfo
+import json_to_csv
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -63,7 +65,8 @@ if __name__ == '__main__':
     # │   ├── test.csv              # test csv definition (i-th line from profile.csv)
     # │   ├── results.json          # results output from the test complying with the schema
     # │   └── *                     # whatever other output files test produces
-    # └── results_test_{i}.json     # ultimate report for i-th test
+    # ├── results_test_{i}.json     # ultimate report for i-th test
+    # └── summary.csv               # engineering summary for debug
     #
     # Fail if can't create the directory or if it exists.
     pathlib.Path(args.output_dir).mkdir()
@@ -80,6 +83,9 @@ if __name__ == '__main__':
     file = os.path.join(args.output_dir, 'sysinfo.json')
     with open(file, 'w') as f:
         json.dump(sysinfo, f, indent=indent)
+
+    # track results for summary CSV
+    to_summarize  = []
 
     for i, t in enumerate(tests):
         print('Running: {0}/{1}'.format(i+1, len(tests)))
@@ -122,3 +128,11 @@ if __name__ == '__main__':
         file = os.path.join(args.output_dir, 'results_test_{0}.json'.format(i+1))
         with open(file, 'w') as f:
             json.dump(report, f, indent=indent)
+
+        # Store non-updated test results for summary
+        to_summarize += [results]
+
+    # Write summary CSV
+    csv_table = json_to_csv.make_csv(to_summarize)
+    file = os.path.join(args.output_dir, 'summary.csv')
+    json_to_csv.write_table(file, csv_table)
