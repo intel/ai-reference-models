@@ -51,12 +51,51 @@ Note that each test execution of `app-cmdline` must produce outputs to `test_{i}
 
 During the run tool collects system information and amends it to each test results description. Tool requires elevated privileges.
 
-Predefined template parameters:
+**Example:**
+
+```
+# echo "os,arch" > profile.csv
+# echo "Linux,x86_64" >> profile.csv
+
+# export RESULTS='{{ \"os\": \"{os}\", \"arch\": \"{arch}\" }}'
+# sudo PYTHONPATH=./models_v2/common \
+    python3 -m benchmark --output_dir /tmp/output --profile profile.csv --indent 4 \
+      /bin/bash -c "echo $RESULTS >{output_dir}/results.json"
+```
+
+This example benchmarks `/bin/bash` executing `echo` command which outputs to `results.json` required by the `benchmark.py` script. Note usage of environment variable `$RESULTS` in the `app-cmdline` as well as `{os}` and `{arch}` template parameters being taken from `profile.csv`. Mind that double curvy brackets `{{ }}` is a way to escape curvy brackets for Python format function.
+
+See below snapshot of input CSV profile and results produced by the run.
+
+```
+# cat profile.csv
+os,arch
+Linux,x86_64
+
+# tree /tmp/output/
+/tmp/output/
+├── profile.csv
+├── results_test_1.json
+├── sysinfo.json
+└── test_1
+    ├── results.json
+    └── test.csv
+
+1 directory, 5 files
+
+# cat /tmp/output/test_1/results.json
+{ "os": "Linux", "arch": "x86_64" }
+
+```
+
+## Predefined template parameters
+
 | Parameter    | Description                                       |
 | ------------ | ------------------------------------------------- |
 | `output_dir` | Directory where `app-cmdline` should write output |
 
-Options:
+## Options
+
 | Option                |                                 |
 | --------------------- | ------------------------------- |
 | `-h`, `--help`        | Show this help message and exit |
