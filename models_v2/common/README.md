@@ -3,6 +3,7 @@
 [benchmark.py]: benchmark.py
 [js_merge.py]: js_merge.py
 [js_sysinfo.py]: js_sysinfo.py
+[json_to_csv.py]: json_to_csv.py
 [parse_result.py]: parse_result.py
 
 [DKMS]: https://github.com/dell/dkms
@@ -18,6 +19,7 @@ This folder contains common Python utilities and modules which can be reused acr
 | [benchmark.py]    | Tool to benchmark application given in cmdline arguments |
 | [js_merge.py]     | Tool to merge few JSON files together                    |
 | [js_sysinfo.py]   | Tool to dump system information in JSON format           |
+| [json_to_csv.py]  | Tool to dump few json files into single CSV              |
 | [parse_result.py] | Sample results parser (view file for cmdline options)    |
 
 # benchmark.py
@@ -41,7 +43,8 @@ Tool generates outputs in the directory given with `--output_dir` option. Output
 │   ├── test.csv              # test csv definition (i-th line from profile.csv)
 │   ├── results.json          # results output from the test complying with the schema
 │   └── *                     # whatever other output files test produces
-└── results_test_{i}.json     # ultimate report for i-th test
+├── results_test_{i}.json     # ultimate report for i-th test
+└── summary.csv               # engineering summary for debug
 ```
 
 Note that each test execution of `app-cmdline` must produce outputs to `test_{i}` folder and one of the outputs must be `results.json` file. Use predefined `output_dir` parameter on `app-cmdline` to specify path to `test_{i}` output directory (don't confuse this parameter with `--output_dir` option).
@@ -120,3 +123,49 @@ JSON dump options:
 | --------------------- | ------------------------------- |
 | `-o, --output OUTPUT` | File to store output            |
 | `--indent INDENT`     | Indent for json.dump()          |
+
+# json_to_csv.py
+
+Usage:
+```
+json_to_csv [-h] -o OUTPUT file [file ...]
+```
+
+Tool dumps few JSON files into a single CSV file. Arrays and nested JSON keys are handled by serializing through joining indexes or keys with the `.` delimiter.
+
+**Example:**
+
+```
+# cat a.json
+{
+    "os": "Linux",
+    "arch": "x86_64",
+    "software": [ "lshw", "dmidecode" ]
+}
+
+# cat b.json
+{
+    "os": "Linux",
+    "arch": "x86",
+    "software": [ "lshw", "svr-info" ]
+}
+
+# python3 ./models_v2/common/json_to_csv.py -o c.csv a.json b.json
+
+# cat c.csv
+os,arch,software.0,software.1
+Linux,x86_64,lshw,dmidecode
+Linux,x86,lshw,svr-info
+
+```
+
+Positional arguments:
+| Argument | Description       |
+| -------- | ----------------- |
+| file     | JSON file to dump |
+
+Options:
+| Option                |                                 |
+| --------------------- | ------------------------------- |
+| `-h`, `--help`        | Show this help message and exit |
+| `-o, --output OUTPUT` | File to store output            |

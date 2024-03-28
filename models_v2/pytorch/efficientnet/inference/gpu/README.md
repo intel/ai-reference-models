@@ -275,7 +275,7 @@ results:
   export OUTPUT_DIR=/opt/output
   ```
 
-* Run the benchmark script (assumes ``intel/image-recognition:pytorch-flex-gpu-efficientnet`` has already been pulled or built locally):
+* Run the benchmark script (assumes ``intel/image-recognition:pytorch-flex-gpu-efficientnet-inference`` has already been pulled or built locally):
   ```
   sudo \
     PATH=$PATH_TO_SVR_INFO:$PATH \
