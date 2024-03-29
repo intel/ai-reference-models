@@ -531,7 +531,7 @@ if args.benchmark:
 if args.dtype == "int8" and args.ipex:
     qconfig = ipex.quantization.default_static_qconfig_mapping
     if args.ipex_smooth_quant:
-        qconfig = ipex.quantization.get_smooth_quant_qconfig_mapping()
+        qconfig = ipex.quantization.get_smooth_quant_qconfig_mapping(alpha=0.75)
 
     if args.do_calibration:
         example_inputs = None
