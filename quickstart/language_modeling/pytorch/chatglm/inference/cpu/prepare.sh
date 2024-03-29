@@ -27,7 +27,11 @@ fi
 huggingface-cli download "THUDM/chatglm3-6b" "config.json" "tokenizer_config.json" ${CLI_ARGS}
 directory=${TRANSFORMERS_CACHE}/models--THUDM--chatglm3-6b/snapshots/
 
-latest_dir=$(ls -td ${directory}/*/ | head -n1)
+if [ -n "$REVISION" ]; then
+    latest_dir=${directory}/$REVISION/
+else
+    latest_dir=$(ls -td ${directory}/*/ | head -n1)
+fi
 # modify config.json
 sed -i "s/\"torch_dtype\":\ \"float16\"/\"torch_dtype\":\ \"float32\"/g" "${latest_dir}/config.json"
 # modify tokenizer_config.json

@@ -69,7 +69,9 @@ else
     echo "Supported Backends:[ipex, inductor]"
     exit 1
 fi
-
+if [ -n "$REVISION" ]; then
+    ARGS="$ARGS --revision $REVISION"
+fi
 mode="jit"
 ARGS="$ARGS --jit"
 echo "### running with jit mode"
