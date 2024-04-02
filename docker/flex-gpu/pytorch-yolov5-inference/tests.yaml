@@ -13,7 +13,10 @@ bs064-s1-fp16-yolov5m:
     DUMMY: 'yes'
     PRECISION: 'fp16'
     JIT: 'trace'
-    OUTPUT_DIR: '/tmp'  
+    OUTPUT_DIR: '/tmp'
+    http_proxy: '$http_proxy'
+    https_proxy: '$https_proxy'
+    PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: 'python'  
   volumes:
     - src: /tmp
       dst: /tmp
@@ -33,6 +36,9 @@ bs064-s4-fp16-yolov5m:
     PRECISION: 'fp16'
     JIT: 'trace'
     OUTPUT_DIR: '/tmp'
+    http_proxy: '$http_proxy'
+    https_proxy: '$https_proxy'
+    PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: 'python'
   volumes:
     - src: /tmp
       dst: /tmp
