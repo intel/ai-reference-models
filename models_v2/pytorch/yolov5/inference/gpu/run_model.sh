@@ -305,7 +305,7 @@ elif [[ ${PLATFORM} == "Max" ]]; then
 fi
 export PROFILE="OFF"
 
-export PYTHONPATH=$PWD:$PWD/yolov5$PYTHONPATH
+export PYTHONPATH=$PWD/yolov5:$PYTHONPATH
 # Start inference script with numactl
 echo "Starting inference..."
 #TODO: Set ZE_AFFINITY_MASK for multiple tiles.

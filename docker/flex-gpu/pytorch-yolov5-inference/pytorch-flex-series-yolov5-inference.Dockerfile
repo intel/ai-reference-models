@@ -37,6 +37,8 @@ RUN apt-get update && \
 COPY models_v2/pytorch/yolov5/inference/gpu .
 COPY models_v2/common common
 
+ENV PYTHONPATH=$WORKDIR/common
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN python -m pip install --no-cache-dir --upgrade pip \
