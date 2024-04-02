@@ -18,8 +18,6 @@ import sys
 import platform
 import torch
 import torch.backends.cudnn as cudnn
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
 
 # sample modules
 import io_utils
@@ -89,6 +87,12 @@ def load_model():
 
     return model
 
+def dummy_dataset(validation_dataset_size, sample_width, sample_height):
+    im = torch.torch.randn(validation_dataset_size, 3, sample_width, sample_height)
+    path, s, cap = '', '', None
+    
+    return path, im, im, cap, s
+
 def load_validation_dataset(batch_size, sample_number, sample_width, sample_height, model, data_dir=None, data_workers=4, pin_memory_device=None):
     # Ensure we are loading even batches of data.
     # If not using dummy data this means the provided validation dataset must have at least batch_size worth of images.
@@ -101,11 +105,10 @@ def load_validation_dataset(batch_size, sample_number, sample_width, sample_heig
         io_utils.write_warning('From {0} images to {1} images.'.format(sample_number, sample_number - sample_number % batch_size))
         sample_number -= sample_number % batch_size
 
-    if data_dir == None:
+    if args.dummy:
         io_utils.write_info('Dummy data is used')
         validation_dataset_size = sample_number
-        validation_dataset = datasets.FakeData(validation_dataset_size, (3, sample_width, sample_height), 80, transforms.ToTensor())
-        validation_sampler = None
+        validation_dataset = [dummy_dataset(validation_dataset_size, sample_width, sample_height)]
 
     else:
         if not os.path.exists(data_dir):
@@ -123,40 +126,5 @@ def load_validation_dataset(batch_size, sample_number, sample_width, sample_heig
         if args.instance != 1:
             io_utils.write_info('Loading Coco dataset')
             validation_dataset = LoadImages(data_dir, img_size=[sample_width, sample_height], stride=model.stride, auto=model.pt)
- 
-        for path, images, im0s, vid_cap, s in validation_dataset:
-            images = torch.from_numpy(images).to(args.device)
-            if args.no_amp:
-                if args.fp16:
-                    images = images.to(dtype=torch.float16)
-                elif args.bf16:
-                    images = images.to(dtype=torch.bfloat16)
-                else:
-                    images = images.to(dtype=torch.float32)
-            images = images / 255  # 0 - 255 to 0.0 - 1.0
-            if len(images.shape) == 3:
-                images = images[None]  # expand for batch dim
-        return validation_dataset
-        
-    if pin_memory_device == None:
-        return torch.utils.data.DataLoader(
-            validation_dataset, batch_size=batch_size, shuffle=False,
-            num_workers=data_workers, pin_memory=True, sampler=validation_sampler)
-    else:
-        return torch.utils.data.DataLoader(
-            validation_dataset, batch_size=batch_size, shuffle=False,
-            num_workers=data_workers, pin_memory=True, pin_memory_device=pin_memory_device, sampler=validation_sampler)
-
-def validate_data_src(path_to_data, use_dummy):
-    if use_dummy:
-        return None
-
-    if path_to_data == None:
-        io_utils.write_error('A dataset must be provided through "--data [PATH]" argument or "--dummy" data must be enabled.')
-        sys.exit(1)
-
-    if not os.path.exists(path_to_data):
-        io_utils.write_error('Dataset "{0}" does not exist!'.format(path_to_data))
-        sys.exit(1)
-
-    return path_to_data
+    
+    return validation_dataset
