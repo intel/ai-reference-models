@@ -156,143 +156,6 @@ def quantize_model(model):
     io_utils.write_info('Quantization completed')
     return model
 
-def do_warmup_acc(model, ds):
-    ds_batches = len(ds)
-
-    # Final config of the model
-    use_autocast, autocast_dtype, model = inference_config(model)
-
-    # Main perf testing loop.
-    io_utils.write_info('Starting warmup')
-    with torch.inference_mode():
-        if args.channels_last:
-            io_utils.write_info('Images will be converted to channels last format')
-        for path, images, im0s, vid_cap, s in ds:
-            if args.channels_last:
-                images = images.to(memory_format=torch.channels_last)
-
-            if args.xpu:
-                try:
-                    import memory_check
-                    memory_check.display_mem(args.device)
-                except:
-                    pass
-                images = torch.from_numpy(images).to(args.device)
-                if args.no_amp:
-                    if args.fp16:
-                        images = images.to(dtype=torch.float16)
-                    elif args.bf16:
-                        images = images.to(dtype=torch.bfloat16)
-                images = images / 255 # 0 - 255 to 0.0 - 1.0
-                if len(images.shape) == 3:
-                    images = images[None]  # expand for batch dim
-                if args.jit_trace:
-                    # warmup
-                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up])):
-                        pred = model(images)
-                        torch.xpu.synchronize(args.device)                                                            
-                        # NMS
-                        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                        pred = [x.to("cpu") for x in pred]                       
-                else:
-                    io_utils.write_error('Must use jit_trace for Yolov5!')
-                    sys.exit(1)
-            else:
-                if args.gpu:
-                    try:
-                        import memory_check
-                        memory_check.display_mem(args.device)
-                    except:
-                        pass
-                    images = images.cuda(args.device, non_blocking=args.non_blocking)
-                if args.no_amp:
-                    if args.fp16:
-                        images = images.to(dtype=torch.float16)
-                    elif args.bf16:
-                        images = images.to(dtype=torch.bfloat16)
-                if args.jit_trace:
-                    # warmup
-                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up])):
-                        pred = model(images)
-                        torch.cuda.synchronize(args.device)                                                            
-                        # NMS
-                        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                        pred = [x.to("cpu") for x in pred]
-                else:
-                    io_utils.write_error('Must use jit_trace for Yolov5!')
-                    sys.exit(1)
-
-    io_utils.write_info('Completed {0} warmup batches'.format(args.warm_up))
-    return use_autocast, autocast_dtype, model
-
-def do_warmup(model, ds):
-    ds_batches = len(ds)
-
-    # Final config of the model
-    use_autocast, autocast_dtype, model = inference_config(model)
-
-    # Main perf testing loop.
-    io_utils.write_info('Starting warmup')
-
-    with torch.inference_mode():
-        if args.channels_last:
-            io_utils.write_info('Images will be converted to channels last format')
-        for batch_index, (images, target) in enumerate(ds):
-            if args.channels_last:
-                images = images.to(memory_format=torch.channels_last)
-
-            if args.xpu:
-                try:
-                    import memory_check
-                    memory_check.display_mem(args.device)
-                except:
-                    pass
-                images = images.to(args.device, non_blocking=args.non_blocking)
-                if args.no_amp:
-                    if args.fp16:
-                        images = images.to(dtype=torch.float16)
-                    elif args.bf16:
-                        images = images.to(dtype=torch.bfloat16)
-
-                if args.jit_trace:
-                    # warmup
-                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up])): 
-                        pred = model(images)
-                        torch.xpu.synchronize(args.device)                                                            
-                        # NMS
-                        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                        pred = [x.to("cpu") for x in pred]                       
-                else:
-                    io_utils.write_error('Must use jit_trace for Yolov5!')
-                    sys.exit(1)
-            else:
-                if args.gpu:
-                    try:
-                        import memory_check
-                        memory_check.display_mem(args.device)
-                    except:
-                        pass
-                    images = images.cuda(args.device, non_blocking=args.non_blocking)
-                if args.no_amp:
-                    if args.fp16:
-                        images = images.to(dtype=torch.float16)
-                    elif args.bf16:
-                        images = images.to(dtype=torch.bfloat16)
-                if args.jit_trace:
-                    # warmup
-                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up])):
-                        pred = model(images)
-                        torch.cuda.synchronize(args.device)                                                            
-                        # NMS
-                        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                        pred = [x.to("cpu") for x in pred]
-                else:
-                    io_utils.write_error('Must use jit_trace for Yolov5!')
-                    sys.exit(1)
-
-    io_utils.write_info('Completed {0} warmup batches'.format(args.warm_up))
-    return use_autocast, autocast_dtype, model
-
 def inference_config(model):
     use_autocast = False
     if not args.no_amp:
@@ -342,208 +205,87 @@ def inference_config(model):
                 if args.xpu:
                     with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
                         model = torch.jit.trace(model, trace_input, check_trace=False)
-                    model = wrap_cpp_module(torch._C._jit_pass_fold_convbn(model._c))
                 elif args.gpu:
                     with torch.autocast(enabled=use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=autocast_dtype, cache_enabled=False):
-                        model = torch.jit.trace(model, trace_input)
+                        model = torch.jit.trace(model, trace_input, check_trace=False)
+                model = wrap_cpp_module(torch._C._jit_pass_fold_convbn(model._c))
         elif args.jit_script and not args.load:
             io_utils.write_error('Must use jit_trace for Yolov5!')
             sys.exit(1)
 
     return use_autocast, autocast_dtype, model
-  
-def do_perf_benchmarking(model, ds):
-    ds_batches = len(ds)
-    total_batches = ds_batches * args.batch_streaming
-    print_frequency = max([1, total_batches // args.status_prints])
 
-    # Profiling
-    profiling = os.environ.get('PROFILE', 'OFF').upper() in ['1', 'Y', 'ON', 'YES', 'TRUE']
-    if profiling:
-        io_utils.write_info('Using profiling')
+def do_warmup(model, ds):
+    ds_batches = len(ds)
 
     # Final config of the model
     use_autocast, autocast_dtype, model = inference_config(model)
 
-    # Safe the model before doing perf
-    if args.save:
-        loader_utils.save_model_to_file(model)
-    
-    # Create progress meter for output to terminal
-    throughput = statistics_utils.average_meter('Throughput', ':.2f', ' img/s')
-    latency = statistics_utils.average_meter('Latency', ':.2f', ' ms')
-    top1 = statistics_utils.average_meter('Acc@1', ':.2f', '%')
-    throughput_overhead = statistics_utils.average_meter('Throughput /w Overhead', ':.2f', ' img/s')
-    latency_overhead = statistics_utils.average_meter('Latency /w Overhead', ':.2f', ' ms')
-    progress = statistics_utils.progress_meter(
-        total_batches,
-        [
-            throughput,
-            latency,
-            top1,
-            throughput_overhead,
-            latency_overhead
-        ],
-        prefix='INFO[{0}/{1}]: PERF_STATUS'.format(args.instance, args.total_instances)
-    )
-
     # Main perf testing loop.
-    #barrier_utils.do_ipc_sync(args.barrier, 'start_perf_benchmark', args.terminate_if_sync_fail)
-    should_display = False
-    total_duration = 0
-    io_utils.write_info('Starting inference perf testing on {0} batches with {1} unique batches...'.format(total_batches, ds_batches))
-    if args.dummy:
-        io_utils.write_warning('Since dummy data is being used expect accuracy to be close to zero.')
-    start_benchmark_time = time.time()
-    with torch.inference_mode():       
+    io_utils.write_info('Starting warmup')
+    with torch.inference_mode():
         if args.channels_last:
-            io_utils.write_info('Images will be converted to channels last format')      
-        
-        if profiling:
-            profile_name = 'fp32'
-            if args.fp16:
-                profile_name = 'fp16'
-            elif args.bf16:
-                profile_name = 'bf16'
-
-        for batch_index, (images, target) in enumerate(ds):
-            total = 0
+            io_utils.write_info('Images will be converted to channels last format')
+        for path, images, im0s, vid_cap, s in ds:
             if args.channels_last:
                 images = images.to(memory_format=torch.channels_last)
+
+            if not args.dummy:
+                images = torch.from_numpy(images).to(args.device)
+            else:
+                images = images.to(args.device, non_blocking=args.non_blocking)
+            if args.no_amp:
+                if args.fp16:
+                    images = images.to(dtype=torch.float16)
+                elif args.bf16:
+                    images = images.to(dtype=torch.bfloat16)
+                else:
+                    images = images.to(dtype=torch.float32)
+            images = images / 255 # 0 - 255 to 0.0 - 1.0
+            if len(images.shape) == 3:
+                images = images[None]  # expand for batch dim
             
             if args.xpu:
-                with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
-                    
+                try:
+                    import memory_check
+                    memory_check.display_mem(args.device)
+                except:
+                    pass
+
+                if args.jit_trace:
+                    # warmup
+                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up])):
+                        pred = model(images)
+                        torch.xpu.synchronize(args.device)                                                            
+                        # NMS
+                        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+                        pred = [x.to("cpu") for x in pred]                       
+                else:
+                    io_utils.write_error('Must use jit_trace for Yolov5!')
+                    sys.exit(1)
+            else:
+                if args.gpu:
                     try:
                         import memory_check
                         memory_check.display_mem(args.device)
                     except:
                         pass
-                    
-                    images = images.to(args.device, non_blocking=args.non_blocking)
-                    if args.no_amp:
-                        if args.fp16:
-                            images = images.to(dtype=torch.float16)
-                        elif args.bf16:
-                            images = images.to(dtype=torch.bfloat16)
 
-                    if args.jit_trace:
-                        # inference
-                        for batch_repeat_index in range(args.batch_streaming):                      
-                            torch.xpu.synchronize(args.device)
-                            start_time = time.time()
+                if args.jit_trace:
+                    # warmup
+                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up])):
+                        pred = model(images)
+                        torch.cuda.synchronize(args.device)                                                            
+                        # NMS
+                        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+                        pred = [x.to("cpu") for x in pred]
+                else:
+                    io_utils.write_error('Must use jit_trace for Yolov5!')
+                    sys.exit(1)
 
-                            pred = model(images)
-
-                            torch.xpu.synchronize(args.device)
-                            end_time = time.time()
-                    
-                            # NMS
-                            pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                            pred = [x.to("cpu") for x in pred]
-
-                            duration = end_time - start_time
-                            print("Inference: {:>5}  E2E Time: {:>25}     Instance: {} Current Time: {}".format(batch_repeat_index,duration, args.instance, time.time()))                           
-                            total += duration
-                    else:
-                        io_utils.write_error('Must use jit_trace for Yolov5!')
-                        sys.exit(1)
-
-                if profiling:
-                    torch.save(prof.key_averages().table(sort_by='self_xpu_time_total'), './profiling.' + profile_name + '.inf.pt')
-                    torch.save(prof.table(sort_by='id', row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
-            else:
-                activities = None
-                prof_sort = None
-                if profiling:
-                    prof_sort = 'self_cpu_time_total'
-                    activities=[torch.profiler.ProfilerActivity.CPU]
-                    if args.gpu:
-                        activities.append(torch.profiler.ProfilerActivity.CUDA)
-                        prof_sort = 'self_cuda_time_total'
-                with torch.autograd.profiler.profile(enabled=profiling, use_cuda=True if args.gpu else False, record_shapes=False) as prof:
-                    if args.gpu:
-                        try:
-                            import memory_check
-                            memory_check.display_mem(args.device)
-                        except:
-                            pass
-                        images = images.cuda(args.device, non_blocking=args.non_blocking)
-                    
-                    if args.no_amp:
-                        if args.fp16:
-                            images = images.to(dtype=torch.float16)
-                        elif args.bf16:
-                            images = images.to(dtype=torch.bfloat16)
-
-                    if args.jit_trace:
-                        # inference
-                        for batch_repeat_index in range(args.batch_streaming):
-                            torch.cuda.synchronize(args.device)
-                            start_time = time.time()
-                            
-                            pred = model(images)
-                            
-                            torch.cuda.synchronize(args.device)
-                            end_time = time.time()
-                            
-                            # NMS
-                            pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                            pred = [x.to("cpu") for x in pred]
-
-                            duration = end_time - start_time
-                            print("Inference: {:>5}  E2E Time: {:>25}     Instance: {} Current Time: {}".format(batch_repeat_index,duration, args.instance, time.time()))                           
-                            total += duration
-                    else:
-                        io_utils.write_error('Must use jit_trace for Yolov5!')
-                        sys.exit(1)
-
-                if profiling:
-                    torch.save(prof.key_averages().table(sort_by=prof_sort), './profiling.' + profile_name + '.inf.pt')
-                    torch.save(prof.table(sort_by='id', row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
-
-            duration_eval = total / args.batch_streaming
-            total_duration += duration_eval * args.batch_streaming * 1000 # milliseconds
-            end_benchmark_time = time.time()
-            benchmark_wall_clock_time = end_benchmark_time - start_benchmark_time
-
-            latency.update(
-                duration_eval * 1000,
-                n=args.batch_streaming
-                ) # milliseconds
-            throughput.update(
-                args.batch_size / duration_eval,
-                n=args.batch_streaming
-                ) # IMG/S
-            latency_overhead.reset()
-            latency_overhead.update(
-                benchmark_wall_clock_time * 1000 / ((batch_index * args.batch_streaming) + args.batch_streaming),
-                n=((batch_index * args.batch_streaming) + args.batch_streaming)
-                ) # milliseconds
-            throughput_overhead.reset()
-            throughput_overhead.update(
-                args.batch_size * ((batch_index * args.batch_streaming) + args.batch_streaming) / benchmark_wall_clock_time,
-                n=((batch_index * args.batch_streaming) + args.batch_streaming)
-                ) # IMG/S
-            should_display = False
-            for batch_repeat_index in range(args.batch_streaming):
-                acc1 = [0]
-                # record stats
-                top1.update(acc1[0])
-
-                if ((batch_index * args.batch_streaming) + batch_repeat_index) % print_frequency == print_frequency - 1:
-                    should_display = True
-                elif ((batch_index * args.batch_streaming) + batch_repeat_index) + 1 == total_batches:
-                    should_display = True
-
-            if should_display:
-                progress.display((batch_index * args.batch_streaming) + args.batch_streaming)
-
-    # If we haven't already displayed the latest data
-    if not should_display:
-        progress.display(total_batches)
-
-    return total_batches, throughput.avg, latency.avg, top1.avg, throughput_overhead.avg, latency_overhead.avg
+    io_utils.write_info('Completed {0} warmup batches'.format(args.warm_up))
+    
+    return use_autocast, autocast_dtype, model
 
 def accuracy(pred, ds, path, im0s, images, s, names):
     save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
@@ -578,7 +320,7 @@ def accuracy(pred, ds, path, im0s, images, s, names):
             
     return acc
 
-def do_accuracy_test(model, ds, names):
+def do_perf_benchmarking(model, ds, names):
     ds_batches = len(ds)
     total_batches = args.batch_streaming
     print_frequency = max([1, total_batches // args.status_prints])
@@ -637,7 +379,10 @@ def do_accuracy_test(model, ds, names):
             if args.channels_last:
                 images = images.to(memory_format=torch.channels_last)
 
-            images = torch.from_numpy(images).to(args.device)
+            if not args.dummy:
+                images = torch.from_numpy(images).to(args.device)
+            else:
+                images = images.to(args.device, non_blocking=args.non_blocking)
             if args.no_amp:
                 if args.fp16:
                     images = images.to(dtype=torch.float16)
@@ -657,9 +402,6 @@ def do_accuracy_test(model, ds, names):
                     except:
                         pass
 
-                    images = images.to(args.device, non_blocking=args.non_blocking)
-                    if args.fp16:
-                      images = images.to(dtype=torch.float16)
                     if args.jit_trace:
                         # inference
                         for batch_repeat_index in range(args.batch_streaming):
@@ -701,12 +443,6 @@ def do_accuracy_test(model, ds, names):
                             memory_check.display_mem(args.device)
                         except:
                             pass
-                        images = images.cuda(args.device, non_blocking=args.non_blocking)
-                    if args.no_amp:
-                        if args.fp16:
-                            images = images.to(dtype=torch.float16)
-                        elif args.bf16:
-                            images = images.to(dtype=torch.bfloat16)
 
                     if args.jit_trace:
                         # inference
@@ -760,7 +496,8 @@ def do_accuracy_test(model, ds, names):
             should_display = False
                              
             # record stats
-            top1.update(accuracy(pred, ds, path, im0s, images, s, names))
+            if not args.dummy:
+                top1.update(accuracy(pred, ds, path, im0s, images, s, names))
 
             if ((batch_index * args.batch_streaming) + batch_repeat_index) % print_frequency == print_frequency - 1:
                 should_display = True
@@ -810,7 +547,7 @@ def predict(instance, input_args):
         args.width,
         args.height,
         model,
-        loader_utils.validate_data_src(args.data, args.dummy),
+        args.data,
         data_workers=4,
         pin_memory_device='xpu' if args.xpu else 'cuda' if args.gpu else None
     )
@@ -819,20 +556,12 @@ def predict(instance, input_args):
         # Quantize model to requested integer datatype
         model = quantize_model(model)
     
-    if args.dummy:
-        # Do warmup on the model
-        use_autocast, autocast_dtype, model = do_warmup(model, validation_loader_inf)
-        # Do inference benchmarking
-        
-        batches_tested, throughput, latency, top1, throughput_overhead, latency_overhead = do_perf_benchmarking(model, validation_loader_inf)
-        summary_utils.write_results(batches_tested, throughput, latency, top1, throughput_overhead, latency_overhead)
-    else:
-        # Do warmup on the model
-        use_autocast, autocast_dtype, model = do_warmup_acc(model, validation_loader_inf)
-        
-        # Do accuracy testing
-        batches_tested, throughput, latency, top1, throughput_overhead, latency_overhead = do_accuracy_test(model, validation_loader_inf, names)
-        summary_utils.write_results(batches_tested, throughput, latency, top1, throughput_overhead, latency_overhead)
+    # Do warmup on the model
+    use_autocast, autocast_dtype, model = do_warmup(model, validation_loader_inf)
+    
+    # Do inference benchmarking
+    batches_tested, throughput, latency, top1, throughput_overhead, latency_overhead = do_perf_benchmarking(model, validation_loader_inf, names)
+    summary_utils.write_results(batches_tested, throughput, latency, top1, throughput_overhead, latency_overhead)
 
 def main():
     arguments_utils.parse_arguments() 

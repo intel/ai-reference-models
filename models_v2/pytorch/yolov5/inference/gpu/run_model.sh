@@ -305,6 +305,7 @@ elif [[ ${PLATFORM} == "Max" ]]; then
 fi
 export PROFILE="OFF"
 
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 export PYTHONPATH=$PWD/yolov5:$PYTHONPATH
 # Start inference script with numactl
 echo "Starting inference..."
