@@ -595,6 +595,9 @@ def calc_accuracy(outputs, masked_lm_labels, next_sentence_label, args):
 
 def main():
     args = parse_args()
+    if not args.ipex and not args.inductor:
+        print('[Info] please specify --ipex or --inductor to choose path to run, exiting...')
+        exit(0) 
     if args.ipex:
         print('Using ipex')
         import intel_extension_for_pytorch as ipex
@@ -620,25 +623,27 @@ def main():
     # Prepare optimizer
     model, optimizer, lr_scheduler, checkpoint, global_step = prepare_model_and_optimizer(args, device)
     model.train()
-    if args.bf32:
-        if args.ipex:
-            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
-            model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, auto_kernel_selection=True)
-    elif args.fp16:
-        if args.ipex:
-            scaler = torch.cpu.amp.GradScaler()
-            model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, weights_prepack=True, fuse_update_step=False)
-    elif args.bf16:
-        if args.ipex:
-            model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float32)
-    elif args.fp8:
-        if args.ipex:
-            model, optimizer = prepare_fp8(model, optimizer)
-    if not args.fp8:
-        with torch.cpu.amp.autocast(enabled=args.bf16):
-            if args.inductor:
-                print('[Info] Running training steps torch.compile() with default backend')
-                model = torch.compile(model)
+    if args.bf32 and args.ipex:
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, auto_kernel_selection=True)
+    elif args.fp16 and args.ipex:
+        scaler = torch.cpu.amp.GradScaler()
+        model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, weights_prepack=True, fuse_update_step=False)
+    elif args.bf16 and args.ipex:
+        model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float32)
+    elif args.fp8 and args.ipex:
+        model, optimizer = prepare_fp8(model, optimizer)
+
+    if args.inductor:
+        if args.fp8 or args.bf32:
+            print('[Info] torch.compile() training does not support fp8 or bf32 yet, exiting...')
+            exit(0) 
+        from torch._inductor import config as inductor_config
+        inductor_config.cpp_wrapper = True
+        amp_dtype = torch.half if args.fp16 else torch.bfloat16
+        with torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16, dtype=amp_dtype):
+            print('[Info] Running training steps torch.compile() with default backend')
+            model = torch.compile(model)
 
     worker_seeds, shuffling_seeds = utils.setup_seeds(args.seed, args.num_epochs_to_generate_seeds_for, device)
     worker_seed = worker_seeds[args.local_rank]
@@ -765,23 +770,23 @@ def main():
                     with torch.cpu.amp.autocast():
                         outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                              labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
-                elif args.fp8:
+                elif args.fp8 and args.ipex:
                     with fp8_autocast(enabled=True, calibrating=False, fp8_recipe=DelayedScaling(fp8_format=Format.E4M3)):
                         outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                                 labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
-                else:
+                else: #bf32 or fp32
                     outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                              labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
                 t3 = time.time()
                 loss = outputs.loss
                 loss = loss / args.gradient_accumulation_steps
-                if args.fp16:
+                if args.fp16 and args.ipex:
                     scaler.scale(loss).backward()
                 else:
                     loss.backward()
                 t4 = time.time()
                 if step % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
-                    if args.fp16:
+                    if args.fp16 and args.ipex:
                         scaler.step(optimizer)
                         scaler.update()
                     else:

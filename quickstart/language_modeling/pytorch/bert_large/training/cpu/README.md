@@ -129,7 +129,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   export HOSTFILE=your_ip_list_file #one ip per line 
   ```
 
-* [optional] Compile model with PyTorch Inductor backend
+* [optional] Compile model with PyTorch Inductor backend (support fp32/bf16/fp16)
 ```shell
   export TORCH_INDUCTOR=1
 ```
