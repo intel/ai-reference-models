@@ -87,23 +87,23 @@ if __name__ == '__main__':
     # track results for summary CSV
     to_summarize  = []
 
-    for i, t in enumerate(tests):
-        print('Running: {0}/{1}'.format(i+1, len(tests)))
+    for iteration, test in enumerate(tests):
+        print('Running: {0}/{1}'.format(iteration+1, len(tests)))
 
         # create output directory for the test
-        output_dir = os.path.join(args.output_dir, 'test_' + str(i+1))
+        output_dir = os.path.join(args.output_dir, 'test_' + str(iteration+1))
         pathlib.Path(output_dir).mkdir()
 
         # dump test csv definition
         with open(os.path.join(output_dir, 'test.csv'), 'w') as f:
-            writer = csv.DictWriter(f, fieldnames=t.keys())
+            writer = csv.DictWriter(f, fieldnames=test.keys())
             writer.writeheader()
-            writer.writerow(t)
+            writer.writerow(test)
 
         # creating benchmark app cmdline from the template
         app_args = list(benchmark_app_args)
         for a in range(len(app_args)):
-            app_args[a] = app_args[a].format(**t, output_dir=output_dir, control_file='tbd')
+            app_args[a] = app_args[a].format(**test, output_dir=output_dir, control_file='tbd')
 
         print('Cmdline: ' + str(app_args))
 
@@ -114,18 +114,14 @@ if __name__ == '__main__':
 
         # read in results.json for the current test
         file = os.path.join(output_dir, 'results.json')
-        try:
-            with open(file, 'r') as f:
-                results = json.load(f)
-        except Exception as e:
-            print('error: ' + str(e), file=sys.stderr)
-            sys.exit(1)
+        with open(file, 'r') as f:
+            results = json.load(f)
 
         # merge sysinfo with test results
         report = js_merge.merge(results, sysinfo)
 
         # write the merged report
-        file = os.path.join(args.output_dir, 'results_test_{0}.json'.format(i+1))
+        file = os.path.join(args.output_dir, 'results_test_{0}.json'.format(iteration+1))
         with open(file, 'w') as f:
             json.dump(report, f, indent=indent)
 
