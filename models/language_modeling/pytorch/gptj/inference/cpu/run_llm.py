@@ -35,15 +35,6 @@ import torch
 from torch.nn.functional import pad
 from torch.utils.data import DataLoader
 
-import intel_extension_for_pytorch as ipex
-from intel_extension_for_pytorch.quantization import convert, prepare
-
-from intel_extension_for_pytorch.quantization.fp8 import (
-    fp8_autocast,
-    DelayedScaling,
-    Format,
-    prepare_fp8,
-)
 
 parser = argparse.ArgumentParser("LLM generation script", add_help=False)
 parser.add_argument(
@@ -111,6 +102,17 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+if args.ipex:
+    import intel_extension_for_pytorch as ipex
+    from intel_extension_for_pytorch.quantization import convert, prepare
+
+    from intel_extension_for_pytorch.quantization.fp8 import (
+        fp8_autocast,
+        DelayedScaling,
+        Format,
+        prepare_fp8,
+    )
+
 def trace_handler(prof):
     print(prof.key_averages().table(
         sort_by="self_cpu_time_total", row_limit=10))
@@ -177,9 +179,7 @@ else:
     )
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
 get_memory_usage("Host", args)
-autocast = False
-if args.dtype == "bf16":
-    autocast = True
+
 if args.dtype == "bf16" or args.dtype == "fp32":
     if args.ipex:
         user_model = ipex.llm.optimize(
@@ -191,26 +191,37 @@ if args.dtype == "bf16" or args.dtype == "fp32":
     if args.inductor:
         from torch._inductor import config as inductor_config
         inductor_config.cpp_wrapper = True
-        with torch.no_grad(), torch.cpu.amp.autocast(enabled=autocast):
+        with torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
             if args.ipex:
                 print('[Info] Running torch.compile() with IPEX backend')
                 user_model = torch.compile(user_model, backend="ipex")
             else:
                 print('[Info] Running torch.compile() BFloat16 with default backend')
-                user_model = torch.compile(user_model)
+                user_model.forward = torch.compile(user_model.forward)
 elif args.dtype == "fp16":
-    user_model = ipex.llm.optimize(
-        user_model.eval(),
-        quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into fp16
-        inplace=True,
-        deployment_mode=False,
-    )
-    user_model = ipex.optimize(
-        user_model.eval(),
-        dtype=torch.half,
-        conv_bn_folding=False,
-        auto_kernel_selection=True,
-    )
+    if args.ipex:
+        user_model = ipex.llm.optimize(
+            user_model.eval(),
+            quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into fp16
+            inplace=True,
+            deployment_mode=False,
+        )
+        user_model = ipex.optimize(
+            user_model.eval(),
+            dtype=torch.half,
+            conv_bn_folding=False,
+            auto_kernel_selection=True,
+        )
+    if args.inductor:
+        from torch._inductor import config as inductor_config
+        inductor_config.cpp_wrapper = True
+        with torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
+            if args.ipex:
+                print('[Info] Running torch.compile() with IPEX backend')
+                user_model = torch.compile(user_model, backend="ipex")
+            else:
+                print('[Info] Running torch.compile() BFloat16 with default backend')
+                user_model.forward = torch.compile(user_model.forward)
 elif args.dtype == "bf32":
     user_model = ipex.llm.optimize(
         user_model.eval(),
@@ -514,19 +525,17 @@ if args.dtype in ["bf32", "fp16"] and args.jit and not args.accuracy_only:
         trace_graph = torch.jit.freeze(trace_graph.eval())
         setattr(user_model, "trace_graph", trace_graph)
 
-# generate promt
+# input prompt
+current_path = pathlib.Path(__file__).parent.resolve()
+with open(str(current_path) + "/prompt.json") as f:
+    prompt_pool = json.load(f)
+if args.prompt is not None:
+    prompt = args.prompt
+elif args.input_tokens in prompt_pool:
+    prompt = prompt_pool[args.input_tokens]
+else:
+    raise SystemExit("[ERROR] Plese use --prompt if want to use custom input.")
 if args.benchmark:
-    # input prompt
-    current_path = pathlib.Path(__file__).parent.resolve()
-    with open(str(current_path) + "/prompt.json") as f:
-        prompt_pool = json.load(f)
-    if args.prompt is not None:
-        prompt = args.prompt
-    elif args.input_tokens in prompt_pool:
-        prompt = prompt_pool[args.input_tokens]
-    else:
-        raise SystemExit("[ERROR] Plese use --prompt if want to use custom input.")
-
     input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
     print("---- Prompt size:", input_size)
 
