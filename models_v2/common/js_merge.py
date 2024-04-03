@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# System modules
 import argparse
 import copy
 import json
@@ -47,12 +48,8 @@ if __name__ == '__main__':
 
     data = {}
     for file in args.file:
-        try:
-            with open(file, 'r') as f:
-                data = merge(data, json.load(f))
-        except Exception as e:
-            print('error: ' + str(e), file=sys.stderr)
-            sys.exit(1)
+        with open(file, 'r') as f:
+            data = merge(data, json.load(f))
 
     indent=int(args.indent) if args.indent and args.indent.isdecimal() else args.indent
     if args.output == '':
