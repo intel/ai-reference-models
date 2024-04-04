@@ -79,6 +79,7 @@ def parse_option():
     parser.add_argument('--output', default='output', type=str, metavar='PATH',
                         help='root of output folder, the full path is <output>/<model_name>/<tag> (default: output)')
     parser.add_argument('--tag', help='tag of experiment')
+    parser.add_argument('--dummy', action='store_true', help='Use randomly generated dummy data. Low accuracy but no data required.')
     parser.add_argument('--eval', action='store_true', help='Perform evaluation only')
     parser.add_argument('--throughput', action='store_true', help='Test throughput only')
 
@@ -149,7 +150,7 @@ def main(config):
         criterion = LabelSmoothingCrossEntropy(smoothing=config.MODEL.LABEL_SMOOTHING)
     else:
         criterion = torch.nn.CrossEntropyLoss()
-    
+
     if args.device == "xpu":
         criterion = criterion.xpu()
 
@@ -192,10 +193,10 @@ def main(config):
         model, optimizer = torch.xpu.optimize(model=model, optimizer=optimizer, dtype=torch.float32)
     if args.device == "xpu" and args.dtype == "bf16":
         model, optimizer = torch.xpu.optimize(model=model, optimizer=optimizer, dtype=torch.bfloat16)
-    
+
     start_time = time.time()
     for epoch in range(config.TRAIN.START_EPOCH, config.TRAIN.EPOCHS):
-        if hasattr(data_loader_train.sampler, 'set_epoch'): 
+        if hasattr(data_loader_train.sampler, 'set_epoch'):
             data_loader_train.sampler.set_epoch(epoch)
 
         train_one_epoch(config, model, criterion, data_loader_train, optimizer, epoch, mixup_fn, lr_scheduler,
@@ -268,7 +269,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                     loss = criterion(outputs, targets)
                 loss = loss / config.TRAIN.ACCUMULATION_STEPS
 
-            # cuda: with gradient scaling 
+            # cuda: with gradient scaling
             if device == "cuda":
                 # this attribute is added by timm on one optimizer (adahessian)
                 is_second_order = hasattr(optimizer, 'is_second_order') and optimizer.is_second_order
@@ -343,7 +344,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
             with open('./' + title + 'profile_detailed.txt', 'w') as f1:
                 f1.write(str(prof.table(sort_by="id", row_limit=100000)))
             prof.export_chrome_trace('./' + title + 'profile_trace.json')
-        
+
         if idx >= warmup_iter:  # warmup iterations
             total_time_inner += end_time - start_time
             latency = total_time_inner / (idx - warmup_iter + 1)
@@ -353,7 +354,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 print("---throughput={} fps".format(throughput))
                 exit()
 
-          
+
     if device == "cuda":
         epoch_time = time.time() - start
         logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}")
@@ -378,7 +379,7 @@ def write_profile_info(prof, bs):
     print(prof.key_averages(group_by_input_shape=True).table())
 
 def print_perf_info(total_time, counter, batch_size):
-    latency = total_time / counter 
+    latency = total_time / counter
     throughput = batch_size / latency
     logger.info(f'Latency: {latency:.6f}')
     logger.info(f'Throughput: {throughput:.6f}')
@@ -515,7 +516,7 @@ if __name__ == '__main__':
     os.environ['CCL_RANK'] = os.environ['RANK']
     os.environ['CCL_SIZE'] = os.environ['WORLD_SIZE']
     args.profile = os.environ.get("PROFILE", "OFF").upper() in ["1", "Y", "ON", "YES", "TRUE"]
-    
+
     if config.AMP_OPT_LEVEL:
         print("[warning] Apex amp has been deprecated, please use pytorch amp instead!")
 

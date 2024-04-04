@@ -42,6 +42,12 @@ split-folders --ratio .8 .1 .1 --output dataset images
 ```
 The imagenet/dataset directory is your dataset directory.
 
+## Dataset: dummy
+Alternatively, you can edit run_models.sh to include the parameter
+```--dummy```
+when it invokes main_no_ddp.py.
+This flag will use randomly generated data instead. This will not create any actual useful machine learning, but allows you to get up and running quickly and easily without any datasets downloaded and run split-packages or anything like that.
+
 ## Inference
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/pytorch/swin-transformer/inference/gpu`
