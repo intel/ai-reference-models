@@ -26,6 +26,16 @@ git apply ../diffusers.patch
 python setup.py install
 ```
 
+### Datasets
+
+Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
+Export the `DATASET_DIR` environment variable to specify the directory where the dataset
+will be downloaded. This environment variable will be used again when running quickstart scripts.
+```
+export DATASET_DIR=<directory where the dataset will be saved>
+bash download_dataset.sh
+```
+
 * [optional] Compile model with PyTorch Inductor backend
 ```shell
 export TORCH_INDUCTOR=1
