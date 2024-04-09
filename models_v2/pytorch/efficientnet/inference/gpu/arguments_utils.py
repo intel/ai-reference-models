@@ -28,6 +28,8 @@ def parse_arguments():
                         help='path to dataset (default: None)')
     parser.add_argument('--output-dir', default='/workspace/temp/',
                         help='path to output results (default: /workspace/temp/)')
+    parser.add_argument('--socket', default='', type=str,
+                        help='socket to control telemetry capture (default: disabled)')
     parser.add_argument('-a', '--arch', metavar='ARCH', default='efficientnet_b0',
                         choices=model_names,
                         help='model architecture: ' +

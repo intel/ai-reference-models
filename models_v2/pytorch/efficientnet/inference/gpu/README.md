@@ -236,6 +236,7 @@ Other arguments and/or environment variables are optional and should be used acc
 |                    |                      | `fp32`            |                                                                       |
 | `--save`           | `SAVE_PATH`          |                   | Local path to save model to (default: disabled)                       |
 | `--streams`        | `STREAMS`            | >=1               | Number of parallel streams to do inference on (default: `1`)          |
+| `--socket`         | `SOCKET`             | String            | Socket to control telemetry capture (default: disabled)               |
 
 For more details, check help with `run_model.sh --help`
 
@@ -279,6 +280,7 @@ results:
   ```
   sudo \
     PATH=$PATH_TO_SVR_INFO:$PATH \
+    SOCKET=/tmp/telemetry.s \
     IMAGE=intel/image-recognition:pytorch-flex-gpu-efficientnet-inference \
     OUTPUT_DIR=$OUTPUT_DIR \
     PROFILE=$(pwd)/models_v2/pytorch/efficientnet/inference/gpu/profiles/b0.bf16.csv \
