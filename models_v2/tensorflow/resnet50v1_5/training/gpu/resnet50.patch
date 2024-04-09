@@ -1,24 +1,8 @@
-diff --git a/official/vision/image_classification/augment.py b/official/vision/image_classification/augment.py
-index f322d31da..294fcd543 100644
---- a/official/vision/image_classification/augment.py
-+++ b/official/vision/image_classification/augment.py
-@@ -25,7 +25,10 @@ from __future__ import print_function
- import math
- from typing import Any, Dict, List, Optional, Text, Tuple
- 
--from keras.layers.preprocessing import image_preprocessing as image_ops
-+try:
-+    from keras.src.layers.preprocessing import image_preprocessing as image_ops
-+except ImportError:
-+    from keras.layers.preprocessing import image_preprocessing as image_ops
- import tensorflow as tf
- 
- 
-diff --git a/official/vision/image_classification/classifier_trainer.py b/official/vision/image_classification/classifier_trainer.py
-index ab6fbaea9..0347bc8c9 100644
---- a/official/vision/image_classification/classifier_trainer.py
-+++ b/official/vision/image_classification/classifier_trainer.py
-@@ -283,6 +283,14 @@ def serialize_config(params: base_configs.ExperimentConfig, model_dir: str):
+diff --git a/official/legacy/image_classification/classifier_trainer.py b/official/legacy/image_classification/classifier_trainer.py
+index 8f1d2e6b6..bad0ab107 100644
+--- a/official/legacy/image_classification/classifier_trainer.py
++++ b/official/legacy/image_classification/classifier_trainer.py
+@@ -284,6 +284,15 @@ def serialize_config(params: base_configs.ExperimentConfig, model_dir: str):
    hyperparams.save_params_dict_to_yaml(params, params_save_path)
  
  
@@ -30,10 +14,11 @@ index ab6fbaea9..0347bc8c9 100644
 +  def __exit__(self, exc_type, exc_value, traceback):
 +    pass
 +
++
  def train_and_eval(
      params: base_configs.ExperimentConfig,
      strategy_override: tf.distribute.Strategy) -> Mapping[str, Any]:
-@@ -323,6 +331,7 @@ def train_and_eval(
+@@ -324,6 +333,7 @@ def train_and_eval(
    initialize(params, train_builder)
  
    logging.info('Global batch size: %d', train_builder.global_batch_size)

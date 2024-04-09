@@ -7,6 +7,9 @@ fp32-online-inference:
   env:
     PRECISION: fp32
     OUTPUT_DIR: /tmp
+  volumes:
+    - src: /tmp
+      dst: /tmp
 fp16-online-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-tf-flex-gpu-stable-diffusion-inference
   cmd: bash run_model.sh
@@ -15,3 +18,6 @@ fp16-online-inference:
   env:
     PRECISION: fp16
     OUTPUT_DIR: /tmp
+  volumes:
+    - src: /tmp
+      dst: /tmp

@@ -13,14 +13,17 @@
 # limitations under the License.
 
 ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG TF_BASE_TAG="xpu"
+ARG TF_BASE_TAG="2.15.0.0-xpu"
 
 FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
 WORKDIR /workspace/tf-flex-series-wide-deep-large-inference/models
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends parallel pciutils numactl && \
+    apt-get install -y --no-install-recommends \
+        parallel \
+        pciutils \
+        numactl && \
     rm -rf /var/lib/apt/lists/*
     
 COPY models_v2/tensorflow/wide_deep_large_ds/inference/gpu . 

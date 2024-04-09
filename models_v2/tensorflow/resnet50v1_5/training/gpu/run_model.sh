@@ -52,19 +52,20 @@ else
     rm -rf $OUTPUT_DIR && mkdir -p $OUTPUT_DIR                         
 fi
 
+export TF_NUM_INTEROP_THREADS=1  #for better performance
 if [ $MULTI_TILE == "True" ];then
   current_dir=$(pwd)
   if [ -d "tensorflow-models" ]; then
     echo "Repository already exists. Skipping clone."
   else
     mkdir $current_dir/resnet50_hvd/ && cd $current_dir/resnet50_hvd/
-    git clone -b v2.8.0 https://github.com/tensorflow/models.git tensorflow-models
+    git clone -b v2.14.0 https://github.com/tensorflow/models.git tensorflow-models
     cd tensorflow-models
     git apply $current_dir/hvd_support.patch
   fi
   export PYTHONPATH=$script_directory/resnet50_hvd/tensorflow-models
   mpirun -np 2 -prepend-rank -ppn 2 \
-  python ${PYTHONPATH}/official/vision/image_classification/classifier_trainer.py \
+  python ${PYTHONPATH}/official/legacy/image_classification/classifier_trainer.py \
   --mode=train_and_eval \
   --model_type=resnet \
   --dataset=imagenet \
@@ -73,20 +74,20 @@ if [ $MULTI_TILE == "True" ];then
   --config_file=$CONFIG_FILE |& tee Resnet50_training_${MULTI_TILE}.log
   value0=$(cat ./Resnet50_training_${MULTI_TILE}.log | grep examples/second | grep '\[0\]' | tail -1 | awk -F 'examples/second' '{print $1}' | awk -F ',' '{print $2}')
   value1=$(cat ./Resnet50_training_${MULTI_TILE}.log | grep examples/second | grep '\[1\]' | tail -1 | awk -F 'examples/second' '{print $1}' | awk -F ',' '{print $2}')
-  value=$(echo "$value1 + $value0" )
+  value=$(echo "$value1" + "$value0" | bc)
 else
   current_dir=$(pwd)
   if [ -d "tensorflow-models" ]; then
     echo "Repository already exists. Skipping clone."
   else
     mkdir $current_dir/resnet50/ && cd $current_dir/resnet50/
-    git clone -b v2.8.0 https://github.com/tensorflow/models.git tensorflow-models
+    git clone -b v2.14.0 https://github.com/tensorflow/models.git tensorflow-models
     cd tensorflow-models
     git apply $current_dir/resnet50.patch
     cd $current_dir
   fi
   export PYTHONPATH=$script_directory/resnet50/tensorflow-models
-  python ${PYTHONPATH}/official/vision/image_classification/classifier_trainer.py \
+  python ${PYTHONPATH}/official/legacy/image_classification/classifier_trainer.py \
   --mode=train_and_eval \
   --model_type=resnet \
   --dataset=imagenet \
