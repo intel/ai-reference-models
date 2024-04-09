@@ -15,6 +15,7 @@
 # System modules
 import argparse
 import csv
+import datetime
 import json
 import os
 import pathlib
@@ -27,6 +28,21 @@ import json
 import js_merge
 import js_sysinfo
 import json_to_csv
+import save_to_json
+
+def get_config(metadata: str, app_args: list):
+    res = {
+        'config': {
+            'metadata': {
+                # getting version in a form '2024.Q1'
+                'version': '{0}.Q{1}'.format(datetime.datetime.now().year, (datetime.datetime.now().month-1)//3+1)
+            },
+            'workload': {
+                'cmdline': app_args
+            }
+        }
+    }
+    return js_merge.merge(res, save_to_json.pairs_to_dict(metadata.split(' ')))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -38,6 +54,7 @@ if __name__ == '__main__':
     #parser.add_argument('-q', '--quiet', action="store_true", help='Be quiet and suppress messages to stdout')
 
     parser.add_argument('--indent', default=None, help='indent for json.dump()')
+    parser.add_argument('--metadata', action='store', type=str, default='', help='Space separated key=value pairs to amend to json reports')
     parser.add_argument('--output_dir', action="store", type=str, default='', required=True, help='Path to store outputs')
     parser.add_argument('--profile', action="store", type=str, default='', required=True, help='Profile with tests list')
 
@@ -117,8 +134,11 @@ if __name__ == '__main__':
         with open(file, 'r') as f:
             results = json.load(f)
 
-        # merge sysinfo with test results
-        report = js_merge.merge(results, sysinfo)
+        # merge various components into final test report
+        report = {}
+        report = js_merge.merge(report, results)
+        report = js_merge.merge(report, get_config(args.metadata, app_args))
+        report = js_merge.merge(report, sysinfo)
 
         # write the merged report
         file = os.path.join(args.output_dir, 'results_test_{0}.json'.format(iteration+1))
