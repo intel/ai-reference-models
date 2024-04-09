@@ -1,8 +1,16 @@
 diff --git a/official/legacy/image_classification/callbacks.py b/official/legacy/image_classification/callbacks.py
-index a4934ed88..a7eaad9fb 100644
+index 9360a72be..79263dbaa 100644
 --- a/official/legacy/image_classification/callbacks.py
 +++ b/official/legacy/image_classification/callbacks.py
-@@ -149,8 +149,8 @@ class CustomTensorBoard(tf.keras.callbacks.TensorBoard):
+@@ -77,6 +77,7 @@ def get_callbacks(
+             save_weights_only=True,
+             verbose=1))
+     callbacks.append(MovingAverageCallback())
++  #callbacks.append(ThresholdStopping(monitor = "val_accuracy", threshold = 0.759))
+   return callbacks
+ 
+ 
+@@ -148,8 +149,8 @@ class CustomTensorBoard(tf.keras.callbacks.TensorBoard):
    def _calculate_metrics(self) -> MutableMapping[str, Any]:
      logs = {}
      # TODO(b/149030439): disable LR reporting.
@@ -13,35 +21,7 @@ index a4934ed88..a7eaad9fb 100644
      return logs
  
    def _calculate_lr(self) -> int:
-diff --git a/official/vision/image_classification/augment.py b/official/vision/image_classification/augment.py
-index f322d31da..e668ff731 100644
---- a/official/vision/image_classification/augment.py
-+++ b/official/vision/image_classification/augment.py
-@@ -25,7 +25,10 @@ from __future__ import print_function
- import math
- from typing import Any, Dict, List, Optional, Text, Tuple
- 
--from keras.layers.preprocessing import image_preprocessing as image_ops
-+try:
-+  from keras.src.layers.preprocessing import image_preprocessing as image_ops
-+except ImportError:
-+  from keras.layers.preprocessing import image_preprocessing as image_ops
- import tensorflow as tf
- 
- 
-diff --git a/official/vision/image_classification/callbacks.py b/official/vision/image_classification/callbacks.py
-index a4934ed88..7eaaf0bea 100644
---- a/official/vision/image_classification/callbacks.py
-+++ b/official/vision/image_classification/callbacks.py
-@@ -78,6 +78,7 @@ def get_callbacks(
-             save_weights_only=True,
-             verbose=1))
-     callbacks.append(MovingAverageCallback())
-+  #callbacks.append(ThresholdStopping(monitor = "val_accuracy", threshold = 0.759))
-   return callbacks
- 
- 
-@@ -254,3 +255,38 @@ class AverageModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
+@@ -253,3 +254,37 @@ class AverageModelCheckpoint(tf.keras.callbacks.ModelCheckpoint):
        result = super()._save_model(epoch, logs)  # pytype: disable=attribute-error  # typed-keras
        self.model.set_weights(non_avg_weights)
        return result
@@ -79,15 +59,14 @@ index a4934ed88..7eaaf0bea 100644
 +        ",".join(list(logs.keys())),
 +        )
 +    return monitor_value
-+
-diff --git a/official/vision/image_classification/classifier_trainer.py b/official/vision/image_classification/classifier_trainer.py
-index ab6fbaea9..4655da449 100644
---- a/official/vision/image_classification/classifier_trainer.py
-+++ b/official/vision/image_classification/classifier_trainer.py
-@@ -36,7 +36,16 @@ from official.vision.image_classification.configs import configs
- from official.vision.image_classification.efficientnet import efficientnet_model
- from official.vision.image_classification.resnet import common
- from official.vision.image_classification.resnet import resnet_model
+diff --git a/official/legacy/image_classification/classifier_trainer.py b/official/legacy/image_classification/classifier_trainer.py
+index 8f1d2e6b6..ebd65f84d 100644
+--- a/official/legacy/image_classification/classifier_trainer.py
++++ b/official/legacy/image_classification/classifier_trainer.py
+@@ -36,7 +36,16 @@ from official.modeling import hyperparams
+ from official.modeling import performance
+ from official.utils import hyperparams_flags
+ from official.utils.misc import keras_utils
 +import time
  
 +global is_mpi
@@ -101,7 +80,7 @@ index ab6fbaea9..4655da449 100644
  
  def get_models() -> Mapping[str, tf.keras.Model]:
    """Returns the mapping from model type name to Keras model."""
-@@ -271,7 +280,7 @@ def define_classifier_flags():
+@@ -272,7 +281,7 @@ def define_classifier_flags():
        help='The name of the dataset, e.g. ImageNet, etc.')
    flags.DEFINE_integer(
        'log_steps',
@@ -110,7 +89,7 @@ index ab6fbaea9..4655da449 100644
        help='The interval of steps between logging of batch level stats.')
  
  
-@@ -289,6 +298,12 @@ def train_and_eval(
+@@ -290,6 +299,12 @@ def train_and_eval(
    """Runs the train and eval path using compile/fit."""
    logging.info('Running train and eval.')
  
@@ -123,7 +102,7 @@ index ab6fbaea9..4655da449 100644
    distribute_utils.configure_cluster(params.runtime.worker_hosts,
                                       params.runtime.task_index)
  
-@@ -299,7 +314,7 @@ def train_and_eval(
+@@ -300,7 +315,7 @@ def train_and_eval(
        num_gpus=params.runtime.num_gpus,
        tpu_address=params.runtime.tpu)
  
@@ -132,7 +111,7 @@ index ab6fbaea9..4655da449 100644
  
    logging.info('Detected %d devices.',
                 strategy.num_replicas_in_sync if strategy else 1)
-@@ -324,56 +339,74 @@ def train_and_eval(
+@@ -325,56 +340,74 @@ def train_and_eval(
  
    logging.info('Global batch size: %d', train_builder.global_batch_size)
  
@@ -255,18 +234,18 @@ index ab6fbaea9..4655da449 100644
    serialize_config(params=params, model_dir=params.model_dir)
  
    if params.evaluation.skip_eval:
-@@ -384,7 +417,9 @@ def train_and_eval(
-         'validation_steps': validation_steps,
+@@ -386,6 +419,10 @@ def train_and_eval(
          'validation_freq': params.evaluation.epochs_between_evals,
      }
--
+ 
 +  print('[info] Training steps = ', train_steps)
 +  print('[info] Validation steps = ', validation_steps)
 +  global_start_time = time.time()
++
    history = model.fit(
        train_dataset,
        epochs=train_epochs,
-@@ -394,6 +429,11 @@ def train_and_eval(
+@@ -395,6 +432,11 @@ def train_and_eval(
        verbose=2,
        **validation_kwargs)
  
@@ -278,11 +257,11 @@ index ab6fbaea9..4655da449 100644
    validation_output = None
    if not params.evaluation.skip_eval:
      validation_output = model.evaluate(
-diff --git a/official/vision/image_classification/configs/base_configs.py b/official/vision/image_classification/configs/base_configs.py
-index 760b3dce0..3939249b6 100644
---- a/official/vision/image_classification/configs/base_configs.py
-+++ b/official/vision/image_classification/configs/base_configs.py
-@@ -180,6 +180,7 @@ class OptimizerConfig(hyperparams.Config):
+diff --git a/official/legacy/image_classification/configs/base_configs.py b/official/legacy/image_classification/configs/base_configs.py
+index 975a1be9d..c7ad5c30c 100644
+--- a/official/legacy/image_classification/configs/base_configs.py
++++ b/official/legacy/image_classification/configs/base_configs.py
+@@ -185,6 +185,7 @@ class OptimizerConfig(hyperparams.Config):
    beta_1: float = None
    beta_2: float = None
    epsilon: float = None
@@ -290,19 +269,19 @@ index 760b3dce0..3939249b6 100644
  
  
  @dataclasses.dataclass
-diff --git a/official/vision/image_classification/dataset_factory.py b/official/vision/image_classification/dataset_factory.py
-index a0458eccc..275c6d5fb 100644
---- a/official/vision/image_classification/dataset_factory.py
-+++ b/official/vision/image_classification/dataset_factory.py
-@@ -29,6 +29,7 @@ import tensorflow_datasets as tfds
+diff --git a/official/legacy/image_classification/dataset_factory.py b/official/legacy/image_classification/dataset_factory.py
+index b0bd931e6..8eb254588 100644
+--- a/official/legacy/image_classification/dataset_factory.py
++++ b/official/legacy/image_classification/dataset_factory.py
+@@ -26,6 +26,7 @@ import tensorflow_datasets as tfds
+ from official.legacy.image_classification import augment
+ from official.legacy.image_classification import preprocessing
  from official.modeling.hyperparams import base_config
- from official.vision.image_classification import augment
- from official.vision.image_classification import preprocessing
 +import horovod.tensorflow as hvd
  
  AUGMENTERS = {
      'autoaugment': augment.AutoAugment,
-@@ -207,7 +208,16 @@ class DatasetBuilder:
+@@ -204,7 +205,16 @@ class DatasetBuilder:
    def num_steps(self) -> int:
      """The number of steps (batches) to exhaust this dataset."""
      # Always divide by the global batch size to get the correct # of steps
@@ -320,7 +299,7 @@ index a0458eccc..275c6d5fb 100644
  
    @property
    def dtype(self) -> tf.dtypes.DType:
-@@ -403,14 +413,10 @@ class DatasetBuilder:
+@@ -399,14 +409,10 @@ class DatasetBuilder:
      Returns:
        A TensorFlow dataset outputting batched images and labels.
      """
@@ -334,11 +313,11 @@ index a0458eccc..275c6d5fb 100644
 -          'Sharding the dataset: input_pipeline_id=%d '
 -          'num_input_pipelines=%d', self.input_context.num_input_pipelines,
 -          self.input_context.input_pipeline_id)
-+          'Sharding the dataset: total size: %d ', hvd.size(), " local rank: %d ", hvd.rank())
++          'Sharding the dataset: total size: {}, local rank: {}.'.format(hvd.size(), hvd.rank()))
  
      if self.is_training and self.config.builder == 'records':
        # Shuffle the input files.
-@@ -455,10 +461,10 @@ class DatasetBuilder:
+@@ -451,10 +457,10 @@ class DatasetBuilder:
        # replicas automatically when strategy.distribute_datasets_from_function
        # is called, so we use local batch size here.
        dataset = dataset.batch(
@@ -351,11 +330,11 @@ index a0458eccc..275c6d5fb 100644
  
      # Prefetch overlaps in-feed with training
      dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
-diff --git a/official/vision/image_classification/lars_optimizer.py b/official/vision/image_classification/lars_optimizer.py
+diff --git a/official/legacy/image_classification/lars_optimizer.py b/official/legacy/image_classification/lars_optimizer.py
 new file mode 100644
 index 000000000..029ae654e
 --- /dev/null
-+++ b/official/vision/image_classification/lars_optimizer.py
++++ b/official/legacy/image_classification/lars_optimizer.py
 @@ -0,0 +1,248 @@
 +# Copyright 2018 The TensorFlow Authors. All Rights Reserved.
 +#
@@ -605,11 +584,11 @@ index 000000000..029ae654e
 +        "skip_list": self._skip_list,
 +    })
 +    return config
-diff --git a/official/vision/image_classification/learning_rate.py b/official/vision/image_classification/learning_rate.py
-index 72f7e9518..19207291d 100644
---- a/official/vision/image_classification/learning_rate.py
-+++ b/official/vision/image_classification/learning_rate.py
-@@ -22,10 +22,14 @@ from typing import Any, Mapping, Optional
+diff --git a/official/legacy/image_classification/learning_rate.py b/official/legacy/image_classification/learning_rate.py
+index 94b3a9143..e4851d40b 100644
+--- a/official/legacy/image_classification/learning_rate.py
++++ b/official/legacy/image_classification/learning_rate.py
+@@ -21,10 +21,13 @@ from typing import Any, Mapping, Optional
  
  import numpy as np
  import tensorflow as tf
@@ -619,12 +598,12 @@ index 72f7e9518..19207291d 100644
  
  BASE_LEARNING_RATE = 0.1
  
- 
+-
 +@tf.keras.utils.register_keras_serializable(package='Custom', name='WarmupDeacySchedule')
  class WarmupDecaySchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
    """A wrapper for LearningRateSchedule that includes warmup steps."""
  
-@@ -66,10 +70,11 @@ class WarmupDecaySchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+@@ -65,10 +68,11 @@ class WarmupDecaySchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
      return lr
  
    def get_config(self) -> Mapping[str, Any]:
@@ -637,7 +616,7 @@ index 72f7e9518..19207291d 100644
      })
      return config
  
-@@ -115,3 +120,104 @@ class CosineDecayWithWarmup(tf.keras.optimizers.schedules.LearningRateSchedule):
+@@ -114,3 +118,103 @@ class CosineDecayWithWarmup(tf.keras.optimizers.schedules.LearningRateSchedule):
          "warmup_steps": self._warmup_steps,
          "init_learning_rate": self._init_learning_rate,
      }
@@ -741,56 +720,22 @@ index 72f7e9518..19207291d 100644
 +      'warmup_epochs': self.warmup_epochs,
 +      'name': self.name,
 +    }
-+
-diff --git a/official/vision/image_classification/optimizer_factory.py b/official/vision/image_classification/optimizer_factory.py
-index 48a4512ee..0ed4cb914 100644
---- a/official/vision/image_classification/optimizer_factory.py
-+++ b/official/vision/image_classification/optimizer_factory.py
-@@ -26,6 +26,7 @@ import tensorflow_addons as tfa
+diff --git a/official/legacy/image_classification/optimizer_factory.py b/official/legacy/image_classification/optimizer_factory.py
+index 2ba0ed050..e5cb134e8 100644
+--- a/official/legacy/image_classification/optimizer_factory.py
++++ b/official/legacy/image_classification/optimizer_factory.py
+@@ -27,6 +27,7 @@ from official.legacy.image_classification import learning_rate
+ from official.legacy.image_classification.configs import base_configs
  from official.modeling import optimization
- from official.vision.image_classification import learning_rate
- from official.vision.image_classification.configs import base_configs
-+import official.vision.image_classification.lars_optimizer as lars_optimizer
+ from official.modeling.optimization import legacy_adamw
++import official.legacy.image_classification.lars_optimizer as lars_optimizer
  
  # pylint: disable=protected-access
  
-@@ -61,12 +62,12 @@ def build_optimizer(
-   if optimizer_name == 'sgd':
-     logging.info('Using SGD optimizer')
-     nesterov = params.get('nesterov', False)
--    optimizer = tf.keras.optimizers.SGD(
-+    optimizer = tf.keras.optimizers.legacy.SGD(
-         learning_rate=base_learning_rate, nesterov=nesterov)
-   elif optimizer_name == 'momentum':
-     logging.info('Using momentum optimizer')
-     nesterov = params.get('nesterov', False)
--    optimizer = tf.keras.optimizers.SGD(
-+    optimizer = tf.keras.optimizers.legacy.SGD(
-         learning_rate=base_learning_rate,
-         momentum=params['momentum'],
-         nesterov=nesterov)
-@@ -75,7 +76,7 @@ def build_optimizer(
-     rho = params.get('decay', None) or params.get('rho', 0.9)
-     momentum = params.get('momentum', 0.9)
-     epsilon = params.get('epsilon', 1e-07)
--    optimizer = tf.keras.optimizers.RMSprop(
-+    optimizer = tf.keras.optimizers.legacy.RMSprop(
-         learning_rate=base_learning_rate,
-         rho=rho,
-         momentum=momentum,
-@@ -85,7 +86,7 @@ def build_optimizer(
-     beta_1 = params.get('beta_1', 0.9)
-     beta_2 = params.get('beta_2', 0.999)
-     epsilon = params.get('epsilon', 1e-07)
--    optimizer = tf.keras.optimizers.Adam(
-+    optimizer = tf.keras.optimizers.legacy.Adam(
-         learning_rate=base_learning_rate,
-         beta_1=beta_1,
+@@ -256,6 +257,16 @@ def build_optimizer(
          beta_2=beta_2,
-@@ -102,6 +103,16 @@ def build_optimizer(
-         beta_1=beta_1,
-         beta_2=beta_2,
-         epsilon=epsilon)
+         epsilon=epsilon,
+     )
 +  elif optimizer_name == 'lars':
 +    logging.info('Using Lars')
 +    weight_decay = params.get('weight_decay', 0.0002)
@@ -804,7 +749,7 @@ index 48a4512ee..0ed4cb914 100644
    else:
      raise ValueError('Unknown optimizer %s' % optimizer_name)
  
-@@ -139,7 +150,7 @@ def build_learning_rate(params: base_configs.LearningRateConfig,
+@@ -293,7 +304,7 @@ def build_learning_rate(params: base_configs.LearningRateConfig,
    else:
      warmup_steps = 0
  
@@ -813,7 +758,7 @@ index 48a4512ee..0ed4cb914 100644
  
    if lr_multiplier and lr_multiplier > 0:
      # Scale the learning rate based on the batch size and a multiplier
-@@ -172,6 +183,14 @@ def build_learning_rate(params: base_configs.LearningRateConfig,
+@@ -326,6 +337,14 @@ def build_learning_rate(params: base_configs.LearningRateConfig,
          batch_size=batch_size,
          total_steps=train_epochs * train_steps,
          warmup_steps=warmup_steps)
@@ -828,10 +773,10 @@ index 48a4512ee..0ed4cb914 100644
    if warmup_steps > 0:
      if decay_type not in ['cosine_with_warmup']:
        logging.info('Applying %d warmup steps to the learning rate',
-diff --git a/official/vision/image_classification/resnet/imagenet_preprocessing.py b/official/vision/image_classification/resnet/imagenet_preprocessing.py
-index 86ba3ed98..298a4a412 100644
---- a/official/vision/image_classification/resnet/imagenet_preprocessing.py
-+++ b/official/vision/image_classification/resnet/imagenet_preprocessing.py
+diff --git a/official/legacy/image_classification/resnet/imagenet_preprocessing.py b/official/legacy/image_classification/resnet/imagenet_preprocessing.py
+index 5eab92596..8bed8900b 100644
+--- a/official/legacy/image_classification/resnet/imagenet_preprocessing.py
++++ b/official/legacy/image_classification/resnet/imagenet_preprocessing.py
 @@ -113,7 +113,7 @@ def process_record_dataset(dataset,
    dataset = dataset.map(
        lambda value: parse_record_fn(value, is_training, dtype),
@@ -841,25 +786,16 @@ index 86ba3ed98..298a4a412 100644
  
    # Operations between the final prefetch and the get_next call to the iterator
    # will happen synchronously during run time. We prefetch here again to
-@@ -350,7 +350,7 @@ def input_fn(is_training,
-       parse_record_fn=parse_record_fn,
-       dtype=dtype,
-       datasets_num_private_threads=datasets_num_private_threads,
--      drop_remainder=drop_remainder,
-+      drop_remainder=False,
-       tf_data_experimental_slack=tf_data_experimental_slack,
-   )
- 
-diff --git a/official/vision/image_classification/resnet/resnet_runnable.py b/official/vision/image_classification/resnet/resnet_runnable.py
-index fe3059f77..c521e5992 100644
---- a/official/vision/image_classification/resnet/resnet_runnable.py
-+++ b/official/vision/image_classification/resnet/resnet_runnable.py
-@@ -100,7 +100,7 @@ class ResnetRunnable(orbit.StandardTrainer, orbit.StandardEvaluator):
+diff --git a/official/legacy/image_classification/resnet/resnet_runnable.py b/official/legacy/image_classification/resnet/resnet_runnable.py
+index e37851564..302696c40 100644
+--- a/official/legacy/image_classification/resnet/resnet_runnable.py
++++ b/official/legacy/image_classification/resnet/resnet_runnable.py
+@@ -99,7 +99,7 @@ class ResnetRunnable(orbit.StandardTrainer, orbit.StandardEvaluator):
          datasets_num_private_threads=self.flags_obj
          .datasets_num_private_threads,
          dtype=self.dtype,
--        drop_remainder=True)
-+        drop_remainder=False)
+-        drop_remainder=True,
++        drop_remainder=False,
+         training_dataset_cache=self.flags_obj.training_dataset_cache)
      orbit.StandardTrainer.__init__(
          self,
-         train_dataset,

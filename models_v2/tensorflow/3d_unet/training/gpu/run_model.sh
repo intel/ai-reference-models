@@ -64,6 +64,8 @@ echo " PRECISION: ${PRECISION}"
 echo " BATCH_SIZE: $BATCH_SIZE"
 echo " MULTI_TILE: $MULTI_TILE"
 
+mkdir -p $OUTPUT_DIR
+
 current_dir=$(pwd)
 if [ $MULTI_TILE == "True" ];then
   if [ -d "DeepLearningExamples" ]; then

@@ -13,49 +13,49 @@
 # limitations under the License.
 
 ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG TF_BASE_TAG="2.14.0.1-xpu"
+ARG TF_BASE_TAG="2.15.0.0-xpu"
 
 FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+ARG MPI_VERSION
+ARG CCL_VERSION
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        bc \
         ca-certificates \
         curl \
-        intel-oneapi-mpi-devel=2021.11.0-49493  \
-        intel-oneapi-ccl=2021.11.2-5 && \
+        bc \
+        intel-oneapi-mpi-devel=${MPI_VERSION} \
+        intel-oneapi-ccl=${CCL_VERSION} && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace/tf-max-series-resnet50v1-5-training/models
 
 COPY models_v2/tensorflow/resnet50v1_5/training/gpu .
 
-RUN python -m pip install gin gin-config \
-    tfa-nightly \
-    tensorflow-model-optimization \
-    tensorflow-datasets \
-    protobuf==3.20.3 \
-    pyyaml 
+RUN pip install -r requirements.txt
+
+RUN python -m pip install --no-cache-dir intel-optimization-for-horovod
 
 RUN mkdir -p resnet50 && \
     cd resnet50 && \
-    git clone -b v2.8.0 https://github.com/tensorflow/models.git tensorflow-models && \
+    git clone -b v2.14.0 https://github.com/tensorflow/models.git tensorflow-models && \
     cd tensorflow-models && \
     git apply /workspace/tf-max-series-resnet50v1-5-training/models/resnet50.patch 
 
 RUN mkdir -p resnet50_hvd && \
     cd resnet50_hvd && \
-    git clone -b v2.8.0 https://github.com/tensorflow/models.git tensorflow-models && \
+    git clone -b v2.14.0 https://github.com/tensorflow/models.git tensorflow-models && \
     cd tensorflow-models && \
     git apply /workspace/tf-max-series-resnet50v1-5-training/models/hvd_support.patch
 
-ENV LD_LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.11/lib:/opt/intel/oneapi/ccl/2021.11/lib/:$LD_LIBRARY_PATH
-ENV PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/bin:/opt/intel/oneapi/mpi/2021.11/bin:$PATH
-ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.11
-ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.11
-ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
+ENV LD_LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.12/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.12/lib:/opt/intel/oneapi/ccl/2021.12/lib/:$LD_LIBRARY_PATH
+ENV PATH=/opt/intel/oneapi/mpi/2021.12/opt/mpi/libfabric/bin:/opt/intel/oneapi/mpi/2021.12/bin:$PATH
+ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.12
+ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.12
+ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.12/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party 

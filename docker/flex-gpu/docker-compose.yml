@@ -46,8 +46,9 @@ services:
     build:
       args:
         TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-extension-for-tensorflow}
-        TF_BASE_TAG: ${TF_BASE_TAG:-xpu}
-        MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.15.0.0-xpu}
+        MODEL_URL_INT8: ${MODEL_URL_INT8:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
+        MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1.pb}
       dockerfile: docker/flex-gpu/tf-resnet50v1-5-inference/tf-flex-series-resnet50v1-5-inference.Dockerfile
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__);from tensorflow.python.client import device_lib; print(device_lib.list_local_devices())'"

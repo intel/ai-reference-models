@@ -3,7 +3,7 @@
 ## Model Information
 | **Case** |**Framework** | **Model Repo** | **Tag** 
 | :---: | :---: | :---: | :---: |
-| Training | Tensorflow | [Tensorflow-Models](https://github.com/tensorflow/models) | v2.8.0 |
+| Training | Tensorflow | [Tensorflow-Models](https://github.com/tensorflow/models) | v2.14.0 |
 
 # Pre-Requisite
 * Host has Intel® Data Center GPU Max
@@ -41,8 +41,7 @@ Download the ImageNet dataset and convert it to TFRecord format. The following [
     ./setup.sh
     ```
 5. Install [tensorflow and ITEX](https://pypi.org/project/intel-extension-for-tensorflow/)
-6. If you run multi-tile (export MULTI_TILE=True), please install "intel-optimization-for-horovod" with `pip install intel-optimization-for-horovod`
-7. Set environment variables for Intel® oneAPI Base Toolkit: 
+6. Set environment variables for Intel® oneAPI Base Toolkit: 
     Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
     ```bash
     source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
@@ -50,17 +49,17 @@ Download the ImageNet dataset and convert it to TFRecord format. The following [
     source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
     source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
     source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
-8. Setup required environment paramaters
-  There are several config yaml files in configure and hvd_configure folder. Set one of them as CONFIG_FILE, then model would correspondly run with `real data` or `dummy data`. Single-tile please use yaml file in configure folder. Distribute training please use yaml file in hvd_configure folder, `itex_bf16_lars.yaml`/`itex_fp32_lars.yaml` for HVD real data and `itex_dummy_bf16_lars.yaml`/`itex_dummy_fp32_lars.yaml` for HVD dummy data.
-Export those parameters to script or environment.
+7. Setup required environment paramaters
+  There are several config yaml files in configure and hvd_configure folder. Set one of them as CONFIG_FILE, then model would correspondly run with `real data` or `dummy data`. Single-tile please use yaml file in configure folder. Distribute training please use yaml file in hvd_configure folder, `configure/itex_bf16_lars.yaml`/`configure/itex_fp32_lars.yaml` for HVD real data and `configure/itex_dummy_bf16_lars.yaml`/`configure/itex_dummy_fp32_lars.yaml` for HVD dummy data.
+8. Export those parameters to script or environment.
 
     |   **Parameter**    | **export command**                                    |
     | :---: | :--- |
     |  **DATASET_DIR**   | `export DATASET_DIR=/the/path/to/dataset`    (if you choose dummy data, you can igore this parameter)          |
     |   **OUTPUT_DIR**   | `export OUTPUT_DIR=/the/path/to/output_dir`           |
     |   **MULTI_TILE**   | `export MULTI_TILE=False (False or True)`           |
-    |   **CONFIG_FILE**   | `path/to/itex_xx.yaml  (dataset type and precision) ` |
-6. Run `run_model.sh`
+    |   **CONFIG_FILE**   | `export CONFIG_FILE=path/to/itex_xx.yaml  (dataset type and precision) ` |
+9. Run `run_model.sh`
 
 ## Output
 

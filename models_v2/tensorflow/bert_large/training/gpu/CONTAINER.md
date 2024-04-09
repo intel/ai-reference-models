@@ -1,7 +1,7 @@
 # TensorFlow BERT Large Training 
 
 ## Description
-This document has instructions for running BERT Large training with BF16 precision using Intel(R) Extension for TensorFlow on Intel® Data Center GPU Max Series.
+This document has instructions for running BERT Large training with BF16,FP32 and TF32 precisions using Intel(R) Extension for TensorFlow on Intel® Data Center GPU Max Series.
 
 ## Datasets
 
@@ -10,7 +10,7 @@ Follow instructions [here](README.md#prepare-dataset) to download and prepare th
 ## Quick Start Scripts
 | Script name | Description |
 |-------------|-------------|
-| `run_model.sh` | Runs BERT Large BF16 training on single and two tiles |
+| `run_model.sh` | Runs BERT Large BF16,FP32 and TF32 training on single and two tiles |
 
 Requirements:
 * Host has [Intel® Data Center GPU Max Series](https://ark.intel.com/content/www/us/en/ark/products/series/232874/intel-data-center-gpu-max-series.html)
@@ -21,13 +21,13 @@ Requirements:
 ```
 docker pull intel/language-modeling:tf-max-gpu-bert-large-training
 ```
-The BERT Large training container includes scripts, models and libraries needed to run BF16 training.You wil need to volume mount the dataset directory and the output directory where log files will be generated. 
+The BERT Large training container includes scripts, models and libraries needed to run BF16/FP32/TF32 training.You wil need to volume mount the dataset directory and the output directory where log files will be generated. 
 
 ```bash
 export DATA_DIR=<path to processed dataset>
 export RESULTS_DIR=<path to output log files>
 export MULTI_TILE=<provide True for multi-tile training and False for single tile training>
-export DATATYPE=bf16
+export DATATYPE=<provide bf16,fp32 or tf32 precision>
 
 IMAGE_NAME=intel/language-modeling:tf-max-gpu-bert-large-training
 DOCKER_ARGS="--rm -it"

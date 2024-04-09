@@ -1,7 +1,7 @@
 # TensorFlow UNet-3D Training
 
 ## Description 
-This document has instructions for running UNet-3D training with BFloat16 precision using Intel® Extension for TensorFlow on Intel® Data Center GPU Max Series.
+This document has instructions for running UNet-3D training with BFloat16 and FP32 precisions using Intel® Extension for TensorFlow on Intel® Data Center GPU Max Series.
 
 ## Datasets
 
@@ -13,7 +13,7 @@ Set the `DATASET_DIR` to point to the TF records directory when running UNet-3D 
 
 | Script name | Description |
 |-------------|-------------|
-| `run_model.sh` | Runs BFloat16 Training on single and two tiles |
+| `run_model.sh` | Runs BFloat16 and FP32 Training on single and two tiles |
 
 Requirements:
 
@@ -26,12 +26,12 @@ Requirements:
 ```bash
 docker pull intel/image-segmentation:tf-max-gpu-unet-3d-training
 ```
-The UNet-3D training container includes scripts, model and libraries needed to run BFloat16 Training. To run the quickstart scripts using this container, you'll need to provide volume mounts of the Brain Tumor Segmentation dataset. You will also need to provide an output directory to store logs.
+The UNet-3D training container includes scripts, model and libraries needed to run BFloat16/FP32 Training. To run the quickstart scripts using this container, you'll need to provide volume mounts of the Brain Tumor Segmentation dataset. You will also need to provide an output directory to store logs.
 
 ```bash
 #Required
 export DATASET_DIR=<provide path to pre-processed dataset>
-export PRECISION=bfloat16
+export PRECISION=<provide either bfloat16 or fp32 precision>
 export MULTI_TILE=<provide True for multi-tile training, False for single-tile training>
 export OUTPUT_DIR=<provide path to output logs directory>
 SCRIPT=run_model.sh

@@ -1,4 +1,4 @@
-# Running ResNet50 v1.5 Inference with Int8 on Intel® Data Center GPU Flex Series using Intel® Extension for TensorFlow*
+# Running ResNet50 v1.5 Inference on Intel® Data Center GPU Flex Series using Intel® Extension for TensorFlow*
 
 ## Overview
 
@@ -26,7 +26,10 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 
 | Script name | Description |
 |:-------------:|:-------------:|
-| `run_model.sh` | Runs inference for int8 precision |
+| `run_model.sh` | Runs inference for INT8,BF16,FP16,TF32 and FP32 precision |
+
+> [!NOTE]
+> On Flex 140 GPU, only INT8 precision has been validated using this container.
 
 ## Run Using Docker
 
@@ -37,7 +40,7 @@ docker pull intel/image-recognition:tf-flex-gpu-resnet50v1-5-inference
 ```
 
 ### Run Docker Image
-The ResNet50 v1-5 inference container includes scripts, model and libraries needed to run int8 inference. To run the `run_model.sh` script using this container, you'll need to provide volume mounts for the ImageNet dataset for measuring accuracy test mode. For inference test mode, dummy dataset will be used.  You will need to provide an output directory where log files will be written. 
+The ResNet50 v1-5 inference container includes scripts, model and libraries needed to run inference. To run the `run_model.sh` script using this container, you'll need to provide volume mounts for the ImageNet dataset for measuring accuracy test mode. For inference test mode, dummy dataset will be used.  You will need to provide an output directory where log files will be written. 
 
 **Note:** The default batch size for Flex series 140 is 256 for batch inference and 1024 for Flex series 170. Additionally, add `--cap-add=SYS_NICE` to the `docker run` command for executing the script on Flex series 140.
 ```bash

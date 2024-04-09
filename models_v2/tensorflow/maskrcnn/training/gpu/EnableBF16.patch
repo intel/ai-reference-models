@@ -1,48 +1,44 @@
 diff --git a/TensorFlow2/Segmentation/MaskRCNN/main.py b/TensorFlow2/Segmentation/MaskRCNN/main.py
-index 53b59d6e..6902a0ba 100644
+index 9edc89cc..03029cae 100644
 --- a/TensorFlow2/Segmentation/MaskRCNN/main.py
 +++ b/TensorFlow2/Segmentation/MaskRCNN/main.py
-@@ -57,6 +57,20 @@ def main():
+@@ -57,6 +57,18 @@ def main():
      # setup dataset
      dataset = Dataset(params)
  
-+    try:
-+      import horovod.tensorflow.keras as hvd
++    if params.horovod:
 +      import tensorflow as tf
++      import horovod.tensorflow.keras as hvd
 +      hvd.init()
-+      params.mpi_num = hvd.size()
-+      params.model_dir = params.model_dir if hvd.rank() == 0 else \
-+          os.path.join(params.model_dir, str(hvd.rank()))
++      if hvd.size() <= 1:
++        raise RuntimeError("Found hvd.size() <= 1, please ensure you are running multiple processes in horovod mode.")
 +      xpus = tf.config.experimental.list_physical_devices('XPU')
 +      tf.config.experimental.set_visible_devices(xpus[hvd.local_rank()], 'XPU')
-+      logging.info("MPI horovod is enabled, this is running in MPI mode! local_rank = {}".format(hvd.local_rank()))
-+    except ImportError:
-+      params.mpi_num = 0
-+      logging.info("No MPI horovod support, this is running in no-MPI mode!")
++      logging.info("Horovod is enabled, this is running in MPI mode! local_rank = {}".format(hvd.local_rank()))
++    else:
++      logging.info("No Horovod support, this is running in no-MPI mode!")
 +
      if params.mode == 'train':
          run_training(dataset, params)
      if params.mode == 'eval':
 diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/arguments.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/arguments.py
-index 63368c09..ad04efa4 100644
+index 63368c09..fa1a0e11 100644
 --- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/arguments.py
 +++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/arguments.py
-@@ -53,6 +53,14 @@ RUNTIME_GROUP.add_argument(
+@@ -53,6 +53,12 @@ RUNTIME_GROUP.add_argument(
      ]
  )
  
-+LOGGING_GROUP.add_argument(
-+    '--mpi_num',
-+    type=int,
-+    default=0,
-+    metavar='N',
-+    help='Number of mpi ranks'
++RUNTIME_GROUP.add_argument(
++    '--horovod',
++    action='store_true',
++    help='Run distributed multiple processes with horovod'
 +)
 +
  RUNTIME_GROUP.add_argument(
      '--data_dir',
      type=str,
-@@ -72,7 +80,7 @@ RUNTIME_GROUP.add_argument(
+@@ -72,7 +78,7 @@ RUNTIME_GROUP.add_argument(
  RUNTIME_GROUP.add_argument(
      '--backbone_checkpoint',
      type=str,
@@ -52,14 +48,16 @@ index 63368c09..ad04efa4 100644
      help='Pretrained checkpoint for resnet'
  )
 diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset.py
-index 29d2373a..4bd0f2b6 100644
+index 29d2373a..b8c874e0 100644
 --- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset.py
 +++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset.py
-@@ -48,6 +48,32 @@ class Dataset:
+@@ -48,8 +48,38 @@ class Dataset:
  
      def train_fn(self, batch_size):
          """ Input function for training. """
-+        # Features
++
++        # The original code taking first batch and repeat, so it still depends on real data.
++        # We directly synthetic data here to avoid loading real data.
 +        if self._params.use_synthetic_data:
 +            self._logger.info("Using synthetic data")
 +            name_to_features = {
@@ -83,22 +81,29 @@ index 29d2373a..4bd0f2b6 100644
 +
 +            return tf.data.Dataset.from_tensors((name_to_features, {})).repeat()
 +
-+        if self._params.mpi_num:
-+            batch_size = batch_size * self._params.mpi_num
          data = tf.data.TFRecordDataset(self._train_files)
  
-         data = data.cache()
-@@ -73,7 +99,9 @@ class Dataset:
- 
-         data = data.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-         data = data.with_options(self._data_options)
--
-+        if self._params.mpi_num:
++        if self._params.horovod:
 +            import horovod.tensorflow.keras as hvd
 +            data = data.shard(hvd.size(), hvd.rank())
-         return data
++
+         data = data.cache()
+         data = data.shuffle(buffer_size=4096, reshuffle_each_iteration=True, seed=self._params.seed)
+         data = data.repeat()
+@@ -128,9 +158,9 @@ class Dataset:
+         data_options.experimental_threading.max_intra_op_parallelism = 1
+         data_options.experimental_optimization.map_parallelization = True
  
-     def eval_fn(self, batch_size):
+-        map_vectorization_options = tf.data.experimental.MapVectorizationOptions()
+-        map_vectorization_options.enabled = True
+-        map_vectorization_options.use_choose_fastest = True
+-        data_options.experimental_optimization.map_vectorization = map_vectorization_options
++        # map_vectorization_options = tf.data.experimental.MapVectorizationOptions()
++        # map_vectorization_options.enabled = True
++        # map_vectorization_options.use_choose_fastest = True
++        # data_options.experimental_optimization.map_vectorization = map_vectorization_options
+ 
+         return data_options
 diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset_parser.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset_parser.py
 index 96da0e36..3c071b10 100644
 --- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/dataset/dataset_parser.py
@@ -162,46 +167,6 @@ index f4e22985..b681d4c0 100644
          self._batch_size = batch_size
          self._rpn_batch_size_per_im = rpn_batch_size_per_im
          self._min_level = min_level
-diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/mask_rcnn.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/mask_rcnn.py
-index 1cc1e3fd..21b9f9a7 100644
---- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/mask_rcnn.py
-+++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/model/mask_rcnn.py
-@@ -251,21 +251,21 @@ class MaskRCNN(tf.keras.Model):
-         mask_rcnn_loss = self.mask_rcnn_loss(model_outputs)
-         mask_rcnn_loss *= self._params.mrcnn_weight_loss_mask
-         self.add_loss(mask_rcnn_loss)
--        self.add_metric(mask_rcnn_loss, name='mask_rcnn_loss')
-+        # self.add_metric(mask_rcnn_loss, name='mask_rcnn_loss')
- 
-         fast_rcnn_class_loss, fast_rcnn_box_loss = self.fast_rcnn_loss(model_outputs)
-         fast_rcnn_box_loss *= self._params.fast_rcnn_box_loss_weight
-         self.add_loss(fast_rcnn_box_loss)
--        self.add_metric(fast_rcnn_box_loss, name='fast_rcnn_box_loss')
-+        # self.add_metric(fast_rcnn_box_loss, name='fast_rcnn_box_loss')
-         self.add_loss(fast_rcnn_class_loss)
--        self.add_metric(fast_rcnn_class_loss, name='fast_rcnn_class_loss')
-+        # self.add_metric(fast_rcnn_class_loss, name='fast_rcnn_class_loss')
- 
-         rpn_score_loss, rpn_box_loss = self.rpn_loss(model_outputs)
-         rpn_box_loss *= self._params.rpn_box_loss_weight
-         self.add_loss(rpn_box_loss)
--        self.add_metric(rpn_box_loss, name='rpn_box_loss')
-+        # self.add_metric(rpn_box_loss, name='rpn_box_loss')
-         self.add_loss(rpn_score_loss)
--        self.add_metric(rpn_score_loss, name='rpn_score_loss')
-+        # self.add_metric(rpn_score_loss, name='rpn_score_loss')
- 
-         l2_regularization_loss = tf.add_n([
-             tf.nn.l2_loss(tf.cast(v, dtype=tf.float32))
-@@ -274,7 +274,7 @@ class MaskRCNN(tf.keras.Model):
-         ])
-         l2_regularization_loss *= self._params.l2_weight_decay
-         self.add_loss(l2_regularization_loss)
--        self.add_metric(l2_regularization_loss, name='l2_regularization_loss')
-+        # self.add_metric(l2_regularization_loss, name='l2_regularization_loss')
- 
-     def get_config(self):
-         pass
 diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/ops/roi_ops.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/ops/roi_ops.py
 index 8670753e..deaf434a 100644
 --- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/ops/roi_ops.py
@@ -233,28 +198,6 @@ index 8670753e..deaf434a 100644
  
          boxes = box_utils.to_absolute_coordinates(boxes, height, width)
  
-diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/callbacks.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/callbacks.py
-index 4e7b56c9..20ae757c 100644
---- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/callbacks.py
-+++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/callbacks.py
-@@ -127,12 +127,12 @@ class DLLoggerPerfCallback(KerasCallback):
-         self._dllogger.log(
-             step=step,
-             data={
-+                f'{mode}_time': self._calculate_total_time(self._start_timestamps[mode], time.time()),
-                 f'{mode}_throughput': self._calculate_throughput(deltas, self._batch_sizes[mode]),
--                f'{mode}_latency': self._calculate_latency(deltas),
--                f'{mode}_latency_90': self._calculate_latency_confidence(deltas, 90.0),
--                f'{mode}_latency_95': self._calculate_latency_confidence(deltas, 95.0),
--                f'{mode}_latency_99': self._calculate_latency_confidence(deltas, 99.0),
--                f'{mode}_time': self._calculate_total_time(self._start_timestamps[mode], time.time())
-+                # f'{mode}_latency': self._calculate_latency(deltas),
-+                # f'{mode}_latency_90': self._calculate_latency_confidence(deltas, 90.0),
-+                # f'{mode}_latency_95': self._calculate_latency_confidence(deltas, 95.0),
-+                # f'{mode}_latency_99': self._calculate_latency_confidence(deltas, 99.0),
-             }
-         )
- 
 diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/learning_rate.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/learning_rate.py
 index ee96214e..a3566a1a 100644
 --- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/learning_rate.py
@@ -268,17 +211,16 @@ index ee96214e..a3566a1a 100644
      """
      Schedule that starts with learning rate at `init_value` and monotonically increases
 diff --git a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/run.py b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/run.py
-index d7b001b3..f0854fd7 100644
+index d7b001b3..6c44f429 100644
 --- a/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/run.py
 +++ b/TensorFlow2/Segmentation/MaskRCNN/mrcnn_tf2/runtime/run.py
-@@ -14,35 +14,39 @@ from mrcnn_tf2.runtime.weights_mapping import WEIGHTS_MAPPING
+@@ -14,38 +14,43 @@ from mrcnn_tf2.runtime.weights_mapping import WEIGHTS_MAPPING
  def run_training(dataset, params):
      setup(params)
  
 -    strategy = tf.distribute.MirroredStrategy()
 -    params.replicas = strategy.num_replicas_in_sync
-+    params.replicas = 1
-     params.global_train_batch_size = params.train_batch_size * params.replicas
+-    params.global_train_batch_size = params.train_batch_size * params.replicas
 -    logging.info(f'Distributed Strategy is activated for {params.replicas} device(s)')
 -
 -    with strategy.scope():
@@ -294,16 +236,16 @@ index d7b001b3..f0854fd7 100644
 -            # scale only by local BS as distributed strategy later scales it by number of replicas
 -            scale=params.train_batch_size
 -        )
- 
--        optimizer = tf.keras.optimizers.SGD(
--            learning_rate=learning_rate,
--            momentum=params.momentum
--        )
-+    learning_rate_init_value = params.init_learning_rate
-+    if params.mpi_num > 1:
-+        learning_rate_init_value = learning_rate_init_value * params.mpi_num
++    params.replicas = 1
++    if params.horovod:
++        import horovod.tensorflow as hvd
++        num_processes = hvd.size()
++    else:
++        num_processes = 1
++    params.global_train_batch_size = params.train_batch_size * num_processes
++
 +    learning_rate = PiecewiseConstantWithWarmupSchedule(
-+        init_value=learning_rate_init_value,
++        init_value=params.init_learning_rate,
 +        # scale boundaries from epochs to steps
 +        boundaries=[
 +            int(b * dataset.train_size / params.global_train_batch_size)
@@ -314,12 +256,17 @@ index d7b001b3..f0854fd7 100644
 +        scale=params.train_batch_size
 +    )
  
--        mask_rcnn_model = create_model(params)
+-        optimizer = tf.keras.optimizers.SGD(
+-            learning_rate=learning_rate,
+-            momentum=params.momentum
+-        )
 +    optimizer = tf.keras.optimizers.legacy.SGD(
 +        learning_rate=learning_rate,
 +        momentum=params.momentum
 +    )
-+    if params.mpi_num > 1:
+ 
+-        mask_rcnn_model = create_model(params)
++    if params.horovod:
 +        import horovod.tensorflow.keras as hvd
 +        logging.info("MPI horovod is enabled, using hvd.DistributedOptimizer")
 +        optimizer = hvd.DistributedOptimizer(optimizer, groups=1)
@@ -328,15 +275,18 @@ index d7b001b3..f0854fd7 100644
 -            optimizer=optimizer
 -        )
 +    mask_rcnn_model = create_model(params)
-+
-+    mask_rcnn_model.compile(
-+        optimizer=optimizer,
-+        experimental_run_tf_function=False
-+    )
  
-     # distributed strategy splits data between instances so we need global BS
-     train_data = dataset.train_fn(batch_size=params.global_train_batch_size)
-@@ -112,8 +116,9 @@ def setup(params):
+-    # distributed strategy splits data between instances so we need global BS
+-    train_data = dataset.train_fn(batch_size=params.global_train_batch_size)
++    mask_rcnn_model.compile(
++        optimizer=optimizer
++    )
++
++    train_data = dataset.train_fn(batch_size=params.train_batch_size)
+ 
+     if params.eagerly:
+         mask_rcnn_model.run_eagerly = True
+@@ -112,8 +117,9 @@ def setup(params):
          logging.info('XLA is activated')
  
      if params.amp:
@@ -348,7 +298,7 @@ index d7b001b3..f0854fd7 100644
          logging.info('AMP is activated')
  
  
-@@ -164,13 +169,26 @@ def create_callbacks(params):
+@@ -164,13 +170,26 @@ def create_callbacks(params):
              mapping=lambda name: WEIGHTS_MAPPING.get(name.replace(':0', ''), name)
          )
  
@@ -356,40 +306,26 @@ index d7b001b3..f0854fd7 100644
 -        filepath=os.path.join(params.model_dir, params.checkpoint_name_format),
 -        verbose=1
 -    )
-+    # if params.mpi_num > 1:
-+    #     import horovod.tensorflow.keras as hvd
-+    #     if hvd.rank() == 0:
-+    #         yield tf.keras.callbacks.ModelCheckpoint(
-+    #             filepath=os.path.join(params.model_dir, params.checkpoint_name_format),
-+    #             verbose=1
-+    #         )
-+    # else:
-+    #     yield tf.keras.callbacks.ModelCheckpoint(
-+    #         filepath=os.path.join(params.model_dir, params.checkpoint_name_format),
-+    #         verbose=1
-+    #     )
++    if params.horovod:
++        import horovod.tensorflow.keras as hvd
++        if hvd.rank() == 0:
++            yield tf.keras.callbacks.ModelCheckpoint(
++                filepath=os.path.join(params.model_dir, params.checkpoint_name_format),
++                verbose=1, save_weights_only=True
++            )
++    else:
++        yield tf.keras.callbacks.ModelCheckpoint(
++            filepath=os.path.join(params.model_dir, params.checkpoint_name_format),
++            verbose=1, save_weights_only=True
++        )
  
      if params.log_tensorboard:
          yield tf.keras.callbacks.TensorBoard(
--            log_dir=params.log_tensorboard,
--            update_freq='batch'
-+            log_dir=params.log_tensorboard, profile_batch=0,
-+            update_freq=5
+             log_dir=params.log_tensorboard,
+             update_freq='batch'
          )
 +
-+    if params.mpi_num > 1:
++    if params.horovod:
 +        import horovod.tensorflow.keras as hvd
 +        logging.info("MPI horovod is enabled, hvd.callbacks.BroadcastGlobalVariablesCallback")
 +        yield hvd.callbacks.BroadcastGlobalVariablesCallback(0)
-diff --git a/TensorFlow2/Segmentation/MaskRCNN/scripts/train.py b/TensorFlow2/Segmentation/MaskRCNN/scripts/train.py
-index 6b61827e..e46ff590 100644
---- a/TensorFlow2/Segmentation/MaskRCNN/scripts/train.py
-+++ b/TensorFlow2/Segmentation/MaskRCNN/scripts/train.py
-@@ -62,7 +62,6 @@ if __name__ == '__main__':
-         f'python {main_path}'
-         f' train'
-         f' --data_dir "{flags.data_dir}"'
--        f' --backbone_checkpoint "{checkpoint_path}"'
-         f' --train_batch_size {flags.batch_size}'
-     )
-     cmd_eval = (

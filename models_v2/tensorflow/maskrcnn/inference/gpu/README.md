@@ -48,6 +48,7 @@ bash download_and_preprocess_coco.sh $DATASET_DIR
 6. Download weights
     ```
         pushd .
+        git clone https://github.com/NVIDIA/DeepLearningExamples.git
         cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
         python scripts/download_weights.py --save_dir=./weights
         popd 
@@ -65,9 +66,10 @@ bash download_and_preprocess_coco.sh $DATASET_DIR
     |   **Parameter**    | **export command**                                    |
     | :---: | :--- |
     |  **DATASET_DIR**   | `export DATASET_DIR=/the/path/to/dataset`             |
-    |   **BATCH_SIZE** (optional)   | `export BATCH_SIZE=4`           |
-    |   **PRECISION**   | `export PRECISION=bfloat16` (float16 or fp32)           |
+    |  **OUTPUT_DIR**   |  `export OUTPUT_DIR=<path_to_save_logs>`               |
+    |   **PRECISION**   | `export PRECISION=float16`             |
     |   **GPU_TYPE**    | `export GPU_TYPE=<flex_140 or flex_170>`                 |
+    |   **BATCH_SIZE** (optional)   | `export BATCH_SIZE=4`           |
 7. Run `run_model.sh`
 
 ## Output

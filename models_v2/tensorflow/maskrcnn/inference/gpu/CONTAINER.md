@@ -57,7 +57,7 @@ docker run -it \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env BATCH_SIZE=${BATCH_SIZE} \
-  --env PRECSION=${PRECISION} \
+  --env PRECISION=${PRECISION} \
   --env GPU_TYPE=${GPU_TYPE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \

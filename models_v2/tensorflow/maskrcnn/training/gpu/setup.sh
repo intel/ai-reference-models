@@ -30,7 +30,7 @@ if [ -d "DeepLearningExamples" ]; then
 else
   git clone https://github.com/NVIDIA/DeepLearningExamples.git
   cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
-  git checkout c481324031ecf0f70f8939516c02e16cac60446d
+  git checkout 9dd9fcb98f56187e49c5ee280cf8dbd530dde57b
   git apply  $current_dir/EnableBF16.patch
   cd -
 fi

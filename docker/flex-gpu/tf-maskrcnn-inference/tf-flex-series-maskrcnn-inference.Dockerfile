@@ -13,7 +13,7 @@
 # limitations under the License.
 
 ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG TF_BASE_TAG="xpu"
+ARG TF_BASE_TAG="2.15.0.0-xpu"
 
 FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 

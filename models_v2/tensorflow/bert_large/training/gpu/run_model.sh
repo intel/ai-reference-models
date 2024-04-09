@@ -66,8 +66,18 @@ cd ./DeepLearningExamples/TensorFlow2/LanguageModeling/BERT
 
 export ITEX_OPS_OVERRIDE=1
 export DATA_DIR=$DATA_DIR
-TRAIN_BATCH_SIZE_PHASE1=60
-TRAIN_BATCH_SIZE_PHASE2=32
+if [ "$DATATYPE" == "bf16" ]; then
+    TRAIN_BATCH_SIZE_PHASE1=60
+    TRAIN_BATCH_SIZE_PHASE2=32
+elif [ "$DATATYPE" == "fp32" ]; then
+    TRAIN_BATCH_SIZE_PHASE1=30
+    TRAIN_BATCH_SIZE_PHASE2=16
+elif [ "$DATATYPE" == "tf32" ]; then
+    TRAIN_BATCH_SIZE_PHASE1=30
+    TRAIN_BATCH_SIZE_PHASE2=16
+else  
+    echo "not support datatype"
+fi
 EVAL_BATCH_SIZE=8
 LEARNING_RATE_PHASE1=7.5e-4
 LEARNING_RATE_PHASE2=5e-4
@@ -101,14 +111,14 @@ bash scripts/run_pretraining_lamb_phase2.sh \
     $BERT_MODEL \
     $DATA_DIR \
     $RESULTS_DIR \
-    |& tee $pwd/bert_large_training_${DATATYPE}.log
+    |& tee $RESULTS_DIR/bert_large_training_${DATATYPE}.log
 
 cd -
 
 if [[ $MULTI_TILE == "False" ]];then
-    throughput=$(cat $pwd/bert_large_training_${DATATYPE}.log | grep "Throughput Average (sequences/sec)"  | tail -n 1 | awk -F ' ' '{print $9}')
+    throughput=$(cat $RESULTS_DIR/bert_large_training_${DATATYPE}.log | grep "Throughput Average (sequences/sec)"  | tail -n 1 | awk -F ' ' '{print $9}')
 else
-    throughput=$(cat $pwd/bert_large_training_${DATATYPE}.log | grep "Throughput Average (sequences/sec)"  | tail -n 1 | awk -F ' ' '{print $10}')
+    throughput=$(cat $RESULTS_DIR/bert_large_training_${DATATYPE}.log | grep "Throughput Average (sequences/sec)"  | tail -n 1 | awk -F ' ' '{print $10}')
 fi
 
 yaml_content=$(cat <<EOF

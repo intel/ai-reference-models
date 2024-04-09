@@ -2,7 +2,7 @@
 
 ## Description
 
-This document has instructions for running MaskRCNN training with BFloat16 precision using Intel® Extension for TensorFlow on Intel® Data Center GPU Max Series.
+This document has instructions for running MaskRCNN training with BFloat16 and FP32 precisions using Intel® Extension for TensorFlow on Intel® Data Center GPU Max Series.
 
 ## Datasets
 
@@ -13,7 +13,7 @@ Set the `DATASET_DIR` to point to the TF records directory when running MaskRCNN
 ## Quick Start Scripts
 | Script name | Description |
 |-------------|-------------|
-| `run_model.sh` | Runs MaskRCNN BF16 training on single and two tiles |
+| `run_model.sh` | Runs MaskRCNN BF16 and FP32 training on single and two tiles |
 
 Requirements:
 * Host has [Intel® Data Center GPU Max Series](https://ark.intel.com/content/www/us/en/ark/products/series/232874/intel-data-center-gpu-max-series.html)
@@ -25,7 +25,7 @@ Requirements:
 ```bash
 docker pull intel/image-segmentation:tf-max-gpu-maskrcnn-training
 ```
-To MaskRCNN training container includes scripts, models and libraries needed to run BFloat16 training. To run the `run_model.sh` quickstart script using this container, you are required to volume mount the pre-processed COCO 2017 dataset to run the script. You will also need to provide an output directory to store logs.
+To MaskRCNN training container includes scripts, models and libraries needed to run BFloat16/FP32 training. To run the `run_model.sh` quickstart script using this container, you are required to volume mount the pre-processed COCO 2017 dataset to run the script. You will also need to provide an output directory to store logs.
 
 ```bash
 #Optional
@@ -34,7 +34,7 @@ export BATCH_SIZE=<provide batch size. Default is 4>
 #Required
 export DATASET_DIR=<path to pre-processed COCO 2017 dataset>
 export MULTI_TILE=<specify True for Multi-tile training and False for single-tile training>
-export PRECISION=bfloat16
+export PRECISION=<provide either bfloat16 or fp32 precision>
 export OUTPUT_DIR=<path to output directory>
 
 IMAGE_NAME=intel/image-segmentation:tf-max-gpu-maskrcnn-training

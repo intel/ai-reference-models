@@ -54,8 +54,8 @@ if [[ ${GPU_TYPE} == flex_170 ]]; then
       echo "Running FP16 Wide and Deep Large Inference on Flex 170"
       python inference.py  --input_graph=$PB_FILE_PATH \
              --data_location=$DATASET_PATH --batch_size=$BATCH_SIZE \
-            --num_inter_threads=1 |& tee wide-deep-large-ds_inference_BS${BATCH_SIZE}.log
-      throughput=$(cat wide-deep-large-ds_inference_BS${BATCH_SIZE}.log | grep Throughput | awk -F ' ' '{print $12}')
+            --num_inter_threads=1 |& tee ${OUTPUT_DIR}/wide-deep-large-ds_inference_BS${BATCH_SIZE}.log
+      throughput=$(cat ${OUTPUT_DIR}/wide-deep-large-ds_inference_BS${BATCH_SIZE}.log | grep Throughput | awk -F ' ' '{print $5}')
     fi
 elif [[ ${GPU_TYPE} == flex_140 ]]; then 
     if [[ ${device_id} == "56c1" ]]; then
@@ -66,8 +66,8 @@ elif [[ ${GPU_TYPE} == flex_140 ]]; then
              --data_location=$DATASET_PATH --batch_size=$BATCH_SIZE \
             --num_inter_threads=1 ")
         done
-      parallel --lb -d, --tagstring "[{#}]" ::: "${str[@]}" |& tee wide-deep-large-ds_inference_BS${BATCH_SIZE}.log
-      throughput=$(cat wide-deep-large-ds_inference_BS${BATCH_SIZE}.log | grep Throughput | awk -F ' ' '{print $13}' | awk '{ sum_total += $1 } END { print sum_total }' )
+      parallel --lb -d, --tagstring "[{#}]" ::: "${str[@]}" |& tee ${OUTPUT_DIR}/wide-deep-large-ds_inference_BS${BATCH_SIZE}.log
+      throughput=$(cat ${OUTPUT_DIR}/wide-deep-large-ds_inference_BS${BATCH_SIZE}.log | grep Throughput | awk -F ' ' '{print $6}' | awk '{ sum_total += $1 } END { print sum_total }' )
     fi
 fi
  

@@ -88,7 +88,7 @@ k=0
 
 if [ ${TEST_MODE} == "accuracy" ];then
   python eval_image_classifier_inference.py --input-graph=${PB_FILE_PATH} --batch-size=${BATCH_SIZE} --data-num-inter-threads 1 --accuracy-only --data-location ${DATASET_DIR} --dtype ${PRECISION} \
-  |& tee resnet50_${TEST_MODE}_${PRECISION}.log
+  |& tee ${OUTPUT_DIR}/resnet50_${TEST_MODE}_${PRECISION}.log
 elif [ ${TEST_MODE} == "inference" ];then
     if [[ -z ${FLEX_GPU_TYPE} ]]; then
       echo "FLEX_GPU_TYPE not set. Please set either flex_170 or flex_140"
@@ -96,7 +96,7 @@ elif [ ${TEST_MODE} == "inference" ];then
     fi  
   if [[ ${FLEX_GPU_TYPE} == flex_140 ]]; then 
     if [[ ${device_id} == "56c1" ]]; then
-  	echo "Running benchmark"
+  	echo "resnet50 inference on Flex series 170"
 	if [[ ${BATCH_SIZE} == "1" ]]; then
 	  for i in $( eval echo {0..$((num_devs-1))} )
     	do
@@ -112,7 +112,7 @@ elif [ ${TEST_MODE} == "inference" ];then
 		    str+=("ZE_AFFINITY_MASK="${i}" python eval_image_classifier_inference.py --input-graph=${PB_FILE_PATH} --batch-size=${BATCH_SIZE} --warmup-steps=10 --steps=5000 --dtype ${PRECISION} ${ARGS} ")
 	    done
 	fi
-echo "resnet50 int8 inference on Flex series 140"
+echo "resnet50 inference on Flex series 140"
 parallel --lb -d, --tagstring "[{#}]" ::: \
     "${str[@]}" 2>&1 | tee $OUTPUT_DIR/resnet50_${TEST_MODE}_${PRECISION}.log
     fi
@@ -125,7 +125,7 @@ elif [[ ${FLEX_GPU_TYPE} == flex_170 ]]; then
 fi
 fi
 if [ ${TEST_MODE} == "accuracy" ];then
-  value=$(cat resnet50_${TEST_MODE}_${PRECISION}.log | grep "(Top1 accuracy, Top5 accuracy) " | tail -n 1 | sed -e "s/.*(//" | sed -e "s/,.*//")
+  value=$(cat ${OUTPUT_DIR}/resnet50_${TEST_MODE}_${PRECISION}.log | grep "(Top1 accuracy, Top5 accuracy) " | tail -n 1 | sed -e "s/.*(//" | sed -e "s/,.*//")
   key="accuracy"
   unit=""
 elif [ ${TEST_MODE} == "inference" ];then 

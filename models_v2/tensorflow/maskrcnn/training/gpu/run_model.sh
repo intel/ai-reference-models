@@ -64,31 +64,36 @@ echo " EPOCHS: $EPOCHS"
 echo " STEPS_PER_EPOCH: $STEPS_PER_EPOCH"
 echo " MULTI_TILE: $MULTI_TILE"
 
-mpi=""
-mpi_number="2"
-if [[ $MULTI_TILE == "True" ]];then
-    mpi="mpirun -np $mpi_number -prepend-rank -ppn $mpi_number "
-fi
-
 rm -fr $OUTPUT_DIR
-
+mkdir -p $OUTPUT_DIR
 cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
 
-
-$mpi python main.py train \
---data_dir $DATASET_DIR \
---model_dir=$OUTPUT_DIR \
---train_batch_size $BATCH_SIZE \
---seed=0 --use_synthetic_data \
---epochs $EPOCHS --steps_per_epoch $STEPS_PER_EPOCH \
---log_every=1 --log_warmup_steps=1 \
-$AMP |& tee maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log
+mpi_number="2"
+if [[ $MULTI_TILE == "True" ]];then
+    mpirun -np $mpi_number -prepend-rank -ppn $mpi_number python main.py train \
+    --data_dir $DATASET_DIR \
+    --model_dir=$OUTPUT_DIR \
+    --train_batch_size $BATCH_SIZE \
+    --seed=0 --use_synthetic_data \
+    --epochs $EPOCHS --steps_per_epoch $STEPS_PER_EPOCH \
+    --log_every=1 --log_warmup_steps=1  --horovod \
+    $AMP |& tee ${OUTPUT_DIR}/maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log
+else
+    python main.py train \
+    --data_dir $DATASET_DIR \
+    --model_dir=$OUTPUT_DIR \
+    --train_batch_size $BATCH_SIZE \
+    --seed=0 --use_synthetic_data \
+    --epochs $EPOCHS --steps_per_epoch $STEPS_PER_EPOCH \
+    --log_every=1 --log_warmup_steps=1 \
+    $AMP |& tee ${OUTPUT_DIR}/maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log
+fi
 
 if [[ $MULTI_TILE == "False" ]];then
-    result=$(cat maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log | grep train_throughput  | tail -n 1 | awk -F ' ' '{print $9}')
+    result=$(cat ${OUTPUT_DIR}/maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log | grep train_throughput  | tail -n 1 | awk -F ' ' '{print $7}')
     throughput=$result
 else
-    result=$(cat maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log | grep train_throughput  | tail -n 1 | awk -F ' ' '{print $10}')
+    result=$(cat ${OUTPUT_DIR}/maskrcnn_training_${PRECISION}_BS${BATCH_SIZE}.log | grep train_throughput  | tail -n 1 | awk -F ' ' '{print $8}')
     throughput=$(echo "$result $mpi_number" |awk '{printf("%.2f", $1*$2)}')
 fi
 cd -
