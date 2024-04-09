@@ -23,12 +23,21 @@ import shutil
 import subprocess
 import sys
 import json
+import multiprocessing as mp
 
 # Custom modules
 import js_merge
 import js_sysinfo
 import json_to_csv
+import parse_telemetry
+import telemetry
 import save_to_json
+
+platform_choices = [
+    'Flex',
+    'Max',
+    'CUDA'
+]
 
 def get_config(metadata: str, app_args: list):
     res = {
@@ -57,6 +66,9 @@ if __name__ == '__main__':
     parser.add_argument('--metadata', action='store', type=str, default='', help='Space separated key=value pairs to amend to json reports')
     parser.add_argument('--output_dir', action="store", type=str, default='', required=True, help='Path to store outputs')
     parser.add_argument('--profile', action="store", type=str, default='', required=True, help='Profile with tests list')
+    parser.add_argument('--platform', help='System on which telemetry is being collected', default='', required=True, choices=platform_choices)
+    parser.add_argument('--socket', action="store", type=str, default='/tmp/telemetry.s', help='Socket to control telemetry capture')
+    parser.add_argument('--telemetry', action="store_true", help='enable GPU telemetry capture')
 
     args, benchmark_app_args = parser.parse_known_args()
 
@@ -81,6 +93,8 @@ if __name__ == '__main__':
     # ├── test_{i}                  # output directory of i-th test
     # │   ├── test.csv              # test csv definition (i-th line from profile.csv)
     # │   ├── results.json          # results output from the test complying with the schema
+    # │   ├── *_smi_dump.csv        # raw SMI output
+    # │   ├── telemetry.json        # processed telemetry stats from SMI
     # │   └── *                     # whatever other output files test produces
     # ├── results_test_{i}.json     # ultimate report for i-th test
     # └── summary.csv               # engineering summary for debug
@@ -104,12 +118,22 @@ if __name__ == '__main__':
     # track results for summary CSV
     to_summarize  = []
 
+    # define tracker for set of spawned processes
+    processes = {}
+
     for iteration, test in enumerate(tests):
         print('Running: {0}/{1}'.format(iteration+1, len(tests)))
 
         # create output directory for the test
         output_dir = os.path.join(args.output_dir, 'test_' + str(iteration+1))
         pathlib.Path(output_dir).mkdir()
+
+        # start telemetry capture in separate process
+        if args.telemetry:
+            processes['telemetry.capture'] = {
+                'process': mp.Process(target=telemetry.capture, args=(args, output_dir))
+            }
+            processes['telemetry.capture']['process'].start()
 
         # dump test csv definition
         with open(os.path.join(output_dir, 'test.csv'), 'w') as f:
@@ -119,8 +143,8 @@ if __name__ == '__main__':
 
         # creating benchmark app cmdline from the template
         app_args = list(benchmark_app_args)
-        for a in range(len(app_args)):
-            app_args[a] = app_args[a].format(**test, output_dir=output_dir, control_file='tbd')
+        for arg in range(len(app_args)):
+            app_args[arg] = app_args[arg].format(**test, output_dir=output_dir, socket=args.socket)
 
         print('Cmdline: ' + str(app_args))
 
@@ -129,15 +153,49 @@ if __name__ == '__main__':
         except Exception as e:
             print('error: ' + str(e), file=sys.stderr)
 
+        # terminate telemetry capture process
+        if args.telemetry:
+            telemetry.stop(args.socket)
+            telemetry.kill(args.socket)
+            capture_process = processes['telemetry.capture']['process']
+            if capture_process.is_alive():
+                # 30 second timeout should be more than sufficient to join a non-broken process
+                capture_process.join(30)
+            if capture_process.exitcode == None:
+                # If exit code is still zero then we failed to cleanly kill it.
+                # Use process API to forcefully kill.
+                capture_process.kill()
+                print('error: joining {0} process timed-out'.format('telemetry.capture'), file=sys.stderr)
+                sys.exit(1)
+            if capture_process.exitcode != 0:
+                print('error: {0} process returned non-zero exit code: {1}'.format('telemetry.capture', capture_process.exitcode), file=sys.stderr)
+                sys.exit(1)
+            del processes['telemetry.capture']
+
         # read in results.json for the current test
         file = os.path.join(output_dir, 'results.json')
         with open(file, 'r') as f:
             results = json.load(f)
 
+        # incorporate telemetry into results if we collected it
+        # Determine name for SMI data and open it
+        telemetry_results = {}
+        if args.telemetry:
+            smi_dump = parse_telemetry.open_smi_data(output_dir, args.platform)
+            # Process the SMI data
+            telemetry_results = parse_telemetry.process(smi_dump, args.platform)
+            # Close SMI CSV
+            smi_dump.close()
+            # write the telemetry stats to telemetry.json
+            file = os.path.join(output_dir, 'telemetry.json')
+            with open(file, 'w') as f:
+                json.dump(telemetry_results, f, indent=indent)
+
         # merge various components into final test report
         report = {}
         report = js_merge.merge(report, results)
         report = js_merge.merge(report, get_config(args.metadata, app_args))
+        report = js_merge.merge(report, telemetry_results)
         report = js_merge.merge(report, sysinfo)
 
         # write the merged report
