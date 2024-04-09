@@ -62,8 +62,10 @@ def write_results(batches_tested, throughput, latency, top1, top5, throughput_ov
         'schema': 'TBD',
         'config': {
             'workload': {
+                'type': 'inference',
                 'model': {
                     'name': '{0}'.format(args.arch),
+                    'link': 'https://pytorch.org/vision/main/models/generated/torchvision.models.{0}.html'.format(args.arch),
                     'streams': args.total_instances,
                     'precision': args.dtype_str,
                     'batch-size': args.batch_size,
