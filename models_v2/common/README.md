@@ -5,6 +5,7 @@
 [js_sysinfo.py]: js_sysinfo.py
 [json_to_csv.py]: json_to_csv.py
 [parse_result.py]: parse_result.py
+[save_to_json.py]: save_to_json.py
 
 [DKMS]: https://github.com/dell/dkms
 [Docker]: https://www.docker.com/
@@ -21,6 +22,7 @@ This folder contains common Python utilities and modules which can be reused acr
 | [js_sysinfo.py]   | Tool to dump system information in JSON format           |
 | [json_to_csv.py]  | Tool to dump few json files into single CSV              |
 | [parse_result.py] | Sample results parser (view file for cmdline options)    |
+| [save_to_json.py] | Tool to save/amend data to json file                     |
 
 # benchmark.py
 
@@ -208,3 +210,25 @@ Options:
 | --------------------- | ------------------------------- |
 | `-h`, `--help`        | Show this help message and exit |
 | `-o, --output OUTPUT` | File to store output            |
+
+# save_to_json.py
+
+Usage:
+```
+save_to_json [-h] [--amend] [--indent INDENT] file key=value [key=value ...]
+```
+
+Tool saves given key/value pairs to the JSON file. Nested keys should be delimited by `.` (period). With `--amend` option keys are amended to the output file. Amended keys take precedence over existing keys in output file.
+
+Options:
+| Option                |                                 |
+| --------------------- | ------------------------------- |
+| `-h`, `--help`        | Show this help message and exit |
+| `--amend`             | Amend data to output file       |
+| `--indent INDENT`     | Indent for json.dump()          |
+
+Positional arguments:
+| Argument    | Description                                               |
+| ----------- | --------------------------------------------------------- |
+| `file`      | JSON file to store output                                 |
+| `key=value` | key/value pair to amend (`key.key=value` for nested keys) |
