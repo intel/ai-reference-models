@@ -27,6 +27,7 @@ import io_utils
 import loader_utils
 import statistics_utils
 import summary_utils
+import telemetry
 
 from arguments_utils import args
 
@@ -486,8 +487,31 @@ def predict(instance, input_args):
     use_autocast, autocast_dtype, model = do_warmup(model, validation_loader_inf)
     barrier_utils.do_ipc_sync(args.barrier, 'warmup', args.terminate_if_sync_fail)
 
+    # Start benchmarker and sync processes afterwards
+    if args.socket != '':
+        if args.instance == 1: # Only start a single time
+            try:
+                telemetry.start(args.socket)
+            except Exception as e:
+                io_utils.write_error(str(e))
+                io_utils.write_error('failed to communicate with telemetry server')
+                sys.exit(1)
+        barrier_utils.do_ipc_sync(args.barrier, 'telemetry', args.terminate_if_sync_fail)
+
     # Do inference benchmarking
     batches_tested, throughput, latency, top1, top5, throughput_overhead, latency_overhead = do_perf_benchmarking(model, validation_loader_inf, use_autocast, autocast_dtype)
+
+    # Stop benchmarker
+    if args.socket != '':
+        if args.instance == 1: # Only stop a single time
+            try:
+                telemetry.stop(args.socket)
+            except Exception as e:
+                io_utils.write_error(str(e))
+                io_utils.write_error('failed to communicate with telemetry server')
+                sys.exit(1)
+
+    # Write process specific results
     summary_utils.write_results(batches_tested, throughput, latency, top1, top5, throughput_overhead, latency_overhead)
 
 def main():
@@ -508,9 +532,11 @@ def main():
         if processes[instance].exitcode != 0:
             io_utils.write_error('Process {0} returned non-zero exit code: {1}'.format(instance, processes[instance].exitcode))
             has_error = True
+    if has_error:
+        sys.exit(1)
 
     summary_utils.combine_results()
-    sys.exit(1 if has_error else 0)
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
