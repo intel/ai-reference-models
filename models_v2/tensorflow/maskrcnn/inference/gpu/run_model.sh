@@ -60,9 +60,12 @@ echo " PRECISION: ${PRECISION}"
 echo "OUTPUT_DIR: ${OUTPUT_DIR}"
 echo " BATCH_SIZE: ${BATCH_SIZE}"
 
+mkdir -p ${OUTPUT_DIR}
+
 mkdir -p PRETRAINED_WEIGHTS
 python -u ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN/scripts/download_weights.py --save_dir=$PRETRAINED_WEIGHTS
 
+export TF_NUM_INTEROP_THREADS=1 #for better performance
 declare -a str
 device_id=$( lspci | grep -i display | sed -n '1p' | awk '{print $7}' )
 num_devs=$(lspci | grep -i display | awk '{print $7}' | wc -l)
@@ -78,8 +81,8 @@ cd ./DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN
       --data_dir=$DATASET_DIR \
       --batch_size=$BATCH_SIZE \
       --no_xla \
-      --weights_dir=$PRETRAINED_WEIGHTS $AMP |& tee ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}.log
-      value=$(cat ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}.log | grep -o "'predict_throughput': [0-9.]*" | awk -F ": " '{print $2}' | tail -1)
+      --weights_dir=$PRETRAINED_WEIGHTS $AMP |& tee ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}_BS${BATCH_SIZE}.log
+      value=$(cat ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}_BS${BATCH_SIZE}.log | grep -o "'predict_throughput': [0-9.]*" | awk -F ": " '{print $2}' | tail -1)
     fi
 elif [[ ${GPU_TYPE} == flex_140 ]]; then
     if [[ ${device_id} == "56c1" ]]; then
@@ -98,18 +101,17 @@ elif [[ ${GPU_TYPE} == flex_140 ]]; then
             ((k=k+1))
             done
           done
-      parallel --lb -d, --tagstring "[{#}]" ::: "${str[@]}" 2>&1 | tee ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}.log
-      value=$(grep -rnw "5000/Unknown" ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}.log | grep -o "'predict_throughput': [0-9.]*" | awk -F ": " '{print $2}' | tail -2 | awk '{ sum_total += $1 } END { print sum_total }')
+      parallel --lb -d, --tagstring "[{#}]" ::: "${str[@]}" 2>&1 | tee ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}_BS${BATCH_SIZE}.log
+      value=$(grep -rnw "5000/Unknown" ${OUTPUT_DIR}/Maskrcnn_inference_${PRECISION}_BS${BATCH_SIZE}.log | grep -o "'predict_throughput': [0-9.]*" | awk -F ": " '{print $2}' | tail -2 | awk '{ sum_total += $1 } END { print sum_total }')
     fi
 fi
 key="throughput"
 unit="images/sec"
 
-throughput=$(cat maskrcnn_inference_${PRECISION}_BS${BATCH_SIZE}.log | grep Throughput | awk -F ' ' '{print $5}')
 yaml_content=$(cat <<EOF
 results:
  - key: throughput
-   value: $throughput
+   value: $value
    unit: records/sec
 EOF
 )

@@ -58,8 +58,6 @@ Bert-Large Model Training using Intel® Extension for TensorFlow.
     ./setup.sh
     ```
 5. Install [tensorflow and ITEX](https://pypi.org/project/intel-extension-for-tensorflow/)
-6. If you want to run with Horovod in multi-tile (export MULTI_TILE=True), please install intel-optimization-for-horovod instead of horovod.
-`pip uninstall horovod && pip install intel-optimization-for-horovod`
 6. Setup required environment paramaters
 
    | **Parameter**                  |              **export command**              |
