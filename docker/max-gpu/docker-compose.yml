@@ -54,7 +54,7 @@ services:
     build:
       args:
         TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-extension-for-tensorflow}
-        TF_BASE_TAG: ${TF_BASE_TAG:-2.14.0.1-xpu}  
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.15.0.0-xpu}  
         NO_PROXY: ""
         no_proxy: ""
         INT8_MODEL_URL: ${INT8_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
@@ -69,28 +69,31 @@ services:
       - /dev/dri:/dev/dri
   tf-resnet50v1-5-training:
     build: 
+      args:
+        MPI_VERSION: ${MPI_VERSION:-2021.12.0-534}
+        CCL_VERSION: ${CCL_VERSION:-2021.12.0-309}
       dockerfile: docker/max-gpu/tf-resnet50v1-5-training/tf-max-series-resnet50v1-5-training.Dockerfile
     extends: tf-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   tf-bert-large-training:
     build:
       dockerfile: docker/max-gpu/tf-bert-large-training/tf-max-series-bert-large-training.Dockerfile
-    extends: tf-resnet50v1-5-inference
+    extends: tf-resnet50v1-5-training
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
   tf-maskrcnn-training:
     build:
       dockerfile: docker/max-gpu/tf-maskrcnn-training/tf-max-series-maskrcnn-training.Dockerfile
-    extends: tf-resnet50v1-5-inference
+    extends: tf-resnet50v1-5-training
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-maskrcnn-training
   tf-3d-unet-training:
     build:
       dockerfile: docker/max-gpu/tf-3d-unet-training/tf-max-series-3d-unet-training.Dockerfile
-    extends: tf-resnet50v1-5-inference
+    extends: tf-resnet50v1-5-training
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-3d-unet-training
   pytorch-dlrmv2-training:
     build:
       dockerfile: docker/max-gpu/pytorch-dlrmv2-training/pytorch-max-series-dlrmv2-training.Dockerfile
-    extends: pytorch-resnet50v1-5-inference
+    extends: pytorch-resnet50v1-5-training
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrmv2-training
   pytorch-distilbert-inference:
     build:

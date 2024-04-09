@@ -2,7 +2,7 @@
 
 ## Description
 
-This document has instructions for running ResNet50 v1.5 training with BFloat16 precision using Intel® Extension for TensorFlow on Intel® Data Center GPU Max Series.
+This document has instructions for running ResNet50 v1.5 training using Intel® Extension for TensorFlow on Intel® Data Center GPU Max Series.
 
 ## Datasets
 
@@ -13,7 +13,7 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 ## Quick Start Scripts
 | Script name | Description |
 |-------------|-------------|
-| `run_model.sh` | Runs ResNet50 v1.5 BF16 training on single and two tiles |
+| `run_model.sh` | Runs ResNet50 v1.5 BF16 and FP32 training on single and two tiles |
 
 Requirements:
 * Host has [Intel® Data Center GPU Max Series](https://ark.intel.com/content/www/us/en/ark/products/series/232874/intel-data-center-gpu-max-series.html)
@@ -24,7 +24,7 @@ Requirements:
 ```
 docker pull intel/image-recognition:tf-max-gpu-resnet50v1-5-training
 ```
-The ResNet50 v1.5 training container includes scripts, models and libraries needed to run BFloat16 training. The script `run_model.sh` requires configuration files as input. For single-tile training, specify the configuration files present in `configure` folder as the `CONFIG_FILE` environment variable. For Multi-tile training, specify the configuration files in `hvd_configure` folder. You will also need to provide an output directory to store logs. To use Imagenet dataset, you will need to volume mount the dataset. For dummy data, use corresponding configuration files and volume mount of ImageNet dataset is not required and hence `DATASET_DIR` volume mounts are not required.
+The ResNet50 v1.5 training container includes scripts, models and libraries needed to run training. The script `run_model.sh` requires configuration files as input. For single-tile training, specify the configuration files present in `configure` folder as the `CONFIG_FILE` environment variable. For Multi-tile training, specify the configuration files in `hvd_configure` folder. You will also need to provide an output directory to store logs. To use Imagenet dataset, you will need to volume mount the dataset. For dummy data, use corresponding configuration files and volume mount of ImageNet dataset is not required and hence `DATASET_DIR` volume mounts are not required.
 
 The following example shows how to run BF16 training using real data. 
 
