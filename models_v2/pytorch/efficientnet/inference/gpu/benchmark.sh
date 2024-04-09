@@ -21,10 +21,14 @@ else
   exit 1
 fi
 
+METADATA="$METADATA"
+METADATA+=" config.system.docker0.docker.image=$IMAGE"
+METADATA+=" config.system.docker0.docker.sha256=$(docker images --no-trunc --quiet $IMAGE | cut -d: -f2)"
+
 # arguments in {} are mapped by benchmark.py from:
 # 1. Profile given by --profile argument for each iteration of the test
 # 2. Predefined variables: {output_dir}, {control_file}
-python3 -m benchmark --profile=$PROFILE --output_dir=$OUTPUT_DIR --indent 4 \
+python3 -m benchmark --profile=$PROFILE --output_dir=$OUTPUT_DIR --indent 4 --metadata "$METADATA" \
   docker run -it --rm --ipc=host --cap-add SYS_NICE $platform_opt \
     $(env | grep -E '(_proxy=|_PROXY)' | sed 's/^/-e /') \
     -e PLATFORM=${PLATFORM} \

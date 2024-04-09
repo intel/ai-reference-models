@@ -19,17 +19,22 @@ import json
 import os
 import sys
 
-def merge(a: dict, b: dict, path=[]):
+def merge(a: dict, b: dict, prefer_a: bool=True, path=[]):
     c = copy.deepcopy(a)
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
-                c[key] = merge(a[key], b[key], path + [str(key)])
+                c[key] = merge(a[key], b[key], prefer_a, path + [str(key)])
             elif type(a[key]) != type(b[key]):
-                print('error: type conflict at ' + '.'.join(path + [str(key)]))
+                print('error: type conflict for the key value: ' + '.'.join(path + [str(key)]))
                 sys.exit(1)
             elif a[key] != b[key]:
-                print('warning: different values at +' '.'.join(path + [str(key)]), file=sys.stderr)
+                print('info: different values for the key:' + '.'.join(path + [str(key)]), file=sys.stderr)
+                if not prefer_a:
+                    print('info: using value from dict-b: ' + str(b[key]))
+                    c[key] = b[key]
+                else:
+                    print('info: using value from dict-a: ' + str(a[key]))
         else:
             c[key] = b[key]
     return c
