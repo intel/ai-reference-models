@@ -28,11 +28,12 @@
 [[ "${NUM_ITERATIONS}" == "" ]] && NUM_ITERATIONS=100
 [[ "${PRECISION}" == "" ]]      && PRECISION="fp32"
 [[ "${SAVE_PATH}" == "" ]]      && SAVE_PATH=""
+[[ "${SOCKET}" == "" ]]         && SOCKET=""
 [[ "${STATUS_PRINTS}" == "" ]]  && STATUS_PRINTS=10
 [[ "${STREAMS}" == "" ]]        && STREAMS=1
 
 # Process CLI arguments as overides for environment variables
-VALID_ARGS=$(getopt -o h --long amp:,arch:,batch-size:,data:,dummy,help,load:,jit:,multi-tile,num-images:,num-iterations:,output-dir:,platform:,precision:,proxy:,save:,status-prints:,streams: -- "$@")
+VALID_ARGS=$(getopt -o h --long amp:,arch:,batch-size:,data:,dummy,help,load:,jit:,multi-tile,num-images:,num-iterations:,output-dir:,platform:,precision:,proxy:,save:,socket:,status-prints:,streams: -- "$@")
 if [[ $? -ne 0 ]]; then
     exit 1;
 fi
@@ -99,6 +100,10 @@ while [ : ]; do
         SAVE_PATH="$2"
         shift 2
         ;;
+    --socket)
+        SOCKET="$2"
+        shift 2
+        ;;
     --status-prints)
         STATUS_PRINTS=$2
         shift 2
@@ -149,6 +154,7 @@ while [ : ]; do
         echo "  --streams        [STREAMS]       : Number of parallel streams to do inference on (default: '${STREAMS}')"
         echo "                                     Will be truncated to a multiple of BATCH_SIZE"
         echo "                                     If less than BATCH_SIZE will be increased to BATCH_SIZE"
+        echo "  --socket         [SOCKET]        : Socket to control telemetry capture (default: '${SOCKET}')"
         echo ""
         echo "NOTE: Arguments may also be specified through command line variables using the name in '[]'."
         echo "      For example 'export MODEL_NAME=efficientnet_b0'."
@@ -208,28 +214,35 @@ fi
 
 # Show test configuration
 echo 'Running with parameters:'
-echo " AMP:            ${AMP}"
-echo " BATCH_SIZE:     ${BATCH_SIZE}"
-echo " DATASET_DIR:    ${DATASET_DIR}"
-echo " DUMMY:          ${DUMMY}"
-echo " JIT:            ${JIT}"
-echo " LOAD_PATH:      ${LOAD_PATH}"
-echo " MODEL_NAME:     ${MODEL_NAME}"
-echo " MULTI_TILE:     ${MULTI_TILE}"
-echo " NUM_ITERATIONS: ${NUM_ITERATIONS}"
-echo " NUM_IMAGES:     ${NUM_IMAGES}"
-echo " OUTPUT_DIR:     ${OUTPUT_DIR}"
-echo " SAVE_PATH:      ${SAVE_PATH}"
-echo " STATUS_PRINTS:  ${STATUS_PRINTS}"
-echo " STREAMS:        ${STREAMS}"
-echo " PLATFORM:       ${PLATFORM}"
-echo " PRECISION:      ${PRECISION}"
-echo " PROXY:          ${PROXY}"
+echo " AMP:                ${AMP}"
+echo " BATCH_SIZE:         ${BATCH_SIZE}"
+echo " DATASET_DIR:        ${DATASET_DIR}"
+echo " DUMMY:              ${DUMMY}"
+echo " JIT:                ${JIT}"
+echo " LOAD_PATH:          ${LOAD_PATH}"
+echo " MODEL_NAME:         ${MODEL_NAME}"
+echo " MULTI_TILE:         ${MULTI_TILE}"
+echo " NUM_ITERATIONS:     ${NUM_ITERATIONS}"
+echo " NUM_IMAGES:         ${NUM_IMAGES}"
+echo " OUTPUT_DIR:         ${OUTPUT_DIR}"
+echo " PLATFORM:           ${PLATFORM}"
+echo " PRECISION:          ${PRECISION}"
+echo " PROXY:              ${PROXY}"
+echo " SAVE_PATH:          ${SAVE_PATH}"
+echo " SOCKET:             ${SOCKET}"
+echo " STATUS_PRINTS:      ${STATUS_PRINTS}"
+echo " STREAMS:            ${STREAMS}"
 
 # Set system proxies if requested.
 if [[ "${PROXY}" != "" ]]; then
     export http_proxy=${PROXY}
     export https_proxy=${PROXY}
+fi
+
+# Set socket if sepecified
+_socket_args=""
+if [[ "${SOCKET}" != "" ]]; then
+    _socket_args="--socket ${SOCKET}"
 fi
 
 # known issue for multitile
@@ -346,7 +359,12 @@ numactl --cpunodebind=0 --membind=0 python3 predict.py \
     --max-val-dataset-size ${NUM_IMAGES} \
     --batch-streaming ${NUM_ITERATIONS} \
     --width ${_img_width} --height ${_img_height} \
-    ${_dtype_args} ${_amp_arg} ${_jit_arg} ${_perf_args} ${_save_load_args} \
+    ${_dtype_args} \
+    ${_amp_arg} \
+    ${_jit_arg} \
+    ${_perf_args} \
+    ${_save_load_args} \
+    ${_socket_args} \
     --warm-up 10 \
     --output-dir ${OUTPUT_DIR} \
     --total-instances ${STREAMS} \

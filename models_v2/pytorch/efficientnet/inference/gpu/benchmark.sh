@@ -27,8 +27,8 @@ METADATA+=" config.system.docker0.docker.sha256=$(docker images --no-trunc --qui
 
 # arguments in {} are mapped by benchmark.py from:
 # 1. Profile given by --profile argument for each iteration of the test
-# 2. Predefined variables: {output_dir}, {control_file}
-python3 -m benchmark --profile=$PROFILE --output_dir=$OUTPUT_DIR --indent 4 --metadata "$METADATA" \
+# 2. Predefined variables: {output_dir}, {socket}
+python3 -m benchmark --profile=$PROFILE --output_dir=$OUTPUT_DIR --telemetry --socket=/tmp/telemetry.s --platform=$PLATFORM --indent 4 --metadata "$METADATA" \
   docker run -it --rm --ipc=host --cap-add SYS_NICE $platform_opt \
     $(env | grep -E '(_proxy=|_PROXY)' | sed 's/^/-e /') \
     -e PLATFORM=${PLATFORM} \
@@ -41,8 +41,8 @@ python3 -m benchmark --profile=$PROFILE --output_dir=$OUTPUT_DIR --indent 4 --me
     -e NUM_ITERATIONS={num_iterations} \
     -e PRECISION={precision} \
     -e OUTPUT_DIR=/opt/output \
-    -e CONTROL_FILE=/opt/control.json \
     -v {output_dir}:/opt/output \
-    -v {control_file}:/opt/control.json \
+    -e SOCKET=/tmp/telemetry.s \
+    -v {socket}:/tmp/telemetry.s \
     $IMAGE \
       /bin/bash -c './run_model.sh --dummy'
