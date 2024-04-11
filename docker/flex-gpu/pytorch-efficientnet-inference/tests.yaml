@@ -13,7 +13,7 @@
 # limitations under the License.
 
 #Initial test. Will catch any global issues.
-#Unique coverage: Tests BATCH_SIZE 1 case. Will test multiple batches (NUM_IMAGES // BATCH_SIZE)
+#Unique coverage: Tests BATCH_SIZE 1 case. Will test multiple batches (NUM_INPUTS // BATCH_SIZE)
 bs001-s1-bf16amp-jittrace-b0:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-efficientnet-inference
   cmd: bash run_model.sh
@@ -24,8 +24,7 @@ bs001-s1-bf16amp-jittrace-b0:
     BATCH_SIZE: '1'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'yes'
@@ -46,8 +45,7 @@ bs064-s1-bf16amp-jittrace-b0:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'yes'
@@ -56,8 +54,8 @@ bs064-s1-bf16amp-jittrace-b0:
   volumes:
     - src: /tmp
       dst: /tmp
-#Initial test with BATCH_SIZE greater than NUM_IMAGES.
-#Unique coverage: NUM_IMAGES should be increased internally to be at least equal to BATCH_SIZE
+#Initial test with BATCH_SIZE greater than NUM_INPUTS.
+#Unique coverage: NUM_INPUTS should be increased internally to be at least equal to BATCH_SIZE
 bs256-s1-bf16amp-jittrace-b0:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-efficientnet-inference
   cmd: bash run_model.sh
@@ -68,8 +66,7 @@ bs256-s1-bf16amp-jittrace-b0:
     BATCH_SIZE: '256'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'yes'
@@ -90,8 +87,7 @@ bs064-s2-bf16amp-jittrace-b0:
     BATCH_SIZE: '64'
     STREAMS: '2'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'yes'
@@ -112,8 +108,7 @@ bs064-s4-bf16amp-jittrace-b0:
     BATCH_SIZE: '64'
     STREAMS: '4'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'yes'
@@ -134,8 +129,7 @@ bs064-s1-fp16amp-jittrace-b0:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'fp16'
     AMP: 'yes'
@@ -156,8 +150,7 @@ bs064-s1-fp32amp-jittrace-b0:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'fp32'
     AMP: 'yes'
@@ -178,8 +171,7 @@ bs064-s1-fp32amp-jittrace-b3:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b3'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'fp32'
     AMP: 'yes'
@@ -200,8 +192,7 @@ bs064-s1-fp32amp-jittrace-b4:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b4'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'fp32'
     AMP: 'yes'
@@ -222,8 +213,7 @@ bs064-s1-bf16noamp-jittrace-b0:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'no'
@@ -244,8 +234,7 @@ bs064-s1-bf16amp-jitscript-b0:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'yes'
@@ -266,8 +255,7 @@ bs064-s1-bf16noamp-jitscript-b0:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '16'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'no'
@@ -288,8 +276,7 @@ bs064-s1-bf16amp-jittrace-b0-save:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '1'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'yes'
@@ -307,8 +294,30 @@ bs064-s1-bf16amp-jittrace-b0-saveandload:
     BATCH_SIZE: '64'
     STREAMS: '1'
     MODEL_NAME: 'efficientnet_b0'
-    NUM_ITERATIONS: '1'
-    NUM_IMAGES: '64'
+    NUM_INPUTS: '64'
+    DUMMY: 'yes'
+    PRECISION: 'bf16'
+    AMP: 'yes'
+    JIT: 'trace'
+    OUTPUT_DIR: '/tmp'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+#Initial test with test duration specified.
+#Unique coverage: Sets min and max test duration to 10 seconds
+bs001-s1-bf16amp-jittrace-b0-td:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-efficientnet-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env:
+    BATCH_SIZE: '1'
+    STREAMS: '1'
+    MODEL_NAME: 'efficientnet_b0'
+    NUM_INPUTS: '64'
+    MIN_TEST_DURATION: '10'
+    MAX_TEST_DURATION: '10'
     DUMMY: 'yes'
     PRECISION: 'bf16'
     AMP: 'yes'
