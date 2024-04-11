@@ -37,12 +37,11 @@ op_avg = [
     'accuracy-top1',
     'accuracy-top5',
     'latency',
-    'latency-with-overhead'
+    'total-batches-tested-per-stream',
+    'total-images-tested-per-stream'
 ]
 # error out if values are different
 op_same = [
-    'total-batches-tested',
-    'total-images-tested',
     'uniq-batches-tested',
     'uniq-images-tested',
     'warmup-batches'
@@ -50,12 +49,11 @@ op_same = [
 # calculate total min, max, average and stdev of random value
 # total means to multiple on a number of streams, i.e. =min(arr)*len(arr)
 op_total_avg = [
-    'throughput',
-    'throughput-with-overhead'
+    'throughput'
 ]
 
 # Write single result
-def write_results(batches_tested, throughput, latency, top1, top5, throughput_overhead, latency_overhead):
+def write_results(batches_tested, throughput, latency, top1, top5):
     output_dict = {
         # 'schema' points to json-schema output is compliant to
         # TBD for now, need to replace with URL of the schema
@@ -91,13 +89,6 @@ def write_results(batches_tested, throughput, latency, top1, top5, throughput_ov
                     'stdev': 0.0,
                     'units': 'images/s'
                     },
-                'throughput-with-overhead': {
-                    'avg': float(throughput_overhead),
-                    'min': float(throughput_overhead),
-                    'max': float(throughput_overhead),
-                    'stdev': 0.0,
-                    'units': 'images/s'
-                },
                 'accuracy-top1': {
                     'avg': float(top1),
                     'min': float(top1),
@@ -119,21 +110,27 @@ def write_results(batches_tested, throughput, latency, top1, top5, throughput_ov
                     'stdev': 0.0,
                     'units': 'ms'
                 },
-                'latency-with-overhead': {
-                    'avg':float(latency_overhead),
-                    'min':float(latency_overhead),
-                    'max':float(latency_overhead),
+                'total-batches-tested-per-stream': {
+                    'avg': float(batches_tested),
+                    'min': float(batches_tested),
+                    'max': float(batches_tested),
                     'stdev': 0.0,
                     'units': 'ms'
                 },
-                'total-batches-tested': { 'total': batches_tested },
-                'total-images-tested': { 'total': batches_tested * args.batch_size },
-                'uniq-batches-tested': { 'total': batches_tested // args.batch_streaming },
-                'uniq-images-tested': { 'total': args.batch_size * (batches_tested // args.batch_streaming) },
+                'total-images-tested-per-stream': {
+                    'avg': float(batches_tested * args.batch_size),
+                    'min': float(batches_tested * args.batch_size),
+                    'max': float(batches_tested * args.batch_size),
+                    'stdev': 0.0,
+                    'units': 'ms'
+                },
+                'uniq-batches-tested': { 'total': args.num_inputs // args.batch_size },
+                'uniq-images-tested': { 'total': args.num_inputs },
                 'warmup-batches': { 'total': args.warm_up },
             }
         }
     }
+
     io_utils.write_json('{0}/results_{1}.json'.format(args.output_dir, args.instance), output_dict)
 
 def show_test_conditions():
@@ -171,15 +168,16 @@ def show_test_conditions():
     io_utils.stdout_helper('  [BENCHMARK PARAMS]')
     io_utils.stdout_helper('    warm up batches:    {0}'.format(args.warm_up))
     io_utils.stdout_helper('    batch size:         {0}'.format(args.batch_size))
-    io_utils.stdout_helper('    repeat batches:     {0}'.format(args.batch_streaming))
-    io_utils.stdout_helper('    max data set size:  {0}'.format(args.max_val_dataset_size))
+    io_utils.stdout_helper('    num inputs:         {0}'.format(args.num_inputs))
     io_utils.stdout_helper('    label smoothing:    {0}'.format(args.label_smoothing))
     io_utils.stdout_helper('    channels last:      {0}'.format(args.channels_last))
     io_utils.stdout_helper('    instance info:      {0}/{1}'.format(args.instance, args.total_instances))
+    io_utils.stdout_helper('    min test duration:  {0}'.format(args.min_test_duration))
+    io_utils.stdout_helper('    max test duration:  {0}'.format(args.max_test_duration))
     io_utils.stdout_helper('  [MISC]')
     io_utils.stdout_helper('    seed:               {0}'.format(args.seed))
     io_utils.stdout_helper('    non-blocking load:  {0}'.format(args.non_blocking))
-    io_utils.stdout_helper('    status prints:      {0}'.format(args.status_prints))
+    io_utils.stdout_helper('    print frequency:    {0}'.format(args.print_frequency))
     io_utils.stdout_helper(' --------------------------- end inference arguments ---------------------------')
 
 def get_valid_results_list():
@@ -269,7 +267,6 @@ def combine_results():
             summary['results']['metrics'][key]['max'] *= nstreams
             summary['results']['metrics'][key]['avg'] *= nstreams
             summary['results']['metrics'][key]['stdev'] *= nstreams
-
 
     # setting overall status
     summary['results']['metrics']['status'] = status
