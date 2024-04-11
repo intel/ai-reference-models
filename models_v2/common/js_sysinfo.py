@@ -258,15 +258,18 @@ def get_dpkg_info(**kwargs):
 
         if 'dpkg' not in _components_info:
             _components_info['dpkg'] = {}
+        # Our query uses wildcards and could match more than one item. Thus we must handle the case where multiple are matched.
+        results = result.stdout.decode().strip().split('\n')
+        for result in results:
+            result = json.loads(result)
+            _components_info['dpkg'][result['name']] = result
 
-        _components_info['dpkg'][pkg] = json.loads(result.stdout)
-
-        try:
-            subprocess.check_call(['dpkg', '--verify', pkg], stdout=subprocess.DEVNULL,
-                stderr=None if verbose(**kwargs) else subprocess.DEVNULL)
-            _components_info['dpkg'][pkg]['integrity'] = 'ok'
-        except Exception as e:
-            _components_info['dpkg'][pkg]['integrity'] = 'broken'
+            try:
+                subprocess.check_call(['dpkg', '--verify', result['name']], stdout=subprocess.DEVNULL,
+                    stderr=None if verbose(**kwargs) else subprocess.DEVNULL)
+                _components_info['dpkg'][result['name']]['integrity'] = 'ok'
+            except Exception as e:
+                _components_info['dpkg'][result['name']]['integrity'] = 'broken'
 
     return _components_info['dpkg']
 
