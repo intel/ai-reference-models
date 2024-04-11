@@ -67,12 +67,6 @@ def enum_dtypes():
     elif args.fp16:
         args.torch_dtype = torch.float16
         args.dtype_str = 'float16'
-    elif args.int8:
-        args.torch_dtype = torch.int8
-        args.dtype_str = 'int8'
-    elif args.uint8:
-        args.torch_dtype = torch.uint8
-        args.dtype_str = 'uint8'
     elif args.tf32:
         args.torch_dtype = torch.float32
         args.dtype_str = 'tfloat32'
