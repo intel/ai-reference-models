@@ -17,12 +17,11 @@ import os
 import time
 import sys
 import torch
-from diffusers import DPMSolverMultistepScheduler, StableDiffusionPipeline
+from diffusers import DPMSolverMultistepScheduler, StableDiffusionPipeline, StableDiffusionXLPipeline
 import argparse
 import numpy as np
 from scipy.linalg import sqrtm
 from PIL import Image
-import pytorch_fid
 
 from datasets import load_dataset
 
@@ -31,6 +30,8 @@ from functools import partial
 
 parser = argparse.ArgumentParser(description='PyTorch StableDiffusion TexttoImage')
 parser.add_argument('--prompt', default="nateraw/parti-prompts", type=str, help='prompt_dataset')
+parser.add_argument('--width', default=0, type=int, help='generated image width (0=default from model config)')
+parser.add_argument('--height', default=0, type=int, help='generated image height (0=default from model config)')
 parser.add_argument('--batch_size', default=1, type=int, help='batch size')
 parser.add_argument('--idx_start', default=0, type=int, help='select the start index of image')
 parser.add_argument('--precision', choices=["fp32", "fp16", "bf16"],
@@ -43,9 +44,9 @@ parser.add_argument('--save_image', action='store_true', default=False, help='sa
 parser.add_argument('--save_tensor', action='store_true', default=False, help='save tensor')
 parser.add_argument('--accuracy', action='store_true', default=False, help='compare the result with cuda')
 parser.add_argument('-m', '--model_id',
-                    choices=["CompVis/stable-diffusion-v1-4", "stabilityai/stable-diffusion-2-1"],
+                    choices=["CompVis/stable-diffusion-v1-4", "stabilityai/stable-diffusion-2-1", "stabilityai/stable-diffusion-xl-base-1.0"],
                     default='stabilityai/stable-diffusion-2-1', type=str, metavar='PATH',
-                    help='path to model structure or weight')
+                    help='path to model structure or weight.')
 parser.add_argument('--ref_path', default='', type=str, metavar='PATH',
                     help='path to reference image (default: none)')
 parser.add_argument('--save_path', default='./xpu_result', type=str, help='output image dir')
@@ -56,9 +57,9 @@ args = parser.parse_args()
 print(args)
 
 def compare(xpu_res, ref_res):
-    xpu = torch.tensor(xpu_res) 
-    ref = torch.tensor(ref_res) 
-    
+    xpu = torch.tensor(xpu_res)
+    ref = torch.tensor(ref_res)
+
     diff_value = torch.abs((xpu - ref))
     max_diff = torch.max(diff_value)
 
@@ -69,27 +70,27 @@ def compare(xpu_res, ref_res):
     value = diff_value > 0.1
     num = torch.sum(value.contiguous().view(-1))
     ratio1 = num / shape
-    print("difference larger than 0.1, ratio = {}".format(ratio1))  
-  
-    value = diff_value > 0.01 
+    print("difference larger than 0.1, ratio = {}".format(ratio1))
+
+    value = diff_value > 0.01
     num = torch.sum(value.contiguous().view(-1))
     ratio2 = num / shape
-    print("difference larger than 0.01, ratio = {}".format(ratio2))  
+    print("difference larger than 0.01, ratio = {}".format(ratio2))
 
-    value = diff_value > 0.001 
+    value = diff_value > 0.001
     num = torch.sum(value.contiguous().view(-1))
     ratio3 = num / shape
-    print("difference larger than 0.001, ratio = {}".format(ratio3))  
+    print("difference larger than 0.001, ratio = {}".format(ratio3))
 
     if ratio1 < 0.01 and ratio2 < 0.08 and ratio3 < 0.4:
         print("accuracy pass")
     else:
         print("accuracy fail")
-        
+
 def compare_pil_images(ref_res, cur_res):
-    xpu = torch.tensor(np.array(cur_res)) 
-    ref = torch.tensor(np.array(ref_res)) 
-    
+    xpu = torch.tensor(np.array(cur_res))
+    ref = torch.tensor(np.array(ref_res))
+
     diff_value = torch.abs((xpu - ref))
     max_diff = torch.max(diff_value)
 
@@ -100,17 +101,17 @@ def compare_pil_images(ref_res, cur_res):
     value = diff_value > 0.1
     num = torch.sum(value.contiguous().view(-1))
     ratio1 = num / shape
-    print("difference larger than 0.1, ratio = {}".format(ratio1))  
-  
-    value = diff_value > 0.01 
+    print("difference larger than 0.1, ratio = {}".format(ratio1))
+
+    value = diff_value > 0.01
     num = torch.sum(value.contiguous().view(-1))
     ratio2 = num / shape
-    print("difference larger than 0.01, ratio = {}".format(ratio2))  
+    print("difference larger than 0.01, ratio = {}".format(ratio2))
 
-    value = diff_value > 0.001 
+    value = diff_value > 0.001
     num = torch.sum(value.contiguous().view(-1))
     ratio3 = num / shape
-    print("difference larger than 0.001, ratio = {}".format(ratio3))  
+    print("difference larger than 0.001, ratio = {}".format(ratio3))
 
     if ratio1 < 0.01 and ratio2 < 0.08 and ratio3 < 0.4:
         print("accuracy pass")
@@ -154,7 +155,13 @@ def main():
         print("unsupported datatype")
         sys.exit()
 
-    pipe = StableDiffusionPipeline.from_pretrained(args.model_id, torch_dtype=datatype)
+    if args.model_id == "stabilityai/stable-diffusion-xl-base-1.0":
+        # XL model chosen, use XL pipeline
+        pipe = StableDiffusionXLPipeline.from_pretrained(args.model_id, torch_dtype=datatype)
+    else:
+        # Normal model chosen, use regular pipeline
+        pipe = StableDiffusionPipeline.from_pretrained(args.model_id, torch_dtype=datatype)
+
     pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
     pipe = pipe.to(args.device)
     if args.precision == "fp16":
@@ -171,29 +178,33 @@ def main():
         clip_score_fn = partial(clip_score, model_name_or_path="openai/clip-vit-base-patch16")
         out_type = "np"
         clip_score_list = []
-    else: 
+    else:
         out_type = "pil"
 
     if args.accuracy or args.save_tensor:
         out_type = "tensor"
 
+    res = {}
+    if args.width > 0 and args.height > 0:
+        res["width"] = args.width
+        res["height"] = args.height
+
     total_time = 0
     print("output type is: ", out_type)
     with torch.no_grad():
         for step in range(args.warmup_iter):
-            idx1 = args.idx_start + int(step * args.batch_size)
-            idx2 = args.idx_start + int((step + 1) * args.batch_size)
+            print("Warmup Iteration = {}".format(step))
             input = prompts_dataset[step]["Prompt"]
             print("input is : ", input)
             if args.device == "xpu":
                 with torch.xpu.amp.autocast(enabled=amp_enabled, dtype=datatype):
-                    images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type).images
+                    images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type, **res).images
                 torch.xpu.synchronize()
             elif args.device == "cuda":
-                images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type).images
+                images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type, **res).images
                 torch.cuda.synchronize()
             else:
-                images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type).images
+                images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type, **res).images
 
         image_before = []
         iter = 0
@@ -218,7 +229,7 @@ def main():
                         pass
                     start_time = time.time()
                     with torch.xpu.amp.autocast(enabled=amp_enabled, dtype=datatype):
-                        images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type).images
+                        images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type, **res).images
                     torch.xpu.synchronize()
                     end_time = time.time()
                 if profiling:
@@ -227,12 +238,12 @@ def main():
                     prof.export_chrome_trace('./stable_diffusion_inf_profile_trace.json')
             elif args.device == "cuda":
                 start_time = time.time()
-                images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type).images
+                images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type, **res).images
                 torch.cuda.synchronize()
                 end_time = time.time()
             else:
                 start_time = time.time()
-                images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type).images
+                images = pipe(input, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type, **res).images
                 end_time = time.time()
 
 
@@ -284,4 +295,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main() 
+    main()

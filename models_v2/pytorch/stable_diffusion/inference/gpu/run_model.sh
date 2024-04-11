@@ -25,6 +25,7 @@ input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
+
 for i in "${!input_envs[@]}"; do
   var_name=$i
   env_param=${input_envs[$i]}
@@ -54,6 +55,23 @@ elif [[ "${PLATFORM}" == "Arc" ]]; then
     PRECISION=${PRECISION:-fp16}
 fi
 
+WIDTH=${WIDTH:-0}
+HEIGHT=${HEIGHT:-0}
+MODEL=${MODEL:-'stabilityai/stable-diffusion-2-1'}
+
+WIDTH_CHECK=$((${WIDTH} % 8))
+HEIGHT_CHECK=$((${HEIGHT} % 8))
+
+if [ ${WIDTH_CHECK} -ne 0 ]; then
+    echo "WIDTH must be divisible by 8, got ${WIDTH}"
+    exit 1
+fi
+
+if [ ${HEIGHT_CHECK} -ne 0 ]; then
+    echo "HEIGHT must be divisible by 8, got ${HEIGHT}"
+    exit 1
+fi
+
 
 
 # known issue
@@ -67,6 +85,9 @@ echo " OUTPUT_DIR: ${OUTPUT_DIR}"
 echo " PRECISION: ${PRECISION}"
 echo " BATCH_SIZE: ${BATCH_SIZE}"
 echo " MULTI_TILE: ${MULTI_TILE}"
+echo " WIDTH: ${WIDTH} "
+echo " HEIGHT: ${HEIGHT} "
+echo " Model: ${MODEL} "
 
 echo "stable-diffusion ${PRECISION} inference plain MultiTile=${MULTI_TILE} BS=${BATCH_SIZE}"
 
@@ -92,7 +113,7 @@ sum_log_analysis() {
 modelname=stable-diffusion
 if [[ ${MULTI_TILE} == "False" ]]; then
     rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    python -u main.py --save_image --save_path xpu_result0 --precision ${PRECISION}  --evaluate_method clip 2>&1  | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
+    python -u main.py --height ${HEIGHT} --width ${WIDTH} --model_id ${MODEL} --save_image --save_path xpu_result0 --precision ${PRECISION}  --evaluate_method clip 2>&1  | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
     python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $3}')
@@ -106,7 +127,7 @@ else
     ZE_AFFINITY_MASK=0.1 python -u main.py --save_image --save_path xpu_result1 --precision ${PRECISION}  --evaluate_method clip 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log
     wait
     python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
-    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log -b ${BATCH_SIZE}  
+    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log -b ${BATCH_SIZE}
     sum_log_analysis ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep Performance | awk -F ' ' '{print $4}')
