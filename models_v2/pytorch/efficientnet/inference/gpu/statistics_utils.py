@@ -14,10 +14,12 @@
 
 # system modules
 import torch
-import torch.distributed as dist
+import os
+import io
 
 # sample modules
 import io_utils
+from arguments_utils import args
 
 def accuracy(output, target, topk=(1,)):
     """Computes the accuracy over the k top predictions for the specified values of k"""
@@ -51,6 +53,7 @@ class average_meter(object):
         self.count = 0
 
     def update(self, val, n=1):
+        val = float(val)
         self.val = val
         self.sum += val * n
         self.count += n
@@ -61,17 +64,28 @@ class average_meter(object):
         return fmtstr.format(**self.__dict__)
 
 class progress_meter(object):
-    def __init__(self, num_batches, meters, prefix=''):
-        self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
+    def __init__(self, progress_max, meters, prefix=''):
+        self.progress_max_fmtstr = self._get_progress_fmtstr(progress_max)
         self.meters = meters
         self.prefix = prefix
 
-    def display(self, batch):
+    def display(self, progress):
         entries = []
         entries += [str(meter) for meter in self.meters]
-        io_utils.stdout_helper(self.prefix + self.batch_fmtstr.format(batch) + '\t' + ' | '.join(entries))
+        io_utils.stdout_helper(self.prefix + self.progress_max_fmtstr.format(progress) + '\t' + ' | '.join(entries))
 
-    def _get_batch_fmtstr(self, num_batches):
-        num_digits = len(str(num_batches // 1))
+    def _get_progress_fmtstr(self, progress_max):
+        if progress_max == None:
+            return '[{}]'
+        num_digits = len(str(progress_max // 1))
         fmt = '{:' + str(num_digits) + 'd}'
-        return '[' + fmt + '/' + fmt.format(num_batches) + ']'
+        return '[' + fmt + '/' + fmt.format(progress_max) + ']'
+
+def log_raw_perf_to_file(file_name, *_args):
+    file_path = os.sep.join([args.output_dir, file_name]) + '_{0}.csv'.format(args.instance)
+    is_new_file = not os.path.exists(file_path)
+    with io.open(file_path, 'a', encoding='utf-8') as file_obj:
+        if is_new_file:
+            file_obj.write(','.join(list(map(lambda p: '{0} ({1})'.format(p[0], p[1]) if p[1].strip() != '' else '{0}'.format(p[0]), _args))) + '\n')
+        file_obj.write(','.join(list(map(lambda item: str(item[2]), _args))) + '\n')
+

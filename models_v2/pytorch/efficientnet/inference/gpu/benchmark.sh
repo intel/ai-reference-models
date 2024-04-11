@@ -36,9 +36,10 @@ python3 -m benchmark --profile=$PROFILE --output_dir=$OUTPUT_DIR --telemetry --s
     -e JIT=${JIT} \
     -e MODEL_NAME={model_name} \
     -e BATCH_SIZE={batch_size} \
-    -e NUM_IMAGES={num_images} \
+    -e NUM_INPUTS={num_inputs} \
     -e STREAMS={streams} \
-    -e NUM_ITERATIONS={num_iterations} \
+    -e MAX_TEST_DURATION={test_duration} \
+    -e MIN_TEST_DURATION={test_duration} \
     -e PRECISION={precision} \
     -e OUTPUT_DIR=/opt/output \
     -v {output_dir}:/opt/output \
