@@ -69,6 +69,9 @@ https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorc
 | `inference_performance.sh` | Run inference to verify performance for the specified precision (fp32, bf32, bf16, fp16, or int8). |
 | `test_accuracy.sh` | Run inference to verify auroc for the specified precision (fp32, bf32, bf16, fp16, or int8). |
 
+### Note
+For the int8 precision, we do not mean all of the dataflow in DLRM-v2 is int8. In the crossnet part, the mul/add operation is excecuted at fp32 level.
+
 ## Run the model
 
 ```bash
