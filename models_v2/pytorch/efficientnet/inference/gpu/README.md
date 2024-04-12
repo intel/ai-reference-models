@@ -314,3 +314,36 @@ results:
 
 > [!NOTE]
 > Additonal arguments that arent specified in the benchmark profile (``b0.bf16.csv`` in the example above) can be specified through environment variables as described in previous sections.
+
+## Usage With CUDA GPU
+
+Scripts have a matching degree of functionality for usage on CUDA GPU's. However, this is significantly less validated and so may not work as smoothly. The primary difference for using these scripts with CUDA is building the associated docker image. We will not cover CUDA on baremetal here. In addition Intel does not provide pre-built dockers for CUDA. These must be built locally.
+
+```
+docker build \
+  $(env | grep -E '(_proxy=|_PROXY)' | sed 's/^/--build-arg /') \
+  -f docker/cuda-gpu/pytorch-efficientnet-inference/pytorch-cuda-series-efficientnet-inference.Dockerfile \
+  -t intel/image-recognition:pytorch-cuda-gpu-efficientnet-inference .
+```
+
+All other usage outlined in this README should be identical, with the exception of referencing this CUDA docker image in place of the for Intel GPU when running `docker run` as well as needing to add the `--gpus all` argument.
+
+Example usage with dummy data is shown below:
+
+```
+mkdir -p /tmp/output && rm -f /tmp/output/* && chmod -R 777 /tmp/output
+export BATCH_SIZE=1
+docker run -it --rm --gpus all --ipc=host \
+  $(env | grep -E '(_proxy=|_PROXY)' | sed 's/^/-e /') \
+  --cap-add SYS_NICE \
+  --device /dev/dri/ \
+  -e MODEL_NAME=efficientnet_b0 \
+  -e PLATFORM=CUDA \
+  -e NUM_ITERATIONS=32 \
+  -e NUM_IMAGES=${BATCH_SIZE} \
+  -e BATCH_SIZE=${BATCH_SIZE} \
+  -e OUTPUT_DIR=/tmp/output \
+  -v /tmp/output:/tmp/output \
+  intel/image-recognition:pytorch-cuda-gpu-efficientnet-inference \
+    /bin/bash -c "./run_model.sh --dummy"
+```
