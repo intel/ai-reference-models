@@ -177,7 +177,7 @@ def process(smi_dump, platform, results=None):
             metrics[formatted_key]['max'] = max(data[key])
             metrics[formatted_key]['avg'] = sum(data[key]) / len(data[key])
             metrics[formatted_key]['stdev'] = math.sqrt(sum([(item - metrics[formatted_key]['avg']) ** 2 for item in data[key]]) / len(data[key]))
-            metrics[formatted_key]['unit'] = unit
+            metrics[formatted_key]['units'] = unit
 
     return results
 
