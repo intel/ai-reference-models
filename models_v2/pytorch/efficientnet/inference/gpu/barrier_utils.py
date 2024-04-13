@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # system modules
-import torch.multiprocessing as mp
+import threading
 import time
 import sys
 
@@ -31,7 +31,7 @@ def do_ipc_sync(barrier, sync_tag, terminate_if_sync_fail):
         barrier.wait()
         sync_end = time.time()
         io_utils.write_info('Sync on IPC tag {0} completed successfully in {1:.2f} seconds'.format(sync_tag, sync_end - sync_start))
-    except mp.BrokenBarrierError:
+    except threading.BrokenBarrierError:
         if terminate_if_sync_fail == True:
             io_utils.write_error('Sync on IPC tag {0} failed. Terminating.'.format(sync_tag))
             sys.exit(1)

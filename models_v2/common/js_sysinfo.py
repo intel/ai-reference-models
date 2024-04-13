@@ -324,7 +324,7 @@ def get_pytorch_info(**kwargs):
             'version': str(ipex.__version__),
             'has_onemkl': ipex.xpu.has_onemkl()
         }
-    except:
+    except Exception as e:
         if verbose(**kwargs):
             print('warning: ' + str(e), file=sys.stderr)
             print('warning: cannot import \'intel_extension_for_pytorch\'', file=sys.stderr)
