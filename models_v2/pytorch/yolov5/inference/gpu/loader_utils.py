@@ -18,6 +18,7 @@ import sys
 import platform
 import torch
 import torch.backends.cudnn as cudnn
+import numpy as np
 
 # sample modules
 import io_utils
@@ -87,11 +88,31 @@ def load_model():
 
     return model
 
-def dummy_dataset(validation_dataset_size, sample_width, sample_height):
-    im = torch.torch.randn(validation_dataset_size, 3, sample_width, sample_height)
-    path, s, cap = '', '', None
+class LoadDummy:
+    def __init__(self, validation_dataset_size, batch_size, sample_width, sample_height):
+        self.width = sample_width
+        self.height = sample_height
+        self.nf = validation_dataset_size  # number of files
+        self.bs = batch_size
+
+    def __iter__(self):
+        self.count = 0
+        
+        return self
     
-    return path, im, im, cap, s
+    def __next__(self):
+        if self.count == self.nf:
+            raise StopIteration
+        
+        self.count +=1
+        im = torch.torch.randn(self.bs, 3, self.width, self.height)
+        im = np.ascontiguousarray(im) 
+        path, s, cap = '', '', None
+        
+        return path, im, im, cap, s
+
+    def __len__(self):       
+        return self.nf  # number of files
 
 def load_validation_dataset(batch_size, sample_number, sample_width, sample_height, model, data_dir=None, data_workers=4, pin_memory_device=None):
     # Ensure we are loading even batches of data.
@@ -108,7 +129,7 @@ def load_validation_dataset(batch_size, sample_number, sample_width, sample_heig
     if args.dummy:
         io_utils.write_info('Dummy data is used')
         validation_dataset_size = sample_number
-        validation_dataset = [dummy_dataset(validation_dataset_size, sample_width, sample_height)]
+        validation_dataset = LoadDummy(validation_dataset_size, batch_size, sample_width, sample_height)
 
     else:
         if not os.path.exists(data_dir):
