@@ -16,25 +16,24 @@
 
 # Specify default arguments
 
-[[ "${AMP}" == "" ]]            && AMP="no"
-[[ "${BATCH_SIZE}" == "" ]]     && BATCH_SIZE=1
-[[ "${DATASET_DIR}" == "" ]]    && DATASET_DIR=""
-[[ "${DUMMY}" == "" ]]          && DUMMY="no"
-[[ "${LOAD_PATH}" == "" ]]      && LOAD_PATH=""
-[[ "${JIT}" == "" ]]            && JIT="trace"
-[[ "${MODEL_NAME}" == "" ]]     && MODEL_NAME="yolov5m"
-[[ "${MULTI_TILE}" == "" ]]     && MULTI_TILE="False"
-[[ "${NUM_IMAGES}" == "" ]]     && NUM_IMAGES=1
-[[ "${NUM_ITERATIONS}" == "" ]] && NUM_ITERATIONS=100
-[[ "${PRECISION}" == "" ]]      && PRECISION="fp16"
-[[ "${SAVE_PATH}" == "" ]]      && SAVE_PATH=""
-[[ "${STATUS_PRINTS}" == "" ]]  && STATUS_PRINTS=10
-[[ "${STREAMS}" == "" ]]        && STREAMS=1
+[[ "${AMP}" == "" ]]                && AMP="no"
+[[ "${BATCH_SIZE}" == "" ]]         && BATCH_SIZE=1
+[[ "${DATASET_DIR}" == "" ]]        && DATASET_DIR=""
+[[ "${DUMMY}" == "" ]]              && DUMMY="no"
+[[ "${LOAD_PATH}" == "" ]]          && LOAD_PATH=""
+[[ "${MODEL_NAME}" == "" ]]         && MODEL_NAME="yolov5m"
+[[ "${MULTI_TILE}" == "" ]]         && MULTI_TILE="False"
+[[ "${NUM_INPUTS}" == "" ]]         && NUM_INPUTS=1
+[[ "${MIN_TEST_DURATION}" == "" ]]  && MIN_TEST_DURATION=""
+[[ "${MAX_TEST_DURATION}" == "" ]]  && MAX_TEST_DURATION=""
+[[ "${PRECISION}" == "" ]]          && PRECISION="fp16"
+[[ "${SAVE_PATH}" == "" ]]          && SAVE_PATH=""
+[[ "${STREAMS}" == "" ]]            && STREAMS=1
 
 ./get_model.sh
 
 # Process CLI arguments as overides for environment variables
-VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,load:,jit:,multi-tile,num-images:,num-iterations:,output-dir:,platform:,precision:,proxy:,save:,status-prints:,streams: -- "$@")
+VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,load:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,proxy:,save:,streams: -- "$@")
 if [[ $? -ne 0 ]]; then
     exit 1;
 fi
@@ -57,10 +56,6 @@ while [ : ]; do
         DUMMY="yes"
         shift 1
         ;;
-    --jit)
-        JIT="$2"
-        shift 2
-        ;;
     --load)
         LOAD_PATH="$2"
         shift 2
@@ -69,12 +64,16 @@ while [ : ]; do
         MULTI_TILE="True"
         shift 1
         ;;
-    --num-images)
-        NUM_IMAGES=$2
+    --num-inputs)
+        NUM_INPUTS=$2
         shift 2
         ;;
-    --num-iterations)
-        NUM_ITERATIONS=$2
+    --max-test-duration)
+        MAX_TEST_DURATION="$2"
+        shift 2
+        ;;
+    --min-test-duration)
+        MIN_TEST_DURATION="$2"
         shift 2
         ;;
     --output-dir)
@@ -97,47 +96,43 @@ while [ : ]; do
         SAVE_PATH="$2"
         shift 2
         ;;
-    --status-prints)
-        STATUS_PRINTS=$2
-        shift 2
-        ;;
     --streams)
         STREAMS=$2
         shift 2
         ;;
     -h | --help)
         echo "Usage: $(basename $0)"
-        echo "  --amp            [AMP]           : Use AMP on model conversion (default: '${AMP}')"
-        echo "                                     * no"
-        echo "                                     * yes"
-        echo "  --batch-size     [BATCH_SIZE]    : Batch size to use (default: '${BATCH_SIZE}')"
-        echo "  --data           [DATASET_DIR]   : Location to load images from (default: '${DATASET_DIR}')"
-        echo "  --dummy                          : Use randomly generated dummy dataset in place of '--data' argument (default: disabled)"
-        echo "  --load           [LOAD_PATH]     : If specified model will be loaded from this saved location (default: disabled)"
-        echo "  --jit            [JIT]           : JIT method to use (default: '${JIT}')"
-        echo "                                     * none"
-        echo "                                     * script"
-        echo "                                     * trace"
-        echo "  --multi-tile                     : Run benchmark in multi-tile configuration (default: '${MULTI_TILE}')"
-        echo "  --num-images     [NUM_IMAGES]    : Number of images to load (default: '${NUM_IMAGES}')"
-        echo "  --num-iterations [NUM_ITERATIONS]: Number of times to test each batch (default: '${NUM_ITERATIONS}')"
-        echo "  --output-dir     [OUTPUT_DIR]    : Location to write output to. Required"
-        echo "  --platform       [PLATFORM]      : Platform that inference is being ran on (default: '${PLATFORM}')"
-        echo "                                     * CPU"
-        echo "                                     * Flex"
-        echo "                                     * CUDA"
-        echo "                                     * Max"
-        echo "  --precision      [PRECISION]     : Precision to use for the model (default: '${PRECISION}')"
-        echo "                                     * bf16"
-        echo "                                     * fp16"
-        echo "                                     * fp32"
-        echo "                                     * int8"
-        echo "  --proxy          [PROXY]         : System proxy. Required to download models"
-        echo "  --save           [SAVE_PATH]     : If specified model will be saved to this saved location (default: disabled)"
-        echo "  --status-prints  [STATUS_PRINTS] : Total number of status messages to display during inference benchmarking (default: '${STATUS_PRINTS}')"
-        echo "  --streams        [STREAMS]       : Number of parallel streams to do inference on (default: '${STREAMS}')"
-        echo "                                     Will be truncated to a multiple of BATCH_SIZE"
-        echo "                                     If less than BATCH_SIZE will be increased to BATCH_SIZE"
+        echo "  --amp            [AMP]                  : Use AMP on model conversion (default: '${AMP}')"
+        echo "                                            * no"
+        echo "                                            * yes"
+        echo "  --batch-size     [BATCH_SIZE]           : Batch size to use (default: '${BATCH_SIZE}')"
+        echo "  --data           [DATASET_DIR]          : Location to load images from (default: '${DATASET_DIR}')"
+        echo "  --dummy                                 : Use randomly generated dummy dataset in place of '--data' argument (default: disabled)"
+        echo "  --load           [LOAD_PATH]            : If specified model will be loaded from this saved location (default: disabled)"
+        echo "  --multi-tile                            : Run benchmark in multi-tile configuration (default: '${MULTI_TILE}')"
+        echo "  --num-inputs        [NUM_INPUTS]        : Number of images to load (default: '${NUM_INPUTS}')"
+        echo "  --max-test-duration [MAX_TEST_DURATION] : Maximum duration in seconds to run benchmark"
+        echo "                                            Testing will be truncated once maximum test duration has been reached"
+        echo "                                            Disabled by default"
+        echo "  --min-test-duration [MIN_TEST_DURATION] : Minimum duration in seconds to run benchmark"
+        echo "                                            Images will be repeated until minimum test duration has been reached"
+        echo "                                            Disabled by default"
+        echo "  --output-dir     [OUTPUT_DIR]           : Location to write output to. Required"
+        echo "  --platform       [PLATFORM]             : Platform that inference is being ran on (default: '${PLATFORM}')"
+        echo "                                            * CPU"
+        echo "                                            * Flex"
+        echo "                                            * CUDA"
+        echo "                                            * Max"
+        echo "  --precision      [PRECISION]            : Precision to use for the model (default: '${PRECISION}')"
+        echo "                                            * bf16"
+        echo "                                            * fp16"
+        echo "                                            * fp32"
+        echo "                                            * int8"
+        echo "  --proxy          [PROXY]                : System proxy. Required to download models"
+        echo "  --save           [SAVE_PATH]            : If specified model will be saved to this saved location (default: disabled)"
+        echo "  --streams        [STREAMS]              : Number of parallel streams to do inference on (default: '${STREAMS}')"
+        echo "                                            Will be truncated to a multiple of BATCH_SIZE"
+        echo "                                            If less than BATCH_SIZE will be increased to BATCH_SIZE"
         echo ""
         echo "NOTE: Arguments may also be specified through command line variables using the name in '[]'."
         echo "      For example 'export MODEL_NAME=yolov5m'."
@@ -152,6 +147,10 @@ done
 
 # Check data set is configured if specified/required.
 if [[ ${DUMMY} == "yes" ]]; then
+	if [[ ${MIN_TEST_DURATION} == "" ]] || [[ ${MAX_TEST_DURATION} == "" ]]; then
+        echo "ERROR: Requested max test duration and min test duration cannot be empty!"
+        exit 1
+    fi
     if [[ -z "${DATASET_DIR}" ]]; then
         # Dummy data requested and no dataset provided. OK case.
         _dataset_args="--dummy"
@@ -160,6 +159,7 @@ if [[ ${DUMMY} == "yes" ]]; then
         echo "ERROR: Cannot handle simultaneous usage of '--dummy'/'DUMMY' and '--data'/'DATASET_DIR'."
         exit 1
     fi
+
 else
     if [[ -z "${DATASET_DIR}" ]]; then
         # Ambiguous case. Terminate.
@@ -176,7 +176,6 @@ else
             exit 1
         fi
     fi
-
 fi
 
 # Check multi-tile is only specified on valid platforms.
@@ -199,23 +198,22 @@ fi
 
 # Show test configuration
 echo 'Running with parameters:'
-echo " AMP:            ${AMP}"
-echo " BATCH_SIZE:     ${BATCH_SIZE}"
-echo " DATASET_DIR:    ${DATASET_DIR}"
-echo " DUMMY:          ${DUMMY}"
-echo " JIT:            ${JIT}"
-echo " LOAD_PATH:      ${LOAD_PATH}"
-echo " MODEL_NAME:     ${MODEL_NAME}"
-echo " MULTI_TILE:     ${MULTI_TILE}"
-echo " NUM_ITERATIONS: ${NUM_ITERATIONS}"
-echo " NUM_IMAGES:     ${NUM_IMAGES}"
-echo " OUTPUT_DIR:     ${OUTPUT_DIR}"
-echo " SAVE_PATH:      ${SAVE_PATH}"
-echo " STATUS_PRINTS:  ${STATUS_PRINTS}"
-echo " STREAMS:        ${STREAMS}"
-echo " PLATFORM:       ${PLATFORM}"
-echo " PRECISION:      ${PRECISION}"
-echo " PROXY:          ${PROXY}"
+echo " AMP:               ${AMP}"
+echo " BATCH_SIZE:        ${BATCH_SIZE}"
+echo " DATASET_DIR:       ${DATASET_DIR}"
+echo " DUMMY:             ${DUMMY}"
+echo " LOAD_PATH:         ${LOAD_PATH}"
+echo " MIN_TEST_DURATION: ${MIN_TEST_DURATION}"
+echo " MAX_TEST_DURATION: ${MAX_TEST_DURATION}"
+echo " MODEL_NAME:        ${MODEL_NAME}"
+echo " MULTI_TILE:        ${MULTI_TILE}"
+echo " NUM_INPUTS:        ${NUM_INPUTS}"
+echo " OUTPUT_DIR:        ${OUTPUT_DIR}"
+echo " SAVE_PATH:         ${SAVE_PATH}"
+echo " STREAMS:           ${STREAMS}"
+echo " PLATFORM:          ${PLATFORM}"
+echo " PRECISION:         ${PRECISION}"
+echo " PROXY:             ${PROXY}"
 
 # Set system proxies if requested.
 if [[ "${PROXY}" != "" ]]; then
@@ -272,16 +270,13 @@ else
     exit 1
 fi
 
-# Specify if JIT should be used
-if [[ ${JIT} == "none" ]]; then
-    _jit_arg=""
-elif [[ ${JIT} == "trace" ]]; then 
-    _jit_arg="--jit-trace"
-elif [[ ${JIT} == "script" ]]; then 
-    _jit_arg="--jit-script"
-else
-    echo "ERROR: Invalid valid entered for 'JIT': ${JIT}"
-    exit 1
+# Specify test duration if requested
+_test_duration_args=""
+if [[ ${MIN_TEST_DURATION} != "" ]]; then
+    _test_duration_args="${_test_duration_args} --min-test-duration ${MIN_TEST_DURATION}"
+fi
+if [[ ${MAX_TEST_DURATION} != "" ]]; then
+    _test_duration_args="${_test_duration_args} --max-test-duration ${MAX_TEST_DURATION}"
 fi
 
 # General perf args
@@ -313,11 +308,13 @@ echo "Starting inference..."
 numactl --cpunodebind=0 --membind=0 python3 predict.py \
     ${_dataset_args} \
     --batch-size ${BATCH_SIZE} \
-    --status-prints ${STATUS_PRINTS} \
-    --max-val-dataset-size ${NUM_IMAGES} \
-    --batch-streaming ${NUM_ITERATIONS} \
+    --num-inputs ${NUM_INPUTS} \
     --width ${_img_width} --height ${_img_height} \
-    ${_dtype_args} ${_amp_arg} ${_jit_arg} ${_perf_args} ${_save_load_args} \
+    ${_dtype_args} \
+    ${_amp_arg} \
+    ${_test_duration_args} \
+    ${_perf_args} \
+    ${_save_load_args} \
     --warm-up 3 \
     --output-dir ${OUTPUT_DIR} \
     --total-instances ${STREAMS} \
