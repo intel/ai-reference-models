@@ -20,6 +20,7 @@ import torch
 import sys
 import torch._C
 import torch.jit._recursive
+import numpy as np
 
 # sample modules
 import arguments_utils
@@ -84,21 +85,15 @@ def quantize_model(model):
     # Convert model to either jit.trace or jit.script.
     # this can have an impact on both perf and quantizability.
     # If quantization fails for you try changing JIT methodology.
-    if args.jit_trace:
-        trace_input = torch.randn(args.calib_bs, 3, args.width, args.height)
-        if args.channels_last:
-            trace_input = trace_input.to(memory_format=torch.channels_last)
-        if args.xpu or args.gpu:
-            trace_input = trace_input.to(args.device)
-        io_utils.write_info('Using JIT trace for quantization')
-        with torch.inference_mode():
-            model = torch.jit.trace(model, trace_input)
-    elif args.jit_script:
-        io_utils.write_error('Must use jit_trace for Yolov5!')
-        sys.exit(1)
-    else:
-        io_utils.write_error('Quantization is only support for JIT models!')
-        sys.exit(1)
+
+    trace_input = torch.randn(args.calib_bs, 3, args.width, args.height)
+    if args.channels_last:
+        trace_input = trace_input.to(memory_format=torch.channels_last)
+    if args.xpu or args.gpu:
+        trace_input = trace_input.to(args.device)
+    io_utils.write_info('Using JIT trace for quantization')
+    with torch.inference_mode():
+        model = torch.jit.trace(model, trace_input)
     model = wrap_cpp_module(torch._C._jit_pass_fold_convbn(model._c))
 
     # Define various parameters for quantization. Majority of these can be controled through CL arguments.
@@ -192,7 +187,7 @@ def inference_config(model):
         io_utils.write_info('Using zero gradient')
 
     if not any([args.int8, args.uint8]):
-        if args.jit_trace and not args.load:
+        if not args.load:
             trace_input = torch.randn(args.batch_size, 3, args.width, args.height)
             if args.channels_last:
                 trace_input = trace_input.to(memory_format=torch.channels_last)
@@ -209,11 +204,34 @@ def inference_config(model):
                     with torch.autocast(enabled=use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=autocast_dtype, cache_enabled=False):
                         model = torch.jit.trace(model, trace_input, check_trace=False)
                 model = wrap_cpp_module(torch._C._jit_pass_fold_convbn(model._c))
-        elif args.jit_script and not args.load:
-            io_utils.write_error('Must use jit_trace for Yolov5!')
-            sys.exit(1)
 
     return use_autocast, autocast_dtype, model
+
+def process_images(images):
+
+    if args.channels_last:
+        images = images.to(memory_format=torch.channels_last)
+
+    if args.xpu or args.gpu:
+            try:
+                import memory_check
+                memory_check.display_mem(args.device)
+            except:
+                pass  
+
+    images = torch.from_numpy(images).to(args.device)
+    if args.no_amp:
+        if args.fp16:
+            images = images.to(dtype=torch.float16)
+        elif args.bf16:
+            images = images.to(dtype=torch.bfloat16)
+        else:
+            images = images.to(dtype=torch.float32)
+    images = images / 255 # 0 - 255 to 0.0 - 1.0
+    if len(images.shape) == 3:
+        images = images[None]  # expand for batch dim
+    
+    return images
 
 def do_warmup(model, ds):
     ds_batches = len(ds)
@@ -227,61 +245,25 @@ def do_warmup(model, ds):
         if args.channels_last:
             io_utils.write_info('Images will be converted to channels last format')
         for path, images, im0s, vid_cap, s in ds:
-            if args.channels_last:
-                images = images.to(memory_format=torch.channels_last)
+            images = process_images(images)
 
-            if not args.dummy:
-                images = torch.from_numpy(images).to(args.device)
-            else:
-                images = images.to(args.device, non_blocking=args.non_blocking)
-            if args.no_amp:
-                if args.fp16:
-                    images = images.to(dtype=torch.float16)
-                elif args.bf16:
-                    images = images.to(dtype=torch.bfloat16)
-                else:
-                    images = images.to(dtype=torch.float32)
-            images = images / 255 # 0 - 255 to 0.0 - 1.0
-            if len(images.shape) == 3:
-                images = images[None]  # expand for batch dim
-            
             if args.xpu:
-                try:
-                    import memory_check
-                    memory_check.display_mem(args.device)
-                except:
-                    pass
-
-                if args.jit_trace:
-                    # warmup
-                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up])):
-                        pred = model(images)
-                        torch.xpu.synchronize(args.device)                                                            
-                        # NMS
-                        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                        pred = [x.to("cpu") for x in pred]                       
-                else:
-                    io_utils.write_error('Must use jit_trace for Yolov5!')
-                    sys.exit(1)
+                # warmup
+                for batch_repeat_index in range(args.warm_up):
+                    pred = model(images)
+                    torch.xpu.synchronize(args.device)                                                            
+                    # NMS
+                    pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+                    pred = [x.to("cpu") for x in pred]                       
             else:
-                if args.gpu:
-                    try:
-                        import memory_check
-                        memory_check.display_mem(args.device)
-                    except:
-                        pass
-
-                if args.jit_trace:
-                    # warmup
-                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up])):
-                        pred = model(images)
+                # warmup
+                for batch_repeat_index in range(args.warm_up):
+                    pred = model(images)
+                    if args.gpu:
                         torch.cuda.synchronize(args.device)                                                            
-                        # NMS
-                        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                        pred = [x.to("cpu") for x in pred]
-                else:
-                    io_utils.write_error('Must use jit_trace for Yolov5!')
-                    sys.exit(1)
+                    # NMS
+                    pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+                    pred = [x.to("cpu") for x in pred]
 
     io_utils.write_info('Completed {0} warmup batches'.format(args.warm_up))
     
@@ -320,10 +302,51 @@ def accuracy(pred, ds, path, im0s, images, s, names):
             
     return acc
 
+def is_done(ds_batches, actual_batch_run, total_batches, start_benchmark_time):
+    if not args.dummy and actual_batch_run == total_batches:
+        return True
+    if time.time() - start_benchmark_time >= args.max_test_duration:
+        return True
+    if time.time() - start_benchmark_time < args.min_test_duration:
+        return False
+    
+    return False
+
+def inference(model, total, actual_batch_run, ds, path, im0s, images, s, names, acc1, top1):  
+    if args.xpu:
+        torch.xpu.synchronize(args.device)
+    elif args.gpu:
+        torch.cuda.synchronize(args.device)
+    start_time = time.time()
+    
+    pred = model(images)
+    
+    if args.xpu:
+        torch.xpu.synchronize(args.device)
+    elif args.gpu:
+        torch.cuda.synchronize(args.device)
+    end_time = time.time()
+    
+    # NMS
+    pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+    pred = [x.to("cpu") for x in pred]
+
+    duration = end_time - start_time                           
+    print("Inference: {:>5}  E2E Time: {:>25}     Instance: {} Current Time: {}".format(actual_batch_run, duration, args.instance, time.time()))
+    total += duration
+    actual_batch_run += 1
+    
+    #accuracy
+    if not args.dummy:
+        acc1 = accuracy(pred, ds, path, im0s, images, s, names)
+        top1.update(acc1)
+        
+    return total, actual_batch_run, acc1
+        
 def do_perf_benchmarking(model, ds, names):
     ds_batches = len(ds)
-    total_batches = args.batch_streaming
-    print_frequency = max([1, total_batches // args.status_prints])
+    total_batches = ds_batches
+    actual_batch_run = 0
 
     # Profiling
     profiling = os.environ.get('PROFILE', 'OFF').upper() in ['1', 'Y', 'ON', 'YES', 'TRUE']
@@ -341,24 +364,18 @@ def do_perf_benchmarking(model, ds, names):
     throughput = statistics_utils.average_meter('Throughput', ':.2f', ' img/s')
     latency = statistics_utils.average_meter('Latency', ':.2f', ' ms')
     top1 = statistics_utils.average_meter('Accuracy', ':.2f', '')
-    throughput_overhead = statistics_utils.average_meter('Throughput /w Overhead', ':.2f', ' img/s')
-    latency_overhead = statistics_utils.average_meter('Latency /w Overhead', ':.2f', ' ms')
     progress = statistics_utils.progress_meter(
-        total_batches,
+        None,
         [
             throughput,
             latency,
-            top1,
-            throughput_overhead,
-            latency_overhead
+            top1
         ],
         prefix='INFO[{0}/{1}]: PERF_STATUS'.format(args.instance, args.total_instances)
     )
 
     # Main perf testing loop.
-    #barrier_utils.do_ipc_sync(args.barrier, 'start_perf_benchmark', args.terminate_if_sync_fail)
-    should_display = False
-    total_duration = 0
+    barrier_utils.do_ipc_sync(args.barrier, 'start_perf_benchmark', args.terminate_if_sync_fail)
     io_utils.write_info('Starting inference perf testing on {0} batches with {1} unique batches...'.format(total_batches, ds_batches))
 
     start_benchmark_time = time.time()
@@ -372,153 +389,113 @@ def do_perf_benchmarking(model, ds, names):
                 profile_name = 'fp16'
             elif args.bf16:
                 profile_name = 'bf16'
-        
-        batch_index=0
-        for path, images, im0s, vid_cap, s in ds:
-            total = 0
-            if args.channels_last:
-                images = images.to(memory_format=torch.channels_last)
-
-            if not args.dummy:
-                images = torch.from_numpy(images).to(args.device)
-            else:
-                images = images.to(args.device, non_blocking=args.non_blocking)
-            if args.no_amp:
-                if args.fp16:
-                    images = images.to(dtype=torch.float16)
-                elif args.bf16:
-                    images = images.to(dtype=torch.bfloat16)
+                
+        total = 0
+        acc1 = 0
+        duration_eval = 0       
+        while not is_done(ds_batches, actual_batch_run, total_batches, start_benchmark_time):
+            for path, images, im0s, vid_cap, s in ds:
+                images = process_images(images)
+                               
+                if args.xpu:
+                    with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:  
+                        # inference
+                        total, actual_batch_run, acc1 = inference(model, total, actual_batch_run, ds, path, im0s, images, s, names, acc1, top1)
+                                                    
+                        if profiling:
+                            torch.save(prof.key_averages().table(sort_by='self_xpu_time_total'), './profiling.' + profile_name + '.inf.pt')
+                            torch.save(prof.table(sort_by='id', row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
+                        if is_done(ds_batches, actual_batch_run, total_batches, start_benchmark_time):
+                            break 
                 else:
-                    images = images.to(dtype=torch.float32)
-            images = images / 255  # 0 - 255 to 0.0 - 1.0
-            if len(images.shape) == 3:
-                images = images[None]  # expand for batch dim
-            
-            if args.xpu:
-                with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
-                    try:
-                        import memory_check
-                        memory_check.display_mem(args.device)
-                    except:
-                        pass
-
-                    if args.jit_trace:
+                    activities = None
+                    prof_sort = None
+                    if profiling:
+                        prof_sort = 'self_cpu_time_total'
+                        activities=[torch.profiler.ProfilerActivity.CPU]
+                        if args.gpu:
+                            activities.append(torch.profiler.ProfilerActivity.CUDA)
+                            prof_sort = 'self_cuda_time_total'
+                    with torch.autograd.profiler.profile(enabled=profiling, use_cuda=True if args.gpu else False, record_shapes=False) as prof:  
                         # inference
-                        for batch_repeat_index in range(args.batch_streaming):
-                            torch.xpu.synchronize(args.device)
-                            start_time = time.time()
-                            
-                            pred = model(images)
-                            
-                            torch.xpu.synchronize(args.device)
-                            end_time = time.time()
-                            
-                            # NMS
-                            pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                            pred = [x.to("cpu") for x in pred]
-
-                            duration = end_time - start_time                           
-                            print("Inference: {:>5}  E2E Time: {:>25}     Instance: {} Current Time: {}".format(batch_repeat_index,duration, args.instance, time.time()))
-                            total += duration
-                    else:
-                        io_utils.write_error('Must use jit_trace for Yolov5!')
-                        sys.exit(1)
-
-                if profiling:
-                    torch.save(prof.key_averages().table(sort_by='self_xpu_time_total'), './profiling.' + profile_name + '.inf.pt')
-                    torch.save(prof.table(sort_by='id', row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
-            else:
-                activities = None
-                prof_sort = None
-                if profiling:
-                    prof_sort = 'self_cpu_time_total'
-                    activities=[torch.profiler.ProfilerActivity.CPU]
-                    if args.gpu:
-                        activities.append(torch.profiler.ProfilerActivity.CUDA)
-                        prof_sort = 'self_cuda_time_total'
-                with torch.autograd.profiler.profile(enabled=profiling, use_cuda=True if args.gpu else False, record_shapes=False) as prof:
-                    if args.gpu:
-                        try:
-                            import memory_check
-                            memory_check.display_mem(args.device)
-                        except:
-                            pass
-
-                    if args.jit_trace:
-                        # inference
-                        for batch_repeat_index in range(args.batch_streaming):
-                            torch.cuda.synchronize(args.device)
-                            start_time = time.time()
-                            
-                            pred = model(images)
-                            
-                            torch.cuda.synchronize(args.device)
-                            end_time = time.time()
-                            
-                            # NMS
-                            pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
-                            pred = [x.to("cpu") for x in pred]
-
-                            duration = end_time - start_time                           
-                            print("Inference: {:>5}  E2E Time: {:>25}     Instance: {} Current Time: {}".format(batch_repeat_index,duration, args.instance, time.time()))
-                            total += duration
-                    else:
-                        io_utils.write_error('Must use jit_trace for Yolov5!')
-                        sys.exit(1)
-
-                if profiling:
-                    torch.save(prof.key_averages().table(sort_by=prof_sort), './profiling.' + profile_name + '.inf.pt')
-                    torch.save(prof.table(sort_by='id', row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
-            
-            duration_eval = total / args.batch_streaming
-            total_duration += duration_eval * args.batch_streaming * 1000 # milliseconds
-            end_benchmark_time = time.time()
-            benchmark_wall_clock_time = end_benchmark_time - start_benchmark_time
+                        total, actual_batch_run, acc1 = inference(model, total, actual_batch_run, ds, path, im0s, images, s, names, acc1, top1)
+                        
+                        if profiling:
+                            torch.save(prof.key_averages().table(sort_by=prof_sort), './profiling.' + profile_name + '.inf.pt')
+                            torch.save(prof.table(sort_by='id', row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
+                        
+                        if is_done(ds_batches, actual_batch_run, total_batches, start_benchmark_time):
+                            break
+                                        
+            duration_eval = total / actual_batch_run
 
             latency.update(
                 duration_eval * 1000,
-                n=args.batch_streaming
+                n=actual_batch_run
                 ) # milliseconds
             throughput.update(
                 args.batch_size / duration_eval,
-                n=args.batch_streaming
+                n=actual_batch_run
                 ) # IMG/S
-            latency_overhead.reset()
-            latency_overhead.update(
-                benchmark_wall_clock_time * 1000 / ((batch_index * args.batch_streaming) + args.batch_streaming),
-                n=((batch_index * args.batch_streaming) + args.batch_streaming)
-                ) # milliseconds
-            throughput_overhead.reset()
-            throughput_overhead.update(
-                args.batch_size * ((batch_index * args.batch_streaming) + args.batch_streaming) / benchmark_wall_clock_time,
-                n=((batch_index * args.batch_streaming) + args.batch_streaming)
-                ) # IMG/S
-            should_display = False
                              
-            # record stats
-            if not args.dummy:
-                top1.update(accuracy(pred, ds, path, im0s, images, s, names))
-
-            if ((batch_index * args.batch_streaming) + batch_repeat_index) % print_frequency == print_frequency - 1:
-                should_display = True
-            elif ((batch_index * args.batch_streaming) + batch_repeat_index) + 1 == total_batches:
-                should_display = True
-
-            if should_display:
-                progress.display((batch_index * args.batch_streaming) + args.batch_streaming)
+            current_benchmark_duration = time.time() - start_benchmark_time
             
-            batch_index +=1
+            # Estimate how long a single pass through the dataset takes
+            dataset_time_estimate = current_benchmark_duration * (total_batches / throughput.count)
+            # Estimated total duration must be a multiple of complete passes through the dataset that exceeds min test duration
+            estimated_total_duration = 0
+            
+            while estimated_total_duration < args.min_test_duration:
+                estimated_total_duration += dataset_time_estimate
 
-    # If we haven't already displayed the latest data
-    if not should_display:
-        progress.display(total_batches)
+            # Estimated total duration is hard capped at max test duration
+            if estimated_total_duration > args.max_test_duration:
+                estimated_total_duration = args.max_test_duration
 
-    return total_batches, throughput.avg, latency.avg, top1.avg, throughput_overhead.avg, latency_overhead.avg
+            progress.display('~{0:5.1f}% (Estimated {1:3.0f}s remaining)'.format(
+                min([100, 100 * current_benchmark_duration / estimated_total_duration]),
+                max([0, estimated_total_duration - current_benchmark_duration])
+            ))
+            
+            statistics_utils.log_raw_perf_to_file(
+                'raw_perf',
+                ('throughput', 'images/s', args.batch_size / duration_eval),
+                ('accuracy-top1', 'confidence', acc1),
+                ('latency', 'ms', duration_eval * 1000),
+                ('batches-per-time-step', 'count', actual_batch_run)
+            )
+
+        latency.update(
+            duration_eval * 1000,
+            n=actual_batch_run
+            ) # milliseconds
+        throughput.update(
+            args.batch_size / duration_eval,
+            n=actual_batch_run
+            ) # IMG/S
+        statistics_utils.log_raw_perf_to_file(
+            'raw_perf',
+            ('throughput', 'images/s', args.batch_size / duration_eval),
+            ('accuracy-top1', 'confidence', acc1),
+            ('latency', 'ms', duration_eval * 1000),
+            ('batches-per-time-step', 'count', actual_batch_run)
+            )
+                
+    return actual_batch_run, throughput.avg, latency.avg, top1.avg
 
 def predict(instance, input_args):
     # Setup passed in args and make them global
     args = input_args
     args.instance = instance
+
+    # Validate arguments
+    if not args.dummy:
+        # These arguments are not allowed when running in accuracy check mode.
+        args.min_test_duration = 0
+        args.max_test_duration = np.inf
+    if args.max_test_duration < args.min_test_duration:
+        io_utils.write_error('Requested max test duration ({0}) is less than min test duration ({1})!'.format(args.max_test_duration, args.min_test_duration))
+        sys.exit(1)
 
     # Enumerate list of devices and check compatibility
     configure_utils.enum_device()
@@ -543,7 +520,7 @@ def predict(instance, input_args):
     # Data loading code
     validation_loader_inf = loader_utils.load_validation_dataset(
         args.batch_size,
-        args.max_val_dataset_size,
+        args.num_inputs,
         args.width,
         args.height,
         model,
@@ -560,8 +537,8 @@ def predict(instance, input_args):
     use_autocast, autocast_dtype, model = do_warmup(model, validation_loader_inf)
     
     # Do inference benchmarking
-    batches_tested, throughput, latency, top1, throughput_overhead, latency_overhead = do_perf_benchmarking(model, validation_loader_inf, names)
-    summary_utils.write_results(batches_tested, throughput, latency, top1, throughput_overhead, latency_overhead)
+    batches_tested, throughput, latency, top1 = do_perf_benchmarking(model, validation_loader_inf, names)
+    summary_utils.write_results(batches_tested, throughput, latency, top1)
 
 def main():
     arguments_utils.parse_arguments() 

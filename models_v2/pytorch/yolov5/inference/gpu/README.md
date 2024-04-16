@@ -1,6 +1,12 @@
 # YOLO V5 Inference
 
-YOLO V5 Inference best known configurations with [Intel® Extension for PyTorch](https://github.com/intel/intel-extension-for-pytorch).
+[YOLOv5](https://github.com/ultralytics/yolov5) or the fifth iteration of You Only Look Once is a single-stage deep learning based object detection model. It is claimed to deliver real-time object detection with state-of-the-art accuracy. This directory contains a sample implementation of object detection with YOLOv5. It is targeted to run on Intel Discrete Graphics platforms (XPUs) by leveraging [Intel® Extension for Pytorch](https://github.com/intel/intel-extension-for-pytorch).
+
+The sample supports two modes of execution:
+* A performance benchmarking mode where the sample executes YOLOv5 inference based on dummy tensor initialization for a specified time duration, each of which in turn loops over a specified number of inputs or frames. The input is a tensor capturing a batch of input images that is fed to the YOLOv5 model for inference. The output is tensor representing the objects detected.
+* A accuracy-check mode which takes in images from the [COCO 2017] validation dataset and returns the highest confidence score for the detected object.
+
+The rest of this document covers more details about the model, dataset, and the control knobs for each mode of execution. Further, instructions are provided on how to use the scripts in this directory for execution in bare-metal and docker container environments.
 
 ## Model Information
 
@@ -62,7 +68,7 @@ Run sample as follows:
 * With dummy data:
 
   * Running with dummy data is recommended for performance benchmarking (throughput and latency measurements)
-  * Use higher `NUM_ITERATIONS` and lower `NUM_IMAGES` values (e.g. use `NUM_IMAGES=$BATCH_SIZE`) for more precise performance results
+  * Use higher `NUM_INPUTS` values for more precise peak performance results. `NUM_INPUTS` will be rounded to a multiple of `BATCH_SIZE`
   * **NOTE**: Accuracy will be zero when using dummy data
   ```
   mkdir -p /tmp/output && rm -f /tmp/output/* && chmod -R 777 /tmp/output
@@ -74,8 +80,9 @@ Run sample as follows:
     --device /dev/dri/ \
     -e MODEL_NAME=yolov5m \
     -e PLATFORM=PLATFORM \
-    -e NUM_ITERATIONS=32 \
-    -e NUM_IMAGES=${BATCH_SIZE} \
+    -e MAX_TEST_DURATION=60 \
+    -e MIN_TEST_DURATION=60 \
+    -e NUM_INPUTS=1 \
     -e BATCH_SIZE=${BATCH_SIZE} \
     -e OUTPUT_DIR=/tmp/output \
     -v /tmp/output:/tmp/output \
@@ -97,8 +104,7 @@ Run sample as follows:
     --device /dev/dri/ \
     -e MODEL_NAME=yolov5m \
     -e PLATFORM=PLATFORM \
-    -e NUM_ITERATIONS=1 \
-    -e NUM_IMAGES=5000 \
+    -e NUM_INPUTS=5000 \
     -e BATCH_SIZE=${BATCH_SIZE} \
     -e OUTPUT_DIR=/tmp/output \
     -e DATASET_DIR=/dataset \
@@ -145,14 +151,13 @@ Mind the following `docker run` arguments:
    * With dummy data:
 
      * Running with dummy data is recommended for performance benchmarking (throughput and latency measurements)
-     * Use higher `NUM_ITERATIONS` and lower `NUM_IMAGES` values (e.g. use `NUM_IMAGES=$BATCH_SIZE`) for more precise performance results
+     * Use higher `NUM_INPUTS` values for more precise peak performance results. `NUM_INPUTS` will be rounded to a multiple of `BATCH_SIZE`
      * **NOTE**: Accuracy will be zero when using dummy data
      ```
      export MODEL_NAME=yolov5m
      export PLATFORM=Flex  # can also be: Max
      export BATCH_SIZE=1
-     export NUM_ITERATIONS=32
-     export NUM_IMAGES=${BATCH_SIZE}
+     export NUM_INPUTS=1
      export OUTPUT_DIR=/tmp/output
      ./run_model.sh --dummy
      ```
@@ -164,8 +169,7 @@ Mind the following `docker run` arguments:
      export MODEL_NAME=yolov5m
      export PLATFORM=Flex  # can also be: Max
      export BATCH_SIZE=1
-     export NUM_ITERATIONS=1
-     export NUM_IMAGES=50000
+     export NUM_INPUTS=5000
      export OUTPUT_DIR=/tmp/output
      export DATASET_DIR=$DATASET_DIR
      ./run_model.sh
@@ -182,27 +186,26 @@ Before running `run_model.sh` script, user is required to:
 
 Other arguments and/or environment variables are optional and should be used according to the actual needs (see examples above).
 
-| Argument           | Environment variable | Valid Values      | Purpose                                                               |
-| ------------------ | -------------------- | ----------------- | --------------------------------------------------------------------- |
-| `--amp`            | `AMP`                | `no`              | Use AMP on model convertion to the desired precision (default: `no`)  |
-|                    |                      | `yes`             |                                                                       |
-| `--batch-size`     | `BATCH_SIZE`         | >=1               | Batch size to use (default: `1`)                                      |
-| `--data`           | `DATASET_DIR`        | String            | Location to load images from                                          |
-| `--dummy`          | `DUMMY`              |                   | Use randomly generated dummy dataset in place of `--data` argument    |
-| `--jit`            | `JIT`                | `none`            | JIT method to use (default: `trace`)                                  |
-| `--load`           | `LOAD_PATH`          |                   | Local path to load model from (default: disabled)                     |
-|                    |                      | `trace`           |                                                                       |
-|                    |                      | `script`          |                                                                       |
-| `--num-images`     | `NUM_IMAGES`         | >=1               | Number of images to load (default: `1`)                               |
-| `--num-iterations` | `NUM_ITERATIONS`     | >=1               | Number of times to test each batch (default: `100`)                   |
-| `--output-dir`     | `OUTPUT_DIR`         | String            | Location to write output                                              |
-| `--proxy`          | `https_proxy`        | String            | System proxy                                                          |
-| `--precision`      | `PRECISION`          | `fp16`            | Precision to use for the model (default: `fp32`)                      |
-|                    |                      | `fp32`            |                                                                       |
-| `--save`           | `SAVE_PATH`          |                   | Local path to save model to (default: disabled)                       |
-| `--streams`        | `STREAMS`            | >=1               | Number of parallel streams to do inference on (default: `1`)          |
-| `--platform`       | `PLATFORM`           | `Flex`            | Platform that inference is being ran on                               |
-|                    |                      | `Max`             |                                                                       |
+| Argument              | Environment variable | Valid Values      | Purpose                                                                 |
+| ------------------    | -------------------- | ----------------- | ---------------------------------------------------------------------   |
+| `--amp`               | `AMP`                | `no`              | Use AMP on model convertion to the desired precision (default: `no`)    |
+|                       |                      | `yes`             |                                                                         |
+| `--batch-size`        | `BATCH_SIZE`         | >=1               | Batch size to use (default: `1`)                                        |
+| `--data`              | `DATASET_DIR`        | String            | Location to load images from                                            |
+| `--dummy`             | `DUMMY`              |                   | Use randomly generated dummy dataset in place of `--data` argument      |
+| `--load`              | `LOAD_PATH`          |                   | Local path to load model from (default: disabled)                       |
+| `--num-inputs`        | `NUM_INPUTS`         | >=1               | Number of images to load (default: `1`)                                 |
+| `--max-test-duration` | `MAX_TEST_DURATION`  | >=0               | Maximum duration in seconds to run benchmark. Testing will be truncated |
+|                       |                      |                   | once maximum test duration has been reached. (default: disabled)        |
+| `--min-test-duration` | `MIN_TEST_DURATION`  | >=0               | Minimum duration in seconds to run benchmark. Images will be repeated   |                   
+| `--output-dir`        | `OUTPUT_DIR`         | String            | Location to write output                                                |
+| `--proxy`             | `https_proxy`        | String            | System proxy                                                            |
+| `--precision`         | `PRECISION`          | `fp16`            | Precision to use for the model (default: `fp32`)                        |
+|                       |                      | `fp32`            |                                                                         |
+| `--save`              | `SAVE_PATH`          |                   | Local path to save model to (default: disabled)                         |
+| `--streams`           | `STREAMS`            | >=1               | Number of parallel streams to do inference on (default: `1`)            |
+| `--platform`          | `PLATFORM`           | `Flex`            | Platform that inference is being ran on                                 |
+|                       |                      | `Max`             |                                                                         |
 
 
 For more details, check help with `run_model.sh --help`

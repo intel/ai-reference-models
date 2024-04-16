@@ -36,12 +36,11 @@ except Exception as e:
 op_avg = [
     'accuracy-top1',
     'latency',
-    'latency-with-overhead'
+    'total-batches-tested',
+    'total-images-tested'
 ]
 # error out if values are different
 op_same = [
-    'total-batches-tested',
-    'total-images-tested',
     'uniq-batches-tested',
     'uniq-images-tested',
     'warmup-batches'
@@ -50,25 +49,26 @@ op_same = [
 # total means to multiple on a number of streams, i.e. =min(arr)*len(arr)
 op_total_avg = [
     'throughput',
-    'throughput-with-overhead'
 ]
 
 # Write single result
-def write_results(batches_tested, throughput, latency, top1, throughput_overhead, latency_overhead):
+def write_results(batches_tested, throughput, latency, top1):
     output_dict = {
         # 'schema' points to json-schema output is compliant to
         # TBD for now, need to replace with URL of the schema
         'schema': 'TBD',
         'config': {
             'workload': {
+                'type': 'inference',
                 'model': {
                     'name': 'yolov5m',
+                    'link': 'https://github.com/ultralytics/yolov5/commit/781401ec',
                     'streams': args.total_instances,
                     'precision': args.dtype_str,
                     'batch-size': args.batch_size,
                     'device': args.device,
                     'amp': 'false' if args.no_amp else 'true',
-                    'jit': 'trace' if args.jit_trace else 'script' if args.jit_script else 'no',
+                    'jit': 'trace',
                     'dummy': 'true' if args.dummy else 'false',
                     'framework': 'PyTorch'
                 },
@@ -88,19 +88,12 @@ def write_results(batches_tested, throughput, latency, top1, throughput_overhead
                     'stdev': 0.0,
                     'units': 'images/s'
                     },
-                'throughput-with-overhead': {
-                    'avg': float(throughput_overhead),
-                    'min': float(throughput_overhead),
-                    'max': float(throughput_overhead),
-                    'stdev': 0.0,
-                    'units': 'images/s'
-                },
                 'accuracy-top1': {
                     'avg': float(top1),
                     'min': float(top1),
                     'max': float(top1),
                     'stdev': 0.0,
-                    'units': '%'
+                    'units': 'confidence'
                 },
                 'latency': {
                     'avg': float(latency),
@@ -109,17 +102,22 @@ def write_results(batches_tested, throughput, latency, top1, throughput_overhead
                     'stdev': 0.0,
                     'units': 'ms'
                 },
-                'latency-with-overhead': {
-                    'avg':float(latency_overhead),
-                    'min':float(latency_overhead),
-                    'max':float(latency_overhead),
+                'total-batches-tested': {
+                    'avg': float(batches_tested),
+                    'min': float(batches_tested),
+                    'max': float(batches_tested),
                     'stdev': 0.0,
                     'units': 'ms'
                 },
-                'total-batches-tested': { 'total': batches_tested },
-                'total-images-tested': { 'total': batches_tested * args.batch_size },
-                'uniq-batches-tested': { 'total': batches_tested // args.batch_streaming },
-                'uniq-images-tested': { 'total': args.batch_size * (batches_tested // args.batch_streaming) },
+                'total-images-tested': {
+                    'avg': float(batches_tested * args.batch_size),
+                    'min': float(batches_tested * args.batch_size),
+                    'max': float(batches_tested * args.batch_size),
+                    'stdev': 0.0,
+                    'units': 'ms'
+                },
+                'uniq-batches-tested': { 'total': args.num_inputs // args.batch_size },
+                'uniq-images-tested': { 'total': args.num_inputs },
                 'warmup-batches': { 'total': args.warm_up },
             }
         }
@@ -154,20 +152,18 @@ def show_test_conditions():
         io_utils.stdout_helper('    calib iters:         {0}'.format(args.calib_iters))
         io_utils.stdout_helper('    calib batch size:    {0}'.format(args.calib_bs))
     io_utils.stdout_helper('  [PERF ARGS]')
-    io_utils.stdout_helper('    JIT method:         {0}'.format('trace' if args.jit_trace else 'script' if args.jit_script else 'none'))
+    io_utils.stdout_helper('    JIT method:         trace')
     io_utils.stdout_helper('    gradients:          {0}'.format('none' if args.no_grad else 'zero' if args.zero_grad else 'true'))
     io_utils.stdout_helper('  [BENCHMARK PARAMS]')
     io_utils.stdout_helper('    warm up batches:    {0}'.format(args.warm_up))
     io_utils.stdout_helper('    batch size:         {0}'.format(args.batch_size))
-    io_utils.stdout_helper('    repeat batches:     {0}'.format(args.batch_streaming))
-    io_utils.stdout_helper('    max data set size:  {0}'.format(args.max_val_dataset_size))
+    io_utils.stdout_helper('    num inputs:         {0}'.format(args.num_inputs))
     io_utils.stdout_helper('    label smoothing:    {0}'.format(args.label_smoothing))
     io_utils.stdout_helper('    channels last:      {0}'.format(args.channels_last))
     io_utils.stdout_helper('    instance info:      {0}/{1}'.format(args.instance, args.total_instances))
     io_utils.stdout_helper('  [MISC]')
     io_utils.stdout_helper('    seed:               {0}'.format(args.seed))
     io_utils.stdout_helper('    non-blocking load:  {0}'.format(args.non_blocking))
-    io_utils.stdout_helper('    status prints:      {0}'.format(args.status_prints))
     io_utils.stdout_helper(' --------------------------- end inference arguments ---------------------------')
 
 def get_valid_results_list():

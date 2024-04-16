@@ -18,7 +18,9 @@ ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-WORKDIR /workspace/pytorch-flex-series-yolov5-inference/models
+ARG WORKDIR=/workspace/pytorch-flex-series-yolov5-inference
+
+WORKDIR $WORKDIR
 
 ARG PY_VERSION=3.10
 

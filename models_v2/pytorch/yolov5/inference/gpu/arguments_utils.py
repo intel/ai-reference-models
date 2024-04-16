@@ -15,6 +15,7 @@
 import argparse
 import sys
 import os
+import numpy as np
 
 from pathlib import Path
 
@@ -35,14 +36,13 @@ def parse_arguments():
                         help='mini-batch size (default: 16), this is the total '
                             'batch size of all GPUs on the current node when '
                             'using Data Parallel or Distributed Data Parallel')
-    parser.add_argument('--batch-streaming', default=1, type=int,
-                        metavar='N',
-                        help='Aggregate data over this number of batches before calculating stats')
-    parser.add_argument('--max-val-dataset-size', default=5000, type=int,
+    parser.add_argument('--num-inputs', default=5000, type=int,
                         metavar='N',
                         help='limit number of images to use for validation (default: 5000)')
-    parser.add_argument('--status-prints', default=10, type=int,
-                        metavar='N', help='number of status prints during benchmarking (default: 10)')
+    parser.add_argument('--min-test-duration', default=0, type=int,
+                        metavar='N', help='minimum length of benchmark in seconds. Will repeat batches until reached. (default: 0 seconds)')
+    parser.add_argument('--max-test-duration', default=np.inf, type=int,
+                        metavar='N', help='maximum length of benchmark in seconds. Will terminate benchmark once reached. (default: inf)')
     parser.add_argument('--seed', default=None, type=int,
                         help='seed for initializing training. ')
     parser.add_argument('--device', default=0, type=int,
@@ -55,10 +55,6 @@ def parse_arguments():
     parser.add_argument('--uint8', default=0, type=int, help='Use unsigned int8 quantization to do inference')
     parser.add_argument('--asymmetric-quantization', dest='asymmetric_quantization', action='store_true',
                         help='Enable asymmetric quantization (default is symmetric).')
-    parser.add_argument('--jit-trace', action='store_true',
-                        help='enable PyTorch JIT trace graph mode')
-    parser.add_argument('--jit-script', action='store_true',
-                        help='enable PyTorch JIT script graph mode. It is not supported for Yolov5')
     parser.add_argument('--hub', action='store_true',
                         help='enable PyTorch HUB mode')
     parser.add_argument('--zero-grad', action='store_true',
