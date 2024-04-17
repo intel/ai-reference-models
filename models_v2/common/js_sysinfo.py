@@ -243,6 +243,9 @@ def get_dpkg_info(**kwargs):
     if not quiet(**kwargs):
         print('info: calling dpkg-query and dpkg --verify (might be time consuming)...', file=sys.stdout)
 
+    if 'dpkg' not in _components_info:
+        _components_info['dpkg'] = {}
+
     for pkg in packages:
         try:
             result = subprocess.run(['dpkg-query', '--show',
@@ -256,8 +259,6 @@ def get_dpkg_info(**kwargs):
                 print('warning: ' + str(e), file=sys.stderr)
             continue
 
-        if 'dpkg' not in _components_info:
-            _components_info['dpkg'] = {}
         # Our query uses wildcards and could match more than one item. Thus we must handle the case where multiple are matched.
         results = result.stdout.decode().strip().split('\n')
         for result in results:
