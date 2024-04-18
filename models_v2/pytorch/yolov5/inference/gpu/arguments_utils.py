@@ -27,6 +27,8 @@ def parse_arguments():
                         help='path to dataset (default: data/images)')
     parser.add_argument('--output-dir', default='/workspace/temp/',
                         help='path to output results (default: /workspace/temp/)')
+    parser.add_argument('--socket', default='', type=str,
+                        help='socket to control telemetry capture (default: disabled)')
     parser.add_argument('--width', default=640, type=int, metavar='N',
                         help='width of input image to be used (default: 640)')
     parser.add_argument('--height', default=640, type=int, metavar='N',

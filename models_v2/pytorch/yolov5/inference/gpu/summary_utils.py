@@ -136,9 +136,11 @@ def show_test_conditions():
     io_utils.stdout_helper('  [INPUT-OUTPUT]')
     io_utils.stdout_helper('    output dir:         {0}'.format(args.output_dir))
     if args.dummy:
-        io_utils.stdout_helper('    using dummy data :  {0}'.format(True))
+        io_utils.stdout_helper('    using dummy data:  {0}'.format(True))
     else:
         io_utils.stdout_helper('    val data dir:       {0}'.format(args.data))
+    if args.socket:
+        io_utils.stdout_helper('    socket:             {0}'.format(args.socket))
     io_utils.stdout_helper('  [DATA TYPE]')
     io_utils.stdout_helper('    using dtype:        {0}'.format(args.dtype_str))
     if args.dtype_str not in ['float32', 'tfloat32', 'bfloat32']:

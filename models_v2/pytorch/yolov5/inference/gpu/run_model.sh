@@ -28,12 +28,13 @@
 [[ "${MAX_TEST_DURATION}" == "" ]]  && MAX_TEST_DURATION=""
 [[ "${PRECISION}" == "" ]]          && PRECISION="fp16"
 [[ "${SAVE_PATH}" == "" ]]          && SAVE_PATH=""
+[[ "${SOCKET}" == "" ]]             && SOCKET=""
 [[ "${STREAMS}" == "" ]]            && STREAMS=1
 
 ./get_model.sh
 
 # Process CLI arguments as overides for environment variables
-VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,load:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,proxy:,save:,streams: -- "$@")
+VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,load:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,proxy:,save:,socket:,streams: -- "$@")
 if [[ $? -ne 0 ]]; then
     exit 1;
 fi
@@ -96,6 +97,10 @@ while [ : ]; do
         SAVE_PATH="$2"
         shift 2
         ;;
+    --socket)
+        SOCKET="$2"
+        shift 2
+        ;;
     --streams)
         STREAMS=$2
         shift 2
@@ -133,7 +138,8 @@ while [ : ]; do
         echo "  --streams        [STREAMS]              : Number of parallel streams to do inference on (default: '${STREAMS}')"
         echo "                                            Will be truncated to a multiple of BATCH_SIZE"
         echo "                                            If less than BATCH_SIZE will be increased to BATCH_SIZE"
-        echo ""
+        echo "  --socket [SOCKET]                       : Socket to control telemetry capture (default: '${SOCKET}')"
+		echo ""
         echo "NOTE: Arguments may also be specified through command line variables using the name in '[]'."
         echo "      For example 'export MODEL_NAME=yolov5m'."
         echo "NOTE: Both arguments and their values are case sensitive."
@@ -210,6 +216,7 @@ echo " MULTI_TILE:        ${MULTI_TILE}"
 echo " NUM_INPUTS:        ${NUM_INPUTS}"
 echo " OUTPUT_DIR:        ${OUTPUT_DIR}"
 echo " SAVE_PATH:         ${SAVE_PATH}"
+echo " SOCKET:            ${SOCKET}"
 echo " STREAMS:           ${STREAMS}"
 echo " PLATFORM:          ${PLATFORM}"
 echo " PRECISION:         ${PRECISION}"
@@ -219,6 +226,12 @@ echo " PROXY:             ${PROXY}"
 if [[ "${PROXY}" != "" ]]; then
     export http_proxy=${PROXY}
     export https_proxy=${PROXY}
+fi
+
+# Set socket if sepecified
+_socket_args=""
+if [[ "${SOCKET}" != "" ]]; then
+    _socket_args="--socket ${SOCKET}"
 fi
 
 # known issue for multitile
@@ -315,6 +328,7 @@ numactl --cpunodebind=0 --membind=0 python3 predict.py \
     ${_test_duration_args} \
     ${_perf_args} \
     ${_save_load_args} \
+    ${_socket_args} \
     --warm-up 3 \
     --output-dir ${OUTPUT_DIR} \
     --total-instances ${STREAMS} \
