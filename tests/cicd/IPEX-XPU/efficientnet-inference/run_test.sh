@@ -21,6 +21,7 @@ mkdir -p ${OUTPUT_DIR}
 # Run script
 echo "Script are here: ${MODEL_SCRIPTS}"
 cd ${MODEL_SCRIPTS}
+export PYTHONPATH=${PYTHONPATH}:$(pwd)/../../../../common
 ./setup.sh
 ./run_model.sh
 if [ $? -ne 0 ]; then

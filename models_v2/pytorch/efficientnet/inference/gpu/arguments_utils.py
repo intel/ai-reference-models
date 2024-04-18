@@ -73,12 +73,6 @@ def parse_arguments():
                         help='set model gradients to none')
     parser.add_argument('--no-amp', action='store_true',
                         help='Do not use autocast. Direct conversion from native data type to desired data type')
-    parser.add_argument('--calib-iters', default=8, type=int,
-                        help='iteration number for calibration')
-    parser.add_argument('--calib-bs', default=32, type=int,
-                        metavar='N', help='mini-batch size for calibration')
-    parser.add_argument('--perchannel-weight', default=False,
-                        help='do calibration with weight per channel quantization')
     parser.add_argument('--non-blocking', default=False, action='store_true',
                         help='non blocking H2D for input and target, default False')
     parser.add_argument('--channels-last', action='store_true', help='enable channels last')
