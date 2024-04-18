@@ -206,6 +206,7 @@ Other arguments and/or environment variables are optional and should be used acc
 | `--streams`           | `STREAMS`            | >=1               | Number of parallel streams to do inference on (default: `1`)            |
 | `--platform`          | `PLATFORM`           | `Flex`            | Platform that inference is being ran on                                 |
 |                       |                      | `Max`             |                                                                         |
+| `--socket`            | `SOCKET`             | String            | Socket to control telemetry capture (default: disabled)                 |
 
 
 For more details, check help with `run_model.sh --help`
@@ -231,3 +232,34 @@ results:
    value: 0.83
    unit: confidence
 ```
+
+## Performance Benchmarking
+
+[benchmark.sh] script can be used to benchmark YOLOv5 performance for the [predefined use cases](profiles/README.md). The [benchmark.sh] script is a tiny YOLOv5 specific wrapper on top of [benchmark.py](/models_v2/common/benchmark.py) script. The workflow for running a benchmark is as follows:
+
+* (optional) Specify path to [svr-info](https://github.com/intel/svr-info):
+  ```
+  export PATH_TO_SVR_INFO=/path/to/svrinfo
+  ```
+
+* Specify path to output benchmark results (folder must be creatable/writable under `root`):
+  ```
+  export OUTPUT_DIR=/opt/output
+  ```
+
+* Run the benchmark script (assumes ``intel/object-detection:pytorch-flex-gpu-yolov5-inference`` has already been pulled or built locally):
+  ```
+  sudo \
+    PATH=$PATH_TO_SVR_INFO:$PATH \
+    IMAGE=intel/object-detection:pytorch-flex-gpu-yolov5-inference \
+    OUTPUT_DIR=$OUTPUT_DIR \
+    PROFILE=$(pwd)/models_v2/pytorch/yolov5/inference/gpu/profiles/yolov5m.fp16.csv \
+    PYTHONPATH=$(pwd)/models_v2/common \
+    $(env | grep -E '(_proxy=|_PROXY)' | sed 's/^//') \
+    $(pwd)/models_v2/pytorch/yolov5/inference/gpu/benchmark.sh
+  ```
+
+* Final output will be written to ``$OUTPUT_DIR``.
+
+> [!NOTE]
+> Additonal arguments that arent specified in the benchmark profile (``yolov5m.fp16.csv`` in the example above) can be specified through environment variables as described in previous sections.
