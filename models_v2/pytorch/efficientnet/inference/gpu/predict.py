@@ -95,11 +95,11 @@ def predict(instance, input_args):
 
 def main():
     arguments_utils.parse_arguments()
-    args.barrier = mp.Barrier(args.total_instances, timeout=args.max_wait_for_sync)
     try:
         mp.set_start_method('spawn')
     except:
         pass
+    args.barrier = mp.Barrier(args.total_instances, timeout=args.max_wait_for_sync)
     processes = {}
     for instance in range(1, args.total_instances + 1):
         processes[instance] = mp.Process(target=predict, args=(instance, args))

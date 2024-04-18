@@ -126,7 +126,7 @@ Run sample as follows:
 
   * Running with dataset images is recommended for accuracy measurements
   * In this mode, the test duration can be controlled by using the `NUM_INPUTS` parameter.
-    The app tests a number of batches equal to `max(1, length of dataset // BATCH_SIZE)`
+    The app tests a number of batches equal to `max(1, NUM_INPUTS // BATCH_SIZE)`
   * **NOTE**: Performance results (throughput and latency measurements) may be impacted due to data handling overhead
   ```
   mkdir -p /tmp/output && rm -f /tmp/output/* && chmod -R 777 /tmp/output
@@ -200,7 +200,7 @@ Mind the following `docker run` arguments:
 
     * Running with dataset images is recommended for accuracy measurements
     * In this mode, the test duration can be controlled by using the `NUM_INPUTS` parameter.
-      The app tests a number of batches equal to `max(1, length of dataset // BATCH_SIZE)`
+      The app tests a number of batches equal to `max(1, NUM_INPUTS // BATCH_SIZE)`
     * **NOTE**: Performance results (throughput and latency measurements) may be impacted due to data handling overhead
     ```
     export MODEL_NAME=efficientnet_b0
@@ -223,38 +223,36 @@ Before running `run_model.sh` script, user is required to:
 
 Other arguments and/or environment variables are optional and should be used according to the actual needs (see examples above).
 
-| Argument              | Environment variable | Valid Values      | Purpose                                                                 |
-| --------------------- | -------------------- | ----------------- | ----------------------------------------------------------------------- |
-| `--amp`               | `AMP`                | `yes`             | Use AMP on model conversion to the desired precision (default: `yes`)   |
-|                       |                      | `no`              |                                                                         |
-| `--arch`              | `MODEL_NAME`         | `efficientnet_b0` | Torchvision model to run (default: `efficientnet_b0`)                   |
-|                       |                      | `efficientnet_b1` |                                                                         |
-|                       |                      | `efficientnet_b2` |                                                                         |
-|                       |                      | `efficientnet_b3` |                                                                         |
-|                       |                      | `efficientnet_b4` |                                                                         |
-|                       |                      | `efficientnet_b5` |                                                                         |
-|                       |                      | `efficientnet_b6` |                                                                         |
-|                       |                      | `efficientnet_b7` |                                                                         |
-| `--batch-size`        | `BATCH_SIZE`         | >=1               | Batch size to use (default: `1`)                                        |
-| `--data`              | `DATASET_DIR`        | String            | Location to load images from                                            |
-| `--dummy`             | `DUMMY`              |                   | Use randomly generated dummy dataset in place of `--data` argument      |
-| `--jit`               | `JIT`                | `none`            | JIT method to use (default: `trace`)                                    |
-| `--load`              | `LOAD_PATH`          |                   | Local path to load model from (default: disabled)                       |
-|                       |                      | `trace`           |                                                                         |
-|                       |                      | `script`          |                                                                         |
-| `--max-test-duration` | `MAX_TEST_DURATION`  | >=0               | Maximum duration in seconds to run benchmark. Testing will be truncated |
-|                       |                      |                   | once maximum test duration has been reached. (default: disabled)        |
-| `--min-test-duration` | `MIN_TEST_DURATION`  | >=0               | Minimum duration in seconds to run benchmark. Images will be repeated   |
-|                       |                      |                   | until minimum test duration has been reached. (default: disabled)       |
-| `--num-inputs`        | `NUM_INPUTS`         | >=1               | Number of images to load (default: `1`)                                 |
-| `--output-dir`        | `OUTPUT_DIR`         | String            | Location to write output                                                |
-| `--proxy`             | `https_proxy`        | String            | System proxy                                                            |
-| `--precision`         | `PRECISION`          | `bp16`            | Precision to use for the model (default: `fp32`)                        |
-|                       |                      | `fp16`            |                                                                         |
-|                       |                      | `fp32`            |                                                                         |
-| `--save`              | `SAVE_PATH`          |                   | Local path to save model to (default: disabled)                         |
-| `--streams`           | `STREAMS`            | >=1               | Number of parallel streams to do inference on (default: `1`)            |
-| `--socket`            | `SOCKET`             | String            | Socket to control telemetry capture (default: disabled)                 |
+| Argument              | Environment variable | Valid Values      | Purpose                                                                                                                                  |
+| --------------------- | -------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `--amp`               | `AMP`                | `yes`             | Use AMP on model conversion to the desired precision (default: `yes`)                                                                    |
+|                       |                      | `no`              |                                                                                                                                          |
+| `--arch`              | `MODEL_NAME`         | `efficientnet_b0` | Torchvision model to run (default: `efficientnet_b0`)                                                                                    |
+|                       |                      | `efficientnet_b1` |                                                                                                                                          |
+|                       |                      | `efficientnet_b2` |                                                                                                                                          |
+|                       |                      | `efficientnet_b3` |                                                                                                                                          |
+|                       |                      | `efficientnet_b4` |                                                                                                                                          |
+|                       |                      | `efficientnet_b5` |                                                                                                                                          |
+|                       |                      | `efficientnet_b6` |                                                                                                                                          |
+|                       |                      | `efficientnet_b7` |                                                                                                                                          |
+| `--batch-size`        | `BATCH_SIZE`         | >=1               | Batch size to use (default: `1`)                                                                                                         |
+| `--data`              | `DATASET_DIR`        | String            | Location to load images from                                                                                                             |
+| `--dummy`             | `DUMMY`              |                   | Use randomly generated dummy dataset in place of `--data` argument                                                                       |
+| `--jit`               | `JIT`                | `none`            | JIT method to use (default: `trace`)                                                                                                     |
+|                       |                      | `trace`           |                                                                                                                                          |
+|                       |                      | `script`          |                                                                                                                                          |
+| `--load`              | `LOAD_PATH`          |                   | Local path to load model from (default: disabled)                                                                                        |
+| `--max-test-duration` | `MAX_TEST_DURATION`  | >=0               | Maximum duration in seconds to run benchmark. Testing will be truncated once maximum test duration has been reached. (default: disabled) |
+| `--min-test-duration` | `MIN_TEST_DURATION`  | >=0               | Minimum duration in seconds to run benchmark. Images will be repeated until minimum test duration has been reached. (default: disabled)  |
+| `--num-inputs`        | `NUM_INPUTS`         | >=1               | Number of images to load (default: `1`)                                                                                                  |
+| `--output-dir`        | `OUTPUT_DIR`         | String            | Location to write output                                                                                                                 |
+| `--proxy`             | `https_proxy`        | String            | System proxy                                                                                                                             |
+| `--precision`         | `PRECISION`          | `bp16`            | Precision to use for the model (default: `fp32`)                                                                                         |
+|                       |                      | `fp16`            |                                                                                                                                          |
+|                       |                      | `fp32`            |                                                                                                                                          |
+| `--save`              | `SAVE_PATH`          |                   | Local path to save model to (default: disabled)                                                                                          |
+| `--streams`           | `STREAMS`            | >=1               | Number of parallel streams to do inference on (default: `1`)                                                                             |
+| `--socket`            | `SOCKET`             | String            | Socket to control telemetry capture (default: disabled)                                                                                  |
 
 > [!NOTE]
 > * If `--dummy` is not specified (i.e. Quality Check mode), `--min/max-test-duration` settings are ignored. Test length is limited by minimum of num-inputs and the size of the dataset.

@@ -154,14 +154,6 @@ def show_test_conditions():
     io_utils.stdout_helper('    using dtype:        {0}'.format(args.dtype_str))
     if args.dtype_str not in ['float32', 'tfloat32', 'bfloat32']:
         io_utils.stdout_helper('    using amp:          {0}'.format(not args.no_amp))
-    if args.dtype_str in ['int8', 'uint8']:
-        quantization_method = '{0} {1} quantization'.format(
-            'perchannel weights' if args.perchannel_weight else 'non-perchannel weights',
-            'asymmetric' if args.asymmetric_quantization else 'symmetric'
-        )
-        io_utils.stdout_helper('    quantization method: {0}'.format(quantization_method))
-        io_utils.stdout_helper('    calib iters:         {0}'.format(args.calib_iters))
-        io_utils.stdout_helper('    calib batch size:    {0}'.format(args.calib_bs))
     io_utils.stdout_helper('  [PERF ARGS]')
     io_utils.stdout_helper('    JIT method:         {0}'.format('trace' if args.jit_trace else 'script' if args.jit_script else 'none'))
     io_utils.stdout_helper('    gradients:          {0}'.format('none' if args.no_grad else 'zero' if args.zero_grad else 'true'))
