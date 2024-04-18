@@ -33,3 +33,9 @@ services:
       dockerfile: docker/cuda-gpu/pytorch-efficientnet-inference/pytorch-cuda-series-efficientnet-inference.Dockerfile
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-cuda-gpu-efficientnet-inference
     pull_policy: always
+  pytorch-yolov5-inference:
+    build:
+      dockerfile: docker/cuda-gpu/pytorch-yolov5-inference/pytorch-cuda-series-yolov5-inference.Dockerfile
+    extends: pytorch-efficientnet-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-cuda-gpu-yolov5-inference
+    pull_policy: always

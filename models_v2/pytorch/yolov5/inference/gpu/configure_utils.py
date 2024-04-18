@@ -28,8 +28,11 @@ def enum_device():
     # Detect device type from xpu, cuda, and cpu.
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if device == 'cpu':
-        import intel_extension_for_pytorch as ipex
-        device = 'xpu' if ipex.xpu.is_available() else device
+        try:
+            import intel_extension_for_pytorch as ipex
+            device = 'xpu' if ipex.xpu.is_available() else device
+        except:
+            pass
 
     # Assign device number.
     args.gpu = False
