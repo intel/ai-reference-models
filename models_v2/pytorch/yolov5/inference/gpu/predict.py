@@ -454,7 +454,7 @@ def do_perf_benchmarking(model, ds, names):
                 estimated_total_duration = args.max_test_duration
 
             progress.display('~{0:5.1f}% (Estimated {1:3.0f}s remaining)'.format(
-                min([100, 100 * current_benchmark_duration / estimated_total_duration]),
+                min([100, 100 if estimated_total_duration == 0 else 100 * current_benchmark_duration / estimated_total_duration]),
                 max([0, estimated_total_duration - current_benchmark_duration])
             ))
             
