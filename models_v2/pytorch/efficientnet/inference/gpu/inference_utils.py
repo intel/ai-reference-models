@@ -222,7 +222,7 @@ class Inference:
         if estimated_total_duration > args.max_test_duration:
             estimated_total_duration = args.max_test_duration
         self.progress.display('~{0:5.1f}% (Estimated {1:3.0f}s remaining)'.format(
-            min([100, 100 * current_benchmark_duration / estimated_total_duration]),
+            min([100, 100 if estimated_total_duration == 0 else 100 * current_benchmark_duration / estimated_total_duration]),
             max([0, estimated_total_duration - current_benchmark_duration])
         ))
         statistics_utils.log_raw_perf_to_file(
