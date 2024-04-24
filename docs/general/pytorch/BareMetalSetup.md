@@ -1,10 +1,14 @@
 # Install Intel® Extension for PyTorch
 Prepare the environment, you may create a Python virtual enviromment `virtualenv` or `conda` prior to installing dependencies.
 
-    # Install Intel® Extension for PyTorch
-    pip install intel-extension-for-pytorch
-    # Install torch,torchvision
-    python -m pip install torch torchvision
+    # Install Intel® Extension for PyTorch:
+    python -m pip install intel-extension-for-pytorch
+    
+    # Install torch,torchvision:
+    python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+    # Install oneccl:
+    python -m pip install oneccl_bind_pt --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/cpu/us/
 
 ## Install generic dependencies
 Make sure the following components are installed in your environment :
