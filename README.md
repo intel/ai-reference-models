@@ -58,6 +58,8 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [Inception v3](https://arxiv.org/pdf/1512.00567.pdf)   | PyTorch | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/inception_v3/inference/cpu/README.md) | [ImageNet 2012] |
 | [MNASNet 0.5](https://arxiv.org/abs/1807.11626)        | PyTorch | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/mnasnet0_5/inference/cpu/README.md) | [ImageNet 2012] |
 | [MNASNet 1.0](https://arxiv.org/abs/1807.11626)      | PyTorch | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/mnasnet1_0/inference/cpu/README.md) | [ImageNet 2012] |
+| [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Inference | [Int8 FP32 BFloat16 BFloat32](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/README.md) | [ImageNet 2012] |
+| [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Training  | [FP32 BFloat16 BFloat32](/quickstart/image_recognition/pytorch/resnet50/training/cpu/README.md) | [ImageNet 2012] |
 | [ResNet 101](https://arxiv.org/pdf/1512.03385.pdf)   | PyTorch | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnet101/inference/cpu/README.md) | [ImageNet 2012] |
 | [ResNet 152](https://arxiv.org/pdf/1512.03385.pdf)   | PyTorch | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnet152/inference/cpu/README.md) | [ImageNet 2012] |
 | [ResNext 32x4d](https://arxiv.org/abs/1611.05431)    | PyTorch | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnext-32x4d/inference/cpu/README.md) | [ImageNet 2012] |
