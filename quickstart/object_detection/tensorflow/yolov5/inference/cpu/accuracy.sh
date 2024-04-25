@@ -19,16 +19,6 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
-if [ -z "${DATASET_DIR}" ]; then
-  echo "The required environment variable DATASET_DIR has not been set"
-  exit 1
-fi
-
-if [ ! -d "${DATASET_DIR}" ]; then
-  echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
-  exit 1
-fi
-
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
   echo "Please set PRECISION to fp32, bfloat16, fp16, int8"
@@ -63,15 +53,6 @@ if [[ $PRECISION == "fp16" ]]; then
   echo "ONEDNN_MAX_CPU_ISA=$ONEDNN_MAX_CPU_ISA"
 fi
 
-# if INSTANCES_JSON not empty
-if [[ -n "${INSTANCES_JSON}" ]]; then
-  # Check if the file exists
-  if [[ ! -f "${INSTANCES_JSON}" ]]; then
-    echo "File ${INSTANCES_JSON} does not exist."
-    exit 1
-  fi
-fi
-
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
          --model-name=yolov5 \
@@ -79,11 +60,9 @@ _command python benchmarks/launch_benchmark.py \
          --mode=inference \
          --framework tensorflow \
          --in-graph ${PRETRAINED_MODEL} \
-         --data-location=${DATASET_DIR} \
          --output-dir ${OUTPUT_DIR} \
          --batch-size=${BATCH_SIZE} \
          --socket-id 0 \
          --accuracy-only \
-         --instances-json=${INSTANCES_JSON} \
          $@ \
          $ARGS

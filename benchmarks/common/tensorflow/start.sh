@@ -1978,10 +1978,6 @@ function yolov5() {
         CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
       fi
 
-      if [ ${INSTANCES_JSON} != "None" ]; then
-        CMD="${CMD} $(add_arg "--instances-json" ${INSTANCES_JSON})"
-      fi
-
       CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
