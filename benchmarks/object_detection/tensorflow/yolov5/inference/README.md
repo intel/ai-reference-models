@@ -74,9 +74,3 @@ export BATCH_SIZE=<customized batch size value>
 Run the script:
 ./quickstart/object_detection/tensorflow/yolov5/inference/cpu/<script_name.sh>
 ```
-
-If running accuracy, the model expects labels in txt format within [data/labels/val2017](/models/object_detection/tensorflow/yolov5/inference/data/labels/val2017) and it expects the matching images to be in jpg format within [data/images/val2017](/models/object_detection/tensorflow/yolov5/inference/data/images/val2017). You can provide an alternative location for the images with the environment variable DATASET_DIR. If you only have a single json file for the labels, use the following environment variable:
-```
-export INSTANCES_JSON=<path to the json-type labels file>
-```
-Then the scripts will construct the expected data structure.
