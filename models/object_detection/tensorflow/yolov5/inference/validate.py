@@ -30,7 +30,6 @@ if str(DETECT_DIR) not in sys.path:
 from models.common import DetectMultiBackend
 from utils.callbacks import Callbacks
 from utils.dataloaders import create_dataloader
-from data.unpack_json_labels import unpack_json_labels
 from utils.general import (
     LOGGER,
     TQDM_BAR_FORMAT,
@@ -99,39 +98,12 @@ def run(
     save_dir=Path(""),
     callbacks=Callbacks(),
     compute_loss=None,
-    instances_json = None,
     speed = False,
 ):
     device = select_device(device)
 
     save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
     (save_dir / "labels").mkdir(parents=True, exist_ok=True)  # make dir
-
-    # Check if source is a real directory
-    assert os.path.isdir(source), "Source is not a real directory"
-
-    # Check if the directory is not empty
-    assert os.listdir(source), "Directory is empty"
-
-    # Check if all files in the directory end with '.jpg'
-    all_jpg = all(file.endswith('.jpg') for file in glob.glob(os.path.join(source, '*')))
-    assert all_jpg, "Not all files in the directory end with .jpg"
-
-    print("Directory is valid and all files end with .jpg")
-
-    # If data is not in data/images/val2017
-    if source != ROOT / "data/images/val2017":
-        destination = ROOT / "data/images/val2017"
-        os.makedirs(destination, exist_ok=True)
-        for file_name in os.listdir(source):
-            full_file_name = os.path.join(source, file_name)
-            if os.path.isfile(full_file_name):
-                shutil.copy(full_file_name, destination)
-                copied_file_path = os.path.join(destination, file_name)
-                os.chmod(copied_file_path, 0o644)
-    
-    if instances_json:
-        unpack_json_labels(instances_json, ROOT)
 
     # Load model
     model = DetectMultiBackend(weights, precision=precision, device=device, data=yaml_path)
@@ -273,8 +245,8 @@ def run(
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--precision", type=str, default="fp32", help="precision i.e. fp32, fp16, bfloat16, int8")
-    parser.add_argument("--source", type=str, default=ROOT / "data/images/val2017", help="path to coco validation dataset")
-    parser.add_argument("--yaml-path", default=ROOT / "data/coco-val.yaml", help="dataset.yaml path")
+    parser.add_argument("--source", type=str, default=ROOT / "datasets/coco/images", help="path to coco validation dataset")
+    parser.add_argument("--yaml-path", default=ROOT / "data/coco.yaml", help="dataset.yaml path")
     parser.add_argument("--weights", nargs="+", type=str, default=ROOT / "yolov5s.pb", help="model path(s)")
     parser.add_argument("--device", default="", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
     parser.add_argument("--single-cls", action="store_true", help="treat as single-class dataset")
@@ -282,7 +254,6 @@ def parse_opt():
     parser.add_argument("--project", default=ROOT / "runs/val", help="save to project/name")
     parser.add_argument("--name", default="exp", help="save to project/name")
     parser.add_argument("--exist-ok", action="store_true", help="existing project/name ok, do not increment")
-    parser.add_argument("--instances-json", default=None, type=str, help="Path to the coco-val2017-instances json file")
     opt = parser.parse_args()
     print_args(vars(opt))
     return opt
