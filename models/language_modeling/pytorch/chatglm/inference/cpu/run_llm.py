@@ -171,15 +171,9 @@ elif args.dtype == "fp16":
     if args.ipex:
         user_model = ipex.llm.optimize(
             user_model.eval(),
-            quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into fp16
-            inplace=True,
-            deployment_mode=False,
-        )
-        user_model = ipex.optimize(
-            user_model.eval(),
             dtype=torch.half,
-            conv_bn_folding=False,
-            auto_kernel_selection=True,
+            inplace=True,
+            deployment_mode=True if args.jit and (not args.accuracy_only) else False,
         )
     if args.inductor:
         from torch._inductor import config as inductor_config
@@ -192,16 +186,14 @@ elif args.dtype == "fp16":
                 print('[Info] Running torch.compile() BFloat16 with default backend')
                 user_model.forward = torch.compile(user_model.forward)
 elif args.dtype == "bf32":
+    ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
     user_model = ipex.llm.optimize(
         user_model.eval(),
-        quantization_config=ipex.quantization.default_static_qconfig_mapping, # temp qconfig for workaround into bf32
+        dtype=torch.float,
         inplace=True,
-        deployment_mode=False,
+        deployment_mode=True if args.jit and (not args.accuracy_only) else False,
     )
-    ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
-    user_model = ipex.optimize(
-        user_model.eval(), torch.float, auto_kernel_selection=True
-    )
+
 get_memory_usage("IPEX", args)
 print("Data type of the model:", user_model.dtype)
 
@@ -483,39 +475,6 @@ def eval_func(traced_model):
     print("Latency (sec):", latency)
     return acc
 
-
-if args.dtype in ["bf32", "fp16"] and args.jit and not args.accuracy_only:
-    input_ids = torch.ones(32).to(torch.long)
-    attention_mask = torch.ones(len(input_ids))
-    position_ids = torch.arange(len(input_ids))
-    last_ind = input_ids.shape[0] - 1
-    example_inputs = (
-        {
-            "input_ids": input_ids.unsqueeze(0),
-            "attention_mask": attention_mask.unsqueeze(0),
-            "position_ids": position_ids.unsqueeze(0),
-            "past_key_values": tuple(global_past_key_value),
-            "return_last_logit": torch.tensor(True),
-        }
-        if has_position_id
-        else {
-            "input_ids": input_ids.unsqueeze(0),
-            "attention_mask": attention_mask.unsqueeze(0),
-            "past_key_values": tuple(global_past_key_value),
-            "return_last_logit": torch.tensor(True),
-        }
-    )
-    with torch.no_grad(), torch.cpu.amp.autocast(
-        enabled=amp_enabled, dtype=amp_dtype
-    ):
-        trace_graph = torch.jit.trace(
-            user_model.eval(),
-            example_kwarg_inputs=example_inputs,
-            strict=False,
-            check_trace=False,
-        )
-        trace_graph = torch.jit.freeze(trace_graph.eval())
-        setattr(user_model, "trace_graph", trace_graph)
 
 # input prompt
 current_path = pathlib.Path(__file__).parent.resolve()
