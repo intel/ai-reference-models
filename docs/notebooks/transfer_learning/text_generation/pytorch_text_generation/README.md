@@ -8,7 +8,7 @@ is used as an example of a custom dataset being loaded from a json file.
 
 The notebook includes options for bfloat16 precision training,
 [Intel® Extension for PyTorch\*](https://intel.github.io/intel-extension-for-pytorch) which extends PyTorch
-with optimizations for extra performance boost on Intel hardware, and [SmoothQuant quantization with Intel® Neural Compressor](https://github.com/intel/neural-compressor/blob/v2.1.1/docs/source/smooth_quant.md).
+with optimizations for extra performance boost on Intel hardware.
 
 The notebook performs the following steps:
 1. Import dependencies and setup parameters
@@ -16,7 +16,6 @@ The notebook performs the following steps:
 3. Prepare the model and test domain knowledge
 4. Transfer Learning
 5. Retest domain knowledge
-6. Quantize the model
 
 ## Running the notebook
 
