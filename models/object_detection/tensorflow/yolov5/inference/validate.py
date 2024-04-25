@@ -30,10 +30,6 @@ if str(DETECT_DIR) not in sys.path:
 from models.common import DetectMultiBackend
 from utils.callbacks import Callbacks
 from utils.dataloaders import create_dataloader
-<<<<<<< HEAD
-=======
-from data.unpack_json_labels import unpack_json_labels
->>>>>>> be0e7cd1b ([Tensorflow] Enable bfloat16, fp16, and int8 for Yolo V5 (#1790))
 from utils.general import (
     LOGGER,
     TQDM_BAR_FORMAT,
@@ -102,10 +98,6 @@ def run(
     save_dir=Path(""),
     callbacks=Callbacks(),
     compute_loss=None,
-<<<<<<< HEAD
-=======
-    instances_json = None,
->>>>>>> be0e7cd1b ([Tensorflow] Enable bfloat16, fp16, and int8 for Yolo V5 (#1790))
     speed = False,
 ):
     device = select_device(device)
@@ -113,35 +105,6 @@ def run(
     save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
     (save_dir / "labels").mkdir(parents=True, exist_ok=True)  # make dir
 
-<<<<<<< HEAD
-=======
-    # Check if source is a real directory
-    assert os.path.isdir(source), "Source is not a real directory"
-
-    # Check if the directory is not empty
-    assert os.listdir(source), "Directory is empty"
-
-    # Check if all files in the directory end with '.jpg'
-    all_jpg = all(file.endswith('.jpg') for file in glob.glob(os.path.join(source, '*')))
-    assert all_jpg, "Not all files in the directory end with .jpg"
-
-    print("Directory is valid and all files end with .jpg")
-
-    # If data is not in data/images/val2017
-    if source != ROOT / "data/images/val2017":
-        destination = ROOT / "data/images/val2017"
-        os.makedirs(destination, exist_ok=True)
-        for file_name in os.listdir(source):
-            full_file_name = os.path.join(source, file_name)
-            if os.path.isfile(full_file_name):
-                shutil.copy(full_file_name, destination)
-                copied_file_path = os.path.join(destination, file_name)
-                os.chmod(copied_file_path, 0o644)
-    
-    if instances_json:
-        unpack_json_labels(instances_json, ROOT)
-
->>>>>>> be0e7cd1b ([Tensorflow] Enable bfloat16, fp16, and int8 for Yolo V5 (#1790))
     # Load model
     model = DetectMultiBackend(weights, precision=precision, device=device, data=yaml_path)
     stride, pt = model.stride, model.pt
@@ -254,15 +217,9 @@ def run(
     nt = np.bincount(stats[3].astype(int), minlength=nc)  # number of targets per class
 
     # Print results
-<<<<<<< HEAD
     pf = "%22s" + "%11i" * 2 + "%11.4g" * 4  # print format
     # LOGGER.info(pf % ("all", seen, nt.sum(), mp, mr, map50, map))
     LOGGER.info("Accuracy (map50): %.4g" % map50)
-=======
-    pf = "%22s" + "%11i" * 2 + "%11.3g" * 4  # print format
-    # LOGGER.info(pf % ("all", seen, nt.sum(), mp, mr, map50, map))
-    LOGGER.info("Accuracy (map50): %.3g" % map50)
->>>>>>> be0e7cd1b ([Tensorflow] Enable bfloat16, fp16, and int8 for Yolo V5 (#1790))
     if nt.sum() == 0:
         LOGGER.warning(f"WARNING ⚠️ no labels found in {task} set, can not compute metrics without labels")
 
@@ -288,13 +245,8 @@ def run(
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--precision", type=str, default="fp32", help="precision i.e. fp32, fp16, bfloat16, int8")
-<<<<<<< HEAD
     parser.add_argument("--source", type=str, default=ROOT / "datasets/coco/images", help="path to coco validation dataset")
     parser.add_argument("--yaml-path", default=ROOT / "data/coco.yaml", help="dataset.yaml path")
-=======
-    parser.add_argument("--source", type=str, default=ROOT / "data/images/val2017", help="path to coco validation dataset")
-    parser.add_argument("--yaml-path", default=ROOT / "data/coco-val.yaml", help="dataset.yaml path")
->>>>>>> be0e7cd1b ([Tensorflow] Enable bfloat16, fp16, and int8 for Yolo V5 (#1790))
     parser.add_argument("--weights", nargs="+", type=str, default=ROOT / "yolov5s.pb", help="model path(s)")
     parser.add_argument("--device", default="", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
     parser.add_argument("--single-cls", action="store_true", help="treat as single-class dataset")
@@ -302,10 +254,6 @@ def parse_opt():
     parser.add_argument("--project", default=ROOT / "runs/val", help="save to project/name")
     parser.add_argument("--name", default="exp", help="save to project/name")
     parser.add_argument("--exist-ok", action="store_true", help="existing project/name ok, do not increment")
-<<<<<<< HEAD
-=======
-    parser.add_argument("--instances-json", default=None, type=str, help="Path to the coco-val2017-instances json file")
->>>>>>> be0e7cd1b ([Tensorflow] Enable bfloat16, fp16, and int8 for Yolo V5 (#1790))
     opt = parser.parse_args()
     print_args(vars(opt))
     return opt
