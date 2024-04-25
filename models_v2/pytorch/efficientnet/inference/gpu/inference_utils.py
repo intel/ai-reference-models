@@ -214,13 +214,17 @@ class Inference:
         current_benchmark_duration = self.current_benchmark_time - self.start_benchmark_time
         # Estimate how long a single pass through the dataset takes
         dataset_time_estimate = current_benchmark_duration * (args.total_batches / self.average_meters['throughput'].count)
-        # Estimated total duration must be a multiple of complete passes through the dataset that exceeds min test duration
         estimated_total_duration = 0
-        while estimated_total_duration < args.min_test_duration:
-            estimated_total_duration += dataset_time_estimate
-        # Estimated total duration is hard capped at max test duration
-        if estimated_total_duration > args.max_test_duration:
-            estimated_total_duration = args.max_test_duration
+        if args.dummy:
+            # Estimated total duration must be a multiple of complete passes through the dataset that exceeds min test duration
+            while estimated_total_duration < args.min_test_duration:
+                estimated_total_duration += dataset_time_estimate
+            # Estimated total duration is hard capped at max test duration
+            if estimated_total_duration > args.max_test_duration:
+                estimated_total_duration = args.max_test_duration
+        else:
+            # Total estimate is current latency (in seconds) times number of total batches (latency is per batch).
+            estimated_total_duration = (self.average_meters['latency'].avg / 1000) * args.total_batches
         self.progress.display('~{0:5.1f}% (Estimated {1:3.0f}s remaining)'.format(
             min([100, 100 if estimated_total_duration == 0 else 100 * current_benchmark_duration / estimated_total_duration]),
             max([0, estimated_total_duration - current_benchmark_duration])
@@ -342,14 +346,20 @@ class Inference:
             if args.channels_last:
                 io_utils.write_info('Images will be converted to channels last format')
 
-            processed_validation_dataset = []
+            dataset = []
             for batch_index, (images, target) in enumerate(self.validation_dataset):
-                images = self.process_images(images)
-                processed_validation_dataset += [(batch_index, images, target)]
+                # Do preemptive processing of images to save on overhead.
+                # NOTE: this increases memory usage which in turn limits dataset
+                # size (on large dataset device might run out of resources).
+                if args.dummy:
+                    images = self.process_images(images)
+                dataset += [(batch_index, images, target)]
 
             self.synchronize() # Sync once before inference to make sure any ops such as fetching tensors are completed
             while not self.benchmark_done:
-                for batch_index, images, target in processed_validation_dataset:
+                for batch_index, images, target in dataset:
+                    if not args.dummy:
+                        images = self.process_images(images)
                     if args.jit_trace:
                         self.inference(images, target)
                     elif args.xpu:
