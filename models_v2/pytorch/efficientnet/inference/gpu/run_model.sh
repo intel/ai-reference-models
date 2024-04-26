@@ -32,9 +32,10 @@
 [[ "${SAVE_PATH}" == "" ]]         && SAVE_PATH=""
 [[ "${SOCKET}" == "" ]]            && SOCKET=""
 [[ "${STREAMS}" == "" ]]           && STREAMS=1
+[[ "${IPEX}" == "" ]]              && IPEX="yes"
 
 # Process CLI arguments as overides for environment variables
-VALID_ARGS=$(getopt -o h --long amp:,arch:,batch-size:,data:,dummy,help,load:,jit:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,print-frequency:,proxy:,save:,socket:,streams: -- "$@")
+VALID_ARGS=$(getopt -o h --long amp:,arch:,batch-size:,data:,dummy,help,load:,jit:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,print-frequency:,proxy:,save:,socket:,streams:,ipex: -- "$@")
 if [[ $? -ne 0 ]]; then
     exit 1;
 fi
@@ -91,6 +92,10 @@ while [ : ]; do
         ;;
     --platform)
         PLATFORM=$2
+        shift 2
+        ;;
+    --ipex)
+        IPEX=$2
         shift 2
         ;;
     --precision)
@@ -153,6 +158,7 @@ while [ : ]; do
         echo "                                           * Flex"
         echo "                                           * CUDA"
         echo "                                           * Max"
+	echo "  --ipex              [IPEX]             : Use Intel Extension for PyTorch for xpu device (default: '${IPEX}')"
         echo "  --precision         [PRECISION]        : Precision to use for the model (default: '${PRECISION}')"
         echo "                                           * bf16"
         echo "                                           * fp16"
@@ -236,6 +242,7 @@ echo " MULTI_TILE:        ${MULTI_TILE}"
 echo " NUM_INPUTS:        ${NUM_INPUTS}"
 echo " OUTPUT_DIR:        ${OUTPUT_DIR}"
 echo " PLATFORM:          ${PLATFORM}"
+echo " IPEX:              ${IPEX}"
 echo " PRECISION:         ${PRECISION}"
 echo " PRINT_FREQUENCY:   ${PRINT_FREQUENCY}"
 echo " PROXY:             ${PROXY}"
@@ -317,7 +324,7 @@ if [[ ${AMP} == "no" ]]; then
 elif [[ ${AMP} == "yes" ]]; then
     _amp_arg=""
 else
-    echo "ERROR: Invalid valid entered for 'AMP': ${AMP}"
+    echo "ERROR: Invalid value entered for 'AMP': ${AMP}"
     exit 1
 fi
 
@@ -338,7 +345,7 @@ elif [[ ${JIT} == "trace" ]]; then
 elif [[ ${JIT} == "script" ]]; then
     _jit_arg="--jit-script"
 else
-    echo "ERROR: Invalid valid entered for 'JIT': ${JIT}"
+    echo "ERROR: Invalid value entered for 'JIT': ${JIT}"
     exit 1
 fi
 
@@ -369,6 +376,13 @@ elif [[ ${PLATFORM} == "CPU" ]]; then
     _platform_args="--device cpu"
 fi
 export PROFILE="OFF"
+
+if [[ "$IPEX" == "yes" ]]; then
+    _platform_args+=" --ipex"
+elif [[ "$IPEX" != "no" ]]; then
+    echo "ERROR: Invalid value entered for 'IPEX': ${IPEX}"
+    exit 1
+fi
 
 # Start inference script with numactl
 echo "Starting inference..."

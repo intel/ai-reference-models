@@ -82,11 +82,12 @@ def load_model_from_torchvision():
         # do training or inference on CPU
         pass
 
-    io_utils.write_info('Doing torch xpu optimize for inference')
     model.eval()
-    dtype = torch.float16 if args.fp16 else torch.float32
-    dtype = torch.bfloat16 if args.bf16 else dtype
-    if args.xpu:
+
+    if args.xpu and args.ipex:
+        io_utils.write_info('Doing torch xpu optimize for inference')
+        dtype = torch.float16 if args.fp16 else torch.float32
+        dtype = torch.bfloat16 if args.bf16 else dtype
         model = torch.xpu.optimize(model=model, dtype=dtype, level='O1')
 
     if args.gpu:

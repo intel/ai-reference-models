@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # system modules
-import multiprocessing as mp
+import torch.multiprocessing as mp
 import sys
 
 # sample modules
@@ -95,6 +95,10 @@ def predict(instance, input_args):
 
 def main():
     arguments_utils.parse_arguments()
+
+    # Set sharing to avoid 'too many open files' error
+    # See: https://github.com/pytorch/pytorch/issues/11201
+    mp.set_sharing_strategy('file_system')
     args.barrier = mp.Barrier(args.total_instances, timeout=args.max_wait_for_sync)
     try:
         mp.set_start_method('spawn')

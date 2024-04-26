@@ -50,7 +50,14 @@ class Inference:
 
         # Counter for batches run
         self.actual_batches_run = 0
-        
+
+    def get_device_type(self):
+        if args.gpu:
+            return 'cuda'
+        elif args.xpu:
+            return 'xpu'
+        return 'cpu'
+
     def get_model(self):
         if self.model == None:
             io_utils.write_error('Called get model before Inference.load() was called!')
@@ -77,7 +84,7 @@ class Inference:
             args.height,
             loader_utils.validate_data_src(args.data, args.dummy),
             data_workers=4,
-            pin_memory_device='xpu' if args.xpu else 'cuda' if args.gpu else None
+            pin_memory_device='xpu' if args.xpu and args.ipex else 'cuda' if args.gpu else None
         )
 
         # Final config of the model
@@ -131,11 +138,11 @@ class Inference:
             trace_input = self.process_images(trace_input)
             io_utils.write_info('Model using JIT trace')
             with torch.inference_mode():
-                if args.xpu:
+                if args.xpu and args.ipex:
                     with torch.xpu.amp.autocast(enabled=self.use_autocast, dtype=self.autocast_dtype, cache_enabled=False):
                         self.model = torch.jit.trace(self.model, trace_input)
                 elif args.gpu:
-                    with torch.autocast(enabled=self.use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=self.autocast_dtype, cache_enabled=False):
+                    with torch.autocast(enabled=self.use_autocast, device_type=self.get_device_type(), dtype=self.autocast_dtype, cache_enabled=False):
                         self.model = torch.jit.trace(self.model, trace_input)
         elif args.jit_script and not args.load:
             io_utils.write_info('Model using JIT script')
@@ -288,11 +295,11 @@ class Inference:
 
                 if args.jit_trace:
                     self.inference(images, target)
-                elif args.xpu:
+                elif args.xpu and args.ipex:
                     with torch.xpu.amp.autocast(enabled=self.use_autocast, dtype=self.autocast_dtype, cache_enabled=True):
                         self.inference(images, target)
                 else:
-                    with torch.autocast(enabled=self.use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=self.autocast_dtype, cache_enabled=True):
+                    with torch.autocast(enabled=self.use_autocast, device_type=self.get_device_type(), dtype=self.autocast_dtype, cache_enabled=True):
                         self.inference(images, target)
 
                 # synchronize after warmup is complete
@@ -362,11 +369,11 @@ class Inference:
                         images = self.process_images(images)
                     if args.jit_trace:
                         self.inference(images, target)
-                    elif args.xpu:
+                    elif args.xpu and args.ipex:
                         with torch.xpu.amp.autocast(enabled=self.use_autocast, dtype=self.autocast_dtype, cache_enabled=True):
                             self.inference(images, target)
                     else:
-                        with torch.autocast(enabled=self.use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=self.autocast_dtype, cache_enabled=True):
+                        with torch.autocast(enabled=self.use_autocast, device_type=self.get_device_type(), dtype=self.autocast_dtype, cache_enabled=True):
                             self.inference(images, target)
 
                     # sync for time measurement

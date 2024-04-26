@@ -19,6 +19,7 @@ import random
 import warnings
 import torch
 import torch.backends.cudnn as cudnn
+from packaging.version import Version
 
 # sample modules
 import io_utils
@@ -43,18 +44,26 @@ def enum_device():
             args.device = 'cuda:0'
         io_utils.write_info('Use GPU: {0}'.format(args.device))
     elif device == 'xpu':
-        try:
-            import intel_extension_for_pytorch as ipex
-            if ipex.xpu.is_available():
+        if not args.ipex:
+            if Version(torch.__version__) < Version('2.4.0a'):
+                io_utils.write_error('XPU backend not available in this PyTorch version (requires v2.4.0a or later): ' + torch.__version__)
+            elif torch.xpu.is_available():
                 args.xpu = True
-        except:
-            pass
+        elif args.ipex:
+            try:
+                import intel_extension_for_pytorch as ipex
+                if ipex.xpu.is_available():
+                    args.xpu = True
+            except Exception as e:
+                io_utils.write_error('Intel Extension for PyTorch (IPEX) not available: ' + str(e))
+                pass
         if not args.xpu:
-            io_utils.write_error('Make sure Intel Extension for PyTorch is enabled.')
+            io_utils.write_error('XPU backend not available.')
             sys.exit(1)
         if args.device == 'xpu':
             args.device = 'xpu:0'
         io_utils.write_info('Use XPU: {0}'.format(args.device))
+        io_utils.write_info('Use IPEX: {0}'.format(args.ipex))
     elif device == 'cpu':
         io_utils.write_info('Use CPU')
     else:
@@ -73,19 +82,19 @@ def enum_dtypes():
     elif args.tf32:
         args.torch_dtype = torch.float32
         args.dtype_str = 'tfloat32'
-        if args.xpu:
+        if args.xpu and args.ipex:
             import intel_extension_for_pytorch as ipex
             torch.xpu.set_fp32_math_mode(torch.xpu.FP32MathMode.TF32)
     elif args.bf32:
         args.torch_dtype = torch.float32
         args.dtype_str = 'bfloat32'
-        if args.xpu:
+        if args.xpu and args.ipex:
             import intel_extension_for_pytorch as ipex
             torch.xpu.set_fp32_math_mode(torch.xpu.FP32MathMode.BF32)
     else:
         args.torch_dtype = torch.float32
         args.dtype_str = 'float32'
-        if args.xpu:
+        if args.xpu and args.ipex:
             import intel_extension_for_pytorch as ipex
             torch.xpu.set_fp32_math_mode(torch.xpu.FP32MathMode.FP32)
 
@@ -132,7 +141,7 @@ def config_devices():
                 'from checkpoints.'
             ]))
 
-    if args.xpu:
+    if args.xpu and args.ipex:
         using_block_layout = os.environ.get('IPEX_XPU_ONEDNN_LAYOUT', 'OFF').upper() in ['1', 'Y', 'ON', 'YES', 'TRUE']
         if using_block_layout:
             import intel_extension_for_pytorch as ipex
