@@ -398,20 +398,23 @@ GPU Utilization (%),GPU Temperature (C)
 
 Usage:
 ```
-save_to_json [-h] [--amend] [--indent INDENT] file key=value [key=value ...]
+save_to_json [-h] [--amend] [--directory] [--recursive] [--pattern PATTERN] [--indent INDENT] target key=value [key=value ...]
 ```
 
-Tool saves given key/value pairs to the JSON file. Nested keys should be delimited by `.` (period). With `--amend` option keys are amended to the output file. Amended keys take precedence over existing keys in output file.
+Tool saves given key/value pairs to the specified JSON file(s). Nested keys should be delimited by `.` (period). With `--amend` option keys are amended to the output file(s). Amended keys take precedence over existing keys in output file.
 
 Options:
-| Option                |                                 |
-| --------------------- | ------------------------------- |
-| `-h`, `--help`        | Show this help message and exit |
-| `--amend`             | Amend data to output file       |
-| `--indent INDENT`     | Indent for json.dump()          |
+| Option                |                                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `-h`, `--help`        | Show this help message and exit                                                                                           |
+| `--directory`         | if specified, target argument points to a directory within which key-values pairs will be saved to all matched json files |
+| `--recursive`         | if specified and operating in directory mode, key-values pairs will be saved to all matched json files recursively        |
+| `--pattern PATTERN`   | if operating in directory mode, only json files that match this regex expression will be modified                         |
+| `--amend`             | Amend data to output file                                                                                                 |
+| `--indent INDENT`     | Indent for json.dump()                                                                                                    |
 
 Positional arguments:
-| Argument    | Description                                               |
-| ----------- | --------------------------------------------------------- |
-| `file`      | JSON file to store output                                 |
-| `key=value` | key/value pair to amend (`key.key=value` for nested keys) |
+| Argument    | Description                                                   |
+| ----------- | ------------------------------------------------------------- |
+| `target`    | JSON file (or directory if in directory mode) to store output |
+| `key=value` | key/value pair to amend (`key.key=value` for nested keys)     |
