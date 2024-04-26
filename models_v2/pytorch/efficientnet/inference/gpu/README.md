@@ -225,6 +225,8 @@ Other arguments and/or environment variables are optional and should be used acc
 
 | Argument              | Environment variable | Valid Values      | Purpose                                                                                                                                  |
 | --------------------- | -------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `--ipex`              | `IPEX`               | `yes`             | Use [Intel® Extension for Pytorch] for XPU support (default: `yes`)                                                                      |
+|                       |                      | `no`              | Use PyTorch XPU backend instead of [Intel® Extension for Pytorch]. Requires PyTorch version 2.4.0a or later.                             |
 | `--amp`               | `AMP`                | `yes`             | Use AMP on model conversion to the desired precision (default: `yes`)                                                                    |
 |                       |                      | `no`              |                                                                                                                                          |
 | `--arch`              | `MODEL_NAME`         | `efficientnet_b0` | Torchvision model to run (default: `efficientnet_b0`)                                                                                    |
