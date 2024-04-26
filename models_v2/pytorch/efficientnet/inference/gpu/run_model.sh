@@ -349,17 +349,24 @@ _perf_args="--pretrained --channels-last --no-grad"
 mkdir -p $OUTPUT_DIR
 
 # Set environment variables
+_platform_args="--device ${PLATFORM}"
 if [[ ${PLATFORM} == "Flex" ]]; then
+    _platform_args="--device xpu"
     export IGC_EnableDPEmulation=1
     export CFESingleSliceDispatchCCSMode=1
     export IPEX_ONEDNN_LAYOUT=1
     export IPEX_LAYOUT_OPT=1
 elif [[ ${PLATFORM} == "Max" ]]; then
+    _platform_args="--device xpu"
     # Currently its an assumption that Max GPU uses these.
     export IGC_EnableDPEmulation=1
     export CFESingleSliceDispatchCCSMode=1
     export IPEX_ONEDNN_LAYOUT=1
     export IPEX_LAYOUT_OPT=1
+elif [[ ${PLATFORM} == "CUDA" ]]; then
+    _platform_args="--device cuda"
+elif [[ ${PLATFORM} == "CPU" ]]; then
+    _platform_args="--device cpu"
 fi
 export PROFILE="OFF"
 
@@ -367,6 +374,7 @@ export PROFILE="OFF"
 echo "Starting inference..."
 #TODO: Set ZE_AFFINITY_MASK for multiple tiles.
 numactl --cpunodebind=0 --membind=0 python3 predict.py \
+    ${_platform_args} \
     --arch ${MODEL_NAME} \
     ${_dataset_args} \
     --batch-size ${BATCH_SIZE} \
