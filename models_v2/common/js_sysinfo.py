@@ -82,6 +82,131 @@ def get_system():
     else:
         return 'baremetal0'
 
+def get_verified_pkg_info(pkg: str, **kwargs):
+    global _components_info
+
+    if 'dpkg' not in _components_info:
+        return {}
+
+    dpkg = _components_info['dpkg']['content']
+
+    if not pkg in dpkg:
+        return {}
+
+    res = { pkg: dpkg[pkg] }
+
+    if res[pkg]['integrity'] != 'unknown':
+        return res
+
+    try:
+        subprocess.check_call(['dpkg', '--verify', pkg], stdout=subprocess.DEVNULL,
+            stderr=None if verbose(**kwargs) else subprocess.DEVNULL)
+        res[pkg]['integrity'] = 'ok'
+    except Exception as e:
+        res[pkg]['integrity'] = 'broken'
+
+    return res
+
+def get_verified_pkgs_info(pkgs: list, **kwargs):
+    res = {}
+    for p in pkgs:
+        res |= get_verified_pkg_info(p, **kwargs)
+    return res
+
+def is_broken(pkgs: dict):
+    for pkg in pkgs:
+        if pkgs[pkg]['integrity'] == 'broken':
+            return True
+    return False
+
+def get_target_pkg_list(target: str, **kwargs):
+    try:
+        result = subprocess.run(['dpkg', '-S', os.path.realpath(target)],
+            check=True, stdout=subprocess.PIPE,
+            stderr=None if verbose(**kwargs) else subprocess.DEVNULL)
+    except Exception as e:
+        if verbose(**kwargs):
+            print('warning: ' + str(e), file=sys.stderr)
+        return []
+
+    owners = []
+    results = result.stdout.decode().strip().split('\n')
+    for result in results:
+        result = result.replace(' ', '').split(':')[0]
+        owners += result.split(',')
+
+    return owners
+
+# We are trying to implement the following paradigm to collect software system
+# information.
+# 1. "files" contain raw information collected by specific tools (like lshw,
+#    svr-info, dpkg, etc.)
+# 2. "config/system/*/software" contains curated subset of system information
+#    which end-user considers relevant
+#
+# There are different options to control which information is collected (--cuda,
+# --xpu, --dkms, --dpkg, etc.).
+#
+# Since there might be multiple sources of the same info, we follow this process
+# to populate "config/system/*/software":
+# 1. First, we try to identify whether software was installed via standard
+#    installation methods (dpkg, rpm, pip, etc.).
+# 2. If we find that software ingredients came from standard packages, we try
+#    to verify packages consistency, i.e. that what we currently have on the
+#    system is what package actually installs.
+# 3. If all is clear package is getting reported to "config/system/*/software"
+#    and is marked as not broken.
+# 4. If package is not found or is found broken, we attempt to get raw information
+#    on the software ingredients. Such software will be marked as installed by
+#    "unknown" and marked "broken" if previously identified package was found
+#    broken.
+
+def get_cuda_info(**kwargs):
+    global _components_info
+
+    if 'cuda' not in _components_info:
+        if not quiet(**kwargs):
+            print('info: looking for cuda...', file=sys.stdout)
+
+        try:
+            with open('/usr/local/cuda/version.json', 'r') as f:
+                _components_info['cuda'] = {
+                    'file-type': 'cuda.version',
+                    'system': get_system(),
+                    'content': json.load(f)
+                }
+        except Exception as e:
+            if verbose(**kwargs):
+                print('warning: ' + str(e), file=sys.stderr)
+            return {}
+
+    if 'cuda' not in _components_info:
+        return {}
+
+    return { get_system() + '.cuda.version': _components_info['cuda'] }
+
+def get_cuda_stack_info(**kwargs):
+    global _components_info
+
+    integrity = 'unknown'
+    pkgs = get_target_pkg_list('/usr/local/cuda', **kwargs)
+
+    res = get_verified_pkgs_info(pkgs, **kwargs)
+    if res:
+        if not is_broken(res):
+            return res
+        integrity = 'broken'
+
+    if 'cuda' not in _components_info:
+        return res
+
+    res = _components_info['cuda']['content']
+    for c in res:
+        res[c]['installed-by'] = 'unknown'
+        res[c]['integrity'] = integrity
+
+    return res
+
 def get_dkms_info(**kwargs):
     global _components_info
 
@@ -89,13 +214,21 @@ def get_dkms_info(**kwargs):
         if 'dpkg' not in _components_info:
             return _components_info['dkms']
 
+        dpkg = _components_info['dpkg']['content']
+
         res = {}
         for module in _components_info['dkms']:
-            if module not in _components_info['dpkg']:
+            if module not in dpkg:
                 res[module] = _components_info['dkms'][module]
-            elif _components_info['dkms'][module]['version'] not in _components_info['dpkg'][module]['version']:
+                continue
+
+            pkg = get_verified_pkg_info(module, **kwargs)
+            if pkg[module]['integrity'] == 'broken' or _components_info['dkms'][module]['version'] not in dpkg[module]['version']:
                 res[module] = _components_info['dkms'][module]
                 res[module]['integrity'] = 'broken'
+            else:
+                res |= pkg
+
         return res
 
     if not quiet(**kwargs):
@@ -153,11 +286,21 @@ def get_docker_info(**kwargs):
 
     return { get_system() + '.docker.version': _components_info['docker'] }
 
-def parse_docker_info(**kwargs):
+def get_docker_stack_info(**kwargs):
     global _components_info
 
+    installed_by = 'unknown'
+    integrity = 'unknown'
+
+    res = get_verified_pkg_info('docker.io', **kwargs)
+    if res:
+        if not is_broken(res):
+            return res
+        installed_by = 'dpkg'
+        integrity = 'broken'
+
     if 'docker' not in _components_info:
-        return {}
+        return res
 
     docker_info = _components_info['docker']['content']
 
@@ -169,23 +312,23 @@ def parse_docker_info(**kwargs):
         'docker-client': {
             'name': 'Docker Client',
             'version': docker_info['Client']['Version'],
-            'installed-by': 'unknown',
-            'integrity': 'unknown'
+            'installed-by': installed_by,
+            'integrity': integrity
         },
         'docker-server': {
             'name': 'Docker Server',
             'version': engine['Version'],
-            'installed-by': 'unknown',
-            'integrity': 'unknown'
+            'installed-by': installed_by,
+            'integrity': integrity
         }
     }
     return res
 
-def get_dpkg_info(**kwargs):
+def get_xpu_stack_info(**kwargs):
     global _components_info
 
-    if 'dpkg' in _components_info:
-        return _components_info['dpkg']
+    if 'dpkg' not in _components_info:
+        return {}
 
     packages = [
         'intel-cmemu',
@@ -232,47 +375,59 @@ def get_dpkg_info(**kwargs):
         'xpu-smi'
     ]
 
-    if enabled('dkms', **kwargs):
-        packages += ['intel-i915-dkms']
-
-    if enabled('docker', **kwargs):
-        packages += ['docker.io']
-
     packages.sort()
+
+    dpkg = _components_info['dpkg']['content']
+    res = {}
+    for pkg in dpkg:
+        for pattern in packages:
+            if dpkg[pkg]['name'].startswith(pattern):
+                res |= get_verified_pkg_info(pkg)
+
+    return res
+
+def get_dpkg_info(**kwargs):
+    global _components_info
+
+    if 'dpkg' in _components_info:
+        return _components_info['dpkg']
 
     if not quiet(**kwargs):
         print('info: calling dpkg-query and dpkg --verify (might be time consuming)...', file=sys.stdout)
 
-    if 'dpkg' not in _components_info:
-        _components_info['dpkg'] = {}
+    dpkg = {
+        'file-type': 'dpkg',
+        'system': get_system(),
+        'content': {}
+    }
 
-    for pkg in packages:
-        try:
-            result = subprocess.run(['dpkg-query', '--show',
-                '-f={ "name": "${binary:Package}", "version": "${Version}", "installed-by": "dpkg" }\n', pkg],
-                check=True, stdout=subprocess.PIPE,
-                stderr=None if verbose(**kwargs) else subprocess.DEVNULL)
-        except Exception as e:
-            # Depending on the use case some packages might not be needed and not installed,
-            # so printing warning only in verbose mode
-            if verbose(**kwargs):
-                print('warning: ' + str(e), file=sys.stderr)
-            continue
+    try:
+        result = subprocess.run(['dpkg-query', '--show',
+            '-f={ "name": "${binary:Package}", "version": "${Version}", "status": "${Status}", "installed-by": "dpkg" }\n'],
+            check=True, stdout=subprocess.PIPE,
+            stderr=None if verbose(**kwargs) else subprocess.DEVNULL)
+    except Exception as e:
+        if verbose(**kwargs):
+            print('warning: ' + str(e), file=sys.stderr)
+            return {}
 
-        # Our query uses wildcards and could match more than one item. Thus we must handle the case where multiple are matched.
-        results = result.stdout.decode().strip().split('\n')
-        for result in results:
-            result = json.loads(result)
-            _components_info['dpkg'][result['name']] = result
+    results = result.stdout.decode().strip().split('\n')
+    for result in results:
+        result = json.loads(result)
+        dpkg['content'][result['name']] = result
+        dpkg['content'][result['name']]['integrity'] = 'unknown'
 
+        if enabled('verify', **kwargs):
             try:
                 subprocess.check_call(['dpkg', '--verify', result['name']], stdout=subprocess.DEVNULL,
                     stderr=None if verbose(**kwargs) else subprocess.DEVNULL)
-                _components_info['dpkg'][result['name']]['integrity'] = 'ok'
+                dpkg['content'][result['name']]['integrity'] = 'ok'
             except Exception as e:
-                _components_info['dpkg'][result['name']]['integrity'] = 'broken'
+                dpkg['content'][result['name']]['integrity'] = 'broken'
 
-    return _components_info['dpkg']
+    _components_info['dpkg'] = dpkg
+
+    return { get_system() + '.dpkg': _components_info['dpkg'] }
 
 def get_lshw_info(**kwargs):
     global _components_info
@@ -378,20 +533,20 @@ def get_software(**kwargs):
         },
     }
 
-    # Ordering is important here. 'dpkg' should be the first one since
-    # other queries might look into what dpkg collected and add/adjust
-    # some info.
-    if enabled('dpkg', **kwargs):
-        res |= get_dpkg_info(**kwargs)
+    if enabled('cuda', **kwargs):
+        res |= get_cuda_stack_info(**kwargs)
 
     if enabled('dkms', **kwargs):
         res |= get_dkms_info(**kwargs)
 
     if enabled('docker', **kwargs):
-        res |= parse_docker_info(**kwargs)
+        res |= get_docker_stack_info(**kwargs)
 
     if enabled('pytorch', **kwargs):
         res |= get_pytorch_info(**kwargs)
+
+    if enabled('xpu', **kwargs):
+        res |= get_xpu_stack_info(**kwargs)
 
     return res
 
@@ -410,7 +565,27 @@ def get_gpu_info(card, **kwargs):
     pci_id = read_sysfs_file(card + '/device/device')
     vendor_id = read_sysfs_file(card + '/device/vendor')
 
-    if vendor_id.lower() == '0x1a03'.lower():
+    if vendor_id.lower() == '0x10de'.lower():
+        res |= {
+            'name': pci_id,
+            'vendor': 'NVIDIA Corporation'
+        }
+        if pci_id.lower() == '0x2236'.lower():
+            res |= {
+                'name': 'GA102GL [A10]',
+                'link': 'https://www.nvidia.com/en-us/data-center/products/a10-gpu/'
+            }
+        elif pci_id.lower() == '0x26b9'.lower():
+            res |= {
+                'name': 'L40',
+                'link': 'https://www.nvidia.com/en-us/data-center/l40/'
+            }
+        elif pci_id.lower() == '0x27b8'.lower():
+            res |= {
+                'name': 'L4',
+                'link': 'https://www.nvidia.com/en-us/data-center/l4/'
+            }
+    elif vendor_id.lower() == '0x1a03'.lower():
         res |= {
             'name': pci_id,
             'vendor': 'ASPEED Technology'
@@ -685,11 +860,17 @@ def get_sysinfo(**kwargs):
     # adding empty 'config' here to enforce it to be dumped before 'files'
     res |= { 'config': {} }
 
+    if enabled('cuda', **kwargs):
+        files |= get_cuda_info(**kwargs)
+
     if enabled('svrinfo', **kwargs):
         files |= get_svrinfo(**kwargs)
 
     if enabled('docker', **kwargs):
         files |= get_docker_info(**kwargs)
+
+    if enabled('dpkg', **kwargs):
+        files |= get_dpkg_info(**kwargs)
 
     if enabled('lshw', **kwargs):
         files |= get_lshw_info(**kwargs)
@@ -712,13 +893,17 @@ def get_parser():
 
     group = parser.add_argument_group('collect information options')
     group.add_argument('-a', '--all', action="store_true", help='collect information for all known components')
+    group.add_argument('--verify', action=argparse.BooleanOptionalAction, default=False,
+        help='verify integrity of ALL the packages (select packages are always verified)')
     # using 'store_const' to support triplet options with values [None, True, False]
+    group.add_argument('--cuda', action="store_const", const=True, help='collect information for CUDA')
     group.add_argument('--dkms', action="store_const", const=True, help='collect information for DKMS')
     group.add_argument('--docker', action="store_const", const=True, help='collect information for Docker')
     group.add_argument('--dpkg', action="store_const", const=True, help='collect information for some key DPKG packages')
     group.add_argument('--lshw', action="store_const", const=True, help='collect information with lshw')
     group.add_argument('--pytorch', action="store_const", const=True, help='collect information for Pytorch')
     group.add_argument('--svrinfo', action="store_const", const=True, help='collect information with svr-info (should be in PATH)')
+    group.add_argument('--xpu', action="store_const", const=True, help='collect information for xpu')
 
     group1 = parser.add_argument_group('JSON dump options')
     group1.add_argument('-o', '--output', action="store", type=str, default='', help='File to store output')
