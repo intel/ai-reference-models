@@ -26,6 +26,7 @@ import io_utils
 from arguments_utils import args
 try:
     import js_sysinfo
+    import js_merge
 except Exception as e:
     print('fatal: ' + str(e), file=sys.stderr)
     print('fatal: set PYTHONPATH to the location of js_sysinfo.py')
@@ -74,7 +75,6 @@ def write_results(batches_tested, throughput, latency, top1, top5):
                     'framework': 'PyTorch'
                 },
             },
-            'system': js_sysinfo.get_system_config(all=True, quiet=True),
         },
         'results': {
             'metadata': {
@@ -130,6 +130,7 @@ def write_results(batches_tested, throughput, latency, top1, top5):
             }
         }
     }
+    output_dict = js_merge.merge(output_dict, js_sysinfo.get_sysinfo(all=True, quiet=True, verify=False))
 
     io_utils.write_json('{0}/results_{1}.json'.format(args.output_dir, args.instance), output_dict)
 
