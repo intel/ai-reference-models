@@ -15,7 +15,7 @@ The purpose of the Intel® AI Reference Models repository (and associated contai
 ***DISCLAIMER: These scripts are not intended for benchmarking Intel platforms.
 For any performance and/or benchmarking information on specific Intel platforms, visit [https://www.intel.ai/blog](https://www.intel.ai/blog).***
 
-Intel is committed to the respect of human rights and avoiding complicity in human rights abuses, a policy reflected in the [Intel Global Human Rights Principles](https://www.intel.com/content/www/us/en/policy/policy-human-rights.html). Accordingly, by accessing the Intel material on this platform you agree that you will not use the material in a product or application that causes or contributes to a violation of an internationally recognized human right.
+Intel is committed to respecting human rights and avoiding causing or contributing to adverse impacts on human rights. See [Intel’s Global Human Rights Principles](https://www.intel.com/content/www/us/en/policy/policy-human-rights.html). Intel’s products and software are intended only to be used in applications that do not cause or contribute to adverse impacts on human rights.
 
 ## License
 The Intel® AI Reference Models is licensed under [Apache License Version 2.0](https://github.com/intel/ai-reference-models/blob/master/LICENSE).
