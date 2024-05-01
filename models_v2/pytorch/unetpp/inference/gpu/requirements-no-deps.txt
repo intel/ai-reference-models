@@ -1,4 +1,4 @@
-pretrainedmodels==0.7.4
 efficientnet-pytorch==0.7.1
-timm==0.4.12
+pretrainedmodels==0.7.4
 segmentation-models-pytorch
+timm==0.4.12

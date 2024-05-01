@@ -1,5 +1,5 @@
-ninja
-yacs
 cython
 matplotlib
+ninja
 tqdm
+yacs
