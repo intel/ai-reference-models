@@ -30,12 +30,11 @@
 [[ "${SAVE_PATH}" == "" ]]          && SAVE_PATH=""
 [[ "${SOCKET}" == "" ]]             && SOCKET=""
 [[ "${STREAMS}" == "" ]]            && STREAMS=1
-[[ "${IPEX}" == "" ]]               && IPEX="yes"
 
 ./get_model.sh
 
 # Process CLI arguments as overides for environment variables
-VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,load:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,proxy:,save:,socket:,streams:,ipex: -- "$@")
+VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,load:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,proxy:,save:,socket:,streams: -- "$@")
 if [[ $? -ne 0 ]]; then
     exit 1;
 fi
@@ -86,10 +85,6 @@ while [ : ]; do
         PLATFORM=$2
         shift 2
         ;;
-    --ipex)
-        IPEX=$2
-        shift 2
-        ;;
     --precision)
         PRECISION=$2
         shift 2
@@ -133,7 +128,6 @@ while [ : ]; do
         echo "                                            * Flex"
         echo "                                            * CUDA"
         echo "                                            * Max"
-	echo "  --ipex           [IPEX]                 : Use Intel Extension for PyTorch for xpu device (default: '${IPEX}')"
         echo "  --precision      [PRECISION]            : Precision to use for the model (default: '${PRECISION}')"
         echo "                                            * bf16"
         echo "                                            * fp16"
@@ -225,7 +219,6 @@ echo " SAVE_PATH:         ${SAVE_PATH}"
 echo " SOCKET:            ${SOCKET}"
 echo " STREAMS:           ${STREAMS}"
 echo " PLATFORM:          ${PLATFORM}"
-echo " IPEX:              ${IPEX}"
 echo " PRECISION:         ${PRECISION}"
 echo " PROXY:             ${PROXY}"
 
@@ -286,7 +279,7 @@ if [[ ${AMP} == "no" ]]; then
 elif [[ ${AMP} == "yes" ]]; then
     _amp_arg=""
 else
-    echo "ERROR: Invalid value entered for 'AMP': ${AMP}"
+    echo "ERROR: Invalid valid entered for 'AMP': ${AMP}"
     exit 1
 fi
 
@@ -306,7 +299,6 @@ _perf_args="--no-grad"
 mkdir -p $OUTPUT_DIR
 
 # Set environment variables
-_platform_args=""
 if [[ "${PLATFORM}" == "Flex" ]]; then
     _platform_args="--device xpu"
     export IGC_EnableDPEmulation=1
@@ -328,18 +320,6 @@ elif [[ -n "${PLATFORM}" ]]; then
     _platform_args="--device ${PLATFORM}"
 fi
 export PROFILE="OFF"
-
-if [[ "$IPEX" == "yes" ]]; then
-    _platform_args+=" --ipex"
-elif [[ "$IPEX" == "no" ]]; then
-    # This setting is required on native XPU backend, but might
-    # give lower performance on IPEX
-    export OverrideDefaultFP64Settings=1
-else
-    echo "ERROR: Invalid value entered for 'IPEX': ${IPEX}"
-    exit 1
-fi
-
 
 export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 export PYTHONPATH=$PWD/yolov5:$PYTHONPATH

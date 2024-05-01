@@ -90,7 +90,7 @@ Run sample as follows:
     --cap-add SYS_NICE \
     --device /dev/dri/ \
     -e MODEL_NAME=yolov5m \
-    -e PLATFORM=PLATFORM \
+    -e PLATFORM=${PLATFORM} \
     -e MAX_TEST_DURATION=60 \
     -e MIN_TEST_DURATION=60 \
     -e NUM_INPUTS=1 \
@@ -115,7 +115,7 @@ Run sample as follows:
     --cap-add SYS_NICE \
     --device /dev/dri/ \
     -e MODEL_NAME=yolov5m \
-    -e PLATFORM=PLATFORM \
+    -e PLATFORM=${PLATFORM} \
     -e NUM_INPUTS=5000 \
     -e BATCH_SIZE=${BATCH_SIZE} \
     -e OUTPUT_DIR=/tmp/output \
