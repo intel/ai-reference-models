@@ -1,11 +1,11 @@
-pandas
-tqdm==4.41.0
 ascii-graph==1.5.1
-wrapt==1.10.11
-librosa
-toml
-soundfile
 ipdb
+librosa
+pandas
+soundfile
 sox
 tensorboard==2.0.0
+toml
+tqdm==4.41.0
 wheel==0.38.0 # Included this to avoid a vulnerability
+wrapt==1.10.11

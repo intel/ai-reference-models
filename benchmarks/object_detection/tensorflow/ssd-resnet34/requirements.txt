@@ -1,13 +1,12 @@
 Cython
 contextlib2
-pillow>=9.3.0
-lxml
 jupyter
+lxml
 matplotlib
-pycocotools
-tensorflow-addons
-opencv-python
 notebook>=6.1.5
-tf_slim
-
+opencv-python
+pillow>=9.3.0
+pycocotools
 pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability
+tensorflow-addons
+tf_slim

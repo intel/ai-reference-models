@@ -1,5 +1,5 @@
-pandas
 matplotlib
-scipy==1.11.1
-scikit-image
 numpy==1.25.2
+pandas
+scikit-image
+scipy==1.11.1

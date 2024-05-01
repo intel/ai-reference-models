@@ -19,19 +19,19 @@ channels:
   - conda-forge
 dependencies:
   # - gcp-storage-emulator>=2022.6.11 # Not avaiable in conda
+  # - pytest-bigquery-mock>=0.1.2 # Not avaiable in conda
+  - mlflow==2.9.1
   - mock ==5.1.0
   - moto ==4.1.14
-  - pytest ==7.4.0
-  - pytest-xdist ==3.3.1
-  - pytest-mock ==3.11.1
-  - pytest-cov ==4.1.0
-  # - pytest-bigquery-mock>=0.1.2 # Not avaiable in conda
-  - tox ==3.27.1
   - packaging <=23.0
-  - scikit-learn ==1.2.2
-  - xlrd ==2.0.1
-  - mlflow==2.9.1
   - pip ==21.2.4
+  - pytest ==7.4.0
+  - pytest-cov ==4.1.0
+  - pytest-mock ==3.11.1
+  - pytest-xdist ==3.3.1
+  - scikit-learn ==1.2.2
+  - tox ==3.27.1
+  - xlrd ==2.0.1
   - pip:
     - azureml >=0.2.7 # pypi only
     - azureml-core ~=1.49.0 # pypi only

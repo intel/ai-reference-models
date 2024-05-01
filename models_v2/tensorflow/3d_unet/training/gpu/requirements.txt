@@ -14,5 +14,6 @@
 # limitations under the License.
 #
 
-tfa-nightly
 git+https://github.com/NVIDIA/dllogger
+intel-optimization-for-horovod==0.28.1.4
+tfa-nightly

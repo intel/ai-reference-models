@@ -15,12 +15,12 @@
 #
 
 git+https://github.com/NVIDIA/dllogger
-requests
-tqdm
-sentencepiece
-tensorflow_hub
-wget
-progressbar
+intel-optimization-for-horovod==0.28.1.4
 nltk
+progressbar
+requests
+sentencepiece
 tensorflow-addons
-horovod
+tensorflow_hub==0.15.0
+tqdm
+wget

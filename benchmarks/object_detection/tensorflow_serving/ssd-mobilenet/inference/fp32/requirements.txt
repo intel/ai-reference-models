@@ -1,16 +1,13 @@
-# rest
-requests
-
 # grpc, tensorflow-serving-api is removed until version is fixed to avoid a vulnerability
-
 # object detection api
+# rest
 Cython
+absl-py
 contextlib2
 jupyter
-matplotlib
-pillow>=9.3.0
 lxml
-absl-py
+matplotlib
 notebook>=6.1.5
-
+pillow>=9.3.0
 pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability
+requests

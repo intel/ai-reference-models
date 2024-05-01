@@ -1,2 +1,2 @@
-tqdm
 pillow
+tqdm

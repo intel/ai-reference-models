@@ -1,8 +1,8 @@
 Cython
 contextlib2
-pillow>=9.3.0
-lxml
 jupyter
+lxml
 matplotlib
 numpy>=1.17.4
+pillow>=9.3.0
 pycocotools

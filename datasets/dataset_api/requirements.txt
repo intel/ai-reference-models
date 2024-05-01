@@ -1,8 +1,8 @@
-pandas
-tqdm
 docx2txt
 openpyxl
+pandas
 pillow
-scikit-learn-intelex
 python-dotenv
+scikit-learn-intelex
+tqdm
 wget
