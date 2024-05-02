@@ -74,11 +74,11 @@ def load_model():
         pass
 
     if not any([args.int8, args.uint8]): #TODO: Do we want this condition?
-        io_utils.write_info('Doing torch xpu optimize for inference')
         model.eval()
         dtype = torch.float16 if args.fp16 else torch.float32
         dtype = torch.bfloat16 if args.bf16 else dtype
-        if args.xpu:
+        if args.xpu and args.ipex:
+            io_utils.write_info('Doing torch xpu optimize for inference')
             import intel_extension_for_pytorch
             model = torch.xpu.optimize(model=model, dtype=dtype, level='O1')
             model = intel_extension_for_pytorch.optimize(model)
