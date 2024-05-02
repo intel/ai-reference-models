@@ -60,6 +60,13 @@ save_txt=False  # save results to *.txt
 hide_labels=False  # hide labels
 hide_conf=False  # hide confidences
 
+def get_device_type(self):
+    if args.gpu:
+        return 'cuda'
+    elif args.xpu:
+        return 'xpu'
+    return 'cpu'
+
 def quantize_model(model):
     if args.load:
         # loaded model should already be quantized
@@ -73,7 +80,7 @@ def quantize_model(model):
         args.height,
         loader_utils.validate_data_src(args.data, args.dummy),
         data_workers=4,
-        pin_memory_device='xpu' if args.xpu else 'cuda' if args.gpu else None
+        pin_memory_device='xpu' if args.xpu and args.ipex else 'cuda' if args.gpu else None
     )
 
     io_utils.write_info('Doing JIT model quantization to integer datatype')
@@ -198,13 +205,13 @@ def inference_config(model):
                 trace_input = trace_input.to(dtype=autocast_dtype)
             io_utils.write_info('Using JIT trace')
             with torch.inference_mode():
-                if args.xpu:
+                if args.xpu and args.ipex:
                     with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
                         model = torch.jit.trace(model, trace_input, check_trace=False)
                 elif args.gpu:
-                    with torch.autocast(enabled=use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=autocast_dtype, cache_enabled=False):
+                    with torch.autocast(enabled=use_autocast, device_type=get_device_type(), dtype=autocast_dtype, cache_enabled=False):
                         model = torch.jit.trace(model, trace_input, check_trace=False)
-                if args.xpu or args.gpu:
+                if args.xpu and args.ipex or args.gpu:
                     # Fuse some layers together to get rid of BatchNorm2d for better performance.
                     # NOTE: this does not work for cpu backend, fails with:
                     #   AttributeError: 'DetectMultiBackend' object has no attribute '_c'
@@ -401,26 +408,25 @@ def do_perf_benchmarking(model, ds, names):
         while not is_done(ds_batches, actual_batch_run, total_batches, start_benchmark_time):
             for path, images, im0s, vid_cap, s in ds:
                 images = process_images(images)
-                               
-                if args.xpu:
+
+                prof_sort = None
+                if profiling:
+                    prof_sort = 'self_cpu_time_total'
+                    if args.gpu:
+                        prof_sort = 'self_cuda_time_total'
+                    elif args.xpu:
+                        prof_sort = 'self_xpu_time_total'
+                if args.xpu and args.ipex:
                     with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:  
                         # inference
                         total, actual_batch_run, acc1 = inference(model, total, actual_batch_run, ds, path, im0s, images, s, names, acc1, top1)
                                                     
                         if profiling:
-                            torch.save(prof.key_averages().table(sort_by='self_xpu_time_total'), './profiling.' + profile_name + '.inf.pt')
+                            torch.save(prof.key_averages().table(sort_by=prof_sort), './profiling.' + profile_name + '.inf.pt')
                             torch.save(prof.table(sort_by='id', row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
                         if is_done(ds_batches, actual_batch_run, total_batches, start_benchmark_time):
                             break 
                 else:
-                    activities = None
-                    prof_sort = None
-                    if profiling:
-                        prof_sort = 'self_cpu_time_total'
-                        activities=[torch.profiler.ProfilerActivity.CPU]
-                        if args.gpu:
-                            activities.append(torch.profiler.ProfilerActivity.CUDA)
-                            prof_sort = 'self_cuda_time_total'
                     with torch.autograd.profiler.profile(enabled=profiling, use_cuda=True if args.gpu else False, record_shapes=False) as prof:  
                         # inference
                         total, actual_batch_run, acc1 = inference(model, total, actual_batch_run, ds, path, im0s, images, s, names, acc1, top1)
