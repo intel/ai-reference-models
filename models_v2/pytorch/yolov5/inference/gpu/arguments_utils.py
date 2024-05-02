@@ -49,6 +49,8 @@ def parse_arguments():
                         help='seed for initializing training. ')
     parser.add_argument('--device', default='cpu', type=str,
                         help='device to use (cpu, cuda[:n], xpu[:n], etc.)')
+    parser.add_argument('--ipex', action='store_true',
+                        help='use Intel Extension for PyTorch for xpu device')
     parser.add_argument('--tf32', default=0, type=int, help='Datatype used: TF32')
     parser.add_argument('--bf32', default=0, type=int, help='Datatype used: BF32')
     parser.add_argument('--fp16', default=0, type=int, help='Datatype used: FP16')
