@@ -47,15 +47,10 @@ def parse_arguments():
                         metavar='N', help='maximum length of benchmark in seconds. Will terminate benchmark once reached. (default: inf)')
     parser.add_argument('--seed', default=None, type=int,
                         help='seed for initializing training. ')
-<<<<<<< HEAD
-    parser.add_argument('--device', default=0, type=int,
-                        help='device id to use. should correspond to either NV GPU or Intel XPU')
-=======
     parser.add_argument('--device', default='cpu', type=str,
                         help='device to use (cpu, cuda[:n], xpu[:n], etc.)')
     parser.add_argument('--ipex', action='store_true',
                         help='use Intel Extension for PyTorch for xpu device')
->>>>>>> b812a1f8b (pytorch/yolov5: enable native xpu support path)
     parser.add_argument('--tf32', default=0, type=int, help='Datatype used: TF32')
     parser.add_argument('--bf32', default=0, type=int, help='Datatype used: BF32')
     parser.add_argument('--fp16', default=0, type=int, help='Datatype used: FP16')
