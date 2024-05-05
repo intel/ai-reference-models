@@ -96,6 +96,12 @@ Apply the access in this page [LLaMA2 7B](https://huggingface.co/meta-llama/Llam
 huggingface-cli login
 {your huggingface token}
 
+# Get the dataset here: wget https://github.com/tloen/alpaca-lora/blob/main/alpaca_data.json
+mv alpaca_data.json <clone of the AI Reference models>/models/language_modeling/pytorch/llama/training/cpu
+
+# Get the dataset template here: wget https://github.com/tloen/alpaca-lora/blob/main/templates/alpaca.json
+mkdir <clone of the AI Reference models>/models/language_modeling/pytorch/llama/training/cpu/templates
+mv alpaca.json <clone of the AI Reference models>/models/language_modeling/pytorch/llama/training/cpu/templates
 
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
