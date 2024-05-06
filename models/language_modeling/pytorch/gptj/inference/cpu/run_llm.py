@@ -537,14 +537,17 @@ def eval_func(traced_model):
 
 # input prompt
 current_path = pathlib.Path(__file__).parent.resolve()
-with open(str(current_path) + "/prompt.json") as f:
-    prompt_pool = json.load(f)
+
 if args.prompt is not None:
     prompt = args.prompt
-elif args.input_tokens in prompt_pool:
-    prompt = prompt_pool[args.input_tokens]
 else:
-    raise SystemExit("[ERROR] Plese use --prompt if want to use custom input.")
+    with open(str(current_path) + "/prompt.json") as f:
+        prompt_pool = json.load(f)
+    if args.input_tokens in prompt_pool:
+        prompt = prompt_pool["gpt-j"][args.input_tokens]
+    else:
+        raise SystemExit("[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input.")
+
 if args.benchmark:
     input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
     print("---- Prompt size:", input_size)
