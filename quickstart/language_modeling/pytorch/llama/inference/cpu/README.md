@@ -115,6 +115,10 @@ git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ip
 pip install -e ./
 cd ..
 
+# Get prompt.json for gneration inference
+wget https://intel-extension-for-pytorch.s3.amazonaws.com/miscellaneous/llm/prompt.json
+mv prompt.json <clone of the model zoo>/models/language_modeling/pytorch/llama/inference/cpu
+
 #[optional] you may need to get access to llama2 weights from HF
 Apply the access in the pages with your huggingface account:
 - LLaMA2 7B : https://huggingface.co/meta-llama/Llama-2-7b-hf 
