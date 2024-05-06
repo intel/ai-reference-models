@@ -121,6 +121,10 @@ git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ip
 pip install -e ./
 cd ..
 
+# Get prompt.json for gneration inference
+wget https://intel-extension-for-pytorch.s3.amazonaws.com/miscellaneous/llm/prompt.json
+mv prompt.json <clone of the model zoo>/models/language_modeling/pytorch/chatglm/inference/cpu
+
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
 
