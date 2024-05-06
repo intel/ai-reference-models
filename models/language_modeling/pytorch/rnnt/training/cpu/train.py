@@ -647,6 +647,9 @@ def main(args):
         evalutaion=evaluator(model, eval_transforms, loss_fn, greedy_decoder, ctc_vocab, eval_datasets, logger),
         logger=logger,
         args=args)
+    if cpu_distributed_training:
+        dist.destroy_process_group()
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='RNNT Training Reference')
