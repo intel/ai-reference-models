@@ -1,65 +1,100 @@
-# BERT Large Training 
+# PyTorch BERT Large training
 
-## Description
-This document has instructions for running BERT Large training with BF16 precision using Intel(R) Extension for PyTorch on Intel Max Series GPU. 
+## Description 
+This document has instructions for running BERT-Large training using Intel Extension for PyTorch. 
 
-## Datasets
-### Download and Extract the Dataset
-Download the [MLCommons BERT Dataset](https://drive.google.com/drive/folders/1cywmDnAsrP5-2vsr8GDc6QUc7VWe-M3v) and download the `results_text.tar.gz` file. Extract the file. After this step, you should have a directory called `results4` that contains 502 files with a total size of 13GB. Set the `DATASET_DIR` to point the location of this dataset. The script assumes the `DATASET_DIR` to be the current working directory. 
+## Pull Command
 
-The above step is optional. If the `results4` folder is not present in the `DATASET_DIR` path, the quick start scripts automatically download it. 
+Docker image based on CentOS Stream8
+```
+docker pull intel/language-modeling:centos-pytorch-cpu-bert-large-training
+```
 
-### Generate the BERT Input Dataset 
-The Training script processes the raw dataset. The processed dataset occupies about `539GB` worth of disk space. Additionally, this step can take several hours to complete to generate a folder `hdf5_seq_512`. Hence, the script provides the ability to process the data only once and this data can be volume mounted to the container for future use. Set the `PROCESSED_DATASET_DIR` to point to the location of `hdf5_seq_512`. 
-
-The script assumes the `PROCESSED_DATASET_DIR` to be the current working directory. If the processed folder `hdf5_seq_512` does not exist in the `PROCESSED_DATASET_DIR` path, the quick start scripts process the data.
+Docker image based on Ubuntu 22.04
+```
+docker pull intel/language-modeling:ubuntu-pytorch-cpu-bert-large-training
+```
 
 ## Quick Start Scripts
 | Script name | Description |
 |-------------|-------------|
-| `bf16_training_plain_format.sh` | Runs BERT Large BF16 training (plain format) on two tiles |
-| `ddp_bf16_training_plain_format.sh` | Runs BERT Large Distributed Data Parallel BF16 Training on two tiles | 
+| `run_bert_pretrain_phase1.sh` | Runs BERT large pretraining phase 1 using max_seq_len=128 for the first 90% dataset for the specified precision (fp32, avx-fp32, bf32 or bf16). The script saves the model to the `OUTPUT_DIR` in a directory called `model_save`. |
+| `run_bert_pretrain_phase2.sh` | Runs BERT large pretraining phase 2 using max_seq_len=512 with the remaining 10% of the dataset for the specified precision (fp32, avx-fp32, bf32 or bf16). Use path to the `model_save` directory from phase one as the `CHECKPOINT_DIR` for phase 2. |
 
-## Docker
-Requirements:
-* Host machine has Intel(R) Data Center Max Series GPU
-* Follow instructions to install GPU-compatible driver [602](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-jammy-dc.html#step-1-add-package-repository)
-* Docker
+**Note:** The `avx-fp32` precision runs the same scripts as `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
 
-## Docker pull Command
+## Datasets
+Follow instructions to [download and preprocess](https://github.com/IntelAI/models/blob/v2.9.0/quickstart/language_modeling/pytorch/bert_large/training/cpu/README.md#datasets)  the text dataset and set the `DATASET_DIR` to point to the pre-processed dataset.
+
+# BERT Config File
+BERT Training happens in two stages. For stage 1, download the BERT Config file from [here](https://drive.google.com/drive/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT) and export `CONFIG_FILE` variable to point to this file path. 
+
+# Checkpoint Directory
+The checkpoint directory is created as a result of Phase 1 Training. Please set the `CHECKPOINT_DIR` to point to the pre-trained model path and volume mount it for Phase 2 training. 
+
+## Docker Run
+(Optional) Export related proxy into docker environment.
+```bash
+export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
+  -e FTP_PROXY=${FTP_PROXY} -e http_proxy=${http_proxy} \
+  -e HTTP_PROXY=${HTTP_PROXY} -e https_proxy=${https_proxy} \
+  -e HTTPS_PROXY=${HTTPS_PROXY} -e no_proxy=${no_proxy} \
+  -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
+  -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
-docker pull intel/language-modeling:pytorch-max-gpu-bert-large-training
-```
+To run the BERT-Large training scripts, set environment variables to specify the dataset directory, precision and an output directory. 
 
-The BERT Large training container includes scripts,models,libraries needed to run BF16 training. To run the `ddp_bf16_training_plain_format.sh` quick start script follow the instructions below.
-```
-export OUTPUT_DIR=${PWD}/logs 
-export DATASET_DIR=${PWD}
-export PROCESSED_DATASET_DIR=${PWD}
+```bash
+export OS=<provide either centos or ubuntu>
+export DATASET_DIR=<path to the dataset>
+export OUTPUT_DIR=<directory where log files will be written>
+export SCRIPT=quickstart/<specify the training script>
+export PRECISION=<specify the precision to run>
+export BERT_MODEL_CONFIG=<path to bert configuration file>
+export CHECKPOINT_DIR=<path to checkpoint to Directory>
 
-DOCKER_ARGS="--rm --init -it"
-IMAGE_NAME=intel/language-modeling:pytorch-max-gpu-bert-large-training
+DOCKER_ARGS="--privileged --init -it"
+IMAGE_NAME=intel/language-modeling:${OS}-pytorch-cpu-bert-large-training
+WORKDIR=/workspace/pytorch-bert-large-training
+TRAIN_SCRIPT=${WORKDIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py  
 
-SCRIPT=quickstart/ddp_bf16_training_plain_format.sh
-Tile=2
-
-docker run \
-  --privileged \
-  --device=/dev/dri \
-  --shm-size=10G \
-  --ipc host \
-  --env DATASET_DIR=${DATASET_DIR} \
-  --env PROCESSED_DATASET_DIR=${PROCESSED_DATASET_DIR} \
+docker run --rm \
+  --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env Tile=${Tile} \
+  --env TRAIN_SCRIPT=${TRAIN_SCRIPT} \
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env BERT_MODEL_CONFIG=${BERT_MODEL_CONFIG} \
+  --env PRETRAINED_MODEL=${CHECKPOINT_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --volume ${PROCESSED_DATASET_DIR}:${PROCESSED_DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --volume /dev/dri:/dev/dri/ \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${BERT_MODEL_CONFIG}:${BERT_MODEL_CONFIG} \
+  --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
+  ${DOCKER_RUN_ENVS} \
+  --shm-size 8G \
+  -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  /bin/bash $SCRIPT
-  ```
+  /bin/bash $SCRIPT $PRECISION
+```
+## Documentation and Sources
+#### Get Started​
+[Docker* Repository](https://hub.docker.com/r/intel/language-modeling)
+
+[Main GitHub*](https://github.com/IntelAI/models)
+
+[Release Notes](https://github.com/IntelAI/models/releases)
+
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/language_modeling/pytorch/bert_large/training/cpu/DEVCATALOG.md)
+
+#### Code Sources
+[Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pyt-cpu)
+
+[Report Issue](https://community.intel.com/t5/Intel-Optimized-AI-Frameworks/bd-p/optimized-ai-frameworks)
+
+## License Agreement
+LEGAL NOTICE: By accessing, downloading or using this software and any required dependent software (the “Software Package”), you agree to the terms and conditions of the software license agreements for the Software Package, which may also include notices, disclaimers, or license terms for third party software included with the Software Package. Please refer to the [license](https://github.com/IntelAI/models/tree/master/third_party) file for additional details.
+
+[View All Containers and Solutions 🡢](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html?s=Newest)
