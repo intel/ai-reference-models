@@ -99,6 +99,19 @@ parser.add_argument(
     type=int,
     help="weight sharing core per instance",
 )
+parser.add_argument(
+    "--weight-only-quant",
+    action="store_true",
+    help="use weight-only quantization",
+)
+parser.add_argument("--torchao", action="store_true")
+parser.add_argument(
+    "--weight-dtype",
+    type=str,
+    choices=["INT8","INT4"],
+    help="int8 or int4",
+    default="int8",
+)
 args = parser.parse_args()
 
 if args.ipex:
@@ -201,6 +214,21 @@ if args.dtype == "bf16" or args.dtype == "fp32":
             else:
                 print("[Info] Running torch.compile() BFloat16 with default backend")
                 user_model.forward = torch.compile(user_model.forward, dynamic=True)
+
+    if args.weight_only_quant and args.torchao and args.weight_dtype:
+        from torch._inductor import config as inductor_config
+        from torchao.quantization import quant_api 
+        inductor_config.cpp_wrapper = True
+        with torch.no_grad(),torch.cpu.amp.autocast(
+                enabled=True, dtype=torch.bfloat16
+        ):
+            if args.weight_dtype == "INT8":
+                quant_api.change_linear_weights_to_int8_woqtensors(user_model)
+            elif args.weight_dtype == "INT4":
+                quant_api.change_linear_weights_to_int4_woqtensors(user_model)
+            
+            user_model.forward = torch.compile(user_model.forward)
+
 elif args.dtype == "fp16":
     if args.ipex:
         user_model = ipex.llm.optimize(
