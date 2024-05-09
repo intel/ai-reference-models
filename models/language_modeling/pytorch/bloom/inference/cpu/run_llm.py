@@ -565,20 +565,20 @@ def benchmark_evaluate(prompt):
         print("rest-token-latency: %.3f sec." % average_2n_latency)
         print("P90-rest-token-latency: %.3f sec." % p90_latency)
 
+# input prompt
+current_path = pathlib.Path(__file__).parent.resolve()
 
-
-if args.benchmark:
-    # input prompt
-    current_path = pathlib.Path(__file__).parent.resolve()
+if args.prompt is not None:
+    prompt = args.prompt
+else:
     with open(str(current_path) + "/prompt.json") as f:
         prompt_pool = json.load(f)
-    if args.prompt is not None:
-        prompt = args.prompt
-    elif args.input_tokens in prompt_pool:
-        prompt = prompt_pool[args.input_tokens]
+    if "bloom" in prompt_pool and args.input_tokens in prompt_pool["bloom"]:
+        prompt = prompt_pool["bloom"][args.input_tokens]
     else:
-        raise SystemExit("[ERROR] Plese use --prompt if want to use custom input.")
+        raise SystemExit("[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input.")
 
+if args.benchmark:
     input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
     print("---- Prompt size:", input_size)
 
