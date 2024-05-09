@@ -544,7 +544,7 @@ if args.prompt is not None:
 else:
     with open(str(current_path) + "/prompt.json") as f:
         prompt_pool = json.load(f)
-    if args.input_tokens in prompt_pool:
+    if "chatglm" in prompt_pool and args.input_tokens in prompt_pool["chatglm"]:
         prompt = prompt_pool["chatglm"][args.input_tokens]
     else:
         raise SystemExit("[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input.")
