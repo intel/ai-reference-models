@@ -97,10 +97,6 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
     # Optional environemnt variables:
     export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>
 
-    # [optional] Compile model with PyTorch Inductor backend
-    export TORCH_INDUCTOR=1
-    ```
-
     #### Run quickstart script:
     ```
     NOTE: `inference_realtime.sh` and `inference_throughput.sh` runs with synthetic data

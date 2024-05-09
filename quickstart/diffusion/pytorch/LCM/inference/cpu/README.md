@@ -36,11 +36,6 @@ export DATASET_DIR=<directory where the dataset will be saved>
 bash download_dataset.sh
 ```
 
-* [optional] Compile model with PyTorch Inductor backend
-```shell
-export TORCH_INDUCTOR=1
-```
-
 # Quick Start Scripts
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |

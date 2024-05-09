@@ -4,7 +4,7 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) inference (generation) using Intel-optimized PyTorch.
+This document has instructions for running [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) inference (generation) using Intel-optimized PyTorch. 
 
 ## Bare Metal
 ### General setup
@@ -68,10 +68,6 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
   ```
 
-* [optional] Compile model with PyTorch Inductor backend
-  ```shell
-  export TORCH_INDUCTOR=1
-  ```
 
 # Quick Start Scripts
 
