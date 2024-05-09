@@ -117,11 +117,6 @@ else
         --batch-size $BATCH_SIZE
 fi
 
-CORES_PER_INSTANCE=${OMP_NUM_THREADS}
-TOTAL_CORES=`expr $CORES \* $SOCKETS`
-INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
-INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
-
 
 latency=($(grep -i 'inference-latency:' ${OUTPUT_DIR}/latency_log_${precision}* |sed -e 's/.*atency: //;s/[^0-9.]//g;s/\.$//' |awk '
         BEGIN {
