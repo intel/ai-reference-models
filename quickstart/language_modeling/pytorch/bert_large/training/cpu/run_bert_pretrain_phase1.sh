@@ -80,7 +80,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         $params
 else
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
+    python -m torch.backends.xeon.run_cpu --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
         --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
         --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
         --model_type 'bert' \
@@ -90,7 +90,7 @@ else
         --dense_seq_output \
         --config_name ${BERT_MODEL_CONFIG} \
         $ARGS \
-        $params
+        $params 2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase1_${precision}.log
 fi
     
 
