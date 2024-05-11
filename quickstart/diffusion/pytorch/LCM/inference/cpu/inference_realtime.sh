@@ -96,22 +96,39 @@ export OMP_NUM_THREADS=$CORES_PER_INSTANCE
 NUMBER_INSTANCE=`expr $CORES_PER_NUMA / $CORES_PER_INSTANCE`
 
 PRECISION=$1
+num_warmup=${num_warmup:-"1"}
+num_iter=${num_iter:-"1"}
 
 rm -rf ${OUTPUT_DIR}/LCM_${PRECISION}_inference_realtime*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --memory-allocator jemalloc \
-    --ninstances $NUMAS \
-    --log-dir ${OUTPUT_DIR} \
-    --log_file_prefix LCM_${PRECISION}_inference_realtime \
-    ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
-    --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
-    --dataset_path=${DATASET_DIR} \
-    --benchmark \
-    -w 1 -i 1 \
-    --weight-sharing \
-    --number-instance $NUMBER_INSTANCE \
-    $ARGS
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --memory-allocator jemalloc \
+        --ninstances $NUMAS \
+        --log-dir ${OUTPUT_DIR} \
+        --log_file_prefix LCM_${PRECISION}_inference_realtime \
+        ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
+        --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
+        --dataset_path=${DATASET_DIR} \
+        --benchmark \
+        -w ${num_warmup} -i ${num_iter} \
+        --weight-sharing \
+        --number-instance $NUMBER_INSTANCE \
+        $ARGS
+else
+    python -m torch.backends.xeon.run_cpu \
+        --enable-jemalloc \
+        --ninstances $NUMAS \
+        --log_path ${OUTPUT_DIR} \
+        ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
+        --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
+        --dataset_path=${DATASET_DIR} \
+        --benchmark \
+        -w ${num_warmup} -i ${num_iter} \
+        --weight-sharing \
+        --number-instance $NUMBER_INSTANCE \
+        $ARGS
+fi
 
 # For the summary of results
 wait

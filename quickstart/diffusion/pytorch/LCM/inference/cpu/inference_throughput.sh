@@ -86,20 +86,35 @@ export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
 PRECISION=$1
+num_warmup=${num_warmup:-"1"}
+num_iter=${num_iter:-"10"}
 
 rm -rf ${OUTPUT_DIR}/LCM_${PRECISION}_inference_throughput*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --memory-allocator jemalloc \
-    --throughput_mode \
-    --log-dir ${OUTPUT_DIR} \
-    --log_file_prefix LCM_${PRECISION}_inference_throughput \
-    ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
-    --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
-    --dataset_path=${DATASET_DIR} \
-    --benchmark \
-    -w 1 -i 10 \
-    $ARGS
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --memory-allocator jemalloc \
+        --throughput_mode \
+        --log-dir ${OUTPUT_DIR} \
+        --log_file_prefix LCM_${PRECISION}_inference_throughput \
+        ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
+        --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
+        --dataset_path=${DATASET_DIR} \
+        --benchmark \
+        -w ${num_warmup} -i ${num_iter} \
+        $ARGS
+else
+    python -m torch.backends.xeon.run_cpu \
+        --enable-jemalloc \
+        --throughput_mode \
+        --log_path ${OUTPUT_DIR} \
+        ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
+        --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
+        --dataset_path=${DATASET_DIR} \
+        --benchmark \
+        -w ${num_warmup} -i ${num_iter} \
+        $ARGS
+fi
 
 # For the summary of results
 wait
