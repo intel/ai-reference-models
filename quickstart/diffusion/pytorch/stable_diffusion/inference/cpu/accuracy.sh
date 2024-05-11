@@ -90,18 +90,32 @@ PRECISION=$1
 rm -rf ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_accuracy*
 rm -rf ${PRECISION}_results
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --memory-allocator jemalloc \
-    --ninstance 1 \
-    --nodes-list=0 \
-    --log-dir=${OUTPUT_DIR} \
-    --log_file_prefix stable_diffusion_${PRECISION}_inference_accuracy \
-    ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
-    --dataset_path=${DATASET_DIR} \
-    --accuracy \
-    -i=10 \
-    --output_dir="${PRECISION}_results" \
-    $ARGS
+if [[ "0" == ${TORCH_INDUCTOR} ]]; then
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --memory-allocator jemalloc \
+        --ninstance 1 \
+        --nodes-list=0 \
+        --log-dir=${OUTPUT_DIR} \
+        --log_file_prefix stable_diffusion_${PRECISION}_inference_accuracy \
+        ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
+        --dataset_path=${DATASET_DIR} \
+        --accuracy \
+        -i=10 \
+        --output_dir="${PRECISION}_results" \
+        $ARGS
+else
+    python -m torch.backends.xeon.run_cpu \
+        --enable-jemalloc \
+        --ninstance 1 \
+        --node_id=0 \
+        --log_path=${OUTPUT_DIR} \
+        ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
+        --dataset_path=${DATASET_DIR} \
+        --accuracy \
+        -i=10 \
+        --output_dir="${PRECISION}_results" \
+        $ARGS
+fi
 
 # For the summary of results
 wait
