@@ -20,7 +20,6 @@
 ARGS=""
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
-#export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 path="ipex"
 ARGS="$ARGS  --benchmark --num-warmup 10 --num-iter 50  --token-latency"

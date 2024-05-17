@@ -26,7 +26,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 * Install Intel OpenMP
   ```
-  conda install intel-openmp
+  pip install packaging intel-openmp accelerate
+  ```
+* Set IOMP, jemalloc and tcmalloc Preload for better performance
+  ```
+  export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":"<path_to>/tcmalloc/lib/libtcmalloc.so":"<path_to_iomp>/lib/libiomp5.so":$LD_PRELOAD
   ```
 
 * Install datasets
@@ -66,26 +70,14 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 Follow the instructions above to setup your bare metal environment, download and
 preprocess the dataset, and do the model specific setup. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+the AI Reference Models can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have an enviornment variable set to point to an output directory.
 
 ```
-# Clone the model zoo repo and set the MODEL_DIR
+# Clone the AI Reference Models repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
-
-# Clone the Transformers repo in the VIT Base inference directory
-cd quickstart/image_classification/pytorch/vit/inference/cpu
-git clone https://github.com/huggingface/transformers.git
-cd transformers
-git checkout v4.28.1
-pip install -r examples/pytorch/image-classification/requirements.txt
-pip install cchardet 
-pip install scikit-learn
-git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
-pip install -e ./
-cd ..
 
 # Prepare for downloading access
 # On https://huggingface.co/datasets/imagenet-1k, login your account, and click the aggreement and then generating {your huggingface token}

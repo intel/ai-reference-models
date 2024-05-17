@@ -9,38 +9,24 @@ This document has instructions for running [Bloom 176B](https://huggingface.co/b
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison and TCMalloc.
 
-### Prepare model
-```
-  cd <clone of the model zoo>/quickstart/language_modeling/pytorch/bloom/inference/cpu
-  git clone https://github.com/huggingface/transformers.git
-  cd transformers
-  git checkout v4.28.1
-  pip install -r requirements.txt
-  git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
-  pip install -e ./
-  cd ..
- ```
 ### Model Specific Setup
 
 * Install Intel OpenMP
   ```
-  conda install intel-openmp
+  pip install packaging intel-openmp accelerate
+  ```
+* Set IOMP and tcmalloc Preload for better performance
+  ```
+  export LD_PRELOAD="<path_to>/tcmalloc/lib/libtcmalloc.so":"<path_to_iomp>/lib/libiomp5.so":$LD_PRELOAD
   ```
 
 * Install datasets
   ```
   pip install datasets
   ```
-* Install oneccl-bind-pt(also named torch-ccl)
-  ```
-  git clone https://github.com/intel/torch-ccl.git
-  cd torch-ccl && git checkout v2.1.0+cpu
-  git submodule sync && git submodule update --init --recursive
-  python setup.py install
-  cd ../
-  ```
+
 * Install Deepspeed
   ```
   git clone https://github.com/delock/DeepSpeedSYCLSupport
@@ -50,6 +36,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   python setup.py install
   cd ../
   ```
+
 * Install OneCCL
   ```
   git clone https://github.com/oneapi-src/oneCCL.git
@@ -61,6 +48,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   source _install/env/setvars.sh
   cd ../..
   ```
+
 * Set INPUT_TOKEN before running the model
   ```
   export INPUT_TOKEN=32
@@ -104,17 +92,17 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
 Follow the instructions above to setup your bare metal environment, download and
 preprocess the dataset, and do the model specific setup. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+the AI Reference Models can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have an enviornment variable set to point to an output directory.
 
 ```
-# Clone the model zoo repo and set the MODEL_DIR
+# Clone the AI Reference Models repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
 
 # Clone the Transformers repo in the bloom 1b4 inference directory
-cd <clone of the model zoo>/quickstart/language_modeling/pytorch/bloom/inference/cpu
+cd <AI Reference Models>/quickstart/language_modeling/pytorch/bloom/inference/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.28.1
@@ -125,7 +113,7 @@ cd ..
 
 # Get prompt.json for gneration inference
 wget https://intel-extension-for-pytorch.s3.amazonaws.com/miscellaneous/llm/prompt.json
-mv prompt.json <clone of the model zoo>/models/language_modeling/pytorch/gptj/inference/cpu
+mv prompt.json <clone of the AI Reference Models repo>/models/language_modeling/pytorch/gptj/inference/cpu
 
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
@@ -137,4 +125,3 @@ bash run_multi_instance_realtime.sh fp32
 <!--- 80. License -->
 ## License
 [LICENSE](https://github.com/IntelAI/models/blob/master/LICENSE)
-

@@ -9,9 +9,18 @@ This document has instructions for running [Latent Consistency Models (LCMs).](h
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison, Jemalloc and TCMalloc.
 
 ### Install dependencies
+* Install Intel OpenMP
+  ```
+  pip install packaging intel-openmp accelerate
+  ```
+* Set IOMP, jemalloc and tcmalloc Preload for better performance
+  ```
+  export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":"<path_to>/tcmalloc/lib/libtcmalloc.so":"<path_to_iomp>/lib/libiomp5.so":$LD_PRELOAD
+  ```
+
 ```
 pip install torchmetrics pycocotools transformers==4.35.2 peft==0.6.2
 pip install torch-fidelity --no-deps
@@ -52,11 +61,11 @@ bash download_dataset.sh
 
 Follow the instructions above to setup your bare metal environment, download and
 preprocess the dataset, and do the model specific setup. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+the AI Reference Models can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have an enviornment variable set to point to an output directory.
 
 ```bash
-# Clone the model zoo repo and set the MODEL_DIR
+# Clone the AI Reference Models repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
