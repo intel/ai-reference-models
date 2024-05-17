@@ -77,7 +77,7 @@ FINETUNED_MODEL=${FINETUNED_MODEL:-"'THUDM/chatglm3-6b'"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/chatglm/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
-rm -rf ${OUTPUT_DIR}/latency_log*
+rm -rf ${OUTPUT_DIR}/*accuracy*
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [[ "0" == ${TORCH_INDUCTOR} ]];then

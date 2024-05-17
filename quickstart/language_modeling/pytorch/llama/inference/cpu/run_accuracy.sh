@@ -74,7 +74,7 @@ FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/llama/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
-rm -rf ${OUTPUT_DIR}/latency_log*
+rm -rf ${OUTPUT_DIR}/*accuracy*
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
