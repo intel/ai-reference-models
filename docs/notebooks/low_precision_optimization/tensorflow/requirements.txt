@@ -1,7 +1,6 @@
-# removed neural-compressor to avoid vulnerability in Snyk scans
-intel-tensorflow # upgraded to latest to avoid vulnerability
+intel-tensorflow # upgraded to avoid a vulnerability
 ipykernel
 matplotlib
 notebook
 runipy
-wheel==0.38.0 # Included this to avoid a vulnerability
+wheel==0.38.0 # upgraded to avoid a vulnerability

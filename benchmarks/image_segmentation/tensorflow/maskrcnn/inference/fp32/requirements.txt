@@ -1,14 +1,14 @@
 IPython[all]
-Pillow>=9.3.0
+Pillow>=9.3.0 # upgraded to avoid a vulnerability
 cython
 h5py
 imgaug
 intel-tensorflow
-keras==2.6.0rc3 # upgrade required by Snyk to avoid a vulnerability
+keras==2.6.0rc3
 matplotlib
 numpy
 opencv-python
 pycocotools
-pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability
+pygments>=2.7.4 # upgraded to avoid a vulnerability
 scikit-image
 scipy

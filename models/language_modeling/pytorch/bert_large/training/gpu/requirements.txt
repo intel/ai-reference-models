@@ -23,4 +23,4 @@ tensorflow-cpu
 transformers
 types-dataclasses
 typing_extensions
-wheel==0.38.0 # Included this to avoid a vulnerability
+wheel==0.38.0 # upgraded to avoid a vulnerability
