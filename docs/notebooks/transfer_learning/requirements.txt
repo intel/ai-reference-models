@@ -18,7 +18,7 @@ notebook~=7.0.7
 numpy~=1.23.5
 opencv-python~=4.7.0.72
 pandas~=2.0.1
-pillow>=10.3.0# upgraded to fix CVEs
+pillow>=10.3.0 # upgraded to avoid a vulnerability
 psutil~=5.9.5
 pycocotools~=2.0.6
 scikit-learn~=1.2.2
@@ -30,6 +30,6 @@ tensorflow-hub~=0.13.0
 tf-models-official
 torch==1.13.1
 torchvision==0.14.1
-transformers~=4.36.0
+transformers~=4.38.0 # upgraded to avoid a vulnerability
 urllib3~=2.0.2
 wget~=3.2
