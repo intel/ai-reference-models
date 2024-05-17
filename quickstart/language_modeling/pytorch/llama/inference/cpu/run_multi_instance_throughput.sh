@@ -19,7 +19,7 @@
 ARGS=${ARGS:-""}
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
-#export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+
 NUM_ITER=${NUM_ITER:-20}
 ARGS="$ARGS  --benchmark --num-warmup 10 --num-iter $NUM_ITER --token-latency"
 echo "### running with intel extension for pytorch"
@@ -83,7 +83,7 @@ FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/llama/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
-rm -rf ${OUTPUT_DIR}/latency_log*
+rm -rf ${OUTPUT_DIR}/throughput_log*
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
