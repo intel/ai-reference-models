@@ -1036,9 +1036,26 @@ index 84db89e0f..cb986d7ea 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/models/vit/modeling_vit.py b/src/transformers/models/vit/modeling_vit.py
-index 474b92f72..98aab97f0 100644
+index 474b92f72..094ea6eb0 100644
 --- a/src/transformers/models/vit/modeling_vit.py
 +++ b/src/transformers/models/vit/modeling_vit.py
+@@ -129,14 +129,14 @@ class ViTEmbeddings(nn.Module):
+             embeddings = embeddings * (1.0 - mask) + mask_tokens * mask
+ 
+         # add the [CLS] token to the embedded patch tokens
+-        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
++        cls_tokens = self.cls_token.to(embeddings.dtype).expand(batch_size, -1, -1)
+         embeddings = torch.cat((cls_tokens, embeddings), dim=1)
+ 
+         # add positional encoding to each token
+         if interpolate_pos_encoding:
+             embeddings = embeddings + self.interpolate_pos_encoding(embeddings, height, width)
+         else:
+-            embeddings = embeddings + self.position_embeddings
++            embeddings = embeddings + self.position_embeddings.to(embeddings.dtype)
+ 
+         embeddings = self.dropout(embeddings)
+ 
 @@ -779,8 +779,8 @@ class ViTForImageClassification(ViTPreTrainedModel):
      def forward(
          self,
