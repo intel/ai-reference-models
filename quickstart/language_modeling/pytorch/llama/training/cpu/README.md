@@ -9,7 +9,7 @@ This document has instructions for running [LLaMA2 7B](https://huggingface.co/me
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison and TCMalloc.
 
 ### Prepare dependency
 ```
@@ -19,7 +19,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
 * Install Intel OpenMP
   ```
-  conda install intel-openmp
+  pip install packaging intel-openmp accelerate
+  ```
+* Set IOMP and tcmalloc Preload for better performance
+  ```
+  export LD_PRELOAD="<path_to>/tcmalloc/lib/libtcmalloc.so":"<path_to_iomp>/lib/libiomp5.so":$LD_PRELOAD
   ```
 
 * Set ENV to use multi-nodes distributed training (no need for single-node multi-sockets)
@@ -73,16 +77,16 @@ cd ../..
 
 Follow the instructions above to setup your bare metal environment, download and
 preprocess the dataset, and do the model specific setup. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+the AI Reference Models can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have an enviornment variable set to point to an output directory.
 
 ```
-# Clone the model zoo repo and set the MODEL_DIR
+# Clone the AI Reference Models repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
 
 export MODEL_DIR=$(pwd)
-cd <clone of the model zoo>/quickstart/language_modeling/pytorch/llama/training/cpu
+cd <clone of the AI Reference Models>/quickstart/language_modeling/pytorch/llama/training/cpu
 pip uninstall transformers
 git clone https://github.com/huggingface/transformers.git
 cd transformers
