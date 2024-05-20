@@ -1,0 +1,96 @@
+name: Container Build Workflow
+on: 
+  workflow_call:
+    inputs:
+      dir: 
+        required: true
+        type: string
+      env_overrides: 
+        required: false
+        type: string
+
+jobs:
+  setup-build-matrix:
+    runs-on: [ aia-mlops ]
+    container:
+      image: ${{ vars.REGISTRY }}/aiops/compose-dev
+      env:
+        http_proxy: ${{ secrets.HTTP_PROXY }}
+        https_proxy: ${{ secrets.HTTPS_PROXY }}
+        no_proxy: ${{ secrets.NO_PROXY }}
+      credentials:
+        username: ${{ secrets.REGISTRY_USER }}
+        password: ${{ secrets.REGISTRY_TOKEN }}
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set Matrix
+        id: matrix
+        run: echo "matrix=$(jq -c . < ./docker/${{ inputs.dir }}/.actions.json)" >> $GITHUB_OUTPUT
+      - name: Print Inputs
+        if: ${{ inputs.env_overrides }}
+        run: echo "Overrides - ${{ inputs.env_overrides }}" >> $GITHUB_STEP_SUMMARY
+  build-containers:
+    needs: [setup-build-matrix]
+    container:
+      image: ${{ vars.REGISTRY }}/aiops/compose-dev
+      env:
+        http_proxy: ${{ secrets.HTTP_PROXY }}
+        https_proxy: ${{ secrets.HTTPS_PROXY }}
+        no_proxy: ${{ secrets.NO_PROXY }}
+      credentials:
+        username: ${{ secrets.REGISTRY_USER }}
+        password: ${{ secrets.REGISTRY_TOKEN }}
+      volumes:
+        - /usr/local/share/ca-certificates:/usr/local/share/ca-certificates
+    env: ${{ matrix }}
+    strategy:
+      matrix: ${{ fromJson(needs.setup-build-matrix.outputs.matrix) }}
+      fail-fast: false
+    runs-on: [ aia-mlops ]
+    steps: 
+    - uses: actions/checkout@v4
+    - uses: docker/login-action@v3 # To prevent rate limiting
+      with:
+        username: ${{ secrets.DOCKERHUB_USER }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - uses: docker/login-action@v3
+      with:
+        registry: ${{ vars.REGISTRY }}
+        username: ${{ secrets.REGISTRY_USER }}
+        password: ${{ secrets.REGISTRY_TOKEN }}
+    - name: Update Certificates
+      run: update-ca-certificates
+    - name: Random Number Generator
+      run: echo "random-number=$(shuf -i 0-1000 -n1)" >> $GITHUB_ENV
+      working-directory: docker/${{ inputs.dir }}
+    - name: Remove Containers
+      run: |
+        REGISTRY=${{ vars.REGISTRY }} \
+        COMPOSE_PROJECT_NAME=${{ env.random-number }} \
+        ${{ inputs.env_overrides }} docker compose -p ${{ env.random-number }} down --rmi all
+    - name: Build Containers
+      run: |
+        REGISTRY=${{ vars.REGISTRY }} \
+        COMPOSE_PROJECT_NAME=${{ env.random-number }} \
+        ${{ inputs.env_overrides }} docker compose -p ${{ env.random-number }} up --build --force-recreate --always-recreate-deps
+      working-directory: docker/${{ inputs.dir }}
+    - name: Push Containers
+      run: |
+        REGISTRY=${{ vars.REGISTRY }} \
+        COMPOSE_PROJECT_NAME=${{ env.random-number }} \
+        ${{ inputs.env_overrides }} docker compose -p ${{ env.random-number }} push --ignore-push-failures
+      working-directory: docker/${{ inputs.dir }}
+    - name: Print Containers
+      run: |
+        REGISTRY=${{ vars.REGISTRY }} \
+        COMPOSE_PROJECT_NAME=${{ env.random-number }} \
+        ${{ inputs.env_overrides }} docker compose -p ${{ env.random-number }} images --format json | jq '.[] | "\(.Repository):\(.Tag)"' >> $GITHUB_STEP_SUMMARY
+      working-directory: docker/${{ inputs.dir }}
+    - name: Remove Containers
+      run: |
+        REGISTRY=${{ vars.REGISTRY }} \
+        COMPOSE_PROJECT_NAME=${{ env.random-number }} \
+        ${{ inputs.env_overrides }} docker compose -p ${{ env.random-number }} down --rmi all
+      working-directory: docker/${{ inputs.dir }}

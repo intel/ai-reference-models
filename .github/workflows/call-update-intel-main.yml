@@ -1,0 +1,11 @@
+name: Call update-intel-main to update the intel-main branch
+
+on:
+  push:
+    branches: [ "develop" ]
+  workflow_dispatch:
+jobs:
+  merge-using-call:
+    uses: intel-innersource/applications.hpc.workloads.hpc-wl.hpc-wl/.github/workflows/update-intel-main.yml@intel-main
+    with:
+      branch-name: develop

@@ -1,0 +1,59 @@
+name: Scanner-Coverity
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        description: 'Enter Project GitHub organization e.g. intel-innersource'
+        required: true
+        type: string
+        default: intel-innersource        
+      repo:
+        description: 'Enter Project repo for which you want to run coverity scan:'
+        required: true
+        type: string
+        default: frameworks.ai.models.intel-models
+      refs:
+        description: 'Enter Project branch, tag:'
+        required: true
+        type: string
+        default: develop
+      buildCommand:
+        description: 'Enter Project build command or Script:'
+        required: false
+        type: string
+      projectType:
+        description: 'Enter project type: (gcc, java or python)'
+        required: true
+        type: string
+        default: python
+      url:
+        description: 'Enter coverity server url:'
+        required: true
+        type: string
+        default: https://coverityent.devtools.intel.com/prod8
+      stream:
+        description: 'Enter coverity stream name:'
+        required: true
+        type: string
+        default: model_zoo_first_test
+      runners:
+        description: "Enter the comma-separated list of labels of the runner that will execute the workflow (e.g. [ 'k8-runners' ]): "
+        required: true
+        type: string
+        default: "[ 'k8-runners' ]"
+
+jobs:
+  scan-coverity:
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Coverity.yml@one-ci-cd
+    with:
+      org: ${{ inputs.org }}
+      repo: ${{ inputs.repo }}
+      refs: ${{ inputs.refs }}
+      projectType: ${{ inputs.projectType }}
+      url: ${{ inputs.url }}
+      stream: ${{ inputs.stream }}
+      runners: ${{ inputs.runners }}
+    secrets:
+      USER: tf_qa_prod
+      PASSWORD: ${{ secrets.TF_QA_PROD }}
+      token: ${{ secrets.GITHUB_TOKEN }}

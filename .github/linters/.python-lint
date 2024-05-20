@@ -1,0 +1,2 @@
+[MESSAGES CONTROL]
+disable=line-too-long, missing-module-docstring, redefined-outer-name, no-member, used-before-assignment, consider-using-with, bare-except, consider-using-dict-items, import-error, broad-exception-caught, raise-missing-from, not-an-iterable, too-few-public-methods

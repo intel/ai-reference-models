@@ -1,0 +1,71 @@
+{
+  "tests":
+    [{
+      "workload": "ssd-resnet34-inference",
+      "script": "inference_throughput.sh",
+      "framework": "pytorch",
+      "framework_version": "2.1.0",
+      "precision": ["bf16", "int8"],
+      "dataset": ""
+      },
+      {
+      "workload": "resnet50-inference",
+      "script": "inference_realtime.sh",
+      "framework": "pytorch",
+      "framework_version": "2.1.0",
+      "precision": ["fp32", "avx-fp32", "bf16", "int8", "bf32", "avx-int8"],
+      "dataset": "/pytorch/Imagenet_FullData/",
+      "benchmark": "latency",
+      "threshold": [294],
+      "tolerance": 0.05
+      },
+      {
+        "workload": "resnet50-inference",
+        "script": "inference_throughput.sh",
+        "framework": "pytorch",
+        "framework_version": "2.1.0",
+        "precision": ["fp32", "avx-fp32", "bf16", "int8", "bf32", "avx-int8"],
+        "dataset": "/pytorch/Imagenet_FullData/",
+        "benchmark": "throughput",
+        "threshold": [294],
+        "tolerance": 0.05
+      },
+      {
+        "workload": "resnet50-inference",
+        "script": "accuracy.sh",
+        "framework": "pytorch",
+        "framework_version": "2.1.0",
+        "precision": ["fp32", "avx-fp32", "bf16", "int8", "bf32", "avx-int8"],
+        "dataset": "/pytorch/Imagenet_FullData/",
+        "benchmark": "throughput",
+        "threshold": [294],
+        "tolerance": 0.05
+      },
+      {
+        "workload": "resnext32x16d-inference",
+        "script": "inference_realtime.sh",
+        "framework": "pytorch",
+        "framework_version": "2.1.0",
+        "precision": ["fp32", "int8", "bf16", "bf32", "avx-fp32", "avx-int8"],
+        "dataset": "/pytorch/Imagenet_FullData/",
+        "benchmark": "latency"
+      },
+      {
+        "workload": "resnext32x16d-inference",
+        "script": "inference_throughput.sh",
+        "framework": "pytorch",
+        "framework_version": "2.1.0",
+        "precision": ["fp32", "int8", "bf16", "bf32", "avx-fp32", "avx-int8"],
+        "dataset": "/pytorch/Imagenet_FullData/",
+        "benchmark": "throughput"
+      },
+      {
+        "workload": "resnext32x16d-inference",
+        "script": "accuracy.sh",
+        "framework": "pytorch",
+        "framework_version": "2.1.0",
+        "precision": ["fp32", "int8", "bf16", "bf32", "avx-fp32", "avx-int8"],
+        "dataset": "/pytorch/Imagenet_FullData/",
+        "benchmark": "accuracy"
+      }]
+}

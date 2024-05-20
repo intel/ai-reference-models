@@ -1,0 +1,13 @@
+name: Models v2 compliance check
+on: [ pull_request ]
+permissions: read-all
+  
+jobs:
+  models_check:
+    runs-on: k8-runners 
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checking models v2 compliance
+        run: |
+          yes | pip install pyyaml termcolor
+          python3 .github/utils/models_v2-compliance-check.py --models_dir models_v2 --config_file .github/config/models_v2-check-config.json

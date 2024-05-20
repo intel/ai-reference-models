@@ -1,0 +1,157 @@
+name: Scanner-OneBoM
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: 'Enter Project repo for which you want to run coverity scan:'
+        required: true
+        type: string
+        default: frameworks.ai.models.intel-models
+      current-ref:
+        description: 'Enter target branch, tag:'
+        required: true
+        type: string
+        default: r3.1.1
+      previous-ref:
+        description: 'Enter prior release target branch, tag (to generate BoM Delta):'
+        required: true
+        type: string
+        default: r3.1
+      build-prereq-container:
+        description: 'Build the Pre-reqs Container from Scratch?'
+        required: false
+        type: boolean
+        default: false
+      prereqs-container-name:
+        description: 'The name:tag of the container that has the pre-reqs installed'
+        type: string
+        default: 'amr-registry.caas.intel.com/aiops/airm-trivy-scan'
+      runner_label:
+        description: 'Enter one label of the runner that will execute the workflow:'
+        required: true
+        type: string
+        default: k8-runners
+        
+env: 
+  ONEBOM_SCRIPTS_DIR: ".github/utils/onebom"
+  ONEBOM_SCRIPTS_REF: "develop"
+  SRC_DIR: "${{ github.workspace }}/develop/.github/utils/onebom"
+  CURRENT_SCRIPT_DIR: "${{ github.workspace }}/${{ inputs.current-ref }}/.github/utils/onebom"
+  PREVIOUS_SCRIPT_DIR: "${{ github.workspace }}/${{ inputs.previous-ref }}/.github/utils/onebom"
+  ARTIFACT_PREFIX: "OneBomArtifacts"
+  PINNED_REQS_FILE_LIST: "pinned-reqs-file-list.txt"
+
+jobs:
+  generate-onebom-container:
+    runs-on: ${{ inputs.runner_label }}
+    steps:
+       - name: Build Pre-req Container
+         if: ${{ inputs.build-prereq-container == 'true' }}
+         run: 
+          cd "${{ env.SRC_DIR }}" && 
+          ./00-build-container.sh
+
+  generate-onebom-artifacts:
+    needs: generate-onebom-container
+    runs-on: ${{ inputs.runner_label }}
+    strategy:
+      matrix:
+        release-version: ['r3.1.1', 'r3.1']
+    env:
+      DEST_DIR: "${{ github.workspace }}/${{ matrix.release-version }}/.github/utils/onebom"
+
+    steps:
+      - name: Check Env
+        run: env
+      - name: Checkout Script Branch
+        uses: actions/checkout@v4
+        with: 
+          ref: "${{ env.ONEBOM_SCRIPTS_REF }}"
+          path: "${{ github.workspace }}/${{ env.ONEBOM_SCRIPTS_REF }}"
+      - name: Checkout ${{ matrix.release-version}} Branch
+        uses: actions/checkout@v4
+        with: 
+          ref: ${{ matrix.release-version }}
+          path: ${{ github.workspace }}/${{ matrix.release-version }}
+      - name: Copy OneBoM Scripts
+        run:
+          mkdir -p "${{ env.DEST_DIR }}" &&
+          ls -al "${{ env.SRC_DIR }}" &&
+          cp -rv  "${{ env.SRC_DIR }}" "${{ env.DEST_DIR }}/../" &&
+          ls -al "${{ env.DEST_DIR }}"
+      - name: Generate List of Requirements.txt files
+        run: 
+          cd "${{ env.DEST_DIR }}" && 
+          ./01-generate-requirements-file-list.sh
+      - name: Generate the Collated List of Requirements
+        run: 
+          cd "${{ env.DEST_DIR }}" && 
+          ./02-generate-collated-requirements-file.sh
+      - name: Fire up SBOM Container
+        run: 
+          cd "${{ env.DEST_DIR }}" && 
+          ./03-run-sbom-container.sh
+      - name: Resolve and Freeze Requirements in the Container
+        run: 
+          cd "${{ env.DEST_DIR }}" && 
+          ./04-exec-resolve-and-freeze-reqs.sh
+      - name: Replace All Requirements with Lock Versions
+        run: 
+          cd "${{ env.DEST_DIR }}" && 
+          ./05-exec-replace-requirements-with-locked-versions.sh
+      - name: Generate Trivy Scans
+        run: 
+          cd "${{ env.DEST_DIR }}" && 
+          ./06-exec-trivy-scans.sh
+      - name: Terminate SBOM Container
+        run: 
+          cd "${{ env.DEST_DIR }}" && 
+          ./07-terminate-sbom-container.sh
+      - name: Package Tarballs
+        run: 
+          cd "${{ env.DEST_DIR }}" && 
+          ./08-package-tarballs.sh
+      - name: List directory contents
+        run: ls -al ${{ matrix.release-version }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ matrix.release-version }}
+          if-no-files-found: error
+          path: |
+            ${{ matrix.release-version }}/pinned-requirements.tgz
+            ${{ matrix.release-version }}/SCR-trivy-scans.tgz
+            ${{ matrix.release-version }}/trivy-file-list.txt
+            ${{ matrix.release-version }}/${{ env.PINNED_REQS_FILE_LIST }}
+                  
+  gather_artifacts:
+    env:
+      APPS_NEEDING_RELEASE: "apps-needing-release.txt"
+      APPS_NEEDING_VARIANT: "apps-needing-variant.txt"
+    needs: generate-onebom-artifacts
+    runs-on: ${{ inputs.runner_label }}
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+    - name: Validate Artifacts
+      run: |
+        ls -R
+    - name: Get Apps that need new releases
+      run: 
+        grep -Fx -f "${{ env.ARTIFACT_PREFIX }}-${{ inputs.previous-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" "${{ env.ARTIFACT_PREFIX }}-${{ inputs.current-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" > "${{ env.APPS_NEEDING_RELEASE }}"
+    - name: Get Apps that need verions
+      run: 
+        grep -vFx -f "${{ env.ARTIFACT_PREFIX }}-${{ inputs.previous-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" "${{ env.ARTIFACT_PREFIX }}-${{ inputs.current-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" > "${{ env.APPS_NEEDING_VARIANT }}"
+    - name: Validate outputs
+      run: |
+        ls -al
+        cat "${{ env.APPS_NEEDING_RELEASE }}"
+        cat "${{ env.APPS_NEEDING_VARIANT }}"
+    - name: Upload Diff files
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARTIFACT_PREFIX }}
+        if-no-files-found: error
+        path: | 
+          ${{ env.APPS_NEEDING_RELEASE }}
+          ${{ env.APPS_NEEDING_VARIANT }} 

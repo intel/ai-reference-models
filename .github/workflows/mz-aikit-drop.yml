@@ -1,0 +1,87 @@
+name: Model zoo drop for AIKit
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Model zoo branch name'
+        default: develop
+        required: true
+        type: string
+      mz_version:
+        description: 'Model zoo version'
+        default: '3.0.0'
+        required: true
+        type: string
+      aikit_release:
+        description: 'Target AIKit version'
+        default: '2024.0.0'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      target_branch:
+        description: 'Model zoo branch name'
+        required: true
+        type: string
+      mz_version:
+        description: 'Model zoo version'
+        required: true
+        type: string
+      aikit_release:
+        description: 'Target AIKit version'
+        required: true
+        type: string
+      is_lkg_drop:
+        description: 'LKG drop indicator flag'
+        required: true
+        type: boolean
+
+jobs:
+  aikit_drop:
+    runs-on: [ self-hosted, Linux ]
+    container:
+      image: amr-registry.caas.intel.com/aiops/imz-dev-ci:py3.9
+      env:
+        http_proxy: ${{ secrets.HTTP_PROXY }}
+        https_proxy: ${{ secrets.HTTPS_PROXY }}
+        no_proxy: ${{ secrets.NO_PROXY }}
+      options: --privileged --pull always
+    continue-on-error: false
+
+    steps:
+      - name: Checkout MZ Repository [develop]
+        uses: actions/checkout@v4
+        with:
+          repository: intel-innersource/frameworks.ai.models.intel-models
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: develop
+
+      - name: Checkout MZ Repository [target]
+        uses: actions/checkout@v4
+        with:
+          repository: intel-innersource/frameworks.ai.models.intel-models
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: modelzoo
+          ref: ${{inputs.target_branch}}
+
+      - name: Checkout OneAPI Tools Repository
+        uses: actions/checkout@v4
+        with:
+          repository: intel-innersource/frameworks.devops.oneapi.tools.component-drop-tool
+          token: ${{ secrets.SYSTFQABOT_TOKEN }}
+          path: oneapi_drop_tool
+
+      - name: Create model zoo bits
+        run: |
+          cd ${GITHUB_WORKSPACE}/develop/.github/utils/aikit
+          ./create_mz_bits.sh ${{ inputs.mz_version }} ${{ inputs.aikit_release }} ${GITHUB_WORKSPACE}
+
+      - name: Drop to artifacory
+        run: |
+          echo "Drop MZ bits to Artifactory for AIKit version ${{ inputs.aikit_release }} ..."
+          cd ${GITHUB_WORKSPACE}/oneapi_drop_tool
+          git submodule update --init --remote --recursive
+          python -m pip install -r requirements.txt
+          MZ_DROP_LOCATION="${GITHUB_WORKSPACE}/l_model-zoo-${{ inputs.mz_version }}-${{ inputs.aikit_release }}-drop"
+          python cdt.py --user=tf_qa_prod --password=${{ secrets.TF_QA_PROD }} drop -p MZ -r ${{inputs.aikit_release}} -c l_drop -cd $MZ_DROP_LOCATION -b $MZ_DROP_LOCATION/boms/l_modelzoo.txt

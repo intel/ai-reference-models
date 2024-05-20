@@ -1,0 +1,18 @@
+name: PR validations
+on:
+  pull_request:
+    branches:
+    - develop
+    types: [opened, edited]
+jobs:
+  scans:
+    if: ${{ contains(github.event.pull_request.body, '/run-scanners') }}
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scans.yml@develop
+    secrets: inherit
+  workload-tests:
+    if: ${{ contains(github.event.pull_request.body, '/test-workloads') }}
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-launcher.yml@develop
+    secrets: inherit
+    with:
+      aikit_release: '2024.0.0'
+      is_lkg_drop: false

@@ -1,0 +1,48 @@
+name: Container Test Workflow
+on: 
+  workflow_call:
+    inputs:
+      dir: 
+        required: true
+        type: string
+      runner_label:
+        required: true
+        type: string
+
+jobs:
+  test-containers:
+    runs-on: [ self-hosted, Linux, "${{ inputs.runner_label }}"]
+    steps: 
+    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with:
+        path: mlops
+        ref: develop
+        repository: ${{ vars.MLOPS_REPO }}
+        token: ${{ secrets.ACTION_TOKEN }}
+    - uses: docker/login-action@v3
+      with:
+        registry: ${{ vars.REGISTRY }}
+        username: ${{ secrets.REGISTRY_USER }}
+        password: ${{ secrets.REGISTRY_TOKEN }}
+    - name: Test Containers
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        python -m pip install -r ${{ github.workspace }}/mlops/test-runner/requirements.txt
+        python ${{ github.workspace }}/mlops/test-runner/test_runner.py -f ${{ github.workspace }}/docker/${{ inputs.dir }}/tests.yaml -l ${{ github.workspace }}/docker/${{ inputs.dir }}/logs
+      env:
+        PYTHONPATH: ${{ github.workspace }}/mlops/test-runner
+        REGISTRY: ${{ vars.REGISTRY }}
+        GITHUB_RUN_NUMBER: ${{ github.run_number }}
+    - name: Print Log Summary
+      if: always()
+      run: echo -e "\`\`\`\n$(cat ${{ github.workspace }}/docker/${{ inputs.dir }}/logs/test-runner.log)\n\`\`\`" >> $GITHUB_STEP_SUMMARY
+    - name: Get Test Name
+      if: always()
+      run: echo "test=$(basename ${{ inputs.dir }})" >> $GITHUB_ENV
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: '${{ env.test }} outputs'
+        path: ${{ github.workspace }}/docker/${{ inputs.dir }}/logs

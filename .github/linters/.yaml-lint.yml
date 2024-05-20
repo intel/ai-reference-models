@@ -1,0 +1,22 @@
+# This is my first, very own configuration file for yamllint!
+# It extends the default conf by adjusting some options.
+
+extends: default
+
+rules:
+  braces: disable
+  brackets: disable
+  colons: disable
+  comments: disable
+  comments-indentation: disable
+  document-start: disable
+  empty-lines: disable
+  hyphens: disable
+  indentation: disable
+  key-duplicates: disable
+  line-length: disable
+  new-lines: disable
+  new-line-at-end-of-file: disable
+  superlite: disable
+  trailing-spaces: disable
+  truthy: disable

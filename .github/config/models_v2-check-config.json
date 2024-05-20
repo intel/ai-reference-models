@@ -1,0 +1,69 @@
+{
+  "frameworks": [
+    "pytorch",
+    "tensorflow",
+    "jax"
+  ],
+  "mode": [
+    "training",
+    "inference"
+  ],
+  "platform": [
+    "cpu",
+    "gpu"
+  ],
+  "mandatory_files": [
+    "README.md", 
+    "setup.sh", 
+    "run_model.sh", 
+    "tests.yaml"
+  ],
+  "test_keys": [
+    "cmd",
+    "env"
+  ],
+  "skip_files_check": [
+    "jax/gemma/inference/cpu",
+    "jax/gptj/inference/cpu",
+    "pytorch/3d_unet/inference/gpu",
+    "pytorch/bert_large/inference/gpu",
+    "pytorch/bert_large/training/gpu",
+    "pytorch/distilbert/inference/gpu",
+    "pytorch/dlrm/inference/gpu",
+    "pytorch/fastpitch/inference/gpu",
+    "pytorch/gpt-j_mlperf/inference/cpu",
+    "pytorch/hifi_gan/inference/gpu",
+    "pytorch/quartznet/inference/gpu",
+    "pytorch/resnet50v1_5/inference/gpu",
+    "pytorch/resnet50v1_5/training/gpu",
+    "pytorch/rnnt/inference/gpu",
+    "pytorch/rnnt/training/gpu",
+    "pytorch/ssd-mobilenetv1/inference/gpu",
+    "pytorch/swin-transformer/inference/gpu",
+    "pytorch/torchrec_dlrm/inference/gpu",
+    "pytorch/torchrec_dlrm/training/gpu",
+    "pytorch/unetpp/inference/gpu"
+  ],
+  "skip_test_structure_check": [
+    "jax/gemma/inference/cpu",
+    "jax/gptj/inference/cpu",
+    "pytorch/3d_unet/inference/gpu",
+    "pytorch/bert_large/inference/gpu",
+    "pytorch/bert_large/training/gpu",
+    "pytorch/distilbert/inference/gpu",
+    "pytorch/dlrm/inference/gpu",
+    "pytorch/fastpitch/inference/gpu",
+    "pytorch/gpt-j_mlperf/inference/cpu",
+    "pytorch/hifi_gan/inference/gpu",
+    "pytorch/quartznet/inference/gpu",
+    "pytorch/resnet50v1_5/inference/gpu",
+    "pytorch/resnet50v1_5/training/gpu",
+    "pytorch/rnnt/inference/gpu",
+    "pytorch/rnnt/training/gpu",
+    "pytorch/ssd-mobilenetv1/inference/gpu",
+    "pytorch/swin-transformer/inference/gpu",
+    "pytorch/torchrec_dlrm/inference/gpu",
+    "pytorch/torchrec_dlrm/training/gpu",
+    "pytorch/unetpp/inference/gpu"
+  ]
+}

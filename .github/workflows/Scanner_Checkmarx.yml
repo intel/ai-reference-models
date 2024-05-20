@@ -1,0 +1,54 @@
+name: Scanner-Checkmarx
+on:
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: 'Enter Project repo for which you want to run checkmarx scan:'
+        required: true
+        type: string
+        default: frameworks.ai.models.intel-models
+      refs:
+        description: 'Enter Project branch, tag:'
+        required: true
+        type: string
+        default: develop
+      projectid:
+        description: 'Enter project-id:'
+        required: true
+        type: string
+      region:
+        description: 'Enter User-account region : eg- INTEL-GAR, INTEL-GER, INTEL-AMR'
+        required: true
+        type: string
+        default: INTEL-AMR
+      ignore_vulnerabilities:
+        description: Exit normally even if vulnerabilities are found by Checkmarx 
+        required: false
+        default: true
+        type: boolean
+      timeout:
+        description: Abort if the timeout (in seconds) is exceeded
+        required: false
+        default: '600'
+        type: string
+      runner_label:
+        description: 'Enter one label of the runner that will execute the workflow:'
+        required: true
+        type: string
+        default: gasp
+
+jobs:
+  scan-checkmarx:
+    uses: intel-innersource/frameworks.ai.infrastructure.code-scan-tools/.github/workflows/Scanner_Checkmarx.yml@one-ci-cd
+    with:
+      repos: ${{ inputs.repos }}
+      refs: ${{ inputs.refs }}
+      projectid: ${{ inputs.projectid }}
+      region: ${{ inputs.region }}
+      timeout: ${{ inputs.timeout }}
+      ignore_vulnerabilities: ${{ inputs.ignore_vulnerabilities }}
+      runner_label: ${{ inputs.runner_label }}
+    secrets:
+      SYS_ACCOUNT: tf_qa_prod
+      CHECKMARX_PASSWORD: ${{ secrets.TF_QA_PROD }}
+      token: ${{ secrets.GITHUB_TOKEN }}
