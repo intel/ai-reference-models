@@ -56,7 +56,7 @@ def run(
     data_loader = DataLoader(dataset, batch_size=bs, collate_fn=LoadImagesAndLabels.collate_fn)
 
     # Run inference
-    #model.warmup(imgsz=(bs, 3, *imgsz))  # warmup
+    model.warmup(imgsz=(bs, 3, imgsz, imgsz))  # warmup
     seen = 0
     dt = (Profile(), Profile(), Profile())
 
@@ -64,7 +64,7 @@ def run(
 
     for batch in data_loader:
         b_count += 1
-        if seen + bs >= total_images:
+        if seen + bs > total_images:
             break
         im, labels, paths, shapes = batch
         out_strs = ['image ']*bs
