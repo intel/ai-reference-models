@@ -217,9 +217,9 @@ def run(
     nt = np.bincount(stats[3].astype(int), minlength=nc)  # number of targets per class
 
     # Print results
-    pf = "%22s" + "%11i" * 2 + "%11.3g" * 4  # print format
+    pf = "%22s" + "%11i" * 2 + "%11.4g" * 4  # print format
     # LOGGER.info(pf % ("all", seen, nt.sum(), mp, mr, map50, map))
-    LOGGER.info("Accuracy (map50): %.3g" % map50)
+    LOGGER.info("Accuracy (map50): %.4g" % map50)
     if nt.sum() == 0:
         LOGGER.warning(f"WARNING ⚠️ no labels found in {task} set, can not compute metrics without labels")
 
