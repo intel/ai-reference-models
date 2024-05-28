@@ -4,6 +4,9 @@ on:
     branches:
     - develop
     types: [opened, edited]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   scans:
     if: ${{ contains(github.event.pull_request.body, '/run-scanners') }}
@@ -14,5 +17,5 @@ jobs:
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-launcher.yml@develop
     secrets: inherit
     with:
-      aikit_release: '2024.0.0'
+      aikit_release: '2024.2.0'
       is_lkg_drop: false
