@@ -3,20 +3,4 @@
 
 # These owners will be the default owners for everything in the repo,
 # but PR owner should be able to assign other contributors when appropriate
-* wafaa.s.taie@intel.com @ashahba @claynerobison 
-datasets @ashahba @claynerobison @dzungductran
-docs @claynerobison @mhbuehler
-k8s  @ashahba @dzungductran
-models @ashraf-bhuiyan @riverliuintel
-models @riverliuintel
-models/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe
-quickstart mahathi.vatsal.salopanthula@intel.com
-quickstart/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe
-
-# Order is important. The last matching pattern has the most precedence.
-# So if a pull request only touches javascript files, only these owners
-# will be requested to review.
-#*.js    @octocat @github/js
-
-# You can also use email addresses if you prefer.
-
+* wafaa.s.taie@intel.com @ashahba @claynerobison mahathi.vatsal.salopanthula@intel.com @jitendra42 @lerealno
