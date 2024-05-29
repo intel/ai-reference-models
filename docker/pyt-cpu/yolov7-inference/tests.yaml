@@ -1,0 +1,120 @@
+fp32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/inference_realtime.sh
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/inference_throughput.sh
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/accuracy.sh
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/inference_realtime.sh
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/inference_throughput.sh
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/accuracy.sh
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/inference_realtime.sh
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/inference_throughput.sh
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/accuracy.sh
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/inference_realtime.sh
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/inference_throughput.sh
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash quickstart/accuracy.sh
+  env:
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
