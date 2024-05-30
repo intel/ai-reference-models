@@ -3,7 +3,7 @@ b0-flex170-bs128-batch-inference:
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
-  env: 
+  env:
     BATCH_SIZE: '128'
     MODEL_NAME: EfficientNetB0
     OUTPUT_DIR: /tmp
@@ -15,7 +15,7 @@ b3-flex170-bs128-batch-inference:
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
-  env: 
+  env:
     BATCH_SIZE: '128'
     MODEL_NAME: EfficientNetB3
     OUTPUT_DIR: /tmp
@@ -27,11 +27,10 @@ b4-flex170-bs128-batch-inference:
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
-  env: 
+  env:
     BATCH_SIZE: '128'
     MODEL_NAME: EfficientNetB4
     OUTPUT_DIR: /tmp
   volumes:
     - src: /tmp
       dst: /tmp
-      

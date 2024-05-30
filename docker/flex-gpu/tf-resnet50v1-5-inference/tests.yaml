@@ -22,7 +22,7 @@ batch-170-fp16-inference:
     PRECISION: float16
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_170
-    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb 
+    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
     BATCH_SIZE: '1024'
     OUTPUT_DIR: /tmp
   volumes:
@@ -37,7 +37,7 @@ batch-170-bf16-inference:
     PRECISION: bfloat16
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_170
-    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb 
+    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
     BATCH_SIZE: '1024'
     OUTPUT_DIR: /tmp
   volumes:
@@ -52,7 +52,7 @@ batch-170-tf32-inference:
     PRECISION: tensorfloat32
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_170
-    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb 
+    PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
     BATCH_SIZE: '1024'
     OUTPUT_DIR: /tmp
   volumes:
@@ -80,7 +80,7 @@ batch-140-int8-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
@@ -93,7 +93,7 @@ online-140-int8-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
@@ -106,7 +106,7 @@ batch-140-fp16-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
@@ -119,7 +119,7 @@ online-140-fp16-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
@@ -132,7 +132,7 @@ batch-140-bf16-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
@@ -145,7 +145,7 @@ online-140-bf16-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
@@ -158,7 +158,7 @@ batch-140-tf32-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
@@ -171,7 +171,7 @@ online-140-tf32-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
@@ -184,7 +184,7 @@ batch-140-fp32-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb
@@ -197,7 +197,7 @@ online-140-fp32-inference:
   device: /dev/dri
   cap_add: SYS_NICE
   env:
-    PRECISION : int8
+    PRECISION: int8
     TEST_MODE: inference
     FLEX_GPU_TYPE: flex_140
     PB_FILE_PATH: /workspace/tf-flex-series-resnet50v1-5-inference/models/pretrained_models/resnet50_v1.pb

@@ -1,6 +1,9 @@
 inference-fp16:
   if: ${{ eq(RUNNER, "flex-gpu") }}
-  cmd: bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${TORCHVISION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/stable_diffusion-inference/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${MULTI_TILE} ${PLATFORM}
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${TORCHVISION_VERSION}
+      ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/stable_diffusion-inference/run_test.sh ${PRECISION}
+      ${IS_LKG_DROP} ${MULTI_TILE} ${PLATFORM}
   env:
     PRECISION: "fp16"
     MULTI_TILE: "False"
@@ -8,7 +11,10 @@ inference-fp16:
 
 inference-fp32:
   if: ${{ eq(RUNNER, "flex-gpu") }}
-  cmd: bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${TORCHVISION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/stable_diffusion-inference/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${MULTI_TILE} ${PLATFORM}
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${TORCHVISION_VERSION}
+      ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/stable_diffusion-inference/run_test.sh ${PRECISION}
+      ${IS_LKG_DROP} ${MULTI_TILE} ${PLATFORM}
   env:
     PRECISION: "fp32"
     MULTI_TILE: "False"
@@ -16,7 +22,10 @@ inference-fp32:
 
 inference-pvc-fp16:
   if: ${{ eq(RUNNER, "max-gpu") }}
-  cmd: bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${TORCHVISION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/stable_diffusion-inference/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${MULTI_TILE} ${PLATFORM}
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${TORCHVISION_VERSION}
+      ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/stable_diffusion-inference/run_test.sh ${PRECISION}
+      ${IS_LKG_DROP} ${MULTI_TILE} ${PLATFORM}
   env:
     PRECISION: "fp16"
     MULTI_TILE: "True"
@@ -24,7 +33,10 @@ inference-pvc-fp16:
 
 inference-pvc-fp32:
   if: ${{ eq(RUNNER, "max-gpu") }}
-  cmd: bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${TORCHVISION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/stable_diffusion-inference/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${MULTI_TILE} ${PLATFORM}
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${TORCHVISION_VERSION}
+      ${IS_LKG_DROP} ${AIKIT_VERSION}; bash $GITHUB_WORKSPACE/tests/cicd/IPEX-XPU/stable_diffusion-inference/run_test.sh ${PRECISION}
+      ${IS_LKG_DROP} ${MULTI_TILE} ${PLATFORM}
   env:
     PRECISION: "fp32"
     MULTI_TILE: "True"

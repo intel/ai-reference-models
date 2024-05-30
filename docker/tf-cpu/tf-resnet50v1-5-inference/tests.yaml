@@ -118,7 +118,7 @@ ResNet50 v1.5 Realtime Inference fp32:
     dst: /output/tf-resnet50v1-5-inference/realtime_fp32
 ResNet50 v1.5 Realtime Inference int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1 
+  cmd: /bin/bash quickstart/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_int8

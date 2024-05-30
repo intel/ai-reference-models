@@ -48,7 +48,7 @@
     dst: /output/tf-3d-unet-mlperf-inference/accuracy_int8
 3d-UNet-MLPerf Realtime Inference int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-segmentation-tf-3d-unet-mlperf-inference
-  cmd: /bin/bash quickstart/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1 
+  cmd: /bin/bash quickstart/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1
   env:
     DATASET_DIR: /tf_dataset/dataset/3DUNet/MICCAI_BraTS_2019_Data_Training
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
