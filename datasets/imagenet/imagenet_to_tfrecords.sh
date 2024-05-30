@@ -95,9 +95,12 @@ python3 ${WORKDIR}/imagenet_to_gcs.py \
 
 # Combine the two folders in tf-records together
 cd $IMAGENET_HOME/tf_records
-mv train/* ./
+
+if [[ ${DATASET} == "training" ]]; then
+  mv train/* ./
+  rm -rf train
+fi
 mv validation/* ./
-rm -rf train
 rm -rf validation
 
 cd ${WORKDIR}
