@@ -19,7 +19,7 @@
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
-    cap_add: SYS_NICE
+  cap_add: SYS_NICE
   env:
     BATCH_SIZE: '1'
     PRECISION: float16

@@ -39,7 +39,7 @@ on:
 
 jobs:
   aikit_drop:
-    runs-on: [ self-hosted, Linux ]
+    runs-on: [self-hosted, Linux]
     container:
       image: amr-registry.caas.intel.com/aiops/imz-dev-ci:py3.9
       env:

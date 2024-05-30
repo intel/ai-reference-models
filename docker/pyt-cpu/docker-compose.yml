@@ -218,7 +218,7 @@ services:
     pull_policy: always
     build:
       context: ../../
-      args: 
+      args:
         BASE_TAG: srf-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pyt-2.3-py310
       dockerfile: docker/pyt-cpu/yolov7-inference/pytorch-yolov7-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     extends: bert-large-training

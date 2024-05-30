@@ -22,7 +22,7 @@ on:
         default: false
         required: true
         type: boolean
-  
+
 jobs:
   scans:
     uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scans.yml@develop
@@ -36,7 +36,7 @@ jobs:
   mz-drop:
     if: ${{ always() && needs.scans.result=='success' && needs.workload-tests.result=='success' }}
     needs: [scans, workload-tests]
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yml@develop   
+    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-aikit-drop.yml@develop
     with:
       target_branch: ${{ inputs.target_branch }}
       mz_version: ${{ inputs.mz_version }}

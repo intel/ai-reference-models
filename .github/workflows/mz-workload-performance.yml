@@ -41,7 +41,7 @@ jobs:
         db_table: wl_perf_mz
         db: resultsdb
         file: .github/utils/result_summary_table.json
-      env: 
+      env:
         DB_PASS: ${{ secrets.DB_PASS }}
         DB_SERVER: ${{ secrets.DB_SERVER }}
   display-tables:
@@ -78,4 +78,4 @@ jobs:
         python3 create-md-table.py
         MD_TABLE=$(cat ${{ matrix.table }})
         echo "## Performance Tests ${{ matrix.table }}" >> $GITHUB_STEP_SUMMARY
-        echo "${MD_TABLE}" >> $GITHUB_STEP_SUMMARY    
+        echo "${MD_TABLE}" >> $GITHUB_STEP_SUMMARY

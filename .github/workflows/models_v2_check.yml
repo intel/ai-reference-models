@@ -1,10 +1,10 @@
 name: Models v2 compliance check
-on: [ pull_request ]
+on: [pull_request]
 permissions: read-all
-  
+
 jobs:
   models_check:
-    runs-on: k8-runners 
+    runs-on: k8-runners
     steps:
       - uses: actions/checkout@v4
       - name: Checking models v2 compliance

@@ -2,7 +2,7 @@ name: Unit Test
 on: pull_request
 jobs:
   unit-test:
-    runs-on: [ k8-runners ]
+    runs-on: [k8-runners]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

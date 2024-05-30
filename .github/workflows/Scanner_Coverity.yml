@@ -6,7 +6,7 @@ on:
         description: 'Enter Project GitHub organization e.g. intel-innersource'
         required: true
         type: string
-        default: intel-innersource        
+        default: intel-innersource
       repo:
         description: 'Enter Project repo for which you want to run coverity scan:'
         required: true

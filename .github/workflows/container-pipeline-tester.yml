@@ -22,7 +22,7 @@ jobs:
   setup-build-matrix:
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
-    runs-on: [ 'k8-runners' ]
+    runs-on: ['k8-runners']
     env:
       # excluding from the build due to issues: ["docker/max-gpu", "tf-cpu"]
       DEFAULT_GROUPS: '["docker/dataset", "docker/flex-gpu", "docker/pyt-cpu", "docker/cuda-gpu"]'
@@ -37,7 +37,7 @@ jobs:
         run: echo "Overrides - ${{ inputs.env_overrides }}" >> $GITHUB_STEP_SUMMARY
 
   build-containers:
-    needs: [ setup-build-matrix ]
+    needs: [setup-build-matrix]
     container:
       image: ${{ vars.REGISTRY }}/aiops/compose-dev
       env:
@@ -49,7 +49,7 @@ jobs:
         password: ${{ secrets.REGISTRY_TOKEN }}
       volumes:
         - /usr/local/share/ca-certificates/:/usr/local/share/ca-certificates/
-    runs-on: [ 'builder' ]
+    runs-on: ['builder']
     strategy:
       matrix:
         group: ${{ fromJson(needs.setup-build-matrix.outputs.matrix) }}

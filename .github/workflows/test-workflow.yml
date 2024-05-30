@@ -1,8 +1,8 @@
 name: Container Test Workflow
-on: 
+on:
   workflow_call:
     inputs:
-      dir: 
+      dir:
         required: true
         type: string
       runner_label:
@@ -11,8 +11,8 @@ on:
 
 jobs:
   test-containers:
-    runs-on: [ self-hosted, Linux, "${{ inputs.runner_label }}"]
-    steps: 
+    runs-on: [self-hosted, Linux, "${{ inputs.runner_label }}"]
+    steps:
     - uses: actions/checkout@v4
     - uses: actions/checkout@v4
       with:

@@ -22,7 +22,7 @@ on:
         type: string
         default: INTEL-AMR
       ignore_vulnerabilities:
-        description: Exit normally even if vulnerabilities are found by Checkmarx 
+        description: Exit normally even if vulnerabilities are found by Checkmarx
         required: false
         default: true
         type: boolean

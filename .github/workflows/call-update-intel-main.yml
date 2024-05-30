@@ -2,7 +2,7 @@ name: Call update-intel-main to update the intel-main branch
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: ["develop"]
   workflow_dispatch:
 jobs:
   merge-using-call:

@@ -3,7 +3,7 @@ fp16-batch-inference:
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
-  env: 
+  env:
     BATCH_SIZE: '8'
     DATASET_DIR: /local_dateset/datasets/Cosim_test/dataset/fastpitch/LJSpeech-1.1
     PRECISION: FP16

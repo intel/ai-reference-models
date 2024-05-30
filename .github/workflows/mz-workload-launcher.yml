@@ -29,7 +29,7 @@ jobs:
         # echo "ITEX_XPU_TESTS=$(jq -c '.tests' .github/config/MZ-ITEX-XPU.json)" >> $GITHUB_OUTPUT
         # echo "IPEX_XPU_TESTS=$(jq -c '.tests' .github/config/MZ-IPEX-XPU.json)" >> $GITHUB_OUTPUT
         echo "PYTORCH_TESTS=$(jq -c '.tests' .github/config/MZ-PyTorch.json)" >> $GITHUB_OUTPUT
-  
+
   test-TENSORFLOW:
     secrets: inherit
     needs: setup
@@ -46,10 +46,20 @@ jobs:
       aikit_release: ${{ inputs.aikit_release || '2024.0.0' }}
       is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
       script: ${{ matrix.tests_arr.script }}
-      precisions: "['${{ matrix.tests_arr.precision[0] }}','${{ matrix.tests_arr.precision[1] }}','${{ matrix.tests_arr.precision[2] }}','${{ matrix.tests_arr.precision[3] }}','${{ matrix.tests_arr.precision[4] }}']"
+      precisions:
+        "['${{ matrix.tests_arr.precision[0] }}',
+          '${{ matrix.tests_arr.precision[1] }}',
+          '${{ matrix.tests_arr.precision[2] }}',
+          '${{ matrix.tests_arr.precision[3] }}',
+          '${{ matrix.tests_arr.precision[4] }}']"
       dataset: ${{ matrix.tests_arr.dataset }}
       benchmark: ${{ matrix.tests_arr.benchmark }}
-      thresholds: "['${{ matrix.tests_arr.threshold[0] }}','${{ matrix.tests_arr.threshold[1] }}','${{ matrix.tests_arr.threshold[2] }}','${{ matrix.tests_arr.threshold[3] }}','${{ matrix.tests_arr.threshold[4] }}']"
+      thresholds:
+        "['${{ matrix.tests_arr.threshold[0] }}',
+          '${{ matrix.tests_arr.threshold[1] }}',
+          '${{ matrix.tests_arr.threshold[2] }}',
+          '${{ matrix.tests_arr.threshold[3] }}',
+          '${{ matrix.tests_arr.threshold[4] }}']"
       tolerance: ${{ matrix.tests_arr.tolerance }}
 
   test-PYTORCH:
@@ -68,34 +78,43 @@ jobs:
       aikit_release: ${{ inputs.aikit_release || '2024.0.0' }}
       is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
       script: ${{ matrix.tests_arr.script }}
-      precisions: "['${{ matrix.tests_arr.precision[0] }}','${{ matrix.tests_arr.precision[1] }}','${{ matrix.tests_arr.precision[2] }}','${{ matrix.tests_arr.precision[3] }}','${{ matrix.tests_arr.precision[4] }}']"
+      precisions:
+        "['${{ matrix.tests_arr.precision[0] }}',
+          '${{ matrix.tests_arr.precision[1] }}',
+          '${{ matrix.tests_arr.precision[2] }}',
+          '${{ matrix.tests_arr.precision[3] }}',
+          '${{ matrix.tests_arr.precision[4] }}']"
       dataset: ${{ matrix.tests_arr.dataset }}
       benchmark: ${{ matrix.tests_arr.benchmark }}
-      thresholds: "['${{ matrix.tests_arr.threshold[0] }}','${{ matrix.tests_arr.threshold[1] }}','${{ matrix.tests_arr.threshold[2] }}','${{ matrix.tests_arr.threshold[3] }}','${{ matrix.tests_arr.threshold[4] }}']"
+      thresholds:
+        "['${{ matrix.tests_arr.threshold[0] }}',
+          '${{ matrix.tests_arr.threshold[1] }}',
+          '${{ matrix.tests_arr.threshold[2] }}',
+          '${{ matrix.tests_arr.threshold[3] }}',
+          '${{ matrix.tests_arr.threshold[4] }}']"
       tolerance: ${{ matrix.tests_arr.tolerance }}
 
-  #test-ITEX-XPU:
-  #  secrets: inherit
-  #  needs: setup
-  #  strategy:
-  #    matrix:
-  #      tests_arr: ${{ fromJson(needs.setup.outputs.itex-xpu-tests) }}
-  #    fail-fast: false
-  #  uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-tests-runner.yml@develop
-  #  with:
-  #    runner_label: k8-runners
-  #    workload: ${{ matrix.tests_arr.workload }}
-  #    framework: ${{ matrix.tests_arr.framework }}
-  #    framework_version: ${{ matrix.tests_arr.framework_version }}
-  #    aikit_release: ${{ inputs.aikit_release || '2024.0.0' }}
-  #    is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
-  #    framework_extension_version: ${{ matrix.tests_arr.framework_extension_version }}
-  #    phase: ${{ matrix.tests_arr.phase }}
-  #    device: ${{ matrix.tests_arr.device }}
+      #test-ITEX-XPU:
+      #  secrets: inherit
+      #  needs: setup
+      #  strategy:
+      #    matrix:
+      #      tests_arr: ${{ fromJson(needs.setup.outputs.itex-xpu-tests) }}
+      #    fail-fast: false
+      #  uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-tests-runner.yml@develop
+      #  with:
+      #    runner_label: k8-runners
+      #    workload: ${{ matrix.tests_arr.workload }}
+      #    framework: ${{ matrix.tests_arr.framework }}
+      #    framework_version: ${{ matrix.tests_arr.framework_version }}
+      #    aikit_release: ${{ inputs.aikit_release || '2024.0.0' }}
+      #    is_lkg_drop: ${{ inputs.is_lkg_drop || false }}
+      #    framework_extension_version: ${{ matrix.tests_arr.framework_extension_version }}
+      #    phase: ${{ matrix.tests_arr.phase }}
+      #    device: ${{ matrix.tests_arr.device }}
 
-  
-  #display-results:
-  #  if: ${{ always() && (github.event_name != 'pull_request' || contains(github.event.workflow, 'cicd-pipeline')) }}
-  #  needs: [test-TENSORFLOW, test-PYTORCH] # test-ITEX-XPU]
-  #  secrets: inherit
-  #  uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-performance.yml@develop
+      #display-results:
+      #  if: ${{ always() && (github.event_name != 'pull_request' || contains(github.event.workflow, 'cicd-pipeline')) }}
+      #  needs: [test-TENSORFLOW, test-PYTORCH] # test-ITEX-XPU]
+      #  secrets: inherit
+      #  uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-performance.yml@develop

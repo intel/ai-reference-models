@@ -3,7 +3,7 @@ fp16-flex170-10000-batch-inference:
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
-  env: 
+  env:
     BATCH_SIZE: '10000'
     DATASET_PATH: /local_dateset/datasets/wide_deep_large/data/eval_preprocessed_eval.tfrecords
     PB_FILE_PATH: /local_dateset/datasets/wide_deep_large/wide_deep_fp16_pretrained_model.pb
@@ -22,7 +22,7 @@ fp16-flex140-10000-batch-inference:
   ipc: host
   device: /dev/dri
   cap_add: SYS_NICE
-  env: 
+  env:
     BATCH_SIZE: '10000'
     DATASET_PATH: /local_dateset/datasets/wide_deep_large/data/eval_preprocessed_eval.tfrecords
     PB_FILE_PATH: /local_dateset/datasets/wide_deep_large/wide_deep_fp16_pretrained_model.pb

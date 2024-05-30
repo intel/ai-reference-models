@@ -4,19 +4,11 @@
 extends: default
 
 rules:
-  braces: disable
-  brackets: disable
-  colons: disable
-  comments: disable
-  comments-indentation: disable
+  line-length:
+    max: 200
+    level: warning
+
   document-start: disable
-  empty-lines: disable
-  hyphens: disable
   indentation: disable
-  key-duplicates: disable
-  line-length: disable
-  new-lines: disable
-  new-line-at-end-of-file: disable
-  superlite: disable
-  trailing-spaces: disable
+  comments: disable
   truthy: disable

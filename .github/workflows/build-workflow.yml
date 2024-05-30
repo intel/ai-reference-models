@@ -1,17 +1,17 @@
 name: Container Build Workflow
-on: 
+on:
   workflow_call:
     inputs:
-      dir: 
+      dir:
         required: true
         type: string
-      env_overrides: 
+      env_overrides:
         required: false
         type: string
 
 jobs:
   setup-build-matrix:
-    runs-on: [ aia-mlops ]
+    runs-on: [aia-mlops]
     container:
       image: ${{ vars.REGISTRY }}/aiops/compose-dev
       env:
@@ -48,8 +48,8 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.setup-build-matrix.outputs.matrix) }}
       fail-fast: false
-    runs-on: [ aia-mlops ]
-    steps: 
+    runs-on: [aia-mlops]
+    steps:
     - uses: actions/checkout@v4
     - uses: docker/login-action@v3 # To prevent rate limiting
       with:

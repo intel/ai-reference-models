@@ -38,11 +38,11 @@ inputs:
     required: true
     default: 0.05
   token:
-    description: 'GITHUB_TOKEN or a repo scoped PAT.'
+    description: "GITHUB_TOKEN or a repo scoped PAT."
     required: true
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Install dependencies
       shell: bash
@@ -76,18 +76,29 @@ runs:
                 RESULT=0
               fi
             fi
-            
-            JOB_URL=$(curl -L -s -H 'Accept: application/vnd.github+json' -H "Authorization: Bearer ${{ inputs.token }}" https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs |  jq '.jobs[] | select(.name | contains("${{ inputs.framework }}")) | select(.name | contains("${{ inputs.workload }}")) | select(.name | contains("${{ inputs.script }}")) | .html_url' | sed 's/"//g')
+
+            JOB_URL=$(curl -L -s -H 'Accept: application/vnd.github+json' -H "Authorization: Bearer ${{ inputs.token }}" \
+              https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs |  jq '.jobs[] | \
+              select(.name | contains("${{ inputs.framework }}")) | select(.name | contains("${{ inputs.workload }}")) | \
+              select(.name | contains("${{ inputs.script }}")) | .html_url' | sed 's/"//g')
             STEP_URL=${JOB_URL}#step:9:1
 
             if [[ "${{ inputs.benchmark_type }}" == "latency" ]] && (( $(echo "${RESULT} < ${UPPER_LIMIT}" | bc -l) )); then
-                python ${GITHUB_WORKSPACE}/.github/actions/check-performance/create-df.py ${{ env.FOLDER }} ${{ inputs.workload }} ${{ inputs.script }} ${PRECISIONS[idx]} ${{ inputs.benchmark_type }} ${{ inputs.tolerance }} ${THRESHOLDS[idx]} ${RESULT} PASS ${STEP_URL} ${{ inputs.output_folder }}
+              python ${GITHUB_WORKSPACE}/.github/actions/check-performance/create-df.py ${{ env.FOLDER }} ${{ inputs.workload }} \
+                ${{ inputs.script }} ${PRECISIONS[idx]} ${{ inputs.benchmark_type }} ${{ inputs.tolerance }} ${THRESHOLDS[idx]} \
+                ${RESULT} PASS ${STEP_URL} ${{ inputs.output_folder }}
             elif [[ "${{ inputs.benchmark_type }}" == "latency" ]] && (( $(echo "${RESULT} >= ${UPPER_LIMIT}" | bc -l) )); then
-                python ${GITHUB_WORKSPACE}/.github/actions/check-performance/create-df.py ${{ env.FOLDER }} ${{ inputs.workload }} ${{ inputs.script }} ${PRECISIONS[idx]} ${{ inputs.benchmark_type }} ${{ inputs.tolerance }} ${THRESHOLDS[idx]} ${RESULT} FAIL ${STEP_URL} ${{ inputs.output_folder }}
+              python ${GITHUB_WORKSPACE}/.github/actions/check-performance/create-df.py ${{ env.FOLDER }} ${{ inputs.workload }} \
+                ${{ inputs.script }} ${PRECISIONS[idx]} ${{ inputs.benchmark_type }} ${{ inputs.tolerance }} ${THRESHOLDS[idx]} \
+                ${RESULT} FAIL ${STEP_URL} ${{ inputs.output_folder }}
             elif [[ "${{ inputs.benchmark_type }}" == "throughput" || "${{ inputs.benchmark_type }}" == "accuracy" ]] && (( $(echo "${RESULT} > ${LOWER_LIMIT}" | bc -l) )); then
-                python ${GITHUB_WORKSPACE}/.github/actions/check-performance/create-df.py ${{ env.FOLDER }} ${{ inputs.workload }} ${{ inputs.script }} ${PRECISIONS[idx]} ${{ inputs.benchmark_type }} ${{ inputs.tolerance }} ${THRESHOLDS[idx]} ${RESULT} PASS ${STEP_URL} ${{ inputs.output_folder }}
+              python ${GITHUB_WORKSPACE}/.github/actions/check-performance/create-df.py ${{ env.FOLDER }} ${{ inputs.workload }} \
+                ${{ inputs.script }} ${PRECISIONS[idx]} ${{ inputs.benchmark_type }} ${{ inputs.tolerance }} ${THRESHOLDS[idx]} \
+                ${RESULT} PASS ${STEP_URL} ${{ inputs.output_folder }}
             elif [[ "${{ inputs.benchmark_type }}" == "throughput" || "${{ inputs.benchmark_type }}" == "accuracy" ]] && (( $(echo "${RESULT} <= ${LOWER_LIMIT}" | bc -l) )); then
-                python ${GITHUB_WORKSPACE}/.github/actions/check-performance/create-df.py ${{ env.FOLDER }} ${{ inputs.workload }} ${{ inputs.script }} ${PRECISIONS[idx]} ${{ inputs.benchmark_type }} ${{ inputs.tolerance }} ${THRESHOLDS[idx]} ${RESULT} FAIL ${STEP_URL} ${{ inputs.output_folder }}
+              python ${GITHUB_WORKSPACE}/.github/actions/check-performance/create-df.py ${{ env.FOLDER }} ${{ inputs.workload }} \
+                ${{ inputs.script }} ${PRECISIONS[idx]} ${{ inputs.benchmark_type }} ${{ inputs.tolerance }} ${THRESHOLDS[idx]} \
+                ${RESULT} FAIL ${STEP_URL} ${{ inputs.output_folder }}
             fi
           fi
         done

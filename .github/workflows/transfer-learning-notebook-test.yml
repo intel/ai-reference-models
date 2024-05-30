@@ -4,17 +4,17 @@ on:
 
 jobs:
   manual-tl-notebook-test:
-    runs-on: [ aia-mlops ]
+    runs-on: [aia-mlops]
     container:
       image: ${{ vars.REGISTRY }}/aiops/compose-dev
       options: --shm-size=8GB
+      #credentials:
+      #  username: ${{ secrets.REGISTRY_USER }}
+      #   password: ${{ secrets.REGISTRY_TOKEN }}
       env:
         http_proxy: ${{ secrets.HTTP_PROXY }}
         https_proxy: ${{ secrets.HTTPS_PROXY }}
         no_proxy: ${{ secrets.NO_PROXY }}
-      # credentials:
-      #   username: ${{ secrets.REGISTRY_USER }}
-      #   password: ${{ secrets.REGISTRY_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: Run Transfer Learning Notebook Tests

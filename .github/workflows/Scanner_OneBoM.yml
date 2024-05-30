@@ -31,8 +31,8 @@ on:
         required: true
         type: string
         default: k8-runners
-        
-env: 
+
+env:
   ONEBOM_SCRIPTS_DIR: ".github/utils/onebom"
   ONEBOM_SCRIPTS_REF: "develop"
   SRC_DIR: "${{ github.workspace }}/develop/.github/utils/onebom"
@@ -47,8 +47,8 @@ jobs:
     steps:
        - name: Build Pre-req Container
          if: ${{ inputs.build-prereq-container == 'true' }}
-         run: 
-          cd "${{ env.SRC_DIR }}" && 
+         run:
+          cd "${{ env.SRC_DIR }}" &&
           ./00-build-container.sh
 
   generate-onebom-artifacts:
@@ -65,12 +65,12 @@ jobs:
         run: env
       - name: Checkout Script Branch
         uses: actions/checkout@v4
-        with: 
+        with:
           ref: "${{ env.ONEBOM_SCRIPTS_REF }}"
           path: "${{ github.workspace }}/${{ env.ONEBOM_SCRIPTS_REF }}"
       - name: Checkout ${{ matrix.release-version}} Branch
         uses: actions/checkout@v4
-        with: 
+        with:
           ref: ${{ matrix.release-version }}
           path: ${{ github.workspace }}/${{ matrix.release-version }}
       - name: Copy OneBoM Scripts
@@ -80,36 +80,36 @@ jobs:
           cp -rv  "${{ env.SRC_DIR }}" "${{ env.DEST_DIR }}/../" &&
           ls -al "${{ env.DEST_DIR }}"
       - name: Generate List of Requirements.txt files
-        run: 
-          cd "${{ env.DEST_DIR }}" && 
+        run:
+          cd "${{ env.DEST_DIR }}" &&
           ./01-generate-requirements-file-list.sh
       - name: Generate the Collated List of Requirements
-        run: 
-          cd "${{ env.DEST_DIR }}" && 
+        run:
+          cd "${{ env.DEST_DIR }}" &&
           ./02-generate-collated-requirements-file.sh
       - name: Fire up SBOM Container
-        run: 
-          cd "${{ env.DEST_DIR }}" && 
+        run:
+          cd "${{ env.DEST_DIR }}" &&
           ./03-run-sbom-container.sh
       - name: Resolve and Freeze Requirements in the Container
-        run: 
-          cd "${{ env.DEST_DIR }}" && 
+        run:
+          cd "${{ env.DEST_DIR }}" &&
           ./04-exec-resolve-and-freeze-reqs.sh
       - name: Replace All Requirements with Lock Versions
-        run: 
-          cd "${{ env.DEST_DIR }}" && 
+        run:
+          cd "${{ env.DEST_DIR }}" &&
           ./05-exec-replace-requirements-with-locked-versions.sh
       - name: Generate Trivy Scans
-        run: 
-          cd "${{ env.DEST_DIR }}" && 
+        run:
+          cd "${{ env.DEST_DIR }}" &&
           ./06-exec-trivy-scans.sh
       - name: Terminate SBOM Container
-        run: 
-          cd "${{ env.DEST_DIR }}" && 
+        run:
+          cd "${{ env.DEST_DIR }}" &&
           ./07-terminate-sbom-container.sh
       - name: Package Tarballs
-        run: 
-          cd "${{ env.DEST_DIR }}" && 
+        run:
+          cd "${{ env.DEST_DIR }}" &&
           ./08-package-tarballs.sh
       - name: List directory contents
         run: ls -al ${{ matrix.release-version }}
@@ -123,7 +123,7 @@ jobs:
             ${{ matrix.release-version }}/SCR-trivy-scans.tgz
             ${{ matrix.release-version }}/trivy-file-list.txt
             ${{ matrix.release-version }}/${{ env.PINNED_REQS_FILE_LIST }}
-                  
+
   gather_artifacts:
     env:
       APPS_NEEDING_RELEASE: "apps-needing-release.txt"
@@ -137,11 +137,13 @@ jobs:
       run: |
         ls -R
     - name: Get Apps that need new releases
-      run: 
-        grep -Fx -f "${{ env.ARTIFACT_PREFIX }}-${{ inputs.previous-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" "${{ env.ARTIFACT_PREFIX }}-${{ inputs.current-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" > "${{ env.APPS_NEEDING_RELEASE }}"
+      run:
+        grep -Fx -f "${{ env.ARTIFACT_PREFIX }}-${{ inputs.previous-ref }}/${{ env.PINNED_REQS_FILE_LIST }}"
+          "${{ env.ARTIFACT_PREFIX }}-${{ inputs.current-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" > "${{ env.APPS_NEEDING_RELEASE }}"
     - name: Get Apps that need verions
-      run: 
-        grep -vFx -f "${{ env.ARTIFACT_PREFIX }}-${{ inputs.previous-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" "${{ env.ARTIFACT_PREFIX }}-${{ inputs.current-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" > "${{ env.APPS_NEEDING_VARIANT }}"
+      run:
+        grep -vFx -f "${{ env.ARTIFACT_PREFIX }}-${{ inputs.previous-ref }}/${{ env.PINNED_REQS_FILE_LIST }}"
+          "${{ env.ARTIFACT_PREFIX }}-${{ inputs.current-ref }}/${{ env.PINNED_REQS_FILE_LIST }}" > "${{ env.APPS_NEEDING_VARIANT }}"
     - name: Validate outputs
       run: |
         ls -al
@@ -152,6 +154,6 @@ jobs:
       with:
         name: ${{ env.ARTIFACT_PREFIX }}
         if-no-files-found: error
-        path: | 
+        path: |
           ${{ env.APPS_NEEDING_RELEASE }}
-          ${{ env.APPS_NEEDING_VARIANT }} 
+          ${{ env.APPS_NEEDING_VARIANT }}

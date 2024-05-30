@@ -10,7 +10,7 @@ concurrency:
 jobs:
   build:
     name: Super Linter
-    runs-on: [ k8-runners ]
+    runs-on: [k8-runners]
     permissions:
       contents: read
       packages: read
@@ -52,5 +52,4 @@ jobs:
           VALIDATE_PYTHON_RUFF: false
           #disabled till shell format implementation
           VALIDATE_SHELL_SHFMT: false
-          VALIDATE_YAML: false
           YAML_CONFIG_FILE: .yaml-lint.yml
