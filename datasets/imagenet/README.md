@@ -52,9 +52,9 @@ Tensorflow requires conversion of the dataset to [TFRecord] format.
    python3 -m venv tf_env
    source tf_env/bin/activate
    pip install --upgrade pip
-   pip install intel-tensorflow
-   pip install -I urllib3
-   pip install wget
+   pip install tensorflow==2.13.1
+   pip install -I urllib3==2.2.1
+   pip install wget==3.2
    ```
 
 1. Download and run the [imagenet_to_tfrecords.sh](imagenet_to_tfrecords.sh) script passing a path to the directory where ImageNet `*.tar` files were downloaded:
