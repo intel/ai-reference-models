@@ -4,7 +4,7 @@ fp32-training:
   shm-size: 10G
   env:
     PRECISION: fp32
-    NUM_BATCH: '10000' 
+    NUM_BATCH: '10000'
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
   volumes:
