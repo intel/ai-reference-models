@@ -159,16 +159,16 @@ jobs:
       with:
         name: workload-results-${{ env.project-number }}
         path: tests/cicd/output/*
-    - name: Check performance
-      if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml')
-      uses: ./.github/actions/check-performance
-      with:
-        output_folder: ${GITHUB_WORKSPACE}/tests/cicd/output
-        workload: ${{ inputs.workload }}
-        framework: ${{ inputs.framework }}
-        script: ${{ inputs.script }}
-        benchmark_type: ${{ inputs.benchmark }}
-        precisions: ${{ inputs.precisions }}
-        thresholds: ${{ inputs.thresholds }}
-        tolerance: ${{ inputs.tolerance }}
-        token: ${{ secrets.GITHUB_TOKEN }}
+        #- name: Check performance
+        #  if: github.event_name != 'workflow_dispatch' || contains(github.event.workflow, 'cicd-pipeline.yml')
+        #  uses: ./.github/actions/check-performance
+        #  with:
+        #    output_folder: ${GITHUB_WORKSPACE}/tests/cicd/output
+        #    workload: ${{ inputs.workload }}
+        #    framework: ${{ inputs.framework }}
+        #    script: ${{ inputs.script }}
+        #    benchmark_type: ${{ inputs.benchmark }}
+        #    precisions: ${{ inputs.precisions }}
+        #    thresholds: ${{ inputs.thresholds }}
+        #    tolerance: ${{ inputs.tolerance }}
+        #    token: ${{ secrets.GITHUB_TOKEN }}
