@@ -54,7 +54,7 @@ SSD-ResNet34 Throughput fp32:
   cmd: /bin/bash quickstart/multi_instance_batch_inference_1200.sh  --benchmark-only warmup-steps=100 steps=200
   env:
     DATASET_DIR: /tf_dataset/dataset/ssd-resnet34
-    KMP_AFFINITY: granularity=fine,verbose,compact,1,0 
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     OUTPUT_DIR: /output/tf-ssd-resnet34-inference/throughput_fp32
     BATCH_SIZE: '112'
     PRECISION: fp32

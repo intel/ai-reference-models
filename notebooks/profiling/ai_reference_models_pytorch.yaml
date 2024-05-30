@@ -4,13 +4,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: false 
+    cores: false
     expr: ""
 
   resnet50:
@@ -35,13 +35,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   googlenet:
@@ -57,13 +57,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   inception_v3:
@@ -80,13 +80,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   mnasnet0_5:
@@ -102,13 +102,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   mnasnet1_0:
@@ -124,13 +124,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   resnet101:
@@ -146,13 +146,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   resnet152:
@@ -168,13 +168,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   resnext-32x4d:
@@ -190,13 +190,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   resnext-32x16d:
@@ -225,13 +225,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   vgg11:
@@ -247,13 +247,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   vgg11_bn:
@@ -269,13 +269,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   wide_resnet50_2:
@@ -291,13 +291,13 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: true 
+    cores: true
     expr: "cores * 4"
 
   wide_resnet101_2:
@@ -313,15 +313,15 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: [
-    "./quickstart/language_modeling/pytorch/bert_base/inference/cpu/setup.sh", 
+    "./quickstart/language_modeling/pytorch/bert_base/inference/cpu/setup.sh",
   ]
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
 
   bert_base:
@@ -337,24 +337,24 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: "Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
-  additional-commands: 
-    [ 
+  additional-commands:
+    [
       "./quickstart/language_modeling/pytorch/bert_large/inference/cpu/setup.sh",
       "mkdir bert_squad_model",
-      "mkdir squad1.1", 
-      "wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -O squad1.1/dev-v1.1.json", 
+      "mkdir squad1.1",
+      "wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -O squad1.1/dev-v1.1.json",
       "wget https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-whole-word-masking-finetuned-squad-config.json -O bert_squad_model/config.json",
       "wget https://cdn.huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad-pytorch_model.bin -O bert_squad_model/pytorch_model.bin"
     ]
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
 
-  bert_large: 
+  bert_large:
     - precision: fp32
       script: ["run_multi_instance_realtime.sh", "run_multi_instance_throughput.sh", "run_accuracy.sh"]
 
@@ -367,17 +367,17 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: [
     "./quickstart/language_modeling/pytorch/roberta_base/inference/cpu/setup.sh",
   ]
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   roberta_base:
     - precision: fp32
       script: ["run_multi_instance_throughput.sh", "run_multi_instance_realtime.sh", "run_accuracy.sh"]
@@ -391,22 +391,22 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: [
-    "git clone https://huggingface.co/distilbert-base-uncased-finetuned-sst-2-english", 
+    "git clone https://huggingface.co/distilbert-base-uncased-finetuned-sst-2-english",
     "./quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/setup.sh",
   ]
-  exports: [ 
-    "FINETUNED_MODEL -i", 
-    "HF_DATASETS_ONLINE 0", 
-    "SEQUENCE_LENGTH 128", 
+  exports: [
+    "FINETUNED_MODEL -i",
+    "HF_DATASETS_ONLINE 0",
+    "SEQUENCE_LENGTH 128",
     "CORE_PER_INSTANCE 4"
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   distilbert_base:
     - precision: fp32
       script: ["run_multi_instance_throughput.sh", "run_multi_instance_realtime.sh", "run_accuracy.sh"]
@@ -429,19 +429,19 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: [
     "./quickstart/language_modeling/pytorch/gptj/inference/cpu/setup.sh",
   ]
-  exports: [ 
-    "INPUT_TOKEN 32", 
-    "OUTPUT_TOKEN 32" 
+  exports: [
+    "INPUT_TOKEN 32",
+    "OUTPUT_TOKEN 32"
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   gptj:
     - precision: fp32
       script: ["run_multi_instance_throughput.sh", "run_multi_instance_realtime.sh", "run_accuracy.sh"]
@@ -467,7 +467,7 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: [
     "./quickstart/language_modeling/pytorch/rnnt/inference/cpu/install_dependency_baremetal.sh",
@@ -475,13 +475,13 @@
     "./quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_model.sh",
     "./quickstart/language_modeling/pytorch/rnnt/inference/cpu/setup.sh",
   ]
-  exports: [ 
+  exports: [
     "CHECKPOINT_DIR -i"
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   rnnt:
     - precision: fp32
       script: ["inference_realtime.sh", "inference_throughput.sh", "accuracy.sh"]
@@ -501,15 +501,15 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: [
     "pip install Pillow pycocotools"
   ]
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
 
   faster_rcnn_resnet50_fpn:
@@ -525,15 +525,15 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
     "CHECKPOINT_DIR -i",
     "MODE jit"
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
   maskrcnn:
     - precision: fp32
@@ -554,15 +554,15 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: [
     "pip install Pillow pycocotools"
   ]
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
 
   maskrcnn_resnet50_fpn:
@@ -578,15 +578,15 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: [
     "pip install Pillow pycocotools"
   ]
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
 
   retinanet_resnet50_fpn:
@@ -602,16 +602,16 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
   additional-commands: []
-  exports: [ 
+  exports: [
     "CHECKPOINT_DIR -i",
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   ssd-resnet34:
     - precision: fp32
       script: ["inference_realtime.sh", "inference_throughput.sh", "accuracy.sh"]
@@ -637,17 +637,19 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
-  data-download: Download and extract the Criteo Terabyte Dataset dataset from https://labs.criteo.com/2013/12/download-terabyte-click-logs/, then follow the instructions (to provide publicly) in README"
+  data-location:
+  data-download:
+    Download and extract the Criteo Terabyte Dataset dataset from https://labs.criteo.com/2013/12/download-terabyte-click-logs/,
+    then follow the instructions (to provide publicly) in README"
   additional-commands: ["./quickstart/recommendation/pytorch/dlrm/inference/cpu/setup.sh"]
   exports: [
-    "DNNL_MAX_CPU_ISA AVX512_CORE_AMX", 
-    "WEIGHT_PATH -i", 
+    "DNNL_MAX_CPU_ISA AVX512_CORE_AMX",
+    "WEIGHT_PATH -i",
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   dlrm:
     - precision: fp32
       script: ["inference_performance.sh", "accuracy.sh"]
@@ -667,7 +669,7 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: "Follow the instructions on ... to download and install the dataset"
   additional-commands: [
     "./quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/setup.sh",
@@ -675,16 +677,16 @@
     ]
   exports: [
     "DNNL_MAX_CPU_ISA AVX512_CORE_AMX",
-    "RAW_DIR -i", 
-    "TEMP_DIR -i", 
+    "RAW_DIR -i",
+    "TEMP_DIR -i",
     "PREPROCESSED_DIR -i",
     "MULTI_HOT_DIR -i",
     "WEIGHT_DIR -i"
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   torchrec_dlrm:
     - precision: fp32
       script: ["inference_performance.sh", "accuracy.sh"]
@@ -707,18 +709,18 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: "Follow the instructions on ... to download and install the dataset"
   additional-commands: [
     "./quickstart/recommendation/pytorch/memrec_dlrm/inference/cpu/setup.sh",
     ]
   exports: [
-    "WEIGHT_PATH -i", 
+    "WEIGHT_PATH -i",
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   memrec_dlrm:
     - precision: fp32
       script: ["inference_performance.sh", "accuracy.sh"]
@@ -729,17 +731,17 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: "Follow the instructions on ... to download and install the dataset"
   additional-commands: [
     "./quickstart/diffusion/pytorch/stable_diffusion/inference/cpu/setup.sh",
     ]
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   stable_diffusion:
     - precision: fp32
       script: ["inference_throughput.sh", "inference_realtime.sh", "accuracy.sh"]
@@ -765,17 +767,17 @@
   mode: inference
   framework: pytorch
   device: cpu
-  data-location: 
+  data-location:
   data-download: "Follow the instructions on ... to download and install the dataset"
   additional-commands: [
     "./quickstart/diffusion/pytorch/LCM/inference/cpu/setup.sh",
     ]
-  exports: [ 
+  exports: [
   ]
   set-batch-size:
-    cores: False 
+    cores: false
     expr: ""
-  
+
   LCM:
     - precision: fp32
       script: ["inference_throughput.sh", "inference_realtime.sh", "accuracy.sh"]

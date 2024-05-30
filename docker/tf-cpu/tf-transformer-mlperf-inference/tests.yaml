@@ -55,7 +55,7 @@ Transformer Throughput bf16:
   cmd: /bin/bash quickstart/inference_throughput.sh
   env:
     DATASET_DIR: /tf_dataset/pre-trained-models/transformer_mlperf/data
-    KMP_AFFINITY=granularity: fine,verbose,compact,1,0 
+    KMP_AFFINITY=granularity: fine,verbose,compact,1,0
     OUTPUT_DIR: /output/tf-transformer-mlperf-inference/throughput_bf16
     PRECISION: bfloat16
     BATCH_SIZE: '448'

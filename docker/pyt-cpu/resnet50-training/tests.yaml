@@ -42,4 +42,3 @@ bf32-training:
   volumes:
     - src: /pytorch/Imagenet_FullData/
       dst: /pytorch/Imagenet_FullData/
-

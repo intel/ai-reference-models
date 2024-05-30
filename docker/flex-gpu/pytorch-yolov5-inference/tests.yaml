@@ -17,13 +17,13 @@ bs064-s1-fp16-yolov5m:
     OUTPUT_DIR: '/tmp'
     http_proxy: '$http_proxy'
     https_proxy: '$https_proxy'
-    PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: 'python'  
+    PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: 'python'
   volumes:
     - src: /tmp
       dst: /tmp
 bs064-s4-fp16-yolov5m:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-flex-gpu-yolov5-inference
-  cmd: bash run_model.sh 
+  cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   cap_add: SYS_NICE

@@ -5,7 +5,7 @@ bf16-distributed-training:
   device: /dev/dri
   env:
     PRECISION: BF16
-    BATCH_SIZE: '65536' 
+    BATCH_SIZE: '65536'
     PLATFORM: Max
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
@@ -24,7 +24,7 @@ fp32-distributed-training:
   device: /dev/dri
   env:
     PRECISION: FP32
-    BATCH_SIZE: '65536' 
+    BATCH_SIZE: '65536'
     PLATFORM: Max
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
@@ -43,7 +43,7 @@ tf32-distributed-training:
   device: /dev/dri
   env:
     PRECISION: TF32
-    BATCH_SIZE: '65536' 
+    BATCH_SIZE: '65536'
     PLATFORM: Max
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'

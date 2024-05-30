@@ -24,7 +24,7 @@ BERT-Large Weightsharing Inference fp32:
     TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
     OMP_NUM_THREADS: '4'
     CORES_PER_INSTANCE: '4'
-    KMP_AFFINITY: granularity=fine,verbose,compact,1,0 
+    KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/weightsharing_fp32
     BATCH_SIZE: '1'

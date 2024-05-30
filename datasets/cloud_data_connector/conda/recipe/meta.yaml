@@ -1,9 +1,6 @@
-{% set name = "cloud-data-connector" %}
-{% set version = "1.0.2" %}
-
 package:
-  name: {{ name|lower }}
-  version: {{ version }}
+  name: cloud-data-connector
+  version: "1.0.3"
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/cloud_data_connector-{{ version }}.tar.gz
@@ -44,7 +41,9 @@ test:
     - cloud_data_connector
 
 about:
-  summary: 'Data connector is a tool to connect to AzureML, Azure blob, GCP storage, GCP Big Query and AWS storage S3. The goal is provide all cloud managers in one place and provide documentation for an easy integration.'
+  summary:
+    'Data connector is a tool to connect to AzureML, Azure blob, GCP storage, GCP Big Query and AWS storage S3.
+    The goal is provide all cloud managers in one place and provide documentation for an easy integration.'
   about_license_url: https://www.apache.org/licenses/LICENSE-2.0.html
 
 extra:

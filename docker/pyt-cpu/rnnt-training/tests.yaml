@@ -2,7 +2,7 @@ fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-training
   cmd: quickstart/training.sh fp32
   ipc: host
-  env: 
+  env:
     PRECISION: fp32
     CHECKPOINT_DIR: /pytorch/rnnt_model
     OUTPUT_DIR: /tmp
@@ -18,7 +18,7 @@ bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-training
   cmd: quickstart/training.sh bf16
   ipc: host
-  env: 
+  env:
     PRECISION: bf16
     CHECKPOINT_DIR: /pytorch/rnnt_model
     OUTPUT_DIR: /tmp
@@ -34,7 +34,7 @@ bf32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-training
   cmd: quickstart/training.sh bf32
   ipc: host
-  env: 
+  env:
     PRECISION: bf32
     CHECKPOINT_DIR: /pytorch/rnnt_model
     OUTPUT_DIR: /tmp

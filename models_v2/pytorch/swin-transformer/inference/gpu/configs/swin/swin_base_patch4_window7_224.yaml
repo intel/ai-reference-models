@@ -4,8 +4,8 @@ MODEL:
   DROP_PATH_RATE: 0.5
   SWIN:
     EMBED_DIM: 128
-    DEPTHS: [ 2, 2, 18, 2 ]
-    NUM_HEADS: [ 4, 8, 16, 32 ]
+    DEPTHS: [2, 2, 18, 2]
+    NUM_HEADS: [4, 8, 16, 32]
     WINDOW_SIZE: 7
 TEST:
   SEQUENTIAL: 'True'
