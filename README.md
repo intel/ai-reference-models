@@ -136,6 +136,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [RetinaNet ResNet-50 FPN](https://arxiv.org/abs/1708.02002)   | PyTorch | Inference  | [FP32 BFloat16](/quickstart/object_detection/pytorch/retinanet_resnet50_fpn/inference/cpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/retinanet_resnet50_fpn/inference/cpu/README.md#datasets) |
 | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | PyTorch | Inference  | [FP32 Int8 BFloat16 BFloat32](/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/README.md#datasets) |
 | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | PyTorch | Training   | [FP32 BFloat16 BFloat32](/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/README.md#datasets) |
+| [Yolo V7](https://arxiv.org/abs/2207.02696)              | PyTorch | Inference   | [Int8 FP32 FP16 BFloat16 BFloat32](/quickstart/object_detection/pytorch/yolov7/inference/cpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/yolov7/inference/cpu/README.md#datasets) |
 
 ### Recommendation
 
