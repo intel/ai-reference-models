@@ -77,7 +77,7 @@ fi
 
 FINETUNED_MODEL=${FINETUNED_MODEL:-"'EleutherAI/gpt-j-6b'"}
 
-EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/gptj/inference/cpu/run_llm.py"}
+EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/models/language_modeling/pytorch/gptj/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/*accuracy*
 

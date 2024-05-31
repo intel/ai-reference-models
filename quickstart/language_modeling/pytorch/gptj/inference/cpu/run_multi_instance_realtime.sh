@@ -82,7 +82,7 @@ SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"'EleutherAI/gpt-j-6b'"}
 
-EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/gptj/inference/cpu/run_llm.py"}
+EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/models/language_modeling/pytorch/gptj/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/latency_log*
 
