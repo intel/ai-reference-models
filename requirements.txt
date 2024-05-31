@@ -1,7 +1,9 @@
 conditional
 flake8==3.7.5
 mock
+pytest==6.0.2; python_version<'3.10'
+pytest>=6.2.5; python_version>='3.10'
 pytest-cov
 pytest-xdist
-pytest<=6.0.2
-tox
+tox==3.28.0
+virtualenv

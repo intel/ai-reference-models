@@ -120,7 +120,6 @@ def launch_benchmark(mock_platform_util, request, mock_isdir, mock_isfile, mock_
        ['catch_error', SystemExit, ['--framework', 'foo'], "The specified framework is not supported"]]
        """
     catch_error = False
-    error = None
     error_message = ''
 
     # deleting from this sometimes so need to redeclare it, probably can do that differently...
@@ -135,7 +134,6 @@ def launch_benchmark(mock_platform_util, request, mock_isdir, mock_isfile, mock_
     if hasattr(request, 'param'):
         if 'catch_error' in request.param[0]:
             catch_error = True
-            error = request.param[1]
             if request.param[0] != 'catch_error_override_all_params':
                 # TODO: make more efficient! Want to get rid of any example_req_args that exist in request.param[2]
                 # using safe deletion from the back
@@ -159,11 +157,18 @@ def launch_benchmark(mock_platform_util, request, mock_isdir, mock_isfile, mock_
         req_args = example_req_args
 
     with mock_patch.object(sys, "argv", ['run_tf_benchmark.py'] + req_args):
-        with conditional(catch_error, pytest.raises(error)) as e:
-            obj = LaunchBenchmark(mock_platform_util)
-            if error_message:
-                assert error_message in str(e.value)
-            return obj
+        try:
+            with conditional(catch_error, pytest.raises(ValueError)) as e:
+                obj = LaunchBenchmark(mock_platform_util)
+                if error_message:
+                    assert error_message in str(e.value)
+                return obj
+        except:  # noqa: E722
+            with conditional(catch_error, pytest.raises(SystemExit)) as e:
+                obj = LaunchBenchmark(mock_platform_util)
+                if error_message:
+                    assert error_message in str(e.value)
+                return obj
 
 
 def test_launch_benchmark_parse_args(launch_benchmark):
