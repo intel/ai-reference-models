@@ -26,6 +26,7 @@ input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
+MULTI_NODE=${MULTI_NODE:-False}
 for i in "${!input_envs[@]}"; do
   var_name=$i
   env_param=${input_envs[$i]}
@@ -41,14 +42,43 @@ if [[ "${PLATFORM}" == "Max" ]]; then
     PRECISION=${PRECISION:-BF16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-20}
 elif [[ "${PLATFORM}" == "Arc" ]]; then
-    if [[ "${MULTI_TILE}" == "True" ]]; then
-        echo "Arc not support multitile"
+    if [[ "${MULTI_TILE}" == "True" || "${MULTI_NODE}" == "True" ]]; then
+        echo "Arc not support multinode/multitile"
         exit 1
     fi
     BATCH_SIZE=${BATCH_SIZE:-256}
     PRECISION=${PRECISION:-BF16}
     NUM_ITERATIONS=${NUM_ITERATIONS:-20}
 
+fi
+
+if [[ "${MULTI_NODE}" == "True" ]]; then
+    MULTI_TILE=True
+    declare -A input_envs
+    multi_node_envs[HOSTFILE]=${HOSTFILE}
+    multi_node_envs[MASTER_ADDR]=${MASTER_ADDR}
+    multi_node_envs[SSH_PORT]=${SSH_PORT}
+    multi_node_envs[NUM_PROCESS]=${NUM_PROCESS:-4}
+    multi_node_envs[NUM_PROCESS_PER_NODE]=${NUM_PROCESS_PER_NODE:-2}
+
+    for i in "${multi_node_envs[@]}"; do
+        var_name=$i
+        env_param=${multi_node_envs[$i]}
+
+    if [[ -z $env_param ]]; then
+        echo "The required environment variable $var_name is not set" >&2
+        exit 1
+    fi
+    done
+    if [[ ! -f "${HOSTFILE}" ]]; then
+        echo "The HOSTFILE '${HOSTFILE}' does not exist"
+        exit 1
+    fi
+
+    if [[ "${NUM_PROCCESS_PER_NODE}" -gt ${NUM_PROCESS} ]];then
+        echo "NUM_PROCESS_PER_NODE cannot be greater than NUM_PROCESS"
+        exit 1
+    fi
 fi
 
 if [[ "${PRECISION}" == "BF16" ]]; then
@@ -60,6 +90,27 @@ elif [[ "${PRECISION}" == "TF32" ]]; then
 else
     echo -e "Invalid input! Only BF16 FP32 TF32 are supported."
     exit 1
+fi
+
+if [[ "${MULTI_NODE}" == "True" ]]; then
+    master_ip_flag="--dist-url ${MASTER_ADDR}"
+    port_flag="--dist-port ${SSH_PORT}"
+    num_process=${NUM_PROCESS}
+    ppn=${NUM_PROCESS_PER_NODE}
+    hostfile="-f ${HOSTFILE}"
+    export FI_TCP_IFACE=${FI_TCP_IFACE:-eno0}
+    export I_MPI_HYDRA_IFACE=${FI_TCP_IFACE}
+    export OMPI_ALLOW_RUN_AS_ROOT=1
+    export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+    export OMPI_MCA_tl_tcp_if_exclude="lo,docker0"
+    export CCL_ATL_TRANSPORT=ofi
+    export FI_PROVIDER=TCP
+else 
+    master_ip_flag=""
+    port_flag=""
+    num_process=2
+    ppn=2
+    hostfile=""
 fi
 
 echo "resnet50 ${PRECISION} training MultiTile=${MULTI_TILE} BS=${BATCH_SIZE} Iter=${NUM_ITERATIONS}"
@@ -101,7 +152,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
     acc_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Accuracy | awk -F ' ' '{print $2}')
 else
     rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_raw.log
-    mpiexec -np 2 -ppn 2 --prepend-rank python -u main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log 
+    mpiexec -np ${num_process} -ppn ${ppn} --prepend-rank ${hostfile} python -u main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 $master_ip_flag $port_flag 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log 
     python common/parse_result.py -m $modelname --ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
