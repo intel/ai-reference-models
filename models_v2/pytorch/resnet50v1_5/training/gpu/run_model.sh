@@ -152,7 +152,11 @@ if [[ ${MULTI_TILE} == "False" ]]; then
     acc_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Accuracy | awk -F ' ' '{print $2}')
 else
     rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_raw.log
-    mpiexec -np ${num_process} -ppn ${ppn} --prepend-rank ${hostfile} python -u main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 $master_ip_flag $port_flag 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log 
+    if [[ ${CONTAINER} == "Singularity" ]]; then
+        mpiexec -np ${NUM_PROCESS} -ppn ${NUM_PROCESS_PER_NODE} --hostfile ${HOSTFILE} --prepend-rank --map-by node python -u /workspace/pytorch-max-series-resnet50v1-5-training/models/main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 $master_ip_flag $port_flag
+    else
+        mpiexec -np ${num_process} -ppn ${ppn} --prepend-rank ${hostfile} python -u main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 $master_ip_flag $port_flag 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log 
+    fi
     python common/parse_result.py -m $modelname --ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
     throughput_unit=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $4}')

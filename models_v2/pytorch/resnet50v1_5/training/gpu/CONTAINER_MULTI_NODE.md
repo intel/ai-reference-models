@@ -47,7 +47,9 @@ Refer to instructions provided [here](https://github.com/intel/ai-containers/tre
 
 Create a `hostfile.txt` that needs to contain the hostnames/ IP addresses of the laucher and worker node(s).
 
-### Docker pull command:
+Here we provide two options for running the training workloads on multi-node, docker container and singularity container.
+
+### Running with Docker container:
 ```bash
 docker pull intel/image-recognition:pytorch-max-gpu-resnet50v1-5-multi-node-training
 ```
@@ -138,6 +140,43 @@ docker run --rm \
   $IMAGE_NAME \
   bash -c "./run_model.sh"
   ```
+
+### Running with Singularity container:
+The ResNet50 v1.5 training container includes scripts, model and libraries needed to run BF16,FP32 and TF32 training. To run the `run_model.sh` quickstart script using this container, you'll need to provide volume mounts for the ImageNet dataset. You will need to provide an output directory where log files will be written. 
+
+```bash
+git clone https://github.com/IntelAI/models.git
+cd models/models_v2/pytorch/resnet50v1_5/training/gpu
+```
+
+On the Launcher Node, set up necessary environemtal variables:
+```bash
+#Optional
+export PRECISION=<provide either BF16,FP32 or TF32, otherwise (default: BF16)>
+export BATCH_SIZE=<provide batch size, otherwise (default: 256)>
+export NUM_ITERATIONS=<provide number of iterations,otherwise (default: 20)>
+export NUM_PROCESS=<provide number of processes,otherwise (default: 4)>
+export NUM_PROCESS_PER_NODE=<provide number of processes per node,otherwise (default: 2)>
+export FI_TCP_IFACE=<provide TCP interface,otherwise (default:ib0)> # Doing `ip a` can reveal the relevant interface; default ib0 is for TCP with IP-over-IB
+
+#Required
+export CONTAINER=Singularity
+export DATASET_DIR=<path to ImageNet dataset>
+export OUTPUT_DIR=<path to output logs directory>
+export PLATFORM=Max
+export MULTI_NODE=True
+export MULTI_TILE=True
+export MASTER_ADDR=<provide the IP address of the launcher node>
+export SSH_PORT=<provide the port number used during SSH configuration,otherwise (default: 29500)>
+export HOSTFILE=<path to hostfile.txt file>
+
+IMAGE_NAME=intel_image-recognition_pytorch-max-gpu-resnet50v1-5-training.sif
+```
+
+On the Launcher Node, launch the workload:
+```bash
+FI_TCP_IFACE=${FI_TCP_IFACE} singularity exec --bind ${DATASET_DIR}:${DATASET_DIR} --bind ${OUTPUT_DIR}:${OUTPUT_DIR} --bind ${HOSTFILE}:${HOSTFILE} /scratch/helpdesk/u.yq116016/images/pytorch-max-series-multi-node-multi-card-training.sif bash -c "bash run_model.sh"
+```
 ## Documentation and Sources
 
 [GitHub* Repository](https://github.com/IntelAI/models/tree/master/docker/max-gpu)
