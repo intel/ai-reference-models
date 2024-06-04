@@ -139,8 +139,7 @@ class Wide_and_Deep:
             if self.args.batch_size == 1:
                 latency = (E2Eduration / num_records) * 1000
                 print(f'Latency is: {latency:.4f} ms')
-            else:
-                print('Throughput is:', num_records / evaluate_duration)
+            print('Throughput is:', num_records / evaluate_duration)
         else:
             print("Accuracy ")
             loaded_model = load_model(os.path.join(self.args.pretrained_model, 'wide_and_deep.h5'))
