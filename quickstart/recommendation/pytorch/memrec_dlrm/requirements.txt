@@ -1,6 +1,6 @@
 future==0.18.3
 numpy==1.26.0
-onnx==1.15.0  #Upgraded to avoid vulnerability
+onnx==1.16.0  #Upgraded to avoid vulnerability
 pydot==1.4.2
 torch==2.0.1
 torchviz==0.0.2
