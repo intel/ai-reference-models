@@ -83,8 +83,11 @@ fi
 
 LOG_0="${LOG}/throughput.log"
 
-
-export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_jemalloc"
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_jemalloc"
+else
+    export launcher_cmd="-m torch.backends.xeon.run_cpu --throughput-mode --enable_jemalloc"
+fi
 if [[ $PLOTMEM == "true" ]]; then
 pip install memory_profiler matplotlib
 export mrun_cmd="mprof run --python -o ${MEMLOG}"
