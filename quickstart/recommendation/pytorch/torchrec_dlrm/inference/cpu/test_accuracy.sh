@@ -70,10 +70,16 @@ fi
 
 LOG_0="${LOG}/acc.log"
 export BATCH_SIZE=65536
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_jemalloc"
+else
+    export launcher_cmd="-m torch.backends.xeon.run_cpu --throughput-mode --enable_jemalloc"
+fi
 
 if [[ $PLOTMEM == "true" ]]; then
 pip install memory_profiler
 export mrun_cmd="mprof run --python -o ${MEMLOG}"
+unset launcher_cmd
 fi
 
 COMMON_ARGS=" --embedding_dim 128 \
