@@ -28,35 +28,32 @@ echo "### running with intel extension for pytorch"
 if [[ "$1" == "fp32" ]]
 then
     precision="fp32"
-    ARGS="$ARGS --dtype 'fp32' "
+    ARGS="$ARGS --dtype fp32 "
     echo "### running fp32 mode"
 elif [[ "$1" == "bf16" ]]
 then
     precision="bf16"
-    ARGS="$ARGS --dtype 'bf16' "
+    ARGS="$ARGS --dtype bf16 "
     echo "### running bf16 mode"
-elif [[ "$1" == "fp32" ]]
-then
-    echo "### running fp32 mode"
 elif [[ "$1" == "fp16" ]]
 then
     precision=fp16
-    ARGS="$ARGS --dtype 'fp16'"
+    ARGS="$ARGS --dtype fp16"
     echo "### running fp16 mode"
 elif [[ "$1" == "bf32" ]]
 then
     precision="bf32"
-    ARGS="$ARGS --dtype 'bf32'"
+    ARGS="$ARGS --dtype bf32"
     echo "### running bf32 mode"
 elif [[ "$1" == "int8-fp32" ]]
 then
     precision="int8-fp32"
-    ARGS="$ARGS --dtype 'int8' --int8-qconfig   '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype int8 --int8-qconfig   ${OUTPUT_DIR}/qconfig.json"
     echo "### running int8-fp32 mode"
 elif [[ "$1" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype int8 --int8_bf16_mixed --int8-qconfig ${OUTPUT_DIR}/qconfig.json"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
@@ -70,7 +67,7 @@ if [ -z "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
+FINETUNED_MODEL=${FINETUNED_MODEL:-"meta-llama/Llama-2-7b-hf"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/models/language_modeling/pytorch/llama/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
@@ -92,7 +89,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
 else
     echo "### running with torch.compile inductor backend"
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./LLaMa_${precision}_accuracy_${mode}" \
+    python -m torch.backends.xeon.run_cpu --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \
         --model-name-or-path   ${FINETUNED_MODEL}
