@@ -148,4 +148,5 @@ END   {
         sum = sum / i * INSTANCES_PER_SOCKET;
         printf("%.3f", sum);
 }')
+echo "--------------------------------Performance Summary per Socket--------------------------------"
 echo ""stable_diffusion";"latency";$1;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

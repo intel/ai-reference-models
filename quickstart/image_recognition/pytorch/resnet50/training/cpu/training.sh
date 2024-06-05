@@ -145,5 +145,5 @@ END   {
     sum = sum / i;
     printf("%.3f", sum);
 }')
-
+echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
 echo "resnet50;"training throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
