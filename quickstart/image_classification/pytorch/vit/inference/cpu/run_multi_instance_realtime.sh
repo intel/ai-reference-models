@@ -144,5 +144,6 @@ END   {
 }')
 
 echo $INSTANCES_PER_SOCKET
+echo "--------------------------------Performance Summary per Socket--------------------------------"
 echo ""vit-base";"latency";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
 echo ""vit-base";"p99_latency";${precision};${BATCH_SIZE};${p99_latency}" | tee -a ${WORK_SPACE}/summary.log

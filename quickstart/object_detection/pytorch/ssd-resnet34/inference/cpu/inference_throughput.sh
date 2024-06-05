@@ -169,4 +169,5 @@ END   {
 sum = sum / i;
         printf("%.3f", sum);
 }')
+echo "--------------------------------Performance Summary per Numa Node--------------------------------"
 echo ""SSD-RN34";"throughput";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

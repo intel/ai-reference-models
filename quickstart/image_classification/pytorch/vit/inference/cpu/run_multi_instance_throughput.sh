@@ -115,4 +115,5 @@ END   {
 sum = sum / i;
 printf("%.3f", sum);
 }')
+echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
 echo ""vit-base";"throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log

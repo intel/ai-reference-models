@@ -132,4 +132,5 @@ END   {
         sum = sum / i;
         printf("%.3f", sum);
 }')
+echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
 echo ""LCM";"throughput";$1;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

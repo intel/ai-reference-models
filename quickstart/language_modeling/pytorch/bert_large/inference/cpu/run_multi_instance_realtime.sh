@@ -111,5 +111,6 @@ END   {
     printf("%.3f ms", sum);
 }')
 echo $INSTANCES_PER_SOCKET
+echo "--------------------------------Performance Summary per Socket--------------------------------"
 echo ""BERT";"latency";${precision}; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 echo ""BERT";"p99_latency";${precision}; ${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log
