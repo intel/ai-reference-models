@@ -22,7 +22,9 @@ ARGS=""
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-ARGS="$ARGS --benchmark --perf_begin_iter 10 --perf_run_iters 100 "
+num_warmup=${num_warmup:-"10"}
+num_iter=${num_iter:-"100"}
+ARGS="$ARGS --benchmark --perf_begin_iter ${num_warmup} --perf_run_iters ${num_iter}"
 
 precision="fp32"
 if [[ "$1" == "bf16" ]]
@@ -76,6 +78,13 @@ NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
 CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
 ARGS="$ARGS --use_share_weight --total_cores ${CORES_PER_NUMA} --cores_per_instance ${OMP_NUM_THREADS}"
 FINETUNED_MODEL=${FINETUNED_MODEL:-"google/vit-base-patch16-224"}
+DATASET_DIR=${DATASET_DIR:-"None"}
+DATASET_ARGS=""
+if [[ "None" == ${DATASET_DIR} ]];then
+    DATASET_ARGS="--dataset_name imagenet-1k"
+else
+    DATASET_ARGS="--train_dir ${DATASET_DIR}/train --validation_dir ${DATASET_DIR}/val"
+fi
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/image-classification/run_image_classification.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
@@ -94,20 +103,20 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         --do_eval \
         --output_dir ./tmp \
         --per_device_eval_batch_size $BATCH_SIZE \
-        --dataset_name imagenet-1k \
+        ${DATASET_ARGS} \
         --remove_unused_columns False
 else
     echo "Running inference with torch.compile inductor backend."
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+    python -m torch.backends.xeon.run_cpu --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \
         --model_name_or_path   ${FINETUNED_MODEL} \
         --do_eval \
         --output_dir ./tmp \
         --per_device_eval_batch_size $BATCH_SIZE \
-        --dataset_name imagenet-1k \
-        --remove_unused_columns False
+        ${DATASET_ARGS} \
+        --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/latency_log_${path}_${precision}_${mode}.log
 fi
 
 CORES_PER_INSTANCE=${OMP_NUM_THREADS}

@@ -64,6 +64,13 @@ fi
 CORES=`lscpu | grep Core | awk '{print $4}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"google/vit-base-patch16-224"}
+DATASET_DIR=${DATASET_DIR:-"None"}
+DATASET_ARGS=""
+if [[ "None" == ${DATASET_DIR} ]];then
+    DATASET_ARGS="--dataset_name imagenet-1k"
+else
+    DATASET_ARGS="--train_dir ${DATASET_DIR}/train --validation_dir ${DATASET_DIR}/val"
+fi
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/image-classification/run_image_classification.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
@@ -83,20 +90,20 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         --do_eval \
         --output_dir ./tmp \
         --per_device_eval_batch_size $BATCH_SIZE \
-        --dataset_name imagenet-1k \
+        ${DATASET_ARGS} \
         --remove_unused_columns False
 else
     echo "Running inference with torch.compile inductor backend."
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
+    python -m torch.backends.xeon.run_cpu --ninstances 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \
         --model_name_or_path   ${FINETUNED_MODEL} \
         --do_eval \
         --output_dir ./tmp \
         --per_device_eval_batch_size $BATCH_SIZE \
-        --dataset_name imagenet-1k \
-        --remove_unused_columns False
+        ${DATASET_ARGS} \
+        --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/accuracy_log_${path}_${precision}_${mode}.log
 fi
 
 accuracy=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_accuracy" |sed -e 's/.*= //;s/[^0-9.]//g')
