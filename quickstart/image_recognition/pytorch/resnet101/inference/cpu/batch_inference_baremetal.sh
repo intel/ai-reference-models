@@ -91,7 +91,7 @@ python ${MULTI_INSTANCE_ARGS} \
   $ARGS
 
 wait
-
+echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
 if [[ ${PLATFORM} == "linux" ]]; then
   throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/resnet101_throughput_log_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
   BEGIN {

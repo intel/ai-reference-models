@@ -147,7 +147,7 @@ END   {
     sum = sum / i;
     printf("%.3f ms", sum);
 }')
-
+echo "--------------------------------Performance Summary per Socket--------------------------------"
 echo $INSTANCES_PER_SOCKET
 echo ""distilbert-base";"latency";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
 echo ""distilbert-base";"p99_latency";${precision};${BATCH_SIZE};${p99_latency}" | tee -a ${WORK_SPACE}/summary.log
