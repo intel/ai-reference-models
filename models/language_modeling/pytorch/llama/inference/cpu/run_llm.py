@@ -716,12 +716,12 @@ def benchmark_evaluate(prompt):
     print("inference-latency: %.3f sec." % latency)
     if args.token_latency:
         first_latency = np.mean([x[0] for x in total_list])
-        average_2n = list(chain(*[x[1:] for x in total_list]))
-        average_2n.sort()
-        average_2n_latency = np.mean(average_2n)
-        p90_latency = average_2n[int(len(average_2n) * 0.9)]
+        next_latency_list = list(chain(*[x[1:] for x in total_list]))
+        next_latency_list.sort()
+        average_next_latency = np.mean(next_latency_list)
+        p90_latency = np.percentile(next_latency_list, 90)
         print("first-token-latency: %.3f sec." % first_latency)
-        print("rest-token-latency: %.3f sec." % average_2n_latency)
+        print("rest-token-latency: %.3f sec." % average_next_latency)
         print("P90-rest-token-latency: %.3f sec." % p90_latency)
 
 
