@@ -19,9 +19,9 @@
 ARGS=${ARGS:-""}
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
-
+NUM_WARMUP=${NUM_WARMUP:-10}
 NUM_ITER=${NUM_ITER:-20}
-ARGS="$ARGS  --benchmark --num-warmup 10 --num-iter $NUM_ITER --token-latency"
+ARGS="$ARGS  --benchmark --num-warmup ${NUM_WARMUP} --num-iter $NUM_ITER --token-latency"
 echo "### running with intel extension for pytorch"
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
@@ -31,35 +31,32 @@ fi
 if [[ "$1" == "fp32" ]]
 then
     precision="fp32"
-    ARGS="$ARGS --dtype 'fp32' "
+    ARGS="$ARGS --dtype fp32 "
     echo "### running fp32 mode"
 elif [[ "$1" == "bf16" ]]
 then
     precision="bf16"
-    ARGS="$ARGS --dtype 'bf16' "
+    ARGS="$ARGS --dtype bf16 "
     echo "### running bf16 mode"
-elif [[ "$1" == "fp32" ]]
-then
-    echo "### running fp32 mode"
 elif [[ "$1" == "fp16" ]]
 then
     precision=fp16
-    ARGS="$ARGS --dtype 'fp16'"
+    ARGS="$ARGS --dtype fp16"
     echo "### running fp16 mode"
 elif [[ "$1" == "bf32" ]]
 then
     precision="bf32"
-    ARGS="$ARGS --dtype 'bf32'"
+    ARGS="$ARGS --dtype bf32"
     echo "### running bf32 mode"
 elif [[ "$1" == "int8-fp32" ]]
 then
     precision="int8-fp32"
-    ARGS="$ARGS --dtype 'int8' --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype int8 --int8-qconfig ${OUTPUT_DIR}/qconfig.json"
     echo "### running int8-fp32 mode"
 elif [[ "$1" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed  --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype int8 --int8_bf16_mixed  --int8-qconfig ${OUTPUT_DIR}/qconfig.json"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
@@ -79,7 +76,7 @@ fi
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
-FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
+FINETUNED_MODEL=${FINETUNED_MODEL:-"meta-llama/Llama-2-7b-hf"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/models/language_modeling/pytorch/llama/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
@@ -104,7 +101,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
 else
     echo "### running with torch.compile inductor backend"
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${precision}_${mode}" \
+    python -m torch.backends.xeon.run_cpu --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \
         -m ${FINETUNED_MODEL} \
