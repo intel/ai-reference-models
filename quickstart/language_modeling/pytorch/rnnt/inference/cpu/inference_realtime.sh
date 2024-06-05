@@ -118,5 +118,6 @@ END   {
     sum = sum / i;
     printf("%.3f ms", sum);
 }')
+echo "--------------------------------Performance Summary per Socket--------------------------------"
 echo ""RNN-T";"latency";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 echo ""RNN-T";"p99_latency";$PRECISION; ${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log

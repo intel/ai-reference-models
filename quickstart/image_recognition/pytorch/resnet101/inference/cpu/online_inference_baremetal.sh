@@ -107,5 +107,6 @@ if [[ ${PLATFORM} == "linux" ]]; then
           sum = sum / i * INSTANCES_PER_SOCKET;
           printf("%.2f", sum);
   }')
+  echo "--------------------------------Performance Summary per Socket--------------------------------"
   echo "resnet101;"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 fi
