@@ -19,7 +19,6 @@ pytorch-max-gpu-resnet50v1-5-training:
       Tile: 1
       DATASET_DIR: /pytorch/imagenet
       OUTPUT_DIR: /output/pytorch-max-gpu-resnet50v1-5-training/ddp
-      
       DOCKER_ARGS: --ipc=host --privileged --shm-size=10G --device=/dev/dri
     volumes:
       OUTPUT_DIR: /output/pytorch-max-gpu-resnet50v1-5-training/ddp

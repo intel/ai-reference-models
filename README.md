@@ -4,7 +4,7 @@
        src="https://scan.coverity.com/projects/30278/badge.svg"/>
 </a>
 
-### This repository will be deprecated upon the publication of v3.2.0 and will no longer be maintained or published. 
+### This repository will be deprecated upon the publication of v3.2.0 and will no longer be maintained or published.
 Internal customers may continue to use this repository for CI and regression testing, but no code will be published from it. Instead, all pull requests and contributions intended to help external customers replicate Landing Zone model performance must be made directly to https://github.com/intel/ai-reference-models. For more information, see the [Contributing Guidelines](/CONTRIBUTING.md).
 
 Until the cut-over to https://github.com/intel/ai-reference-models, the default branch has been changed to r3.2, which will become the base of the external main branch.
@@ -18,9 +18,9 @@ Containers for running the workloads can be found at [Intel® AI Containers](htt
 
 ## Purpose of Intel® AI Reference Models
 
-Intel optimizes popular deep learning frameworks such as TensorFlow* and PyTorch* by contributing to the upstream projects. Additional optimizations are built into plugins/extensions such as the [Intel Extension for Pytorch*](https://github.com/intel/intel-extension-for-pytorch) and the [Intel Extension for TensorFlow*](https://github.com/intel/intel-extension-for-tensorflow). Popular neural network models running against common datasets are the target workloads that drive these optimizations. 
+Intel optimizes popular deep learning frameworks such as TensorFlow* and PyTorch* by contributing to the upstream projects. Additional optimizations are built into plugins/extensions such as the [Intel Extension for Pytorch*](https://github.com/intel/intel-extension-for-pytorch) and the [Intel Extension for TensorFlow*](https://github.com/intel/intel-extension-for-tensorflow). Popular neural network models running against common datasets are the target workloads that drive these optimizations.
 
-The purpose of the Intel® AI Reference Models repository (and associated containers) is to quickly replicate the complete software environment that demonstrates the best-known performance of each of these target model/dataset combinations. When executed in optimally-configured hardware environments, these software environments showcase the AI capabilities of Intel platforms. 
+The purpose of the Intel® AI Reference Models repository (and associated containers) is to quickly replicate the complete software environment that demonstrates the best-known performance of each of these target model/dataset combinations. When executed in optimally-configured hardware environments, these software environments showcase the AI capabilities of Intel platforms.
 
 ***DISCLAIMER: These scripts are not intended for benchmarking Intel platforms.
 For any performance and/or benchmarking information on specific Intel platforms, visit [https://www.intel.ai/blog](https://www.intel.ai/blog).***
@@ -198,7 +198,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf)  | PyTorch | Inference | Flex Series | [FP16 FP32](/models_v2/pytorch/efficientnet/inference/gpu/README.md) |
 | [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/models_v2/tensorflow/efficientnet/inference/gpu/README.md) |
 | [Wide Deep Large Dataset](https://arxiv.org/pdf/2112.10752.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/models_v2/tensorflow/wide_deep_large_ds/inference/gpu/README.md) |
-| [YOLO V5](https://arxiv.org/pdf/2108.11539.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/yolov5/inference/gpu/README.md) | 
+| [YOLO V5](https://arxiv.org/pdf/2108.11539.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/yolov5/inference/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | Max Series, Arc Series | [BFloat16 FP32 FP16](/models_v2/pytorch/bert_large/inference/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Training  | Max Series, Arc Series | [BFloat16 FP32 TF32](/models_v2/pytorch/bert_large/training/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | Max Series | [BFloat16 TF32 FP32](/models_v2/tensorflow/bert_large/training/gpu/README.md) |
@@ -207,11 +207,11 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | TensorFlow | Training | Max Series | [BFloat16 FP32](/models_v2/tensorflow/3d_unet/training/gpu/README.md) |
 | [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | PyTorch | Inference | Flex Series, Max Series, Arc Series | [FP16 FP32](/models_v2/pytorch/stable_diffusion/inference/gpu/README.md) |
 | [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | TensorFlow | Inference | Flex Series | [FP16 FP32](/models_v2/tensorflow/stable_diffusion/inference/gpu/README.md) |
-| [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Inference | Flex Series | [FP32 Float16](/models_v2/tensorflow/maskrcnn/inference/gpu/README.md) | 
-| [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Training | Max Series | [FP32 BFloat16](/models_v2/tensorflow/maskrcnn/training/gpu/README.md) | 
+| [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Inference | Flex Series | [FP32 Float16](/models_v2/tensorflow/maskrcnn/inference/gpu/README.md) |
+| [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Training | Max Series | [FP32 BFloat16](/models_v2/tensorflow/maskrcnn/training/gpu/README.md) |
 | [Swin Transformer](https://arxiv.org/pdf/2103.14030.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/swin-transformer/inference/gpu/README.md) |
-| [FastPitch](https://arxiv.org/pdf/1703.06870.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/fastpitch/inference/gpu/README.md) | 
-| [UNet++](https://arxiv.org/pdf/1807.10165.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/unetpp/inference/gpu/README.md) | 
+| [FastPitch](https://arxiv.org/pdf/1703.06870.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/fastpitch/inference/gpu/README.md) |
+| [UNet++](https://arxiv.org/pdf/1807.10165.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/unetpp/inference/gpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Inference | Max Series | [FP16 BF16 FP32](/models_v2/pytorch/rnnt/inference/gpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Training | Max Series | [FP32 BF16 TF32](/models_v2/pytorch/rnnt/training/gpu/README.md) |
 

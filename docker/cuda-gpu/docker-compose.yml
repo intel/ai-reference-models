@@ -39,13 +39,3 @@ services:
     extends: pytorch-efficientnet-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-cuda-gpu-yolov5-inference
     pull_policy: always
-  pytorch-ifrnet-inference:
-    build:
-      dockerfile: docker/cuda-gpu/pytorch-ifrnet-inference/pytorch-cuda-series-ifrnet-inference.Dockerfile
-    extends: pytorch-efficientnet-inference
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-cuda-gpu-ifrnet-inference
-  pytorch-rife-inference:
-    build:
-      dockerfile: docker/cuda-gpu/pytorch-rife-inference/pytorch-cuda-series-rife-inference.Dockerfile
-    extends: pytorch-efficientnet-inference
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-cuda-gpu-rife-inference

@@ -44,7 +44,7 @@ avx-int8-realtime-inference:
       dst: /pytorch/Imagenet_FullData
 fp32-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnext-32x16d-inference
-  cmd: quickstart/inference_throughput.sh 
+  cmd: quickstart/inference_throughput.sh
   shm-size: 8G
   env:
     PRECISION: fp32
@@ -55,7 +55,7 @@ fp32-throughput-inference:
       dst: /pytorch/Imagenet_FullData
 bf16-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnext-32x16d-inference
-  cmd: quickstart/inference_throughput.sh 
+  cmd: quickstart/inference_throughput.sh
   shm-size: 8G
   env:
     PRECISION: bf16
@@ -77,7 +77,7 @@ int8-throughput-inference:
       dst: /pytorch/Imagenet_FullData
 avx-int8-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnext-32x16d-inference
-  cmd: quickstart/inference_throughput.sh 
+  cmd: quickstart/inference_throughput.sh
   shm-size: 8G
   env:
     PRECISION: avx-int8
@@ -88,7 +88,7 @@ avx-int8-throughput-inference:
       dst: /pytorch/Imagenet_FullData
 fp32-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnext-32x16d-inference
-  cmd: quickstart/accuracy.sh 
+  cmd: quickstart/accuracy.sh
   shm-size: 8G
   env:
     PRECISION: fp32
@@ -99,7 +99,7 @@ fp32-accuracy-inference:
       dst: /pytorch/Imagenet_FullData
 bf16-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnext-32x16d-inference
-  cmd: quickstart/accuracy.sh 
+  cmd: quickstart/accuracy.sh
   shm-size: 8G
   env:
     PRECISION: bf16
@@ -110,7 +110,7 @@ bf16-accuracy-inference:
       dst: /pytorch/Imagenet_FullData
 int8-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnext-32x16d-inference
-  cmd: quickstart/accuracy.sh 
+  cmd: quickstart/accuracy.sh
   shm-size: 8G
   env:
     PRECISION: int8
@@ -121,7 +121,7 @@ int8-accuracy-inference:
       dst: /pytorch/Imagenet_FullData
 avx-int8-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-resnext-32x16d-inference
-  cmd: quickstart/accuracy.sh 
+  cmd: quickstart/accuracy.sh
   shm-size: 8G
   env:
     PRECISION: avx-int8
