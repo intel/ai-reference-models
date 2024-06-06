@@ -28,4 +28,3 @@ pytorch-max-gpu-bert-large-training:
       PROCESSED_DATASET_DIR: /pytorch/dataset
       DATASET_DIR: /pytorch/dataset
       /dev/dri: /dev/dri
-      
