@@ -1,4 +1,4 @@
-# Running YOLOv7 Inference using Intel® Extension for PyTorch*
+# Running GPT-J Inference using Intel® Extension for PyTorch*
 
 ## Description 
 This document provides instructions for running  GPT-J inference using Intel® Extension for PyTorch on Intel® Xeon® Scalable Processors. 
