@@ -28,7 +28,7 @@ The tables below link to documentation on how to run each use case using docker 
 
 | Framework | Model                                                  | Precisions | Mode |  Dataset |
 | --------| ------------------------------------------------------ | ---------- | ------| --------------------- |
-| TensorFlow | [3D U-Net MLPerf*](../../quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/README_DEV_CAT.md) | FP32,BF16,INT8 Inference | BRATS 2019 |
+| TensorFlow | [3D U-Net MLPerf*](../../quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/README_DEV_CAT.md) | FP32,BF16,INT8 | Inference | BRATS 2019 |
 
 ### Object Detection
 
@@ -38,7 +38,6 @@ The tables below link to documentation on how to run each use case using docker 
 | PyTorch |[Mask R-CNN](../../quickstart/object_detection/pytorch/maskrcnn/inference/cpu/DEVCATALOG.md) | FP32,BF32,BF16 | Inference | COCO 2017 |
 | PyTorch |[SSD-ResNet34](../../quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/DEVCATALOG.md) | FP32,BF32,BF16 | Training | COCO 2017 |
 | PyTorch |[SSD-ResNet34](../../quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/DEVCATALOG.md) | FP32,BF32,BF16,INT8 | Inference | COCO 2017 |
-| PyTorch | [YOLO v7]() | FP32,BF16,FP16,INT8 | Inference | COCO 2017 |
 | TensorFlow | [SSD-ResNet34](../../quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/README_DEV_CAT.md) | FP32,BF32,BF16 |Training | COCO 2017 |
 | TensorFlow | [SSD-ResNet34](../../quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/README_DEV_CAT.md) | FP32,BF16,INT8 |Inference | COCO 2017  |
 | TensorFlow | [SSD-MobileNet*](../../quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/README_DEV_CAT.md) | FP32,BF32,BF16,INT8 | Inference | COCO 2017 |
@@ -68,5 +67,5 @@ The tables below link to documentation on how to run each use case using docker 
 | --------| ------------------------------------------------------ | ---------- | ------| --------------------- |
 | PyTorch | [DLRM](../../quickstart/recommendation/pytorch/dlrm/training/cpu/DEVCATALOG.md) | FP32,BF32,BF16 | Training | Criteo Terabyte |
 | PyTorch | [DLRM](../../quickstart/recommendation/pytorch/dlrm/inference/cpu/DEVCATALOG.md) | FP32,BF32,BF16,INT8 | Inference | Criteo Terabyte |
-| PyTorch | [DLRM v2]() | FP32,BF16,FP16,INT8 | Inference | Criteo Terabyte |
+| PyTorch | [DLRM v2](../../quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/CONTAINER.md) | FP32,BF16,FP16,INT8 | Inference | Criteo Terabyte |
 | TensorFlow | [DIEN](../../quickstart/recommendation/tensorflow/dien/inference/cpu/README_DEV_CAT.md) | FP32,BF32,BF16 | Inference | DIEN dataset |
