@@ -75,6 +75,7 @@ if [ -z "${INPUT_TOKEN}" ]; then
 fi
 
 export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
+export KMP_BLOCKTIME=-1
 CORES=`lscpu | grep Core | awk '{print $4}'`
 # ARGS="$ARGS --use-share-weight --ws-total-cores ${CORES} --ws-cores-per-instance ${OMP_NUM_THREADS}"
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`

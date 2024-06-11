@@ -78,7 +78,7 @@ fi
 if [ -n "$REVISION" ]; then
     ARGS="$ARGS --revision $REVISION"
 fi
-
+export KMP_BLOCKTIME=-1
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
