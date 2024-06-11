@@ -147,7 +147,7 @@ first_latency=($(grep -i 'first-token-latency:' ${OUTPUT_DIR}/throughput_log_${p
         }
     }
 '))
-rest_token_latency=($(grep -i 'rest-token-latency:' ${OUTPUT_DIR}/throughput_log_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
+rest_token_latency=($(grep -i '^rest-token-latency:' ${OUTPUT_DIR}/throughput_log_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
     BEGIN {
         num = 0;
         sum = 0;
