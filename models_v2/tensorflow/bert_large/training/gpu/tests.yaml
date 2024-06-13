@@ -1,24 +1,27 @@
 training-bf16:
   cmd:
     bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
-    bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE}
+    bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE} ${NUM_DEVICES}
   env:
     PRECISION: "bf16"
     DATASET: "/localdisk/bert_small_data/bert-large-training"
     MULTI_TILE: "False"
+    NUM_DEVICES: 1
 training-tf32:
   cmd:
     bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
-    bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE}
+    bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE} ${NUM_DEVICES}
   env:
     PRECISION: "tf32"
     DATASET: "/localdisk/bert_small_data/bert-large-training"
     MULTI_TILE: "False"
+    NUM_DEVICES: 1
 training-fp32:
   cmd:
     bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
-    bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE}
+    bash $GITHUB_WORKSPACE/tests/cicd/ITEX-XPU/bert_large-training/run_test.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE} ${NUM_DEVICES}
   env:
     PRECISION: "fp32"
     DATASET: "/localdisk/bert_small_data/bert-large-training"
     MULTI_TILE: "False"
+    NUM_DEVICES: 1
