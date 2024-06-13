@@ -24,6 +24,7 @@ input_envs[CONFIG_FILE]=${CONFIG_FILE}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 #input_envs[DATASET_DIR]=${DATASET_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
+input_envs[NUM_DEVICES]=${NUM_DEVICES}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -44,7 +45,8 @@ echo 'Running with parameters:'
 echo " DATASET_PATH: ${DATASET_DIR}"
 echo " OUTPUT_DIR: ${OUTPUT_DIR}"
 echo " CONFIG_FILE: ${CONFIG_FILE}"
-echo " MULTI_TILE: $MULTI_TILE"
+echo " MULTI_TILE: ${MULTI_TILE}"
+echo " NUM_DEVICES: ${NUM_DEVICES}"
 
 if [ ! -d "$OUTPUT_DIR" ]; then
     mkdir -p $OUTPUT_DIR
@@ -53,7 +55,7 @@ else
 fi
 
 export TF_NUM_INTEROP_THREADS=1  #for better performance
-if [ $MULTI_TILE == "True" ];then
+if [[ ${NUM_DEVICES} > 1 ]];then
   current_dir=$(pwd)
   if [ -d "tensorflow-models" ]; then
     echo "Repository already exists. Skipping clone."
@@ -64,17 +66,19 @@ if [ $MULTI_TILE == "True" ];then
     git apply $current_dir/hvd_support.patch
   fi
   export PYTHONPATH=$script_directory/resnet50_hvd/tensorflow-models
-  mpirun -np 2 -prepend-rank -ppn 2 \
+  mpirun -np ${NUM_DEVICES} -prepend-rank -ppn ${NUM_DEVICES} \
   python ${PYTHONPATH}/official/legacy/image_classification/classifier_trainer.py \
   --mode=train_and_eval \
   --model_type=resnet \
   --dataset=imagenet \
   --model_dir=$OUTPUT_DIR \
   --data_dir=$DATASET_DIR \
-  --config_file=$CONFIG_FILE |& tee Resnet50_training_${MULTI_TILE}.log
-  value0=$(cat ./Resnet50_training_${MULTI_TILE}.log | grep examples/second | grep '\[0\]' | tail -1 | awk -F 'examples/second' '{print $1}' | awk -F ',' '{print $2}')
-  value1=$(cat ./Resnet50_training_${MULTI_TILE}.log | grep examples/second | grep '\[1\]' | tail -1 | awk -F 'examples/second' '{print $1}' | awk -F ',' '{print $2}')
-  value=$(echo "$value1" + "$value0" | bc)
+  --config_file=$CONFIG_FILE |& tee Resnet50_training_MultiTile-${MULTI_TILE}_${NUM_DEVICES}devices.log
+  value=0
+  for i in $(seq 0 $((NUM_DEVICES-1)));do
+    values[i]=$(cat Resnet50_training_MultiTile-${MULTI_TILE}_${NUM_DEVICES}devices.log | grep examples/second | grep "\[$i\]" | tail -1 | awk -F 'examples/second' '{print $1}' | awk -F ',' '{print $2}')
+    value=$(echo "$value + ${values[i]}" | bc)
+  done
 else
   current_dir=$(pwd)
   if [ -d "tensorflow-models" ]; then
@@ -93,8 +97,8 @@ else
   --dataset=imagenet \
   --model_dir=$OUTPUT_DIR \
   --data_dir=$DATASET_DIR \
-  --config_file=$CONFIG_FILE |& tee Resnet50_training_${MULTI_TILE}.log
-  value=$(cat ./Resnet50_training_${MULTI_TILE}.log | grep 'examples/second' | tail -1 | awk -F 'examples/second' '{print $1}' | awk -F ',' '{print $2}')
+  --config_file=$CONFIG_FILE |& tee Resnet50_training_MultiTile-${MULTI_TILE}_1device.log
+  value=$(cat ./Resnet50_training_MultiTile-${MULTI_TILE}_1device.log | grep 'examples/second' | tail -1 | awk -F 'examples/second' '{print $1}' | awk -F ',' '{print $2}')
 fi
 
 key="throughput"
