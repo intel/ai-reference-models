@@ -28,7 +28,7 @@ The table below provides links to run each workload in a docker container. The c
 | [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | TensorFlow | [INT8 Inference](../../models_v2/tensorflow/resnet50v1_5/inference/gpu/CONTAINER_FLEX.md) | 
 | [SSD-MobileNet v1](https://arxiv.org/pdf/1704.04861.pdf) | TensorFlow | [INT8 Inference](../../quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/DEVCATALOG.md) | 
 | [SSD-MobileNet v1](https://arxiv.org/pdf/1704.04861.pdf) | PyTorch | [INT8 Inference](../../quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/DEVCATALOG.md) | 
-| [Stable Diffusion](https://arxiv.org/abs/2112.10752) | PyTorch | [Flex GPU FP16 Inference](../../models_v2/pytorch/stable_diffusion/inference/gpu/CONTAINER_FLEX.md) and [Arc GPU FP16,FP32 Inference](../../quickstart/generative-ai/pytorch/stable_diffusion/inference/gpu/WSL2_ARC_STABLE_DIFFUSION.md) |
+| [Stable Diffusion](https://arxiv.org/abs/2112.10752) | PyTorch | [Flex GPU FP16 Inference](../../models_v2/pytorch/stable_diffusion/inference/gpu/CONTAINER_FLEX.md) and [Arc GPU FP16 Inference](../../models_v2/pytorch/stable_diffusion/inference/gpu/WSL2_ARC_STABLE_DIFFUSION.md) |
 | [Stable Diffusion](https://arxiv.org/abs/2112.10752) | TensorFlow | [FP32,FP16 Inference](../../models_v2/tensorflow/stable_diffusion/inference/gpu/CONTAINER.md) | 
 | [UNet++](https://arxiv.org/abs/1807.10165) | PyTorch | [FP16 Inference](../../models_v2/pytorch/unetpp/inference/gpu/CONTAINER.md) |
 | [Swin Transformer](https://arxiv.org/abs/2103.14030) | PyTorch | [FP16 Inference](../../models_v2/pytorch/swin-transformer/inference/gpu/CONTAINER.md) |
