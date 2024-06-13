@@ -26,17 +26,30 @@ docker pull intel/image-recognition:tf-max-gpu-resnet50v1-5-training
 ```
 The ResNet50 v1.5 training container includes scripts, models and libraries needed to run training. The script `run_model.sh` requires configuration files as input. For single-tile training, specify the configuration files present in `configure` folder as the `CONFIG_FILE` environment variable. For Multi-tile training, specify the configuration files in `hvd_configure` folder. You will also need to provide an output directory to store logs. To use Imagenet dataset, you will need to volume mount the dataset. For dummy data, use corresponding configuration files and volume mount of ImageNet dataset is not required and hence `DATASET_DIR` volume mounts are not required.
 
-The following example shows how to run BF16 training using real data. 
+> [!NOTE]
+> Please refer to the below table to set the `CONFIG_FILE`. For single-device training, use one of the yaml file under the `configure` directory while using one of the yaml file under the `hvd_configure` directory for multi-device (NUM_DEVICES>1) distributed training with Horovod.
+
+| **NUM_DEVICES** | **Dataset Type** | **Precision** | **CONFIG FILE** |
+| :---: | :---: | :---: | :---: |
+|   1   | Dummy | BF16  | `/workspace/tf-max-series-resnet50v1-5-training/models/configure/itex_dummy_bf16.yaml`
+|   1   | Dummy | FP32  | `/workspace/tf-max-series-resnet50v1-5-training/models/configure/itex_dummy_fp32.yaml`
+|   1   | Real  | BF16  | `/workspace/tf-max-series-resnet50v1-5-training/models/configure/itex_bf16.yaml`
+|   1   | Real  | FP32  | `/workspace/tf-max-series-resnet50v1-5-training/models/configure/itex_fp32.yaml`
+|   >1  | Dummy | BF16  | `/workspace/tf-max-series-resnet50v1-5-training/models/hvd_configure/itex_dummy_bf16_lars.yaml`
+|   >1  | Dummy | FP32  | `/workspace/tf-max-series-resnet50v1-5-training/models/hvd_configure/itex_dummy_fp32_lars.yaml`
+|   >1  | Real  | BF16  | `/workspace/tf-max-series-resnet50v1-5-training/models/hvd_configure/itex_bf16_lars.yaml`
+|   >1  | Real  | FP32  | `/workspace/tf-max-series-resnet50v1-5-training/models/hvd_configure/itex_fp32_lars.yaml`
 
 ```bash
 #Optional
 export DATASET_DIR=<path to pre-processed ImageNet datasets>
 
 #Required
-export CONFIG_FILE=/workspace/tf-max-series-resnet50v1-5-training/models/hvd_configure/itex_bf16_lars.yaml
-export MULTI_TILE=<specify True for Multi-tile training and False for single-tile training>
-export SCRIPT=run_model.sh
 export OUTPUT_DIR=<provide path to output logs directory>
+export MULTI_TILE=<provide True for multi-tile GPU such as Max 1550, and False for single-tile GPU such as Max 1100>
+export NUM_DEVICES=<provide the number of GPU devices used for training. It must be equal to or smaller than the number of GPU devices attached to each node. For GPU with 2 tiles, such as Max 1550 GPU, the number of GPU devices in each node is 2 times the number of GPUs, so it can be set as <=16 for a node with 8 Max 1550 GPUs. While for GPU with single tile, such as Max 1100 GPU, the number of GPU devices available in each node is the same as number of GPUs, so it can be set as <=8 for a node with 8 Max 1100 GPUs.>
+export CONFIG_FILE=<choose based on NUM_DEVICES used for training, dataset type and precision, see details in the table above>
+export SCRIPT=run_model.sh
 
 DOCKER_ARGS="--rm --init -it"
 IMAGE_NAME=intel/image-recognition:tf-max-gpu-resnet50v1-5-training
@@ -47,6 +60,7 @@ docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env MULTI_TILE=${MULTI_TILE} \
+  --env NUM_DEVICES=${NUM_DEVICES} \
   --env CONFIG_FILE=${CONFIG_FILE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
