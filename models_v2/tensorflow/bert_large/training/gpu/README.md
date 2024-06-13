@@ -65,13 +65,14 @@ Bert-Large Model Training using Intel® Extension for TensorFlow.
    | **DATA_DIR**                |    `export DATA_DIR=/the/path/to/dataset`    |
    | **RESULTS_DIR**                 | `export RESULTS_DIR=/the/path/to/result_dir` |
    | **DATATYPE**      | `export DATATYPE=bf16` (bf16, tf32 or fp32)  |
-   | **MULTI_TILE**           |  `export MULTI_TILE=False` (False or True)   |
+   | **MULTI_TILE**           |  `export MULTI_TILE=False` (provide True for multi-tile GPU such as Max 1550, and False for single-tile GPU such as Max 1100)   |
+   | **NUM_DEVICES**          |  `export NUM_DEVICES=<num_devices>` (`<num_devices>` is the number of GPU devices to use for training. It must be equal to or smaller than the number of GPU devices attached to each node. For GPU with 2 tiles, such as Max 1550 GPU, the number of GPU devices in each node is 2 times the number of GPUs, so `<num_devices>` can be set as <=16 for a node with 8 Max 1550 GPUs. While for GPU with single tile, such as Max 1100 GPU, the number of GPU devices available in each node is the same as number of GPUs, so `<num_devices>` can be set as <=8 for a node with 8 Max 1100 GPUs.)     | 
 
 7. Run `run_model.sh`
 
 ## Output
 
-Single-tile output will typicall looks like:
+Single-device output will typically look like:
 
 ```
 I0907 03:06:10.519348 140707593221952 model_training_utils.py:83] Training Summary: 
@@ -89,29 +90,29 @@ DLL 2023-09-07 03:06:10.520066 -  throughput_train : 99.048 sequences/s
 DLL 2023-09-07 03:06:10.520158 -  total_loss : 10.3896 
 ```
 
-Multi-tile output will typicall looks like:
+Multi-device output will typically look like:
 
 ```
-[0] I1030 10:59:04.732321 139681571383104 model_training_utils.py:83] Training Summary: 
-[0] {'total_training_steps': 8, 'train_loss': 10.069790840148926}
-[0] I1030 10:59:04.732495 139681571383104 model_training_utils.py:595] -----------------------------
-[0] I1030 10:59:04.732545 139681571383104 model_training_utils.py:596]   Batch size = 32
-[0] I1030 10:59:04.732575 139681571383104 model_training_utils.py:597]   Num steps = 8
-[0] I1030 10:59:04.732604 139681571383104 model_training_utils.py:598]   LR = 0.0005
-[0] I1030 10:59:04.732630 139681571383104 model_training_utils.py:600] Multi-GPU training with TF Horovod
-[0] I1030 10:59:04.732667 139681571383104 model_training_utils.py:601] hvd.size() = 2
-[0] I1030 10:59:04.732693 139681571383104 model_training_utils.py:602] Total Training Time = 279.63 for Sequences = 15360
-[0] I1030 10:59:04.732739 139681571383104 model_training_utils.py:604] Throughput Average (sequences/sec) with overhead = 54.93
-[0] I1030 10:59:04.732893 139681571383104 model_training_utils.py:606] Throughput Average (sequences/sec) = 197.41
-[0] I1030 10:59:04.732919 139681571383104 model_training_utils.py:607] -----------------------------
-[0] decayed_learning_rate_at_crossover_point = 1.000000e-03, adjusted_init_lr = 1.000000e-03
-[0] DLL 2023-10-30 10:59:04.732944 -  throughput_train : 197.408 sequences/s
-[0] DLL 2023-10-30 10:59:04.733007 -  total_loss : 10.0698 
-[0] 2023:10:30-10:59:08:(273540) |CCL_INFO| finalizing level-zero
-[0] 2023:10:30-10:59:08:(273540) |CCL_INFO| finalized level-zero
+I1030 10:59:04.732321 139681571383104 model_training_utils.py:83] Training Summary: 
+{'total_training_steps': 8, 'train_loss': 10.069790840148926}
+I1030 10:59:04.732495 139681571383104 model_training_utils.py:595] -----------------------------
+I1030 10:59:04.732545 139681571383104 model_training_utils.py:596]   Batch size = 32
+I1030 10:59:04.732575 139681571383104 model_training_utils.py:597]   Num steps = 8
+I1030 10:59:04.732604 139681571383104 model_training_utils.py:598]   LR = 0.0005
+I1030 10:59:04.732630 139681571383104 model_training_utils.py:600] Multi-GPU training with TF Horovod
+I1030 10:59:04.732667 139681571383104 model_training_utils.py:601] hvd.size() = 2
+I1030 10:59:04.732693 139681571383104 model_training_utils.py:602] Total Training Time = 279.63 for Sequences = 15360
+I1030 10:59:04.732739 139681571383104 model_training_utils.py:604] Throughput Average (sequences/sec) with overhead = 54.93
+I1030 10:59:04.732893 139681571383104 model_training_utils.py:606] Throughput Average (sequences/sec) = 197.41
+I1030 10:59:04.732919 139681571383104 model_training_utils.py:607] -----------------------------
+decayed_learning_rate_at_crossover_point = 1.000000e-03, adjusted_init_lr = 1.000000e-03
+DLL 2023-10-30 10:59:04.732944 -  throughput_train : 197.408 sequences/s
+DLL 2023-10-30 10:59:04.733007 -  total_loss : 10.0698 
+2023:10:30-10:59:08:(273540) |CCL_INFO| finalizing level-zero
+2023:10:30-10:59:08:(273540) |CCL_INFO| finalized level-zero
 ```
 
-Final results of the training run can be found in `results.yaml` file.
+Final results of the training can be found in `results.yaml` file.
 
 ```
 results:

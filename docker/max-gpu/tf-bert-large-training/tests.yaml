@@ -1,4 +1,4 @@
-single-tile-bf16-training:
+single-device-bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
@@ -8,6 +8,7 @@ single-tile-bf16-training:
     RESULTS_DIR: /tmp
     DATATYPE: bf16
     MULTI_TILE: 'False'
+    NUM_DEVICES: 1
   volumes:
     - src: /local_dateset/bert_small_data/bert-large-training/
       dst: /local_dateset/bert_small_data/bert-large-training/
@@ -15,7 +16,7 @@ single-tile-bf16-training:
       dst: /dev/dri/by-path
     - src: /tmp
       dst: /tmp
-multi-tile-bf16-training:
+multi-device-bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
   cmd: bash run_model.sh
   device: /dev/dri
@@ -24,7 +25,8 @@ multi-tile-bf16-training:
     DATA_DIR: /local_dateset/bert_small_data/bert-large-training/
     RESULTS_DIR: /tmp
     DATATYPE: bf16
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
+    NUM_DEVICES: 2
   volumes:
     - src: /local_dateset/bert_small_data/bert-large-training/
       dst: /local_dateset/bert_small_data/bert-large-training/
@@ -32,7 +34,7 @@ multi-tile-bf16-training:
       dst: /dev/dri/by-path
     - src: /tmp
       dst: /tmp
-single-tile-fp32-training:
+single-device-fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
@@ -42,6 +44,7 @@ single-tile-fp32-training:
     RESULTS_DIR: /tmp
     DATATYPE: fp32
     MULTI_TILE: 'False'
+    NUM_DEVICES: 1
   volumes:
     - src: /local_dateset/bert_small_data/bert-large-training/
       dst: /local_dateset/bert_small_data/bert-large-training/
@@ -49,7 +52,7 @@ single-tile-fp32-training:
       dst: /dev/dri/by-path
     - src: /tmp
       dst: /tmp
-multi-tile-fp32-training:
+multi-device-fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
   cmd: bash run_model.sh
   device: /dev/dri
@@ -58,7 +61,8 @@ multi-tile-fp32-training:
     DATA_DIR: /local_dateset/bert_small_data/bert-large-training/
     RESULTS_DIR: /tmp
     DATATYPE: fp32
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
+    NUM_DEVICES: 2
   volumes:
     - src: /local_dateset/bert_small_data/bert-large-training/
       dst: /local_dateset/bert_small_data/bert-large-training/
@@ -66,7 +70,7 @@ multi-tile-fp32-training:
       dst: /dev/dri/by-path
     - src: /tmp
       dst: /tmp
-single-tile-tf32-training:
+single-device-tf32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
@@ -76,6 +80,7 @@ single-tile-tf32-training:
     RESULTS_DIR: /tmp
     DATATYPE: tf32
     MULTI_TILE: 'False'
+    NUM_DEVICES: 1
   volumes:
     - src: /local_dateset/bert_small_data/bert-large-training/
       dst: /local_dateset/bert_small_data/bert-large-training/
@@ -83,7 +88,7 @@ single-tile-tf32-training:
       dst: /dev/dri/by-path
     - src: /tmp
       dst: /tmp
-multi-tile-tf32-training:
+multi-device-tf32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
   cmd: bash run_model.sh
   device: /dev/dri
@@ -92,7 +97,8 @@ multi-tile-tf32-training:
     DATA_DIR: /local_dateset/bert_small_data/bert-large-training/
     RESULTS_DIR: /tmp
     DATATYPE: tf32
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
+    NUM_DEVICES: 2
   volumes:
     - src: /local_dateset/bert_small_data/bert-large-training/
       dst: /local_dateset/bert_small_data/bert-large-training/

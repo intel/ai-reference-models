@@ -8,6 +8,7 @@ OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/output/ITEX-XPU/bert_large-training/$
 is_lkg_drop=$2
 DATASET=$3
 MULTI_TILE=$4
+NUM_DEVICES=$5
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
@@ -22,5 +23,5 @@ cd models_v2/tensorflow/bert_large/training/gpu
 pip uninstall horovod 
 pip install intel-optimization-for-horovod
 
-RESULTS_DIR=${OUTPUT_DIR} DATATYPE=${PRECISION} MULTI_TILE=${MULTI_TILE} DATA_DIR=${DATASET} ./run_model.sh
+RESULTS_DIR=${OUTPUT_DIR} DATATYPE=${PRECISION} MULTI_TILE=${MULTI_TILE} DATA_DIR=${DATASET} NUM_DEVICES=${NUM_DEVICES} ./run_model.sh
 cd - 
