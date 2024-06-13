@@ -8,6 +8,7 @@ OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/output/ITEX-XPU/resnet50v1_5-training
 is_lkg_drop=$2
 DATASET=$3
 MULTI_TILE=$4
+NUM_DEVICES=$5
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
@@ -30,5 +31,5 @@ apt-get update
 
 pip install intel-optimization-for-horovod
 
-OUTPUT_DIR=${OUTPUT_DIR} CONFIG_FILE=$(pwd)/${CONFIG_FILE} DATASET_DIR=${DATASET} MULTI_TILE=${MULTI_TILE} ./run_model.sh
+OUTPUT_DIR=${OUTPUT_DIR} CONFIG_FILE=$(pwd)/${CONFIG_FILE} DATASET_DIR=${DATASET} MULTI_TILE=${MULTI_TILE} NUM_DEVICES=${NUM_DEVICES} ./run_model.sh
 cd - 

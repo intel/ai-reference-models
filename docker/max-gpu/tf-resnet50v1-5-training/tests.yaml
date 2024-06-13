@@ -1,4 +1,4 @@
-single-tile-bf16-real-data-training:
+single-device-bf16-real-data-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
@@ -8,12 +8,13 @@ single-tile-bf16-real-data-training:
     MULTI_TILE: 'False'
     OUTPUT_DIR: /tmp
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+    NUM_DEVICES: 1
   volumes:
     - src: /tf_dataset/dataset/TF_Imagenet_FullData
       dst: /tf_dataset/dataset/TF_Imagenet_FullData
     - src: /tmp
       dst: /tmp
-single-tile-bf16-dummy-data-training:
+single-device-bf16-dummy-data-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
@@ -22,19 +23,21 @@ single-tile-bf16-dummy-data-training:
     CONFIG_FILE: /workspace/tf-max-series-resnet50v1-5-training/models/configure/itex_dummy_bf16.yaml
     MULTI_TILE: 'False'
     OUTPUT_DIR: /tmp
+    NUM_DEVICES: 1
   volumes:
     - src: /tmp
       dst: /tmp
-multi-tile-bf16-real-data-training:
+multi-device-bf16-real-data-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
     CONFIG_FILE: /workspace/tf-max-series-resnet50v1-5-training/models/hvd_configure/itex_bf16_lars.yaml
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
     OUTPUT_DIR: /tmp
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+    NUM_DEVICES: 2
   volumes:
     - src: /tf_dataset/dataset/TF_Imagenet_FullData
       dst: /tf_dataset/dataset/TF_Imagenet_FullData
@@ -42,21 +45,22 @@ multi-tile-bf16-real-data-training:
       dst: /dev/dri/by-path
     - src: /tmp
       dst: /tmp
-multi-tile-bf16-dummy-data-training:
+multi-device-bf16-dummy-data-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
     CONFIG_FILE: /workspace/tf-max-series-resnet50v1-5-training/models/hvd_configure/itex_dummy_bf16_lars.yaml
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
     OUTPUT_DIR: /tmp
+    NUM_DEVICES: 1
   volumes:
     - src: /dev/dri/by-path
       dst: /dev/dri/by-path
     - src: /tmp
       dst: /tmp
-single-tile-fp32-real-data-training:
+single-device-fp32-real-data-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
@@ -66,12 +70,13 @@ single-tile-fp32-real-data-training:
     MULTI_TILE: 'False'
     OUTPUT_DIR: /tmp
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+    NUM_DEVICES: 1
   volumes:
     - src: /tf_dataset/dataset/TF_Imagenet_FullData
       dst: /tf_dataset/dataset/TF_Imagenet_FullData
     - src: /tmp
       dst: /tmp
-single-tile-fp32-dummy-data-training:
+single-device-fp32-dummy-data-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
@@ -80,19 +85,21 @@ single-tile-fp32-dummy-data-training:
     CONFIG_FILE: /workspace/tf-max-series-resnet50v1-5-training/models/configure/itex_dummy_fp32.yaml
     MULTI_TILE: 'False'
     OUTPUT_DIR: /tmp
+    NUM_DEVICES: 1
   volumes:
     - src: /tmp
       dst: /tmp
-multi-tile-fp32-real-data-training:
+multi-device-fp32-real-data-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
     CONFIG_FILE: /workspace/tf-max-series-resnet50v1-5-training/models/hvd_configure/itex_fp32_lars.yaml
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
     OUTPUT_DIR: /tmp
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+    NUM_DEVICES: 1
   volumes:
     - src: /tf_dataset/dataset/TF_Imagenet_FullData
       dst: /tf_dataset/dataset/TF_Imagenet_FullData
@@ -100,15 +107,16 @@ multi-tile-fp32-real-data-training:
       dst: /dev/dri/by-path
     - src: /tmp
       dst: /tmp
-multi-tile-fp32-dummy-data-training:
+multi-device-fp32-dummy-data-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
     CONFIG_FILE: /workspace/tf-max-series-resnet50v1-5-training/models/hvd_configure/itex_dummy_fp32_lars.yaml
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
     OUTPUT_DIR: /tmp
+    NUM_DEVICES: 1
   volumes:
     - src: /dev/dri/by-path
       dst: /dev/dri/by-path
