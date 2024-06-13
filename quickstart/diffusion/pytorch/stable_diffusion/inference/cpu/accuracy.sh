@@ -82,7 +82,7 @@ fi
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
-export KMP_BLOCKTIME=1
+export KMP_BLOCKTIME=200
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
 PRECISION=$1
