@@ -145,7 +145,7 @@ class FP32Conv2d(torch.nn.Module):
         self.input_quant = module.input_quant
 
     def forward(self, x):
-        x = self.input_quant(x.float().to(memory_format=torch.channels_last)).dequantize()
+        x = self.input_quant(x.float()).dequantize()
         return F.conv2d(x, self.quant_weight.dequantize(), self.bias, self.stride,
                         self.padding, self.dilation, self.groups)
 
