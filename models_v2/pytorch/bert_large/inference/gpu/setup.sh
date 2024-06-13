@@ -21,8 +21,8 @@
 #  - git clones & applying patches
 
 set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
+apt-get update && apt-get install -y python3-venv protobuf-compiler parallel
 
 pip install -r requirements.txt
 
-cp -r ../../../../common/parse_result.py common/parse_result.py 
+cp -r ../../../../common .

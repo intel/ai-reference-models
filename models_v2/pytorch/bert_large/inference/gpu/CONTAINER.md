@@ -2,7 +2,7 @@
 
 ## Description
 
-This document has instructions for running BERT Large Inference with FP16, BF16 and FP32 precisions using Intel(R) Extension for PyTorch on Intel Max Series GPU. 
+This document has instructions for running BERT Large Inference with FP16, BF16 and FP32 precisions using Intel® Extension for PyTorch on Intel® Max Series GPU. 
 
 
 ## Requirements
@@ -16,7 +16,7 @@ This document has instructions for running BERT Large Inference with FP16, BF16 
 
 | Script name | Description |
 |-------------|-------------|
-| `run_model.sh` |  BERT Large FP16, BF16 and FP32 inference on single tile and two tiles |
+| `run_model.sh` |  BERT Large FP16, BF16 and FP32 inference on single or multiple GPU devices |
 
 ## Datasets
 
@@ -60,10 +60,11 @@ The BERT Large inference container includes scripts, models,libraries needed to 
 #Optional
 export PRECISION=<provide FP16 ,BF16 or FP32,otherwise (default:BF16)>
 export BATCH_SIZE=<provide batch size,otherwise (default: 256)>
-export NUM_ITERATIONS=<provide num_iterations,otherwise (default: 1)>
+export NUM_ITERATIONS=<provide num_iterations,otherwise (default: -1)>
 
 #Required
-export MULTI_TILE=<provide True or False to enable/disable multi-tile inference>
+export MULTI_TILE=<provide True for multi-tile GPU such as Max 1550, and False for single-tile GPU such as Max 1100>
+export NUM_DEVICES=<provide the number of GPU devices used for inference. If it is larger than 1, the script launches multi-instance inference, where 1 instance launched on each GPU device simultaneously. It must be equal to or smaller than the number of GPU devices attached to each node. For GPU with 2 tiles, such as Max 1550 GPU, the number of GPU devices in each node is 2 times the number of GPUs, so `<num_devices>` can be set as <=16 for a node with 8 Max 1550 GPUs. While for GPU with single tile, such as Max 1100 GPU, the number of GPU devices available in each node is the same as number of GPUs, so `<num_devices>` can be set as <=8 for a node with 8 single-tile GPUs.>
 export DATASET_DIR=<path to dataset>
 export OUTPUT_DIR=<path to output log files>
 export BERT_WEIGHT=$(pwd)/squad_large_finetuned_checkpoint
@@ -86,6 +87,7 @@ docker run \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env PLATFORM=${PLATFORM} \
   --env MULTI_TILE=${MULTI_TILE} \
+  --env NUM_DEVICES=${NUM_DEVICES} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
@@ -101,7 +103,7 @@ docker run \
 [GitHub* Repository](https://github.com/IntelAI/models/tree/master/docker/max-gpu)
 
 ## Support
-Support for Intel® Extension for PyTorch* is found via the [Intel® AI Analytics Toolkit.](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html#gs.qbretz) Additionally, the Intel® Extension for PyTorch* team tracks both bugs and enhancement requests using [GitHub issues](https://github.com/intel/intel-extension-for-pytorch/issues). Before submitting a suggestion or bug report, please search the GitHub issues to see if your issue has already been reported.
+Support for Intel® Extension for PyTorch* is found via the [Intel® AI Tools](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html). Additionally, the Intel® Extension for PyTorch* team tracks both bugs and enhancement requests using [GitHub issues](https://github.com/intel/intel-extension-for-pytorch/issues). Before submitting a suggestion or bug report, please search the GitHub issues to see if your issue has already been reported.
 
 ## License Agreement
 

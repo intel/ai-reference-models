@@ -1,4 +1,4 @@
-# single-tile-fp16-inference:
+# single-device-fp16-inference:
 #   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
 #   cmd: bash run_model.sh
 #   ipc: host
@@ -9,6 +9,7 @@
 #     PLATFORM: Max
 #     OUTPUT_DIR: /tmp
 #     MULTI_TILE: 'False'
+#     NUM_DEVICES: 1
 #     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
 #     DATASET_DIR: /dataset/squad_dir
 #   volumes:
@@ -18,7 +19,7 @@
 #       dst: /dataset/squad_large_finetuned_checkpoint
 #     - src: /tmp
 #       dst: /tmp
-# multi-tile-fp16-inference:
+# multi-device-fp16-inference:
 #   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
 #   cmd: bash run_model.sh
 #   ipc: host
@@ -29,6 +30,7 @@
 #     PLATFORM: Max
 #     OUTPUT_DIR: /tmp
 #     MULTI_TILE: 'True'
+#     NUM_DEVICES: 2
 #     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
 #     DATASET_DIR: /dataset/squad_dir
 #   volumes:
@@ -38,7 +40,7 @@
 #       dst: /dataset/squad_large_finetuned_checkpoint
 #     - src: /tmp
 #       dst: /tmp
-# single-tile-bf16-inference:
+# single-device-bf16-inference:
 #   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
 #   cmd: bash run_model.sh
 #   ipc: host
@@ -49,6 +51,7 @@
 #     PLATFORM: Max
 #     OUTPUT_DIR: /tmp
 #     MULTI_TILE: 'False'
+#     NUM_DEVICES: 1
 #     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
 #     DATASET_DIR: /dataset/squad_dir
 #   volumes:
@@ -58,7 +61,7 @@
 #       dst: /dataset/squad_large_finetuned_checkpoint
 #     - src: /tmp
 #       dst: /tmp
-# multi-tile-bf16-inference:
+# multi-device-bf16-inference:
 #   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
 #   cmd: bash run_model.sh
 #   ipc: host
@@ -69,6 +72,7 @@
 #     PLATFORM: Max
 #     OUTPUT_DIR: /tmp
 #     MULTI_TILE: 'True'
+#     NUM_DEVICES: 2
 #     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
 #     DATASET_DIR: /dataset/squad_dir
 #   volumes:
@@ -78,7 +82,7 @@
 #       dst: /dataset/squad_large_finetuned_checkpoint
 #     - src: /tmp
 #       dst: /tmp
-# single-tile-fp32-inference:
+# single-device-fp32-inference:
 #   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
 #   cmd: bash run_model.sh
 #   ipc: host
@@ -89,6 +93,7 @@
 #     PLATFORM: Max
 #     OUTPUT_DIR: /tmp
 #     MULTI_TILE: 'False'
+#     NUM_DEVICES: 1
 #     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
 #     DATASET_DIR: /dataset/squad_dir
 #   volumes:
@@ -98,7 +103,7 @@
 #       dst: /dataset/squad_large_finetuned_checkpoint
 #     - src: /tmp
 #       dst: /tmp
-multi-tile-fp32-inference:
+multi-device-fp32-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
   cmd: bash run_model.sh
   ipc: host
@@ -109,6 +114,7 @@ multi-tile-fp32-inference:
     PLATFORM: Max
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
+    NUM_DEVICES: 2
     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
     DATASET_DIR: /dataset/squad_dir
   volumes:
