@@ -1,7 +1,4 @@
-SimpleITK
-absl-py
-batchgenerators==0.23
 nnunet==1.7.1
-pandas
-pybind11==2.11.1
-tqdm
+argparse
+numpy==1.23.1
+torchinfo
