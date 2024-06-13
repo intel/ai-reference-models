@@ -53,26 +53,28 @@ ImageNet is recommended, the download link is https://image-net.org/challenges/L
 7. Setup required environment paramaters
 
 | **Parameter**                |                                  **export command**                                  |
-|:---------------------------:|:------------------------------------------------------------------------------------:|
-| **MULTI_TILE**               | `export MULTI_TILE=False` (True or False)                                            |
-| **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                 |
-| **DATASET_DIR**              |                               `export DATASET_DIR=`                                  |
+|:----------------------------:|:------------------------------------------------------------------------------------:|
+| **MULTI_TILE**               | `export MULTI_TILE=False` (provide True for multi-tile GPU such as Max 1550, and False for single-tile GPU such as Max 1100 or Arc Series GPU)                                                                                                                  |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                   |
+| **NUM_DEVICES** | `export NUM_DEVICES=<num_devices>` (`<num_devices>` is the number of GPU devices used for training. It must be equal to or smaller than the number of GPU devices attached to each node. For GPU with 2 tiles, such as Max 1550 GPU, the number of GPU devices in each node is 2 times the number of GPUs, so `<num_devices>` can be set as <=16 for a node with 8 Max 1550 GPUs. While for GPU with single tile, such as Max 1100 GPU or Arc Series GPU, the number of GPU devices available in each node is the same as number of GPUs, so `<num_devices>` can be set as <=8 for a node with 8 single-tile GPUs.)                 |
+| **DATASET_DIR**              |                               `export DATASET_DIR=</the/path/to/dataset>`            |
+| **OUTPUT_DIR**               |                               `export OUTPUT_DIR=</the/path/to/output_dir>`          |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
-| **PRECISION**  (optional)    | `export PRECISION=BF16` (BF16 or TF32 or FP32 for Max and BF16 or FP32 for Arc )    |
+| **PRECISION**  (optional)    | `export PRECISION=BF16` (BF16 or TF32 or FP32 for Max and BF16 or FP32 for Arc )     |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=20`                             |
-| **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
-6. Run `run_model.sh`
+
+8. Run `run_model.sh`
 
 ## Output
 
-Single-tile output will typically look like:
+Single-device output will typically look like:
 
 ```
 Epoch: [0][ 20/196]     Time  0.148 ( 0.379)    Data  0.000 ( 0.218)    Loss 7.3804e+00 (8.0065e+00)    Acc@1   0.00 (  0.12)    Acc@5   0.39 (  0.45)
 Training performance: batch size:256, throughput:1716.10 image/sec
 ```
 
-Multi-tile output will typically looks like:
+Multi-device output will typically look like:
 ```
 [1] Epoch: [0][  20/2503]       Time  0.173 ( 0.855)    Data  0.001 ( 0.072)    Loss 7.6168e+00 (7.5532e+00)     Acc@1   0.39 (  0.08)   Acc@5   0.39 (  0.43)
 [1] Training performance: batch size:256, throughput:1474.26 image/sec

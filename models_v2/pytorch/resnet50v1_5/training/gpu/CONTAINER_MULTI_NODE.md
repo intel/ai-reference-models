@@ -182,7 +182,7 @@ FI_TCP_IFACE=${FI_TCP_IFACE} singularity exec --bind ${DATASET_DIR}:${DATASET_DI
 [GitHub* Repository](https://github.com/IntelAI/models/tree/master/docker/max-gpu)
 
 ## Support
-Support for Intel® Extension for PyTorch* is found via the [Intel® AI Analytics Toolkit.](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html#gs.qbretz) Additionally, the Intel® Extension for PyTorch* team tracks both bugs and enhancement requests using [GitHub issues](https://github.com/intel/intel-extension-for-pytorch/issues). Before submitting a suggestion or bug report, please search the GitHub issues to see if your issue has already been reported.
+Support for Intel® Extension for PyTorch* is found via the [Intel® AI Tools](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html). Additionally, the Intel® Extension for PyTorch* team tracks both bugs and enhancement requests using [GitHub issues](https://github.com/intel/intel-extension-for-pytorch/issues). Before submitting a suggestion or bug report, please search the GitHub issues to see if your issue has already been reported.
 
 ## License Agreement
 

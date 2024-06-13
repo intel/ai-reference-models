@@ -25,6 +25,7 @@ input_envs[DATASET_DIR]=${DATASET_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
+input_envs[NUM_DEVICES]=${NUM_DEVICES}
 
 MULTI_NODE=${MULTI_NODE:-False}
 for i in "${!input_envs[@]}"; do
@@ -108,12 +109,12 @@ if [[ "${MULTI_NODE}" == "True" ]]; then
 else 
     master_ip_flag=""
     port_flag=""
-    num_process=2
-    ppn=2
+    num_process=${NUM_DEVICES}
+    ppn=${NUM_DEVICES}
     hostfile=""
 fi
 
-echo "resnet50 ${PRECISION} training MultiTile=${MULTI_TILE} BS=${BATCH_SIZE} Iter=${NUM_ITERATIONS}"
+echo "resnet50 ${PRECISION} training MultiTile=${MULTI_TILE} NumDevices=${NUM_DEVICES} BS=${BATCH_SIZE} Iter=${NUM_ITERATIONS}"
 
 
 if [[ ! -d "${DATASET_DIR}" ]] && [[ "${MULTI_TILE}" != "True" ]]; then
@@ -129,13 +130,14 @@ echo " PRECISION: ${PRECISION}"
 echo " BATCH_SIZE: ${BATCH_SIZE}"
 echo " NUM_ITERATIONS: ${NUM_ITERATIONS}"
 echo " MULTI_TILE: ${MULTI_TILE}"
+echo " NUM_DEVICES: ${NUM_DEVICES}"
 
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
 
 modelname=resnet50
 
-if [[ ${MULTI_TILE} == "False" ]]; then
+if [[ ${NUM_DEVICES} == 1 ]]; then
     rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log
     python main.py \
         -a resnet50 \
@@ -153,9 +155,27 @@ if [[ ${MULTI_TILE} == "False" ]]; then
 else
     rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_raw.log
     if [[ ${CONTAINER} == "Singularity" ]]; then
-        mpiexec -np ${NUM_PROCESS} -ppn ${NUM_PROCESS_PER_NODE} --hostfile ${HOSTFILE} --prepend-rank --map-by node python -u /workspace/pytorch-max-series-resnet50v1-5-training/models/main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 $master_ip_flag $port_flag
+        mpiexec -np ${NUM_PROCESS} -ppn ${NUM_PROCESS_PER_NODE} --hostfile ${HOSTFILE} --prepend-rank --map-by node python -u /workspace/pytorch-max-series-resnet50v1-5-training/models/main.py \
+	    -a resnet50 \
+	    -b ${BATCH_SIZE} \
+	    --xpu 0 \
+	    --dummy \
+	    --num-iterations ${NUM_ITERATIONS} \
+	    --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view \
+	    --seed 123 \
+	    $master_ip_flag \
+	    $port_flag
     else
-        mpiexec -np ${num_process} -ppn ${ppn} --prepend-rank ${hostfile} python -u main.py -a resnet50 -b ${BATCH_SIZE} --xpu 0 --dummy --num-iterations ${NUM_ITERATIONS} --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view --seed 123 $master_ip_flag $port_flag 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log 
+        mpiexec -np ${num_process} -ppn ${ppn} --prepend-rank ${hostfile} python -u main.py \
+	    -a resnet50 \
+	    -b ${BATCH_SIZE} \
+	    --xpu 0 \
+	    --dummy \
+	    --num-iterations ${NUM_ITERATIONS} \
+	    --bucket-cap 200 --disable-broadcast-buffers ${flag} --large-first-bucket --use-gradient-as-bucket-view \
+	    --seed 123 \ 
+	    $master_ip_flag \
+	    $port_flag 2>&1 | tee ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log 
     fi
     python common/parse_result.py -m $modelname --ddp -l ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/ddp-${modelname}_${PRECISION}_train.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
