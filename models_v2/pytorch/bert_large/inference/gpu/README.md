@@ -6,7 +6,7 @@ BERT Large Inference best known configurations with Intel® Extension for PyTorc
 
 | **Use Case** | **Framework** | **Model Repo** | **Branch/Commit/Tag** | **Optional Patch** |
 |:---:| :---: |:--------------:|:---------------------:|:------------------:|
-|  Inference   |    PyTorch    |       https://github.com/huggingface/transformers/tree/main/src/transformers/models/bert        |           -           |         -          |
+|  Inference   |    PyTorch    |       https://github.com/huggingface/transformers/tree/main/src/transformers/models/bert        |           main           |         -          |
 
 # Pre-Requisite
 * Host has one of the following GPUs:
@@ -81,29 +81,30 @@ BERT_WEIGHT=<path_to_BERT_WEIGHT_directory>/squad_large_finetuned_checkpoint
 7. Setup required environment paramaters
 
 | **Parameter**                |                                  **export command**                                  |
-|:---------------------------:|:------------------------------------------------------------------------------------:|
-| **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                 |
-| **BERT_WEIGHT**              | `export BERT_WEIGHT=<path_to_BERT_WEIGHT_directory>/squad_large_finetuned_checkpoint` |
-| **DATASET_DIR**              | `export DATASET_DIR=<path/to/dataset>`                  |
-| **OUTPUT_DIR**               |                               `export OUTPUT_DIR=$PWD`                               |
+|:----------------------------:|:------------------------------------------------------------------------------------:|
+| **MULTI_TILE**               | `export MULTI_TILE=False` (provide True for multi-tile GPU such as Max 1550, and False for single-tile GPU such as Max 1100 or Arc Series GPU)                           |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                   |
+| **NUM_DEVICES**              | `export NUM_DEVICES=<num_devices>` (`<num_devices>` is the number of GPU devices used for inference. If it is larger than 1, the script launches multi-instance inference, where 1 instance launched on each GPU device simultaneously. It must be equal to or smaller than the number of GPU devices attached to each node. For GPU with 2 tiles, such as Max 1550 GPU, the number of GPU devices in each node is 2 times the number of GPUs, so `<num_devices>` can be set as <=16 for a node with 8 Max 1550 GPUs. While for GPU with single tile, such as Max 1100 GPU or Arc Series GPU, the number of GPU devices available in each node is the same as number of GPUs, so `<num_devices>` can be set as <=8 for a node with 8 single-tile GPUs.)                                    |
+| **BERT_WEIGHT**              | `export BERT_WEIGHT=<path_to_BERT_WEIGHT_directory>/squad_large_finetuned_checkpoint`|
+| **DATASET_DIR**              | `export DATASET_DIR=<path/to/dataset>`                                               |
+| **OUTPUT_DIR**               |                               `export OUTPUT_DIR=</path/to/output_dir>`              |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
-| **PRECISION** (optional)     |                  `export PRECISION=BF16` (BF16, FP32 and FP16 are supported for Max and FP16 for Arc) |
+| **PRECISION** (optional)     | `export PRECISION=BF16` (BF16, FP32 and FP16 are supported for Max and FP16 for Arc) |
 |**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=-1`                             |
 8. Run `run_model.sh`
 
 ## Output
 
-Single-tile output will typically looks like:
+Single-device output will typically looks like:
 
 ```
 2023-11-15 06:22:47,398 - __main__ - INFO - Results: {'exact': 87.01040681173131, 'f1': 93.17865304772475, 'total': 10570, 'HasAns_exact': 87.01040681173131, 'HasAns_f1': 93.17865304772475, 'HasAns_total': 10570, 'best_exact': 87.01040681173131, 'best_exact_thresh': 0.0, 'best_f1': 93.17865304772475, 'best_f1_thresh': 0.0}
 ```
 
-Multi-tile output will typically looks like:
+Multi-device output will typically looks like:
 ```
-2023-11-15 06:29:34,737 - __main__ - INFO - Results: {'exact': 87.01040681173131, 'f1': 93.17865304772475, 'total': 10570, 'HasAns_exact': 87.01040681173131, 'HasAns_f1': 93.17865304772475, 'HasAns_total': 10570, 'best_exact': 87.01040681173131, 'best_exact_thresh': 0.0, 'best_f1': 93.17865304772475, 'best_f1_thresh': 0.0}
-2023-11-15 06:29:35,599 - __main__ - INFO - Results: {'exact': 87.01040681173131, 'f1': 93.17865304772475, 'total': 10570, 'HasAns_exact': 87.01040681173131, 'HasAns_f1': 93.17865304772475, 'HasAns_total': 10570, 'best_exact': 87.01040681173131, 'best_exact_thresh': 0.0, 'best_f1': 93.17865304772475, 'best_f1_thresh': 0.0}
+[1]     2023-11-15 06:29:34,737 - __main__ - INFO - Results: {'exact': 87.01040681173131, 'f1': 93.17865304772475, 'total': 10570, 'HasAns_exact': 87.01040681173131, 'HasAns_f1': 93.17865304772475, 'HasAns_total': 10570, 'best_exact': 87.01040681173131, 'best_exact_thresh': 0.0, 'best_f1': 93.17865304772475, 'best_f1_thresh': 0.0}
+[2]     2023-11-15 06:29:35,599 - __main__ - INFO - Results: {'exact': 87.01040681173131, 'f1': 93.17865304772475, 'total': 10570, 'HasAns_exact': 87.01040681173131, 'HasAns_f1': 93.17865304772475, 'HasAns_total': 10570, 'best_exact': 87.01040681173131, 'best_exact_thresh': 0.0, 'best_f1': 93.17865304772475, 'best_f1_thresh': 0.0}
 ```
 
 Final results of the inference run can be found in `results.yaml` file.
