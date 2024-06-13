@@ -22,15 +22,15 @@ DistilBert Inference best known configurations with Intel® Extension for PyTorc
   Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
 
 # Prepare Dataset
-## Dataset: 
+## Dataset:
 Please refer to https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/bert/implementations/pytorch-22.09#download-and-prepare-the-data
 
 the dataset should be like below
-|_hdf5  
-      |_ eval                               # evaluation chunks in binary hdf5 format fixed length (not used in training, can delete after data   preparation)  
-      |_ eval_varlength                     # evaluation chunks in binary hdf5 format variable length *used for training*
-      |_ training                           # 500 chunks in binary hdf5 format 
-      |_ training_4320                      # 
+|_hdf5
+      |_ eval                               # evaluation chunks in binary hdf5 format fixed length (not used in training, can delete after data preparation)
+      |_ eval_varlength                     # evaluation chunks in binary hdf5 format variable length _used for training_
+      |_ training                           # 500 chunks in binary hdf5 format
+      |_ training_4320                      #
       |_ hdf5_4320_shards_uncompressed   # sharded data in hdf5 format fixed length (not used in training, can delete after data   preparation)
       |_ hdf5_4320_shards_varlength      # sharded data in hdf5 format variable length *used for training
 
@@ -50,7 +50,7 @@ the dataset should be like below
   ```
   python -m pip install torch==<torch_version> torchvision==<torchvvision_version> intel-extension-for-pytorch==<ipex_version> --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
   ```
-6. Set environment variables for Intel® oneAPI Base Toolkit: 
+6. Set environment variables for Intel® oneAPI Base Toolkit:
     Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
     ```bash
     source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
