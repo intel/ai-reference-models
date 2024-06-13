@@ -1,7 +1,4 @@
-#
-# -*- coding: utf-8 -*-
-#
-# Copyright (c) 2023 Intel Corporation
+# Copyright (c) 2023-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,140 +11,252 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-#
 
 #!/bin/bash
 
-# Create an array of input directories that are expected and then verify that they exist
-declare -A input_envs
-input_envs[DATASET_DIR]=${DATASET_DIR}
-input_envs[MULTI_TILE]=${MULTI_TILE}
-input_envs[PLATFORM]=${PLATFORM}
+# Specify default arguments
 
-for i in "${!input_envs[@]}"; do
-  var_name=$i
-  env_param=${input_envs[$i]}
+[[ "${AMP}" == "" ]]            && AMP="yes"
+[[ "${BATCH_SIZE}" == "" ]]     && BATCH_SIZE=1
+[[ "${DUMMY}" == "" ]]          && DUMMY="yes"
+[[ "${JIT}" == "" ]]            && JIT="trace"
+[[ "${MULTI_TILE}" == "" ]]     && MULTI_TILE="False"
+[[ "${NUM_IMAGES}" == "" ]]     && NUM_IMAGES=1
+[[ "${NUM_ITERATIONS}" == "" ]] && NUM_ITERATIONS=10
+[[ "${PRECISION}" == "" ]]      && PRECISION="fp16"
+[[ "${STATUS_PRINTS}" == "" ]]  && STATUS_PRINTS=10
+[[ "${STREAMS}" == "" ]]        && STREAMS=1
 
-  if [[ -z $env_param ]]; then
-    echo "The required environment variable $var_name is not set" >&2
-    exit 1
-  fi
+# Process CLI arguments as overides for environment variables
+VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help:,jit:,multi-tile,num-images:,num-iterations:,output-dir:,platform:,precision:,status-prints:,streams: -- "$@")
+if [[ $? -ne 0 ]]; then
+    exit 1;
+fi
+eval set -- "$VALID_ARGS"
+while [ : ]; do
+  case "$1" in
+    --amp)
+        AMP="$2"
+        shift 2
+        ;;
+    --batch-size)
+        BATCH_SIZE=$2
+        shift 2
+        ;;
+    --dummy)
+        DUMMY="yes"
+        shift 1
+        ;;
+    --jit)
+        JIT="$2"
+        shift 2
+        ;;
+    --multi-tile)
+        MULTI_TILE="True"
+        shift 1
+        ;;
+    --num-images)
+        NUM_IMAGES=$2
+        shift 2
+        ;;
+    --num-iterations)
+        NUM_ITERATIONS=$2
+        shift 2
+        ;;
+    --output-dir)
+        OUTPUT_DIR=$2
+        shift 2
+        ;;
+    --platform)
+        PLATFORM=$2
+        shift 2
+        ;;
+    --precision)
+        PRECISION=$2
+        shift 2
+        ;;
+    --status-prints)
+        STATUS_PRINTS=$2
+        shift 2
+        ;;
+    --streams)
+        STREAMS=$2
+        shift 2
+        ;;
+    -h | --help)
+        echo "Usage: $(basename $0)"
+        echo "  --amp            [AMP]           : Use AMP on model conversion (default: '${AMP}')"
+        echo "                                     * no"
+        echo "                                     * yes"
+        echo "  --batch-size     [BATCH_SIZE]    : Batch size to use (default: '${BATCH_SIZE}')"
+        echo "  --dummy                          : Use randomly generated dummy dataset in place of '--data' argument (default: disabled)"
+        echo "  --jit            [JIT]           : JIT method to use (default: '${JIT}')"
+        echo "                                     * none"
+        echo "                                     * script"
+        echo "                                     * trace"
+        echo "  --multi-tile                     : Run benchmark in multi-tile configuration (default: '${MULTI_TILE}')"
+        echo "  --num-images     [NUM_IMAGES]    : Number of images to load (default: '${NUM_IMAGES}')"
+        echo "  --num-iterations [NUM_ITERATIONS]: Number of times to test each batch (default: '${NUM_ITERATIONS}')"
+        echo "  --output-dir     [OUTPUT_DIR]    : Location to write output to. Required"
+        echo "  --platform       [PLATFORM]      : Platform that inference is being ran on (default: '${PLATFORM}')"
+        echo "                                     * CPU"
+        echo "                                     * ATS-M"
+        echo "                                     * CUDA"
+        echo "                                     * PVC"
+        echo "  --precision      [PRECISION]     : Precision to use for the model (default: '${PRECISION}')"
+        echo "                                     * bf16"
+        echo "                                     * fp16"
+        echo "                                     * fp32"
+        echo "                                     * int8"
+        echo "  --status-prints  [STATUS_PRINTS] : Total number of status messages to display during inference benchmarking (default: '${STATUS_PRINTS}')"
+        echo "  --streams        [STREAMS]       : Number of parallel streams to do inference on (default: '${STREAMS}')"
+        echo "                                     Will be truncated to a multiple of BATCH_SIZE"
+        echo "                                     If less than BATCH_SIZE will be increased to BATCH_SIZE"
+        echo ""
+        echo "NOTE: Arguments may also be specified through command line variables using the name in '[]'."
+        echo "      For example 'export NUM_IMAGES=16'."
+        echo "NOTE: Both arguments and their values are case sensitive."
+        exit 0
+        ;;
+    --) shift;
+        break
+        ;;
+  esac
 done
 
-OUTPUT_DIR=${OUTPUT_DIR:-$PWD}
-
-if [[ "${PLATFORM}" == "Max" ]]; then
-    PRECISION=${PRECISION:-FP16}
-elif [[ "${PLATFORM}" == "Flex" ]]; then
-    echo "Only support Max for platform"
-fi
-
-if [[ ! -d "${DATASET_DIR}" ]]; then
-    echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
-    exit 1
+# Check data set is configured if specified/required.
+if [[ ${DUMMY} == "yes" ]]; then
+    _dataset_args="--dummy"
 else
-    export DOWNLOAD_DATA_DIR=${DATASET_DIR}
+    # Preprocessed dataset location is handled during setup script and python scripts have pre defined locations
+    _dataset_args=""
 fi
-BATCH_SIZE=1
-git clone --recurse-submodules https://github.com/mlcommons/inference.git mlperf_inference
-cd mlperf_inference/loadgen
-python setup.py install
-cd ../../3d-unet
-git clone https://github.com/MIC-DKFZ/nnUNet.git nnUnet -b v1.7.1
-
-make setup
-make preprocess_data
-make mkdir_postprocessed_data
 
 
-# known issue
+# Check multi-tile is only specified on valid platforms.
+if [[ "${MULTI_TILE}" == "True" ]]; then
+    if [[ "${PLATFORM}" == "PVC" ]]; then
+        echo "Streams will be round-robin scheduled across multiple tiles"
+        if [ $((STREAMS%2)) -ne 0 ]; then
+        echo "WARNING: can't schedule evenly odd number of streams ($STREAMS) across tiles"
+    fi
+    fi
+    if [[ "${PLATFORM}" == "ATS-M" ]]; then
+        echo "ERROR: ATS-M does not support multitile"
+        exit 1
+    fi
+    if [[ "${PLATFORM}" == "CUDA" ]]; then
+        echo "ERROR: multitile is not implemented for CUDA"
+        exit 1
+    fi
+fi
+
+# Show test configuration
+echo 'Running with parameters:'
+echo " AMP:              ${AMP}"
+echo " BATCH_SIZE:       ${BATCH_SIZE}"
+echo " DUMMY:            ${DUMMY}"
+echo " JIT:              ${JIT}"
+echo " MULTI_TILE:       ${MULTI_TILE}"
+echo " NUM_ITERATIONS:   ${NUM_ITERATIONS}"
+echo " NUM_IMAGES:       ${NUM_IMAGES}"
+echo " OUTPUT_DIR:       ${OUTPUT_DIR}"
+echo " STATUS_PRINTS:    ${STATUS_PRINTS}"
+echo " STREAMS:          ${STREAMS}"
+echo " PLATFORM:         ${PLATFORM}"
+echo " PRECISION:        ${PRECISION}"
+
+# known issue for multitile
 if [[ "${MULTI_TILE}" == "True" ]]; then
     export ZE_FLAT_DEVICE_HIERARCHY=COMPOSITE
 fi
 
-echo 'Running with parameters:'
-echo " PLATFORM: ${PLATFORM}"
-echo " DATASET_DIR: ${DATASET_DIR}"
-echo " OUTPUT_DIR: ${OUTPUT_DIR}"
-echo " PRECISION: ${PRECISION}"
-echo " BATCH_SIZE: ${BATCH_SIZE}"
-echo " MULTI_TILE: ${MULTI_TILE}"
-
-if [[ "${PRECISION}" == "INT8" ]]; then
-    flag="run_pytorch_performance_int8"
-    IPEX_XPU_ONEDNN_LAYOUT=1
-elif [[ "${PRECISION}" == "FP32" ]]; then
-    flag="run_pytorch_performance"
-elif [[ "${PRECISION}" == "FP16" ]]; then
-    flag="run_pytorch_performance_fp16"
-else
-    echo -e "Invalid input! Only FP32 FP16 INT8 are supported."
+# Specify data type
+if [[ ${PRECISION} == "fp32" ]]; then
+    _dtype_args=""
+elif [[ ${PRECISION} == "fp16" ]]; then
+    _dtype_args="--fp16 1"
+elif [[ ${PRECISION} == "bf16" ]]; then
+    _dtype_args="--bf16 1"
+elif [[ ${PRECISION} == "int8" ]]; then
+    #_dtype_args="--int8 1 --asymmetric-quantization --perchannel-weight 1"
+    echo "ERROR: Precision '${PRECISION}' is not supported yet for model"
     exit 1
 fi
-echo "3DUNet ${PRECISION} inference plain MultiTile=${MULTI_TILE} BS=${BATCH_SIZE}"
+
+# Specify if AMP should be used
+if [[ ${AMP} == "no" ]]; then
+    _amp_arg="--no-amp"
+elif [[ ${AMP} == "yes" ]]; then
+    _amp_arg=""
+else
+    echo "ERROR: Invalid valid entered for 'AMP': ${AMP}"
+    exit 1
+fi
+
+# Specify if JIT should be used
+if [[ ${JIT} == "none" ]]; then
+    _jit_arg="--use-jit none"
+elif [[ ${JIT} == "trace" ]]; then # Only specifiable through environment variables.
+    _jit_arg="--use-jit trace"
+elif [[ ${JIT} == "script" ]]; then # Only specifiable through environment variables.
+    _jit_arg="--use-jit script"
+else
+    echo "ERROR: Invalid valid entered for 'JIT': ${JIT}"
+    exit 1
+fi
+
+# General perf args
+_perf_args="--channels-last"
 
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
 
-sum_log_analysis() {
-    if [ -f $2 ]; then
-        rm -f $2
-    fi
-    if diff /dev/null ${1}_t0.log |tail -l | grep '^\\ No newline' > /dev/null;then echo >> ${1}_t0.log; fi
-    if diff /dev/null ${1}_t1.log |tail -l | grep '^\\ No newline' > /dev/null;then echo >> ${1}_t1.log; fi
-    bs=$(cat ${1}_t1.log |grep Batch |awk '{print $3}')
-    echo -e "Batch Size: $bs" >$2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Performance" |awk -v tag=$(cat ${1}"_t0.log" ${1}"_t1.log" |grep "Performance" |awk '{sum+=$2} END {printf "%.4f\n",sum}') '{if ( $2=="None" ) {sum="None";nextfile}else  sum=tag} ;END{print "Sum "$1" "sum " "$3}' >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Performance" |awk -v tag=$(cat ${1}"_t0.log" ${1}"_t1.log" |grep "Performance" |awk 'BEGIN {min=1234567890123} {if ($2 <min) {min=$2}}END {printf "%.4f\n",min}') '{if ( $2=="None" ) {min="None";nextfile}else  min=tag} ;END{print "Min "$1" "min " "$3}' >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Latency" |awk '{if ( $2=="N/A" ){avg="N/A";nextfile}else avg=((sum+=$2/2))};END{print "Avg "$1" "avg " "$3}'  >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Accuracy" |awk -v avg=$(cat ${1}"_t0.log" ${1}"_t1.log" |grep "Accuracy" |awk '{sum+=$3}END{printf "%.4f\n",sum/NR}') '{if ( $3=="None" || $2=="N/A" || $3=="nan" || $3=="N/A"){avg="None";nextfile}else avg=avg};END{print "Avg "$1" "$2 " "avg}' >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Functional" | awk -v fail=$(cat ${1}"_t0.log" ${1}"_t1.log" |grep "Functional" |awk '{for(i=1;i<=NF;++i) if($i=="fail") ++sum}END{print sum}') '{if ( fail >= 1 ) tag="fail ";else tag="pass"};END{print $1" "tag}'  >> $2
-    cat ${1}"_t0.log" ${1}"_t1.log" |grep "Error" |awk '{if(a[$1]){a[$1]=a[$1]";"$2}else{a[$1]=$2}}END{for(i in a)print $1" " a[i]}' >> $2
-}
+# Set environment variables
+if [[ ${PLATFORM} == "ATS-M" ]]; then
+    export IGC_EnableDPEmulation=1
+    export CFESingleSliceDispatchCCSMode=1
+    export IPEX_ONEDNN_LAYOUT=1
+    export IPEX_LAYOUT_OPT=1
+elif [[ ${PLATFORM} == "PVC" ]]; then
+    # Currently its an assumption that PCV uses these.
+    export IGC_EnableDPEmulation=1
+    export CFESingleSliceDispatchCCSMode=1
+    export IPEX_ONEDNN_LAYOUT=1
+    export IPEX_LAYOUT_OPT=1
+fi
+export PROFILE="OFF"
 
-modelname=3dunet
-if [[ ${MULTI_TILE} == "False" ]]; then
-    rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    make ${flag} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    cd ..
-    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
-    throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $2}')
-    throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $3}')
-    latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Latency | awk -F ' ' '{print $2}')
-    acc=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Accuracy | awk -F ' ' '{print $3}')
-    acc_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Accuracy | awk -F ' ' '{print $2}')
-else
-    rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
-    rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log
-    ZE_AFFINITY_MASK=0.0 make ${flag} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log &
-    ZE_AFFINITY_MASK=0.1 make ${flag} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log
-    wait
-    cd ..
-    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
-    python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t1_raw.log -b ${BATCH_SIZE}
-    sum_log_analysis ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log
-    throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $3}')
-    throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep "Sum Performance" | awk -F ' ' '{print $4}')
-    latency=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep Latency | awk -F ' ' '{print $3}')
-    acc=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep Accuracy | awk -F ' ' '{print $4}')
-    acc_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf.log | grep Accuracy | awk -F ' ' '{print $3}')
+# Check if preprocessing has been done
+if [[ ${DUMMY} == "no" ]] && [[ ! -d ${DATASET_DIR}/build/preprocessed_data ]]; then
+    ./preprocess.sh
 fi
 
-yaml_content=$(cat <<EOF
-results:
- - key: throughput
-   value: $throughput
-   unit: $throughput_unit
- - key: latency
-   value: $latency
-   unit: s
- - key: accuracy
-   value: $acc
-   unit: $acc_unit
-EOF
-)
+# Start inference script with numactl
+echo "Starting inference..."
+#TODO: Set ZE_AFFINITY_MASK for multiple tiles.
+numactl --cpunodebind=0 --membind=0 python3 predict.py \
+    ${_dataset_args} \
+    --batch-size ${BATCH_SIZE} \
+    --status-prints ${STATUS_PRINTS} \
+    --max-val-dataset-size ${NUM_IMAGES} \
+    --batch-streaming ${NUM_ITERATIONS} \
+    ${_dtype_args} ${_amp_arg} ${_jit_arg} ${_perf_args} \
+    --warm-up 10 \
+    --output-dir ${OUTPUT_DIR} \
+    --total-instances ${STREAMS} \
+    --terminate-if-sync-fail \
+    --data ${DATASET_DIR}/build/preprocessed_data\
+    --label-data-dir ${DATASET_DIR}/build/raw_data/nnUNet_raw_data/Task043_BraTS2019/labelsTr\
+    2>&1 | tee ${OUTPUT_DIR}/output_raw.log
+predict_exit_code=${PIPESTATUS[0]}
+echo "Inference complete"
 
-# Write the content to a YAML file
-echo "$yaml_content" >  ${OUTPUT_DIR}/results.yaml
-echo "YAML file created."
+echo "Output directory contents:"
+ls ${OUTPUT_DIR}
+
+if [ $predict_exit_code -ne 0 ]; then
+    echo "ERROR: Model scripts terminated with non-zero exit code: $predict_exit_code"
+    exit 1
+fi
+exit 0

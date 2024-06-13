@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
-#
-# Copyright (c) 2023 Intel Corporation
+# Copyright (c) 2023-2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
+#!/usr/bin/env bash
 
 # setup.sh
 #  - install OS pkgs
@@ -21,13 +20,19 @@
 #  - git clones & applying patches
 
 set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
 
-pip install -r requirements.txt
+mkdir -p build/result
+cd build/result
+if [[ ! -e fold_1.zip ]]; then
+  wget https://zenodo.org/record/3904106/files/fold_1.zip
+  unzip -o fold_1.zip
+fi
+cd ../..
 
-mkdir -p 3d-unet/build/result
-cd 3d-unet/build/result
-wget https://zenodo.org/record/3904106/files/fold_1.zip
-cd ../../..
-
-cp -r ../../../../common .
+mkdir -p folds
+cd ./folds
+for i in {0..4}
+do
+  wget https://raw.githubusercontent.com/mlcommons/inference/master/vision/medical_imaging/3d-unet-brats19/folds/fold"$i"_validation.txt
+done
+cd ..

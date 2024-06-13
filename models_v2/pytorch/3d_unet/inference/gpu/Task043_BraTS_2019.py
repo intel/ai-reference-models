@@ -1,3 +1,4 @@
+#    Copyright (c) 2023-2024 Intel Corporation
 #    Copyright (c) 2020, NVIDIA CORPORATION.  All rights reserved.
 #    Copyright 2020 Division of Medical Image Computing, German Cancer Research Center (DKFZ), Heidelberg, Germany
 #
@@ -21,8 +22,6 @@ import numpy as np
 from collections import OrderedDict
 import os
 import sys
-
-sys.path.insert(0, os.path.join(os.getcwd(), "nnUnet"))
 
 from batchgenerators.utilities.file_and_folder_operations import *
 from nnunet.paths import nnUNet_raw_data

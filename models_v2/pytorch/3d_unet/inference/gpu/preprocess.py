@@ -21,8 +21,6 @@ import pickle
 import sys
 import torch
 
-sys.path.insert(0, os.path.join(os.getcwd(), "nnUnet"))
-
 from batchgenerators.augmentations.utils import pad_nd_image
 from batchgenerators.utilities.file_and_folder_operations import subfiles
 from nnunet.training.model_restore import load_model_and_checkpoint_files
