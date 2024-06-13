@@ -53,7 +53,7 @@ SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 TOTAL_CORES=`expr $CORES \* $SOCKETS`
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
-export KMP_BLOCKTIME=1
+export KMP_BLOCKTIME=200
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
 PRECISION=$1
