@@ -1,10 +1,11 @@
-single-tile-bf16-training:
+single-device-bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
     MULTI_TILE: 'False'
+    NUM_DEVICES: 1
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
@@ -15,13 +16,14 @@ single-tile-bf16-training:
       dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
     - src: /tmp
       dst: /tmp
-multi-tile-bf16-training:
+multi-device-bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
+    NUM_DEVICES: 2
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
@@ -34,13 +36,14 @@ multi-tile-bf16-training:
       dst: /dev/dri
     - src: /tmp
       dst: /tmp
-single-tile-fp32-training:
+single-device-fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
     MULTI_TILE: 'False'
+    NUM_DEVICES: 1
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
@@ -51,13 +54,14 @@ single-tile-fp32-training:
       dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
     - src: /tmp
       dst: /tmp
-multi-tile-fp32-training:
+multi-device-fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
+    NUM_DEVICES: 2
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
@@ -70,13 +74,14 @@ multi-tile-fp32-training:
       dst: /dev/dri
     - src: /tmp
       dst: /tmp
-single-tile-tf32-training:
+single-device-tf32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
     MULTI_TILE: 'False'
+    NUM_DEVICES: 1
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
@@ -87,13 +92,14 @@ single-tile-tf32-training:
       dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
     - src: /tmp
       dst: /tmp
-multi-tile-tf32-training:
+multi-device-tf32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
   device: /dev/dri
   env:
-    MULTI_TILE: 'True'
+    MULTI_TILE: 'False'
+    NUM_DEVICES: 2
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
