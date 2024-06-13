@@ -11,6 +11,7 @@ bf16-training:
     DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
+    NUM_DEVICES: 2
   volumes:
     - src: /tmp
       dst: /tmp
@@ -31,6 +32,7 @@ fp32-training:
     DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
+    NUM_DEVICES: 2
   volumes:
     - src: /tmp
       dst: /tmp
@@ -51,6 +53,7 @@ tf32-training:
     DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
+    NUM_DEVICES: 2
   volumes:
     - src: /tmp
       dst: /tmp
