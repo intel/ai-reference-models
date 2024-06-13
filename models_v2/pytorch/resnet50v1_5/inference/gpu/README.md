@@ -54,30 +54,31 @@ ImageNet is recommended, the download link is https://image-net.org/challenges/L
 7. Setup required environment paramaters
 
 | **Parameter**                |                                  **export command**                                  |
-|:---------------------------:|:------------------------------------------------------------------------------------:|
-| **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=Max` (Max or Flex or Arc)                                                 |
-| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=1024`                                |
-| **PRECISION** (optional)     |`export PRECISION=INT8` (INT8,FP32, FP16 for all platform, BF16 and TF32 only for Max)  |
-| **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
-|**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=500`                             |
-| **DATASET_DIR** (optional)   |                               `export DATASET_DIR=--dummy`                           |
+|:----------------------------:|:------------------------------------------------------------------------------------:|
+| **MULTI_TILE**               | `export MULTI_TILE=False` (provide True for multi-tile GPU such as Max 1550, and False for single-tile GPU such as Max 1100 or Flex Series GPU or Arc Series GPU)         |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max or Flex or Arc)                                           |
+| **NUM_DEVICES**              | `export NUM_DEVICES=<num_devices>` (`<num_devices>` is the number of GPU devices used for inference. If it is larger than 1, the script launches multi-instance inference, where 1 instance launched on each GPU device simultaneously. It must be equal to or smaller than the number of GPU devices attached to each node. For GPU with 2 tiles, such as Max 1550 GPU, the number of GPU devices in each node is 2 times the number of GPUs, so `<num_devices>` can be set as <=16 for a node with 8 Max 1550 GPUs. While for GPU with single tile, such as Max 1100 GPU or Flex Series GPU or Arc Series GPU, the number of GPU devices available in each node is the same as number of GPUs, so `<num_devices>` can be set as <=8 for a node with 8 single-tile GPUs.)                             |
+| **OUTPUT_DIR**               |                               `export OUTPUT_DIR=/the/path/to/output_dir`            |
+| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=1024`                               |
+| **PRECISION** (optional)     |`export PRECISION=INT8` (INT8,FP32, FP16 for all platform, BF16 and TF32 only for Max)|
+|**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=500`                            |
+| **DATASET_DIR** (optional)   |                               `export DATASET_DIR=--dummy` (provide --dummy if using dummy dataset or </the/path/to/dataset> if using Imagenet)                      |
 8. Run `run_model.sh`
 
 ## Output
 
-Single-tile output will typically look like:
+Single-device output will typically look like:
 
 ```
 Test: [500/500] Time  0.039 ( 0.042)    Loss 8.4575e+00 (8.4625e+00)    Acc@1   0.20 (  0.10)   Acc@5   0.59 (  0.50)
 Quantization Evalution performance: batch size:1024, throughput:26373.51 image/sec, Acc@1:0.10, Acc@5:0.50
 ```
 
-Multi-tile output will typically looks like:
+Multi-device output will typically look like:
 ```
-Test: [500/500] Time  0.040 ( 0.044)    Loss 8.4575e+00 (8.4625e+00)    Acc@1   0.20 (  0.10)   Acc@5   0.59 (  0.50)
+[1]     Test: [500/500] Time  0.040 ( 0.044)    Loss 8.4575e+00 (8.4625e+00)    Acc@1   0.20 (  0.10)   Acc@5   0.59 (  0.50)
 Quantization Evalution performance: batch size:1024, throughput:25780.13 image/sec, Acc@1:0.10, Acc@5:0.50
-Test: [500/500] Time  0.039 ( 0.044)    Loss 8.4575e+00 (8.4625e+00)    Acc@1   0.20 (  0.10)   Acc@5   0.59 (  0.50)
+[2]     Test: [500/500] Time  0.039 ( 0.044)    Loss 8.4575e+00 (8.4625e+00)    Acc@1   0.20 (  0.10)   Acc@5   0.59 (  0.50)
 Quantization Evalution performance: batch size:1024, throughput:26216.49 image/sec, Acc@1:0.10, Acc@5:0.50
 ```
 
@@ -92,5 +93,5 @@ results:
    unit: s
  - key: accuracy
    value: 0.100
-   unit: top1
+   unit: Acc@1
 ```

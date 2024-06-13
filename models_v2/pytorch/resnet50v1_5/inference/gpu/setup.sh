@@ -21,7 +21,7 @@
 #  - git clones & applying patches
 
 set -e
-apt-get update && apt-get install -y python3-venv
+apt-get update && apt-get install -y python3-venv parallel
 
 pip install -r requirements.txt
 
