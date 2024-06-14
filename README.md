@@ -1,3 +1,7 @@
+<a href="https://scan.coverity.com/projects/intel-models">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/30278/badge.svg"/>
+</a>
 # Intel® AI Reference Models
 
 This repository contains **links to pre-trained models, sample scripts, best practices, and step-by-step tutorials** for many popular open-source machine learning models optimized by Intel to run on Intel® Xeon® Scalable processors and Intel® Data Center GPUs.
