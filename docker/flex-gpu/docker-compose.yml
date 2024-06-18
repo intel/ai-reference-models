@@ -52,13 +52,6 @@ services:
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__);from tensorflow.python.client import device_lib; print(device_lib.list_local_devices())'"
     extends: pytorch-stable-diffusion-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
-  tf-ssd-mobilenet-inference:
-    build:
-      args:
-        MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/ssd_mobilenet_v1_int8_itex.pb}
-      dockerfile: docker/flex-gpu/tf-ssd-mobilenet-inference/tf-flex-series-ssd-mobilenet-inference.Dockerfile
-    extends: tf-resnet50v1-5-inference
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-tf-flex-gpu-ssd-mobilenet-inference
   tf-maskrcnn-inference:
     build:
       dockerfile: docker/flex-gpu/tf-maskrcnn-inference/tf-flex-series-maskrcnn-inference.Dockerfile

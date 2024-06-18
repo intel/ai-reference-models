@@ -30,7 +30,7 @@ from launch_benchmark import LaunchBenchmark
 
 
 # Example args and output strings for testing mocks
-test_model_name = "resnet50"
+test_model_name = "resnet50v1_5"
 test_framework = "tensorflow"
 test_mode = "inference"
 test_precision = "fp32"
