@@ -1,8 +1,0 @@
-accelerate
-datasets>=1.8.0
-protobuf
-py7zr
-sacrebleu>=1.4.12
-scipy
-sentencepiece!=0.1.92
-wheel==0.38.0 # upgraded to avoid a vulnerability
