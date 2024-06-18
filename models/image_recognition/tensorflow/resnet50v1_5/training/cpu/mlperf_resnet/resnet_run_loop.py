@@ -309,6 +309,8 @@ def resnet_model_fn(features, labels, mode, model_class,
 
   if use_bfloat16 == True:
     dtype = tf.bfloat16
+  elif use_float16 == True:
+    dtype = tf.float16
 
   features = tf.cast(features, dtype)
 
@@ -515,10 +517,6 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
       allow_soft_placement=True)
   session_config.graph_options.rewrite_options.remapping = (
           rewriter_config_pb2.RewriterConfig.AGGRESSIVE)
-  if flags.use_float16:
-    session_config.graph_options.rewrite_options.auto_mixed_precision = (
-              rewriter_config_pb2.RewriterConfig.ON)
-
 
 
   if flags.num_gpus == 0:
