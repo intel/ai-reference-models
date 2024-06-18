@@ -1,1 +1,0 @@
-../fp32/generate_voc.py
