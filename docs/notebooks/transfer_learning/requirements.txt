@@ -31,5 +31,5 @@ tf-models-official
 torch==1.13.1
 torchvision==0.14.1
 transformers~=4.38.0 # upgraded to avoid a vulnerability
-urllib3~=2.0.2
+urllib3>=2.2.2
 wget~=3.2
