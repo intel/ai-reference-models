@@ -32,26 +32,23 @@ Make sure the following components are installed in your environment :
     Install jemalloc either using conda or from source
 
     Using conda:
-    conda install jemalloc
+    conda install -y jemalloc=5.2.1 -c conda-forge
 
     From source:
     cd ..
     git clone  https://github.com/jemalloc/jemalloc.git    
     cd jemalloc
-    git checkout c8209150f9d219a137412b06431c9d52839c7272
+    git checkout 5.2.1
     ./autogen.sh
     ./configure --prefix=your_path(eg: /home/tdoux/tdoux/jemalloc/)
     make
     make install
 
 ### Build tcmalloc 
-    wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz
-    tar -xzf gperftools-2.7.90.tar.gz 
-    cd gperftools-2.7.90
-    ./configure --prefix=$HOME/.local
-    make
-    make install
+    Install tcmalloc using conda
 
+    Using conda:
+    conda install -y gperftools -c conda-forge 
 
 ### Build torch-ccl 
     cd ..
