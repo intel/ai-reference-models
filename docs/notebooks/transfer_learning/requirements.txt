@@ -1,8 +1,8 @@
-accelerate>=0.20.1
-Pillow~=10.2.0 # upgraded to fix CVEs
 PyYAML~=6.0
+accelerate>=0.20.1
 charset-normalizer~=3.1.0
 datasets~=2.12.0
+evaluate==0.4.0
 fsspec~=2023.9.2
 gin-config~=0.5.0
 intel-extension-for-pytorch==1.13.100
@@ -18,9 +18,10 @@ notebook~=7.0.7
 numpy~=1.23.5
 opencv-python~=4.7.0.72
 pandas~=2.0.1
+pillow>=10.3.0 # upgraded to avoid a vulnerability
 psutil~=5.9.5
 pycocotools~=2.0.6
-scikit-learn~=1.2.2
+scikit-learn>=1.5.0
 scipy~=1.10.1
 sentencepiece~=0.1.99
 tensorflow-addons~=0.20.0
@@ -29,7 +30,6 @@ tensorflow-hub~=0.13.0
 tf-models-official
 torch==1.13.1
 torchvision==0.14.1
-transformers~=4.36.0
-urllib3~=2.0.2
+transformers~=4.38.0 # upgraded to avoid a vulnerability
+urllib3>=2.2.2
 wget~=3.2
-evaluate==0.4.0
