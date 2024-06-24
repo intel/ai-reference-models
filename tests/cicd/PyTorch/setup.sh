@@ -30,8 +30,11 @@ if [[ "${is_lkg_drop}" == "true" ]]; then
 else
   pip install --upgrade pip
   echo "Installing pytorch"
-  pip install intel-extension-for-pytorch==${PY_VERSION}
-  python -m pip install torch==$1 torchvision==0.16.0
+  export no_proxy=""
+  export NO_PROXY=""
+  python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+  python -m pip install intel-extension-for-pytorch
+  python -m pip install oneccl_bind_pt --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/cpu/us/
 fi
 
 # Check the operating system type
@@ -51,7 +54,7 @@ if [[ "$os_name" == *"CentOS"* ]]; then
     tar
   yum install -y \
     numactl \
-    mesa-libGL 
+    mesa-libGL
   yum install -y libsndfile
   yum clean all
   yum install mesa-libGL
@@ -73,42 +76,42 @@ elif [[ "$os_name" == *"Ubuntu"* ]]; then
     numactl \
     libgl1 \
     libglib2.0-0 \
-    libegl1-mesa 
+    libegl1-mesa
   apt-get install -y python3-dev
   apt-get install -y gcc python3.10-dev
   apt-get install -y libgl1-mesa-glx
 fi
 
-cd ${WORKSPACE}
-if [ -d "jemalloc" ]; then
-  echo "Repository already exists. Skipping clone."
-else
-  unset LD_PRELOAD
-  unset MALLOC_CONF
-  git clone https://github.com/jemalloc/jemalloc.git
-  cd jemalloc
-  git checkout c8209150f9d219a137412b06431c9d52839c7272
-  ./autogen.sh
-  ./configure --prefix=${WORKSPACE}/
-  make
-  make install
-  cd -
-fi
+#if [ -d "jemalloc" ]; then
+#  echo "Repository already exists. Skipping clone."
+#else
+#  unset LD_PRELOAD
+#  unset MALLOC_CONF
+#  git clone https://github.com/jemalloc/jemalloc.git
+#  cd jemalloc
+#  git checkout c8209150f9d219a137412b06431c9d52839c7272
+#  ./autogen.sh
+#  ./configure --prefix=${WORKSPACE}/
+#  make
+#  make install
+#  cd -
+#fi
 
 pip install packaging intel-openmp
 
-if [ -d "gperftools-2.7.90" ]; then
-  echo "The gperftools directory exists. Skipping download and extraction."
-else
-  wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz
-  tar -xzf gperftools-2.7.90.tar.gz
-  cd gperftools-2.7.90
-  ./configure --prefix=${WORKSPACE}/tcmalloc
-  make
-  make install
-  cd -
-fi
+#if [ -d "gperftools-2.7.90" ]; then
+#  echo "The gperftools directory exists. Skipping download and extraction."
+#else
+#  wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz
+#  tar -xzf gperftools-2.7.90.tar.gz
+#  cd gperftools-2.7.90
+#  ./configure --prefix=${WORKSPACE}/tcmalloc
+#  make
+#  make install
+#  cd -
+#fi
 
-export LD_PRELOAD="${WORKSPACE}/jemalloc/lib/libjemalloc.so":"${WORKSPACE}/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD 
-export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
-export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+#export LD_PRELOAD="${WORKSPACE}/jemalloc/lib/libjemalloc.so":"${WORKSPACE}/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
+#export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+#export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+export LD_PRELOAD="/usr/local/lib/libiomp5.so":$LD_PRELOAD
