@@ -13,9 +13,9 @@
     "gpu"
   ],
   "mandatory_files": [
-    "README.md", 
-    "setup.sh", 
-    "run_model.sh", 
+    "README.md",
+    "setup.sh",
+    "run_model.sh",
     "tests.yaml"
   ],
   "test_keys": [
@@ -28,6 +28,8 @@
     "pytorch/3d_unet/inference/gpu",
     "pytorch/bert_large/inference/gpu",
     "pytorch/bert_large/training/gpu",
+    "pytorch/bert_large/inference/cpu",
+    "pytorch/bert_large/training/cpu",
     "pytorch/distilbert/inference/gpu",
     "pytorch/dlrm/inference/gpu",
     "pytorch/fastpitch/inference/gpu",

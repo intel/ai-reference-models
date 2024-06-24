@@ -14,6 +14,8 @@ on:
         - emr
         - flex-gpu
         - max-gpu
+        - k8-runners
+        - srf_cpu
       framework:
         required: false
         description: 'Enter Framework:'
@@ -197,7 +199,7 @@ jobs:
     - name: Checkout Model Zoo Repo
       uses: actions/checkout@v4
       with:
-        path: 'Model-Zoo-dGPU'
+        path: 'Model-Zoo'
     - name: Test Container Group
       uses: intel-innersource/frameworks.ai.infrastructure.machine-learning-operations/test-runner@develop
       with:
