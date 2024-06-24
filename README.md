@@ -141,6 +141,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | Max Series, Arc Series | [BFloat16 FP32 FP16](/models_v2/pytorch/bert_large/inference/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Training  | Max Series, Arc Series | [BFloat16 FP32 TF32](/models_v2/pytorch/bert_large/training/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | Max Series | [BFloat16 TF32 FP32](/models_v2/tensorflow/bert_large/training/gpu/README.md) |
+| [DLRM v2](https://arxiv.org/abs/1906.00091) | PyTorch | Inference | Max Series | [FP32 BF16](/models_v2/pytorch/torchrec_dlrm/inference/gpu/README.md)
 | [DLRM v2](https://arxiv.org/abs/1906.00091) | PyTorch | Training | Max Series | [FP32 TF32 BF16](/models_v2/pytorch/torchrec_dlrm/training/gpu/README.md)
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | PyTorch | Inference | Max Series | [FP16 INT8 FP32](/models_v2/pytorch/3d_unet/inference/gpu/README.md) |
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | TensorFlow | Training | Max Series | [BFloat16 FP32](/models_v2/tensorflow/3d_unet/training/gpu/README.md) |
