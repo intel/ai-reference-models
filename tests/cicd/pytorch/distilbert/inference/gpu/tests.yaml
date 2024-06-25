@@ -1,0 +1,64 @@
+inference-fp16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/distilbert/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${PLATFORM}
+  env:
+    PRECISION: "FP16"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "False"
+inference-fp16-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/distilbert/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${PLATFORM}
+  env:
+    PRECISION: "FP16"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "True"
+inference-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/distilbert/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${PLATFORM}
+  env:
+    PRECISION: "FP32"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "False"
+inference-fp32-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/distilbert/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${PLATFORM}
+  env:
+    PRECISION: "FP32"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "True"
+inference-bf16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/distilbert/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${PLATFORM}
+  env:
+    PRECISION: "BF16"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "False"
+inference-bf16-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/distilbert/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${PLATFORM}
+  env:
+    PRECISION: "BF16"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "True"
+inference-tf32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/distilbert/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${PLATFORM}
+  env:
+    PRECISION: "TF32"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "False"
+inference-tf32-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/distilbert/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${PLATFORM}
+  env:
+    PRECISION: "TF32"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "True"
