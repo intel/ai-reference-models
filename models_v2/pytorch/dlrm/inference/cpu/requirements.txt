@@ -1,0 +1,6 @@
+future
+numpy
+scikit-learn
+torch
+tqdm
+wheel==0.38.0 # Included this to avoid a vulnerability
