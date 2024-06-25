@@ -1,0 +1,54 @@
+training-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50v1_5/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${NUM_DEVICES}
+  env:
+    PRECISION: "FP32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MULTI_TILE: "False"
+    NUM_DEVICES: "1"
+training-bf16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50v1_5/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${NUM_DEVICES}
+  env:
+    PRECISION: "BF16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MULTI_TILE: "False"
+    NUM_DEVICES: "1"
+training-tf32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50v1_5/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${NUM_DEVICES}
+  env:
+    PRECISION: "TF32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MULTI_TILE: "False"
+    NUM_DEVICES: "1"
+training-fp32-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50v1_5/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${NUM_DEVICES}
+  env:
+    PRECISION: "FP32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MULTI_TILE: "True"
+    NUM_DEVICES: "1"
+training-bf16-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50v1_5/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${NUM_DEVICES}
+  env:
+    PRECISION: "BF16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MULTI_TILE: "True"
+    NUM_DEVICES: "1"
+training-tf32-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50v1_5/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE} ${NUM_DEVICES}
+  env:
+    PRECISION: "TF32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MULTI_TILE: "True"
+    NUM_DEVICES: "1"

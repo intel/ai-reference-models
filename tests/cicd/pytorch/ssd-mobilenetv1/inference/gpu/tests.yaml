@@ -1,0 +1,48 @@
+inference-fp16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/ssd-mobilenetv1/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP16"
+    DATASET_DIR: "/pytorch/VOCdevkit/VOC2007/"
+    MULTI_TILE: "False"
+inference-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/ssd-mobilenetv1/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP32"
+    DATASET_DIR: "/pytorch/VOCdevkit/VOC2007/"
+    MULTI_TILE: "False"
+inference-int8:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/ssd-mobilenetv1/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "INT8"
+    DATASET_DIR: "/pytorch/VOCdevkit/VOC2007/"
+    MULTI_TILE: "False"
+inference-fp16-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/ssd-mobilenetv1/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP16"
+    DATASET_DIR: "/pytorch/VOCdevkit/VOC2007/"
+    MULTI_TILE: "True"
+inference-fp32-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/ssd-mobilenetv1/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP32"
+    DATASET_DIR: "/pytorch/VOCdevkit/VOC2007/"
+    MULTI_TILE: "True"
+inference-int8-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/ssd-mobilenetv1/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "INT8"
+    DATASET_DIR: "/pytorch/VOCdevkit/VOC2007/"
+    MULTI_TILE: "True"
