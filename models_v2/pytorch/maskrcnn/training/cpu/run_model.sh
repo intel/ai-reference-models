@@ -33,6 +33,8 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
+mkdir -p ${OUTPUT_DIR}
+
 if [ -z "${PRECISION}" ]; then
   echo "The PRECISION env variable is not set"
   exit 1
@@ -73,7 +75,7 @@ throughput="0"
 accuracy="0"
 latency="0"
 
-if [ "$DISTRIBUTED" ]; then  
+if [ "$DISTRIBUTED" ]; then
     $1=${PRECISION}
     NNODES=${NNODES:-1}
     if [ -z "${HOSTFILE}" ]; then
@@ -86,7 +88,7 @@ if [ "$DISTRIBUTED" ]; then
     source $oneccl_bindings_for_pytorch_path/env/setvars.sh
     export FI_PROVIDER=psm3
     export PSM3_HAL=sockets
-    
+
     rm -rf ${OUTPUT_DIR}/maskrcnn_dist_training_log_${PRECISION}*
 
     LOG= ${OUTPUT_DIR}/maskrcnn_dist_training_log_${PRECISION}.log
@@ -141,12 +143,12 @@ else
     wait
 fi
 
-if [ "$DISTRIBUTED" ]; then 
+if [ "$DISTRIBUTED" ]; then
     throughput=$(grep 'Training throughput:' ${LOG_0} |sed -e 's/.*Training throughput//;s/[^0-9.]//g' |awk '
     BEGIN {
             sum = 0;
             i = 0;
-        }   
+        }
         {
             sum = sum + $1;
             i++;
@@ -156,10 +158,10 @@ if [ "$DISTRIBUTED" ]; then
             printf("%.3f", sum);
     }')
     echo ""maskrcnn";"training distributed throughput";"latency";"accuracy";${PRECISION};${LOCAL_BATCH_SIZE};${throughput};${latency};${accuracy};" | tee -a ${OUTPUT_DIR}/summary.log
-else 
+else
     throughput=$(grep 'Training throughput:' ${LOG_0} |sed -e 's/.Trainng throughput//;s/[^0-9.]//g')
     echo ""maskrcnn";"training throughput";"latency";"accuracy";$PRECISION;${BATCH_SIZE};${throughput};${latency};${accuracy};" | tee -a ${OUTPUT_DIR}/summary.log
-fi 
+fi
 
 latency=$(grep 'Latency:' ${LOG_0} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
   BEGIN {
@@ -176,7 +178,7 @@ latency=$(grep 'Latency:' ${LOG_0} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk 
   }')
 
 yaml_content=$(cat << EOF
-results: 
+results:
 - key : throughput
   value: $throughput
   unit: fps

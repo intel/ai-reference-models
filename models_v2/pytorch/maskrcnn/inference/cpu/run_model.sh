@@ -38,6 +38,8 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
+mkdir -p ${OUTPUT_DIR}
+
 if [ -z  "${PRECISION}" ]; then
   echo "The PRECISION is not set"
   exit 1
@@ -92,9 +94,9 @@ else
   CORES=`lscpu | grep Core | awk '{print $4}'`
 fi
 
-if [ "$THROUGHPUT" ]; then 
+if [ "$THROUGHPUT" ]; then
     BATCH_SIZE=${BATCH_SIZE:-`expr $CORES \* 2`}
-else 
+else
     BATCH_SIZE=${BATCH_SIZE:-112}
 fi
 
@@ -105,7 +107,7 @@ if [[ "$?" == 0 ]]; then
     --enable_jemalloc --throughput_mode"
 fi
 
-if [ "$THROUGHPUT" ]; then 
+if [ "$THROUGHPUT" ]; then
     python ${IPEX_ARGS} \
     ${MODEL_DIR}/../../common/maskrcnn-benchmark/tools/test_net.py \
     $ARGS \
@@ -116,9 +118,9 @@ if [ "$THROUGHPUT" ]; then
     MODEL.WEIGHT "${CHECKPOINT_DIR}/e2e_mask_rcnn_R_50_FPN_1x.pth" \
     MODEL.DEVICE cpu \
     2>&1 | tee ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_throughput.log
-    wait 
+    wait
 
-else 
+else
     python ${IPEX_ARGS} \
     ${MODEL_DIR}/../../common/maskrcnn-benchmark/tools/test_net.py \
     $ARGS \
@@ -133,9 +135,9 @@ fi
 
 
 if [[ ${PLATFORM} == "linux" ]]; then
-  if [ "$THROUGHPUT" ]; then 
+  if [ "$THROUGHPUT" ]; then
       LOG_0=${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_throughput*
-  else 
+  else
       LOG_0=${OUTPUT_DIR}/maskrcnn_${PRECISION}_accuracy*
   fi
 
@@ -176,7 +178,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
 fi
 
 yaml_content=$(cat << EOF
-results: 
+results:
 - key : throughput
   value: $throughput
   unit: fps
