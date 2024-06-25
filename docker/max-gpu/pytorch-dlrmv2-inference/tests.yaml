@@ -5,7 +5,7 @@ fp16-distributed-real-data-inference:
   device: /dev/dri
   env:
     PRECISION: FP16
-    BATCH_SIZE: '65536' 
+    BATCH_SIZE: '65536'
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: Max

@@ -42,7 +42,9 @@ def check_directory_structure(model_dir, config):
     dir_structure = re.compile(
         f'({pipe.join(config["frameworks"])})/[\w-]+/({pipe.join(config["mode"])})/({pipe.join(config["platform"])})'
     )
-
+    if model_dir in config["skip_dir_structure_check"]:
+        print("\t\tDirectory structure:", colored("SKIPPED", "yellow"))
+        return True
     if dir_structure.match(model_dir):
         print("\t\tDirectory structure:", colored("OK", "green"))
         return True
