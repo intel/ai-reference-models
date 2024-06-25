@@ -1,0 +1,64 @@
+training-bf16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "BF16"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "False"
+training-bf16-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "BF16"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "True"
+training-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP32"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "False"
+training-fp32-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP32"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "True"
+training-fp8:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP8"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "False"
+training-fp8-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP8"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "True"
+training-tf32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "TF32"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "False"
+training-tf32-multi:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "TF32"
+    DATASET_DIR: "/pytorch/bert_squad"
+    MULTI_TILE: "True"
