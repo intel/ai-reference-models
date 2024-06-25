@@ -1,0 +1,16 @@
+inference-fp16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/torchrec_dlrm/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP16"
+    DATASET_DIR: "/pytorch/dlrm_terabyte_preprocessed/"
+    MULTI_TILE: "True"
+inference-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/torchrec_dlrm/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MULTI_TILE}
+  env:
+    PRECISION: "FP32"
+    DATASET_DIR: "/pytorch/dlrm_terabyte_preprocessed/"
+    MULTI_TILE: "True"
