@@ -1,0 +1,21 @@
+inference-fp16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/tf_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/maskrcnn/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/tf_dataset/dataset/coco_dataset/COCO2017_training_data"
+inference-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/tf_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/maskrcnn/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/tf_dataset/dataset/coco_dataset/COCO2017_training_data"
+inference-bfloat16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/tf_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/maskrcnn/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "bfloat16"
+    DATASET_DIR: "/tf_dataset/dataset/coco_dataset/COCO2017_training_data"

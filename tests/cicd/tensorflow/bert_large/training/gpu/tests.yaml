@@ -1,0 +1,27 @@
+training-bf16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/tf_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE} ${NUM_DEVICES}
+  env:
+    PRECISION: "bf16"
+    DATASET: "/localdisk/bert_small_data/bert-large-training"
+    MULTI_TILE: "False"
+    NUM_DEVICES: 1
+training-tf32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/tf_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE} ${NUM_DEVICES}
+  env:
+    PRECISION: "tf32"
+    DATASET: "/localdisk/bert_small_data/bert-large-training"
+    MULTI_TILE: "False"
+    NUM_DEVICES: 1
+training-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/tf_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/bert_large/training/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET} ${MULTI_TILE} ${NUM_DEVICES}
+  env:
+    PRECISION: "fp32"
+    DATASET: "/localdisk/bert_small_data/bert-large-training"
+    MULTI_TILE: "False"
+    NUM_DEVICES: 1

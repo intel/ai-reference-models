@@ -1,0 +1,4 @@
+# avoid submission of zip files and yolov5 folder
+
+*.zip
+yolov5

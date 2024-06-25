@@ -1,0 +1,6 @@
+inference-fp16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/tf_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/tensorflow/wide_deep_large_ds/inference/gpu/test_model.sh ${DATASET_PATH} ${IS_LKG_DROP}
+  env:
+    DATASET_PATH: "/tf_dataset/dataset/wide_deep_kaggle/eval_preprocessed_eval.tfrecords"
