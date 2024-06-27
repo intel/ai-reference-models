@@ -48,7 +48,7 @@ the `results4/` subdirectory and outputs the resulting 500 hdf5 files to a
 subdirectory named `hdf5/`.
 
 ```shell
-pip install tensorflow-cpu
+pip install tensorflow-cpu protobuf==3.20.3 numpy==1.20
 ```
 
 For phase1 the seq_len=128:

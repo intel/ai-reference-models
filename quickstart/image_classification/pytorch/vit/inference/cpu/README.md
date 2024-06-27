@@ -38,6 +38,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   pip install datasets
   ```
 
+  * Install dependencies
+```
+  pip install protobuf==3.20.3 numpy==1.20
+```
+
 * Set CORE_PER_INSTANCE before running realtime mode
   ```
   export CORE_PER_INSTANCE=4

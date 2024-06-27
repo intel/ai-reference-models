@@ -26,6 +26,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
   export LD_PRELOAD="<path_to>/tcmalloc/lib/libtcmalloc.so":"<path_to_iomp>/lib/libiomp5.so":$LD_PRELOAD
   ```
 
+  * Install dependencies
+```
+  pip install protobuf==3.20.3 numpy==1.20
+```
+
 * Set ENV to use multi-nodes distributed training (no need for single-node multi-sockets)
 
 In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes. 
