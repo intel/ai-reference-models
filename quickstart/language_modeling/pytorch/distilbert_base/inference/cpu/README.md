@@ -26,6 +26,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
 ```
 
+* Install dependencies
+```
+  pip install protobuf==3.20.3 numpy==1.20
+```
+
 * Set SEQUENCE_LENGTH before running the model
   ```
   export SEQUENCE_LENGTH=128 
