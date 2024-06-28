@@ -37,7 +37,7 @@ if [[ "$1" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
-ARGS=""
+ARGS=${ARGS:-""}
 if [ "$1" == "bf16" ]; then
     ARGS="$ARGS --precision=bf16"
     echo "### running bf16 datatype"
