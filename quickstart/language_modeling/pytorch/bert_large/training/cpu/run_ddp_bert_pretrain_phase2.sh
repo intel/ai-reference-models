@@ -22,12 +22,12 @@ MODEL_DIR=${MODEL_DIR-../../../../../..}
 #export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 ARGS="--benchmark"
 precision=fp32
-batch_size=${batch_size:-28}
+batch_size=${batch_size:-24}
 if [[ "$1" == "bf16" ]]
 then
     ARGS="$ARGS --bf16"
     precision=bf16
-    batch_size=${batch_size:-56}
+    batch_size=${batch_size:-60}
     echo "### running bf16 mode"
 elif [[ $1 == "bf32" ]]; then
     echo "### running BF32 mode"
@@ -47,6 +47,7 @@ DATASET_DIR=${DATASET_DIR:-~/dataset/}
 TRAIN_SCRIPT=${TRAIN_SCRIPT:-${MODEL_DIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+NUMA_NODES=`lscpu | grep "NUMA node(s)" | awk '{print $3}'`
 NNODES=${NNODES:-1}
 HOSTFILE=${HOSTFILE:-./hostfile}
 work_space=${work_space:-${OUTPUT_DIR}}
@@ -61,7 +62,7 @@ export PSM3_HAL=sockets
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
-    python -m intel_extension_for_pytorch.cpu.launch --distributed --nnodes ${NNODES} --hostfile ${HOSTFILE}  --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+    python -m intel_extension_for_pytorch.cpu.launch --distributed --nnodes ${NNODES} --hostfile ${HOSTFILE} --nproc_per_node $NUMA_NODES --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
         --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
         --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
         --model_type 'bert' \
@@ -74,7 +75,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase2_${precision}.log
 else
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --distributed --nnodes ${NNODES} --hostfile ${HOSTFILE}  --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+    python -m intel_extension_for_pytorch.cpu.launch --distributed --nnodes ${NNODES} --hostfile ${HOSTFILE} --nproc_per_node $NUMA_NODES --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
         --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
         --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
         --model_type 'bert' \
