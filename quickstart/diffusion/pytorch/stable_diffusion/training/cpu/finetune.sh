@@ -65,7 +65,7 @@ rm -rf ${OUTPUT_DIR}/stable_diffusion_finetune_log_${PRECISION}*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator tcmalloc \
-    --ninstance 1 \
+    --ninstances 1 \
     --nodes-list=0 \
     --log_dir=${OUTPUT_DIR} \
     --log_file_prefix="./stable_diffusion_finetune_log_${PRECISION}" \

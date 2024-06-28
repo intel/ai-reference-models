@@ -88,7 +88,6 @@ CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
 CORES_PER_INSTANCE=4
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
-export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 export KMP_BLOCKTIME=200
 export KMP_AFFINITY=granularity=fine,compact,1,0
 export OMP_NUM_THREADS=$CORES_PER_INSTANCE
@@ -103,7 +102,7 @@ rm -rf ${OUTPUT_DIR}/LCM_${PRECISION}_inference_realtime*
 
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
     python -m intel_extension_for_pytorch.cpu.launch \
-        --memory-allocator jemalloc \
+        --memory-allocator tcmalloc \
         --ninstances $NUMAS \
         --log-dir ${OUTPUT_DIR} \
         --log_file_prefix LCM_${PRECISION}_inference_realtime \
@@ -117,7 +116,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         $ARGS
 else
     python -m torch.backends.xeon.run_cpu \
-        --enable-jemalloc \
+        --enable_tcmalloc \
         --ninstances $NUMAS \
         --log_path ${OUTPUT_DIR} \
         ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
