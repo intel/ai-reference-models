@@ -108,6 +108,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
 else
     echo "Running inference with torch.compile inductor backend."
     export TORCHINDUCTOR_FREEZING=1
+    ARGS="$ARGS --use_share_weight --total_cores ${CORES_PER_NUMA} --cores_per_instance ${OMP_NUM_THREADS}"
     python -m torch.backends.xeon.run_cpu --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \
