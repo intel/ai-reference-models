@@ -81,7 +81,6 @@ else
 fi
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
-export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 export KMP_BLOCKTIME=200
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
@@ -93,8 +92,8 @@ rm -rf ${PRECISION}_results
 
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
     python -m intel_extension_for_pytorch.cpu.launch \
-        --memory-allocator jemalloc \
-        --ninstance 1 \
+        --memory-allocator tcmalloc \
+        --ninstances 1 \
         --nodes-list=0 \
         --log-dir=${OUTPUT_DIR} \
         --log_file_prefix LCM_${PRECISION}_inference_accuracy \
@@ -107,8 +106,8 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         $ARGS
 else
      python -m torch.backends.xeon.run_cpu \
-        --enable-jemalloc \
-        --ninstance 1 \
+        --enable_tcmalloc \
+        --ninstances 1 \
         --log_path ${OUTPUT_DIR} \
         --node-id=0 \
         ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
