@@ -97,7 +97,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     mode="jit"
     ARGS="$ARGS --jit_mode_eval"
     echo "### running with jit mode"
-    python -m intel_extension_for_pytorch.cpu.launch --latency-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+    python -m intel_extension_for_pytorch.cpu.launch --latency-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
         --model_name_or_path   ${FINETUNED_MODEL} \
         --do_eval \
