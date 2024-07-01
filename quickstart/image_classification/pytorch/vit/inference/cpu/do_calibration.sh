@@ -34,7 +34,7 @@ EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/image-classification
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 
 
-python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0 --enable_jemalloc \
+python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0 --memory-allocator tcmalloc \
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \
   --do_eval \
