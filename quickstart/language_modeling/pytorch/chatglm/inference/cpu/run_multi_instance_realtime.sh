@@ -99,7 +99,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     if [[ "$1" == "int8-bf16" || "$1" == "int8-fp32" ]];then
         ARGS="$ARGS --ipex_smooth_quant"
     fi
-    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
         --ipex \
         --model-name-or-path   ${FINETUNED_MODEL} \
@@ -109,7 +109,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
 else
     echo "### running with torch.compile inductor backend"
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+    python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \
         --model-name-or-path   ${FINETUNED_MODEL} \
