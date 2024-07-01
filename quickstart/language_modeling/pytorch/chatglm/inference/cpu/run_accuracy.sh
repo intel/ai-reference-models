@@ -88,14 +88,14 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     if [[ "$1" == "int8-bf16" || "$1" == "int8-fp32" ]];then
         ARGS="$ARGS --ipex_smooth_quant"
     fi
-    python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./ChatGLM_${precision}_accuracy_${mode}" \
+    python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./ChatGLM_${precision}_accuracy_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
         --ipex \
         --model-name-or-path   ${FINETUNED_MODEL}
 else
     echo "### running with torch.compile inductor backend"
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./ChatGLM_${precision}_accuracy_${mode}" \
+    python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./ChatGLM_${precision}_accuracy_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \
         --model-name-or-path   ${FINETUNED_MODEL}
