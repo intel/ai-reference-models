@@ -38,7 +38,7 @@ if [ -z "${SEQUENCE_LENGTH}" ]; then
   exit 1
 fi
 
-python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0 --enable_jemalloc \
+python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0 --memory-allocator jemalloc \
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \
   --task_name sst2 \

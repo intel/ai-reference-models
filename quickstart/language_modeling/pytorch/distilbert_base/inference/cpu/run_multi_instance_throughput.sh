@@ -84,7 +84,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     mode="jit"
     ARGS="$ARGS --jit_mode_eval"
     echo "### running with jit mode"
-    python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+    python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
         --use_ipex \
         --model_name_or_path   ${FINETUNED_MODEL} \
@@ -98,7 +98,7 @@ else
     echo "Running inference with torch.compile inductor backend."
     export TORCHINDUCTOR_FREEZING=1
     ARGS="$ARGS --inductor"
-    python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+    python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
         ${EVAL_SCRIPT} $ARGS \
         --model_name_or_path   ${FINETUNED_MODEL} \
         --task_name sst2 \
