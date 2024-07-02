@@ -65,6 +65,7 @@ Run sample in performance mode with dummy dataset.
 mkdir -p /tmp/output && rm -f /tmp/output/* && chmod -R 777 /tmp/output
   
 docker run --rm -it --device /dev/dri/ --cap-add SYS_NICE --ipc=host --shm-size=5g \
+    -e PLATFORM=Flex \
     -e OUTPUT_DIR="/tmp/output" \
     -e DUMMY=yes \
     -e PRECISION=fp16 \
@@ -80,6 +81,7 @@ Run sample in accuracy mode. In this example, dataset has been downloaded to `/h
 mkdir -p /tmp/output && rm -f /tmp/output/* && chmod -R 777 /tmp/output
   
 docker run --rm -it --device /dev/dri/ --cap-add SYS_NICE --ipc=host --shm-size=5g \
+    -e PLATFORM=Flex \
     -e OUTPUT_DIR="/tmp/output" \
     -e DUMMY=no \
     -e PRECISION=fp16 \
@@ -126,6 +128,7 @@ docker run --rm -it --device /dev/dri/ --cap-add SYS_NICE --ipc=host --shm-size=
    * Run sample in performance mode with dummy dataset:
     ```
     mkdir -p /tmp/output && rm -f /tmp/output/* && chmod -R 777 /tmp/output
+    export PLATFORM=Flex
     export OUTPUT_DIR="/tmp/output"
     export DUMMY=yes
     export PRECISION=fp16
@@ -137,6 +140,7 @@ docker run --rm -it --device /dev/dri/ --cap-add SYS_NICE --ipc=host --shm-size=
    * Run sample in accuracy mode:  
     ```
     mkdir -p /tmp/output && rm -f /tmp/output/* && chmod -R 777 /tmp/output
+    export PLATFORM=Flex
     export OUTPUT_DIR="/tmp/output"
     export DUMMY=no
     export PRECISION=fp16
@@ -152,6 +156,7 @@ Runtime arguments can be passed as command line parameters or as environment var
 
 |     Argument         | Environment variable  |  Valid Values         | Purpose                                                               |
 |----------------------| --------------------- |-----------------------| --------------------------------------------------------------------- |
+| `--platform`         | `PLATFORM`            | `Flex`, `Max`, `CUDA`, `CPU` | Run on the device in the specified plarform group              |
 | `--dummy`            | `DUMMY`               | `yes`, `no`           | If `yes`, run model on dummy data, dataset maybe absent. If `no`, use real data and perform accuracy check on model output. (default: `yes`)|
 | `--precision`        | `PRECISION`           | `fp32`,`fp16`,`bf16`  | Datatype to use. (default: `fp16`)|
 | `--batch-size`       | `BATCH_SIZE`          | 1, 2, ...             | Number of images in single inference call. Maximum supported value varies depending on datatype and available memory, but usually is small, 1 or 2 images. (default: `1`)|
