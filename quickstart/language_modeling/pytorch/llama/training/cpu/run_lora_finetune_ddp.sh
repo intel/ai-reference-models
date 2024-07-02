@@ -112,7 +112,6 @@ source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 #export FI_PROVIDER_PATH=$oneccl_bindings_for_pytorch_path/lib/prov
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator jemalloc \
-    --distributed \
     --nnodes ${NNODES} \
     --hostfile ${HOSTFILE} \
     --logical-cores-for-ccl --ccl_worker_count 8 \

@@ -67,7 +67,7 @@ params="--train_batch_size=$LBS     --learning_rate=3.5e-4     --opt_lamb_beta_1
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
-    python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+    python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --enable_jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
         --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
         --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
         --model_type 'bert' \
