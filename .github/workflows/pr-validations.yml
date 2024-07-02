@@ -2,20 +2,58 @@ name: PR validations
 on:
   pull_request:
     branches:
-    - develop
-    types: [opened, edited]
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+      - 'lreal/**'
+permissions: read-all
+
 jobs:
-  scans:
-    if: ${{ contains(github.event.pull_request.body, '/run-scanners') }}
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/Scans.yml@develop
-    secrets: inherit
-  workload-tests:
-    if: ${{ contains(github.event.pull_request.body, '/test-workloads') }}
-    uses: intel-innersource/frameworks.ai.models.intel-models/.github/workflows/mz-workload-launcher.yml@develop
-    secrets: inherit
-    with:
-      aikit_release: '2024.2.0'
-      is_lkg_drop: false
+  checks_setup:
+    name: Setup checks
+    runs-on: self-hosted
+    outputs:
+      checks: ${{ steps.set_checks.outputs.checks }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Analize changed files
+        id: set_checks
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          echo "checks=`python3 .github/utils/pr-checks-entrypoint.py
+                                -c .github/config/models_v2-check-config.json
+                                -u ${{ github.event.pull_request.url }}`" >> $GITHUB_OUTPUT
+      - name: Print checks information
+        run:
+          echo ${{ toJson(steps.set_checks.outputs.checks) }} | jq
+  bom_changes:
+    name: BoM changes found
+    needs: checks_setup
+    runs-on: self-hosted
+    if: ${{ fromJson(needs.checks_setup.outputs.checks).flags.is_bom_change }}
+    steps:
+      - name: Call BoM change action
+        run: |
+          echo "Place holder to be replaced by the action call"
+          echo "BoM files changed in this PR:"
+          echo ${{ fromJson(needs.checks_setup.outputs.checks).files.bom }} | jq
+  models_check:
+    name: Models workloads
+    needs: checks_setup
+    runs-on: self-hosted
+    if: ${{ fromJson(needs.checks_setup.outputs.checks).flags.is_model_change }}
+    strategy:
+      matrix:
+        workload: ${{ fromJson(needs.checks_setup.outputs.checks).dirs.workloads_to_run }}
+    steps:
+      - name: Workload test execution
+        run: echo "Place holder for ${{ matrix.workload }} workload execution"
+  containers_check:
+    name: Containers building
+    needs: checks_setup
+    runs-on: self-hosted
+    if: ${{ fromJson(needs.checks_setup.outputs.checks).flags.is_container_change }}
+    strategy:
+      matrix:
+        container: ${{ fromJSON(needs.checks_setup.outputs.checks).dirs.containers_to_check }}
+    steps:
+      - name: Workload test execution
+        run: echo "Place holder for ${{ matrix.container }} container building"
