@@ -16,6 +16,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 * Install dependencies
   ```bash
   cd <clone of the model zoo>/quickstart/recommendation/pytorch/torchrec_dlrm
+  pip install torchrec==0.3.2 --no-deps
   pip install requirements.txt
   ```
 
