@@ -41,8 +41,8 @@ def parse_arguments():
                         help='limit number of images to use for validation')
     parser.add_argument('--status-prints', default=10, type=int,
                         metavar='N', help='number of status prints during benchmarking (default: 10)')
-    parser.add_argument('--device', default=0, type=int,
-                        help='device id to use. should correspond to either NV GPU or Intel XPU')
+    parser.add_argument('--device', default='cpu', type=str,
+                        help='device to use (cpu, cuda[:n], xpu[:n], etc.)')
     parser.add_argument('--tf32', default=0, type=int, help='Datatype used: TF32')
     parser.add_argument('--bf32', default=0, type=int, help='Datatype used: BF32')
     parser.add_argument('--fp16', default=0, type=int, help='Datatype used: FP16')

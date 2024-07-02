@@ -25,38 +25,41 @@ import io_utils
 from arguments_utils import args
 
 def enum_device():
-    # Detect device type from xpu, cuda, and cpu.
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    if device == 'cpu':
-        import intel_extension_for_pytorch as ipex
-        device = 'xpu' if ipex.xpu.is_available() else device
+    device = args.device.split(':')
+    if len(device) > 2:
+        io_utils.write_error('invalid device (expecting: device[:ordinal]): ' + args.device)
+        sys.exit(1)
 
-    # Assign device number.
+    device = device[0]
+
     args.gpu = False
     args.xpu = False
     if device == 'cuda':
-        io_utils.write_info('Use GPU: {0}'.format(args.device))
-        args.device = '{0}:{1}'.format(device, args.device)
-        args.gpu = True
-    elif device == 'xpu':
-        io_utils.write_info('Use XPU: {0}'.format(args.device))
-        args.device = '{0}:{1}'.format(device, args.device)
-        args.xpu = True
-    else:
-        io_utils.write_info('Use CPU')
-        args.device = 'cpu'
-
-    # Ensure system is configured properly
-    if args.gpu:
         if not torch.cuda.is_available():
             io_utils.write_error('Make sure cuda is enabled in torch.')
             sys.exit(1)
-    elif args.xpu:
+        args.gpu = True
+        if args.device == 'cuda':
+            args.device = 'cuda:0'
+        io_utils.write_info('Use GPU: {0}'.format(args.device))
+    elif device == 'xpu':
         try:
             import intel_extension_for_pytorch as ipex
+            if ipex.xpu.is_available():
+                args.xpu = True
         except:
+            pass
+        if not args.xpu:
             io_utils.write_error('Make sure Intel Extension for PyTorch is enabled.')
             sys.exit(1)
+        if args.device == 'xpu':
+            args.device = 'xpu:0'
+        io_utils.write_info('Use XPU: {0}'.format(args.device))
+    elif device == 'cpu':
+        io_utils.write_info('Use CPU')
+    else:
+        io_utils.write_info('Use device: {0}'.format(args.device))
+        io_utils.write_warning('Specified device ({0}) is not tested for this script.'.format(args.device))
 
 def enum_dtypes():
     if args.bf16:
