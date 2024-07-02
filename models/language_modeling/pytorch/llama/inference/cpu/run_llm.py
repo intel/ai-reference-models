@@ -217,15 +217,18 @@ if args.dtype == "bf16" or args.dtype == "fp32":
 
     if args.weight_only_quant and args.torchao and args.weight_dtype:
         from torch._inductor import config as inductor_config
-        from torchao.quantization import quant_api 
+        from torchao.quantization import quant_api
+        from torchao.utils import unwrap_tensor_subclass
         inductor_config.cpp_wrapper = True
         with torch.no_grad(),torch.cpu.amp.autocast(
                 enabled=True, dtype=torch.bfloat16
         ):
             if args.weight_dtype == "INT8":
-                quant_api.change_linear_weights_to_int8_woqtensors(user_model)
+                quant_api.quantize(user_model, quant_api.int8_weight_only())
+                unwrap_tensor_subclass(user_model)
             elif args.weight_dtype == "INT4":
-                quant_api.change_linear_weights_to_int4_woqtensors(user_model)
+                quant_api.quantize(user_model, quant_api.int4_weight_only())
+                unwrap_tensor_subclass(user_model)
             
             user_model.forward = torch.compile(user_model.forward)
 
