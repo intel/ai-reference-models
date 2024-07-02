@@ -100,9 +100,9 @@ while [ : ]; do
         echo "  --output-dir     [OUTPUT_DIR]    : Location to write output to. Required"
         echo "  --platform       [PLATFORM]      : Platform that inference is being ran on (default: '${PLATFORM}')"
         echo "                                     * CPU"
-        echo "                                     * ATS-M"
         echo "                                     * CUDA"
-        echo "                                     * PVC"
+        echo "                                     * Flex"
+        echo "                                     * Max"
         echo "  --precision      [PRECISION]     : Precision to use for the model (default: '${PRECISION}')"
         echo "                                     * bf16"
         echo "                                     * fp16"
@@ -135,14 +135,14 @@ fi
 
 # Check multi-tile is only specified on valid platforms.
 if [[ "${MULTI_TILE}" == "True" ]]; then
-    if [[ "${PLATFORM}" == "PVC" ]]; then
+    if [[ "${PLATFORM}" == "Max" ]]; then
         echo "Streams will be round-robin scheduled across multiple tiles"
         if [ $((STREAMS%2)) -ne 0 ]; then
         echo "WARNING: can't schedule evenly odd number of streams ($STREAMS) across tiles"
     fi
     fi
-    if [[ "${PLATFORM}" == "ATS-M" ]]; then
-        echo "ERROR: ATS-M does not support multitile"
+    if [[ "${PLATFORM}" == "Flex" ]]; then
+        echo "ERROR: Flex does not support multitile"
         exit 1
     fi
     if [[ "${PLATFORM}" == "CUDA" ]]; then
@@ -213,17 +213,24 @@ _perf_args="--channels-last"
 mkdir -p $OUTPUT_DIR
 
 # Set environment variables
-if [[ ${PLATFORM} == "ATS-M" ]]; then
+_platform_args="--device ${PLATFORM}"
+if [[ ${PLATFORM} == "Flex" ]]; then
+    _platform_args="--device xpu"
     export IGC_EnableDPEmulation=1
     export CFESingleSliceDispatchCCSMode=1
     export IPEX_ONEDNN_LAYOUT=1
     export IPEX_LAYOUT_OPT=1
-elif [[ ${PLATFORM} == "PVC" ]]; then
+elif [[ ${PLATFORM} == "Max" ]]; then
+    _platform_args="--device xpu"
     # Currently its an assumption that PCV uses these.
     export IGC_EnableDPEmulation=1
     export CFESingleSliceDispatchCCSMode=1
     export IPEX_ONEDNN_LAYOUT=1
     export IPEX_LAYOUT_OPT=1
+elif [[ ${PLATFORM} == "CUDA" ]]; then
+    _platform_args="--device cuda"
+elif [[ ${PLATFORM} == "CPU" ]]; then
+    _platform_args="--device cpu"
 fi
 export PROFILE="OFF"
 
@@ -236,6 +243,7 @@ fi
 echo "Starting inference..."
 #TODO: Set ZE_AFFINITY_MASK for multiple tiles.
 numactl --cpunodebind=0 --membind=0 python3 predict.py \
+    ${_platform_args} \
     ${_dataset_args} \
     --batch-size ${BATCH_SIZE} \
     --status-prints ${STATUS_PRINTS} \
