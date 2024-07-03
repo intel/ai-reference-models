@@ -40,7 +40,7 @@ Make sure the following components are installed in your environment :
     cd jemalloc
     git checkout 5.2.1
     ./autogen.sh
-    ./configure --prefix=your_path(eg: /home/tdoux/tdoux/jemalloc/)
+    ./configure --prefix=your_path(eg: /home/user/jemalloc/)
     make
     make install
 
