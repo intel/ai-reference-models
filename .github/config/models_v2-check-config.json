@@ -60,7 +60,9 @@
     "tensorflow/bert_large/training/gpu",
     "tensorflow/efficientnet/inference/gpu",
     "pytorch/ssd-resnet34/training/cpu",
-    "pytorch/ssd-resnet34/inference/cpu"
+    "pytorch/ssd-resnet34/inference/cpu",
+    "pytorch/dlrm/training/cpu",
+    "pytorch/dlrm/inference/cpu"
   ],
   "skip_test_structure_check": [
     "jax/gemma/inference/cpu",
@@ -98,6 +100,9 @@
     "tensorflow/bert_large/training/gpu",
     "tensorflow/efficientnet/inference/gpu",
     "pytorch/ssd-resnet34/training/cpu",
-    "pytorch/ssd-resnet34/inference/cpu"
+    "pytorch/ssd-resnet34/inference/cpu",
+    "pytorch/distilbert/inference/cpu",
+    "pytorch/dlrm/training/cpu",
+    "pytorch/dlrm/inference/cpu"
   ]
 }
