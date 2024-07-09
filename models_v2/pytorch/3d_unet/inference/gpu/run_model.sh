@@ -26,9 +26,10 @@
 [[ "${PRECISION}" == "" ]]      && PRECISION="fp16"
 [[ "${STATUS_PRINTS}" == "" ]]  && STATUS_PRINTS=10
 [[ "${STREAMS}" == "" ]]        && STREAMS=1
+[[ "${IPEX}" == "" ]]           && IPEX="yes"
 
 # Process CLI arguments as overides for environment variables
-VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help:,jit:,multi-tile,num-images:,num-iterations:,output-dir:,platform:,precision:,status-prints:,streams: -- "$@")
+VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,jit:,multi-tile,num-images:,num-iterations:,output-dir:,platform:,precision:,status-prints:,streams:,ipex: -- "$@")
 if [[ $? -ne 0 ]]; then
     exit 1;
 fi
@@ -71,6 +72,10 @@ while [ : ]; do
         PLATFORM=$2
         shift 2
         ;;
+    --ipex)
+        IPEX=$2
+        shift 2
+        ;;
     --precision)
         PRECISION=$2
         shift 2
@@ -103,6 +108,7 @@ while [ : ]; do
         echo "                                     * CUDA"
         echo "                                     * Flex"
         echo "                                     * Max"
+        echo "  --ipex           [IPEX]          : Use Intel Extension for PyTorch for xpu device (default: '${IPEX}')"
         echo "  --precision      [PRECISION]     : Precision to use for the model (default: '${PRECISION}')"
         echo "                                     * bf16"
         echo "                                     * fp16"
@@ -190,7 +196,7 @@ if [[ ${AMP} == "no" ]]; then
 elif [[ ${AMP} == "yes" ]]; then
     _amp_arg=""
 else
-    echo "ERROR: Invalid valid entered for 'AMP': ${AMP}"
+    echo "ERROR: Invalid value entered for 'AMP': ${AMP}"
     exit 1
 fi
 
@@ -202,7 +208,7 @@ elif [[ ${JIT} == "trace" ]]; then # Only specifiable through environment variab
 elif [[ ${JIT} == "script" ]]; then # Only specifiable through environment variables.
     _jit_arg="--use-jit script"
 else
-    echo "ERROR: Invalid valid entered for 'JIT': ${JIT}"
+    echo "ERROR: Invalid value entered for 'JIT': ${JIT}"
     exit 1
 fi
 
@@ -233,6 +239,13 @@ elif [[ ${PLATFORM} == "CPU" ]]; then
     _platform_args="--device cpu"
 fi
 export PROFILE="OFF"
+
+if [[ "$IPEX" == "yes" ]]; then
+    _platform_args+=" --ipex"
+elif [[ "$IPEX" != "no" ]]; then
+    echo "ERROR: Invalid value entered for 'IPEX': ${IPEX}"
+    exit 1
+fi
 
 # Check if preprocessing has been done
 if [[ ${DUMMY} == "no" ]] && [[ ! -d ${DATASET_DIR}/build/preprocessed_data ]]; then
