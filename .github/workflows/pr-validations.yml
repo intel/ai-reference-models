@@ -31,10 +31,10 @@ jobs:
     if: ${{ fromJson(needs.checks_setup.outputs.checks).flags.is_bom_change }}
     steps:
       - name: Call BoM change action
-        run: |
-          echo "Place holder to be replaced by the action call"
-          echo "BoM files changed in this PR:"
-          echo ${{ fromJson(needs.checks_setup.outputs.checks).files.bom }} | jq
+        run:
+          python3 .github/utils/comment-bom-changes.py
+                  -u ${{ github.event.pull_request.url }}
+                  -j ${{ fromJson(needs.checks_setup.outputs.checks).files.bom }}
   models_check:
     name: Models workloads
     needs: checks_setup
