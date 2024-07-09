@@ -156,6 +156,7 @@ Runtime arguments can be passed as command line parameters or as environment var
 
 |     Argument         | Environment variable  |  Valid Values         | Purpose                                                               |
 |----------------------| --------------------- |-----------------------| --------------------------------------------------------------------- |
+| `--ipex`             | `IPEX`                | `yes`                 | Use [Intel® Extension for Pytorch] for XPU support (default: `yes`)   |
 | `--platform`         | `PLATFORM`            | `Flex`, `Max`, `CUDA`, `CPU` | Run on the device in the specified plarform group              |
 | `--dummy`            | `DUMMY`               | `yes`, `no`           | If `yes`, run model on dummy data, dataset maybe absent. If `no`, use real data and perform accuracy check on model output. (default: `yes`)|
 | `--precision`        | `PRECISION`           | `fp32`,`fp16`,`bf16`  | Datatype to use. (default: `fp16`)|

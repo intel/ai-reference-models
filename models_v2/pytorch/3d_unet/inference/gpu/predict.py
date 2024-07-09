@@ -31,6 +31,13 @@ import summary_utils
 
 from arguments_utils import args
 
+def get_device_type():
+    if args.gpu:
+        return 'cuda'
+    elif args.xpu:
+        return 'xpu'
+    return 'cpu'
+
 def quantize_model(model):
     # load data set for quantization
     validation_loader_calib = loader_utils.load_validation_dataset(
@@ -165,11 +172,11 @@ def inference_config(model):
                 trace_input = trace_input.to(dtype=autocast_dtype)
             io_utils.write_info('Using JIT trace')
             with torch.inference_mode():
-                if args.xpu:
+                if args.xpu and args.ipex:
                     with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
                         model = torch.jit.trace(model, trace_input)
-                elif args.gpu:
-                    with torch.autocast(enabled=use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=autocast_dtype, cache_enabled=False):
+                elif args.gpu or args.xpu:
+                    with torch.autocast(enabled=use_autocast, device_type=get_device_type(), dtype=autocast_dtype, cache_enabled=False):
                         model = torch.jit.trace(model, trace_input)
         elif args.use_jit == 'script':
             io_utils.write_info('Using JIT script')
@@ -196,54 +203,39 @@ def do_warmup(model, ds):
             if args.channels_last:
                 images = images.to(memory_format=torch.channels_last_3d)
 
-            if args.xpu:
+            if args.xpu or args.gpu:
                 try:
                     import memory_check
                     memory_check.display_mem(args.device)
                 except:
                     pass
-                images = images.to(args.device, non_blocking=args.non_blocking)
-                if args.no_amp:
-                    if args.fp16:
-                        images = images.to(dtype=torch.float16)
-                    elif args.bf16:
-                        images = images.to(dtype=torch.bfloat16)
 
-                if args.use_jit == 'trace':
-                    # compute output
-                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
-                        outputs += [model(images)]
-                else:
-                    with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=True):
-                        # compute output
-                        for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
-                            outputs += [model(images)]
+            images = images.to(args.device, non_blocking=args.non_blocking)
+            if args.no_amp:
+                if args.fp16:
+                    images = images.to(dtype=torch.float16)
+                elif args.bf16:
+                    images = images.to(dtype=torch.bfloat16)
 
-                torch.xpu.synchronize(args.device)
+            # compute output
+            if args.use_jit == 'trace':
+                for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
+                    outputs += [model(images)]
             else:
-                if args.gpu:
-                    try:
-                        import memory_check
-                        memory_check.display_mem(args.device)
-                    except:
-                        pass
-                    images = images.cuda(args.device, non_blocking=args.non_blocking)
-                if args.no_amp:
-                    if args.fp16:
-                        images = images.to(dtype=torch.float16)
-                    elif args.bf16:
-                        images = images.to(dtype=torch.bfloat16)
-                if args.use_jit == 'trace':
-                    # compute output
-                    for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
-                        outputs += [model(images)]
-                else:
-                    with torch.autocast(enabled=use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=autocast_dtype, cache_enabled=True):
-                        # compute output
+                if args.ipex:
+                    with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=True):
                         for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
                             outputs += [model(images)]
-                if args.gpu:
-                    torch.cuda.synchronize(args.device)
+                else:
+                    with torch.autocast(enabled=use_autocast, device_type=get_device_type(), dtype=autocast_dtype, cache_enabled=True):
+                        for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
+                            outputs += [model(images)]
+
+            if args.xpu:
+                torch.xpu.synchronize(args.device)
+            elif args.gpu:
+                torch.cuda.synchronize(args.device)
+
     io_utils.write_info('Completed {0} warmup batches'.format(len(outputs)))
 
 def do_perf_benchmarking(model, ds, gt_data):
@@ -298,7 +290,7 @@ def do_perf_benchmarking(model, ds, gt_data):
             if args.channels_last:
                 images = images.to(memory_format=torch.channels_last_3d)
 
-            if args.xpu:
+            if args.xpu and args.ipex:
                 with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
                     try:
                         import memory_check
@@ -352,13 +344,13 @@ def do_perf_benchmarking(model, ds, gt_data):
                         activities.append(torch.profiler.ProfilerActivity.CUDA)
                         prof_sort = 'self_cuda_time_total'
                 with torch.autograd.profiler.profile(enabled=profiling, use_cuda=True if args.gpu else False, record_shapes=False) as prof:
-                    if args.gpu:
+                    if args.gpu or args.xpu:
                         try:
                             import memory_check
                             memory_check.display_mem(args.device)
                         except:
                             pass
-                        images = images.cuda(args.device, non_blocking=args.non_blocking)
+                        images = images.to(args.device, non_blocking=args.non_blocking)
                     if args.no_amp:
                         if args.fp16:
                             images = images.to(dtype=torch.float16)
@@ -372,10 +364,12 @@ def do_perf_benchmarking(model, ds, gt_data):
                             outputs = model(images)
                             if not args.dummy:
                                 if args.gpu:
-                                        torch.cuda.synchronize(args.device)
+                                    torch.cuda.synchronize(args.device)
+                                elif args.xpu:
+                                    torch.xpu.synchronize(args.device)
                                 statistics_utils.accuracy(args, outputs[0], target, overall, whole, core, enhancing, gt_data)
                     else:
-                        with torch.autocast(enabled=use_autocast, device_type='cuda' if args.gpu else 'cpu', dtype=autocast_dtype, cache_enabled=False):
+                        with torch.autocast(enabled=use_autocast, device_type=get_device_type(), dtype=autocast_dtype, cache_enabled=False):
                             start_time = time.time()
                             # compute output
                             for batch_repeat_index in range(args.batch_streaming):
@@ -383,11 +377,15 @@ def do_perf_benchmarking(model, ds, gt_data):
                                 if not args.dummy:
                                     if args.gpu:
                                         torch.cuda.synchronize(args.device)
+                                    elif args.xpu:
+                                        torch.xpu.synchronize(args.device)
                                     statistics_utils.accuracy(args, outputs[0], target, overall, whole, core, enhancing, gt_data)
 
+                    # sync for time measurement
                     if args.gpu:
-                        # sync for time measurement
                         torch.cuda.synchronize(args.device)
+                    elif args.xpu:
+                        torch.xpu.synchronize(args.device)
                     duration_eval = (time.time() - start_time) / args.batch_streaming
 
                 if profiling:

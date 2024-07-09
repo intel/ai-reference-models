@@ -49,7 +49,7 @@ def write_results(batches_tested, throughput, latency, overall, whole, core, enh
     }
     output_dict['SAME:Framework Metadata'] = {}
     output_dict['SAME:Framework Metadata']['torch_version'] = str(torch.__version__)
-    if args.xpu:
+    if args.xpu and args.ipex:
         import intel_extension_for_pytorch as ipex
         output_dict['SAME:Framework Metadata']['ipex_version'] = str(ipex.__version__)
         output_dict['SAME:Framework Metadata']['has_onemkl'] = ipex.xpu.has_onemkl()

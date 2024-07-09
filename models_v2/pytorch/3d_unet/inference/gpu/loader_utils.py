@@ -103,7 +103,7 @@ def load_model_from_nnunet():
         model.eval()
         dtype = torch.float16 if args.fp16 else torch.float32
         dtype = torch.bfloat16 if args.bf16 else dtype
-        if args.xpu:
+        if args.xpu and args.ipex:
             model = torch.xpu.optimize(model=model, dtype=dtype, level='O1')
 
     if args.gpu:
