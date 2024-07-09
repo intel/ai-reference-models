@@ -27,6 +27,7 @@
 [[ "${MIN_TEST_DURATION}" == "" ]]  && MIN_TEST_DURATION=""
 [[ "${MAX_TEST_DURATION}" == "" ]]  && MAX_TEST_DURATION=""
 [[ "${PRECISION}" == "" ]]          && PRECISION="fp16"
+[[ "${PROFILE}" == "" ]]            && PROFILE="0"
 [[ "${SAVE_PATH}" == "" ]]          && SAVE_PATH=""
 [[ "${SOCKET}" == "" ]]             && SOCKET=""
 [[ "${STREAMS}" == "" ]]            && STREAMS=1
@@ -35,7 +36,7 @@
 ./get_model.sh
 
 # Process CLI arguments as overides for environment variables
-VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,load:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,proxy:,save:,socket:,streams:,ipex: -- "$@")
+VALID_ARGS=$(getopt -o h --long amp:,batch-size:,data:,dummy,help,load:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,profile:,proxy:,save:,socket:,streams:,ipex: -- "$@")
 if [[ $? -ne 0 ]]; then
     exit 1;
 fi
@@ -94,6 +95,10 @@ while [ : ]; do
         PRECISION=$2
         shift 2
         ;;
+    --profile)
+        PROFILE=$2
+        shift 2
+        ;;
     --proxy)
         PROXY=$2
         shift 2
@@ -139,6 +144,7 @@ while [ : ]; do
         echo "                                            * fp16"
         echo "                                            * fp32"
         echo "                                            * int8"
+	echo "  --profile        [PROFILE]              : Capture performance profile (default: ${PROFILE})"
         echo "  --proxy          [PROXY]                : System proxy. Required to download models"
         echo "  --save           [SAVE_PATH]            : If specified model will be saved to this saved location (default: disabled)"
         echo "  --streams        [STREAMS]              : Number of parallel streams to do inference on (default: '${STREAMS}')"
@@ -327,7 +333,6 @@ elif [[ "${PLATFORM}" == "CPU" ]]; then
 elif [[ -n "${PLATFORM}" ]]; then
     _platform_args="--device ${PLATFORM}"
 fi
-export PROFILE="OFF"
 
 if [[ "$IPEX" == "yes" ]]; then
     _platform_args+=" --ipex"

@@ -416,27 +416,20 @@ def do_perf_benchmarking(model, ds, names):
                         prof_sort = 'self_cuda_time_total'
                     elif args.xpu:
                         prof_sort = 'self_xpu_time_total'
+                # run inference
                 if args.xpu and args.ipex:
                     with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:  
-                        # inference
                         total, actual_batch_run, acc1 = inference(model, total, actual_batch_run, ds, path, im0s, images, s, names, acc1, top1)
-                                                    
-                        if profiling:
-                            torch.save(prof.key_averages().table(sort_by=prof_sort), './profiling.' + profile_name + '.inf.pt')
-                            torch.save(prof.table(sort_by='id', row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
-                        if is_done(ds_batches, actual_batch_run, total_batches, start_benchmark_time):
-                            break 
                 else:
                     with torch.autograd.profiler.profile(enabled=profiling, use_cuda=True if args.gpu else False, record_shapes=False) as prof:  
-                        # inference
                         total, actual_batch_run, acc1 = inference(model, total, actual_batch_run, ds, path, im0s, images, s, names, acc1, top1)
                         
-                        if profiling:
-                            torch.save(prof.key_averages().table(sort_by=prof_sort), './profiling.' + profile_name + '.inf.pt')
-                            torch.save(prof.table(sort_by='id', row_limit=100000), './profiling.' + profile_name + '.inf.detailed.pt')
+                if profiling:
+                    torch.save(prof.key_averages().table(sort_by=prof_sort), args.output_dir + os.sep + 'profiling.' + profile_name + '.inf.pt')
+                    torch.save(prof.table(row_limit=100000), args.output_dir + os.sep + 'profiling.' + profile_name + '.inf.detailed.pt')
                         
-                        if is_done(ds_batches, actual_batch_run, total_batches, start_benchmark_time):
-                            break
+                if is_done(ds_batches, actual_batch_run, total_batches, start_benchmark_time):
+                    break
                                         
             duration_eval = total / actual_batch_run
 
