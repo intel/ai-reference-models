@@ -1,14 +1,16 @@
 name: PR validations
 on:
   pull_request:
-    branches:
-      - 'lreal/**'
 permissions: read-all
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   checks_setup:
     name: Setup checks
-    runs-on: self-hosted
+    # TODO: remove condition to enable the job for all pull requests
+    if: startsWith(github.head_ref, 'lreal/')
+    runs-on: k8-runners
     outputs:
       checks: ${{ steps.set_checks.outputs.checks }}
     steps:
@@ -18,8 +20,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run:
-          echo "checks=`python3 .github/utils/pr-checks-entrypoint.py
-                                -c .github/config/models_v2-check-config.json
+          echo "checks=`python3 .github/utils/pr-checks-setup.py
+                                -c .github/config/compliance-config.json
                                 -u ${{ github.event.pull_request.url }}`" >> $GITHUB_OUTPUT
       - name: Print checks information
         run:
@@ -27,7 +29,7 @@ jobs:
   bom_changes:
     name: BoM changes found
     needs: checks_setup
-    runs-on: self-hosted
+    runs-on: k8-runners
     if: ${{ fromJson(needs.checks_setup.outputs.checks).flags.is_bom_change }}
     steps:
       - name: Call BoM change action
@@ -38,7 +40,7 @@ jobs:
   models_check:
     name: Models workloads
     needs: checks_setup
-    runs-on: self-hosted
+    runs-on: k8-runners
     if: ${{ fromJson(needs.checks_setup.outputs.checks).flags.is_model_change }}
     strategy:
       matrix:
@@ -49,7 +51,7 @@ jobs:
   containers_check:
     name: Containers building
     needs: checks_setup
-    runs-on: self-hosted
+    runs-on: k8-runners
     if: ${{ fromJson(needs.checks_setup.outputs.checks).flags.is_container_change }}
     strategy:
       matrix:
