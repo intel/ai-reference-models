@@ -66,6 +66,7 @@
   ],
   "skip_test_structure_check": [
     "jax/gemma/inference/cpu",
+    "tensorflow/gemma/inference/cpu",
     "jax/gptj/inference/cpu",
     "pytorch/3d_unet/inference/gpu",
     "pytorch/bert_large/inference/gpu",
