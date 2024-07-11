@@ -36,7 +36,7 @@ MaskRCNN Inference best known configurations with Intel® Extension for PyTorch.
 ```
 cd <MODEL_DIR=path_to_maskrcnn_inference_cpu>
 export DATASET_DIR=<directory where the dataset will be saved>
-./../../common/download_dataset.sh
+./download_dataset.sh
 cd -
 ```
 
@@ -60,20 +60,21 @@ export CHECKPOINT_DIR=<directory where the pretrained model will be saved>
 5. Run setup scripts
 ```
 cd <MODEL_DIR=path_to_maskrcnn_inference_cpu>
-./../../common/setup.sh
-pip install -e ../../common/setup.py
-pip install -r ../../common/requirements.txt
+./setup.sh
+pip install -e setup.py
+pip install -r requirements.txt
 ```
 6. Setup required environment paramaters
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
-| **THROUHGPUT** (leave unset if accuracy)              |                               `export THROUGHPUT=true`                                  |
+| **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)       | `export TEST_MODE=THROUGHPUT (THROUGHPUT, ACCURACY, REALTIME)`                                  |
 | **DATASET_DIR**              |                               `export DATASET_DIR=<path-to-coco>`                                  |
 | **PRECISION**    |                               `export PRECISION=fp32 <Select from: fp32, avx-fp32, bf16, or bf32>`                             |
-| **OUTPUT_DIR**    |                               `export OUTPUT_DIR=$PWD`                               |
+| **OUTPUT_DIR**    |                               `export OUTPUT_DIR=<path to an output directory>`                               |
 | **CHECKPOINT_DIR**    |                               `export CHECKPOINT_DIR=<path to pre-trained model>`                               |
 | **MODE**    |                               `export MODE=<set to 'jit' or 'imperative'>`                               |
+| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
 
 7. Run `run_model.sh`
 ## Output
