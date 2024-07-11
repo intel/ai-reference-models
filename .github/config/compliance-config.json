@@ -22,7 +22,8 @@
     "env"
   ],
   "skip_dir_structure_check": [
-    "pytorch/maskrcnn/common/maskrcnn-benchmark"
+    "pytorch/maskrcnn/common/maskrcnn-benchmark",
+    "pytorch/resnet50/common"
   ],
   "skip_files_check": [
     "jax/gemma/inference/cpu",
@@ -62,7 +63,9 @@
     "pytorch/ssd-resnet34/training/cpu",
     "pytorch/ssd-resnet34/inference/cpu",
     "pytorch/dlrm/training/cpu",
-    "pytorch/dlrm/inference/cpu"
+    "pytorch/dlrm/inference/cpu",
+    "pytorch/resnet50/training/cpu",
+    "pytorch/resnet50/inference/cpu"
   ],
   "skip_test_structure_check": [
     "jax/gemma/inference/cpu",
@@ -104,6 +107,10 @@
     "pytorch/ssd-resnet34/inference/cpu",
     "pytorch/distilbert/inference/cpu",
     "pytorch/dlrm/training/cpu",
-    "pytorch/dlrm/inference/cpu"
+    "pytorch/dlrm/inference/cpu",
+    "pytorch/rnnt/training/cpu",
+    "pytorch/rnnt/inference/cpu",
+    "pytorch/resnet50/training/cpu",
+    "pytorch/resnet50/inference/cpu"
   ]
 }

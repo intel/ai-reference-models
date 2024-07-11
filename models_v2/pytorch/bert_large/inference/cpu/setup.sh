@@ -16,6 +16,7 @@
 #
 
 pip install tensorboard
+pip install protobuf==3.20.3 numpy==1.20
 
 # Check the operating system type
 os_type=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
@@ -32,6 +33,6 @@ git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.28.1
 git lfs pull
-git apply ../enable_ipex_for_transformers.diff
+git apply ../../../../common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..

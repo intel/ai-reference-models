@@ -16,25 +16,42 @@
 # limitations under the License.
 #
 
-if [[ "$TRAINING_PHASE" == '1' ]]; then 
-    echo "Running phase 1 training" 
-elif [ "$TRAINING_PHASE" == '2' ]; then
-    echo "Running phase 2 training"
-else
-    echo "Please set TRAINING_PHASE to 1 or 2"
-    exit 1
-fi 
-
-if [[ "$DDP" == 'true' ]]; then 
-    echo "Running distributed training" 
+if [ "$DDP" == 'false' ]; then
+    echo "Running single-node training"
+    if [[ "$TRAINING_PHASE" == '1' ]]; then
+        echo "Running phase 1 training"
+        ARGS="--benchmark"
+        precision=fp32
+        batch_size=${batch_size:-224}
+    elif [ "$TRAINING_PHASE" == '2' ]; then
+        echo "Running phase 2 training"
+        ARGS="--benchmark"
+        precision=fp32
+        batch_size=${batch_size:-28}
+    else
+        echo "Please set TRAINING_PHASE to 1 or 2"
+        exit 1
+    fi
+elif [[ "$DDP" == 'true' ]]; then
+    echo "Running distributed training"
     oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
     source $oneccl_bindings_for_pytorch_path/env/setvars.sh
-elif [ "$DDP" == 'false' ]; then
-    echo "Running single-node training"
+    if [[ "$TRAINING_PHASE" == '1' ]]; then
+        ARGS="--benchmark"
+        precision=fp32
+        batch_size=${batch_size:-224}
+    elif [[ "$TRAINING_PHASE" == '2' ]]; then
+        ARGS="--benchmark"
+        precision=fp32
+        batch_size=${batch_size:-28}
+    else
+        echo "Please set TRAINING_PHASE to 1 or 2"
+        exit 1
+    fi
 else
     echo "Please set DDP to true or false"
     exit 1
-fi 
+fi
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -51,15 +68,9 @@ if [ -z "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-export TRAIN_SCRIPT=${PWD}/run_pretrain_mlperf.py
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
-#export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
-ARGS="$ARGS --benchmark"
-precision=fp32
-
-batch_size=${batch_size:-224}
 if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
@@ -91,136 +102,249 @@ else
     exit 1
 fi
 
+if [ "$DDP" == 'false' ]; then
+    export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000";
+    if [[ "$TRAINING_PHASE" == '1' ]]; then
+        BERT_MODEL_CONFIG=${BERT_MODEL_CONFIG-~/dataset/checkpoint/config.json}
+        rm -rf ${OUTPUT_DIR}/throughput_log_phase1_*
+    elif [[ "$TRAINING_PHASE" == '2' ]]; then
+        PRETRAINED_MODEL=${PRETRAINED_MODEL:-~/dataset/checkpoint/}
+        rm -rf ${OUTPUT_DIR}/throughput_log_phase2_*
+    fi
+elif [ "$DDP" == 'true' ]; then
+    if [[ "$TRAINING_PHASE" == '1' ]]; then
+        BERT_MODEL_CONFIG=${BERT_MODEL_CONFIG-~/dataset/checkpoint/config.json}
+        SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+        NNODES=${NNODES:-1}
+        HOSTFILE=${HOSTFILE:-./hostfile}
+        rm -rf ${OUTPUT_DIR}/throughput_log_phase1_*
+    elif [[ "$TRAINING_PHASE" == '1' ]]; then
+        PRETRAINED_MODEL=${PRETRAINED_MODEL:-~/dataset/checkpoint/}
+        SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+        NNODES=${NNODES:-1}
+        HOSTFILE=${HOSTFILE:-./hostfile}
+        rm -rf ${OUTPUT_DIR}/throughput_log_phase2_*
+    fi
+fi
 
 DATASET_DIR=${DATASET_DIR:-~/dataset/}
 TRAIN_SCRIPT=${TRAIN_SCRIPT:-${MODEL_DIR}/run_pretrain_mlperf.py}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 work_space=${work_space:-${OUTPUT_DIR}}
 
-ARGS_IPEX=""
-params=""
+if [[ "$DDP" == "false" ]]; then
+    if [[ "$TRAINING_PHASE" == "1" ]]; then
+        NUM_RANKS=1
+        LBS=$(( batch_size / NUM_RANKS ))
+        params="--train_batch_size=$LBS     --learning_rate=3.5e-4     --opt_lamb_beta_1=0.9     --opt_lamb_beta_2=0.999     --warmup_proportion=0.0     --warmup_steps=0.0     --start_warmup_step=0     --max_steps=13700    --max_predictions_per_seq=76      --do_train   --train_mlm_accuracy_window_size=0     --target_mlm_accuracy=0.720     --weight_decay_rate=0.01     --max_samples_termination=4500000     --eval_iter_start_samples=150000 --eval_iter_samples=150000     --eval_batch_size=16  --gradient_accumulation_steps=1 --num_samples_per_checkpoint 1 --min_samples_to_start_checkpoints 1 --log_freq 1 "
 
+        TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+        if [[ "0" == ${TORCH_INDUCTOR} ]];then
+            python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
+                --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
+                --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+                --model_type 'bert' \
+                --benchmark \
+                --ipex \
+                --output_dir $OUTPUT_DIR/model_save \
+                --dense_seq_output \
+                --config_name ${BERT_MODEL_CONFIG} \
+                $ARGS \
+                $params
+        else
+            export TORCHINDUCTOR_FREEZING=1
+            python -m torch.backends.xeon.run_cpu --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
+                --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
+                --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+                --model_type 'bert' \
+                --benchmark \
+                --inductor \
+                --output_dir $OUTPUT_DIR/model_save \
+                --dense_seq_output \
+                --config_name ${BERT_MODEL_CONFIG} \
+                $ARGS \
+                $params 2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase1_${precision}.log
+        fi
+        throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_phase1_${precision}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+        BEGIN {
+                sum = 0;
+                i = 0;
+            }
+            {
+                sum = sum + $1;
+        i++;
+            }
+        END   {
+        sum = sum / i;
+        printf("%.3f", sum);
+        }')
+        echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+        echo ""BERT";"training phase1 throughput";${precision}; ${batch_size};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+    elif [[ "$TRAINING_PHASE" == "2" ]]; then
+        NUM_RANKS=1
+        LBS=$(( batch_size / NUM_RANKS ))
+        params="--train_batch_size=$LBS     --learning_rate=3.5e-4     --opt_lamb_beta_1=0.9     --opt_lamb_beta_2=0.999     --warmup_proportion=0.0     --warmup_steps=0.0     --start_warmup_step=0     --max_steps=13700     --phase2    --max_predictions_per_seq=76      --do_train     --skip_checkpoint     --train_mlm_accuracy_window_size=0     --target_mlm_accuracy=0.720     --weight_decay_rate=0.01     --max_samples_termination=4500000     --eval_iter_start_samples=150000 --eval_iter_samples=150000     --eval_batch_size=16  --gradient_accumulation_steps=1     --log_freq=0 "
 
-if [[ "$DDP" == "true" ]]; then 
-    SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
-    NNODES=${NNODES:-1}
-    NUM_RANKS=$(( NNODES * SOCKETS ))
-    LBS=$(( batch_size / NUM_RANKS ))
-    export FI_PROVIDER=psm3
-    export PSM3_HAL=sockets
-    params="$params --log_freq=0" 
+        TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+        if [[ "0" == ${TORCH_INDUCTOR} ]];then
+            python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+                --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
+                --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+                --model_type 'bert' \
+                --model_name_or_path ${PRETRAINED_MODEL} \
+                --benchmark \
+                --ipex \
+                --dense_seq_output \
+                --output_dir $OUTPUT_DIR/model_save \
+                $ARGS \
+                $params
+        else
+            export TORCHINDUCTOR_FREEZING=1
+            python -m torch.backends.xeon.run_cpu --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
+                --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
+                --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+                --model_type 'bert' \
+                --model_name_or_path ${PRETRAINED_MODEL} \
+                --benchmark \
+                --inductor \
+                --dense_seq_output \
+                --output_dir $OUTPUT_DIR/model_save \
+                $ARGS \
+                $params 2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase2_${precision}.log
+        fi
+        throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_phase2_${precision}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+        BEGIN {
+                sum = 0;
+                i = 0;
+            }
+            {
+                sum = sum + $1;
+        i++;
+            }
+        END   {
+        sum = sum / i;
+        printf("%.3f", sum);
+        }')
+        echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+        echo ""BERT";"training phase2 throughput";${precision}; ${batch_size};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+    fi
+elif [[ "$DDP" == "true" ]]; then
+    if [[ "$TRAINING_PHASE" == "1" ]]; then
+        NUM_RANKS=$(( NNODES * SOCKETS ))
+        LBS=$(( batch_size / NUM_RANKS ))
+        params="--train_batch_size=$LBS     --learning_rate=3.5e-4     --opt_lamb_beta_1=0.9     --opt_lamb_beta_2=0.999     --warmup_proportion=0.0     --warmup_steps=0.0     --start_warmup_step=0     --max_steps=13700   --max_predictions_per_seq=76      --do_train     --skip_checkpoint     --train_mlm_accuracy_window_size=0     --target_mlm_accuracy=0.720     --weight_decay_rate=0.01     --max_samples_termination=4500000     --eval_iter_start_samples=150000 --eval_iter_samples=150000     --eval_batch_size=16  --gradient_accumulation_steps=1     --log_freq=0 "
 
-    ARGS_IPEX="$ARGS_IPEX --distributed"
-    ARGS_IPEX="$ARGS_IPEX --nnodes ${NNODES}"
-    ARGS_IPEX="$ARGS_IPEX --hostfile ${HOSTFILE}"
-    ARGS_IPEX="$ARGS_IPEX --nproc_per_node ${SOCKETS}"
-else 
-    NUM_RANKS=1
-    LBS=$(( batch_size / NUM_RANKS ))
-    params="$params --num_samples_per_checkpoint 1 --min_samples_to_start_checkpoints 1 --log_freq 1"
-    
-    ARGS_IPEX="$ARGS_IPEX --node_id 0"
-    ARGS_IPEX="$ARGS_IPEX --enable_jemalloc"
-fi 
+        export FI_PROVIDER=psm3
+        export PSM3_HAL=sockets
 
-params="$params --train_batch_size=$LBS     --learning_rate=3.5e-4     --opt_lamb_beta_1=0.9     --opt_lamb_beta_2=0.999     --warmup_proportion=0.0     --warmup_steps=0.0     --start_warmup_step=0     --max_steps=13700   --max_predictions_per_seq=76      --do_train     --skip_checkpoint     --train_mlm_accuracy_window_size=0     --target_mlm_accuracy=0.720     --weight_decay_rate=0.01     --max_samples_termination=4500000     --eval_iter_start_samples=150000 --eval_iter_samples=150000     --eval_batch_size=16  --gradient_accumulation_steps=1"
+        TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+        if [[ "0" == ${TORCH_INDUCTOR} ]];then
+            python -m intel_extension_for_pytorch.cpu.launch --distributed  --nnodes ${NNODES} --hostfile ${HOSTFILE} --nproc_per_node $SOCKETS --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
+                --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
+                --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+                --model_type 'bert' \
+                --ipex \
+                --output_dir model_save \
+                --dense_seq_output \
+                --config_name ${BERT_MODEL_CONFIG} \
+                $ARGS \
+                $params \
+            2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase1_${precision}.log
+        else
+            export TORCHINDUCTOR_FREEZING=1
+            python -m intel_extension_for_pytorch.cpu.launch --distributed  --nnodes ${NNODES} --hostfile ${HOSTFILE} --nproc_per_node $SOCKETS --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
+                --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
+                --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+                --model_type 'bert' \
+                --inductor \
+                --output_dir model_save \
+                --dense_seq_output \
+                --config_name ${BERT_MODEL_CONFIG} \
+                $ARGS \
+                $params \
+            2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase1_${precision}.log
+        fi
+        # For the summary of results
+        wait
+        throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_phase1_${precision}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+        BEGIN {
+                sum = 0;
+                i = 0;
+            }
+            {
+                sum = sum + $1;
+        i++;
+            }
+        END   {
+        sum = sum / i;
+        printf("%.3f", sum);
+        }')
+        echo ""BERT";"training phase1 distributed throughput";${precision}; ${batch_size};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+    elif [[ "$TRAINING_PHASE" == "2" ]]; then
+        NUM_RANKS=$(( NNODES * SOCKETS ))
+        LBS=$(( batch_size / NUM_RANKS ))
+        params="--train_batch_size=$LBS     --learning_rate=3.5e-4     --opt_lamb_beta_1=0.9     --opt_lamb_beta_2=0.999     --warmup_proportion=0.0     --warmup_steps=0.0     --start_warmup_step=0     --max_steps=13700     --phase2    --max_predictions_per_seq=76      --do_train     --skip_checkpoint     --train_mlm_accuracy_window_size=0     --target_mlm_accuracy=0.720     --weight_decay_rate=0.01     --max_samples_termination=4500000     --eval_iter_start_samples=150000 --eval_iter_samples=150000     --eval_batch_size=16  --gradient_accumulation_steps=1     --log_freq=0 "
 
-if [[ "$TRAINING_PHASE" == "1" ]]; then
-    rm -rf ${OUTPUT_DIR}/throughput_log_phase1_*
-    LOG_PREFIX="throughput_log_phase1_${precision}"
+        export FI_PROVIDER=psm3
+        export PSM3_HAL=sockets
 
-    BERT_MODEL_CONFIG=${BERT_MODEL_CONFIG-~/dataset/checkpoint/config.json}
-    CHECKPOINT_DIR=${CHECKPOINT_DIR-${PWD}/checkpoint_phase1_dir}
+        TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+        if [[ "0" == ${TORCH_INDUCTOR} ]];then
+            python -m intel_extension_for_pytorch.cpu.launch --distributed --nnodes ${NNODES} --hostfile ${HOSTFILE}  --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+                --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
+                --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+                --model_type 'bert' \
+                --ipex \
+                --model_name_or_path ${PRETRAINED_MODEL} \
+                --output_dir model_save \
+                --dense_seq_output \
+                $ARGS \
+                $params \
+                2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase2_${precision}.log
+        else
+            export TORCHINDUCTOR_FREEZING=1
+            python -m intel_extension_for_pytorch.cpu.launch --distributed --nnodes ${NNODES} --hostfile ${HOSTFILE}  --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+                --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
+                --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
+                --model_type 'bert' \
+                --inductor \
+                --model_name_or_path ${PRETRAINED_MODEL} \
+                --output_dir model_save \
+                --dense_seq_output \
+                $ARGS \
+                $params \
+                2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase2_${precision}.log
+        fi
 
-    TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
-
-
-    if [[ "0" != ${TORCH_INDUCTOR} ]];then  
-        export TORCHINDUCTOR_FREEZING=1
-    fi 
-
-    python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} --log_path=${OUTPUT_DIR} --log_file_prefix="./${LOG_PREFIX}" ${TRAIN_SCRIPT} \
-        --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
-        --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
-        --model_type 'bert' \
-        --ipex \
-        --output_dir $OUTPUT_DIR/model_save \
-        --dense_seq_output \
-        --config_name ${BERT_MODEL_CONFIG} \
-        $ARGS \
-        $params
-        2>&1 | tee ${OUTPUT_DIR}/${LOG_PREFIX}
-        wait 
-else
-    rm -rf ${OUTPUT_DIR}/throughput_log_phase2_*
-    LOG_PREFIX="throughput_log_phase2_${precision}"
-    
-    PRETRAINED_MODEL=${PRETRAINED_MODEL-${PWD}/checkpoint_phase1_dir}
-
-    TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}   
-
-    params="$params --phase2"
-
-    if [[ "0" != ${TORCH_INDUCTOR} ]];then  
-        export TORCHINDUCTOR_FREEZING=1
-    fi 
-    python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} --log_path=${OUTPUT_DIR} --log_file_prefix="./${LOG_PREFIX}" ${TRAIN_SCRIPT} \
-        --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
-        --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
-        --model_type 'bert' \
-        --model_name_or_path ${PRETRAINED_MODEL} \
-        --benchmark \
-        --ipex \
-        --dense_seq_output \
-        --output_dir $OUTPUT_DIR/model_save \
-        $ARGS \
-        $params
-        2>&1 | tee ${OUTPUT_DIR}/${LOG_PREFIX}
-        wait 
-fi
-
-total_throughput=0
-total_latency=0 
-total_accuracy=0
-num_logs=0
-
-for log_file in ${OUTPUT_DIR}/${LOG_PREFIX}*; do
-    throughput=$(grep -oP "Throughput: \K\d+\.\d+" $log_file)
-    if [ -z "$throughput" ]; then
-        continue  
-    latency=$(grep -oP "bert_train latency: \K\d+\.\d+" ${log_file})
-    accuracy=$(grep -oP "final_mlm_accuracy: \K\d+\.\d+" ${log_file})
-        
-    total_throughput=$(bc <<< "$total_throughput + $throughput")
-    total_latency=$(bc <<< "$total_latency + $latency")
-    total_accuracy=$(bc <<< "$total_accuracy + $accuracy")
-    ((num_logs++))
-done
-
-if [ $num_logs -gt 0 ]; then
-    average_throughput=$(bc <<< "scale=3; $total_throughput / $num_logs")
-    average_latency=$(bc <<< "scale=3; $total_latency / $num_logs")
-    average_accuracy=$(bc <<< "scale=3; $total_accuracy / $num_logs")
-
-    echo "Average throughput across all valid logs: $average_throughput examples per second" | tee -a ${OUTPUT_DIR}/${LOG_PREFIX}_summary.log
-    echo "Average latency across all valid logs: $average_latency seconds per example" | tee -a ${OUTPUT_DIR}/${LOG_PREFIX}_summary.log
-    echo "Average accuracy across all valid logs: $average_accuracy %" | tee -a ${OUTPUT_DIR}/${LOG_PREFIX}_summary.log
-
-else
-    echo "No valid throughput/accuracy logs found for calculation." | tee -a ${OUTPUT_DIR}/${LOG_PREFIX}_summary.log
-    exit
+        # For the summary of results
+        wait
+        throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_phase2_${precision}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+        BEGIN {
+                sum = 0;
+                i = 0;
+            }
+            {
+                sum = sum + $1;
+        i++;
+            }
+        END   {
+        sum = sum / i;
+        printf("%.3f", sum);
+        }')
+        echo ""BERT";"training phase2 distributed throughput";${precision}; ${batch_size};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+    fi
 fi
 
 yaml_content=$(cat << EOF
-results: 
+results:
 - key : throughput
-  value: $average_throughput
-  unit: sentence/s 
+  value: $throughput
+  unit: sentence/s
 - key: latency
-  value: $average_latency
+  value: $latency
   unit: s
 - key: accuracy
-  value: $average_accuracy
+  value: $accuracy
   unit: f1
 EOF
 )
