@@ -18,7 +18,11 @@ ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 ENV LANG=C.UTF-8
+
 ENV DEBIAN_FRONTEND=noninteractive
+
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
 
 WORKDIR /workspace/pytorch-flex-series-3dunet-inference
 COPY models_v2/pytorch/3d_unet/inference/gpu .

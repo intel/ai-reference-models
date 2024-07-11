@@ -21,6 +21,9 @@ WORKDIR /workspace/pytorch-flex-series-distilbert-inference/models
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+
 RUN apt-get update && apt-get install -y python3-dev && \
     rm -rf /var/lib/apt/lists/*
 

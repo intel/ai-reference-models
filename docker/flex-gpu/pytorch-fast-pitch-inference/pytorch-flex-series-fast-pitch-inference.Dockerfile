@@ -19,6 +19,11 @@ FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 WORKDIR /workspace/pytorch-flex-series-fast-pitch-inference/models
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+
 COPY models_v2/pytorch/fastpitch/inference/gpu .
 COPY models_v2/common common
 

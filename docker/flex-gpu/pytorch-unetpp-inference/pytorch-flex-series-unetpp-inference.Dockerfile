@@ -21,6 +21,12 @@ WORKDIR /workspace/pytorch-flex-series-unetpp-inference/models
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+
 COPY models_v2/pytorch/unetpp/inference/gpu .
 COPY models_v2/common common
 

@@ -20,6 +20,11 @@ FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 WORKDIR /workspace/pytorch-flex-series-resnet50v1-5-inference/models
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends parallel pciutils numactl && \
     rm -rf /var/lib/apt/lists/*
