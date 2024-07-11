@@ -79,7 +79,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [DistilBERT base](https://arxiv.org/abs/1910.01108)  | PyTorch | Inference | [FP32 BF32 BF16Int8-FP32 Int8-BFloat16 BFloat32](/models_v2/pytorch/distilbert/inference/cpu/README.md) | [ DistilBERT Base SQuAD1.1](https://huggingface.co/distilbert-base-uncased-distilled-squad) |
 | [RNN-T](https://arxiv.org/abs/2007.15188)            | PyTorch | Inference | [FP32 BFloat16 BFloat32](/models_v2/pytorch/rnnt/inference/cpu/README.md) | [RNN-T dataset](/models_v2/pytorch/rnnt/inference/cpu/download_dataset.sh) |
 | [RNN-T](https://arxiv.org/abs/2007.15188)            | PyTorch | Training  | [FP32 BFloat16 BFloat32](/models_v2/pytorch/rnnt/training/cpu/README.md) | [RNN-T dataset](/models_v2/pytorch/rnnt/training/cpu/download_dataset.sh) |
-| [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/gptj/inference/cpu/README.md) | |
+| [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/models_v2/pytorch/gptj/inference/cpu/README.md) | |
 | [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/llama/inference/cpu/README.md) | |
 | [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Training | [FP32 FP16 BFloat16 BF32](/quickstart/language_modeling/pytorch/llama/training/cpu/README.md) | |
 | [LLAMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/llama/inference/cpu/README.md) | |
@@ -110,15 +110,14 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 Int8 BFloat16 BFloat32](/models_v2/pytorch/dlrm/inference/cpu/README.md) | [Criteo Terabyte](/models_v2/pytorch/dlrm/inference/cpu/README.md#datasets) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Training  | [FP32 BFloat16 BFloat32](/models_v2/pytorch/dlrm/training/cpu/README.md) | [Criteo Terabyte](/models_v2/pytorch/dlrm/training/cpu/README.md#datasets) |
 | [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 FP16 BFloat16 BFloat32 Int8](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/README.md) | [Criteo 1TB Click Logs dataset](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu#datasets) |
-| [MEMREC-DLRM](https://arxiv.org/pdf/2305.07205.pdf)         | PyTorch | Inference  | [FP32](/quickstart/recommendation/pytorch/memrec_dlrm/inference/cpu/README.md) | [Criteo Terabyte](/quickstart/recommendation/pytorch/memrec_dlrm/inference/cpu/README.md#datasets) |
 
 ### Diffusion
 
 | Model                                           | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | ----------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
 | [Stable Diffusion](https://keras.io/guides/keras_cv/generate_images_with_stable_diffusion/) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/diffusion/tensorflow/stable_diffusion/inference/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
-| [Stable Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1) | PyTorch | Inference | [FP32 BFloat16 FP16 BFloat32 Int8-FP32 Int8-BFloat16](/quickstart/diffusion/pytorch/stable_diffusion/inference/cpu/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
-| [Stable Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1) | PyTorch | Training | [FP32 BFloat16 FP16 BFloat32](/quickstart/diffusion/pytorch/stable_diffusion/training/cpu/README.md) | [cat images](https://huggingface.co/datasets/diffusers/cat_toy_example)
+| [Stable Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1) | PyTorch | Inference | [FP32 BFloat16 FP16 BFloat32 Int8-FP32 Int8-BFloat16](/models_v2/pytorch/stable_diffusion/inference/cpu/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
+| [Stable Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1) | PyTorch | Training | [FP32 BFloat16 FP16 BFloat32](/models_v2/pytorch/stable_diffusion/training/cpu/README.md) | [cat images](https://huggingface.co/datasets/diffusers/cat_toy_example)
 | [Latent Consistency Models(LCM)](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7) | PyTorch | Inference | [FP32 BFloat16 FP16 BFloat32 Int8-FP32 Int8-BFloat16](/quickstart/diffusion/pytorch/LCM/inference/cpu/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
 
 
