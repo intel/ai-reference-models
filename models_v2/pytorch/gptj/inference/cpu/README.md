@@ -12,7 +12,7 @@ GPT-J 6B inference best known configurations with Intel® Extension for PyTorch.
 ## Bare Metal
 ### General setup
 
-Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
+Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to build Pytorch, IPEX, TorchVison and TCMalloc.
 
 ### Model Specific Setup
 
