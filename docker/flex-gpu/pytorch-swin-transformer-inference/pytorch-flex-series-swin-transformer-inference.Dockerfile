@@ -20,6 +20,12 @@ FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 WORKDIR /workspace/pytorch-flex-series-swin-transformer-inference/models
 
 ENV DEBIAN_FRONTEND=noninteractive
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+
 COPY models_v2/common common
 
 COPY models_v2/pytorch/swin-transformer/inference/gpu .
