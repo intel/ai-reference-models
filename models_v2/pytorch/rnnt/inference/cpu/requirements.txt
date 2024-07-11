@@ -1,0 +1,11 @@
+ascii-graph==1.5.1
+ipdb
+librosa
+pandas
+soundfile
+sox
+tensorboard==2.0.0
+toml
+tqdm==4.31.1
+wheel==0.38.0 # Included this to avoid a vulnerability
+wrapt==1.10.11
