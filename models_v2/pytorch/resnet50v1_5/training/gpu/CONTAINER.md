@@ -65,7 +65,6 @@ IMAGE_NAME=intel/image-recognition:pytorch-max-gpu-resnet50v1-5-training
 SCRIPT=run_model.sh
 
 docker run \
-  --privileged \
   --device=/dev/dri \
   --ipc=host \
   --env DATASET_DIR=${DATASET_DIR} \

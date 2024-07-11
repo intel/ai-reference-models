@@ -44,7 +44,6 @@ IMAGE_NAME=intel/language-modeling:pytorch-max-gpu-bert-large-training
 SCRIPT=run_model.sh
 
 docker run \
-  --privileged \
   --device=/dev/dri \
   --ipc host \
   --env DATASET_DIR=${DATASET_DIR} \
