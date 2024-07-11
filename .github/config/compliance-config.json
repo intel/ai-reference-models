@@ -112,6 +112,8 @@
     "pytorch/rnnt/inference/cpu",
     "pytorch/resnet50/training/cpu",
     "pytorch/resnet50/inference/cpu",
-    "pytorch/gptj/inference/cpu"
+    "pytorch/gptj/inference/cpu",
+    "pytorch/stable_diffusion/training/cpu",
+    "pytorch/stable_diffusion/inference/cpu"
   ]
 }
