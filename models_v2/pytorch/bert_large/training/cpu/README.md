@@ -49,21 +49,20 @@ Follow [link]((https://github.com/IntelAI/models/blob/master/docs/general/pytorc
   export TORCH_INDUCTOR=1
 ```
 
-# Prepare Dataset
-## Location of the input files
+
+## Datasets
+
+# Location of the input files
 
 This [MLCommons members Google Drive location](https://drive.google.com/drive/u/0/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT) contains the following.
 * TensorFlow checkpoint (bert_model.ckpt) containing the pre-trained weights (which is actually 3 files).
 * Vocab file (vocab.txt) to map WordPiece to word id.
 * Config file (bert_config.json) which specifies the hyperparameters of the model.
 
-Use the following commands to obtain `bert_config.json` for the `BERT_MODEL_CONFIG` environment variable:
-```shell
-wget -O bert_config.json 'https://drive.google.com/uc?export=download&id=1fbGClQMi2CoMv7fwrwTC5YYPooQBdcFW'
-export BERT_MODEL_CONFIG=$(pwd)/bert_config.json
-```
+# Checkpoint conversion
+python convert_tf_checkpoint.py --tf_checkpoint /cks/model.ckpt-28252 --bert_config_path /cks/bert_config.json --output_checkpoint model.ckpt-28252.pt
 
-## Download the preprocessed text dataset
+# Download the preprocessed text dataset
 
 From the [MLCommons BERT Processed dataset
 directory](https://drive.google.com/drive/folders/1cywmDnAsrP5-2vsr8GDc6QUc7VWe-M3v?usp=sharing)
@@ -79,31 +78,33 @@ cd ..
 After completing this step you should have a directory called `results4/` that
 contains 502 files for a total of about 13Gbytes.
 
-## Generate the BERT input dataset
+# Generate the BERT input dataset
 
-The `create_pretraining_data.py` script duplicates the input plain text, replaces
+The [create_pretraining_data.py](/models/language_modeling/pytorch/bert_large/training/input_preprocessing/create_pretraining_data.py) script duplicates the input plain text, replaces
 different sets of words with masks for each duplication, and serializes the
 output into the HDF5 file format.
 
 ## Training data
 
-The following shows how `create_pretraining_data.py` is called by a parallelized
+The following shows how create_pretraining_data.py is called by a parallelized
 script that can be called as shown below.  The script reads the text data from
 the `results4/` subdirectory and outputs the resulting 500 hdf5 files to a
 subdirectory named `hdf5/`.
 
 ```shell
-pip install tensorflow-cpu
+pip install tensorflow-cpu protobuf==3.20.3 numpy==1.20
 ```
 
 For phase1 the seq_len=128:
 ```shell
 export SEQ_LEN=128
+cd <path to AIRM/models_v2/pytorch/bert_large/training/cpu>
 ./input_preprocessing/parallel_create_hdf5.sh
 ```
 For phase2 the seq_len=512:
 ```shell
 export SEQ_LEN=512
+cd <path to AIRM/models_v2/pytorch/bert_large/training/cpu>
 ./input_preprocessing/parallel_create_hdf5.sh
 ```
 
