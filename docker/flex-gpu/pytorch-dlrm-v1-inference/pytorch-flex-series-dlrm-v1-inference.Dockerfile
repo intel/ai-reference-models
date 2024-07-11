@@ -19,6 +19,9 @@ FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+
 WORKDIR /workspace/pytorch-flex-series-dlrm-v1-inference/models
 
 RUN python -m pip install future \

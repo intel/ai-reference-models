@@ -20,6 +20,10 @@ FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 WORKDIR /workspace/pytorch-flex-series-stable-diffusion-inference/models
 
 ENV DEBIAN_FRONTEND=noninteractive
+
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+
 ARG PY_VERSION=3.10
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
