@@ -63,11 +63,12 @@ export CHECKPOINT_DIR=<directory where to save the pretrained model>
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
-| **THROUHGPUT** (leave unset if accuracy)              |                               `export THROUGHPUT=true`                                  |
+| **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)       | `export TEST_MODE=THROUGHPUT (THROUGHPUT, ACCURACY, REALTIME)`                                  |
 | **DATASET_DIR**              |                               `export DATASET_DIR=<path-to-coco>`                                  |
 | **PRECISION**    |                               `export PRECISION=fp16 <Select from: int8, avx-int8, fp32, avx-fp32, bf16, or bf32>`                             |
-| **OUTPUT_DIR**    |                               `export OUTPUT_DIR=$PWD`                               |
+| **OUTPUT_DIR**    |                               `export OUTPUT_DIR=<path to an output directory>`                              |
 | **CHECKPOINT_DIR**    |                               `export CHECKPOINT_DIR=<path to pre-trained model>`                               |
+| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
 
 7. Run `run_model.sh`
 

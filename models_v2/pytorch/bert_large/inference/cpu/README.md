@@ -40,13 +40,17 @@ Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch
 ```
   export FINETUNED_MODEL=#path/bert_squad_model
   export EVAL_DATA_FILE=#/path/dev-v1.1.json
-  
-  
+
+
   ### [optional] Pure offline mode to benchmark:
   change --tokenizer_name to #path/bert_squad_model in scripts before running
-  e.g. --tokenizer_name ${FINETUNED_MODEL} in run_multi_instance_throughput.sh
-  
+  e.g. --tokenizer_name ${FINETUNED_MODEL} in run_model.sh
 ```
+
+* [optional] Do calibration to get quantization config if you want do calibration by yourself.
+```
+  export INT8_CONFIG=#/path/configure.json
+  run_calibration.sh
 
 # Prepare Dataset
 ## Datasets
@@ -83,13 +87,13 @@ export FINETUNED_MODEL=$(pwd)/bert_squad_model
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
-| **TEST_MODE** (THROUGHPUT, ACCURACY)              | `export TEST_MODE=THROUGHPUT`                  |
+| **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)              | `export TEST_MODE=THROUGHPUT (THROUGHPUT, ACCURACY, REALTIME)`                  |
 | **EVAL_DATA_FILE**              | `export EVAL_DATA_FILE=<path to dev-v1.1.json file>`                  |
-| **OUTPUT_DIR**               |                               `export OUTPUT_DIR=$PWD`                               |
+| **OUTPUT_DIR**               |                               `export OUTPUT_DIR=<path to an output directory>`                               |
 | **PRECISION**     |                  `export PRECISION=bf16` (bf16, bf32, fp32, fp16, int8, avx-int8, avx-fp32 for throughput and bf16, bf32, fp32, fp16, int8, avx-fp32, avx-int8, fp8 for accuracy) |
-| **FINETUNED_MODEL**               |                               `export FINETUNED=$(pwd)/bert_squad_model`                               |
+| **FINETUNED_MODEL**               |                               `export FINETUNED_MODEL=<path to the fine tuned model>`                               |
 | **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
-| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
+| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
 7. Run `run_model.sh`
 
 ## Output

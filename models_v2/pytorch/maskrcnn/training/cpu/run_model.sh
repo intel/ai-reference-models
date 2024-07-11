@@ -17,7 +17,7 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
-if [ ! -e "${MODEL_DIR}/../../common/maskrcnn-benchmark/tools/train_net.py" ]; then
+if [ ! -e "${MODEL_DIR}/maskrcnn-benchmark/tools/train_net.py" ]; then
   echo "Could not find the script of train.py. Please set environment variable '\${MODEL_DIR}'."
   echo "From which the train.py exist."
   exit 1
@@ -64,6 +64,8 @@ CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 TOTAL_CORES=`expr $CORES \* $SOCKETS`
 
+CORES_PER_INSTANCE=$CORES
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export USE_IPEX=1
 export KMP_BLOCKTIME=1
@@ -100,12 +102,12 @@ if [ "$DISTRIBUTED" ]; then
         --nnodes ${NNODES} \
         --hostfile ${HOSTFILE} \
         --logical-cores-for-ccl --ccl_worker_count 8 \
-        ${MODEL_DIR}/../../common/maskrcnn-benchmark/tools/train_net.py \
+        ${MODEL_DIR}/maskrcnn-benchmark/tools/train_net.py \
         $ARGS \
         --iter-warmup 10 \
         -i 20 \
         -b ${LOCAL_BATCH_SIZE} \
-        --config-file "${MODEL_DIR}/../../common/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml" \
+        --config-file "${MODEL_DIR}/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml" \
         --skip-test \
         --backend ccl \
         SOLVER.MAX_ITER 720000 \
@@ -127,12 +129,12 @@ else
     python -m intel_extension_for_pytorch.cpu.launch \
         --enable_jemalloc \
         --node_id=0 \
-        ${MODEL_DIR}/../../common/maskrcnn-benchmark/tools/train_net.py \
+        ${MODEL_DIR}/maskrcnn-benchmark/tools/train_net.py \
         $ARGS \
         --iter-warmup 10 \
         -i 20 \
         -b ${BATCH_SIZE} \
-        --config-file "${MODEL_DIR}/../../common/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml" \
+        --config-file "${MODEL_DIR}/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml" \
         --skip-test \
         SOLVER.MAX_ITER 720000 \
         SOLVER.STEPS '"(480000, 640000)"' \

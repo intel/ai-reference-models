@@ -99,8 +99,8 @@ def setup_seeds(master_seed, epochs, device):
     shuffling_seeds = generate_seeds(seeding_rng, epochs)
 
     # broadcast seeds from rank=0 to other workers
-    # worker_seeds = broadcast_seeds(worker_seeds, device)
-    # shuffling_seeds = broadcast_seeds(shuffling_seeds, device)
+    worker_seeds = broadcast_seeds(worker_seeds, device)
+    shuffling_seeds = broadcast_seeds(shuffling_seeds, device)
     return worker_seeds, shuffling_seeds
 
 

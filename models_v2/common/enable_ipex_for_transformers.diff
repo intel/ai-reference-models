@@ -1067,7 +1067,7 @@ index 474b92f72..094ea6eb0 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499b0..850c4e650 100755
+index cf71499b0..2e770d89b 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,29 @@ from .utils import (
@@ -1247,7 +1247,7 @@ index cf71499b0..850c4e650 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -1415,6 +1487,70 @@ class Trainer:
+@@ -1415,6 +1487,75 @@ class Trainer:
              model = self.torch_jit_model_eval(model, dataloader, training)
              self.jit_compilation_time = round(time.time() - start_time, 4)
  
@@ -1255,6 +1255,11 @@ index cf71499b0..850c4e650 100755
 +            from torch._inductor import config as inductor_config
 +            inductor_config.cpp_wrapper = True
 +            example_batch = next(iter(dataloader))
++            if 'pixel_values' in example_batch:
++                if self.args.fp16_cpu:
++                    example_batch['pixel_values'] = example_batch['pixel_values'].to(torch.half)
++                elif self.args.bf16 or self.args.int8_bf16:
++                    example_batch['pixel_values'] = example_batch['pixel_values'].to(torch.bfloat16)
 +            example_batch = self._prepare_inputs(example_batch)
 +            if self.args.int8:
 +                from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
@@ -1318,7 +1323,7 @@ index cf71499b0..850c4e650 100755
          # Note: in torch.distributed mode, there's no point in wrapping the model
          # inside a DistributedDataParallel as we'll be under `no_grad` anyways.
          if not training:
-@@ -1575,8 +1711,9 @@ class Trainer:
+@@ -1575,8 +1716,9 @@ class Trainer:
  
          # torch.compile() needs to be called after wrapping the model with FSDP or DDP
          # to ensure that it accounts for the graph breaks required by those wrappers
@@ -1330,7 +1335,7 @@ index cf71499b0..850c4e650 100755
  
          return model
  
-@@ -1993,7 +2130,11 @@ class Trainer:
+@@ -1993,7 +2135,11 @@ class Trainer:
                          scale_after = self.scaler.get_scale()
                          optimizer_was_run = scale_before <= scale_after
                      else:
@@ -1343,7 +1348,7 @@ index cf71499b0..850c4e650 100755
  
                      if optimizer_was_run and not self.deepspeed:
                          self.lr_scheduler.step()
-@@ -2714,7 +2855,10 @@ class Trainer:
+@@ -2714,7 +2860,10 @@ class Trainer:
              # loss gets scaled under gradient_accumulation_steps in deepspeed
              loss = self.deepspeed.backward(loss)
          else:
@@ -1355,7 +1360,7 @@ index cf71499b0..850c4e650 100755
  
          return loss.detach()
  
-@@ -3085,7 +3229,64 @@ class Trainer:
+@@ -3085,7 +3234,65 @@ class Trainer:
          self._memory_tracker.stop_and_update_metrics(output.metrics)
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
@@ -1383,10 +1388,11 @@ index cf71499b0..850c4e650 100755
 +                prof = profile_ctx.__enter__()
 +            for epoch in range(test_epoches + 1):
 +                for it, batch in enumerate(dataloader):
-+                    if self.args.fp16_cpu:
-+                        batch['pixel_values'] = batch['pixel_values'].to(torch.half)
-+                    elif self.args.bf16 or self.args.int8_bf16:
-+                        batch['pixel_values'] = batch['pixel_values'].to(torch.bfloat16)
++                    if 'pixel_values' in batch:
++                        if self.args.fp16_cpu:
++                            batch['pixel_values'] = batch['pixel_values'].to(torch.half)
++                        elif self.args.bf16 or self.args.int8_bf16:
++                            batch['pixel_values'] = batch['pixel_values'].to(torch.bfloat16)
 +                    if epoch * steps_per_epoch + it >= total_steps:
 +                        timeBuff = np.asarray(timeBuff)
 +                        totalTime = np.sum(timeBuff)
@@ -1421,7 +1427,7 @@ index cf71499b0..850c4e650 100755
      def evaluation_loop(
          self,
          dataloader: DataLoader,
-@@ -3133,7 +3334,12 @@ class Trainer:
+@@ -3133,7 +3340,12 @@ class Trainer:
              logger.info("  Num examples: Unknown")
          logger.info(f"  Batch size = {batch_size}")
  
@@ -1435,7 +1441,7 @@ index cf71499b0..850c4e650 100755
  
          self.callback_handler.eval_dataloader = dataloader
          # Do this before wrapping.
-@@ -3158,6 +3364,20 @@ class Trainer:
+@@ -3158,6 +3370,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.

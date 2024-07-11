@@ -29,6 +29,13 @@ MaskRCNN Training best known configurations with Intel® Extension for PyTorch.
 ```
   export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
+* Set ENV to use multi-node distributed training (no need for single-node multi-sockets)
+
+  In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
+  ```bash
+  export NNODES=#your_node_number
+  export HOSTFILE=your_ip_list_file #one ip per line
+  ```
 
 # Prepare Dataset
   Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
@@ -37,7 +44,7 @@ MaskRCNN Training best known configurations with Intel® Extension for PyTorch.
 ```
 cd <MODEL_DIR=path_to_maskrcnn_training_cpu>
 export DATASET_DIR=<directory where the dataset will be saved>
-./../../common/download_dataset.sh
+./download_dataset.sh
 cd -
 ```
 
@@ -54,21 +61,20 @@ cd -
 5. Run setup scripts
 ```
 cd <MODEL_DIR=path_to_maskrcnn_training_cpu>
-./../../common/setup.sh
-pip install -e ../../common/setup.py
-pip install -r ../../common/requirements.txt
+./setup.sh
+pip install -e setup.py
+pip install -r requirements.txt
 ```
 6. Setup required environment paramaters
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
-| **LD_PRELOAD**              | `export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":"path_to/tcmalloc/lib/libtcmalloc.so":$LD_PRELOAD`                  |
-| **MALLOC_CONF**              | `export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"`                  |
 | **MODEL_DIR**    |                               `export MODEL_DIR=$PWD`                               |
 | **DISTRIBUTED** (leave unset if single node)              |                               `export DISTRIBUTED=true`                                  |
 | **DATASET_DIR**              |                               `export DATASET_DIR=<path-to-coco>`                                  |
 | **PRECISION**    |                               `export PRECISION=fp32 <Select from: fp32, avx-fp32, bf16, or bf32>`                             |
-| **OUTPUT_DIR**    |                               `export OUTPUT_DIR=$PWD`                               |
+| **OUTPUT_DIR**    |                               `export OUTPUT_DIR=<path to an output directory>`                               |
+| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
 
 7. Run `run_model.sh`
 ## Output

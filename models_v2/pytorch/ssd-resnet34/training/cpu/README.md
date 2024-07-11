@@ -29,6 +29,13 @@ SSD-RN34 Training best known configurations with Intel® Extension for PyTorch.
 ```
   export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
+* Set ENV to use multi-node distributed training (no need for single-node multi-sockets)
+
+  In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
+  ```
+  export NNODES=#your_node_number
+  export HOSTFILE=your_ip_list_file #one ip per line
+  ```
 
 # Prepare Dataset
   Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
@@ -70,8 +77,9 @@ export CHECKPOINT_DIR=<directory where to save the pretrained model>
 | **NUM_RANKS** (leave unset if training single node)              |                               `export NUM_RANKS=1`                                  |
 | **DATASET_DIR**              |                               `export DATASET_DIR=<path-to-coco>`                                  |
 | **PRECISION**    |                               `export PRECISION=fp32 <Select from: fp32, avx-fp32, bf16, or bf32>`                             |
-| **OUTPUT_DIR**    |                               `export OUTPUT_DIR=$PWD`                               |
+| **OUTPUT_DIR**    |                               `export OUTPUT_DIR=<path to an output directory>`                               |
 | **CHECKPOINT_DIR**    |                               `export CHECKPOINT_DIR=<path to pre-trained model>`                               |
+| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
 
 7. Run `run_model.sh`
 
