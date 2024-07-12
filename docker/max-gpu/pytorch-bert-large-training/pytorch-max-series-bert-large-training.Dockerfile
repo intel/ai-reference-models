@@ -44,8 +44,13 @@ ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.12
 ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.12
 ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.12/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
 
-RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.2.0 \
-        jinja2==3.1.3
+RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.3.0 \
+        jinja2==3.1.4 \
+        certifi==2024.07.04 \
+        requests==2.32.0 \
+        urllib3==2.2.2
+
+RUN python -m pip uninstall -y nltk
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
