@@ -229,7 +229,7 @@ if args.dtype == "bf16" or args.dtype == "fp32":
             elif args.weight_dtype == "INT4":
                 quant_api.quantize(user_model, quant_api.int4_weight_only())
                 unwrap_tensor_subclass(user_model)
-            
+
             user_model.forward = torch.compile(user_model.forward)
 
 elif args.dtype == "fp16":
