@@ -45,6 +45,15 @@ Vision Transformer inference best known configurations with Intel® Extension fo
   bash do_calibration.sh
   ```
 
+* [optional] you may need to get access to llama2 weights from HF
+  Apply the access in the pages with your huggingface account:
+  - LLaMA2 7B : https://huggingface.co/meta-llama/Llama-2-7b-hf
+  - LLaMA2 13B : https://huggingface.co/meta-llama/Llama-2-13b-hf
+
+  huggingface-cli login
+  {your huggingface token}
+
+
 # Inference
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/pytorch/vit/inference/cpu`

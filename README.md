@@ -80,9 +80,9 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [RNN-T](https://arxiv.org/abs/2007.15188)            | PyTorch | Inference | [FP32 BFloat16 BFloat32](/models_v2/pytorch/rnnt/inference/cpu/README.md) | [RNN-T dataset](/models_v2/pytorch/rnnt/inference/cpu/download_dataset.sh) |
 | [RNN-T](https://arxiv.org/abs/2007.15188)            | PyTorch | Training  | [FP32 BFloat16 BFloat32](/models_v2/pytorch/rnnt/training/cpu/README.md) | [RNN-T dataset](/models_v2/pytorch/rnnt/training/cpu/download_dataset.sh) |
 | [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/models_v2/pytorch/gptj/inference/cpu/README.md) | |
-| [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/llama/inference/cpu/README.md) | |
-| [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Training | [FP32 FP16 BFloat16 BF32](/quickstart/language_modeling/pytorch/llama/training/cpu/README.md) | |
-| [LLAMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/llama/inference/cpu/README.md) | |
+| [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/models_v2/pytorch/llama/inference/cpu/README.md) | |
+| [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Training | [FP32 FP16 BFloat16 BF32](/models_v2/pytorch/llama/training/cpu/README.md) | |
+| [LLAMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/models_v2/pytorch/llama/inference/cpu/README.md) | |
 | [ChatGLMv3 6B](https://huggingface.co/THUDM/chatglm3-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/quickstart/language_modeling/pytorch/chatglm/inference/cpu/README.md) | |
 | [GEMMA Keras](https://www.kaggle.com/models/google/gemma/keras/) | Keras | Inference | [FP32 FP16 BFloat16](/models_v2/tensorflow/gemma/inference/cpu/README.md) | Synthetic Data | |
 
