@@ -117,6 +117,7 @@
     "pytorch/stable_diffusion/inference/cpu",
     "pytorch/vit/inference/cpu",
     "pytorch/llama/training/cpu",
-    "pytorch/llama/inference/cpu"
+    "pytorch/llama/inference/cpu",
+    "pytorch/torchrec_dlrm/inference/cpu"
   ]
 }

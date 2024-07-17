@@ -1,3 +1,6 @@
+#
+# -*- coding: utf-8 -*-
+#
 # Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 #!/usr/bin/env python3
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 #
@@ -31,8 +35,6 @@ from torchrec.datasets.criteo import (
     DEFAULT_INT_NAMES,
     InMemoryBinaryCriteoIterDataPipe,
 )
-# This is for crop dataset
-DAYS_MIN=1
 from torchrec.datasets.random import RandomRecDataset
 
 # OSS import
@@ -96,44 +98,18 @@ def _get_in_memory_dataloader(
         sparse_part = "sparse_multi_hot.npz"
         datapipe = MultiHotCriteoIterDataPipe
 
-    if args.dataset_name == "criteo_kaggle":
-        # criteo_kaggle has no validation set, so use 2nd half of training set for now.
-        # Setting stage to "test" will get the 2nd half of the dataset.
-        # Setting root_name to "train" reads from the training set file.
-        (root_name, stage) = ("train", "test") if stage == "val" else stage
+    if stage == "train":
         stage_files: List[List[str]] = [
-            [os.path.join(dir_path, f"{root_name}_dense.npy")],
-            [os.path.join(dir_path, f"{root_name}_{sparse_part}")],
-            [os.path.join(dir_path, f"{root_name}_labels.npy")],
+            [os.path.join(dir_path, f"day_{i}_dense.npy") for i in range(DAYS - 1)],
+            [os.path.join(dir_path, f"day_{i}_{sparse_part}") for i in range(DAYS - 1)],
+            [os.path.join(dir_path, f"day_{i}_labels.npy") for i in range(DAYS - 1)],
         ]
-    # criteo_1tb code path uses below two conditionals
-    elif stage == "train":
-        if args.converge:
-            stage_files: List[List[str]] = [
-                [os.path.join(dir_path, f"day_{i}_dense.npy") for i in range(DAYS - 1)],
-                [os.path.join(dir_path, "multihot", f"day_{i}_{sparse_part}") for i in range(DAYS - 1)],
-                [os.path.join(dir_path, f"day_{i}_labels.npy") for i in range(DAYS - 1)],
-            ]
-        else:
-            stage_files: List[List[str]] = [
-                # for crop dataset
-                [os.path.join(dir_path, f"day_{i}_dense.npy") for i in range(DAYS_MIN)],
-                [os.path.join(dir_path, f"day_{i}_{sparse_part}") for i in range(DAYS_MIN)],
-                [os.path.join(dir_path, f"day_{i}_labels.npy") for i in range(DAYS_MIN)],
-            ]
     elif stage in ["val", "test"]:
-        if args.converge:
-            stage_files: List[List[str]] = [
-                [os.path.join(dir_path, f"day_{DAYS-1}_dense.npy")],
-                [os.path.join(dir_path, "multihot", f"day_{DAYS-1}_{sparse_part}")],
-                [os.path.join(dir_path, f"day_{DAYS-1}_labels.npy")],
-            ]
-        else:
-            stage_files: List[List[str]] = [
-                [os.path.join(dir_path, f"day_{DAYS_MIN-1}_dense.npy")],
-                [os.path.join(dir_path, f"day_{DAYS_MIN-1}_{sparse_part}")],
-                [os.path.join(dir_path, f"day_{DAYS_MIN-1}_labels.npy")],
-            ]
+        stage_files: List[List[str]] = [
+            [os.path.join(dir_path, f"day_{DAYS-1}_dense.npy")],
+            [os.path.join(dir_path, f"day_{DAYS-1}_{sparse_part}")],
+            [os.path.join(dir_path, f"day_{DAYS-1}_labels.npy")],
+        ]
     if stage in ["val", "test"] and args.test_batch_size is not None:
         batch_size = args.test_batch_size
     else:
@@ -143,11 +119,8 @@ def _get_in_memory_dataloader(
             stage,
             *stage_files,  # pyre-ignore[6]
             batch_size=batch_size,
-            #rank=dist.get_rank(),
-            #world_size=dist.get_world_size(),
-            # The rand and world_size set for custom dist-dlrm
-            rank=0,
-            world_size=1,
+            rank=0, #  dist.get_rank(),
+            world_size=1, #  dist.get_world_size(),
             drop_last=args.drop_last_training_batch if stage == "train" else False,
             shuffle_batches=args.shuffle_batches,
             shuffle_training_set=args.shuffle_training_set,
@@ -158,7 +131,6 @@ def _get_in_memory_dataloader(
             else ([args.num_embeddings] * CAT_FEATURE_COUNT),
         ),
         batch_size=None,
-        num_workers=0,
         pin_memory=args.pin_memory,
         collate_fn=lambda x: x,
     )
