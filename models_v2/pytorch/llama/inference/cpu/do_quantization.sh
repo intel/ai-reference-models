@@ -78,7 +78,7 @@ echo "### running with jit mode"
 
 FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
 
-EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/models/language_modeling/pytorch/llama/inference/cpu/run_llm.py"}
+EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/latency_log*
 python -m intel_extension_for_pytorch.cpu.launch --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
