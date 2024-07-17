@@ -1,3 +1,21 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2023 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 #
 # This source code is licensed under the MIT license found in the
@@ -10,7 +28,7 @@ import numpy as np
 import torch
 from torchrec.datasets.utils import Batch
 from torchrec.sparse.jagged_tensor import KeyedJaggedTensor
-
+import gc
 
 class RestartableMap:
     def __init__(self, f, source):
@@ -91,10 +109,11 @@ class Multihot:
         for embs_count, multi_hot_size in zip(
             num_embeddings_per_feature, multi_hot_sizes
         ):
-            embedding_ids = np.arange(embs_count)[:, np.newaxis]
+            multi_hot_table = torch.empty((embs_count, multi_hot_size), dtype=torch.int)
+            multi_hot_table[:, 0].copy_(torch.arange(embs_count, dtype=torch.int))
             if dist_type == "uniform":
                 synthetic_sparse_ids = np.random.randint(
-                    0, embs_count, size=(embs_count, multi_hot_size - 1)
+                    0, embs_count, size=(embs_count, multi_hot_size - 1), dtype=np.int32
                 )
             elif dist_type == "pareto":
                 synthetic_sparse_ids = (
@@ -103,14 +122,11 @@ class Multihot:
                     ).astype(np.int32)
                     % embs_count
                 )
-            multi_hot_table = np.concatenate(
-                (embedding_ids, synthetic_sparse_ids), axis=-1
-            )
+            synthetic_sparse_ids = torch.from_numpy(synthetic_sparse_ids).int()
+            multi_hot_table[:, 1:].copy_(synthetic_sparse_ids)
+            del synthetic_sparse_ids
+            gc.collect()
             multi_hot_tables_l.append(multi_hot_table)
-        multi_hot_tables_l = [
-            torch.from_numpy(multi_hot_table).int()
-            for multi_hot_table in multi_hot_tables_l
-        ]
         return multi_hot_tables_l
 
     def __make_offsets(

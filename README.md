@@ -109,7 +109,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf) | TensorFlow | Inference | [FP32](/benchmarks/recommendation/tensorflow/wide_deep/inference/README.md) | [Census Income dataset](https://github.com/IntelAI/models/tree/master/benchmarks/recommendation/tensorflow/wide_deep/inference/fp32#dataset) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 Int8 BFloat16 BFloat32](/models_v2/pytorch/dlrm/inference/cpu/README.md) | [Criteo Terabyte](/models_v2/pytorch/dlrm/inference/cpu/README.md#datasets) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Training  | [FP32 BFloat16 BFloat32](/models_v2/pytorch/dlrm/training/cpu/README.md) | [Criteo Terabyte](/models_v2/pytorch/dlrm/training/cpu/README.md#datasets) |
-| [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 FP16 BFloat16 BFloat32 Int8](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/README.md) | [Criteo 1TB Click Logs dataset](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu#datasets) |
+| [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 FP16 BFloat16 BFloat32 Int8](/models_v2/pytorch/torchrec_dlrm/inference/cpu/README.md) | [Criteo 1TB Click Logs dataset](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu#datasets) |
 
 ### Diffusion
 

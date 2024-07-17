@@ -1,3 +1,21 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2023 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 #!/usr/bin/env python3
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 #
@@ -214,7 +232,7 @@ class MultiHotCriteoIterDataPipe(IterableDataset):
         offset_per_key = torch.cumsum(
             torch.concat((torch.tensor([0]), torch.tensor(length_per_key))), dim=0
         )
-        values = torch.concat([torch.from_numpy(feat).flatten() for feat in sparse])
+        values = torch.concat([torch.from_numpy(feat.copy()).flatten() for feat in sparse])
         return Batch(
             dense_features=torch.from_numpy(dense.copy()),
             sparse_features=KeyedJaggedTensor(
@@ -308,3 +326,11 @@ class MultiHotCriteoIterDataPipe(IterableDataset):
 
     def __len__(self) -> int:
         return self.num_full_batches // self.world_size + (self.last_batch_sizes[0] > 0)
+
+    def load_batch(self, sample_list=None) -> Batch:
+        if sample_list is None:
+            sample_list = list(range(self.batch_size))
+        dense = self.dense_arrs[0][sample_list, :]
+        sparse = [arr[sample_list, :] % self.hashes[i] for i, arr in enumerate(self.sparse_arrs[0])]
+        labels = self.labels_arrs[0][sample_list, :]
+        return self._np_arrays_to_batch(dense, sparse, labels)
