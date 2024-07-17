@@ -33,6 +33,6 @@ mkdir -p folds
 cd ./folds
 for i in {0..4}
 do
-  wget https://raw.githubusercontent.com/mlcommons/inference/master/vision/medical_imaging/3d-unet-brats19/folds/fold"$i"_validation.txt
+  wget https://raw.githubusercontent.com/mlcommons/inference/v3.1/vision/medical_imaging/3d-unet-brats19/folds/fold"$i"_validation.txt
 done
 cd ..
