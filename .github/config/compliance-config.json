@@ -118,6 +118,7 @@
     "pytorch/vit/inference/cpu",
     "pytorch/llama/training/cpu",
     "pytorch/llama/inference/cpu",
-    "pytorch/torchrec_dlrm/inference/cpu"
+    "pytorch/torchrec_dlrm/inference/cpu",
+    "pytorch/chatglm/inference/cpu"
   ]
 }
