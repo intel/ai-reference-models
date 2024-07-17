@@ -22,25 +22,19 @@ from torchrec.models.dlrm import SparseArch
 from torchrec.sparse.jagged_tensor import KeyedJaggedTensor
 from typing import List
 
-def unpack(input :KeyedJaggedTensor, default_embedding_names:[str]) -> dict:
+def unpack(input :KeyedJaggedTensor) -> dict:
     output = {}
     for k, v in input.to_dict().items():
-        if k in default_embedding_names:
-            output[k] = {}
-            output[k]['values'] = v._values.to(torch.int64)
-            output[k]['offsets'] = v._offsets.to(torch.int64)
+        output[k] = {}
+        output[k]['values'] = v._values.int()
+        output[k]['offsets'] = v._offsets.int()
     return output
-
 
 class SparseArchTraceAbleWrapper(nn.Module):
 
-    def __init__(self, sparse_arch: SparseArch, dense) -> None:
+    def __init__(self, sparse_arch: SparseArch) -> None:
         super().__init__()
         self.sparse_arch: SparseArch = sparse_arch
-        if not dense:
-            for embedding_bag in self.sparse_arch.embedding_bag_collection.embedding_bags.values():
-                embedding_bag.sparse = True
-
 
     def forward(
         self,
@@ -49,6 +43,7 @@ class SparseArchTraceAbleWrapper(nn.Module):
         """
         Args:
             features (dict): input tensors of sparse features.
+
         Returns:
             torch.Tensor: tensor of shape B X F X D.
         """
@@ -61,9 +56,8 @@ class SparseArchTraceAbleWrapper(nn.Module):
                     f['values'],
                     f['offsets'],
                     per_sample_weights=None,
-                )
+                ).float()
                 pooled_embeddings.append(res)
-        #data = torch.cat(pooled_embeddings, dim=1)
-        #B: int = features['cat_0']['offsets'].numel() - 1
-        #return data.reshape(B, self.sparse_arch.F, self.sparse_arch.D)
-        return pooled_embeddings
+        data = torch.cat(pooled_embeddings, dim=1)
+        B: int = features['cat_0']['offsets'].numel() - 1
+        return data.reshape(B, self.sparse_arch.F, self.sparse_arch.D)

@@ -1,6 +1,5 @@
-#!/usr/bin/env bash
-#
-# Copyright (c) 2023 Intel Corporation
+#!/bin/bash
+# Copyright (c) 2024 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +14,9 @@
 # limitations under the License.
 #
 
-# setup.sh
-#  - install OS pkgs
-#  - should create virtual env & install pip  requirement.txt
-#  - git clones & applying patches
-
-set -e
-apt-get update && apt-get install -y python3-venv protobuf-compiler
-
-pip install -r requirements.txt
-
-cp -r ../../../../common .
+pip install torchrec==0.3.2 --no-deps
+pip install torchmetrics==0.11.0
+pip install fbgemm-gpu==0.3.2
+pip install torchsnapshot
+pip install pyre_extensions
+pip install iopath
