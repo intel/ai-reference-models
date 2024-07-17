@@ -38,7 +38,8 @@ RUN apt-get update && \
     autoconf \ 
     bzip2 \
     tar \
-    unzip
+    unzip \
+    bc
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -60,19 +61,17 @@ RUN pip install packaging intel-openmp datasets accelerate
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 #ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-COPY models/language_modeling/pytorch/gptj/inference/cpu models/language_modeling/pytorch/gptj/inference/cpu
-COPY models/language_modeling/pytorch/common models/language_modeling/pytorch/common
-COPY quickstart/language_modeling/pytorch/gptj/inference/cpu quickstart
+COPY models_v2/common/enable_ipex_for_transformers.diff .
+COPY models_v2/pytorch/gptj/inference/cpu .
 
-RUN cd quickstart && \
-    git clone https://github.com/huggingface/transformers.git && \
+RUN git clone https://github.com/huggingface/transformers.git && \
     cd transformers && \
     git checkout v4.28.1 && \
-    git apply ../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff && \
+    git apply ../enable_ipex_for_transformers.diff && \
     pip install -e ./
 
 RUN wget https://intel-extension-for-pytorch.s3.amazonaws.com/miscellaneous/llm/prompt.json \
-    -O models/language_modeling/pytorch/gptj/inference/cpu/prompt.json
+    -O /workspace/pytorch-gpt-j-inference/prompt.json
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
