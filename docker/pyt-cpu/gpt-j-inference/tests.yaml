@@ -1,58 +1,62 @@
 fp16-t1-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_realtime.sh fp16
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '1024'
     OUTPUT_TOKEN: '128'
+    TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
 bf16-t1-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_realtime.sh bf16
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '1024'
     OUTPUT_TOKEN: '128'
+    TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
 fp32-t1-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_realtime.sh fp32
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '1024'
     OUTPUT_TOKEN: '128'
+    TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
 int8-fp32-t1-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: sh -c "./quickstart/do_quantization.sh calibration sq && ./quickstart/run_multi_instance_realtime.sh int8-fp32"
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '1024'
     OUTPUT_TOKEN: '128'
+    TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
 fp32-t1-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_throughput.sh fp32
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -60,13 +64,14 @@ fp32-t1-throughput-inference:
     INPUT_TOKEN: '1024'
     OUTPUT_TOKEN: '128'
     TORCH_INDUCTOR: '0'
+    TEST_MODE: "THROUGHPUT"
     BATCH_SIZE: '2'
   volumes:
     - src: /tmp
       dst: /tmp
 bf16-t1-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_throughput.sh bf16
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -74,19 +79,21 @@ bf16-t1-throughput-inference:
     INPUT_TOKEN: '1024'
     OUTPUT_TOKEN: '128'
     TORCH_INDUCTOR: '0'
+    TEST_MODE: "THROUGHPUT"
     BATCH_SIZE: '4'
   volumes:
     - src: /tmp
       dst: /tmp
 fp16-t1-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_throughput.sh fp16
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '1024'
     OUTPUT_TOKEN: '128'
+    TEST_MODE: "THROUGHPUT"
     TORCH_INDUCTOR: '0'
     BATCH_SIZE: '4'
   volumes:
@@ -94,13 +101,14 @@ fp16-t1-throughput-inference:
       dst: /tmp
 int8-fp32-t1-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: sh -c "./quickstart/do_quantization.sh calibration sq && ./quickstart/run_multi_instance_throughput.sh int8-fp32"
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '1024'
     OUTPUT_TOKEN: '128'
+    TEST_MODE: "THROUGHPUT"
     TORCH_INDUCTOR: '0'
     BATCH_SIZE: '4'
   volumes:
@@ -108,65 +116,70 @@ int8-fp32-t1-throughput-inference:
       dst: /tmp
 fp32-t2-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_realtime.sh fp32
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '2016'
     OUTPUT_TOKEN: '32'
+    TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
 fp16-t2-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_realtime.sh fp16
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '2016'
     OUTPUT_TOKEN: '32'
+    TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
 bf16-t2-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_realtime.sh bf16
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '2016'
     OUTPUT_TOKEN: '32'
+    TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
 int8-fp32-t2-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: sh -c "./quickstart/do_quantization.sh calibration sq && ./quickstart/run_multi_instance_realtime.sh int8-fp32"
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '2016'
     OUTPUT_TOKEN: '32'
+    TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
 fp32-t2-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_throughput.sh fp32
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '2016'
     OUTPUT_TOKEN: '32'
+    TEST_MODE: "THROUGHPUT"
     TORCH_INDUCTOR: '0'
     BATCH_SIZE: '2'
   volumes:
@@ -174,13 +187,14 @@ fp32-t2-throughput-inference:
       dst: /tmp
 bf16-t2-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_throughput.sh bf16
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '2016'
     OUTPUT_TOKEN: '32'
+    TEST_MODE: "THROUGHPUT"
     TORCH_INDUCTOR: '0'
     BATCH_SIZE: '4'
   volumes:
@@ -188,13 +202,14 @@ bf16-t2-throughput-inference:
       dst: /tmp
 fp16-t2-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_multi_instance_throughput.sh fp16
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '2016'
     OUTPUT_TOKEN: '32'
+    TEST_MODE: "THROUGHPUT"
     TORCH_INDUCTOR: '0'
     BATCH_SIZE: '4'
   volumes:
@@ -202,110 +217,59 @@ fp16-t2-throughput-inference:
       dst: /tmp
 int8-fp32-t2-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: sh -c "./quickstart/do_quantization.sh calibration sq && ./quickstart/run_multi_instance_throughput.sh int8-fp32"
+  cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
     OUTPUT_DIR: /tmp
     INPUT_TOKEN: '2016'
     OUTPUT_TOKEN: '32'
+    TEST_MODE: "THROUGHPUT"
     TORCH_INDUCTOR: '0'
     BATCH_SIZE: '4'
   volumes:
     - src: /tmp
       dst: /tmp
-fp32-t2-accuracy-inference:
+fp32-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_accuracy.sh fp32
+  cmd: bash run_model.sh
   env:
     PRECISION: fp32
     OUTPUT_DIR: /tmp
-    INPUT_TOKEN: '2016'
-    OUTPUT_TOKEN: '32'
+    TEST_MODE: 'ACCURACY'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
-bf16-t2-accuracy-inference:
+bf16-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_accuracy.sh bf16
+  cmd: bash run_model.sh
   env:
     PRECISION: bf16
     OUTPUT_DIR: /tmp
-    INPUT_TOKEN: '2016'
-    OUTPUT_TOKEN: '32'
+    TEST_MODE: 'ACCURACY'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
-fp16-t2-accuracy-inference:
+fp16-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_accuracy.sh fp16
+  cmd: bash run_model.sh
   env:
     PRECISION: fp16
     OUTPUT_DIR: /tmp
-    INPUT_TOKEN: '2016'
-    OUTPUT_TOKEN: '32'
+    TEST_MODE: 'ACCURACY'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
       dst: /tmp
-int8-fp32-t2-accuracy-inference:
+int8-fp32-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: sh -c "./quickstart/do_quantization.sh calibration sq && ./quickstart/run_accuracy.sh int8-fp32"
+  cmd: bash run_model.sh
   env:
     PRECISION: int8-fp32
     OUTPUT_DIR: /tmp
-    INPUT_TOKEN: '2016'
-    OUTPUT_TOKEN: '32'
-    TORCH_INDUCTOR: '0'
-  volumes:
-    - src: /tmp
-      dst: /tmp
-fp32-t1-accuracy-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_accuracy.sh fp32
-  env:
-    PRECISION: fp32
-    OUTPUT_DIR: /tmp
-    INPUT_TOKEN: '1024'
-    OUTPUT_TOKEN: '128'
-    TORCH_INDUCTOR: '0'
-  volumes:
-    - src: /tmp
-      dst: /tmp
-bf16-t1-accuracy-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_accuracy.sh bf16
-  env:
-    PRECISION: bf16
-    OUTPUT_DIR: /tmp
-    INPUT_TOKEN: '1024'
-    OUTPUT_TOKEN: '128'
-    TORCH_INDUCTOR: '0'
-  volumes:
-    - src: /tmp
-      dst: /tmp
-fp16-t1-accuracy-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: bash quickstart/run_accuracy.sh fp16
-  env:
-    PRECISION: fp16
-    OUTPUT_DIR: /tmp
-    INPUT_TOKEN: '1024'
-    OUTPUT_TOKEN: '128'
-    TORCH_INDUCTOR: '0'
-  volumes:
-    - src: /tmp
-      dst: /tmp
-int8-fp32-t1-accuracy-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
-  cmd: sh -c "./quickstart/do_quantization.sh calibration sq && ./quickstart/run_accuracy.sh int8-fp32"
-  env:
-    PRECISION: int8-fp32
-    OUTPUT_DIR: /tmp
-    INPUT_TOKEN: '1024'
-    OUTPUT_TOKEN: '128'
+    TEST_MODE: 'ACCURACY'
     TORCH_INDUCTOR: '0'
   volumes:
     - src: /tmp
