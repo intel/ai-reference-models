@@ -60,6 +60,7 @@ if [ -z "${OUTPUT_DIR}" ]; then
 fi
 
 rm -rf ${OUTPUT_DIR}/results.yaml
+rm -rf ${OUTPUT_DIR}/summary.log
 
 if [[ "${PRECISION}" == "int8-fp32" ]] || [[ "${PRECISION}" == "int8-fp16"  ]]; then
     if [ ! -f "${OUTPUT_DIR}/qconfig.json" ]; then
@@ -108,15 +109,6 @@ else
 fi
 
 
-if [ -z "${OUTPUT_TOKEN}" ]; then
-  echo "The required environment variable OUTPUT_TOKEN has not been set, please set before running, e.g. export OUTPUT_TOKEN=32"
-  exit 1
-fi
-if [ -z "${INPUT_TOKEN}" ]; then
-  echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 64 128 512 1024 2016 ), e.g. export INPUT_TOKEN=1024"
-  exit 1
-fi
-
 FINETUNED_MODEL=${FINETUNED_MODEL:-"meta-llama/Llama-2-7b-hf"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/run_llm.py"}
@@ -124,6 +116,16 @@ WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 
 if [[ "$TEST_MODE" != "ACCURACY" ]]; then
+    if [ -z "${OUTPUT_TOKEN}" ]; then
+        echo "The required environment variable OUTPUT_TOKEN has not been set, please set before running, e.g. export OUTPUT_TOKEN=32"
+        exit 1
+    fi
+
+    if [ -z "${INPUT_TOKEN}" ]; then
+        echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 64 128 512 1024 2016 ), e.g. export INPUT_TOKEN=1024"
+        exit 1
+    fi
+    
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         path="ipex"
         mode="jit"
@@ -263,14 +265,14 @@ else
         python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./LLaMa_${PRECISION}_accuracy_${mode}" \
             ${EVAL_SCRIPT} $ARGS \
             --ipex \
-            --model-name-or-path   ${FINETUNED_MODEL}
+            --model-name-or-path ${FINETUNED_MODEL}
     else
         echo "### running with torch.compile inductor backend"
         export TORCHINDUCTOR_FREEZING=1
         python -m torch.backends.xeon.run_cpu --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
-            --model-name-or-path   ${FINETUNED_MODEL}
+            --model-name-or-path ${FINETUNED_MODEL}
     fi
 
     accuracy=$(cat ${OUTPUT_DIR}/LLaMa_${PRECISION}_accuracy* | grep "Accuracy:" |sed -e 's/.*= //;s/[^0-9.]//g')
