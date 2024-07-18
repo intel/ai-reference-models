@@ -1285,6 +1285,8 @@ def construct_model(args):
         lr_scheduler = LRPolicyScheduler(
             optimizer, args.lr_warmup_steps, args.lr_decay_start, args.lr_decay_steps
         )
+    return model, optimizer, lr_scheduler
+
 
 def main(argv: List[str]) -> None:
     """
