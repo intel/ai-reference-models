@@ -81,17 +81,22 @@ https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorc
 | **WEIGHT_DIR** (ONLY FOR ACCURACY)     |                 `export WEIGHT_DIR=<offical released checkpoint>`        |
 | **PRECISION**    |                               `export PRECISION=int8 <specify the precision to run: int8, fp32, bf32 or bf16>`                             |
 | **OUTPUT_DIR**    |                               `export OUTPUT_DIR=$PWD`                               |
-| **BATCH_SIZE** (optional)  |                               `export BATCH_SIZE=10000`                                |
+| **BATCH_SIZE** |                               `export BATCH_SIZE=256`                                |
 7. Run `run_model.sh`
 ## Output
 
 Single-tile output will typically look like:
 
 ```
-accuracy 76.215 %, best 76.215 %
-dlrm_inf latency:  0.11193203926086426  s
-dlrm_inf avg time:  0.007462135950724284  s, ant the time count is : 15
-dlrm_inf throughput:  4391235.996821996  samples/s
+2024-07-18 15:58:00,970 - dlrm_main.py - __main__ - INFO - EVAL_START, EPOCH_NUM: 0
+2024-07-18 16:00:14,120 - dlrm_main.py - __main__ - INFO - AUROC over test set: [0.5129603203103565, 0.0, 0.0].
+2024-07-18 16:00:14,121 - dlrm_main.py - __main__ - INFO - Number of test samples: 131072
+2024-07-18 16:00:14,121 - dlrm_main.py - __main__ - INFO - Throughput: 103711.5248249468 fps
+2024-07-18 16:00:14,121 - dlrm_main.py - __main__ - INFO - Final AUROC: [0.5129603203103565, 0.0, 0.0] 
+2024-07-18 16:00:17,133 - dlrm_main.py - __main__ - INFO - AUROC over test set: [0.5129603203103565, 0.0, 0.0].
+2024-07-18 16:00:17,133 - dlrm_main.py - __main__ - INFO - Number of test samples: 131072
+2024-07-18 16:00:17,133 - dlrm_main.py - __main__ - INFO - Throughput: 102890.12235101678 fps
+2024-07-18 16:00:17,134 - dlrm_main.py - __main__ - INFO - Final AUROC: [0.5129603203103565, 0.0, 0.0] 
 ```
 
 
@@ -99,12 +104,12 @@ Final results of the inference run can be found in `results.yaml` file.
 ```
 results:
  - key: throughput
-   value: 4391236.0
-   unit: inst/s
+   value: 102890.122
+   unit: fps
  - key: latency
-   value: 0.007462135950724283
+   value: N/A
    unit: s
  - key: accuracy
-   value: 76.215
-   unit: accuracy
+   value: 0.513
+   unit: ROC AUC
 ```
