@@ -38,6 +38,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         echo "The required environment variable WEIGHT_DIR has not been set"
         exit 1
     fi
+    EXTRA_ARGS="$EXTRA_ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
 else
     echo "Please set TEST_MODE to THROUGHPUT or ACCURACY"
     exit 1
@@ -87,7 +88,7 @@ else
     exit 1
 fi
 
-LOG=${OUTPUT_DIR}_${LOG}_${PRECISION}.log
+LOG=${OUTPUT_DIR}_${LOG_PREFIX}_${PRECISION}.log
 
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
     if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
@@ -134,7 +135,6 @@ COMMON_ARGS="${COMMON_ARGS} \
     --interaction_type=dcn \
     --dcn_num_layers=3 \
     --dcn_low_rank_dim=512 \
-    --limit_val_batches 300 \
     --log-freq 10 \
     --inference-only \
     $EXTRA_ARGS $ARGS"
@@ -170,7 +170,19 @@ sum = sum / i;
         printf("%.3f", sum);
 }')
 
-accuracy=$(grep 'Final AUROC:' $LOG |sed -e 's/.*Final AUROC//;s/[^0-9.]//g')
+accuracy=$(grep 'Final AUROC:' $LOG | sed -e 's/.*Final AUROC: \[\([^,]*\).*/\1/' |awk '
+BEGIN {
+        sum = 0;
+        i = 0;
+      }
+      {
+        sum = sum + $1;
+        i++;
+      }
+END   {
+sum = sum / i;
+        printf("%.3f", sum);
+}')
 
 if [[ -z $throughput ]]; then
     throughput="N/A"
