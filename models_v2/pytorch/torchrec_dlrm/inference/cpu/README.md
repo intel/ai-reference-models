@@ -81,7 +81,8 @@ https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorc
 | **WEIGHT_DIR** (ONLY FOR ACCURACY)     |                 `export WEIGHT_DIR=<offical released checkpoint>`        |
 | **PRECISION**    |                               `export PRECISION=int8 <specify the precision to run: int8, fp32, bf32 or bf16>`                             |
 | **OUTPUT_DIR**    |                               `export OUTPUT_DIR=$PWD`                               |
-| **BATCH_SIZE** |                               `export BATCH_SIZE=256`                                |
+| **BATCH_SIZE** (optional) |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
+
 7. Run `run_model.sh`
 ## Output
 
