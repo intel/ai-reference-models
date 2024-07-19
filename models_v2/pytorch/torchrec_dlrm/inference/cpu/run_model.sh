@@ -19,6 +19,7 @@ EXTRA_ARGS=""
 
 if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     echo "TEST_MODE set to THROUGHPUT"
+    BATCH_SIZE=${BATCH_SIZE:-256}
     LOG_PREFIX=dlrm_inference_performance_log
     if [ -z "${DATASET_DIR}" ]; then
         echo "DATASET_DIR are not set, will use dummy generated dataset"
@@ -29,6 +30,7 @@ if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     fi
 elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
     echo "TEST_MODE set to ACCURACY"
+    BATCH_SIZE=${BATCH_SIZE:-65536}
     LOG_PREFIX=dlrm_inference_accuarcy_log
     if [ -z "${DATASET_DIR}" ]; then
         echo "The required environment variable DATASET_DIR has not been set"
@@ -76,9 +78,9 @@ elif [[ $PRECISION == "fp16" ]]; then
     echo "running fp16 path"
     ARGS="$ARGS --dtype fp16"
 elif [[ $PRECISION == "int8" ]]; then
-    if [[ "${TEST_MODE}" == "THROUGHPUT" && "0" == ${TORCH_INDUCTOR} ]];then
-      echo "prepare int8 weight"
-      bash ${MODEL_DIR}/prepare_int8.sh
+    if [ ! -e "${MODEL_DIR}/int8_weight.json"  ]; then
+        echo "prepare int8 weight"
+        bash ${MODEL_DIR}/prepare_int8.sh
     fi
     echo "running int8 path"
     ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"

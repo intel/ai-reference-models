@@ -607,6 +607,17 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="Int8 recipe location.",
     )
     parser.add_argument(
+        "--int8-prepare",
+        action="store_true",
+        help="prepare int8 model.",
+    )
+    parser.add_argument(
+        "--int8-model-dir",
+        type=str,
+        default="./int8_weight.json",
+        help="Int8 recipe location.",
+    )
+    parser.add_argument(
         "--calibration",
         action="store_true",
         help="Whether calibration only for this run.",
@@ -1286,7 +1297,6 @@ def construct_model(args):
             optimizer, args.lr_warmup_steps, args.lr_decay_start, args.lr_decay_steps
         )
     return model, optimizer, lr_scheduler
-
 
 def main(argv: List[str]) -> None:
     """
