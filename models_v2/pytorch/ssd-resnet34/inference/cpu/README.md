@@ -65,10 +65,11 @@ export CHECKPOINT_DIR=<directory where to save the pretrained model>
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)       | `export TEST_MODE=THROUGHPUT (THROUGHPUT, ACCURACY, REALTIME)`                                  |
 | **DATASET_DIR**              |                               `export DATASET_DIR=<path-to-coco>`                                  |
-| **PRECISION**    |                               `export PRECISION=fp16 <Select from: int8, avx-int8, fp32, avx-fp32, bf16, or bf32>`                             |
+| **PRECISION**    |                               `export PRECISION=fp32 <Select from: fp32, avx-fp32, bf16, int8, bf32, or avx-int8>`                             |
 | **OUTPUT_DIR**    |                               `export OUTPUT_DIR=<path to an output directory>`                              |
 | **CHECKPOINT_DIR**    |                               `export CHECKPOINT_DIR=<path to pre-trained model>`                               |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
+ **WEIGHT_SHARING**(optional)    | `export WEIGHT_SHAREING=False (It is false by default but if you want to run with weight sharing, please set it to true)`   |
 
 7. Run `run_model.sh`
 
