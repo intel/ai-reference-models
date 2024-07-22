@@ -74,6 +74,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [BERT large ](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/bert_large/training/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#fine-tuning-with-bert-using-squad-data) and [MRPC](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#classification-training-with-bert) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Inference | [FP32 BFloat16 Int8 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Training | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
+| [BERT large (Hugging Face)](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Inference | [FP32 FP16 BFloat16 BFloat32](/benchmarks/language_modeling/tensorflow/bert_large_hf/inference/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | [FP32 Int8 BFloat16 BFloat32](/models_v2/pytorch/bert_large/inference/cpu/README.md) | BERT Large SQuAD1.1 |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Training  | [FP32 BFloat16 BFloat32](/models_v2/pytorch/bert_large/training/cpu/README.md) | [preprocessed text dataset](https://drive.google.com/drive/folders/1cywmDnAsrP5-2vsr8GDc6QUc7VWe-M3v) |
 | [DistilBERT base](https://arxiv.org/abs/1910.01108)  | PyTorch | Inference | [FP32 BF32 BF16Int8-FP32 Int8-BFloat16 BFloat32](/models_v2/pytorch/distilbert/inference/cpu/README.md) | [ DistilBERT Base SQuAD1.1](https://huggingface.co/distilbert-base-uncased-distilled-squad) |
@@ -101,6 +102,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | PyTorch | Training   | [FP32 BFloat16 BFloat32](/models_v2/pytorch/maskrcnn/training/cpu/README.md) | [COCO 2017](/models_v2/pytorch/maskrcnn/training/cpu/README.md#datasets) |
 | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | PyTorch | Inference  | [FP32 Int8 BFloat16 BFloat32](/models_v2/pytorch/ssd-resnet34/inference/cpu/README.md) | [COCO 2017](/models_v2/pytorch/ssd-resnet34/inference/cpu/README.md) |
 | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | PyTorch | Training   | [FP32 BFloat16 BFloat32](/models_v2/pytorch/ssd-resnet34/training/cpu/README.md) | [COCO 2017](/models_v2/pytorch/ssd-resnet34/training/cpu/README.md) |
+| [Yolo V7](https://arxiv.org/abs/2207.02696)              | PyTorch | Inference   | [Int8 FP32 FP16 BFloat16 BFloat32](/quickstart/object_detection/pytorch/yolov7/inference/cpu/README.md) | [COCO 2017](/quickstart/object_detection/pytorch/yolov7/inference/cpu/README.md#datasets) |
 
 ### Recommendation
 
@@ -120,8 +122,14 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [Stable Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1) | PyTorch | Training | [FP32 BFloat16 FP16 BFloat32](/models_v2/pytorch/stable_diffusion/training/cpu/README.md) | [cat images](https://huggingface.co/datasets/diffusers/cat_toy_example)
 | [Latent Consistency Models(LCM)](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7) | PyTorch | Inference | [FP32 BFloat16 FP16 BFloat32 Int8-FP32 Int8-BFloat16](/quickstart/diffusion/pytorch/LCM/inference/cpu/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
 
+### Graph Networks
+
+| Model                                           | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
+| ----------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
+| [GraphSAGE](https://arxiv.org/pdf/1706.02216.pdf) | TensorFlow | Inference | [FP32 BFloat16 FP16 Int8 BFloat32](/benchmarks/graph_networks/tensorflow/graphsage/inference/README.md) | [Protein Protein Interaction](http://snap.stanford.edu/graphsage) |
 
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
+
 
 
 ## Intel® Data Center GPU Workloads
@@ -134,8 +142,9 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [DistilBERT](https://arxiv.org/pdf/1910.01108.pdf) | PyTorch | Inference | Flex Series, Max Series | [FP32 FP16 BF16 TF32](/models_v2/pytorch/distilbert/inference/gpu/README.md) |
 | [DLRM v1](https://arxiv.org/pdf/1906.00091.pdf) | PyTorch | Inference | Flex Series | [FP16 FP32](/models_v2/pytorch/dlrm/inference/gpu/README.md) |
 | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | Arc Series| [INT8 FP16 FP32](/models_v2/pytorch/ssd-mobilenetv1/inference/gpu/README.md) |
-| [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf)  | PyTorch | Inference | Flex Series | [FP16 FP32](/models_v2/pytorch/efficientnet/inference/gpu/README.md) |
+| [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf)  | PyTorch | Inference | Flex Series | [FP16 BF16 FP32](/models_v2/pytorch/efficientnet/inference/gpu/README.md) |
 | [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/models_v2/tensorflow/efficientnet/inference/gpu/README.md) |
+| [FBNet](https://arxiv.org/pdf/1812.03443.pdff)  | PyTorch | Inference | Flex Series | [FP16 BF16 FP32](/models_v2/pytorch/fbnet/inference/gpu/README.md) |
 | [Wide Deep Large Dataset](https://arxiv.org/pdf/2112.10752.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/models_v2/tensorflow/wide_deep_large_ds/inference/gpu/README.md) |
 | [YOLO V5](https://arxiv.org/pdf/2108.11539.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/yolov5/inference/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | Max Series, Arc Series | [BFloat16 FP32 FP16](/models_v2/pytorch/bert_large/inference/gpu/README.md) |
@@ -154,6 +163,8 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [UNet++](https://arxiv.org/pdf/1807.10165.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/unetpp/inference/gpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Inference | Max Series | [FP16 BF16 FP32](/models_v2/pytorch/rnnt/inference/gpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Training | Max Series | [FP32 BF16 TF32](/models_v2/pytorch/rnnt/training/gpu/README.md) |
+| [IFRNet](https://arxiv.org/pdf/2205.14620.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/IFRNet/inference/gpu/README.md) |
+| [RIFE](https://arxiv.org/pdf/2011.06294.pdf)    | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/RIFE/inference/gpu/README.md) |
 
 ## How to Contribute
 If you would like to add a new benchmarking script, please use [this guide](/CONTRIBUTING.md).

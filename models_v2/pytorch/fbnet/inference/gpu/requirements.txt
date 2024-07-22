@@ -1,0 +1,6 @@
+argparse
+numpy
+onnx
+scipy
+timm
+torchsummary
