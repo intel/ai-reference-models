@@ -21,5 +21,5 @@ dir=$(pwd)
 mkdir -p ${CHECKPOINT_DIR}/
 cd ${CHECKPOINT_DIR}/
 CHECKPOINT_DIR=$(pwd)
-python ${MODEL_DIR}/models/object_detection/pytorch/yolov7/hub_help.py  --checkpoint-dir $CHECKPOINT_DIR --weight yolov7.pt 
+python ${dir}/hub_help.py  --checkpoint-dir $CHECKPOINT_DIR --weight yolov7.pt
 cd $dir
