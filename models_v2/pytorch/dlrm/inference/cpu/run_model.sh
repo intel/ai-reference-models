@@ -43,14 +43,16 @@ fi
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
-if [ $THROUGHPUT ]; then 
+if [ $THROUGHPUT ]; then
     LOG=${OUTPUT_DIR}/dlrm_inference_performance_log/${PRECISION}
-else 
+else
     LOG=${OUTPUT_DIR}/dlrm_inference_accuracy_log/${PRECISION}
-fi 
+fi
 
 rm -rf ${LOG}
 mkdir -p ${LOG}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
 
 CORES_PER_SOCKET=`lscpu | grep "Core(s) per socket" | awk '{print $4}'`
 SOCKETS=`lscpu | grep "Socket(s)" | awk '{print $2}'`
@@ -80,15 +82,15 @@ else
 fi
 
 export OMP_NUM_THREADS=$CORES_PER_SOCKET
-if [ "$THROUGHPUT" ]; then 
+if [ "$THROUGHPUT" ]; then
     LOG="${LOG}/throughput.log"
-else 
+else
     LOG="${LOG}/accuracy.log"
 fi
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 
-if [ "$THROUGHPUT" ]; then 
+if [ "$THROUGHPUT" ]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
             --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
@@ -112,7 +114,7 @@ if [ "$THROUGHPUT" ]; then
             --print-freq=10 --print-time --test-mini-batch-size=${BATCH_SIZE} --share-weight-instance=$CORES_PER_NUMA_NODE \
             $ARGS |tee $LOG
     fi
-else 
+else
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
@@ -137,22 +139,57 @@ else
         --print-freq=100 --print-time --mini-batch-size=2048 --test-mini-batch-size=16384 \
         --test-freq=2048 --print-auc $ARGS \
         --load-model=${WEIGHT_PATH} | tee $LOG
-    fi 
+    fi
 fi
 
-throughput=$(echo "$LOG" | grep -oP 'Throughput:  \K[^ ]+')
-accuracy=$(echo "$LOG" | grep -oP 'accuracy \K[^ ]+')
-latency=$(echo "$LOG" | grep -oP 'latency:  \K[^ ]+')
+throughput="N/A"
+accuracy="N/A"
+latency="N/A"
+
+latency=$(grep 'Average latency per example:' ${LOG} |sed -e 's/.*Average latency per example//;s/[^0-9.]//g' |awk '
+BEGIN {
+        sum = 0;
+        i = 0;
+      }
+      {
+        sum = sum + $1;
+        i++;
+      }
+END   {
+sum = sum / i;
+        printf("%.3f", sum);
+}')
+echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+echo ""dlrm";"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+
+throughput=$(grep 'Throughput:' ${LOG} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+BEGIN {
+        sum = 0;
+        i = 0;
+      }
+      {
+        sum = sum + $1;
+        i++;
+      }
+END   {
+sum = sum / i;
+        printf("%.3f", sum);
+}')
+echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+echo ""dlrm";"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+
+accuracy=$(grep 'Accuracy:' $LOG |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+echo ""dlrm";"auc";${PRECISION};16384;${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 
 echo "Throughput: $throughput"
 echo "Accuracy: $accuracy"
 echo "Latency: $latency"
 
 yaml_content=$(cat << EOF
-results: 
+results:
 - key : throughput
   value: $throughput
-  unit: samples per second 
+  unit: samples per second
 - key: latency
   value: $latency
   unit: s
