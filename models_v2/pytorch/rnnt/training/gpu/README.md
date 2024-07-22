@@ -112,7 +112,7 @@ total samples tested:  10240
 total time (excluded audio processing):  88.60093999199307 s
 rnnt_train throughput: 115.574 sample per second
 rnnt_train latency:  4.430046999599654
-Saving module RNNT in /home/gta/wliao2/frameworks.ai.models.intel-models/models/language_modeling/pytorch/rnnt/training/gpu/RNNT_1703175379.689953-epoch-0.pt
+Saving module RNNT in /home/frameworks.ai.models.intel-models/models/language_modeling/pytorch/rnnt/training/gpu/RNNT_1703175379.689953-epoch-0.pt
 Saved.
 ```
 
@@ -123,7 +123,7 @@ Done in 395.0894150733948
 [0] total time (excluded audio processing):  [0] 89.35191706901242 [0] s
 [0] rnnt_train throughput: 114.603 sample per second
 [0] rnnt_train latency: [0]  [0] 4.467595853450621
-[0] Saving module DistributedDataParallel in /home/gta/wliao2/frameworks.ai.models.intel-models/models/language_modeling/pytorch/rnnt/training/gpu/out/DistributedDataParallel_1703176458.9948287-epoch-0.pt
+[0] Saving module DistributedDataParallel in /home/frameworks.ai.models.intel-models/models/language_modeling/pytorch/rnnt/training/gpu/out/DistributedDataParallel_1703176458.9948287-epoch-0.pt
 [0] Saved.
 [1] sample id  22   | cost time is [1]  4.505866523002624
  79%|███████▊  | 22/28 [06:41<01:49, 18.25s/it]
@@ -131,7 +131,7 @@ Done in 395.0894150733948
 [1] total time (excluded audio processing):  91.75176179101254 [1] s
 [1] rnnt_train throughput: 111.605 sample per second[1]
 [1] rnnt_train latency:  [1] 4.587588089550628
-[1] Saving module DistributedDataParallel in /home/gta/wliao2/frameworks.ai.models.intel-models/models/language_modeling/pytorch/rnnt/training/gpu/out/DistributedDataParallel_1703176465.345023-epoch-0.pt
+[1] Saving module DistributedDataParallel in /home/frameworks.ai.models.intel-models/models/language_modeling/pytorch/rnnt/training/gpu/out/DistributedDataParallel_1703176465.345023-epoch-0.pt
 [1] Saved.
 ```
 
