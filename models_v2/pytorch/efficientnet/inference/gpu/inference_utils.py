@@ -353,18 +353,20 @@ class Inference:
             if args.channels_last:
                 io_utils.write_info('Images will be converted to channels last format')
 
-            dataset = []
-            for batch_index, (images, target) in enumerate(self.validation_dataset):
+            if args.dummy:
                 # Do preemptive processing of images to save on overhead.
                 # NOTE: this increases memory usage which in turn limits dataset
                 # size (on large dataset device might run out of resources).
-                if args.dummy:
+                dataset = []
+                for batch_index, (images, target) in enumerate(self.validation_dataset):
                     images = self.process_images(images)
-                dataset += [(batch_index, images, target)]
+                    dataset += [(images, target)]
+            else:
+                dataset = self.validation_dataset
 
             self.synchronize() # Sync once before inference to make sure any ops such as fetching tensors are completed
             while not self.benchmark_done:
-                for batch_index, images, target in dataset:
+                for batch_index, (images, target) in enumerate(dataset):
                     if not args.dummy:
                         images = self.process_images(images)
                     if args.jit_trace:
