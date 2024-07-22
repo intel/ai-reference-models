@@ -438,7 +438,7 @@ def test(opt,
         print(f"Number_iter: {opt.number_iter}")
         print(f"Warmup_iter: {opt.warmup_iterations}")
         print(f"Evaluation Epoch: {opt.inf_epoch_number}")
-        
+
         batch_time = AverageMeter('Time', ':6.3f')
 
         with torch.no_grad():
