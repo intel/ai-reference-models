@@ -79,9 +79,9 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     ARGS="$ARGS --benchmark --perf_begin_iter 10 --perf_run_iters 100"
     BATCH_SIZE=${BATCH_SIZE:-`expr 4 \* $CORES`}
     echo "Running throughput"
-    rm -rf ${OUTPUT_DIR}/throughput_log*
+    rm -rf ${OUTPUT_DIR}/distilbert_throughput*
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
-    ARGS="$ARGS --benchmark --perf_begin_iter 500 --perf_run_iters 2000 "
+    ARGS="$ARGS --benchmark --perf_begin_iter 500 --perf_run_iters 2000"
     export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
@@ -89,11 +89,11 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-1}
     ARGS="$ARGS --use_share_weight --total_cores ${CORES_PER_NUMA} --cores_per_instance ${OMP_NUM_THREADS}"
     echo "Running realtime inference"
-    rm -rf ${OUTPUT_DIR}/latency_log*
+    rm -rf ${OUTPUT_DIR}/distilbert_latency*
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-1}
     echo "Running accuracy"
-    rm -rf ${OUTPUT_DIR}/accuracy_log*
+    rm -rf ${OUTPUT_DIR}/distilbert_accuracy*
 fi
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
@@ -104,7 +104,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
         mode="jit"
         ARGS="$ARGS --jit_mode_eval"
         echo "### running with jit mode"
-        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_throughput_${path}_${precision}_${mode}" \
             ${EVAL_SCRIPT} $ARGS \
             --use_ipex \
             --model_name_or_path   ${FINETUNED_MODEL} \
@@ -118,7 +118,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
         ARGS="$ARGS --inductor"
-        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_throughput_${path}_${precision}_${mode}" \
             ${EVAL_SCRIPT} $ARGS \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --task_name sst2 \
@@ -128,6 +128,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
             --per_device_eval_batch_size $BATCH_SIZE \
             --dataloader_drop_last
     fi
+
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         path="ipex"
@@ -135,7 +136,7 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
         mode="jit"
         ARGS="$ARGS --jit_mode_eval"
         echo "### running with jit mode"
-        python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
+        python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_accuracy_${precision}_${mode}" \
             ${EVAL_SCRIPT} $ARGS \
             --use_ipex \
             --model_name_or_path   ${FINETUNED_MODEL} \
@@ -148,7 +149,7 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
         ARGS="$ARGS --inductor"
-        python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
+        python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_accuracy_${precision}_${mode}" \
             ${EVAL_SCRIPT} $ARGS \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --task_name sst2 \
@@ -163,7 +164,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
         mode="jit"
         ARGS="$ARGS --jit_mode_eval"
         echo "### running with jit mode"
-        python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+        python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_latency_${precision}_${mode}" \
              ${EVAL_SCRIPT} $ARGS \
              --use_ipex \
              --model_name_or_path   ${FINETUNED_MODEL} \
@@ -176,7 +177,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
         ARGS="$ARGS --inductor"
-        python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+        python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_latency_${precision}_${mode}" \
              ${EVAL_SCRIPT} $ARGS \
              --model_name_or_path   ${FINETUNED_MODEL} \
              --task_name sst2 \
@@ -194,12 +195,12 @@ if [[ "$TEST_MODE" == "REALTIME" ]]; then
     INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
 fi
 
-throughput="0"
-latency="0"
-accuracy="0"
+throughput="N/A"
+latency="N/A"
+accuracy="N/A"
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     # Capture and aggregate throughput values
-    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/distilbert_throughput* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
     BEGIN {
             sum = 0;
         i = 0;
@@ -212,7 +213,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     sum = sum / i;
     printf("%.3f", sum);
     }')
-    latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/distilbert_throughput* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
     BEGIN {
         sum = 0;
         i = 0;
@@ -230,7 +231,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     echo ""distilbert-base";"p99_latency";${precision};${BATCH_SIZE};${latency}" | tee -a ${WORK_SPACE}/summary.log
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     # Capture and aggregate latency values
-    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/distilbert_throughput* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
     BEGIN {
             sum = 0;
     i = 0;
@@ -244,7 +245,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
             printf("%.2f", sum);
     }')
 
-    latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/distilbert_latency* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
     BEGIN {
         sum = 0;
         i = 0;
@@ -263,7 +264,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     echo ""distilbert-base";"p99_latency";${precision};${BATCH_SIZE};${latency}" | tee -a ${WORK_SPACE}/summary.log
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     # Capture and aggregate throughput values
-    throughput=$(grep 'eval_samples_per_second' ${OUTPUT_DIR}/accuracy_log* | sed -e 's/.*eval_samples_per_second\s*=\s*//;s/[^0-9.]//g' | awk '{
+    throughput=$(grep 'eval_samples_per_second' ${OUTPUT_DIR}/distilbert_accuracy* | sed -e 's/.*eval_samples_per_second\s*=\s*//;s/[^0-9.]//g' | awk '{
         sum += $1;
         count++;
     } END {
