@@ -119,6 +119,7 @@
     "pytorch/llama/training/cpu",
     "pytorch/llama/inference/cpu",
     "pytorch/torchrec_dlrm/inference/cpu",
-    "pytorch/chatglm/inference/cpu"
+    "pytorch/chatglm/inference/cpu",
+    "pytorch/yolov7/inference/cpu"
   ]
 }
