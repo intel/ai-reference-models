@@ -79,8 +79,8 @@ elif [[ $PRECISION == "fp16" ]]; then
     ARGS="$ARGS --dtype fp16"
 elif [[ $PRECISION == "int8" ]]; then
     if [ ! -e "${MODEL_DIR}/int8_weight.json"  ]; then
-        echo "prepare int8 weight"
-        bash ${MODEL_DIR}/prepare_int8.sh
+        echo "int8_weight.json not found in MODEL_DIR, will run weight conversion" 
+        ARGS="$ARGS --int8-prepare"
     fi
     echo "running int8 path"
     ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"
