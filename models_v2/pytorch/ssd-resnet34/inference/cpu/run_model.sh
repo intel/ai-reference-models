@@ -260,9 +260,20 @@ else
     fi
 fi
 
+# post-processing
 throughput="N/A"
 accuracy="N/A"
 latency="N/A"
+
+if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
+    LOG=${OUTPUT_DIR}/throughput_log_ssdresnet34*
+elif [[ "$TEST_MODE" == "REALTIME" ]]; then
+    LOG=${OUTPUT_DIR}/latency_log_ssdresnet34*
+elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
+    LOG=${OUTPUT_DIR}/accuracy_log_ssdresnet34*
+fi
+
+echo $LOG
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_${mode}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
