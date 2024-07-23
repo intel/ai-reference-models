@@ -121,6 +121,7 @@
     "pytorch/torchrec_dlrm/inference/cpu",
     "pytorch/chatglm/inference/cpu",
     "pytorch/yolov7/inference/cpu",
-    "pytorch/LCM/inference/cpu"
+    "pytorch/LCM/inference/cpu",
+    "pytorch/gpt-j_mlperf/inference/cpu"
   ]
 }
