@@ -21,17 +21,22 @@ WORKDIR /workspace/pytorch-ssd-resnet34-inference
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    build-essential \
-    ca-certificates \
-    git \
-    wget \
-    make \
-    cmake \
-    autoconf \
-    bzip2 \
-    tar
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        autoconf \
+        bzip2 \
+        tar
 
-RUN pip install packaging intel-openmp matplotlib Pillow pycocotools defusedxml
+RUN python -m pip install packaging \
+        intel-openmp \
+        matplotlib \
+        Pillow \
+        pycocotools \
+        defusedxml
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -43,17 +48,14 @@ RUN git clone https://github.com/jemalloc/jemalloc.git && \
 
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 
-COPY models/object_detection/pytorch/ssd-resnet34/inference/cpu models/object_detection/pytorch/ssd-resnet34/inference/cpu
-COPY quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/inference_realtime.sh quickstart/inference_realtime.sh
-COPY quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/inference_throughput.sh quickstart/inference_throughput.sh
-COPY quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/accuracy.sh quickstart/accuracy.sh
+COPY models_v2/pytorch/ssd-resnet34/inference/cpu .
 
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    numactl \
-    libegl1-mesa 
+        numactl \
+        libegl1-mesa 
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

@@ -17,6 +17,8 @@
 ARGS=""
 EXTRA_ARGS=""
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
 if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     echo "TEST_MODE set to THROUGHPUT"
     BATCH_SIZE=${BATCH_SIZE:-256}
@@ -91,6 +93,10 @@ else
 fi
 
 LOG=${OUTPUT_DIR}_${LOG_PREFIX}_${PRECISION}.log
+
+if [ -z "${BATCH_SIZE}" ]; then
+  export BATCH_SIZE=512
+fi
 
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
     if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then

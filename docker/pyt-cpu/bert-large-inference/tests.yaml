@@ -1,14 +1,16 @@
 fp32-online-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_realtime.sh fp32
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -16,15 +18,17 @@ fp32-online-inference:
       dst: /pytorch/pytorch-bert-squad-model
 fp32-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_throughput.sh fp32
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'THROUGHPUT'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -32,15 +36,17 @@ fp32-throughput-inference:
       dst: /pytorch/pytorch-bert-squad-model
 bf32-online-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_realtime.sh bf32
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: bf32
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -48,15 +54,17 @@ bf32-online-inference:
       dst: /pytorch/pytorch-bert-squad-model
 bf32-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_throughput.sh bf32
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: bf32
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'THROUGHPUT'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -64,15 +72,17 @@ bf32-throughput-inference:
       dst: /pytorch/pytorch-bert-squad-model
 int8-online-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_realtime.sh int8
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: int8
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -80,15 +90,17 @@ int8-online-inference:
       dst: /pytorch/pytorch-bert-squad-model
 int8-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_throughput.sh int8
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: int8
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'THROUGHPUT'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -96,15 +108,17 @@ int8-throughput-inference:
       dst: /pytorch/pytorch-bert-squad-model
 bf16-online-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_realtime.sh bf16
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -112,15 +126,17 @@ bf16-online-inference:
       dst: /pytorch/pytorch-bert-squad-model
 bf16-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_throughput.sh bf16
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'THROUGHPUT'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -128,15 +144,17 @@ bf16-throughput-inference:
       dst: /pytorch/pytorch-bert-squad-model
 avx-int8-online-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_realtime.sh avx-int8
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: avx-int8
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -144,15 +162,17 @@ avx-int8-online-inference:
       dst: /pytorch/pytorch-bert-squad-model
 avx-int8-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_throughput.sh avx-int8
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: avx-int8
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'THROUGHPUT'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -160,15 +180,17 @@ avx-int8-throughput-inference:
       dst: /pytorch/pytorch-bert-squad-model
 avx-fp32-online-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_realtime.sh avx-fp32
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: avx-fp32
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
@@ -176,15 +198,17 @@ avx-fp32-online-inference:
       dst: /pytorch/pytorch-bert-squad-model
 avx-fp32-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
-  cmd: quickstart/run_multi_instance_throughput.sh avx-fp32
+  cmd: bash run_model.sh
   shm-size: 8G
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: avx-fp32
     EVAL_DATA_FILE: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
-    INT8_CONFIG: /workspace/pytorch-bert-large-inference/quickstart/configure.json
+    INT8_CONFIG: /workspace/pytorch-bert-large-inference/configure.json
     OUTPUT_DIR: /tmp
     FINETUNED_MODEL: /pytorch/pytorch-bert-squad-model
-    EVAL_SCRIPT: /workspace/pytorch-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+    TEST_MODE: 'THROUGHPUT'
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json
       dst: /tf_dataset/dataset/data-bert-squad/squad-data/mini-dev-v1.1.json

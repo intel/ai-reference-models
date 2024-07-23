@@ -1,6 +1,6 @@
 fp32-training:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-training
-  cmd: quickstart/training.sh
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-training-${BASE_IMAGE_NAME:-ubuntu}
+  cmd: sh -c "cd models_v2/pytorch/dlrm/training/cpu && ./run_model.sh"
   shm-size: 10G
   env:
     PRECISION: fp32
@@ -10,9 +10,11 @@ fp32-training:
   volumes:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
 bf16-training:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-training
-  cmd: quickstart/training.sh
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-training-${BASE_IMAGE_NAME:-ubuntu}
+  cmd: sh -c "cd models_v2/pytorch/dlrm/training/cpu && ./run_model.sh"
   shm-size: 10G
   env:
     PRECISION: bf16
@@ -22,9 +24,11 @@ bf16-training:
   volumes:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
 bf32-training:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-training
-  cmd: quickstart/training.sh
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-training-${BASE_IMAGE_NAME:-ubuntu}
+  cmd: sh -c "cd models_v2/pytorch/dlrm/training/cpu && ./run_model.sh"
   shm-size: 10G
   env:
     PRECISION: bf32
@@ -34,3 +38,5 @@ bf32-training:
   volumes:
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
