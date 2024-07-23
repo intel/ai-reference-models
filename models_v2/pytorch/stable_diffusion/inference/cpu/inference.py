@@ -274,6 +274,8 @@ def main():
     # torch.compile with inductor backend
     if args.compile_inductor:
         print("torch.compile with inductor backend ...")
+        # torch._inductor.config.profiler_mark_wrapper_call = True
+        # torch._inductor.config.cpp.enable_kernel_profile = True
         from torch._inductor import config as inductor_config
         inductor_config.cpp_wrapper = True
         if args.precision == "fp32":
@@ -281,17 +283,23 @@ def main():
                 pipe.unet = torch.compile(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
+                pipe.text_encoder = torch.compile(pipe.text_encoder)
+                pipe.vae.decode = torch.compile(pipe.vae.decode)
         elif args.precision == "bf16":
             with torch.cpu.amp.autocast(), torch.no_grad():
                 pipe.unet = torch.compile(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
+                pipe.text_encoder = torch.compile(pipe.text_encoder)
+                pipe.vae.decode = torch.compile(pipe.vae.decode)
         elif args.precision == "fp16":
             torch._C._set_sdp_use_flash(False)
             with torch.cpu.amp.autocast(dtype=torch.half), torch.no_grad():
                 pipe.unet = torch.compile(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
+                pipe.text_encoder = torch.compile(pipe.text_encoder)
+                pipe.vae.decode = torch.compile(pipe.vae.decode)
         elif args.precision == "int8-fp32":
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
             import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
@@ -309,6 +317,8 @@ def main():
                 pipe.traced_unet = torch.compile(pipe.traced_unet)
                 pipe.traced_unet(*input)
                 pipe.traced_unet(*input)
+                pipe.text_encoder = torch.compile(pipe.text_encoder)
+                pipe.vae.decode = torch.compile(pipe.vae.decode)
         elif args.precision == "int8-bf16":
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
             import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
@@ -327,6 +337,8 @@ def main():
                 pipe.traced_unet = torch.compile(pipe.traced_unet)
                 pipe.traced_unet(*input)
                 pipe.traced_unet(*input)
+                pipe.text_encoder = torch.compile(pipe.text_encoder)
+                pipe.vae.decode = torch.compile(pipe.vae.decode)
         else:
             raise ValueError("If you want to use torch.compile with inductor backend, --precision needs to be the following: fp32, bf16, int8-bf16, int8-fp32")
 
