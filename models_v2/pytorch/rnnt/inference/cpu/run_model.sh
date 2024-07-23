@@ -22,7 +22,7 @@ if [[ $TEST_MODE == "THROUGHPUT" ]]; then
     echo "TEST_MODE set to THROUGHPUT"
     BATCH_SIZE=${BATCH_SIZE:-448}
     LOG_PREFIX=/rnnt_${PRECISION}_inference_throughput
-elif [[ $TESTMODE == "ACCURACY" ]]; then
+elif [[ $TEST_MODE == "ACCURACY" ]]; then
     echo "TEST_MODE set to ACCURACY"
     BATCH_SIZE=${BATCH_SIZE:-64}
     LOG_PREFIX=/rnnt_${PRECISION}_inference_accuracy
@@ -82,7 +82,7 @@ if [[ $TEST_MODE == "THROUGHPUT" ]]; then
     LOG_PREFIX=/rnnt_${PRECISION}_inference_throughput
     ARGS_IPEX="$ARGS_IPEX --throughput_mode"
     ARGS="$ARGS --warm_up 3 --sort_by_duration"
-elif [[ $TESTMODE == "ACCURACY" ]]; then
+elif [[ $TEST_MODE == "ACCURACY" ]]; then
     LOG_PREFIX=/rnnt_${PRECISION}_inference_accuracy
 else
     LOG_PREFIX=/rnnt_${PRECISION}_inference_realtime

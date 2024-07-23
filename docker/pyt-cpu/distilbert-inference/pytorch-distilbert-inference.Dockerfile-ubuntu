@@ -23,15 +23,15 @@ WORKDIR /workspace/pytorch-distilbert-inference
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    build-essential \
-    ca-certificates \
-    git \
-    wget \
-    make \
-    cmake \
-    autoconf \
-    bzip2 \
-    tar
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        autoconf \
+        bzip2 \
+        tar
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -49,36 +49,35 @@ RUN wget https://github.com/gperftools/gperftools/releases/download/gperftools-2
     make && \
     make install
 
-COPY models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff 
-COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/convert.py quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/convert.py
-COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/configure.json configure.json
-COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/run_accuracy.sh  quickstart/run_accuracy.sh
-COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/do_calibration.sh quickstart/do_calibration.sh
-COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/run_multi_instance_realtime.sh quickstart/run_multi_instance_realtime.sh
-COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/run_multi_instance_throughput.sh quickstart/run_multi_instance_throughput.sh
-COPY quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/download_model_dataset.sh quickstart/download_model_dataset.sh
 
-RUN  cd quickstart && \
-     git clone https://github.com/huggingface/transformers.git && \
-     cd transformers && \
-     git checkout v4.28.1 && \
-     git apply /workspace/pytorch-distilbert-inference/models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff && \
-     pip install -e ./ && \
-     cd -
+RUN pip install packaging \
+        datasets \
+        intel-openmp \
+        evaluate \ 
+        scikit-learn \
+        scipy
 
-RUN pip install packaging datasets intel-openmp evaluate \ 
-    datasets scikit-learn scipy
-
+RUN apt-get update && \
+    apt-get install -y git-lfs 
+    
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD 
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD 
-ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+COPY models_v2/pytorch/distilbert/inference/cpu .
+COPY models_v2/common/enable_ipex_for_transformers.diff .
+
+RUN git clone https://github.com/huggingface/transformers.git && \
+    cd transformers && \
+    git checkout v4.28.1 && \
+    git lfs pull && \
+    pip install -r examples/pytorch/text-classification/requirements.txt && \
+    git apply ../enable_ipex_for_transformers.diff && \
+    pip install -e ./ 
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    numactl \
-    libegl1-mesa 
+        numactl \
+        libegl1-mesa 
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

@@ -48,22 +48,14 @@ ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,d
 RUN pip install matplotlib Pillow pycocotools pytz==2018.5 cython && \
     pip install yacs opencv-python cityscapesscripts transformers defusedxml
 
-COPY models/object_detection/pytorch/ssd-resnet34/training/cpu models/object_detection/pytorch/ssd-resnet34/training/cpu
-COPY quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/throughput.sh quickstart/throughput.sh
-COPY quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/accuracy.sh quickstart/accuracy.sh
+COPY models_v2/pytorch/ssd-resnet34/training/cpu .
+
+RUN bash setup.sh
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    libpng-dev \
-    libfreetype-dev && \
-    pip install --upgrade pip && \
-    pip install --no-cache-dir https://github.com/mlperf/logging/archive/9ea0afa.zip 
-
-
-RUN apt-get update && \
-    apt-get install --no-install-recommends --fix-missing -y \
-    numactl \
-    libegl1-mesa 
+        numactl \
+        libegl1-mesa 
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

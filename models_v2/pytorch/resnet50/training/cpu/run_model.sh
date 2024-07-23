@@ -122,7 +122,7 @@ if [[ "$DISTRIBUTED" == "true" || "$DISTRIBUTED" == "True" || "$DISTRIBUTED" == 
 else
     BATCH_SIZE=${BATCH_SIZE:-128}
     ARGS_IPEX="$ARGS_IPEX --ninstances 1  --ncore_per_instance ${CORES_PER_INSTANCE} --log_path=${OUTPUT_DIR} --log_file_prefix="./resnet50_training_log_${PRECISION}""
-    ARGS="$ARGS --train-no-eval -w 50 -b $BATCH_SIZE"
+    ARGS="$ARGS --train-no-eval --warmup-iterations 50 -b $BATCH_SIZE"
     LOG_PREFIX=resnet50_training_log
 fi
 
@@ -162,7 +162,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     else
         python -m intel_extension_for_pytorch.cpu.launch \
             ${ARGS_IPEX} \
-            ${MODEL_DIR}../../common/train.py \
+            ${MODEL_DIR}/../../common/train.py \
             ${ARGS} 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
     fi
 else
@@ -176,7 +176,7 @@ else
     else
         python -m intel_extension_for_pytorch.cpu.launch \
             ${ARGS_IPEX} \
-            ${MODEL_DIR}../../common/train.py \
+            ${MODEL_DIR}/../../common/train.py \
             ${ARGS} 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
     fi
 fi

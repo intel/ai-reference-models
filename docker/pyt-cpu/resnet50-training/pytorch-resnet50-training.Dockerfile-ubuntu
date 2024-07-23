@@ -18,20 +18,21 @@ ARG BASE_TAG="2.0.0-pip-base"
 
 FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-optimized-pytorch
 
-
 SHELL ["/bin/bash", "-c"]
 
 WORKDIR /workspace/pytorch-resnet50-training 
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    build-essential \
-    git \
-    make \
-    cmake \
-    autoconf \
-    bzip2 \
-    tar
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        autoconf \
+        bzip2 \
+        tar
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -48,18 +49,19 @@ RUN wget https://github.com/gperftools/gperftools/releases/download/gperftools-2
     make && \
     make install
 
-RUN pip install packaging intel-openmp 
+RUN pip install packaging \
+        intel-openmp 
 
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-COPY models/image_recognition/pytorch/common models/image_recognition/pytorch/common
-COPY quickstart/image_recognition/pytorch/resnet50/training/cpu/training.sh quickstart/training.sh
-    
+COPY models_v2/pytorch/resnet50/common models_v2/pytorch/resnet50/common 
+COPY models_v2/pytorch/resnet50/training/cpu models_v2/pytorch/resnet50/training/cpu
+
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    numactl \
-    libegl1-mesa 
+        numactl \
+        libegl1-mesa 
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

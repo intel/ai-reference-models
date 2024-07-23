@@ -331,7 +331,7 @@ def train(
         print("Throughput: {:.3f} fps".format(perf))
         # print_once("Final Evaluation ....................... ......  ... .. . .")
         # evalutaion()
-        save(model, optimizer, epoch, output_dir=args.output_dir)
+        # save(model, optimizer, epoch, output_dir=args.output_dir)
     else:
         total_time = 0
         while True:
