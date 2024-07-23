@@ -32,7 +32,7 @@ The tables below link to documentation on how to run each use case using docker 
 | Framework | Model                                                  | Precisions | Mode |  Dataset |
 | --------| ------------------------------------------------------ | ---------- | ------| --------------------- |
 | PyTorch |[Mask R-CNN](../../models_v2/pytorch/maskrcnn/training/cpu/CONTAINER.md) | FP32,BF32,BF16 | Training | COCO 2017 |
-| PyTorch |[Mask R-CNN](../../models_v2/pytorch/maskrcnn/inference/cpu) | FP32,BF32,BF16 | Inference | COCO 2017 |
+| PyTorch |[Mask R-CNN](../../models_v2/pytorch/maskrcnn/inference/cpu/CONTAINER.md) | FP32,BF32,BF16 | Inference | COCO 2017 |
 | PyTorch |[SSD-ResNet34](../../models_v2/pytorch/ssd-resnet34/training/cpu/CONTAINER.md) | FP32,BF32,BF16 | Training | COCO 2017 |
 | PyTorch |[SSD-ResNet34](../../models_v2/pytorch/ssd-resnet34/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,INT8 | Inference | COCO 2017 |
 | TensorFlow | [SSD-ResNet34](../../quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/README_DEV_CAT.md) | FP32,BF32,BF16 |Training | COCO 2017 |
