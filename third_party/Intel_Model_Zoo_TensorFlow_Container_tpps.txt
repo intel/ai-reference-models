@@ -5,7 +5,9 @@ This file contains the list of third party software (“third party programs”)
 Third party programs and their corresponding required notices and/or license terms are listed below.
 
 -------------------------------------------------------------
-1. bert-tensorflow
+1. Bert large hugging face
+ 
+   bert-tensorflow
 
    coverage
 
@@ -6669,6 +6671,9 @@ DEALINGS IN THE SOFTWARE.
 
     Copyright (C) 2011-2013 Tarek Ziade <tarek@ziade.org>
     Copyright (C) 2012-2016 Ian Cordasco <graffatcolmingov@gmail.com>
+
+    GraphSage
+    Copyright (c) 2017 William L. Hamilton, Rex Ying
 
     httplib2
     Httplib2 Software License
