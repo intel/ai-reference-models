@@ -1,6 +1,0 @@
-future
-numpy
-scikit-learn>=1.5.0
-torch
-tqdm
-wheel==0.38.0 # upgraded to avoid a vulnerability
