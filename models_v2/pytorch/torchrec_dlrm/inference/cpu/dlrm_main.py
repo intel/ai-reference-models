@@ -223,7 +223,6 @@ def ipex_optimize(args, model, optimizer, dataloader):
                     model = convert_int8(args, model, dataloader)
                     torch.jit.save(model, args.int8_model_dir)
                     print(f"save int8 model to {args.int8_model_dir}")
-                    exit()
             else:
                 # just run JIT, since we load optimized INT8 model
                 print_memory("int8 jit optimize")
