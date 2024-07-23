@@ -22,18 +22,23 @@ WORKDIR /workspace/pytorch-maskrcnn-inference
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    build-essential \
-    ca-certificates \
-    git \
-    wget \
-    make \
-    cmake \
-    autoconf \
-    bzip2 \
-    tar
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        autoconf \
+        bzip2 \
+        tar
 
-RUN pip install packaging intel-openmp matplotlib Pillow pycocotools \
-    yacs opencv-python cityscapesscripts defusedxml
+RUN python -m pip install packaging \
+        intel-openmp \
+        Pillow \
+        pycocotools \
+        opencv-python \
+        cityscapesscripts \
+        defusedxml
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -46,24 +51,20 @@ RUN git clone https://github.com/jemalloc/jemalloc.git && \
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-COPY models/object_detection/pytorch/maskrcnn models/object_detection/pytorch/maskrcnn
-COPY quickstart/common quickstart/common
-
-COPY quickstart/object_detection/pytorch/maskrcnn/inference/cpu/inference_realtime.sh quickstart/inference_realtime.sh
-COPY quickstart/object_detection/pytorch/maskrcnn/inference/cpu/inference_throughput.sh quickstart/inference_throughput.sh
-COPY quickstart/object_detection/pytorch/maskrcnn/inference/cpu/accuracy.sh quickstart/accuracy.sh 
+COPY models_v2/pytorch/maskrcnn/inference/cpu .
 
 RUN apt-get update && apt-get install -y python3.10-dev && \
-    cd /workspace/pytorch-maskrcnn-inference/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark && \
-    python setup.py develop && \
-    cd -
+    cd maskrcnn-benchmark && \
+    python setup.py develop 
+
+RUN python -m pip install -r requirements.txt
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    numactl \
-    libgl1 \
-    libglib2.0-0 \
-    libegl1-mesa 
+        numactl \
+        libgl1 \
+        libglib2.0-0 \
+        libegl1-mesa 
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

@@ -26,19 +26,19 @@ WORKDIR /workspace/pytorch-dlrm-v2-inference
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    gcc \
-    cmake \
-    build-essential \
-    ca-certificates \
-    git \
-    wget \
-    make \
-    cmake \
-    curl \
-    autoconf \ 
-    bzip2 \
-    tar \
-    unzip
+        gcc \
+        cmake \
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        curl \
+        autoconf \ 
+        bzip2 \
+        tar \
+        unzip
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -66,18 +66,12 @@ RUN python -m pip install torchrec==0.3.2 --no-deps \
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 #ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto"
 
-COPY models/recommendation/pytorch/torchrec_dlrm/data_process models/recommendation/pytorch/torchrec_dlrm/data_process
-COPY models/recommendation/pytorch/torchrec_dlrm/ipex_optimized_model models/recommendation/pytorch/torchrec_dlrm/ipex_optimized_model 
-COPY models/recommendation/pytorch/torchrec_dlrm/scripts models/recommendation/pytorch/torchrec_dlrm/scripts
-COPY models/recommendation/pytorch/torchrec_dlrm/*.py models/recommendation/pytorch/torchrec_dlrm
-COPY models/recommendation/pytorch/torchrec_dlrm/int8_configure.json models/recommendation/pytorch/torchrec_dlrm/int8_configure.json
-COPY quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu quickstart
-COPY quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/prepare_int8.sh quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/prepare_int8.sh
+COPY models_v2/pytorch/torchrec_dlrm/inference/cpu .
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    numactl \
-    libegl1-mesa 
+        numactl \
+        libegl1-mesa 
 
 RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.3.0 \
         jinja2==3.1.4 \

@@ -23,18 +23,25 @@ WORKDIR /workspace/pytorch-maskrcnn-training
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    build-essential \
-    ca-certificates \
-    git \
-    wget \
-    make \
-    cmake \
-    autoconf \
-    bzip2 \
-    tar
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        autoconf \
+        bzip2 \
+        tar
 
-RUN pip install matplotlib Pillow pycocotools && \
-    pip install yacs opencv-python cityscapesscripts transformers defusedxml intel-openmp 
+RUN python -m pip install matplotlib \
+        Pillow \
+        pycocotools \
+        yacs \
+        opencv-python \
+        cityscapesscripts \
+        transformers \
+        defusedxml \
+        intel-openmp 
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -46,21 +53,20 @@ RUN git clone https://github.com/jemalloc/jemalloc.git && \
 
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 
-COPY models/object_detection/pytorch/maskrcnn models/object_detection/pytorch/maskrcnn
-COPY quickstart/object_detection/pytorch/maskrcnn/training/cpu/training.sh quickstart/training.sh
+COPY models_v2/pytorch/maskrcnn/training/cpu .
 
 RUN apt-get update && apt-get install -y python3.10-dev && \
-    cd /workspace/pytorch-maskrcnn-training/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark && \
+    cd maskrcnn-benchmark && \
     python setup.py develop 
 
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    numactl \
-    libgl1 \
-    libglib2.0-0 \
-    libegl1-mesa
+        numactl \
+        libgl1 \
+        libglib2.0-0 \
+        libegl1-mesa
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

@@ -40,7 +40,8 @@ RUN apt-get update && \
     tar \
     unzip \
     libgl1-mesa-glx \
-    libglib2.0-0
+    libglib2.0-0 \
+    python3-dev
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -55,11 +56,7 @@ RUN pip install packaging intel-openmp pycocotools
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 #ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-COPY models/object_detection/pytorch/yolov7 models/object_detection/pytorch/yolov7
-
-COPY quickstart/object_detection/pytorch/yolov7/inference/cpu/inference_realtime.sh quickstart/inference_realtime.sh 
-COPY quickstart/object_detection/pytorch/yolov7/inference/cpu/inference_throughput.sh quickstart/inference_throughput.sh
-COPY quickstart/object_detection/pytorch/yolov7/inference/cpu/accuracy.sh quickstart/accuracy.sh
+COPY models_v2/pytorch/yolov7/inference/cpu .
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \

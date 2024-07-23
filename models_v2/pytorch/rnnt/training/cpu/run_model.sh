@@ -179,7 +179,7 @@ echo "--------------------------------Performance Summary per NUMA Node---------
 echo ""RNN-T";"training throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 
 accuracy="0"
-$latency="0"
+latency="0"
 
 yaml_content=$(cat << EOF
 results:

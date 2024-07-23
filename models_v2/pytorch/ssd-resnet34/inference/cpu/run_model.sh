@@ -112,7 +112,7 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
 fi
 
 weight_sharing=true
-if [ -z "${WEIGHT_SHAREING}" ]; then
+if [ -z "${WEIGHT_SHARING}" ]; then
   weight_sharing=false
 else
   echo "### Running the test with runtime extension."
@@ -210,6 +210,7 @@ if [ "$weight_sharing" = true ]; then
     fi
 else
     if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
+        BATCH_SIZE=${BATCH_SIZE:-2}
         python -m intel_extension_for_pytorch.cpu.launch \
             --throughput_mode \
             ${MODEL_DIR}/infer.py \

@@ -22,17 +22,17 @@ WORKDIR /workspace/pytorch-bert-large-inference
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    build-essential \
-    ca-certificates \
-    git \
-    wget \
-    make \
-    cmake \
-    g++ \
-    gcc \
-    autoconf \
-    bzip2 \
-    tar
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        g++ \
+        gcc \
+        autoconf \
+        bzip2 \
+        tar
 
 RUN git clone  https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -50,21 +50,14 @@ RUN wget https://github.com/gperftools/gperftools/releases/download/gperftools-2
     make && \
     make install
 
-COPY models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
-COPY quickstart/language_modeling/pytorch/bert_large/inference/cpu/configure.json quickstart/configure.json
-COPY quickstart/language_modeling/pytorch/bert_large/inference/cpu/run_accuracy.sh quickstart/run_accuracy.sh
-COPY quickstart/language_modeling/pytorch/bert_large/inference/cpu/run_calibration.sh quickstart/run_calibration.sh
-COPY quickstart/language_modeling/pytorch/bert_large/inference/cpu/run_multi_instance_realtime.sh quickstart/run_multi_instance_realtime.sh
-COPY quickstart/language_modeling/pytorch/bert_large/inference/cpu/run_multi_instance_throughput.sh quickstart/run_multi_instance_throughput.sh
+COPY models_v2//common/enable_ipex_for_transformers.diff .
+COPY models_v2/pytorch/bert_large/inference/cpu .
 
-RUN cd quickstart && \
-    git clone https://github.com/huggingface/transformers.git && \
+RUN git clone https://github.com/huggingface/transformers.git && \
     cd transformers && \
     git checkout v4.28.1 && \
-    git apply /workspace/pytorch-bert-large-inference/models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff && \
-    pip install -e ./ && \
-    pip install tensorboard && \
-    pip install intel-openmp 
+    git apply ../enable_ipex_for_transformers.diff && \
+    pip install -e ./
 
 RUN pip install packaging intel-openmp tensorboardX
 
@@ -73,8 +66,8 @@ ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,d
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    numactl \
-    libegl1-mesa
+        numactl \
+        libegl1-mesa
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

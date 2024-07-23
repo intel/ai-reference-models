@@ -21,15 +21,15 @@ WORKDIR /workspace/pytorch-dlrm-training
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    build-essential \
-    ca-certificates \
-    git \
-    wget \
-    make \
-    cmake \
-    autoconf \
-    bzip2 \
-    tar
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        autoconf \
+        bzip2 \
+        tar
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -47,16 +47,18 @@ RUN wget https://github.com/gperftools/gperftools/releases/download/gperftools-2
     make && \
     make install
     
-RUN pip install packaging intel-openmp
+RUN python -m pip install packaging \
+        intel-openmp \
+        future \
+        scikit-learn \
+        tqdm \
+        wheel==0.38.0
 
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
-COPY models/recommendation/pytorch/dlrm/product models/recommendation/pytorch/dlrm/product
-COPY quickstart/recommendation/pytorch/dlrm/training/cpu/training.sh quickstart/training.sh
-COPY quickstart/recommendation/pytorch/dlrm/requirements.txt quickstart/requirements.txt
-
-RUN pip install -r /workspace/pytorch-dlrm-training/quickstart/requirements.txt
+COPY models_v2/pytorch/dlrm/common models_v2/pytorch/dlrm/common 
+COPY models_v2/pytorch/dlrm/training/cpu models_v2/pytorch/dlrm/training/cpu
 
 ENV KMP_AFFINITY="granularity=fine,compact,1,0"
 ENV KMP_BLOCKTIME=1
