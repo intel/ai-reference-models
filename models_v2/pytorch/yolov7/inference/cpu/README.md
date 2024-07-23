@@ -9,7 +9,7 @@ Intel-optimized PyTorch and PyTorch inductor.
 
 | Use Case    | Framework   | Model Repository| Branch/Commit| Patch |
 |-------------|-------------|-----------------|--------------|--------------|
-| Inference   | Pytorch     | https://github.com/WongKinYiu/yolov7 | main/a207844 | [`yolov7_ipex_and_inductor.patch`](/models/object_detection/pytorch/yolov7/yolov7_ipex_and_inductor.patch). Enable yolov7 inference with IPEX and torch inductor for specified precision (fp32, int8, bf16, fp16, or bf32). |
+| Inference   | Pytorch     | https://github.com/WongKinYiu/yolov7 | main/a207844 | [`yolov7_ipex_and_inductor.patch`](/models_v2/pytorch/yolov7/inference/cpu/yolov7_ipex_and_inductor.patch). Enable yolov7 inference with IPEX and torch inductor for specified precision (fp32, int8, bf16, fp16, or bf32). |
 
 ## Pre-Requisite
 Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison and Jemalloc.
@@ -96,8 +96,10 @@ export DATASET_DIR=<directory where the dataset will be saved>
 
 ## Output
 Output typically looks like this:
-
-
+100%|██████████| 4/4 [00:17<00:00,  4.29s/it]
+time per prompt(s): 73.46
+Inference latency  73.46 ms
+Throughput: 13.61 fps
 
 Final results of the inference run can be found in `results.yaml` file.
 ```
