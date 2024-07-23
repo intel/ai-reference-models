@@ -15,6 +15,8 @@ Third party programs and their corresponding required notices and/or license ter
 
    Cython
 
+   FBNet
+
    Intel® Extension for PyTorch*
 
    Intel® AI Reference Models PyTorch Containers
@@ -5414,6 +5416,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     mpfr
     pyqt
     readline
+    Yolov7
     zeromq
 
                       GNU GENERAL PUBLIC LICENSE
@@ -6514,6 +6517,9 @@ License agreement for matplotlib versions prior to 1.3.0
     html5lib
     Copyright (c) 2006-2013 James Graham and other contributors
 
+    IFRNet
+    Copyright (c) 2022 Lingtong Kong
+
     imagesize
     Copyright © 2016 Yoshiki Shibukawa
 
@@ -6606,6 +6612,9 @@ License agreement for matplotlib versions prior to 1.3.0
     QtAwesome
     QtPy
     Copyright (c) 2015 The Spyder development team
+
+    RIFE
+    Copyright  (c)  Megvii  Inc.
 
     ruamel_yaml
     Copyright (c) 2014-2020 Anthon van der Neut, Ruamel bvba
