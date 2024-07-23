@@ -92,7 +92,6 @@ if [ -z "${PRECISION}" ]; then
 fi
 
 cd "${MODEL_DIR}/yolov7"
-#MODE_ARGS=""
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     rm -rf ${OUTPUT_DIR}/yolov7_throughput_log*
     ARGS="--checkpoint-dir $CHECKPOINT_DIR --weights yolov7.pt"
