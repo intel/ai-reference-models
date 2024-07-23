@@ -85,7 +85,6 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [LLAMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) | PyTorch | Training | [FP32 FP16 BFloat16 BF32](/models_v2/pytorch/llama/training/cpu/README.md) | |
 | [LLAMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/models_v2/pytorch/llama/inference/cpu/README.md) | |
 | [ChatGLMv3 6B](https://huggingface.co/THUDM/chatglm3-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/models_v2/pytorch/chatglm/inference/cpu/README.md) | |
-| [GEMMA Keras](https://www.kaggle.com/models/google/gemma/keras/) | Keras | Inference | [FP32 FP16 BFloat16](/models_v2/tensorflow/gemma/inference/cpu/README.md) | Synthetic Data | |
 
 
 ### Language Translation
@@ -111,7 +110,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf) | TensorFlow | Inference | [FP32](/benchmarks/recommendation/tensorflow/wide_deep/inference/README.md) | [Census Income dataset](https://github.com/IntelAI/models/tree/master/benchmarks/recommendation/tensorflow/wide_deep/inference/fp32#dataset) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 Int8 BFloat16 BFloat32](/models_v2/pytorch/dlrm/inference/cpu/README.md) | [Criteo Terabyte](/models_v2/pytorch/dlrm/inference/cpu/README.md#datasets) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Training  | [FP32 BFloat16 BFloat32](/models_v2/pytorch/dlrm/training/cpu/README.md) | [Criteo Terabyte](/models_v2/pytorch/dlrm/training/cpu/README.md#datasets) |
-| [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 FP16 BFloat16 BFloat32 Int8](/models_v2/pytorch/torchrec_dlrm/inference/cpu/README.md) | [Criteo 1TB Click Logs dataset](/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu#datasets) |
+| [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 FP16 BFloat16 BFloat32 Int8](/models_v2/pytorch/torchrec_dlrm/inference/cpu/README.md) | [Criteo 1TB Click Logs dataset](/models_v2/pytorch/torchrec_dlrm/inference/cpu#datasets) |
 
 ### Diffusion
 
@@ -129,7 +128,6 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [GraphSAGE](https://arxiv.org/pdf/1706.02216.pdf) | TensorFlow | Inference | [FP32 BFloat16 FP16 Int8 BFloat32](/benchmarks/graph_networks/tensorflow/graphsage/inference/README.md) | [Protein Protein Interaction](http://snap.stanford.edu/graphsage) |
 
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
-
 
 
 ## Intel® Data Center GPU Workloads
