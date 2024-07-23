@@ -73,6 +73,16 @@ else
     exit
 fi
 
+if [[ -z ${PRETRAINED_MODEL} ]]; then
+    echo "Please set environment variable PRETRAINED_MODEL"
+    exit 1
+fi
+
+if [[ ! -d ${PRETRAINED_MODEL} ]]; then
+    echo "Provide the pre-trained model directory folder"
+    exit 1
+fi 
+
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     rm -rf ${OUTPUT_DIR}/throughput_log*
     BATCH_SIZE=${BATCH_SIZE:-56}
@@ -94,9 +104,9 @@ fi
 EVAL_DATA_FILE=${EVAL_DATA_FILE:-"${PWD}/squad1.1/dev-v1.1.json"}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"bert_squad_model"}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
-EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/legacy/question-answering/run_squad.py"}
+EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/transformers/examples/legacy/question-answering/run_squad.py"}
 work_space=${work_space:-${OUTPUT_DIR}}
-INT8_CONFIG=${INT8_CONFIG:-"configure.json"}
+INT8_CONFIG=${INT8_CONFIG:-"${PWD}/configure.json"}
 FP8_CONFIG=${FP8_CONFIG:-"fp8_state_dict.pt"}
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}

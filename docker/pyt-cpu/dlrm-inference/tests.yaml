@@ -1,22 +1,27 @@
 fp32-accuracy:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
   pull_policy: always
-  cmd: quickstart/accuracy.sh
+  cmd: sh -c "cd models_v2/pytorch/dlrm/inference/cpu && ./run_model.sh"
+  cap_add: 'SYS_NICE'
   shm-size: 8G
   env:
     PRECISION: fp32
     WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
       dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
 bf32-accuracy:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
   pull_policy: always
-  cmd: quickstart/accuracy.sh
+  cmd: sh -c "cd models_v2/pytorch/dlrm/inference/cpu && ./run_model.sh"
+  cap_add: 'SYS_NICE'
   shm-size: 8G
   env:
     PRECISION: bf32
@@ -28,10 +33,13 @@ bf32-accuracy:
       dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
 bf16-accuracy:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
   pull_policy: always
-  cmd: quickstart/accuracy.sh
+  cmd: sh -c "cd models_v2/pytorch/dlrm/inference/cpu && ./run_model.sh"
+  cap_add: 'SYS_NICE'
   shm-size: 8G
   env:
     PRECISION: bf16
@@ -43,10 +51,13 @@ bf16-accuracy:
       dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
 int8-accuracy:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
   pull_policy: always
-  cmd: quickstart/accuracy.sh
+  cmd: sh -c "cd models_v2/pytorch/dlrm/inference/cpu && ./run_model.sh"
+  cap_add: 'SYS_NICE'
   shm-size: 8G
   env:
     PRECISION: int8
@@ -58,63 +69,81 @@ int8-accuracy:
       dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
 fp32-performance:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
   pull_policy: always
-  cmd: quickstart/inference_performance.sh
+  cmd: sh -c "cd models_v2/pytorch/dlrm/inference/cpu && ./run_model.sh"
+  cap_add: 'SYS_NICE'
   shm-size: 8G
   env:
     PRECISION: fp32
     WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+    THROUGHPUT: '1'
   volumes:
     - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
       dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
 bf32-performance:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
   pull_policy: always
-  cmd: quickstart/inference_performance.sh
+  cmd: sh -c "cd models_v2/pytorch/dlrm/inference/cpu && ./run_model.sh"
+  cap_add: 'SYS_NICE'
   shm-size: 8G
   env:
     PRECISION: bf32
     WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+    THROUGHPUT: '1'
   volumes:
     - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
       dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
 bf16-performance:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
   pull_policy: always
-  cmd: quickstart/inference_performance.sh
+  cmd: sh -c "cd models_v2/pytorch/dlrm/inference/cpu && ./run_model.sh"
+  cap_add: 'SYS_NICE'
   shm-size: 8G
   env:
     PRECISION: bf16
     WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+    THROUGHPUT: '1'
   volumes:
     - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
       dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp
 int8-performance:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
   pull_policy: always
-  cmd: quickstart/inference_performance.sh
+  cmd: sh -c "cd models_v2/pytorch/dlrm/inference/cpu && ./run_model.sh"
+  cap_add: 'SYS_NICE'
   shm-size: 8G
   env:
     PRECISION: int8
     WEIGHT_PATH: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/spr_dlrm_preprocessed/dlrm
+    THROUGHPUT: '1'
   volumes:
     - src: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
       dst: /pytorch/dlrm_weights/dlrm/tb00_40M.pt
     - src: /pytorch/spr_dlrm_preprocessed/dlrm
       dst: /pytorch/spr_dlrm_preprocessed/dlrm
+    - src: /tmp
+      dst: /tmp

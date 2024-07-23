@@ -43,7 +43,7 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-if [-z "${PRECISION}" ]; then
+if [ -z "${PRECISION}" ]; then
   echo "Please set PRECISION: fp32, bf16, bf32"
   exit 1
 fi
@@ -59,9 +59,10 @@ CORES_PER_NUMA_NODE=`expr $CORES_PER_SOCKET / $NUMA_NODES_PER_SOCKETS`
 export OMP_NUM_THREADS=$CORES_PER_NUMA_NODE
 LOG=${OUTPUT_DIR}/dlrm_training_log/${PRECISION}
 
+BATCH_SIZE=${BATCH_SIZE:-32768}
 
 if [ "$DISTRIBUTED"]; then
-    BATCHSIZE=${BATCHSIZE:-32768}
+    BATCH_SIZE=${BATCH_SIZE:-32768}
     NUM_CCL_WORKER=${NUM_CCL_WORKER:-8}
     HOSTFILE=${HOSTFILE:-hostfile1}
     seed_num=1665468325 #1665462256 #$(date +%s)
