@@ -2,11 +2,10 @@ version: 4.0
 org: Intel
 run_interval: 120
 benchmarks:
-################################################################################################################################################################################################
+  ################################################################################################################################################################################################
   3d-unet-99.9:
-################################################################################################################################################################################################
     division: closed
-    implementations: 
+    implementations:
       pytorch-cpu:
         dtypes:
           int8:
@@ -14,7 +13,9 @@ benchmarks:
             conf_path: ""
             preproc_output_dir: output_logs
             params:
-            preproc_cmds: rm -rf ${CONTAINER_CODE_DIR}/build/model/3dunet_kits19_pytorch_checkpoint.pth && cd ${CONTAINER_CODE_DIR} && bash process_data_model.sh 2>&1 | tee ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
+            preproc_cmds:
+              rm -rf ${CONTAINER_CODE_DIR}/build/model/3dunet_kits19_pytorch_checkpoint.pth && cd ${CONTAINER_CODE_DIR} &&
+                bash process_data_model.sh 2>&1 | tee ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
             scenarios:
               Offline:
                 performance:
@@ -22,32 +23,36 @@ benchmarks:
                   source:
                   pre_args:
                   post_args: perf
-                  postproc_cmds:      
-                  log_dir: output_logs   
+                  postproc_cmds:
+                  log_dir: output_logs
                 accuracy:
                   script: run.sh
                   source:
                   pre_args:
                   post_args: acc
-                  postproc_cmds:         
+                  postproc_cmds:
                   log_dir: output_logs
     compliance_tests:
       - TEST01
       - TEST05
-    compliance_test01_gen_accuracy_txt: mkdir -p build/postprocessed_data && python3 ${CONTAINER_CODE_DIR}/accuracy_kits.py --preprocessed_data_dir=${CONTAINER_CODE_DIR}/build/preprocessed_data --log_file=./mlperf_log_accuracy.json 2>&1|tee ./accuracy.txt && rm -rf build/postprocessed_data
+    compliance_test01_gen_accuracy_txt:
+      mkdir -p build/postprocessed_data && python3 ${CONTAINER_CODE_DIR}/accuracy_kits.py --preprocessed_data_dir=${CONTAINER_CODE_DIR}/build/preprocessed_data
+        --log_file=./mlperf_log_accuracy.json 2>&1|tee ./accuracy.txt && rm -rf build/postprocessed_data
     compliance_test01_part3:
       step1:
-        cmd: bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
+        cmd:
+          bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
       step2:
-        cmd: cd ${CONTAINER_CODE_DIR} && python3 accuracy_kits.py --log_file=./mlperf_log_accuracy_baseline.json 2>&1|tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python3 accuracy_kits.py --log_file=./mlperf_log_accuracy_baseline.json 2>&1|tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
       step3:
-        cmd: cd ${CONTAINER_CODE_DIR} && python3 accuracy_kits.py --log_file=${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json 2>&1|tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python3 accuracy_kits.py --log_file=${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json 2>&1|tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
 
-################################################################################################################################################################################################
+  ################################################################################################################################################################################################
   bert-99:
-################################################################################################################################################################################################
     division: closed
-    implementations: 
+    implementations:
       pytorch-cpu:
         dtypes:
           int8:
@@ -62,70 +67,91 @@ benchmarks:
                   script: run_server.sh
                   source:
                   pre_args:
-                  post_args: 
-                  postproc_cmds:         
+                  post_args:
+                  postproc_cmds:
                   log_dir: test_log
                 accuracy:
                   script: run_server.sh
                   source:
                   pre_args:
-                  post_args: --accuracy   
-                  postproc_cmds:      
+                  post_args: --accuracy
+                  postproc_cmds:
                   log_dir: test_log
               Offline:
                 performance:
                   script: run.sh
                   source:
                   pre_args:
-                  post_args:    
-                  postproc_cmds:      
+                  post_args:
+                  postproc_cmds:
                   log_dir: test_log
                 accuracy:
                   script: run.sh
                   source:
                   pre_args:
-                  post_args: --accuracy         
+                  post_args: --accuracy
                   postproc_cmds:
                   log_dir: test_log
     compliance_tests:
       - TEST01
       - TEST05
-    compliance_test01_gen_accuracy_txt: vocab_file=`find ${MODEL_PATH} -name vocab.txt` && val_data=`find ${DATA_PATH} -name dev-v1.1.json` && python ${CONTAINER_COMPLIANCE_SUITE_DIR}/../../language/bert/accuracy-squad.py --vocab_file $vocab_file --val_data $val_data --log_file ./mlperf_log_accuracy.json --out_file predictions.json 2>&1 | tee ./accuracy.txt && rm -f predictions.json
+    compliance_test01_gen_accuracy_txt:
+      vocab_file=`find ${MODEL_PATH} -name vocab.txt` && val_data=`find ${DATA_PATH} -name dev-v1.1.json` &&
+        python ${CONTAINER_COMPLIANCE_SUITE_DIR}/../../language/bert/accuracy-squad.py --vocab_file $vocab_file
+        --val_data $val_data --log_file ./mlperf_log_accuracy.json --out_file predictions.json 2>&1 |
+        tee ./accuracy.txt && rm -f predictions.json
     compliance_test01_part3:
       step1:
-        cmd: bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
+        cmd:
+          bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
       step2:
-        cmd: cd ${CONTAINER_CODE_DIR} && python ./inference/language/bert/accuracy-squad.py --vocab_file ${CONTAINER_MODEL_DIR}/vocab.txt --val_data ${CONTAINER_DATA_DIR}/dev-v1.1.json --log_file ./mlperf_log_accuracy_baseline.json --out_file predictions.json 2>&1 | tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python ./inference/language/bert/accuracy-squad.py --vocab_file ${CONTAINER_MODEL_DIR}/vocab.txt
+          --val_data ${CONTAINER_DATA_DIR}/dev-v1.1.json --log_file ./mlperf_log_accuracy_baseline.json --out_file predictions.json 2>&1 |
+          tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
       step3:
-        cmd: cd ${CONTAINER_CODE_DIR} && python ./inference/language/bert/accuracy-squad.py --vocab_file ${CONTAINER_MODEL_DIR}/vocab.txt --val_data ${CONTAINER_DATA_DIR}/dev-v1.1.json --log_file ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json --out_file predictions.json 2>&1 | tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python ./inference/language/bert/accuracy-squad.py --vocab_file ${CONTAINER_MODEL_DIR}/vocab.txt
+          --val_data ${CONTAINER_DATA_DIR}/dev-v1.1.json --log_file ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json --out_file predictions.json 2>&1 |
+          tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
 
-################################################################################################################################################################################################
+  ################################################################################################################################################################################################
   dlrm-v2-99.9:
-################################################################################################################################################################################################
     division: closed
-    implementations: 
+    implementations:
       pytorch-cpu-int8:
         dtypes:
           int8:
             system_desc: 1-node-2S-EMR-PyTorch-INT8
             conf_path: ""
             preproc_output_dir: ""
-            params: export DATA_DIR=${CONTAINER_DATA_DIR} && export MODEL_DIR=${CONTAINER_MODEL_DIR} && export number_cores=`lscpu -b -p=Core,Socket | grep -v '^#' | sort -u | wc -l` && number_sockets=`grep physical.id /proc/cpuinfo | sort -u | wc -l` && cpu_per_socket=$((number_cores/number_sockets)) && export NUM_SOCKETS=$number_sockets && export CPUS_PER_SOCKET=$cpu_per_socket && export CPUS_PER_PROCESS=$cpu_per_socket && export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
-            preproc_cmds: cd ${CONTAINER_CODE_DIR} && bash run_dump_torch_model.sh && ln -sf ${CONTAINER_MODEL_DIR}/dlrm_int8.pt dlrm_int8.pt && bash run_calibration.sh 2>&1 | tee ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
+            params:
+              export DATA_DIR=${CONTAINER_DATA_DIR} &&
+              export MODEL_DIR=${CONTAINER_MODEL_DIR} &&
+              export number_cores=`lscpu -b -p=Core,Socket | grep -v '^#' | sort -u | wc -l` &&
+              number_sockets=`grep physical.id /proc/cpuinfo | sort -u | wc -l` &&
+              cpu_per_socket=$((number_cores/number_sockets)) &&
+              export NUM_SOCKETS=$number_sockets &&
+              export CPUS_PER_SOCKET=$cpu_per_socket &&
+              export CPUS_PER_PROCESS=$cpu_per_socket &&
+              export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+            preproc_cmds:
+              cd ${CONTAINER_CODE_DIR} && bash run_dump_torch_model.sh && ln -sf ${CONTAINER_MODEL_DIR}/dlrm_int8.pt dlrm_int8.pt && bash run_calibration.sh 2>&1 |
+                tee ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
             scenarios:
               Server:
                 performance:
                   script: run_main.sh
                   source:
                   pre_args: export CPUS_PER_INSTANCE=2 && export CPUS_FOR_LOADGEN=1 && export BATCH_SIZE=400 &&
-                  post_args: server int8    
-                  postproc_cmds:     
+                  post_args: server int8
+                  postproc_cmds:
                   log_dir: output/pytorch-cpu/dlrm/Server/performance/run_1
                 accuracy:
                   script: run_main.sh
                   source:
-                  pre_args: export CPUS_PER_INSTANCE=2 && export CPUS_FOR_LOADGEN=1 && export BATCH_SIZE=400 && 
-                  post_args: server accuracy int8         
+                  pre_args: export CPUS_PER_INSTANCE=2 && export CPUS_FOR_LOADGEN=1 && export BATCH_SIZE=400 &&
+                  post_args: server accuracy int8
                   postproc_cmds:
                   log_dir: output/pytorch-cpu/dlrm/Server/accuracy
               Offline:
@@ -133,14 +159,14 @@ benchmarks:
                   script: run_main.sh
                   source:
                   pre_args: export CPUS_PER_INSTANCE=2 && export CPUS_FOR_LOADGEN=1 && export BATCH_SIZE=400 &&
-                  post_args: offline int8         
+                  post_args: offline int8
                   postproc_cmds:
                   log_dir: output/pytorch-cpu/dlrm/Offline/performance/run_1
                 accuracy:
                   script: run_main.sh
                   source:
                   pre_args: export CPUS_PER_INSTANCE=2 && export CPUS_FOR_LOADGEN=1 && export BATCH_SIZE=400 &&
-                  post_args: offline accuracy int8         
+                  post_args: offline accuracy int8
                   postproc_cmds:
                   log_dir: output/pytorch-cpu/dlrm/Offline/accuracy
     compliance_tests:
@@ -149,109 +175,127 @@ benchmarks:
     compliance_test01_gen_accuracy_txt: cp compliance_accuracy.txt accuracy.txt
     compliance_test01_part3:
       step1:
-        cmd: bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
+        cmd:
+          bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
       step2:
-        cmd: cd ${CONTAINER_CODE_DIR} && python tools/accuracy-dlrm.py --mlperf-accuracy-file ./mlperf_log_accuracy_baseline.json 2>&1 | tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python tools/accuracy-dlrm.py --mlperf-accuracy-file ./mlperf_log_accuracy_baseline.json 2>&1 | tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
       step3:
-        cmd: cd ${CONTAINER_CODE_DIR} && python tools/accuracy-dlrm.py --mlperf-accuracy-file ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json 2>&1 | tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python tools/accuracy-dlrm.py --mlperf-accuracy-file ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json 2>&1 |
+          tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
 
-################################################################################################################################################################################################
+  ################################################################################################################################################################################################
   gptj-99:
-################################################################################################################################################################################################
     division: closed
-    implementations: 
+    implementations:
       pytorch-cpu:
         dtypes:
           int8:
             system_desc: 1-node-2S-EMR-PyTorch-INT8
             conf_path: ""
             preproc_output_dir:
-            params: ln -sf ${CONTAINER_DATA_DIR} ${CONTAINER_CODE_DIR}/data && export WORKLOAD_DATA=${CONTAINER_CODE_DIR}/data && export CALIBRATION_DATA_JSON=${WORKLOAD_DATA}/calibration-data/cnn_dailymail_calibration.json && export CHECKPOINT_DIR=${WORKLOAD_DATA}/gpt-j-checkpoint && export VALIDATION_DATA_JSON=${WORKLOAD_DATA}/validation-data/cnn_dailymail_validation.json && export INT8_MODEL_DIR=${WORKLOAD_DATA}/gpt-j-int8-model
-            preproc_cmds: cd ${CONTAINER_CODE_DIR} && ln -sf ${CONTAINER_DATA_DIR} ${CONTAINER_CODE_DIR}/data && mkdir -p ${INT8_MODEL_DIR} && bash run_quantization.sh 2>&1 | tee ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log 
+            params:
+              ln -sf ${CONTAINER_DATA_DIR} ${CONTAINER_CODE_DIR}/data &&
+              export WORKLOAD_DATA=${CONTAINER_CODE_DIR}/data &&
+              export CALIBRATION_DATA_JSON=${WORKLOAD_DATA}/calibration-data/cnn_dailymail_calibration.json &&
+              export CHECKPOINT_DIR=${WORKLOAD_DATA}/gpt-j-checkpoint &&
+              export VALIDATION_DATA_JSON=${WORKLOAD_DATA}/validation-data/cnn_dailymail_validation.json &&
+              export INT8_MODEL_DIR=${WORKLOAD_DATA}/gpt-j-int8-model
+            preproc_cmds:
+              cd ${CONTAINER_CODE_DIR} && ln -sf ${CONTAINER_DATA_DIR} ${CONTAINER_CODE_DIR}/data && mkdir -p ${INT8_MODEL_DIR} && bash run_quantization.sh 2>&1 |
+                tee ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
             scenarios:
               Server:
                 performance:
                   script: run_server.sh
                   source:
-                  pre_args: 
-                  post_args: 
+                  pre_args:
+                  post_args:
                   postproc_cmds:
-                  log_dir: 
+                  log_dir:
                 accuracy:
                   script: run_server_accuracy.sh
                   source:
-                  pre_args: 
+                  pre_args:
                   post_args:
                   postproc_cmds:
-                  log_dir:      
+                  log_dir:
               Offline:
                 performance:
                   script: run_offline.sh
                   source:
-                  pre_args: 
-                  post_args:      
-                  postproc_cmds:    
-                  log_dir: 
+                  pre_args:
+                  post_args:
+                  postproc_cmds:
+                  log_dir:
                 accuracy:
                   script: run_offline_accuracy.sh
                   source:
-                  pre_args: 
-                  post_args:    
+                  pre_args:
+                  post_args:
                   postproc_cmds:
-                  log_dir: 
+                  log_dir:
           int4:
             system_desc: 1-node-2S-EMR-PyTorch-INT4
             conf_path: ""
             preproc_output_dir:
-            params: export WORKLOAD_DATA=${CONTAINER_CODE_DIR}/data && export CALIBRATION_DATA_JSON=${WORKLOAD_DATA}/calibration-data/cnn_dailymail_calibration.json && export CHECKPOINT_DIR=${WORKLOAD_DATA}/gpt-j-checkpoint && export VALIDATION_DATA_JSON=${WORKLOAD_DATA}/validation-data/cnn_dailymail_validation.json && export INT4_MODEL_DIR=${WORKLOAD_DATA}/gpt-j-int4-model && export CALIBRATION_DIR=${CONTAINER_CODE_DIR}/../../../calibration/gptj-99/pytorch-cpu
+            params:
+              export WORKLOAD_DATA=${CONTAINER_CODE_DIR}/data &&
+              export CALIBRATION_DATA_JSON=${WORKLOAD_DATA}/calibration-data/cnn_dailymail_calibration.json &&
+              export CHECKPOINT_DIR=${WORKLOAD_DATA}/gpt-j-checkpoint &&
+              export VALIDATION_DATA_JSON=${WORKLOAD_DATA}/validation-data/cnn_dailymail_validation.json &&
+              export INT4_MODEL_DIR=${WORKLOAD_DATA}/gpt-j-int4-model &&
+              export CALIBRATION_DIR=${CONTAINER_CODE_DIR}/../../../calibration/gptj-99/pytorch-cpu
             preproc_cmds: ln -sf ${CONTAINER_DATA_DIR} ${WORKLOAD_DATA} && cd ${CALIBRATION_DIR} && bash run_int4_gpt-j_on_cnndailymail.sh
-              #preproc_cmds: ln -sf ${CONTAINER_DATA_DIR} ${WORKLOAD_DATA} && cd ${CALIBRATION_DIR} && [ -e "${INT4_MODEL_DIR}/best_int4_model.pt" ] && echo no quantization  ||  bash run_int4_gpt-j_on_cnndailymail.sh && rm -rf ${INT4_MODEL_DIR} && mkdir -p ${INT4_MODEL_DIR} && ln -sf ${CALIBRATION_DIR}/saved_results/int4_model.pt ${INT4_MODEL_DIR}/best_int4_model.pt 2>&1 | tee ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
+            #preproc_cmds: ln -sf ${CONTAINER_DATA_DIR} ${WORKLOAD_DATA} && cd ${CALIBRATION_DIR} && [ -e "${INT4_MODEL_DIR}/best_int4_model.pt" ] && echo no quantization ||
+            #  bash run_int4_gpt-j_on_cnndailymail.sh && rm -rf ${INT4_MODEL_DIR} && mkdir -p ${INT4_MODEL_DIR} && ln -sf ${CALIBRATION_DIR}/saved_results/int4_model.pt
+            #  ${INT4_MODEL_DIR}/best_int4_model.pt 2>&1 | tee ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
             scenarios:
               Server:
                 performance:
                   script: run_server_int4.sh
                   source:
-                  pre_args: 
-                  post_args: 
+                  pre_args:
+                  post_args:
                   postproc_cmds:
-                  log_dir: 
+                  log_dir:
                 accuracy:
                   script: run_server_accuracy_int4.sh
                   source:
-                  pre_args: 
+                  pre_args:
                   post_args:
                   postproc_cmds:
-                  log_dir:      
+                  log_dir:
               Offline:
                 performance:
                   script: run_offline_int4.sh
                   source:
-                  pre_args: 
-                  post_args:      
-                  postproc_cmds:    
-                  log_dir: 
+                  pre_args:
+                  post_args:
+                  postproc_cmds:
+                  log_dir:
                 accuracy:
                   script: run_offline_accuracy_int4.sh
                   source:
-                  pre_args: 
-                  post_args:    
+                  pre_args:
+                  post_args:
                   postproc_cmds:
-                  log_dir: 
+                  log_dir:
     compliance_tests:
     compliance_test01_gen_accuracy_txt:
     compliance_test01_part3:
       step1:
-        cmd: 
+        cmd:
       step2:
-        cmd: 
+        cmd:
       step3:
-        cmd: 
+        cmd:
 
-################################################################################################################################################################################################
+  ################################################################################################################################################################################################
   rnnt:
-################################################################################################################################################################################################
     division: closed
-    implementations: 
+    implementations:
       pytorch-cpu:
         dtypes:
           mix:
@@ -266,7 +310,7 @@ benchmarks:
                   script: ./launch_sut.sh
                   source:
                   pre_args: "SCENARIO=Server PRO_BS=4 BS=128 LEN=8 RESPONSE=9 QOS=233500 WARMUP=3"
-                  post_args: 
+                  post_args:
                   postproc_cmds:
                   log_dir: logs/Server/performance/run_1
                 accuracy:
@@ -275,39 +319,42 @@ benchmarks:
                   pre_args: "SCENARIO=Server PRO_BS=4 BS=128 LEN=8 RESPONSE=9 QOS=233500 ACCURACY=true"
                   post_args:
                   postproc_cmds:
-                  log_dir: logs/Server/accuracy     
+                  log_dir: logs/Server/accuracy
               Offline:
                 performance:
                   script: ./launch_sut.sh
                   source:
                   pre_args: "SCENARIO=Offline BS=256 LEN=2 WARMUP=3"
-                  post_args:      
-                  postproc_cmds:    
+                  post_args:
+                  postproc_cmds:
                   log_dir: logs/Offline/performance/run_1
                 accuracy:
                   script: ./launch_sut.sh
                   source:
                   pre_args: "SCENARIO=Offline BS=256 LEN=2 ACCURACY=true"
-                  post_args:    
+                  post_args:
                   postproc_cmds:
                   log_dir: logs/Offline/accuracy
     compliance_tests:
       - TEST01
       - TEST05
-    compliance_test01_gen_accuracy_txt: python -u ${CONTAINER_CODE_DIR}/eval_accuracy.py --log_path=./mlperf_log_accuracy.json --manifest_path=${CONTAINER_DATA_DIR}/local_data/wav/dev-clean-wav.json | tee ./accuracy.txt
+    compliance_test01_gen_accuracy_txt:
+      python -u ${CONTAINER_CODE_DIR}/eval_accuracy.py --log_path=./mlperf_log_accuracy.json --manifest_path=${CONTAINER_DATA_DIR}/local_data/wav/dev-clean-wav.json |
+        tee ./accuracy.txt
     compliance_test01_part3:
       step1:
         cmd: bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
       step2:
         cmd: cd ${CONTAINER_CODE_DIR} && python -u eval_accuracy.py --log_path=./mlperf_log_accuracy_baseline.json --manifest_path=${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
       step3:
-        cmd: cd ${CONTAINER_CODE_DIR} && python -u eval_accuracy.py --log_path=${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json --manifest_path=${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python -u eval_accuracy.py --log_path=${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
+          --manifest_path=${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
 
-################################################################################################################################################################################################
+  ################################################################################################################################################################################################
   resnet50:
-################################################################################################################################################################################################  
     division: closed
-    implementations: 
+    implementations:
       pytorch-cpu:
         dtypes:
           int8:
@@ -315,8 +362,17 @@ benchmarks:
             container_image_name: mlperf_inference_datacenter_resnet50
             conf_path: src
             preproc_output_dir:
-            params: export DATA_CAL_DIR=calibration_dataset && export CHECKPOINT=resnet50-fp32-model.pth && export DATA_DIR=${CONTAINER_CODE_DIR}/ILSVRC2012_img_val && export RN50_START=${CONTAINER_CODE_DIR}/models/resnet50-start-int8-model.pth && export RN50_END=${CONTAINER_CODE_DIR}/models/resnet50-end-int8-model.pth && export RN50_FULL=${CONTAINER_CODE_DIR}/models/resnet50-full.pth
-            preproc_cmds: cd ${CONTAINER_CODE_DIR} && ln -sf ${CONTAINER_DATA_DIR}/calibration_dataset && ln -sf ${CONTAINER_DATA_DIR}/ILSVRC2012_img_val && cp ${CONTAINER_CODE_DIR}/val_data/* ILSVRC2012_img_val/ && ln -sf ${CONTAINER_DATA_DIR}/resnet50-fp32-model.pth && bash ${CONTAINER_CODE_DIR}/generate_torch_model.sh 2>&1> ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
+            params:
+              export DATA_CAL_DIR=calibration_dataset &&
+              export CHECKPOINT=resnet50-fp32-model.pth &&
+              export DATA_DIR=${CONTAINER_CODE_DIR}/ILSVRC2012_img_val &&
+              export RN50_START=${CONTAINER_CODE_DIR}/models/resnet50-start-int8-model.pth &&
+              export RN50_END=${CONTAINER_CODE_DIR}/models/resnet50-end-int8-model.pth &&
+              export RN50_FULL=${CONTAINER_CODE_DIR}/models/resnet50-full.pth
+            preproc_cmds:
+              cd ${CONTAINER_CODE_DIR} && ln -sf ${CONTAINER_DATA_DIR}/calibration_dataset && ln -sf ${CONTAINER_DATA_DIR}/ILSVRC2012_img_val &&
+                cp ${CONTAINER_CODE_DIR}/val_data/* ILSVRC2012_img_val/ && ln -sf ${CONTAINER_DATA_DIR}/resnet50-fp32-model.pth &&
+                bash ${CONTAINER_CODE_DIR}/generate_torch_model.sh 2>&1> ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
             scenarios:
               Server:
                 performance:
@@ -352,20 +408,28 @@ benchmarks:
       - TEST01
       - TEST04
       - TEST05
-    compliance_test01_gen_accuracy_txt: python -u ${CONTAINER_COMPLIANCE_SUITE_DIR}/../../vision/classification_and_detection/tools/accuracy-imagenet.py --mlperf-accuracy-file ./mlperf_log_accuracy.json --imagenet-val-file ${CONTAINER_DATA_DIR}/ILSVRC2012_img_val/val_map.txt --dtype int32 2>&1|tee accuracy.txt
+    compliance_test01_gen_accuracy_txt:
+      python -u ${CONTAINER_COMPLIANCE_SUITE_DIR}/../../vision/classification_and_detection/tools/accuracy-imagenet.py --mlperf-accuracy-file ./mlperf_log_accuracy.json
+        --imagenet-val-file ${CONTAINER_DATA_DIR}/ILSVRC2012_img_val/val_map.txt --dtype int32 2>&1|tee accuracy.txt
     compliance_test01_part3:
       step1:
-        cmd: bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
+        cmd:
+          bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
       step2:
-        cmd: cd ${CONTAINER_CODE_DIR} && python -u rn50-mlperf/mlperf_inference/vision/classification_and_detection/tools/accuracy-imagenet.py --mlperf-accuracy-file ./mlperf_log_accuracy_baseline.json --imagenet-val-file ILSVRC2012_img_val/val_map.txt dtype int32 2>&1|tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python -u rn50-mlperf/mlperf_inference/vision/classification_and_detection/tools/accuracy-imagenet.py
+            --mlperf-accuracy-file ./mlperf_log_accuracy_baseline.json --imagenet-val-file ILSVRC2012_img_val/val_map.txt dtype int32 2>&1 |
+            tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
       step3:
-        cmd: cd ${CONTAINER_CODE_DIR} && python -u rn50-mlperf/mlperf_inference/vision/classification_and_detection/tools/accuracy-imagenet.py --mlperf-accuracy-file ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json --imagenet-val-file ILSVRC2012_img_val/val_map.txt dtype int32 2>&1|tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python -u rn50-mlperf/mlperf_inference/vision/classification_and_detection/tools/accuracy-imagenet.py
+            --mlperf-accuracy-file ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json --imagenet-val-file ILSVRC2012_img_val/val_map.txt dtype int32 2>&1 |
+            tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
 
-################################################################################################################################################################################################
+  ################################################################################################################################################################################################
   retinanet:
-################################################################################################################################################################################################  
     division: closed
-    implementations: 
+    implementations:
       pytorch-cpu:
         dtypes:
           int8:
@@ -373,23 +437,29 @@ benchmarks:
             container_image_name: mlperf_inference_datacenter_retinanet
             conf_path: ""
             preproc_output_dir:
-            params: export WORKLOAD_DATA=${CONTAINER_CODE_DIR}/data && export ENV_DEPS_DIR=${CONTAINER_CODE_DIR}/retinanet-env && export CALIBRATION_DATA_DIR=${WORKLOAD_DATA}/openimages-calibration/train/data && export MODEL_CHECKPOINT=${WORKLOAD_DATA}/retinanet-model.pth && export CALIBRATION_ANNOTATIONS=${WORKLOAD_DATA}/openimages-calibration/annotations/openimages-mlperf-calibration.json && export DATA_DIR=${WORKLOAD_DATA}/openimages && export MODEL_PATH=${WORKLOAD_DATA}/retinanet-int8-model.pth
-            preproc_cmds: cd ${CONTAINER_CODE_DIR} && ln -sf ${CONTAINER_DATA_DIR} && bash run_calibration.sh 2>&1> ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log 
+            params:
+              export WORKLOAD_DATA=${CONTAINER_CODE_DIR}/data &&
+              export ENV_DEPS_DIR=${CONTAINER_CODE_DIR}/retinanet-env &&
+              export CALIBRATION_DATA_DIR=${WORKLOAD_DATA}/openimages-calibration/train/data &&
+              export MODEL_CHECKPOINT=${WORKLOAD_DATA}/retinanet-model.pth &&
+              export CALIBRATION_ANNOTATIONS=${WORKLOAD_DATA}/openimages-calibration/annotations/openimages-mlperf-calibration.json &&
+              export DATA_DIR=${WORKLOAD_DATA}/openimages && export MODEL_PATH=${WORKLOAD_DATA}/retinanet-int8-model.pth
+            preproc_cmds: cd ${CONTAINER_CODE_DIR} && ln -sf ${CONTAINER_DATA_DIR} && bash run_calibration.sh 2>&1> ${CONTAINER_OUTPUT_DIR}/preproc_${MODEL}_${IMPL}_${DTYPE}.log
             scenarios:
               Server:
                 performance:
                   script: run_server.sh
                   source:
                   pre_args:
-                  post_args:      
-                  postproc_cmds:    
+                  post_args:
+                  postproc_cmds:
                   log_dir: ""
                 accuracy:
                   script: run_server_accuracy.sh
                   source:
                   pre_args:
-                  post_args:    
-                  postproc_cmds:      
+                  post_args:
+                  postproc_cmds:
                   log_dir: ""
               Offline:
                 performance:
@@ -397,31 +467,37 @@ benchmarks:
                   source:
                   pre_args:
                   post_args:
-                  postproc_cmds:          
+                  postproc_cmds:
                   log_dir: ""
                 accuracy:
                   script: run_offline_accuracy.sh
                   source:
                   pre_args:
-                  post_args:  
-                  postproc_cmds:        
+                  post_args:
+                  postproc_cmds:
                   log_dir: ""
     compliance_tests:
       - TEST01
       - TEST05
-    compliance_test01_gen_accuracy_txt: python -u ${CONTAINER_COMPLIANCE_SUITE_DIR}/../../vision/classification_and_detection/tools/accuracy-openimages.py --mlperf-accuracy-file ./mlperf_log_accuracy.json --openimages-dir ${DATA_DIR} 2>&1 | tee ./accuracy.txt
+    compliance_test01_gen_accuracy_txt:
+      python -u ${CONTAINER_COMPLIANCE_SUITE_DIR}/../../vision/classification_and_detection/tools/accuracy-openimages.py
+        --mlperf-accuracy-file ./mlperf_log_accuracy.json --openimages-dir ${DATA_DIR} 2>&1 | tee ./accuracy.txt
     compliance_test01_part3:
       step1:
-        cmd: bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
+        cmd:
+          bash ${COMPLIANCE_TEST_DIR}/create_accuracy_baseline.sh ${OUTPUT_RESULT_DIR}/accuracy/mlperf_log_accuracy.json ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json
       step2:
-        cmd: cd ${CONTAINER_CODE_DIR} && python -u retinanet-env/mlperf_inference/vision/classification_and_detection/tools/accuracy-openimages.py --mlperf-accuracy-file ./mlperf_log_accuracy_baseline.json --openimages-dir data/openimages 2>&1 | tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python -u retinanet-env/mlperf_inference/vision/classification_and_detection/tools/accuracy-openimages.py
+          --mlperf-accuracy-file ./mlperf_log_accuracy_baseline.json --openimages-dir data/openimages 2>&1 | tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/baseline_accuracy.txt
       step3:
-        cmd: cd ${CONTAINER_CODE_DIR} && python -u retinanet-env/mlperf_inference/vision/classification_and_detection/tools/accuracy-openimages.py --mlperf-accuracy-file ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json --openimages-dir data/openimages 2>&1 | tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
+        cmd:
+          cd ${CONTAINER_CODE_DIR} && python -u retinanet-env/mlperf_inference/vision/classification_and_detection/tools/accuracy-openimages.py
+          --mlperf-accuracy-file ${COMPLIANCE_TEST_LOG_DIR}/mlperf_log_accuracy.json --openimages-dir data/openimages 2>&1 | tee ${COMPLIANCE_OUTPUT_DIR}/TEST01/accuracy/compliance_accuracy.txt
 
 ################################################################################################################################################################################################
 container:
-################################################################################################################################################################################################
-  3d-unet-99.9/pytorch-cpu/int8: 
+  3d-unet-99.9/pytorch-cpu/int8:
     image_name: mlperf_inference_3dunet
     image_builder: Dockerfile
     work_dir: /opt/workdir/code/3d-unet-99.9/pytorch-cpu
@@ -431,7 +507,7 @@ container:
     model_dir: /data/model
     output_dir: /output
 
-  bert-99/pytorch-cpu/int8: 
+  bert-99/pytorch-cpu/int8:
     image_name: mlperf_inference_bert
     image_builder: Dockerfile
     work_dir: /opt/workdir/code/bert-99/pytorch-cpu
@@ -441,7 +517,7 @@ container:
     model_dir: /data/mlperf_data/bert/model
     output_dir: /output
 
-  dlrm-v2-99.9/pytorch-cpu-int8/int8: 
+  dlrm-v2-99.9/pytorch-cpu-int8/int8:
     image_name: mlperf_inference_dlrm_v2
     image_builder: Dockerfile
     work_dir: /opt/workdir/code/dlrm-v2-99.9/pytorch-cpu-int8
@@ -471,7 +547,7 @@ container:
     model_dir: /data/mlperf_data/gpt-j/models
     output_dir: /output
 
-  rnnt/pytorch-cpu/mix: 
+  rnnt/pytorch-cpu/mix:
     image_name: mlperf_inference_rnnt
     image_builder: Dockerfile
     work_dir: /opt/workdir/code/rnnt/pytorch-cpu
