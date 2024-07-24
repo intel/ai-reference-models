@@ -1,5 +1,0 @@
-PARENT_ITEM_CODE="10057833" APP_PATH="models/language_modeling/pytorch/bert_large/inference/gpu" RELEASE_INFO="v3.1.0"
-PARENT_ITEM_CODE="10057832" APP_PATH="models/language_modeling/pytorch/bert_large/training/gpu" RELEASE_INFO="v3.1.0"
-PARENT_ITEM_CODE="10057164" APP_PATH="models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark" RELEASE_INFO="v3.1.0"
-PARENT_ITEM_CODE="10057835" APP_PATH="models/recommendation/pytorch/torchrec_dlrm/inference/gpu" RELEASE_INFO="v3.1.0"
-PARENT_ITEM_CODE="10057836" APP_PATH="models/recommendation/pytorch/torchrec_dlrm/training/gpu" RELEASE_INFO="v3.1.0"

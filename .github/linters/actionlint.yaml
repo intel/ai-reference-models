@@ -1,9 +1,0 @@
----
-self-hosted-runner:
-  labels:
-    - gasp
-    - builder
-    - k8-runners
-    - aia-devops
-    - aia-mlops
-    - test-runner
