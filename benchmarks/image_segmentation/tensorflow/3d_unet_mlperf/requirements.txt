@@ -4,7 +4,7 @@ tables==3.7.0
 nibabel==3.2.1
 SimpleITK==2.2.0
 nnunet
-torch==1.13.1
+torch==2.2.0
 tqdm
 dicom2nifti
 scikit-image
