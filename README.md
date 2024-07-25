@@ -2,12 +2,14 @@
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/30278/badge.svg"/>
 </a>
-# Intel® AI Reference Models
+
 <a href="https://scan.coverity.com/projects/intel-models">
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/30278/badge.svg"/>
 </a>
 <a href="https://www.bestpractices.dev/projects/8925"><img src="https://www.bestpractices.dev/projects/8925/badge"></a>
+
+# Intel® AI Reference Models
 
 ### This repository will be deprecated upon the publication of v3.2.0 and will no longer be maintained or published.
 Internal customers may continue to use this repository for CI and regression testing, but no code will be published from it. Instead, all pull requests and contributions intended to help external customers replicate Landing Zone model performance must be made directly to https://github.com/intel/ai-reference-models. For more information, see the [Contributing Guidelines](/CONTRIBUTING.md).
