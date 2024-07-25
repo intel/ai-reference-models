@@ -1,3 +1,7 @@
+<a href="https://scan.coverity.com/projects/intel-models">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/30278/badge.svg"/>
+</a>
 # Intel® AI Reference Models
 <a href="https://scan.coverity.com/projects/intel-models">
   <img alt="Coverity Scan Build Status"
