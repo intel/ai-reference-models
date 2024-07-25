@@ -453,10 +453,18 @@ index fc9411e95..21f1d3a43 100644
  
              # Evaluate
 diff --git a/examples/pytorch/image-classification/run_image_classification.py b/examples/pytorch/image-classification/run_image_classification.py
-index e2ce9f1c5..2a7fc1201 100644
+index e2ce9f1c5..e0666475c 100644
 --- a/examples/pytorch/image-classification/run_image_classification.py
 +++ b/examples/pytorch/image-classification/run_image_classification.py
-@@ -275,6 +275,7 @@ def main():
+@@ -230,6 +230,7 @@ def main():
+             cache_dir=model_args.cache_dir,
+             task="image-classification",
+             use_auth_token=True if model_args.use_auth_token else None,
++            revision="014711311cec8b5959350c373878a3311caeb764",
+         )
+     else:
+         data_files = {}
+@@ -275,6 +276,7 @@ def main():
          id2label=id2label,
          finetuning_task="image-classification",
          cache_dir=model_args.cache_dir,
