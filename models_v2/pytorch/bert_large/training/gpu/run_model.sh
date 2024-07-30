@@ -24,6 +24,7 @@ input_envs[DATASET_DIR]=${DATASET_DIR}
 input_envs[MULTI_TILE]=${MULTI_TILE}
 input_envs[PLATFORM]=${PLATFORM}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
+input_envs[NUM_DEVICES]=${NUM_DEVICES}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -59,6 +60,7 @@ echo " PRECISION: ${PRECISION}"
 echo " BATCH_SIZE: ${BATCH_SIZE}"
 echo " NUM_ITERATIONS: ${NUM_ITERATIONS}"
 echo " MULTI_TILE: ${MULTI_TILE}"
+echo " NUM_DEVICES: ${NUM_DEVICES}"
 
 if [[ "${PRECISION}" == "BF16" ]]; then
     flag="--bf16 "
@@ -72,16 +74,26 @@ else
     exit 1
 fi
 
-echo "bert-large ${PRECISION} training MultiTile=${MULTI_TILE} BS=${BATCH_SIZE} Iter=${NUM_ITERATIONS}"
+echo "bert-large ${PRECISION} training MultiTile=${MULTI_TILE} NumDevices=${NUM_DEVICES} BS=${BATCH_SIZE} Iter=${NUM_ITERATIONS}"
 
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
 
 modelname=ddp-bert
 
-if [[ ${MULTI_TILE} == "False" ]]; then
+if [[ ${NUM_DEVICES} == 1 ]]; then
     rm ${OUTPUT_DIR}/${modelname}${PRECISION}_train_t0_raw.log
-    python run_pretrain_mlperf.py --config_name=bert_config.json --input_dir=${DATASET_DIR} --output_dir=${OUTPUT_DIR} --eval_dir=${DATASET_DIR} --device=xpu --do_train --train_batch_size=${BATCH_SIZE} --gradient_accumulation_steps=1 --adamw --num-iterations ${NUM_ITERATIONS} ${flag} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log
+    python run_pretrain_mlperf.py \
+	    --config_name=bert_config.json \
+	    --input_dir=${DATASET_DIR} \
+	    --output_dir=${OUTPUT_DIR} \
+	    --eval_dir=${DATASET_DIR} \
+	    --device=xpu \
+	    --do_train \
+	    --train_batch_size=${BATCH_SIZE} \
+	    --gradient_accumulation_steps=1 \
+	    --adamw --num-iterations ${NUM_ITERATIONS} \
+	    ${flag} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log
     python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Performance | awk -F ' ' '{print $2}')
     throughput_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Performance | awk -F ' ' '{print $3}')
@@ -90,7 +102,7 @@ if [[ ${MULTI_TILE} == "False" ]]; then
     acc_unit=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_t0.log | grep Accuracy | awk -F ' ' '{print $2}')
 else
     rm ${OUTPUT_DIR}/${modelname}_${PRECISION}_train_raw.log
-    mpiexec -np 2 -ppn 2 python run_pretrain_mlperf.py \
+    mpiexec -np ${NUM_DEVICES} -ppn ${NUM_DEVICES} python run_pretrain_mlperf.py \
             --config_name=bert_config.json \
             --input_dir=${DATASET_DIR} \
             --output_dir=${OUTPUT_DIR} \

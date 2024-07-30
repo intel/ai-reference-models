@@ -1,7 +1,7 @@
 # TensorFlow BERT Large Training 
 
 ## Description
-This document has instructions for running BERT Large training with BF16 precision using Intel(R) Extension for TensorFlow on Intel® Data Center GPU Max Series.
+This document has instructions for running BERT Large training with BF16,FP32 and TF32 precisions using Intel(R) Extension for TensorFlow on Intel® Data Center GPU Max Series.
 
 ## Datasets
 
@@ -10,7 +10,7 @@ Follow instructions [here](README.md#prepare-dataset) to download and prepare th
 ## Quick Start Scripts
 | Script name | Description |
 |-------------|-------------|
-| `run_model.sh` | Runs BERT Large BF16 training on single and two tiles |
+| `run_model.sh` | Runs BERT Large BF16,FP32 and TF32 training on single or multiple GPU devices |
 
 Requirements:
 * Host has [Intel® Data Center GPU Max Series](https://ark.intel.com/content/www/us/en/ark/products/series/232874/intel-data-center-gpu-max-series.html)
@@ -21,17 +21,18 @@ Requirements:
 ```
 docker pull intel/language-modeling:tf-max-gpu-bert-large-training
 ```
-The BERT Large training container includes scripts, models and libraries needed to run BF16 training.You wil need to volume mount the dataset directory and the output directory where log files will be generated. 
+The BERT Large training container includes scripts, models and libraries needed to run BF16/FP32/TF32 training.You wil need to volume mount the dataset directory and the output directory where log files will be generated. 
 
 ```bash
 export DATA_DIR=<path to processed dataset>
 export RESULTS_DIR=<path to output log files>
-export MULTI_TILE=<provide True for multi-tile training and False for single tile training>
-export DATATYPE=bf16
+export DATATYPE=<provide bf16,fp32 or tf32 precision>
+export MULTI_TILE=<provide True for multi-tile GPU such as Max 1550, and False for single-tile GPU such as Max 1100>
+export NUM_DEVICES=<provide the number of GPU devices used for training. It must be equal to or smaller than the number of GPU devices attached to each node. For GPU with 2 tiles, such as Max 1550 GPU, the number of GPU devices in each node is 2 times the number of GPUs, so it can be set as <=16 for a node with 8 Max 1550 GPUs. While for GPU with single tile, such as Max 1100 GPU, the number of GPU devices available in each node is the same as number of GPUs, so it can be set as <=8 for a node with 8 Max 1100 GPUs.>
 
 IMAGE_NAME=intel/language-modeling:tf-max-gpu-bert-large-training
 DOCKER_ARGS="--rm -it"
-SCRIPT= run_model.sh
+SCRIPT=run_model.sh
 
 docker run \
   --privileged \
@@ -39,11 +40,12 @@ docker run \
   --ipc=host \
   --env DATA_DIR=${DATA_DIR} \
   --env RESULTS_DIR=${RESULTS_DIR} \
-  --env MULTI_TILE=${MUTI_TILE} \
+  --env MULTI_TILE=${MULTI_TILE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
   --env DATATYPE=${DATATYPE} \
+  --env NUM_DEVICES=${NUM_DEVICES} \
   --volume ${RESULTS_DIR}:${RESULTS_DIR} \
   --volume ${DATA_DIR}:${DATA_DIR} \
   --volume /dev/dri:/dev/dri \
@@ -57,7 +59,7 @@ docker run \
 [GitHub* Repository](https://github.com/IntelAI/models/tree/master/docker/max-gpu)
 
 ## Support
-Support for Intel® Extension for TensorFlow* is available at [Intel® AI Analytics Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html#gs.qbretz) Additionally, the Intel® Extension for TensorFlow* team tracks both bugs and enhancement requests using [GitHub issues](https://github.com/intel/intel-extension-for-tensorflow/issues). Before submitting a suggestion or bug report, please search the GitHub issues to see if your issue has already been reported.
+Support for Intel® Extension for TensorFlow* is available at [Intel® AI Tools](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html). Additionally, the Intel® Extension for TensorFlow* team tracks both bugs and enhancement requests using [GitHub issues](https://github.com/intel/intel-extension-for-tensorflow/issues). Before submitting a suggestion or bug report, please search the GitHub issues to see if your issue has already been reported.
 
 ## License Agreement
 

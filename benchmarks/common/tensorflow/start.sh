@@ -123,7 +123,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
   export DEBIAN_FRONTEND=noninteractive
   # install common dependencies
 
-  # Handle horovod uniformly for all OSs. 
+  # Handle horovod uniformly for all OSs.
   # If a diffferent version need to be used for a specific OS
   # change that variable alone locally in the large if stmts (below)
   if [[ ${MPI_NUM_PROCESSES} != "None"  && $MODE == "training" ]]; then
@@ -269,35 +269,37 @@ elif [[ $MODEL_NAME == "bert_large" && $MODE == "training" && $MPI_NUM_PROCESSES
 fi
 
 # If we are running in a container, call the container_init.sh files
-if _running-in-container ; then
-  # For running inside a real CentOS container
-  if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
-    # Next if block only applies to CentOS 8. Please see here:
-    # https://forums.centos.org/viewtopic.php?f=54&t=78708
-    if [[ ! ${OS_VERSION} =~ "8".* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]] && [[ ${OS_PLATFORM} != *"Red Hat"* ]]; then
-      sed -i '/^mirrorlist=/s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Linux-*
-      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
-      yum clean all
-      yum distro-sync -y
-    fi
-    if [[ $INSTALL_NUMACTL == "True" ]]; then
-      yum update -y
-      yum install -y numactl
-    fi
-  elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
-    if [[ $INSTALL_NUMACTL == "True" ]]; then
-      zypper update -y
-      zypper install -y numactl
-    fi
-  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
-    # For ubuntu, run the container_init.sh scripts
-    if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
-      # Call the framework's container_init.sh, if it exists and we are running on ubuntu
-      INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
-    fi
-    # Call the model specific container_init.sh, if it exists
-    if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
-      ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
+if [[ ${NOINSTALL} != "True" ]]; then
+  if _running-in-container ; then
+    # For running inside a real CentOS container
+    if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
+      # Next if block only applies to CentOS 8. Please see here:
+      # https://forums.centos.org/viewtopic.php?f=54&t=78708
+      if [[ ! ${OS_VERSION} =~ "8".* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]] && [[ ${OS_PLATFORM} != *"Red Hat"* ]]; then
+        sed -i '/^mirrorlist=/s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Linux-*
+        sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
+        yum clean all
+        yum distro-sync -y
+      fi
+      if [[ $INSTALL_NUMACTL == "True" ]]; then
+        yum update -y
+        yum install -y numactl
+      fi
+    elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
+      if [[ $INSTALL_NUMACTL == "True" ]]; then
+        zypper update -y
+        zypper install -y numactl
+      fi
+    elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
+      # For ubuntu, run the container_init.sh scripts
+      if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
+        # Call the framework's container_init.sh, if it exists and we are running on ubuntu
+        INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+      fi
+      # Call the model specific container_init.sh, if it exists
+      if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
+        ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
+      fi
     fi
   fi
 fi
@@ -576,6 +578,34 @@ function bert_options() {
     CMD=" ${CMD} --mpi_workers_sync_gradients=${MPI_WORKERS_SYNC_GRADIENTS}"
   fi
 
+}
+
+## Added for BERT-large model from HuggingFace
+function bert_large_hf_options() {
+  # For accuracy, dataset location is required
+  if [ "${DATASET_LOCATION_VOL}" == None ]; then
+    if [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No dataset directory specified, accuracy cannot be calculated."
+      exit 1
+    else
+      # Download model from huggingface.co/models for benchmarking
+      CMD=" ${CMD} --model-name-or-path=bert-large-uncased-whole-word-masking"
+    fi
+  else
+    CMD=" ${CMD} --model-name-or-path=${DATASET_LOCATION_VOL}"
+  fi
+
+  if [[ -n "${DATASET_NAME}" && ${DATASET_NAME} != "" ]]; then
+    CMD=" ${CMD} --dataset-name=${DATASET_NAME}"
+  fi
+
+  if [[ -n "${WARMUP_STEPS}" && ${WARMUP_STEPS} != "" ]]; then
+    CMD=" ${CMD} --warmup-steps=${WARMUP_STEPS}"
+  fi
+
+  if [[ -n "${STEPS}" && ${STEPS} != "" ]]; then
+    CMD=" ${CMD} --steps=${STEPS}"
+  fi
 }
 
 function install_protoc() {
@@ -1053,7 +1083,7 @@ function mlperf_gnmt() {
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      python3 -m pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps
+      python3 -m pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps --force-reinstall
     fi
 
     # For accuracy, dataset location is required.
@@ -1159,7 +1189,7 @@ function ssd-resnet34() {
           fi
           benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
           model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
-          
+
           cd  ${model_source_dir}/../
           cd ssd-resnet-benchmarks
           git apply ${benchmarks_patch_path}
@@ -1210,7 +1240,7 @@ function ssd-resnet34() {
           fi
           if [ ${SYNTHETIC_DATA} == "True" ]; then
 	    git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/no_gpu_preprocess.diff
-          fi  
+          fi
 	  cd ${old_dir}
 
           CMD="${CMD} \
@@ -1378,7 +1408,7 @@ function transformer_mlperf() {
           exit 1
       fi
 
-      CMD="${CMD} --random_seed=${RANDOM_SEED} --params=${PARAMS} --train_steps=${TRAIN_STEPS} --steps_between_eval=${STEPS_BETWEEN_EVAL} --do_eval=${DO_EVAL} --save_checkpoints=${SAVE_CHECKPOINTS} 
+      CMD="${CMD} --random_seed=${RANDOM_SEED} --params=${PARAMS} --train_steps=${TRAIN_STEPS} --steps_between_eval=${STEPS_BETWEEN_EVAL} --do_eval=${DO_EVAL} --save_checkpoints=${SAVE_CHECKPOINTS}
       --print_iter=${PRINT_ITER} --save_profile=${SAVE_PROFILE}"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
@@ -1428,7 +1458,15 @@ function transformer_mlperf() {
 # GPT-J base model
 function gpt_j() {
     if [ ${MODE} == "inference" ]; then
-      if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") || ( ${PRECISION} == "fp16") ]]; then
+      if [[ -z "${PRETRAINED_MODEL}" ]]; then
+        if [[ ${PRECISION} == "int8" ]]; then
+          echo "Need to provided pretrained savedModel for gptj int8"
+          exit 1
+        fi
+      else
+        CMD=" ${CMD} --pretrained-model=${PRETRAINED_MODEL}"
+      fi
+      if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") || ( ${PRECISION} == "fp16")  || ( ${PRECISION} == "int8")]]; then
         if [[ -z "${CHECKPOINT_DIRECTORY}" ]]; then
           echo "Checkpoint directory not found. The script will download the model."
         else
@@ -1437,7 +1475,7 @@ function gpt_j() {
           export HUGGINGFACE_HUB_CACHE=${CHECKPOINT_DIRECTORY}
           export TRANSFORMERS_CACHE=${CHECKPOINT_DIRECTORY}
         fi
-        
+
         if [ ${BENCHMARK_ONLY} == "True" ]; then
           CMD=" ${CMD} --max_output_tokens=${MAX_OUTPUT_TOKENS}"
           CMD=" ${CMD} --input_tokens=${INPUT_TOKENS}"
@@ -1545,6 +1583,22 @@ function bert_large() {
     fi
 }
 
+# BERT-large model from HuggingFace
+function bert_large_hf() {
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
+      if [[ ${NOINSTALL} != "True" ]]; then
+        python3 -m pip install evaluate git+https://github.com/huggingface/transformers
+      fi
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      bert_large_hf_options
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+}
+
 # distilBERT base model
 function distilbert_base() {
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]|| [ ${PRECISION} == "int8" ]; then
@@ -1605,7 +1659,7 @@ function distilbert_base() {
 }
 
 function gpt_j_6B() {
-    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "fp16" ] || 
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "fp16" ] ||
        [ ${PRECISION} == "bfloat16" ]; then
 
       if [[ ${INSTALL_TRANSFORMER_FIX} != "True" ]]; then
@@ -1697,9 +1751,9 @@ function vision_transformer() {
 	CMD="${CMD} $(add_arg "--init-checkpoint" ${INIT_CHECKPOINT})"
 	CMD="${CMD} $(add_arg "--epochs" ${EPOCHS})"
     fi
-	    
+
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] ||
-       [ ${PRECISION} == "fp16" ]; then
+       [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
       CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
       CMD="${CMD} $(add_arg "--steps" ${STEPS})"
@@ -1766,8 +1820,22 @@ function rgat() {
       if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
+        curr_dir=${pwd}
+
+        infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
+        benchmarks_patch_path=${infer_dir}/tfgnn_legacy_keras.patch
+        echo "patch path: $benchmarks_patch_path"
+
         # Installing tensorflow_gnn from it's main branch
-        python3 -m pip install git+https://github.com/tensorflow/gnn.git@main
+        # python3 -m pip install git+https://github.com/tensorflow/gnn.git@main
+        cd /tmp
+        rm -rf gnn
+        git clone https://github.com/tensorflow/gnn.git
+        cd gnn
+        git apply $benchmarks_patch_path
+        pip install .
+        cd ${curr_dir}
+
 
         if [ ${NUM_INTER_THREADS} != "None" ]; then
           CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
@@ -1792,13 +1860,14 @@ function stable_diffusion() {
     if [ ${MODE} == "inference" ]; then
       if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
         curr_dir=${pwd}
-        echo "Curr dir: "
-        echo ${curr_dir}
 
         infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
-        benchmarks_patch_path=${infer_dir}/patch
-        echo "benchmarks_patch_path:"
-        echo ${benchmarks_patch_path}
+        if [[ $TF_USE_LEGACY_KERAS == "1" ]]; then
+          benchmarks_patch_path=${infer_dir}/patch_for_stockTF
+        else
+          benchmarks_patch_path=${infer_dir}/patch
+        fi
+        echo "patch path: ${benchmarks_patch_path}"
 
         cd /tmp
         rm -rf keras-cv
@@ -1923,6 +1992,21 @@ function wide_deep_large_ds() {
     fi
 }
 
+
+function edsr() {
+  if [ ${PRECISION} == "fp32" ]; then
+    CMD="${CMD}  $(add_arg "--warmup_steps" ${WARMUP_STEPS}) $(add_arg "--steps" ${STEPS}) \
+    $(add_arg "--input_layer" ${INPUT_LAYER}) $(add_arg "--output_layer" ${OUTPUT_LAYER}) \
+    $(add_arg "--use_real_data" ${USE_REAL_DATA})"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+
+}
+
 function graphsage() {
     if [ ${MODE} == "inference" ]; then
       if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
@@ -1944,9 +2028,10 @@ function graphsage() {
         exit 1
       fi
     fi
+
 }
 
-function yolov5() {
+function tiny-yolov4() {
     if [ ${MODE} == "inference" ]; then
       if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
@@ -1958,13 +2043,50 @@ function yolov5() {
         if [ ${NUM_INTRA_THREADS} != "None" ]; then
           CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
         fi
-        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
         CMD=${CMD} run_model
       else
         echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
         exit 1
       fi
     fi
+}
+
+function yolov5() {
+  if [ ${MODE} == "inference" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+  fi
+  if [ ${MODE} == "inference" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ] || [ ${PRECISION} == "int8" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+  fi
 }
 
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
@@ -2018,8 +2140,6 @@ elif [ ${MODEL_NAME} == "transformer_mlperf" ]; then
   transformer_mlperf
 elif [ ${MODEL_NAME} == "unet" ]; then
   unet
-elif [ ${MODEL_NAME} == "wavenet" ]; then
-  wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
   wide_deep
 elif [ ${MODEL_NAME} == "wide_deep_large_ds" ]; then
@@ -2028,22 +2148,18 @@ elif [ ${MODEL_NAME} == "bert_base" ]; then
   bert_base
 elif [ ${MODEL_NAME} == "bert_large" ]; then
   bert_large
+elif [ ${MODEL_NAME} == "bert_large_hf" ]; then
+  bert_large_hf
 elif [ ${MODEL_NAME} == "dien" ]; then
   dien
 elif [ ${MODEL_NAME} == "distilbert_base" ]; then
-  distilbert_base 
+  distilbert_base
 elif [ ${MODEL_NAME} == "vision_transformer" ]; then
-  vision_transformer 
-elif [ ${MODEL_NAME} == "gpt_j_6b" ]; then
-  gpt_j_6B
+  vision_transformer
 elif [ ${MODEL_NAME} == "mmoe" ]; then
   mmoe
 elif [ ${MODEL_NAME} == "graphsage" ]; then
   graphsage
-elif [ ${MODEL_NAME} == "gpt_j" ]; then
-  gpt_j
-elif [ ${MODEL_NAME} == "rgat" ]; then
-  rgat
 elif [ ${MODEL_NAME} == "stable_diffusion" ]; then
   stable_diffusion
 elif [ ${MODEL_NAME} == "yolov5" ]; then

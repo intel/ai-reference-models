@@ -12,18 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="2.1.10-xpu"
+ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
 
-FROM ${BASE_IMAGE}:${BASE_TAG}
+FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 ENV LANG=C.UTF-8
+
 ENV DEBIAN_FRONTEND=noninteractive
 
-USER root
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
 
-WORKDIR /workspace/pytorch-flex-series-efficientnet-inference
+ARG WORKDIR=/workspace/pytorch-flex-series-efficientnet-inference
+
+WORKDIR $WORKDIR
 COPY models_v2/pytorch/efficientnet/inference/gpu .
+COPY models_v2/common common
+
+ENV PYTHONPATH=$WORKDIR/common
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends pciutils numactl && \

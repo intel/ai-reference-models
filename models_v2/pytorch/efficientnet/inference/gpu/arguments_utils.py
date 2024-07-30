@@ -28,6 +28,8 @@ def parse_arguments():
                         help='path to dataset (default: None)')
     parser.add_argument('--output-dir', default='/workspace/temp/',
                         help='path to output results (default: /workspace/temp/)')
+    parser.add_argument('--socket', default='', type=str,
+                        help='socket to control telemetry capture (default: disabled)')
     parser.add_argument('-a', '--arch', metavar='ARCH', default='efficientnet_b0',
                         choices=model_names,
                         help='model architecture: ' +
@@ -42,28 +44,27 @@ def parse_arguments():
                         help='mini-batch size (default: 16), this is the total '
                             'batch size of all GPUs on the current node when '
                             'using Data Parallel or Distributed Data Parallel')
-    parser.add_argument('--batch-streaming', default=1, type=int,
-                        metavar='N',
-                        help='Aggregate data over this number of batches before calculating stats')
-    parser.add_argument('--max-val-dataset-size', default=50000, type=int,
+    parser.add_argument('--num-inputs', default=50000, type=int,
                         metavar='N',
                         help='limit number of images to use for validation (default: 50000)')
-    parser.add_argument('--status-prints', default=10, type=int,
-                        metavar='N', help='number of status prints during benchmarking (default: 10)')
+    parser.add_argument('--print-frequency', default=1, type=int,
+                        metavar='N', help='specify perf stats printing frequency (in seconds) here (default: 1)')
+    parser.add_argument('--min-test-duration', default=0.0, type=float,
+                        metavar='N', help='minimum length of benchmark in seconds. Will repeat batches until reached. (default: 0 seconds)')
+    parser.add_argument('--max-test-duration', default=float('inf'), type=float,
+                        metavar='N', help='maximum length of benchmark in seconds. Will terminate benchmark once reached. (default: inf)')
     parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                         help='use pre-trained model')
     parser.add_argument('--seed', default=None, type=int,
                         help='seed for initializing training. ')
-    parser.add_argument('--device', default=0, type=int,
-                        help='device id to use. should correspond to either NV GPU or Intel XPU')
+    parser.add_argument('--device', default='cpu', type=str,
+                        help='device to use (cpu, cuda[:n], xpu[:n], etc.)')
+    parser.add_argument('--ipex', action='store_true',
+                        help='use Intel Extension for PyTorch for xpu device')
     parser.add_argument('--tf32', default=0, type=int, help='Datatype used: TF32')
     parser.add_argument('--bf32', default=0, type=int, help='Datatype used: BF32')
     parser.add_argument('--fp16', default=0, type=int, help='Datatype used: FP16')
     parser.add_argument('--bf16', default=0, type=int, help='Datatype used: BF16')
-    parser.add_argument('--int8', default=0, type=int, help='Use signed int8 quantization to do inference')
-    parser.add_argument('--uint8', default=0, type=int, help='Use unsigned int8 quantization to do inference')
-    parser.add_argument('--asymmetric-quantization', dest='asymmetric_quantization', action='store_true',
-                        help='Enable asymmetric quantization (default is symmetric).')
     parser.add_argument('--jit-trace', action='store_true',
                         help='enable PyTorch JIT trace graph mode')
     parser.add_argument('--jit-script', action='store_true',
@@ -74,12 +75,6 @@ def parse_arguments():
                         help='set model gradients to none')
     parser.add_argument('--no-amp', action='store_true',
                         help='Do not use autocast. Direct conversion from native data type to desired data type')
-    parser.add_argument('--calib-iters', default=8, type=int,
-                        help='iteration number for calibration')
-    parser.add_argument('--calib-bs', default=32, type=int,
-                        metavar='N', help='mini-batch size for calibration')
-    parser.add_argument('--perchannel-weight', default=False,
-                        help='do calibration with weight per channel quantization')
     parser.add_argument('--non-blocking', default=False, action='store_true',
                         help='non blocking H2D for input and target, default False')
     parser.add_argument('--channels-last', action='store_true', help='enable channels last')

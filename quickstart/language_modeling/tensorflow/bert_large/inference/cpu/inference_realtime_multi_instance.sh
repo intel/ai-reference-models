@@ -29,7 +29,9 @@ if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
   echo "Please set PRECISION to int8, fp32, bfloat32, bfloat16 or fp16."
   exit 1
-elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "fp16" ] && [ ${PRECISION} != "bfloat32" ]; then
+elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] &&
+     [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "fp16" ] &&
+     [ ${PRECISION} != "bfloat32" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
   echo "Supported precisions are: int8, fp32, bfloat32, bfloat16 and fp16"
   exit 1
@@ -64,7 +66,7 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 if [[ $PRECISION == "int8" ]]; then
-    num_inter_threads=" --num-inter-threads 1 "
+    num_inter_threads=" --num-inter-threads 2 "
 else
     num_inter_threads=" --num-inter-threads 3 "
 fi
@@ -104,8 +106,8 @@ if [ -z "${CORES_PER_INSTANCE}" ]; then
 fi
 
 # If OMP_NUM_THREADS env is not mentioned, then run with the default value
-if [ -z "${OMP_NUM_THREADS}" ]; then 
-  export OMP_NUM_THREADS=4
+if [ -z "${OMP_NUM_THREADS}" ]; then
+  export OMP_NUM_THREADS=${CORES_PER_INSTANCE}
 else
   export OMP_NUM_THREADS=${OMP_NUM_THREADS}
 fi
@@ -113,6 +115,20 @@ fi
 if [ -z "${BATCH_SIZE}" ]; then
   BATCH_SIZE="1"
   echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  echo "TF_THREAD_PINNING_MODE is not set. Setting it to the following default value:"
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+  echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+fi
+
+if [ $PRECISION == "fp16" ]; then
+  # Set environment variables needed to get best performance for fp16
+  echo "Adding _FusedMatMul and _MklLayerNorm ops to AMP ALLOWLIST when running FP16."
+  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD=_FusedMatMul,_MklLayerNorm
+  echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD=$TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD"
+
 fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
@@ -128,7 +144,8 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
   --checkpoint ${CHECKPOINT_DIR} \
-  --num-intra-threads 8 \
+  --num-intra-threads ${CORES_PER_INSTANCE} \
+  --num-cores=${CORES_PER_INSTANCE} \
   ${num_inter_threads} \
   --benchmark-only \
   --verbose \

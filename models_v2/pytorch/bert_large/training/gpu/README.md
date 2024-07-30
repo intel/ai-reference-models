@@ -6,7 +6,7 @@ BERT Large training best known configurations with Intel® Extension for PyTorch
 
 | **Use Case** | **Framework** | **Model Repo** | **Branch/Commit/Tag** | **Optional Patch** |
 |:---:| :---: |:--------------:|:---------------------:|:------------------:|
-|  Training   |    PyTorch    |       https://github.com/huggingface/transformers/tree/main/src/transformers/models/bert        |           -           |         -          |
+|  Training   |    PyTorch     |    [NVIDIA/DeepLearningExamples](https://github.com/huggingface/transformers/tree/main/src/transformers/models/bert)        |           main          |        -       |
 
 # Pre-Requisite
 * Host has one of the following GPUs:
@@ -22,19 +22,22 @@ BERT Large training best known configurations with Intel® Extension for PyTorch
 
   Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.
 
+
 # Prepare Dataset
 ## Dataset: 
-Please refer to https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/bert/implementations/pytorch-22.09#download-and-prepare-the-data
+Please refer to [NV-bert repository](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/bert/implementations/pytorch-22.09#download-and-prepare-the-data) to download and prepare the data.
 
-the dataset should be like below
+The dataset should be like below:
+```
 |_hdf5  
-      |_ eval                               # evaluation chunks in binary hdf5 format fixed length (not used in training, can delete after data   preparation)  
+      |_ eval                               # evaluation chunks in binary hdf5 format fixed length (not used in training, can delete after data preparation)  
       |_ eval_varlength                     # evaluation chunks in binary hdf5 format variable length *used for training*
       |_ training                           # 500 chunks in binary hdf5 format 
       |_ training_4320                      # 
-      |_ hdf5_4320_shards_uncompressed   # sharded data in hdf5 format fixed length (not used in training, can delete after data   preparation)
-      |_ hdf5_4320_shards_varlength      # sharded data in hdf5 format variable length *used for training*
-we are using  hdf5/hdf5_4320_shards_varlength as the our dataset.
+         |_ hdf5_4320_shards_uncompressed   # sharded data in hdf5 format fixed length (not used in training, can delete after data   preparation)
+         |_ hdf5_4320_shards_varlength      # sharded data in hdf5 format variable length *used for training*
+```
+We are using  `hdf5/hdf5_4320_shards_varlength` as the our dataset.
 
 ## Training
 1. `git clone https://github.com/IntelAI/models.git`
@@ -50,37 +53,39 @@ we are using  hdf5/hdf5_4320_shards_varlength as the our dataset.
     ```
 5. Install the latest GPU versions of [torch, torchvision and intel_extension_for_pytorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation):
     ```
-    python -m pip install torch==<torch_version> torchvision==<torchvvision_version> intel-extension-for-pytorch==<ipex_version> --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
+    python -m pip install torch==<torch_version> torchvision==<torchvision_version> intel-extension-for-pytorch==<ipex_version> --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
     ```
 6. Setup required environment paramaters
 
-| **Parameter**                |                                  **export command**                                  |
-|:---------------------------:|:------------------------------------------------------------------------------------:|
-| **MULTI_TILE**               | `export MULTI_TILE=True` (True or False)                                             |
-| **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                 |
-| **DATASET_DIR**                 | `export DATASET_DIR=`                                                                                  |
-| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=16`                                |
-| **PRECISION** (optional)     |`export PRECISION=BF16` (BF16 FP8 FP32 and TF32 are supported for Max and BF16 for Arc )               |
-| **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
-|**NUM_ITERATIONS** (optional) |                               `export NUM_ITERATIONS=20`                             |
-6. Run `run_model.sh`
+| **Parameter**                |                                  **export command**                                    |
+|:----------------------------:|:--------------------------------------------------------------------------------------:|
+| **MULTI_TILE**               | `export MULTI_TILE=False` (provide True for multi-tile GPU such as Max 1550, and False for single-tile GPU such as Max 1100 or Arc Series GPU) |
+| **PLATFORM**                 | `export PLATFORM=Max` (Max or Arc)                                                     |
+| **NUM_DEVICES**              | `export NUM_DEVICES=<num_devices>` (`<num_devices>` is the number of GPU devices used for training. It must be equal to or smaller than the number of GPU devices attached to each node. For GPU with 2 tiles, such as Max 1550 GPU, the number of GPU devices in each node is 2 times the number of GPUs, so `<num_devices>` can be set as <=16 for a node with 8 Max 1550 GPUs. While for GPU with single tile, such as Max 1100 GPU or Arc Series GPU, the number of GPU devices available in each node is the same as number of GPUs, so `<num_devices>` can be set as <=8 for a node with 8 single-tile GPUs.) |
+| **DATASET_DIR**              | `export DATASET_DIR=</the/path/to/dataset>`                                            |
+| **OUTPUT_DIR**               | `export OUTPUT_DIR=</the/path/to/output_dir>`                                          |
+| **BATCH_SIZE** (optional)    | `export BATCH_SIZE=16`                                                                 |
+| **PRECISION** (optional)     | `export PRECISION=BF16` (BF16 FP8 FP32 and TF32 are supported for Max and BF16 for Arc)|
+|**NUM_ITERATIONS** (optional) | `export NUM_ITERATIONS=20`                                                             |
+
+7. Run `run_model.sh`
 
 ## Output
 
-Single-tile output will typically looks like:
+Single-device output will typically look like:
 
 ```
 [info] construct file from initialization
-[info] input dir =  /home/gta/Cosim_test/dataset/hdf5
-[info] num files =  2
+[info] input dir =  /home/dataset/hdf5/hdf5_4320_shards_varlength
+[info] num files =  4282
 epoch: 1
-Loaded 193485 samples from datafile: /home/gta/Cosim_test/dataset/hdf5/pretrain-part-01.hdf5
+Loaded 193485 samples from datafile: /home/dataset/hdf5/hdf5_4320_shards_varlength/pretrain-part-01.hdf5
 bert_train latency:  0.24147300720214843  s
 bert_train throughput:  66.25999396531161  sentences/s
 perplexity = 11.020857810974121
 ```
 
-Multi-tile output will typically looks like:
+Multi-device output will typically look like:
 ```
 Model to device:  xpu:0
 using adamw
@@ -94,10 +99,10 @@ found num checkpoints:  0
 resume from checkpoints:  False
 resume checkpoint:  None
 [info] construct file from initialization
-[info] input dir =  /home/gta/Cosim_test/dataset/hdf5
-[info] num files =  2
+[info] input dir =  /home/dataset/hdf5/hdf5_4320_shards_varlength
+[info] num files =  4282
 epoch: 1
-Loaded 194779 samples from datafile: /home/gta/Cosim_test/dataset/hdf5/pretrain-part-00.hdf5
+Loaded 194779 samples from datafile: /home/dataset/hdf5/hdf5_4320_shards_varlength/pretrain-part-00.hdf5
 bert_train latency:  0.2703933477401733  s
 bert_train throughput:  59.17305338212218  sentences/s
 perplexity = 11.018452644348145
@@ -119,9 +124,9 @@ found num checkpoints:  0
 resume from checkpoints:  False
 resume checkpoint:  None
 [info] construct file from initialization
-[info] input dir =  /home/gta/Cosim_test/dataset/hdf5
-[info] num files =  2
-Loaded 193485 samples from datafile: /home/gta/Cosim_test/dataset/hdf5/pretrain-part-01.hdf5
+[info] input dir =  /home/dataset/hdf5/hdf5_4320_shards_varlength
+[info] num files =  4282
+Loaded 193485 samples from datafile: /home/dataset/hdf5/hdf5_4320_shards_varlength/pretrain-part-01.hdf5
 bert_train latency:  0.2730390548706055  s
 bert_train throughput:  58.599675447831  sentences/s
 perplexity = 11.12635612487793

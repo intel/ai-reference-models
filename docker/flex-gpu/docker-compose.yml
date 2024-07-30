@@ -35,8 +35,6 @@ services:
       sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__);print(ipex.xpu.is_available())'"
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-flex-gpu-stable-diffusion-inference
     pull_policy: always
-    devices:
-      - /dev/dri:/dev/dri
   pytorch-resnet50v1-5-inference:
     build:
       dockerfile: docker/flex-gpu/pytorch-resnet50v1-5-inference/pytorch-flex-series-resnet50v1-5-inference.Dockerfile
@@ -46,20 +44,14 @@ services:
     build:
       args:
         TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-extension-for-tensorflow}
-        TF_BASE_TAG: ${TF_BASE_TAG:-xpu}
-        MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.15.0.0-xpu}
+        MODEL_URL_INT8: ${MODEL_URL_INT8:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
+        MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1.pb}
       dockerfile: docker/flex-gpu/tf-resnet50v1-5-inference/tf-flex-series-resnet50v1-5-inference.Dockerfile
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__);from tensorflow.python.client import device_lib; print(device_lib.list_local_devices())'"
     extends: pytorch-stable-diffusion-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-resnet50v1-5-inference
-  tf-ssd-mobilenet-inference:
-    build:
-      args:
-        MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/ssd_mobilenet_v1_int8_itex.pb}   
-      dockerfile: docker/flex-gpu/tf-ssd-mobilenet-inference/tf-flex-series-ssd-mobilenet-inference.Dockerfile
-    extends: tf-resnet50v1-5-inference
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-tf-flex-gpu-ssd-mobilenet-inference
   tf-maskrcnn-inference:
     build:
       dockerfile: docker/flex-gpu/tf-maskrcnn-inference/tf-flex-series-maskrcnn-inference.Dockerfile
@@ -70,6 +62,11 @@ services:
       dockerfile: docker/flex-gpu/pytorch-efficientnet-inference/pytorch-flex-series-efficientnet-inference.Dockerfile
     extends: pytorch-stable-diffusion-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-efficientnet-inference
+  pytorch-fbnet-inference:
+    build:
+      dockerfile: docker/flex-gpu/pytorch-fbnet-inference/pytorch-flex-series-fbnet-inference.Dockerfile
+    extends: pytorch-stable-diffusion-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-fbnet-inference
   pytorch-yolov5-inference:
     build:
       dockerfile: docker/flex-gpu/pytorch-yolov5-inference/pytorch-flex-series-yolov5-inference.Dockerfile
@@ -96,10 +93,10 @@ services:
     extends: pytorch-stable-diffusion-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-flex-gpu-distilbert-inference
   pytorch-unetpp-inference:
-    build: 
+    build:
       dockerfile: docker/flex-gpu/pytorch-unetpp-inference/pytorch-flex-series-unetpp-inference.Dockerfile
     extends: pytorch-stable-diffusion-inference
-    image:  ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-pytorch-flex-gpu-unetpp-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-pytorch-flex-gpu-unetpp-inference
   pytorch-fast-pitch-inference:
     build:
       dockerfile: docker/flex-gpu/pytorch-fast-pitch-inference/pytorch-flex-series-fast-pitch-inference.Dockerfile
@@ -115,3 +112,13 @@ services:
       dockerfile: docker/flex-gpu/tf-wide-deep-large-inference/tf-flex-series-wide-deep-large-inference.Dockerfile
     extends: tf-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-wide-deep-large-inference
+  pytorch-ifrnet-inference:
+    build:
+      dockerfile: docker/flex-gpu/pytorch-ifrnet-inference/pytorch-flex-series-ifrnet-inference.Dockerfile
+    extends: pytorch-stable-diffusion-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-flex-gpu-ifrnet-inference
+  pytorch-rife-inference:
+    build:
+      dockerfile: docker/flex-gpu/pytorch-rife-inference/pytorch-flex-series-rife-inference.Dockerfile
+    extends: pytorch-stable-diffusion-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-flex-gpu-rife-inference

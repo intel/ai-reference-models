@@ -67,10 +67,6 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-# System envirables
-export TF_ENABLE_MKL_NATIVE_FORMAT=1
-export TF_ONEDNN_ENABLE_FAST_CONV=1
-
 #Set up env variable for bfloat32
 if [[ $PRECISION == "bfloat32" ]]; then
   export ONEDNN_DEFAULT_FPMATH_MODE=BF16
@@ -82,11 +78,43 @@ MODE="inference"
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 BATCH_SIZE="${BATCH_SIZE:-"100"}"
 
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  # Get number of cores per instance
+  CORES_PER_SOCKET=`lscpu | grep 'Core(s) per socket' | awk '{print $4}'`
+  SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+  NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+  CORES_PER_INSTANCE=`expr $CORES_PER_SOCKET \* $SOCKETS / $NUMAS`
+  NUM_INSTANCES=`expr $cores_per_socket / $CORES_PER_NUMA`
+
+  echo "CORES_PER_SOCKET: $CORES_PER_SOCKET"
+  echo "SOCKETS: $SOCKETS"
+  echo "NUMAS: $NUMAS"
+  echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
+fi
+
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
+if [ -z "${OMP_NUM_THREADS}" ]; then 
+  export OMP_NUM_THREADS=${CORES_PER_INSTANCE}
+fi
+
+printf '=%.0s' {1..100}
+printf "\nSummary of environment variable settings:\n"
+# Setting environment variables
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  # By default, pinning is none and spinning is enabled
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+fi
+echo "TF_THREAD_PINNING_MODE=$TF_THREAD_PINNING_MODE"
+printf '=%.0s' {1..100}
+printf '\n'
+
 # Remove old log file
 rm -rf  ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+_ht_status_spr
+_command numactl -N0 -m0 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
   --mode=${MODE} \

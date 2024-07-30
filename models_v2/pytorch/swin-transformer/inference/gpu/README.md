@@ -24,6 +24,30 @@ Swin-transformer Inference best known configurations with Intel® Extension for 
 ## Dataset: imagenet
 ImageNet is recommended, the download link is https://image-net.org/challenges/LSVRC/2012/2012-downloads.php.
 
+We recommend downloading ILSVRC2012_img_train_t3.tar. To create the training director you can extract like so:
+```bash
+mkdir imagenet
+cp ILSVRC2012_img_train_t3.tar imagenet/
+cd imagenet
+tar -xvf ILSVRC2012_img_train_t3.tar --one-top-level=images
+find images/ -name '*.tar' -execdir tar -xvf '{}' --one-top-level \;
+```
+
+You will need to reorganize the files in this package into training, testing and validation directories. The easiest way to do that is with the `split-packages` python tool.
+
+```bash
+pip install split-folders
+rm images/*.tar
+split-folders --ratio .8 .1 .1 --output dataset images
+```
+The imagenet/dataset directory is your dataset directory.
+
+## Dataset: dummy
+Alternatively, you can edit run_models.sh to include the parameter
+```--dummy```
+when it invokes main_no_ddp.py.
+This flag will use randomly generated data instead. This will not create any actual useful machine learning, but allows you to get up and running quickly and easily without any datasets downloaded and run split-packages or anything like that.
+
 ## Inference
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/pytorch/swin-transformer/inference/gpu`
@@ -40,7 +64,7 @@ ImageNet is recommended, the download link is https://image-net.org/challenges/L
     ```
     python -m pip install torch==<torch_version> torchvision==<torchvision_version> intel-extension-for-pytorch==<ipex_version> --extra-index-url https://pytorch-extension.intel.com/release-whl-aitools/
     ```
-6. Set environment variables for Intel® oneAPI Base Toolkit: 
+6. Set environment variables for Intel® oneAPI Base Toolkit:
     Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
     ```bash
     source {ONEAPI_ROOT}/compiler/latest/env/vars.sh

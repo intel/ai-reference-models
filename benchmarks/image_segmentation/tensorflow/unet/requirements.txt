@@ -1,4 +1,0 @@
-click
-numpy>=1.16.3
-Pillow>=9.3.0
-matplotlib

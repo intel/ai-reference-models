@@ -1,10 +1,10 @@
 fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-training
-  cmd: quickstart/training.sh fp32
+  cmd: bash run_model.sh
   ipc: host
-  env: 
+  env:
     PRECISION: fp32
-    CHECKPOINT_DIR: /pytorch/rnnt_model
+    CHECKPOINT_DIR: /localdisk/rnnt_model
     OUTPUT_DIR: /tmp
     RESULT_DIR: /tmp
     NUM_STEPS: '100'
@@ -12,15 +12,17 @@ fp32-training:
   volumes:
     - src: /pytorch/rnnt_dataset_training
       dst: /pytorch/rnnt_dataset_training
-    - src: /pytorch/rnnt_model
-      dst: /pytorch/rnnt_model
+    - src: /localdisk/rnnt_model
+      dst: /localdisk/rnnt_model
+    - src: /tmp
+      dst: /tmp
 bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-training
-  cmd: quickstart/training.sh bf16
+  cmd: bash run_model.sh
   ipc: host
-  env: 
+  env:
     PRECISION: bf16
-    CHECKPOINT_DIR: /pytorch/rnnt_model
+    CHECKPOINT_DIR: /localdisk/rnnt_model
     OUTPUT_DIR: /tmp
     RESULT_DIR: /tmp
     NUM_STEPS: '100'
@@ -28,15 +30,17 @@ bf16-training:
   volumes:
     - src: /pytorch/rnnt_dataset_training
       dst: /pytorch/rnnt_dataset_training
-    - src: /pytorch/rnnt_model
-      dst: /pytorch/rnnt_model
+    - src: /localdisk/rnnt_model
+      dst: /localdisk/rnnt_model
+    - src: /tmp
+      dst: /tmp
 bf32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-training
-  cmd: quickstart/training.sh bf32
+  cmd: bash run_model.sh
   ipc: host
-  env: 
+  env:
     PRECISION: bf32
-    CHECKPOINT_DIR: /pytorch/rnnt_model
+    CHECKPOINT_DIR: /localdisk/rnnt_model
     OUTPUT_DIR: /tmp
     RESULT_DIR: /tmp
     NUM_STEPS: '100'
@@ -44,5 +48,7 @@ bf32-training:
   volumes:
     - src: /pytorch/rnnt_dataset_training
       dst: /pytorch/rnnt_dataset_training
-    - src: /pytorch/rnnt_model
-      dst: /pytorch/rnnt_model
+    - src: /localdisk/rnnt_model
+      dst: /localdisk/rnnt_model
+    - src: /tmp
+      dst: /tmp

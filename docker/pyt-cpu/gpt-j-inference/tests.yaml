@@ -1,0 +1,276 @@
+fp16-t1-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-t1-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp32-t1-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-fp32-t1-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-fp32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp32-t1-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: "THROUGHPUT"
+    BATCH_SIZE: '2'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-t1-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: "THROUGHPUT"
+    BATCH_SIZE: '4'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-t1-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TEST_MODE: "THROUGHPUT"
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '4'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-fp32-t1-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-fp32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TEST_MODE: "THROUGHPUT"
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '4'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp32-t2-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-t2-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-t2-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-fp32-t2-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-fp32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp32-t2-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TEST_MODE: "THROUGHPUT"
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '2'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-t2-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TEST_MODE: "THROUGHPUT"
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '4'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-t2-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TEST_MODE: "THROUGHPUT"
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '4'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-fp32-t2-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-fp32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TEST_MODE: "THROUGHPUT"
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '4'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'ACCURACY'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'ACCURACY'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'ACCURACY'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-fp32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  cmd: bash run_model.sh
+  env:
+    PRECISION: int8-fp32
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'ACCURACY'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /tmp
+      dst: /tmp

@@ -32,8 +32,6 @@ def save_model_to_file(model):
             io_utils.write_info('Saving model to "{0}"...'.format(args.save))
             if args.jit_trace or args.jit_script:
                 torch.jit.save(model, args.save)
-            elif any([args.int8, args.uint8]):
-                torch.jit.save(model, args.save)
             else:
                 torch.save(model, args.save)
             io_utils.write_info('Model saved succesfully')
@@ -46,8 +44,6 @@ def load_model_from_file():
     if os.path.isfile(args.load):
         io_utils.write_info('Loading model from "{0}"...'.format(args.load))
         if args.jit_trace or args.jit_script:
-            model = torch.jit.load(args.load)
-        elif any([args.int8, args.uint8]):
             model = torch.jit.load(args.load)
         else:
             model = torch.load(args.load)
@@ -86,13 +82,13 @@ def load_model_from_torchvision():
         # do training or inference on CPU
         pass
 
-    if not any([args.int8, args.uint8]): #TODO: Do we want this condition?
+    model.eval()
+
+    if args.xpu and args.ipex:
         io_utils.write_info('Doing torch xpu optimize for inference')
-        model.eval()
         dtype = torch.float16 if args.fp16 else torch.float32
         dtype = torch.bfloat16 if args.bf16 else dtype
-        if args.xpu:
-            model = torch.xpu.optimize(model=model, dtype=dtype, level='O1')
+        model = torch.xpu.optimize(model=model, dtype=dtype, level='O1')
 
     if args.gpu:
         cudnn.benchmark = True

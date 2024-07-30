@@ -10,6 +10,7 @@ bf16-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
+    NUM_DEVICES: 2
   volumes:
     - src: /tmp
       dst: /tmp
@@ -25,6 +26,7 @@ fp16-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
+    NUM_DEVICES: 2
   volumes:
     - src: /tmp
       dst: /tmp
@@ -40,6 +42,7 @@ fp32-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
+    NUM_DEVICES: 2
   volumes:
     - src: /tmp
       dst: /tmp
@@ -55,6 +58,7 @@ tf32-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
+    NUM_DEVICES: 2
   volumes:
     - src: /tmp
       dst: /tmp
@@ -70,6 +74,7 @@ int8-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
+    NUM_DEVICES: 2
   volumes:
     - src: /tmp
       dst: /tmp

@@ -1,0 +1,128 @@
+inference-fp16-b0:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b0"
+inference-fp16-b1:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b1"
+inference-fp16-b2:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b2"
+inference-fp16-b3:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b3"
+inference-fp16-b4:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b4"
+inference-fp16-b5:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b5"
+inference-fp16-b6:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b6"
+inference-fp16-b7:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b7"
+inference-fp32-b0:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b0"
+inference-fp32-b1:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b1"
+inference-fp32-b2:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b2"
+inference-fp32-b3:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b3"
+inference-fp32-b4:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b4"
+inference-fp32-b5:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b5"
+inference-fp32-b6:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b6"
+inference-fp32-b7:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${DATASET_DIR} ${MODEL_NAME}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    MODEL_NAME: "efficientnet_b7"

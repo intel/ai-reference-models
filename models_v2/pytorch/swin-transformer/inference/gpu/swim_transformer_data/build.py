@@ -40,8 +40,38 @@ try:
 except:
     from timm.data.transforms import _pil_interp
 
+class FakeDataLoader():
+    def __init__(self, config, is_training) -> None:
+        batch_count = 4 if is_training else 1
+        val_dummy_images = torch.rand(config.DATA.BATCH_SIZE * batch_count, 3, config.DATA.IMG_SIZE, config.DATA.IMG_SIZE)
+        val_dummy_target = torch.randint(low=0, high=1, size=(config.DATA.BATCH_SIZE * batch_count,))
+        self.first_run=[val_dummy_images, val_dummy_target]
+        self.counter = 0
+        self.max = config.DATA.BATCH_SIZE * batch_count
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return self.max
+
+    def __next__(self):
+        if self.counter < self.max:
+            self.counter = self.counter + 1
+            return self.first_run
+        self.counter = 0
+        raise StopIteration
+
 
 def build_loader(config, device):
+    if config.DUMMY_MODE:
+        # Generate dummy data to reuse again and again
+        dummy_train_data_loader = FakeDataLoader(config, True)
+        dummy_val_data_loader = FakeDataLoader(config, False)
+        dummy_train_dataset = datasets.FakeData(size=config.DATA.BATCH_SIZE * 4, image_size=(3, config.DATA.IMG_SIZE, config.DATA.IMG_SIZE), num_classes=config.MODEL.NUM_CLASSES, transform=transforms.ToTensor())
+        dummy_val_dataset = datasets.FakeData(size=config.DATA.BATCH_SIZE * 1, image_size=(3, config.DATA.IMG_SIZE, config.DATA.IMG_SIZE), num_classes=config.MODEL.NUM_CLASSES, transform=transforms.ToTensor())
+        return dummy_train_dataset, dummy_val_dataset, dummy_train_data_loader, dummy_val_data_loader, None
+
     config.defrost()
     dataset_train, config.MODEL.NUM_CLASSES = build_dataset(is_train=True, config=config)
     config.freeze()
@@ -96,7 +126,6 @@ def build_loader(config, device):
             mixup_alpha=config.AUG.MIXUP, cutmix_alpha=config.AUG.CUTMIX, cutmix_minmax=config.AUG.CUTMIX_MINMAX,
             prob=config.AUG.MIXUP_PROB, switch_prob=config.AUG.MIXUP_SWITCH_PROB, mode=config.AUG.MIXUP_MODE,
             label_smoothing=config.MODEL.LABEL_SMOOTHING, num_classes=config.MODEL.NUM_CLASSES)
-
     return dataset_train, dataset_val, data_loader_train, data_loader_val, mixup_fn
 
 

@@ -18,7 +18,13 @@ ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-WORKDIR /workspace/pytorch-flex-series-yolov5-inference/models
+ARG WORKDIR=/workspace/pytorch-flex-series-yolov5-inference
+
+
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+
+WORKDIR $WORKDIR
 
 ARG PY_VERSION=3.10
 
@@ -36,6 +42,8 @@ RUN apt-get update && \
 
 COPY models_v2/pytorch/yolov5/inference/gpu .
 COPY models_v2/common common
+
+ENV PYTHONPATH=$WORKDIR/common
 
 RUN pip install --no-cache-dir -r requirements.txt
 

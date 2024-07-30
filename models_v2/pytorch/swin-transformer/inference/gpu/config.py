@@ -230,6 +230,8 @@ _C.PRINT_FREQ = 10
 _C.SEED = 0
 # Perform evaluation only, overwritten by command line argument
 _C.EVAL_MODE = False
+# Perform evaluation on dummy data, overwritten by command line argument
+_C.DUMMY_MODE = False
 # Test throughput only, overwritten by command line argument
 _C.THROUGHPUT_MODE = False
 # local rank for DistributedDataParallel, given by command line argument
@@ -290,6 +292,8 @@ def update_config(config, args):
         config.TAG = args.tag
     if args.eval:
         config.EVAL_MODE = True
+    if args.dummy:
+        config.DUMMY_MODE = True
     if args.throughput:
         config.THROUGHPUT_MODE = True
     if args.lr:

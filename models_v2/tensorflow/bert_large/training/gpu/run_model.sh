@@ -25,6 +25,7 @@ input_envs[DATA_DIR]=${DATA_DIR}
 input_envs[RESULTS_DIR]=${RESULTS_DIR}
 input_envs[DATATYPE]=${DATATYPE}
 input_envs[MULTI_TILE]=${MULTI_TILE}
+input_envs[NUM_DEVICES]=${NUM_DEVICES}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -53,11 +54,8 @@ echo " DATA_DIR: ${DATA_DIR}"
 echo " RESULTS_DIR: ${RESULTS_DIR}"
 echo " DATATYPE: ${DATATYPE}"
 echo " MULTI_TILE: $MULTI_TILE"
+echo " NUM_DEVICES: $NUM_DEVICES"
 
-rank_number=1
-if [[ $MULTI_TILE == "True" ]];then
-    rank_number=2
-fi
 
 rm -fr $RESULTS_DIR
 
@@ -66,14 +64,23 @@ cd ./DeepLearningExamples/TensorFlow2/LanguageModeling/BERT
 
 export ITEX_OPS_OVERRIDE=1
 export DATA_DIR=$DATA_DIR
-TRAIN_BATCH_SIZE_PHASE1=60
-TRAIN_BATCH_SIZE_PHASE2=32
+if [ "$DATATYPE" == "bf16" ]; then
+    TRAIN_BATCH_SIZE_PHASE1=60
+    TRAIN_BATCH_SIZE_PHASE2=32
+elif [ "$DATATYPE" == "fp32" ]; then
+    TRAIN_BATCH_SIZE_PHASE1=30
+    TRAIN_BATCH_SIZE_PHASE2=16
+elif [ "$DATATYPE" == "tf32" ]; then
+    TRAIN_BATCH_SIZE_PHASE1=30
+    TRAIN_BATCH_SIZE_PHASE2=16
+else  
+    echo "not support datatype"
+fi
 EVAL_BATCH_SIZE=8
 LEARNING_RATE_PHASE1=7.5e-4
 LEARNING_RATE_PHASE2=5e-4
 DATATYPE=$DATATYPE
 USE_XLA=false
-NUM_GPUS=$rank_number
 WARMUP_STEPS_PHASE1=5
 WARMUP_STEPS_PHASE2=1
 TRAIN_STEPS=20
@@ -91,7 +98,7 @@ bash scripts/run_pretraining_lamb_phase2.sh \
     $LEARNING_RATE_PHASE2 \
     $DATATYPE \
     $USE_XLA \
-    $NUM_GPUS \
+    $NUM_DEVICES \
     $WARMUP_STEPS_PHASE1 \
     $WARMUP_STEPS_PHASE2 \
     $TRAIN_STEPS \
@@ -101,15 +108,11 @@ bash scripts/run_pretraining_lamb_phase2.sh \
     $BERT_MODEL \
     $DATA_DIR \
     $RESULTS_DIR \
-    |& tee $pwd/bert_large_training_${DATATYPE}.log
+    |& tee $RESULTS_DIR/bert_large_training_${DATATYPE}.log
 
 cd -
 
-if [[ $MULTI_TILE == "False" ]];then
-    throughput=$(cat $pwd/bert_large_training_${DATATYPE}.log | grep "Throughput Average (sequences/sec)"  | tail -n 1 | awk -F ' ' '{print $9}')
-else
-    throughput=$(cat $pwd/bert_large_training_${DATATYPE}.log | grep "Throughput Average (sequences/sec)"  | tail -n 1 | awk -F ' ' '{print $10}')
-fi
+throughput=$(cat $RESULTS_DIR/bert_large_training_${DATATYPE}.log | grep "Throughput Average (sequences/sec)"  | tail -n 1 | awk -F ' ' '{print $9}')
 
 yaml_content=$(cat <<EOF
 results:

@@ -16,23 +16,26 @@
 
 # Specify default arguments
 
-[[ "${AMP}" == "" ]]            && AMP="yes"
-[[ "${BATCH_SIZE}" == "" ]]     && BATCH_SIZE=1
-[[ "${DATASET_DIR}" == "" ]]    && DATASET_DIR=""
-[[ "${DUMMY}" == "" ]]          && DUMMY="no"
-[[ "${LOAD_PATH}" == "" ]]      && LOAD_PATH=""
-[[ "${JIT}" == "" ]]            && JIT="trace"
-[[ "${MODEL_NAME}" == "" ]]     && MODEL_NAME="efficientnet_b0"
-[[ "${MULTI_TILE}" == "" ]]     && MULTI_TILE="False"
-[[ "${NUM_IMAGES}" == "" ]]     && NUM_IMAGES=1
-[[ "${NUM_ITERATIONS}" == "" ]] && NUM_ITERATIONS=100
-[[ "${PRECISION}" == "" ]]      && PRECISION="fp32"
-[[ "${SAVE_PATH}" == "" ]]      && SAVE_PATH=""
-[[ "${STATUS_PRINTS}" == "" ]]  && STATUS_PRINTS=10
-[[ "${STREAMS}" == "" ]]        && STREAMS=1
+[[ "${AMP}" == "" ]]               && AMP="yes"
+[[ "${BATCH_SIZE}" == "" ]]        && BATCH_SIZE=1
+[[ "${DATASET_DIR}" == "" ]]       && DATASET_DIR=""
+[[ "${DUMMY}" == "" ]]             && DUMMY="no"
+[[ "${JIT}" == "" ]]               && JIT="trace"
+[[ "${LOAD_PATH}" == "" ]]         && LOAD_PATH=""
+[[ "${MAX_TEST_DURATION}" == "" ]] && MAX_TEST_DURATION=""
+[[ "${MIN_TEST_DURATION}" == "" ]] && MIN_TEST_DURATION=""
+[[ "${MODEL_NAME}" == "" ]]        && MODEL_NAME="efficientnet_b0"
+[[ "${MULTI_TILE}" == "" ]]        && MULTI_TILE="False"
+[[ "${NUM_INPUTS}" == "" ]]        && NUM_INPUTS=1
+[[ "${PRECISION}" == "" ]]         && PRECISION="fp32"
+[[ "${PRINT_FREQUENCY}" == "" ]]   && PRINT_FREQUENCY=2
+[[ "${SAVE_PATH}" == "" ]]         && SAVE_PATH=""
+[[ "${SOCKET}" == "" ]]            && SOCKET=""
+[[ "${STREAMS}" == "" ]]           && STREAMS=1
+[[ "${IPEX}" == "" ]]              && IPEX="yes"
 
 # Process CLI arguments as overides for environment variables
-VALID_ARGS=$(getopt -o h --long amp:,arch:,batch-size:,data:,dummy,help,load:,jit:,multi-tile,num-images:,num-iterations:,output-dir:,platform:,precision:,proxy:,save:,status-prints:,streams: -- "$@")
+VALID_ARGS=$(getopt -o h --long amp:,arch:,batch-size:,data:,dummy,help,load:,jit:,max-test-duration:,min-test-duration:,multi-tile,num-inputs:,output-dir:,platform:,precision:,print-frequency:,proxy:,save:,socket:,streams:,ipex: -- "$@")
 if [[ $? -ne 0 ]]; then
     exit 1;
 fi
@@ -67,16 +70,20 @@ while [ : ]; do
         LOAD_PATH="$2"
         shift 2
         ;;
+    --max-test-duration)
+        MAX_TEST_DURATION="$2"
+        shift 2
+        ;;
+    --min-test-duration)
+        MIN_TEST_DURATION="$2"
+        shift 2
+        ;;
     --multi-tile)
         MULTI_TILE="True"
         shift 1
         ;;
-    --num-images)
-        NUM_IMAGES=$2
-        shift 2
-        ;;
-    --num-iterations)
-        NUM_ITERATIONS=$2
+    --num-inputs)
+        NUM_INPUTS=$2
         shift 2
         ;;
     --output-dir)
@@ -87,8 +94,16 @@ while [ : ]; do
         PLATFORM=$2
         shift 2
         ;;
+    --ipex)
+        IPEX=$2
+        shift 2
+        ;;
     --precision)
         PRECISION=$2
+        shift 2
+        ;;
+    --print-frequency)
+        PRINT_FREQUENCY=$2
         shift 2
         ;;
     --proxy)
@@ -99,8 +114,8 @@ while [ : ]; do
         SAVE_PATH="$2"
         shift 2
         ;;
-    --status-prints)
-        STATUS_PRINTS=$2
+    --socket)
+        SOCKET="$2"
         shift 2
         ;;
     --streams)
@@ -109,46 +124,52 @@ while [ : ]; do
         ;;
     -h | --help)
         echo "Usage: $(basename $0)"
-        echo "  --amp            [AMP]           : Use AMP on model conversion (default: '${AMP}')"
-        echo "                                     * no"
-        echo "                                     * yes"
-        echo "  --arch           [MODEL_NAME]    : Specify torchvision model to run (default: ${MODEL_NAME}):"
-        echo "                                     * efficientnet_b0"
-        echo "                                     * efficientnet_b1"
-        echo "                                     * efficientnet_b2"
-        echo "                                     * efficientnet_b3"
-        echo "                                     * efficientnet_b4"
-        echo "                                     * efficientnet_b5"
-        echo "                                     * efficientnet_b6"
-        echo "                                     * efficientnet_b7"
-        echo "  --batch-size     [BATCH_SIZE]    : Batch size to use (default: '${BATCH_SIZE}')"
-        echo "  --data           [DATASET_DIR]   : Location to load images from (default: '${DATASET_DIR}')"
-        echo "  --dummy                          : Use randomly generated dummy dataset in place of '--data' argument (default: disabled)"
-        echo "  --load           [LOAD_PATH]     : If specified model will be loaded from this saved location (default: disabled)"
-        echo "  --jit            [JIT]           : JIT method to use (default: '${JIT}')"
-        echo "                                     * none"
-        echo "                                     * script"
-        echo "                                     * trace"
-        echo "  --multi-tile                     : Run benchmark in multi-tile configuration (default: '${MULTI_TILE}')"
-        echo "  --num-images     [NUM_IMAGES]    : Number of images to load (default: '${NUM_IMAGES}')"
-        echo "  --num-iterations [NUM_ITERATIONS]: Number of times to test each batch (default: '${NUM_ITERATIONS}')"
-        echo "  --output-dir     [OUTPUT_DIR]    : Location to write output to. Required"
-        echo "  --platform       [PLATFORM]      : Platform that inference is being ran on (default: '${PLATFORM}')"
-        echo "                                     * CPU"
-        echo "                                     * Flex"
-        echo "                                     * CUDA"
-        echo "                                     * Max"
-        echo "  --precision      [PRECISION]     : Precision to use for the model (default: '${PRECISION}')"
-        echo "                                     * bf16"
-        echo "                                     * fp16"
-        echo "                                     * fp32"
-        echo "                                     * int8"
-        echo "  --proxy          [PROXY]         : System proxy. Required to download models"
-        echo "  --save           [SAVE_PATH]     : If specified model will be saved to this saved location (default: disabled)"
-        echo "  --status-prints  [STATUS_PRINTS] : Total number of status messages to display during inference benchmarking (default: '${STATUS_PRINTS}')"
-        echo "  --streams        [STREAMS]       : Number of parallel streams to do inference on (default: '${STREAMS}')"
-        echo "                                     Will be truncated to a multiple of BATCH_SIZE"
-        echo "                                     If less than BATCH_SIZE will be increased to BATCH_SIZE"
+        echo "  --amp               [AMP]              : Use AMP on model conversion (default: '${AMP}')"
+        echo "                                           * no"
+        echo "                                           * yes"
+        echo "  --arch              [MODEL_NAME]       : Specify torchvision model to run (default: ${MODEL_NAME}):"
+        echo "                                           * efficientnet_b0"
+        echo "                                           * efficientnet_b1"
+        echo "                                           * efficientnet_b2"
+        echo "                                           * efficientnet_b3"
+        echo "                                           * efficientnet_b4"
+        echo "                                           * efficientnet_b5"
+        echo "                                           * efficientnet_b6"
+        echo "                                           * efficientnet_b7"
+        echo "  --batch-size        [BATCH_SIZE]       : Batch size to use (default: '${BATCH_SIZE}')"
+        echo "  --data              [DATASET_DIR]      : Location to load images from (default: '${DATASET_DIR}')"
+        echo "  --dummy                                : Use randomly generated dummy dataset in place of '--data' argument (default: disabled)"
+        echo "  --load              [LOAD_PATH]        : If specified model will be loaded from this saved location (default: disabled)"
+        echo "  --jit               [JIT]              : JIT method to use (default: '${JIT}')"
+        echo "                                           * none"
+        echo "                                           * script"
+        echo "                                           * trace"
+        echo "  --max-test-duration [MAX_TEST_DURATION]: Maximum duration in seconds to run benchmark"
+        echo "                                           Testing will be truncated once maximum test duration has been reached"
+        echo "                                           Disabled by default"
+        echo "  --min-test-duration [MIN_TEST_DURATION]: Minimum duration in seconds to run benchmark"
+        echo "                                           Images will be repeated until minimum test duration has been reached"
+        echo "                                           Disabled by default"
+        echo "  --multi-tile                           : Run benchmark in multi-tile configuration (default: '${MULTI_TILE}')"
+        echo "  --num-inputs        [NUM_INPUTS]       : Number of images to load (default: '${NUM_INPUTS}')"
+        echo "  --output-dir        [OUTPUT_DIR]       : Location to write output to. Required"
+        echo "  --platform          [PLATFORM]         : Platform that inference is being ran on (default: '${PLATFORM}')"
+        echo "                                           * CPU"
+        echo "                                           * Flex"
+        echo "                                           * CUDA"
+        echo "                                           * Max"
+	echo "  --ipex              [IPEX]             : Use Intel Extension for PyTorch for xpu device (default: '${IPEX}')"
+        echo "  --precision         [PRECISION]        : Precision to use for the model (default: '${PRECISION}')"
+        echo "                                           * bf16"
+        echo "                                           * fp16"
+        echo "                                           * fp32"
+        echo "  --proxy             [PROXY]            : System proxy. Required to download models"
+        echo "  --save              [SAVE_PATH]        : If specified model will be saved to this saved location (default: disabled)"
+        echo "  --print-frequency   [PRINT_FREQUENCY]  : Number of seconds between status printouts (default: '${PRINT_FREQUENCY}')"
+        echo "  --socket            [SOCKET]           : Socket to control telemetry capture (default: '${SOCKET}')"
+        echo "  --streams           [STREAMS]          : Number of parallel streams to do inference on (default: '${STREAMS}')"
+        echo "                                           Will be truncated to a multiple of BATCH_SIZE"
+        echo "                                           If less than BATCH_SIZE will be increased to BATCH_SIZE"
         echo ""
         echo "NOTE: Arguments may also be specified through command line variables using the name in '[]'."
         echo "      For example 'export MODEL_NAME=efficientnet_b0'."
@@ -208,28 +229,37 @@ fi
 
 # Show test configuration
 echo 'Running with parameters:'
-echo " AMP:            ${AMP}"
-echo " BATCH_SIZE:     ${BATCH_SIZE}"
-echo " DATASET_DIR:    ${DATASET_DIR}"
-echo " DUMMY:          ${DUMMY}"
-echo " JIT:            ${JIT}"
-echo " LOAD_PATH:      ${LOAD_PATH}"
-echo " MODEL_NAME:     ${MODEL_NAME}"
-echo " MULTI_TILE:     ${MULTI_TILE}"
-echo " NUM_ITERATIONS: ${NUM_ITERATIONS}"
-echo " NUM_IMAGES:     ${NUM_IMAGES}"
-echo " OUTPUT_DIR:     ${OUTPUT_DIR}"
-echo " SAVE_PATH:      ${SAVE_PATH}"
-echo " STATUS_PRINTS:  ${STATUS_PRINTS}"
-echo " STREAMS:        ${STREAMS}"
-echo " PLATFORM:       ${PLATFORM}"
-echo " PRECISION:      ${PRECISION}"
-echo " PROXY:          ${PROXY}"
+echo " AMP:               ${AMP}"
+echo " BATCH_SIZE:        ${BATCH_SIZE}"
+echo " DATASET_DIR:       ${DATASET_DIR}"
+echo " DUMMY:             ${DUMMY}"
+echo " JIT:               ${JIT}"
+echo " LOAD_PATH:         ${LOAD_PATH}"
+echo " MAX_TEST_DURATION: ${MAX_TEST_DURATION}"
+echo " MIN_TEST_DURATION: ${MIN_TEST_DURATION}"
+echo " MODEL_NAME:        ${MODEL_NAME}"
+echo " MULTI_TILE:        ${MULTI_TILE}"
+echo " NUM_INPUTS:        ${NUM_INPUTS}"
+echo " OUTPUT_DIR:        ${OUTPUT_DIR}"
+echo " PLATFORM:          ${PLATFORM}"
+echo " IPEX:              ${IPEX}"
+echo " PRECISION:         ${PRECISION}"
+echo " PRINT_FREQUENCY:   ${PRINT_FREQUENCY}"
+echo " PROXY:             ${PROXY}"
+echo " SAVE_PATH:         ${SAVE_PATH}"
+echo " SOCKET:            ${SOCKET}"
+echo " STREAMS:           ${STREAMS}"
 
 # Set system proxies if requested.
 if [[ "${PROXY}" != "" ]]; then
     export http_proxy=${PROXY}
     export https_proxy=${PROXY}
+fi
+
+# Set socket if sepecified
+_socket_args=""
+if [[ "${SOCKET}" != "" ]]; then
+    _socket_args="--socket ${SOCKET}"
 fi
 
 # known issue for multitile
@@ -283,10 +313,6 @@ elif [[ ${PRECISION} == "fp16" ]]; then
     _dtype_args="--fp16 1"
 elif [[ ${PRECISION} == "bf16" ]]; then
     _dtype_args="--bf16 1"
-elif [[ ${PRECISION} == "int8" ]]; then
-    #_dtype_args="--int8 1 --asymmetric-quantization --perchannel-weight 1"
-    echo "ERROR: Precision '${PRECISION}' is not supported yet for model '${MODEL_NAME}'"
-    exit 1
 else
     echo "ERROR: Unknown precision '${PRECISION}' for model '${MODEL_NAME}'"
     exit 1
@@ -298,8 +324,17 @@ if [[ ${AMP} == "no" ]]; then
 elif [[ ${AMP} == "yes" ]]; then
     _amp_arg=""
 else
-    echo "ERROR: Invalid valid entered for 'AMP': ${AMP}"
+    echo "ERROR: Invalid value entered for 'AMP': ${AMP}"
     exit 1
+fi
+
+# Specify test duration if requested
+_test_duration_args=""
+if [[ ${MIN_TEST_DURATION} != "" ]]; then
+    _test_duration_args="${_test_duration_args} --min-test-duration ${MIN_TEST_DURATION}"
+fi
+if [[ ${MAX_TEST_DURATION} != "" ]]; then
+    _test_duration_args="${_test_duration_args} --max-test-duration ${MAX_TEST_DURATION}"
 fi
 
 # Specify if JIT should be used
@@ -310,7 +345,7 @@ elif [[ ${JIT} == "trace" ]]; then
 elif [[ ${JIT} == "script" ]]; then
     _jit_arg="--jit-script"
 else
-    echo "ERROR: Invalid valid entered for 'JIT': ${JIT}"
+    echo "ERROR: Invalid value entered for 'JIT': ${JIT}"
     exit 1
 fi
 
@@ -321,32 +356,52 @@ _perf_args="--pretrained --channels-last --no-grad"
 mkdir -p $OUTPUT_DIR
 
 # Set environment variables
+_platform_args="--device ${PLATFORM}"
 if [[ ${PLATFORM} == "Flex" ]]; then
+    _platform_args="--device xpu"
     export IGC_EnableDPEmulation=1
     export CFESingleSliceDispatchCCSMode=1
     export IPEX_ONEDNN_LAYOUT=1
     export IPEX_LAYOUT_OPT=1
 elif [[ ${PLATFORM} == "Max" ]]; then
+    _platform_args="--device xpu"
     # Currently its an assumption that Max GPU uses these.
     export IGC_EnableDPEmulation=1
     export CFESingleSliceDispatchCCSMode=1
     export IPEX_ONEDNN_LAYOUT=1
     export IPEX_LAYOUT_OPT=1
+elif [[ ${PLATFORM} == "CUDA" ]]; then
+    _platform_args="--device cuda"
+elif [[ ${PLATFORM} == "CPU" ]]; then
+    _platform_args="--device cpu"
 fi
 export PROFILE="OFF"
+
+if [[ "$IPEX" == "yes" ]]; then
+    _platform_args+=" --ipex"
+elif [[ "$IPEX" != "no" ]]; then
+    echo "ERROR: Invalid value entered for 'IPEX': ${IPEX}"
+    exit 1
+fi
 
 # Start inference script with numactl
 echo "Starting inference..."
 #TODO: Set ZE_AFFINITY_MASK for multiple tiles.
 numactl --cpunodebind=0 --membind=0 python3 predict.py \
+    ${_platform_args} \
     --arch ${MODEL_NAME} \
     ${_dataset_args} \
     --batch-size ${BATCH_SIZE} \
-    --status-prints ${STATUS_PRINTS} \
-    --max-val-dataset-size ${NUM_IMAGES} \
-    --batch-streaming ${NUM_ITERATIONS} \
+    --print-frequency ${PRINT_FREQUENCY} \
+    --num-inputs ${NUM_INPUTS} \
     --width ${_img_width} --height ${_img_height} \
-    ${_dtype_args} ${_amp_arg} ${_jit_arg} ${_perf_args} ${_save_load_args} \
+    ${_dtype_args} \
+    ${_amp_arg} \
+    ${_test_duration_args} \
+    ${_jit_arg} \
+    ${_perf_args} \
+    ${_save_load_args} \
+    ${_socket_args} \
     --warm-up 10 \
     --output-dir ${OUTPUT_DIR} \
     --total-instances ${STREAMS} \

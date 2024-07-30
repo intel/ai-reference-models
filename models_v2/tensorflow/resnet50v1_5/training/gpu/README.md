@@ -3,7 +3,7 @@
 ## Model Information
 | **Case** |**Framework** | **Model Repo** | **Tag** 
 | :---: | :---: | :---: | :---: |
-| Training | Tensorflow | [Tensorflow-Models](https://github.com/tensorflow/models) | v2.8.0 |
+| Training | TensorFlow | [TensorFlow-Models](https://github.com/tensorflow/models) | v2.14.0 |
 
 # Pre-Requisite
 * Host has Intel® Data Center GPU Max
@@ -41,8 +41,7 @@ Download the ImageNet dataset and convert it to TFRecord format. The following [
     ./setup.sh
     ```
 5. Install [tensorflow and ITEX](https://pypi.org/project/intel-extension-for-tensorflow/)
-6. If you run multi-tile (export MULTI_TILE=True), please install "intel-optimization-for-horovod" with `pip install intel-optimization-for-horovod`
-7. Set environment variables for Intel® oneAPI Base Toolkit: 
+6. Set environment variables for Intel® oneAPI Base Toolkit: 
     Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
     ```bash
     source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
@@ -50,27 +49,49 @@ Download the ImageNet dataset and convert it to TFRecord format. The following [
     source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
     source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
     source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
-8. Setup required environment paramaters
-  There are several config yaml files in configure and hvd_configure folder. Set one of them as CONFIG_FILE, then model would correspondly run with `real data` or `dummy data`. Single-tile please use yaml file in configure folder. Distribute training please use yaml file in hvd_configure folder, `itex_bf16_lars.yaml`/`itex_fp32_lars.yaml` for HVD real data and `itex_dummy_bf16_lars.yaml`/`itex_dummy_fp32_lars.yaml` for HVD dummy data.
-Export those parameters to script or environment.
-
+7. Setup required environment paramaters
+   
     |   **Parameter**    | **export command**                                    |
-    | :---: | :--- |
-    |  **DATASET_DIR**   | `export DATASET_DIR=/the/path/to/dataset`    (if you choose dummy data, you can igore this parameter)          |
+    | :---: | :---: |
     |   **OUTPUT_DIR**   | `export OUTPUT_DIR=/the/path/to/output_dir`           |
-    |   **MULTI_TILE**   | `export MULTI_TILE=False (False or True)`           |
-    |   **CONFIG_FILE**   | `path/to/itex_xx.yaml  (dataset type and precision) ` |
-6. Run `run_model.sh`
+    |   **MULTI_TILE**   | `export MULTI_TILE=False` (provide True for multi-tile GPU such as Max 1550, and False for single-tile GPU such as Max 1100)             |
+    |  **NUM_DEVICES**   |  `export NUM_DEVICES=<num_devices>` (`<num_devices>` is the number of GPU devices to use for training. It must be equal to or smaller than the number of GPU devices attached to each node. For GPU with 2 tiles, such as Max 1550 GPU, the number of GPU devices in each node is 2 times the number of GPUs, so `<num_devices>` can be set as <=16 for a node with 8 Max 1550 GPUs. While for GPU with single tile, such as Max 1100 GPU, the number of GPU devices available in each node is the same as number of GPUs, so `<num_devices>` can be set as <=8 for a node with 8 Max 1100 GPUs.)     | 
+    |   **CONFIG_FILE**   | `export CONFIG_FILE=path/to/itex_xx.yaml` (choose based on NUM_DEVICES used for training, dataset type and precision, see details in the note below)  |
+    |  **DATASET_DIR** (optional)  | `export DATASET_DIR=/the/path/to/dataset` (if you choose dummy data, you can ignore this parameter)          |
+
+> [!NOTE]
+> Please refer to the below table to set the `CONFIG_FILE`. For single-device training, use one of the yaml file under the `configure` directory while using one of the yaml file under the `hvd_configure` directory for multi-device (NUM_DEVICES>1) distributed training with Horovod.
+
+| **NUM_DEVICES** | **Dataset Type** | **Precision** | **CONFIG FILE**|
+| :---: | :---: | :---: | :---: |
+|   1   | Dummy | BF16  | `configure/itex_dummy_bf16.yaml`
+|   1   | Dummy | FP32  | `configure/itex_dummy_fp32.yaml`
+|   1   | Real  | BF16  | `configure/itex_bf16.yaml`
+|   1   | Real  | FP32  | `configure/itex_fp32.yaml`
+|   >1  | Dummy | BF16  | `hvd_configure/itex_dummy_bf16_lars.yaml`
+|   >1  | Dummy | FP32  | `hvd_configure/itex_dummy_fp32_lars.yaml`
+|   >1  | Real  | BF16  | `hvd_configure/itex_bf16_lars.yaml`
+|   >1  | Real  | FP32  | `hvd_configure/itex_fp32_lars.yaml`
+
+8. Run `run_model.sh`
 
 ## Output
 
-Output will typically look like:
+Single-device output will typically look like:
 ```
-I1101 12:22:02.439692 139875177744192 keras_utils.py:145] TimeHistory: 57.00 seconds, xxx examples/second between steps 0 and 100
-I1101 12:22:51.165375 139875177744192 keras_utils.py:145] TimeHistory: 48.71 seconds, xxx examples/second between steps 100 and 200
-I1101 12:23:39.856714 139875177744192 keras_utils.py:145] TimeHistory: 48.69 seconds, xxx examples/second between steps 200 and 300
-I1101 12:24:28.548917 139875177744192 keras_utils.py:145] TimeHistory: 48.69 seconds, xxx examples/second between steps 300 and 400
+I1101 12:22:02.439692 139875177744192 keras_utils.py:145] TimeHistory: xxx seconds, xxx examples/second between steps 0 and 100
+I1101 12:22:51.165375 139875177744192 keras_utils.py:145] TimeHistory: xxx seconds, xxx examples/second between steps 100 and 200
+I1101 12:23:39.856714 139875177744192 keras_utils.py:145] TimeHistory: xxx seconds, xxx examples/second between steps 200 and 300
+I1101 12:24:28.548917 139875177744192 keras_utils.py:145] TimeHistory: xxx seconds, xxx examples/second between steps 300 and 400
 
+```
+
+Multi-device output will typically look like:
+```
+[1] I0607 02:58:54.878461 140172183390016 keras_utils.py:145] TimeHistory: xxx seconds, xxx examples/second between steps 0 and 200
+[0] I0607 02:58:54.878722 139770592667456 keras_utils.py:145] TimeHistory: xxx seconds, xxx examples/second between steps 0 and 200
+[0] I0607 03:00:17.279742 139770592667456 keras_utils.py:145] TimeHistory: xxx seconds, xxx examples/second between steps 200 and 400
+[1] I0607 03:00:17.279656 140172183390016 keras_utils.py:145] TimeHistory: xxx seconds, xxx examples/second between steps 200 and 400
 ```
 
 Final results of the training run can be found in `results.yaml` file.

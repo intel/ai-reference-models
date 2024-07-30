@@ -33,7 +33,9 @@ if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
   echo "Please set PRECISION to int8, fp32, bfloat32, bfloat16 or fp16."
   exit 1
-elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "fp16" ] && [ ${PRECISION} != "bfloat32" ]; then
+elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] &&
+     [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "fp16" ] &&
+     [ ${PRECISION} != "bfloat32" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
   echo "Supported precisions are: int8, fp32, bfloat32, bfloat16 and fp16"
   exit 1
@@ -91,6 +93,16 @@ fi
 
 MODE="inference"
 
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_numa_cores_lists
+echo "Cores per node: ${cores_per_node}"
+
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  CORES_PER_INSTANCE=${cores_per_node}
+  echo "Runs an instance per ${CORES_PER_INSTANCE} cores."
+fi
+
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}" ]; then
   if [[ $PRECISION == "int8" ]]; then
@@ -109,7 +121,21 @@ if [[ $PRECISION == "bfloat32" ]]; then
   PRECISION="fp32"
 fi
 
-source "${MODEL_DIR}/quickstart/common/utils.sh"
+if [ -z "${TF_THREAD_PINNING_MODE}" ]; then
+  echo "TF_THREAD_PINNING_MODE is not set. Setting it to the following default value:"
+  export TF_THREAD_PINNING_MODE=none,$(($CORES_PER_INSTANCE-1)),400
+  echo "TF_THREAD_PINNING_MODE: $TF_THREAD_PINNING_MODE"
+fi
+
+if [ $PRECISION == "fp16" ]; then
+  # Set environment variables needed to get best performance for fp16
+  echo "Adding _FusedMatMul and _MklLayerNorm ops to AMP ALLOWLIST when running FP16."
+  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD=_FusedMatMul,_MklLayerNorm
+  echo "TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD=$TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD"
+
+fi
+
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=bert_large \
   --precision ${PRECISION} \

@@ -1,0 +1,7 @@
+inference-fp16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_xpu_setup.sh ${FRAMEWORK_VERSION} ${FRAMEWORK_EXTENSION_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/unetpp/inference/gpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${RUNNER} ${MULTI_TILE}
+  env:
+    PRECISION: "fp16"
+    MULTI_TILE: "False"

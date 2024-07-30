@@ -1,0 +1,64 @@
+training-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DDP}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/bert_squad/bert_pretrain/2048_shards_uncompressed_128/"
+    DDP: "false"
+training-fp32-ddp:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DDP}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/bert_squad/bert_pretrain/2048_shards_uncompressed_128/"
+    DDP: "true"
+training-fp32-avx:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DDP}
+  env:
+    PRECISION: "avx-fp32"
+    DATASET_DIR: "/pytorch/bert_squad/bert_pretrain/2048_shards_uncompressed_128/"
+    DDP: "false"
+training-fp32-ddp-avx:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DDP}
+  env:
+    PRECISION: "avx-fp32"
+    DATASET_DIR: "/pytorch/bert_squad/bert_pretrain/2048_shards_uncompressed_128/"
+    DDP: "true"
+training-bf16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DDP}
+  env:
+    PRECISION: "bf16"
+    DATASET_DIR: "/pytorch/bert_squad/bert_pretrain/2048_shards_uncompressed_128/"
+    DDP: "false"
+training-bf16-ddp:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DDP}
+  env:
+    PRECISION: "bf16"
+    DATASET_DIR: "/pytorch/bert_squad/bert_pretrain/2048_shards_uncompressed_128/"
+    DDP: "true"
+training-bf32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DDP}
+  env:
+    PRECISION: "bf32"
+    DATASET_DIR: "/pytorch/bert_squad/bert_pretrain/2048_shards_uncompressed_128/"
+    DDP: "false"
+training-bf32-ddp:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/bert_large/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DDP}
+  env:
+    PRECISION: "bf32"
+    DATASET_DIR: "/pytorch/bert_squad/bert_pretrain/2048_shards_uncompressed_128/"
+    DDP: "true"
