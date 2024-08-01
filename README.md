@@ -1,15 +1,15 @@
-# Intel® AI Reference Models
+<a href="https://scan.coverity.com/projects/intel-models">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/30278/badge.svg"/>
+</a>
+
 <a href="https://scan.coverity.com/projects/intel-models">
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/30278/badge.svg"/>
 </a>
 <a href="https://www.bestpractices.dev/projects/8925"><img src="https://www.bestpractices.dev/projects/8925/badge"></a>
 
-### This repository will be deprecated upon the publication of v3.2.0 and will no longer be maintained or published.
-Internal customers may continue to use this repository for CI and regression testing, but no code will be published from it. Instead, all pull requests and contributions intended to help external customers replicate Landing Zone model performance must be made directly to https://github.com/intel/ai-reference-models. For more information, see the [Contributing Guidelines](/CONTRIBUTING.md).
-
-Until the cut-over to https://github.com/intel/ai-reference-models, the default branch has been changed to r3.2, which will become the base of the external main branch.
-
+# Intel® AI Reference Models
 
 This repository contains **links to pre-trained models, sample scripts, best practices, and step-by-step tutorials** for many popular open-source machine learning models optimized by Intel to run on Intel® Xeon® Scalable processors and Intel® Data Center GPUs.
 
