@@ -1,4 +1,4 @@
-Keras==2.6.0rc3
+Keras==2.13.1rc0
 SimpleITK
 h5py
 nibabel==2.3.3
