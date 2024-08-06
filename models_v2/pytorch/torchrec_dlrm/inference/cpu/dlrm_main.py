@@ -82,8 +82,8 @@ ADAGRAD_EPS = 1e-8
 WEIGHT_DECAY = 0
 
 import logging
+logging.basicConfig(level=logging.INFO)
 logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(1)
 
 class InteractionType(Enum):
     ORIGINAL = "original"
@@ -179,6 +179,7 @@ def convert_int8(args, model, dataloader):
     )
     batch = fetch_batch(dataloader)
     batch.sparse_features = unpack(batch.sparse_features)
+    print_memory("int8 prepare")
     model = prepare(
         model,
         qconfig,
@@ -197,11 +198,15 @@ def convert_int8(args, model, dataloader):
         exit()
     else:
         model.load_qconf_summary(qconf_summary = args.int8_configure_dir)
+        print_memory("int8 convert")
         convert(model, inplace=True)
         model.eval()
         torch._C._jit_set_texpr_fuser_enabled(False)
+        print_memory("int8 trace")
         model = torch.jit.trace(model, (batch.dense_features, batch.sparse_features), check_trace=True)
+        print_memory("int8 freeze")
         model = torch.jit.freeze(model)
+        print_memory("int8 jit optimize")
         model(batch.dense_features, batch.sparse_features)
         model(batch.dense_features, batch.sparse_features)
         print(model.graph_for(batch.dense_features, batch.sparse_features))
@@ -223,6 +228,7 @@ def ipex_optimize(args, model, optimizer, dataloader):
                     model = convert_int8(args, model, dataloader)
                     torch.jit.save(model, args.int8_model_dir)
                     print(f"save int8 model to {args.int8_model_dir}")
+                    exit()
             else:
                 # just run JIT, since we load optimized INT8 model
                 print_memory("int8 jit optimize")
@@ -287,7 +293,7 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
             import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
             from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-            from torch._export import capture_pre_autograd_graph, dynamic_dim
+            from torch._export import capture_pre_autograd_graph
             print('[Info] Running torch.compile() INT8 quantization')
             with torch.no_grad():
                 example_inputs = (dense, sparse)
@@ -600,21 +606,21 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="Whether only run inference path.",
     )
     parser.add_argument(
+        "--int8-prepare",
+        action="store_true",
+        help="prepare int8 model weight and save to disk.",
+    )
+    parser.add_argument(
         "--int8-configure-dir",
         type=str,
         default="./int8_configure.json",
         help="Int8 recipe location.",
     )
     parser.add_argument(
-        "--int8-prepare",
-        action="store_true",
-        help="prepare int8 model.",
-    )
-    parser.add_argument(
         "--int8-model-dir",
         type=str,
-        default="./int8_weight.json",
-        help="Int8 recipe location.",
+        default="./dlrm-v2-int8.pt",
+        help="Int8 model location.",
     )
     parser.add_argument(
         "--calibration",
@@ -1164,35 +1170,6 @@ def construct_model(args):
         return DLRMTrain(model), None, None
 
     device: torch.device = torch.device("cpu")
-    backend = "gloo"
-
-    pprint(vars(args))
-    # logger.event(
-    #     key=mllog_constants.GLOBAL_BATCH_SIZE,
-    #     value=dist.get_world_size() * args.batch_size,
-    # )
-    # logger.event(
-    #     key=mllog_constants.GRADIENT_ACCUMULATION_STEPS,
-    #     value=1,  # Gradient accumulation is not supported in the reference implementation
-    # )
-    # logger.event(
-    #     key=mllog_constants.SEED,
-    #     value=args.seed,  # Seeding model is not supported in the reference implementation
-    # )
-
-    if args.num_embeddings_per_feature is not None:
-        args.num_embeddings = None
-
-    # Sets default limits for random dataloader iterations when left unspecified.
-    if (
-        args.in_memory_binary_criteo_path is None
-        and args.synthetic_multi_hot_criteo_path is None
-    ):
-        for split in ["train", "val", "test"]:
-            attr = f"limit_{split}_batches"
-            if getattr(args, attr) is None:
-                setattr(args, attr, 10)
-
     eb_configs = [
         EmbeddingBagConfig(
             name=f"t_{feature_name}",
@@ -1237,6 +1214,7 @@ def construct_model(args):
     if args.ipex_optimize:
         # re-write crossnet with using nn.linear instead of only using torch.linear
         replace_crossnet(train_model.model)
+    print_memory("start replace emeddingbag ")
     replace_embeddingbag_collection(train_model.model, args)
     # embedding_optimizer = torch.optim.Adagrad if args.adagrad else torch.optim.SGD
     # This will apply the Adagrad optimizer in the backward pass for the embeddings (sparse_arch). This means that
@@ -1283,8 +1261,9 @@ def construct_model(args):
     if not args.inference_only:
         print_memory("start create optimizer ")
         assert args.adagrad
+        param = list(model.model.dense_arch.parameters()) + list(model.model.inter_arch.parameters()) + list(model.model.over_arch.parameters())
         optimizer = torch.optim.Adagrad(
-            model.parameters(),
+            param,
             lr=args.learning_rate,
             lr_decay=ADAGRAD_LR_DECAY,
             weight_decay=WEIGHT_DECAY,
@@ -1325,12 +1304,18 @@ def main(argv: List[str]) -> None:
             pass
 
     if args.multi_hot_sizes is not None:
+        if args.in_memory_binary_criteo_path is None:
+            logger.info("use dummy data")
+        else:
+            logger.info("use one hot real data set to generate multi-hot data per iter")
         assert (
             args.num_embeddings_per_feature is not None
             and len(args.multi_hot_sizes) == len(args.num_embeddings_per_feature)
             or args.num_embeddings_per_feature is None
             and len(args.multi_hot_sizes) == len(DEFAULT_CAT_NAMES)
         ), "--multi_hot_sizes must be a comma delimited list the same size as the number of embedding tables."
+    if args.synthetic_multi_hot_criteo_path is not None:
+        logger.info("use multi-hot real data set")
     assert (
         args.in_memory_binary_criteo_path is None
         or args.synthetic_multi_hot_criteo_path is None
@@ -1351,40 +1336,16 @@ def main(argv: List[str]) -> None:
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     # logger.event(
-    #     key=mllog_constants.OPT_NAME,
-    #     value=mllog_constants.ADAGRAD if args.adagrad else mllog_constants.SGD,
+    #     key=mllog_constants.GLOBAL_BATCH_SIZE,
+    #     value=dist.get_world_size() * args.batch_size,
     # )
     # logger.event(
-    #     key=mllog_constants.OPT_BASE_LR,
-    #     value=args.learning_rate,
+    #     key=mllog_constants.GRADIENT_ACCUMULATION_STEPS,
+    #     value=1,  # Gradient accumulation is not supported in the reference implementation
     # )
     # logger.event(
-    #     key=mllog_constants.OPT_ADAGRAD_LR_DECAY,
-    #     value=ADAGRAD_LR_DECAY,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_WEIGHT_DECAY,
-    #     value=WEIGHT_DECAY,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_ADAGRAD_INITIAL_ACCUMULATOR_VALUE,
-    #     value=ADAGRAD_INIT_ACC,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_ADAGRAD_EPSILON,
-    #     value=ADAGRAD_EPS,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_LR_WARMUP_STEPS,
-    #     value=args.lr_warmup_steps,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_LR_DECAY_START_STEP,
-    #     value=args.lr_decay_start,
-    # )
-    # logger.event(
-    #     key=mllog_constants.OPT_LR_DECAY_STEPS,
-    #     value=args.lr_decay_steps,
+    #     key=mllog_constants.SEED,
+    #     value=args.seed,  # Seeding model is not supported in the reference implementation
     # )
 
     if args.num_embeddings_per_feature is not None:
@@ -1444,9 +1405,8 @@ def main(argv: List[str]) -> None:
     #     key=mllog_constants.TRAIN_SAMPLES,
     #     value=dist.get_world_size() * len(train_dataloader) * args.batch_size,
     # )
-
     if args.multi_hot_sizes is not None:
-        print_memory("start to create Multihot for dummy data ")
+        print_memory("start to create Multihot")
         multihot = Multihot(
             args.multi_hot_sizes,
             args.num_embeddings_per_feature,
@@ -1455,7 +1415,7 @@ def main(argv: List[str]) -> None:
             dist_type=args.multi_hot_distribution_type,
         )
         multihot.pause_stats_collection_during_val_and_test(model)
-        print_memory("start transfer to multihot dataloader for dummy data ")
+        print_memory("start transfer to multihot dataloader")
         if train_dataloader:
             train_dataloader = RestartableMap(
                 multihot.convert_to_multi_hot, train_dataloader

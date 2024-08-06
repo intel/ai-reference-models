@@ -88,6 +88,10 @@ elif [[ $DDP == 'false' && $PRECISION == "fp16" ]]; then
     echo "### running FP16 mode"
     ARGS="$ARGS --fp16"
     precision=fp16
+elif [[ $DDP == 'true' && $PRECISION == "fp16" ]]; then
+    echo "### running BF32 mode"
+    ARGS="$ARGS --fp16"
+    precision=bf32
 elif [[ $DDP == 'false' && $PRECISION == "fp8" ]]; then
     echo "### running FP8 mode"
     ARGS="$ARGS --fp8"
@@ -132,6 +136,10 @@ TRAIN_SCRIPT=${TRAIN_SCRIPT:-${MODEL_DIR}/run_pretrain_mlperf.py}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 work_space=${work_space:-${OUTPUT_DIR}}
 
+latency="N/A"
+accuracy="N/A"
+throughput="N/A"
+
 if [[ "$DDP" == "false" ]]; then
     if [[ "$TRAINING_PHASE" == "1" ]]; then
         NUM_RANKS=1
@@ -140,7 +148,7 @@ if [[ "$DDP" == "false" ]]; then
 
         TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
         if [[ "0" == ${TORCH_INDUCTOR} ]];then
-            python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
+            python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --memory-allocator jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
                 --model_type 'bert' \
@@ -153,7 +161,7 @@ if [[ "$DDP" == "false" ]]; then
                 $params
         else
             export TORCHINDUCTOR_FREEZING=1
-            python -m torch.backends.xeon.run_cpu --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
+            python -m torch.backends.xeon.run_cpu --node_id 0 --memory-allocator jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
                 --model_type 'bert' \
@@ -187,7 +195,7 @@ if [[ "$DDP" == "false" ]]; then
 
         TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
         if [[ "0" == ${TORCH_INDUCTOR} ]];then
-            python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+            python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --memory-allocator jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
                 --model_type 'bert' \
@@ -200,7 +208,7 @@ if [[ "$DDP" == "false" ]]; then
                 $params
         else
             export TORCHINDUCTOR_FREEZING=1
-            python -m torch.backends.xeon.run_cpu --node_id 0 --enable_jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
+            python -m torch.backends.xeon.run_cpu --node_id 0 --memory-allocator jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
                 --model_type 'bert' \

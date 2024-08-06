@@ -44,12 +44,15 @@ if [ ! -d "${DATASET_DIR}/coco" ]; then
   exit 1
 fi
 
-if [ ! -d "${OUTPUT_DIR}" ]; then
-  echo "The OUTPUT_DIR '${OUTPUT_DIR}' does not exist"
+if [ -z "${OUTPUT_DIR}" ]; then
+  echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
 fi
 
+# Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
 
 if [ -z  "${PRECISION}" ]; then
   echo "The PRECISION is not set"
@@ -110,7 +113,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     pip list | grep intel-extension-for-pytorch
     if [[ "$?" == 0 ]]; then
         IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
-          --enable_jemalloc --throughput_mode"
+          --memory-allocator jemalloc --throughput_mode"
     fi
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-1}
@@ -119,7 +122,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     pip list | grep intel-extension-for-pytorch
     if [[ "$?" == 0 ]]; then
         IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
-          --enable_jemalloc --latency_mode"
+          --memory-allocator jemalloc --latency_mode"
     fi
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-112}
@@ -128,9 +131,13 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     pip list | grep intel-extension-for-pytorch
     if [[ "$?" == 0 ]]; then
         IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
-          --enable_jemalloc"
+          --memory-allocator jemalloc"
     fi
 fi
+
+latency="N/A"
+throughput="N/A"
+accuracy="N/A"
 
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     python ${IPEX_ARGS} \
@@ -194,6 +201,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
       }')
       echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
       echo ""maskrcnn";"throughput";$PRECISION;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+      echo ""maskrcnn";"latency";$PRECISION;${BATCH_SIZE};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
       latency=$(grep 'P99 Latency' ${LOG_0} | sed -e 's/.*P99 Latency//;s/[^0-9.]//g' | awk '
       BEGIN {
               sum = 0;
@@ -212,7 +220,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
       CORES=`lscpu | grep Core | awk '{print $4}'`
       CORES_PER_INSTANCE=4
       INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
-      throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+      throughput=$(grep 'Throughput:' ${LOG_0} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
       BEGIN {
               sum = 0;
               i = 0;
@@ -225,7 +233,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
               sum = sum / i * INSTANCES_PER_SOCKET;
               printf("%.3f", sum);
       }')
-      latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+      latency=$(grep 'P99 Latency' ${LOG_0} |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
       BEGIN {
               sum = 0;
                 i = 0;
@@ -243,7 +251,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
       echo ""maskrcnn";"p99_latency";$PRECISION;${BATCH_SIZE};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
   elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
       LOG_0=${OUTPUT_DIR}/maskrcnn_${PRECISION}_accuracy*
-      throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+      throughput=$(grep 'Throughput:' ${LOG_0} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
       BEGIN {
               sum = 0;
               i = 0;
@@ -274,10 +282,6 @@ if [[ ${PLATFORM} == "linux" ]]; then
       echo ""maskrcnn";"bbox AP:";$PRECISION;${BATCH_SIZE};${bbox_accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
       echo ""maskrcnn";"segm AP:";$PRECISION;${BATCH_SIZE};${segm_accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
   fi
-  echo ""maskrcnn";"throughput";$PRECISION;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-  echo ""maskrcnn";"latency";$PRECISION;${BATCH_SIZE};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
-  echo ""maskrcnn";"bbox AP:";$PRECISION;${BATCH_SIZE};${bbox_accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
-  echo ""maskrcnn";"segm AP:";$PRECISION;${BATCH_SIZE};${segm_accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 fi
 
 yaml_content=$(cat << EOF

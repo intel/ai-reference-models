@@ -17,3 +17,4 @@
 #
 
 pip install pycocotools>=2.0
+pip install sympy==1.12.1

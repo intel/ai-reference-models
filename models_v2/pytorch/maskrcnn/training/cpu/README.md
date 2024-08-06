@@ -60,10 +60,12 @@ cd -
 
 5. Run setup scripts
 ```
-cd <MODEL_DIR=path_to_maskrcnn_training_cpu>
+cd <MODEL_DIR=path/to/maskrcnn/training/cpu>
 ./setup.sh
-pip install -e setup.py
+cd <path/to/maskrcnn/training/cpu/maskrcnn-benchmark>
+pip install -e setup.py develop
 pip install -r requirements.txt
+cd -
 ```
 6. Setup required environment paramaters
 
@@ -74,6 +76,9 @@ pip install -r requirements.txt
 | **DATASET_DIR**              |                               `export DATASET_DIR=<path-to-coco>`                                  |
 | **PRECISION**    |                               `export PRECISION=fp32 <Select from: fp32, avx-fp32, bf16, or bf32>`                             |
 | **OUTPUT_DIR**    |                               `export OUTPUT_DIR=<path to an output directory>`                               |
+| **NNODES** (only if distributed=true)   |     `export NNODES=#your_node_number`   |
+| **HOSTFILE** (only if distributed=true)   |   ` export HOSTFILE=your_ip_list_file #one ip per line`  |
+| **LOCAL_BATCH_SIZE** (only if distributed=true)  |  `export LOCAL_BATCH_SIZE=<set local batch size>`  |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
 
 7. Run `run_model.sh`

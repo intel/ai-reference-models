@@ -32,6 +32,8 @@ if [ -z "${OUTPUT_DIR}" ]; then
 fi
 
 mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
 
 if [ -z "${DATASET_DIR}" ]; then
   echo "The required environment variable DATASET_DIR has not been set"
@@ -83,7 +85,7 @@ TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 
 if [ "$DISTRIBUTED" ]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
-        python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --logical_core_for_ccl --ccl_worker_count $NUM_CCL_WORKER --distributed --hostfile $HOSTFILE --nnodes $NODE \
+        python -m intel_extension_for_pytorch.cpu.launch --memory-allocator tcmalloc --logical_core_for_ccl --ccl_worker_count $NUM_CCL_WORKER --distributed --hostfile $HOSTFILE --nnodes $NODE \
         $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
         --data-set=terabyte \
@@ -97,7 +99,7 @@ if [ "$DISTRIBUTED" ]; then
         $ARGS |tee $LOG_0
     else
         export TORCHINDUCTOR_FREEZING=1
-        python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --logical_core_for_ccl --ccl_worker_count $NUM_CCL_WORKER --distributed --hostfile $HOSTFILE --nnodes $NODE \
+        python -m intel_extension_for_pytorch.cpu.launch --memory-allocator tcmalloc --logical_core_for_ccl --ccl_worker_count $NUM_CCL_WORKER --distributed --hostfile $HOSTFILE --nnodes $NODE \
         $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
         --data-set=terabyte \
@@ -112,7 +114,7 @@ if [ "$DISTRIBUTED" ]; then
     fi
 else
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
-        python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
+        python -m intel_extension_for_pytorch.cpu.launch --nodes-list=0 --memory-allocator tcmalloc $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
         --data-set=terabyte \
         --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
@@ -124,7 +126,7 @@ else
         $ARGS |tee $LOG_0
     else
         export TORCHINDUCTOR_FREEZING=1
-        python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
+        python -m intel_extension_for_pytorch.cpu.launch --nodes-list=0 --memory-allocator tcmalloc $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
         --data-set=terabyte \
         --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
@@ -137,13 +139,42 @@ else
     fi
 fi
 
-throughput=$(echo "$LOG_0" | grep -oP 'Throughput:  \K[^ ]+')
-accuracy=$(echo "$LOG_0" | grep -oP 'accuracy \K[^ ]+')
-latency=$(echo "$LOG_0" | grep -oP 'latency:  \K[^ ]+')
+throughput="N/A"
+accuracy="N/A"
+latency="N/A"
 
-echo "Throughput: $throughput"
-echo "Accuracy: $accuracy"
-echo "Latency: $latency"
+if [ "$DISTRIBUTED" ]; then
+    throughput=$(grep 'Throughput:' ${LOG}/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+    BEGIN {
+            sum = 0;
+            i = 0;
+          }
+          {
+            sum = sum + $1;
+            i++;
+          }
+    END   {
+    sum = sum / i;
+            printf("%.3f", sum);
+    }')
+    echo ""dlrm";"training distributed throughput";${PRECISION};${BATCHSIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+else
+    throughput=$(grep 'Throughput:' ${LOG}/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+    BEGIN {
+            sum = 0;
+            i = 0;
+          }
+          {
+            sum = sum + $1;
+            i++;
+          }
+    END   {
+    sum = sum / i;
+            printf("%.3f", sum);
+    }')
+    echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+    echo ""dlrm";"training throughput";${PRECISION};${BATCHSIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+fi
 
 yaml_content=$(cat << EOF
 results:

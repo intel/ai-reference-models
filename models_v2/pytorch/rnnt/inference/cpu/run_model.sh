@@ -53,10 +53,15 @@ if [ ! -d "${DATASET_DIR}/dataset/LibriSpeech" ]; then
   exit 1
 fi
 
-if [ ! -d "${OUTPUT_DIR}" ]; then
-  echo "The OUTPUT_DIR '${OUTPUT_DIR}' does not exist"
+if [ -z "${OUTPUT_DIR}" ]; then
+  echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
 fi
+
+# Create the output directory in case it doesn't already exist
+mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
@@ -84,9 +89,11 @@ if [[ $TEST_MODE == "THROUGHPUT" ]]; then
     ARGS="$ARGS --warm_up 3 --sort_by_duration"
 elif [[ $TEST_MODE == "ACCURACY" ]]; then
     LOG_PREFIX=/rnnt_${PRECISION}_inference_accuracy
+    ARGS_IPEX="$ARGS_IPEX --latency_mode"
+    ARGS="$ARGS --warm_up 10"
 else
     LOG_PREFIX=/rnnt_${PRECISION}_inference_realtime
-    ARGS="$ARGS --warm_up 10"
+
 fi
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
@@ -98,6 +105,8 @@ rm -rf ${OUTPUT}/${LOG_PREFIX}
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator jemalloc \
     ${ARGS_IPEX} \
+    --log-dir ${OUTPUT_DIR} \
+    --log_file_prefix ${LOG_PREFIX} \
     ${MODEL_DIR}/inference.py \
     --dataset_dir ${DATASET_DIR}/dataset/LibriSpeech/ \
     --val_manifest ${DATASET_DIR}/dataset/LibriSpeech/librispeech-dev-clean-wav.json \
@@ -110,53 +119,67 @@ python -m intel_extension_for_pytorch.cpu.launch \
 
 wait
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
-BEGIN {
-    sum = 0;
-    i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
-    sum = sum / i;
-    printf("%.3f", sum);
-}')
-echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
-echo ""RNN-T";"throughput";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Accuracy//;s/[^0-9.]//g' |awk '
-BEGIN {
-    sum = 0;
-    i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
-    sum = sum / i;
-    printf("%.3f", sum);
-}')
+latency="N/A"
+throughput="N/A"
+accuracy="N/A"
 
-p99_latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
-BEGIN {
-    sum = 0;
-    i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
-    sum = sum / i;
-    printf("%.3f", sum);
-}')
-echo "--------------------------------Performance Summary per Socket--------------------------------"
-echo ""RNN-T";"latency";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-echo ""RNN-T";"p99_latency";$PRECISION; ${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log
-echo ""RNN-T";"throughput";"accuracy";"latency";$PRECISION;${BATCH_SIZE};${throughput};${accuracy};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log
+if [[ "$TEST_MODE" == "REALTIME" ]]; then
+    CORES=`lscpu | grep Core | awk '{print $4}'`
+    CORES_PER_INSTANCE=4
 
+    INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
+
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+    BEGIN {
+            sum = 0;
+    i = 0;
+        }
+        {
+            sum = sum + $1;
+    i++;
+        }
+    END   {
+    sum = sum / i * INSTANCES_PER_SOCKET;
+            printf("%.2f", sum);
+    }')
+    p99_latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+    BEGIN {
+        sum = 0;
+        i = 0;
+        }
+        {
+            sum = sum + $1;
+            i++;
+        }
+    END   {
+        sum = sum / i;
+        printf("%.3f ms", sum);
+    }')
+    echo "--------------------------------Performance Summary per Socket--------------------------------"
+    echo ""RNN-T";"latency";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+    echo ""RNN-T";"p99_latency";$PRECISION; ${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log
+elif [[ $TEST_MODE == "THROUGHPUT" ]]; then
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Throughput://;s/[^0-9.]//g' |awk '
+    BEGIN {
+        sum = 0;
+        i = 0;
+        }
+        {
+            sum = sum + $1;
+            i++;
+        }
+    END   {
+        sum = sum / i;
+        printf("%.3f", sum);
+    }')
+    echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+    echo ""RNN-T";"throughput";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+elif [[ $TEST_MODE == "ACCURACY" ]]; then
+    accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+    WER=$(grep 'Evaluation WER:' ${OUTPUT_DIR}/${LOG_PREFIX}*|sed -e 's/.*Evaluation WER//;s/[^0-9.]//g')
+    echo ""RNN-T";"accuracy";$PRECISION; ${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
+    echo ""RNN-T";"WER";$PRECISION; ${BATCH_SIZE};${WER}" | tee -a ${work_space}/summary.log
+fi
 
 yaml_content=$(cat << EOF
 results:
@@ -164,7 +187,7 @@ results:
   value: $throughput
   unit: fps
 - key: latency
-  value: $p99_latency
+  value: $latency
   unit: ms
 - key: accuracy
   value: $accuracy

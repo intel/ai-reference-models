@@ -45,10 +45,11 @@ if [ -z "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${OUTPUT_DIR}" ]; then
-  echo "The OUTPUT_DIR is not set"
+  echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
 fi
 
+# Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 rm -rf ${OUTPUT_DIR}/summary.log
 rm -rf ${OUTPUT_DIR}/results.yaml
@@ -225,7 +226,7 @@ else
             --jit \
             --throughput-mode \
             $ARGS 2>&1 | tee ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_throughput.log
-            wait
+        wait
     elif [[ "$TEST_MODE" == "REALTIME" ]]; then
         python -m intel_extension_for_pytorch.cpu.launch \
             --memory-allocator jemalloc \
@@ -258,6 +259,7 @@ else
             --jit \
             --accuracy-mode \
             $ARGS 2>&1 | tee ${OUTPUT_DIR}/$LOG_0
+        wait
     fi
 fi
 
@@ -275,22 +277,22 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
 fi
 
 echo $LOG
-
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_${mode}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
-BEGIN {
-        sum = 0;
-i = 0;
-    }
-    {
-        sum = sum + $1;
-i++;
-    }
-END   {
-sum = sum / i;
-    printf("%.3f", sum);
-}')
-echo "--------------------------------Performance Summary per Numa Node--------------------------------"
-echo ""SSD-RN34";"throughput";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_${mode}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+    BEGIN {
+            sum = 0;
+    i = 0;
+        }
+        {
+            sum = sum + $1;
+    i++;
+        }
+    END   {
+    sum = sum / i;
+        printf("%.3f", sum);
+    }')
+    echo "--------------------------------Performance Summary per Numa Node--------------------------------"
+    echo ""SSD-RN34";"throughput";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 if [[ "$TEST_MODE" == "REALTIME" ]]; then
     latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_${mode}* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
     BEGIN {
@@ -307,7 +309,6 @@ if [[ "$TEST_MODE" == "REALTIME" ]]; then
     }')
     echo "--------------------------------Performance Summary per Socket--------------------------------"
     echo ""SSD-RN34";"p99_latency";$PRECISION; ${BATCH_SIZE};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
-else
     latency=$(grep 'inference latency:' ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_${mode}* |sed -e 's/.*inference latency//;s/[^0-9.]//g' |awk '
     BEGIN {
             sum = 0;
@@ -323,9 +324,7 @@ else
     }')
     echo "--------------------------------Performance Summary per Numa Node--------------------------------"
     echo ""SSD-RN34";"latency";$PRECISION; ${BATCH_SIZE};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
-fi
-
-if [[ "$TEST_MODE" == "ACCURACY" ]]; then
+elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_${mode}* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
     echo ""SSD-RN34";"accuracy";$PRECISION; ${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 fi

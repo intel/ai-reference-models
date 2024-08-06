@@ -48,9 +48,9 @@ After you loading the raw dataset `day_*.gz` and unzip them to RAW_DIR.
 cd <AI Reference Models>/models_v2/pytorch/torchrec_dlrm/inference/cpu
 export MODEL_DIR=$(pwd)
 export RAW_DIR=<the unziped raw dataset>
-export TEMP_DIR=<where your choose the put the temp file during preprocess>
-export PREPROCESSED_DIR=<where your choose the put the one-hot dataset>
-export MULTI_HOT_DIR=<where your choose the put the multi-hot dataset>
+export TEMP_DIR=<where you choose the put the temp file during preprocess>
+export PREPROCESSED_DIR=<where you choose the put the one-hot dataset>
+export MULTI_HOT_DIR=<where you choose the put the multi-hot dataset>
 bash preprocess_raw_dataset.sh
 ```
 
@@ -93,11 +93,11 @@ Single-tile output will typically look like:
 2024-07-18 16:00:14,120 - dlrm_main.py - __main__ - INFO - AUROC over test set: [0.5129603203103565, 0.0, 0.0].
 2024-07-18 16:00:14,121 - dlrm_main.py - __main__ - INFO - Number of test samples: 131072
 2024-07-18 16:00:14,121 - dlrm_main.py - __main__ - INFO - Throughput: 103711.5248249468 fps
-2024-07-18 16:00:14,121 - dlrm_main.py - __main__ - INFO - Final AUROC: [0.5129603203103565, 0.0, 0.0] 
+2024-07-18 16:00:14,121 - dlrm_main.py - __main__ - INFO - Final AUROC: [0.5129603203103565, 0.0, 0.0]
 2024-07-18 16:00:17,133 - dlrm_main.py - __main__ - INFO - AUROC over test set: [0.5129603203103565, 0.0, 0.0].
 2024-07-18 16:00:17,133 - dlrm_main.py - __main__ - INFO - Number of test samples: 131072
 2024-07-18 16:00:17,133 - dlrm_main.py - __main__ - INFO - Throughput: 102890.12235101678 fps
-2024-07-18 16:00:17,134 - dlrm_main.py - __main__ - INFO - Final AUROC: [0.5129603203103565, 0.0, 0.0] 
+2024-07-18 16:00:17,134 - dlrm_main.py - __main__ - INFO - Final AUROC: [0.5129603203103565, 0.0, 0.0]
 ```
 
 

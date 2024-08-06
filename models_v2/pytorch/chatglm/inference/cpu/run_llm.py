@@ -632,7 +632,7 @@ elif args.dtype == "int8" and args.inductor:
     from torch.ao.quantization.quantizer.x86_inductor_quantizer import (
         X86InductorQuantizer,
     )
-    from torch._export import capture_pre_autograd_graph, dynamic_dim
+    from torch._export import capture_pre_autograd_graph
 
     print("[Info] Running torch.compile() INT8 quantization")
     with torch.no_grad():

@@ -28,10 +28,14 @@ if [ ! -d "${DATASET_DIR}/dataset/LibriSpeech" ]; then
   exit 1
 fi
 
-if [ ! -d "${OUTPUT_DIR}" ]; then
-  echo "The OUTPUT_DIR '${OUTPUT_DIR}' does not exist"
+if [ -z "${OUTPUT_DIR}" ]; then
+  echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
 fi
+
+# Create the output directory in case it doesn't already exist
+mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
@@ -55,10 +59,10 @@ LEARNING_RATE_WARMUP=${17:-"8000"}
 GRADIENT_ACCUMULATION_STEPS=${18:-1}
 LAUNCH_OPT=${LAUNCH_OPT:-"none"}
 
-if [[ -z "${DISTRIBUTED}" ]]; then
+if [[ "${DISTRIBUTED}" == "False" ]]; then
     echo "Running single-node training"
     LOG_PREFIX="training_throughput_log"
-else
+elif [[ "${DISTRIBUTED}" == "True" ]]; then
     echo "Running distributed multi-node training"
     LOG_PREFIX="distributed_training_throughput_log"
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -66,6 +70,9 @@ else
     HOSTFILE=${HOSTFILE:-"${MODEL_DIR}/hostfile"}
     NUM_RANKS=$(( NNODES * SOCKETS ))
     LOCAL_BATCH_SIZE=$(( BATCH_SIZE / NUM_RANKS))
+else
+    exho "Please set distributed to True or False"
+    exit 1
 fi
 
 if [[ $PRECISION == "avx-fp32" ]]; then
@@ -93,7 +100,7 @@ fi
 IPEX="--ipex"
 
 PROFILE=""
-if [ "$3" = profiling ]; then
+if [ "${profiling}" = 'True' ]; then
     PROFILE="--profiling"
 fi
 
@@ -139,26 +146,28 @@ fi
 
 ARGS_IPEX=""
 
-if [[ -z "${DISTRIBUTED}" ]]; then
+if [[ "${DISTRIBUTED}" == "False" ]]; then
     export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
     export KMP_BLOCKTIME=1
     export KMP_AFFINITY=granularity=fine,compact,1,0
-    ARGS_IPEX="${ARGS_IPEX} --memory-allocator jemalloc --node_id=0"
+    ARGS_IPEX="${ARGS_IPEX} --memory-allocator jemalloc --nodes-list=0"
 else
     CMD+=" --backend=ccl"
     oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
     source $oneccl_bindings_for_pytorch_path/env/setvars.sh
     export FI_PROVIDER=psm3
     export PSM3_HAL=sockets
-    ARGS_IPEX="${ARGS_IPEX} --distributed --nnodes ${NNODES} --hostfile ${HOSTFILE}"
+    ARGS_IPEX="${ARGS_IPEX} --nnodes ${NNODES} --hostfile ${HOSTFILE}"
 fi
 
 rm -rf ${OUTPUT_DIR}/${LOG_PREFIX}*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     ${ARGS_IPEX} \
-    ${MODEL_DIR}/train.py ${CMD} \
-    2>&1 | tee ${OUTPUT_DIR}/${LOG_PREFIX}_${precision}.txt
+    --log-dir=${OUTPUT_DIR} \
+    --log_file_prefix="./${LOG_PREFIX}_${precision}" \
+    ${MODEL_DIR}/train.py \
+    ${CMD} 2>&1 | tee ${OUTPUT_DIR}/${LOG_PREFIX}_${precision}.txt
 
 wait
 
@@ -178,8 +187,8 @@ END   {
 echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
 echo ""RNN-T";"training throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 
-accuracy="0"
-latency="0"
+accuracy="N/A"
+latency="N/A"
 
 yaml_content=$(cat << EOF
 results:

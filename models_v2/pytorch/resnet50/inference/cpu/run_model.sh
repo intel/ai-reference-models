@@ -46,6 +46,8 @@ fi
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
@@ -174,66 +176,59 @@ else
 fi
 wait
 
-throughput=$(grep 'Throughput:'  ${OUTPUT_DIR}/${LOG_PREFIX}_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
-BEGIN {
-    sum = 0;
-    i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
-    sum = sum / i;
-    printf("%.3f", sum);
-}')
-echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
-echo "resnet50;"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-accuracy=$(grep 'Accuracy:'  ${OUTPUT_DIR}/${LOG_PREFIX}_${PRECISION}_* |sed -e 's/.*Accuracy//;s/[^0-9.]//g' |awk '
-BEGIN {
-    sum = 0;
-    i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
-    sum = sum / i;
-    printf("%.3f", sum);
-}')
+latency="N/A"
+throughput="N/A"
+accuracy="N/A"
 
-latency=$(grep 'inference latency' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*inference latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
-BEGIN {
-    sum = 0;
-    i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
-    sum = sum / i;
-    printf("%.3f ms", sum);
-}')
-p99_latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
-BEGIN {
-    sum = 0;
-    i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
-    sum = sum / i;
-    printf("%.3f ms", sum);
-}')
-echo "--------------------------------Performance Summary per Socket--------------------------------"
-echo "resnet50;"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-echo "resnet50;"p99_latency";${PRECISION};${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log
-if [[ $"TEST_MODE" == "REALTIME" ]]; then
-    $latency = $p99_latency
+if [[ "$TEST_MODE" == "REALTIME" ]]; then
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Throughput://;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    BEGIN {
+        sum = 0;
+        i = 0;
+        }
+        {
+            sum = sum + $1;
+            i++;
+        }
+    END   {
+        sum = sum / i;
+        printf("%.3f ms", sum);
+    }')
+    latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    BEGIN {
+        sum = 0;
+        i = 0;
+        }
+        {
+            sum = sum + $1;
+            i++;
+        }
+    END   {
+        sum = sum / i;
+        printf("%.3f ms", sum);
+    }')
+    echo "--------------------------------Performance Summary per Socket--------------------------------"
+    echo "resnet50;"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+    echo "resnet50;"p99_latency";${PRECISION};${BATCH_SIZE};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
+elif [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
+    throughput=$(grep 'Throughput:'  ${OUTPUT_DIR}/${LOG_PREFIX}_${PRECISION}_* |sed -e 's/.*Throughput://;s/[^0-9.]//g' |awk '
+    BEGIN {
+        sum = 0;
+        i = 0;
+        }
+        {
+            sum = sum + $1;
+            i++;
+        }
+    END   {
+        sum = sum / i;
+        printf("%.3f", sum);
+    }')
+    echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+    echo "resnet50;"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
+    accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/${LOG_PREFIX}_${PRECISION}_* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+    echo "resnet50;"accuracy";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 fi
 
 echo "resnet50;"throughput";"accuracy";"p99_latency";${PRECISION};${BATCH_SIZE};${throughput};${latency};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log

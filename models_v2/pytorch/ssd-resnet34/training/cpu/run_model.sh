@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-MODEL_DIR=${MODEL_DIR-$PWD}
+MODEL_DIR=${MODEL_DIR:-$PWD}
 
 if [ ! -e "${MODEL_DIR}/train.py" ]; then
   echo "Could not find the script of train.py. Please set environment variable '\${MODEL_DIR}'."
@@ -34,11 +34,14 @@ if [ -z "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${OUTPUT_DIR}" ]; then
-  echo "The OUTPUT_DIR is not set"
+  echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
 fi
 
+# Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
 
 if [ -z "${PRECISION}" ]; then
   echo "Precision is not set"
@@ -79,7 +82,7 @@ ARGS_IPEX=""
 
 if [ "$THROUGHPUT" ]; then
     echo "Running throughput training mode"
-    ARGS_IPEX="$ARGS_IPEX --node_id 0"
+    ARGS_IPEX="$ARGS_IPEX --nodes-list 0"
     BATCH_SIZE=${BATCH_SIZE:-224}
     ARGS="$ARGS --epochs 70"
     ARGS="$ARGS --pretrained-backbone ${CHECKPOINT_DIR}/ssd/resnet34-333f7ec4.pth"
@@ -153,6 +156,8 @@ throughput=$(grep 'Throughput:' ${LOG_0} |sed -e 's/.*Throughput//;s/[^0-9.]//g'
         }
 
     }')
+echo "--------------------------------Performance Summary per Numa Node--------------------------------"
+echo ""SSD-RN34";"training throughput";$PRECISION; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 accuracy=$(grep 'Accuracy:' ${LOG_0} |sed -e 's/.*Accuracy//;s/[^0-9.]//g' |awk '
     BEGIN {
             sum = 0;
@@ -194,7 +199,8 @@ latency=$(grep 'train latency ' ${LOG_0} |sed -e 's/.*inference latency\s*//;s/[
         }
 
     }')
-
+echo "--------------------------------Performance Summary per Numa Node--------------------------------"
+echo ""SSD-RN34";"training latency";$PRECISION; ${BATCH_SIZE};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
 echo ""SSD-RN34";"throughput";"accuracy";"latency";$PRECISION; ${BATCH_SIZE};${throughput};${accuracy};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
 
 yaml_content=$(cat << EOF

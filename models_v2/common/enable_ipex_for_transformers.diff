@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fc9411e95..21f1d3a43 100644
+index fc9411e95..937d84325 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -140,16 +140,16 @@ index fc9411e95..21f1d3a43 100644
 +            from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
 +            import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
 +            from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-+            from torch._export import capture_pre_autograd_graph, dynamic_dim
++            from torch._export import capture_pre_autograd_graph
 +            print('[Info] Running torch.compile() for INT8 quantization')
 +            print('[Info] Running int8_bf16 is: {}'.format(args.int8_bf16))
 +            with torch.no_grad():
 +                dynamic_shapes = None
 +                if args.eval_batch_size != 1:
 +                    dynamic_shapes = {
-+                        "input_ids": {0: torch.export.Dim("dim")},
-+                        "attention_mask": {0: torch.export.Dim("dim")},
-+                        "token_type_ids": {0: torch.export.Dim("dim")}
++                        "input_ids": {0: torch.export.Dim("dim", max=1024 * 1024)},
++                        "attention_mask": {0: torch.export.Dim("dim", max=1024 * 1024)},
++                        "token_type_ids": {0: torch.export.Dim("dim", max=1024 * 1024)}
 +                    }                    
 +                exported_model = capture_pre_autograd_graph(
 +                    model,
@@ -1075,7 +1075,7 @@ index 474b92f72..094ea6eb0 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499b0..2e770d89b 100755
+index cf71499b0..097002838 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,29 @@ from .utils import (
@@ -1273,7 +1273,7 @@ index cf71499b0..2e770d89b 100755
 +                from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
 +                import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
 +                from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-+                from torch._export import capture_pre_autograd_graph, dynamic_dim
++                from torch._export import capture_pre_autograd_graph
 +                print('[Info] Running torch.compile() INT8 quantization')
 +                with torch.no_grad():
 +                    exported_model = capture_pre_autograd_graph(

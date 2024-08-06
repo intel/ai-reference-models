@@ -59,10 +59,12 @@ export CHECKPOINT_DIR=<directory where the pretrained model will be saved>
 
 5. Run setup scripts
 ```
-cd <MODEL_DIR=path_to_maskrcnn_inference_cpu>
+cd <MODEL_DIR=path_to_maskrcnn/inference/cpu>
 ./setup.sh
-pip install -e setup.py
+cd <path/to/maskrcnn/inference/cpu/maskrcnn-benchmark>
+pip install -e setup.py develop
 pip install -r requirements.txt
+cd -
 ```
 6. Setup required environment paramaters
 

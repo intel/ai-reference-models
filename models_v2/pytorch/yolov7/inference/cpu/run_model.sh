@@ -253,23 +253,8 @@ elif [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
         sum = sum / i;
         printf("%.3f", sum);
     }')
-
-    latency=$(grep 'Inference latency '  ${OUTPUT_DIR}/yolov7_${mode}_log_${PRECISION}* |sed -e 's/.*Inference latency //;s/[^0-9.]//g' |awk '
-    BEGIN {
-        sum = 0;
-        i = 0;
-        }
-        {
-            sum = sum + $1;
-            i++;
-        }
-    END   {
-        sum = sum / i;
-        printf("%.3f", sum);
-    }')
     echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
     echo "yolov7;"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-    echo "yolov7;"latency";${PRECISION};${BATCH_SIZE};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
 
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     accuracy=$(grep -F 'Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = ' \

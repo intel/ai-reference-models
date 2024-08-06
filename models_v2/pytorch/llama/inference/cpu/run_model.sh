@@ -59,6 +59,7 @@ if [ -z "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
+mkdir -p ${OUTPUT_DIR}
 rm -rf ${OUTPUT_DIR}/results.yaml
 rm -rf ${OUTPUT_DIR}/summary.log
 
@@ -125,7 +126,7 @@ if [[ "$TEST_MODE" != "ACCURACY" ]]; then
         echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 64 128 512 1024 2016 ), e.g. export INPUT_TOKEN=1024"
         exit 1
     fi
-    
+
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         path="ipex"
         mode="jit"
