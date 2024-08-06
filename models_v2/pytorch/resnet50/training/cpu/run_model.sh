@@ -118,10 +118,10 @@ if [[ "$DISTRIBUTED" == "true" || "$DISTRIBUTED" == "True" || "$DISTRIBUTED" == 
     source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
     ARGS="$ARGS --warmup-epochs 2 -b $LOCAL_BATCH_SIZE --dist-backend ccl --base-op=LARS --base-lr 10.5 --weight-decay 0.00005"
-    ARGS_IPEX="$ARGS_IPEX --memory-allocator tcmalloc --distributed --nnodes ${NNODES} --hostfile ${HOSTFILE} -logical_cores_for_ccl --ccl_worker_count 8"
+    ARGS_IPEX="$ARGS_IPEX --memory-allocator tcmalloc --nnodes ${NNODES} --hostfile ${HOSTFILE} -logical_cores_for_ccl --ccl_worker_count 8"
 else
     BATCH_SIZE=${BATCH_SIZE:-128}
-    ARGS_IPEX="$ARGS_IPEX --ninstances 1  --ncore_per_instance ${CORES_PER_INSTANCE} --log_path=${OUTPUT_DIR} --log_file_prefix="./resnet50_training_log_${PRECISION}""
+    ARGS_IPEX="$ARGS_IPEX --ninstances 1  --ncores-per-instance ${CORES_PER_INSTANCE} --log-dir=${OUTPUT_DIR} --log_file_prefix="./resnet50_training_log_${PRECISION}""
     ARGS="$ARGS --train-no-eval --warmup-iterations 50 -b $BATCH_SIZE"
     LOG_PREFIX=resnet50_training_log
 fi
@@ -198,10 +198,8 @@ END   {
 }')
 echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
 echo "resnet50;"training throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-latency="0.0"
-accuracy="0.0"
-
-echo "resnet50;"training throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+latency="N/A"
+accuracy="N/A"
 
 yaml_content=$(cat << EOF
 results:

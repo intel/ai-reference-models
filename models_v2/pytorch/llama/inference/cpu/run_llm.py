@@ -224,10 +224,10 @@ if args.dtype == "bf16" or args.dtype == "fp32":
                 enabled=True, dtype=torch.bfloat16
         ):
             if args.weight_dtype == "INT8":
-                quant_api.quantize(user_model, quant_api.int8_weight_only())
+                quant_api.quantize_(user_model, quant_api.int8_weight_only(), set_inductor_config=False)
                 unwrap_tensor_subclass(user_model)
             elif args.weight_dtype == "INT4":
-                quant_api.quantize(user_model, quant_api.int4_weight_only())
+                quant_api.quantize_(user_model, quant_api.int4_weight_only(), set_inductor_config=False)
                 unwrap_tensor_subclass(user_model)
 
             user_model.forward = torch.compile(user_model.forward)
@@ -634,7 +634,7 @@ elif args.dtype == "int8" and args.inductor:
     from torch.ao.quantization.quantizer.x86_inductor_quantizer import (
         X86InductorQuantizer,
     )
-    from torch._export import capture_pre_autograd_graph, dynamic_dim
+    from torch._export import capture_pre_autograd_graph
 
     print("[Info] Running torch.compile() INT8 quantization")
     with torch.no_grad():

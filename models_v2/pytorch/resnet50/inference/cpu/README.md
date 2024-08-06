@@ -15,7 +15,7 @@ Intel-optimized PyTorch.
 ## Bare Metal
 ### General setup
 
-Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
+Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to install Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
 
 ### Model Specific Setup
 
@@ -95,7 +95,7 @@ Inference Throughput output will typically looks like (note that accuracy is mea
 ```
 inference latency 3.168 ms
 Throughput: 315.657 fps
-Accuracy: 0.000   
+Accuracy: 0.000
  * Acc@1 0.000 Acc@5 0.000
 ```
 Final results of the inference run can be found in `results.yaml` file.

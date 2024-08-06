@@ -90,6 +90,9 @@ if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
   exit 1
 fi
+mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
 BATCH_SIZE=${BATCH_SIZE:-`expr 4 \* $CORES`}
@@ -143,43 +146,62 @@ else
         --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/${LOG_PREFIX}_${path}_${precision}_${mode}.log
 fi
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
-BEGIN {
-        sum = 0;
-	i = 0;
-      }
-      {
-        sum = sum + $1;
-i++;
-      }
-END   {
-sum = sum / i;
-printf("%.3f", sum);
-}')
-echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
-echo ""vit-base";"throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
+latency="N/A"
+throughput="N/A"
+accuracy="N/A"
 
-accuracy=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_accuracy" |sed -e 's/.*= //;s/[^0-9.]//g')
-f1=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_f1" |sed -e 's/.*= //;s/[^0-9.]//g')
-echo ""vit-base";"accuracy";${precision};${BATCH_SIZE};${accuracy}" | tee -a ${WORK_SPACE}/summary.log
-
-latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
-BEGIN {
-    sum = 0;
-    i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
+if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+    BEGIN {
+            sum = 0;
+        i = 0;
+        }
+        {
+            sum = sum + $1;
+    i++;
+        }
+    END   {
     sum = sum / i;
-    printf("%.3f ms", sum);
-}')
-echo $INSTANCES_PER_SOCKET
-echo "--------------------------------Performance Summary per Socket--------------------------------"
-echo ""vit-base";"latency";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
-echo ""vit-base";"p99_latency";${precision};${BATCH_SIZE};${p99_latency}" | tee -a ${WORK_SPACE}/summary.log
+    printf("%.3f", sum);
+    }')
+    echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+    echo ""vit-base";"throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
+elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
+    accuracy=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_accuracy" |sed -e 's/.*= //;s/[^0-9.]//g')
+    f1=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_f1" |sed -e 's/.*= //;s/[^0-9.]//g')
+    echo ""vit-base";"accuracy";${precision};${BATCH_SIZE};${accuracy}" | tee -a ${WORK_SPACE}/summary.log
+elif [[ "${TEST_MODE}" == "REALTIME" ]]; then
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*Throughput://;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    BEGIN {
+        sum = 0;
+    i = 0;
+        }
+        {
+            sum = sum + $1;
+    i++;
+        }
+    END   {
+    sum = sum / i * INSTANCES_PER_SOCKET;
+        printf("%.2f", sum);
+    }')
+    latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    BEGIN {
+        sum = 0;
+        i = 0;
+        }
+        {
+            sum = sum + $1;
+            i++;
+        }
+    END   {
+        sum = sum / i;
+        printf("%.3f ms", sum);
+    }')
+    echo $INSTANCES_PER_SOCKET
+    echo "--------------------------------Performance Summary per Socket--------------------------------"
+    echo ""vit-base";"latency";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
+    echo ""vit-base";"p99_latency";${precision};${BATCH_SIZE};${p99_latency}" | tee -a ${WORK_SPACE}/summary.log
+fi
 
 yaml_content=$(cat << EOF
 results:

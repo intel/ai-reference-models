@@ -75,10 +75,11 @@ export MODEL_DIR=$(pwd)
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
-| **DISTRIBUTED** (optional)              | `export DISTRIBUTED=True`                  |
+| **DISTRIBUTED** (True or False)              | `export DISTRIBUTED=<True or False>`                  |
 | **DATASET_DIR**             | `export DATASET_DIR=<path to rnnt_training>`                  |
 | **OUTPUT_DIR**               |                               `export OUTPUT_DIR=<path to an output directory>`                               |
 | **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
+| **profiling**(True or False)               |                               `export profiling=True`                               |
 | **PRECISION**     |                  `export PRECISION=bf16` (fp32, avx-fp32, bf16, or bf32) |                              |
 | **EPOCHS** (optional)    |                  `export EPOCHS=12` |                              |
 | **NNODES** (required for DISTRIBUTED)              | ` export NNODES=#your_node_number`                  |
