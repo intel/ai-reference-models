@@ -92,7 +92,7 @@ TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 
 if [ "$THROUGHPUT" ]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
-        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
+        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --memory-allocator tcmalloc $MODEL_SCRIPT \
             --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
             --data-set=terabyte \
             --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
@@ -104,7 +104,7 @@ if [ "$THROUGHPUT" ]; then
     else
         echo "### running with torch.compile inductor backend"
         export TORCHINDUCTOR_FREEZING=1
-        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
+        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --memory-allocator tcmalloc $MODEL_SCRIPT \
             --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
             --data-set=terabyte \
             --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
@@ -116,7 +116,7 @@ if [ "$THROUGHPUT" ]; then
     fi
 else
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
-        python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
+        python -m intel_extension_for_pytorch.cpu.launch --nodes-list=0 --memory-allocator tcmalloc $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
         --data-set=terabyte \
         --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
@@ -129,7 +129,7 @@ else
     else
     echo "### running with torch.compile inductor backend"
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
+    python -m intel_extension_for_pytorch.cpu.launch --nodes-list=0 --memory-allocator tcmalloc $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
         --data-set=terabyte \
         --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
@@ -146,40 +146,26 @@ throughput="N/A"
 accuracy="N/A"
 latency="N/A"
 
-latency=$(grep 'Average latency per example:' ${LOG} |sed -e 's/.*Average latency per example//;s/[^0-9.]//g' |awk '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-sum = sum / i;
-        printf("%.3f", sum);
-}')
-echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
-echo ""dlrm";"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-
-throughput=$(grep 'Throughput:' ${LOG} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-sum = sum / i;
-        printf("%.3f", sum);
-}')
-echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
-echo ""dlrm";"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
-
-accuracy=$(grep 'Accuracy:' $LOG |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
-echo ""dlrm";"auc";${PRECISION};16384;${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
+if [ "$THROUGHPUT" ]; then
+  throughput=$(grep 'Throughput:' ${LOG} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+  BEGIN {
+          sum = 0;
+          i = 0;
+        }
+        {
+          sum = sum + $1;
+          i++;
+        }
+  END   {
+  sum = sum / i;
+          printf("%.3f", sum);
+  }')
+  echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+  echo ""dlrm";"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+else
+  accuracy=$(grep 'Accuracy:' $LOG |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+  echo ""dlrm";"auc";${PRECISION};16384;${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
+fi
 
 echo "Throughput: $throughput"
 echo "Accuracy: $accuracy"

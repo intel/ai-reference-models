@@ -15,7 +15,7 @@ Intel-optimized PyTorch.
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison, Torch-CCL and Tcmalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Pytorch, IPEX, TorchVison, Torch-CCL and Tcmalloc.
 
 * Install dependencies
 ```

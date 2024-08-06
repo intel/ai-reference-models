@@ -65,6 +65,11 @@ if [ -z "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
+# Create the output directory in case it doesn't already exist
+mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
+
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 
 if [[ $PRECISION == "bf16" ]]; then
@@ -81,7 +86,7 @@ elif [[ $PRECISION == "fp16" ]]; then
     ARGS="$ARGS --dtype fp16"
 elif [[ $PRECISION == "int8" ]]; then
     if [ ! -e "${MODEL_DIR}/int8_weight.json"  ]; then
-        echo "int8_weight.json not found in MODEL_DIR, will run weight conversion" 
+        echo "int8_weight.json not found in MODEL_DIR, will run weight conversion"
         ARGS="$ARGS --int8-prepare"
     fi
     echo "running int8 path"
@@ -102,10 +107,10 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
         export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --throughput-mode --memory-allocator jemalloc"
     else
-        export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_jemalloc"
+        export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --throughput-mode --memory-allocator jemalloc"
     fi
 else
-    export launcher_cmd="-m torch.backends.xeon.run_cpu --throughput-mode --enable_jemalloc"
+    export launcher_cmd="-m torch.backends.xeon.run_cpu --throughput-mode --memory-allocator jemalloc"
 fi
 
 if [[ $PLOTMEM == "true" ]]; then
@@ -153,56 +158,39 @@ else
     export TORCHINDUCTOR_FREEZING=1
     if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
         $mrun_cmd python $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
-    else 
+    else
         $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
     fi
 fi
 
 wait
-
+throughput="N/A"
+accuracy="N/A"
+latency="N/A"
 if [[ $PLOTMEM == "true" ]]; then
 mprof plot ${MEMLOG} -o ${MEMPIC}
 fi
 
-throughput=$(grep 'Throughput:' ${LOG} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-sum = sum / i;
-        printf("%.3f", sum);
-}')
-
-accuracy=$(grep 'Final AUROC:' $LOG | sed -e 's/.*Final AUROC: \[\([^,]*\).*/\1/' |awk '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-sum = sum / i;
-        printf("%.3f", sum);
-}')
-
-if [[ -z $throughput ]]; then
-    throughput="N/A"
+if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
+    throughput=$(grep 'Throughput:' ${LOG} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+    BEGIN {
+            sum = 0;
+            i = 0;
+        }
+        {
+            sum = sum + $1;
+            i++;
+        }
+    END   {
+    sum = sum / i;
+            printf("%.3f", sum);
+    }')
+    echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
+    echo ""dlrm-v2";"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+else
+    accuracy=$(grep 'Final AUROC:' $LOG |sed -e 's/.*Final AUROC//;s/[^0-9.]//g')
+    echo ""dlrm-v2";"auc";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 fi
-if [[ -z $accuracy ]]; then
-    accuracy="N/A"
-fi
-if [[ -z $latency ]]; then
-    latency="N/A"
-fi
-
-echo ""dlrm-v2";"throughput";"accuracy";${PRECISION};${BATCH_SIZE};${throughput};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 
 yaml_content=$(cat << EOF
 results:

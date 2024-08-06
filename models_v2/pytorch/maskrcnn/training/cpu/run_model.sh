@@ -28,12 +28,15 @@ if [ ! -d "${DATASET_DIR}/coco" ]; then
   exit 1
 fi
 
-if [ ! -d "${OUTPUT_DIR}" ]; then
-  echo "The OUTPUT_DIR '${OUTPUT_DIR}' does not exist"
+if [ -z "${OUTPUT_DIR}" ]; then
+  echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
 fi
 
+# Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
 
 if [ -z "${PRECISION}" ]; then
   echo "The PRECISION env variable is not set"
@@ -73,15 +76,18 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 export TRAIN=1
 
-throughput="0"
-accuracy="0"
-latency="0"
+throughput="N/A"
+accuracy="N/A"
+latency="N/A"
 
 if [ "$DISTRIBUTED" ]; then
-    $1=${PRECISION}
     NNODES=${NNODES:-1}
     if [ -z "${HOSTFILE}" ]; then
       echo "The HOSTFILE env variable is not set"
+      exit 1
+    fi
+    if [ -z "${LOCAL_BATCH_SIZE}" ]; then
+      echo "The required environment variable LOCAL_BATCH_SIZE has not been set"
       exit 1
     fi
     NUM_RANKS=$(( NNODES * SOCKETS ))
@@ -98,7 +104,6 @@ if [ "$DISTRIBUTED" ]; then
 
     python -m intel_extension_for_pytorch.cpu.launch \
         --memory-allocator tcmalloc \
-        --distributed \
         --nnodes ${NNODES} \
         --hostfile ${HOSTFILE} \
         --logical-cores-for-ccl --ccl_worker_count 8 \
@@ -127,8 +132,8 @@ else
     LOG_0=${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput*
 
     python -m intel_extension_for_pytorch.cpu.launch \
-        --enable_jemalloc \
-        --node_id=0 \
+        --memory-allocator jemalloc \
+        --nodes-list=0 \
         ${MODEL_DIR}/maskrcnn-benchmark/tools/train_net.py \
         $ARGS \
         --iter-warmup 10 \
@@ -187,9 +192,6 @@ results:
 - key: latency
   value: $latency
   unit: ms
-- key: accuracy
-  value: $accuracy
-  unit: AP
 EOF
 )
 
