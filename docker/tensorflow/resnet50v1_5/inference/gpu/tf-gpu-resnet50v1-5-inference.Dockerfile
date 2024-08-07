@@ -31,11 +31,11 @@ RUN apt-get update && \
         numactl && \
     rm -rf /var/lib/apt/lists/*
 
-ARG MODEL_URL_INT8
+ARG INT8_MODEL_URL
 ARG MODEL_URL
 
 RUN mkdir -p pretrained_models && \ 
-    wget ${MODEL_URL_INT8} -O pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb && \
+    wget ${INT8_MODEL_URL} -O pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb && \
     wget ${MODEL_URL} -O pretrained_models/resnet50_v1.pb 
 
 COPY models_v2/tensorflow/resnet50v1_5/inference/gpu .
