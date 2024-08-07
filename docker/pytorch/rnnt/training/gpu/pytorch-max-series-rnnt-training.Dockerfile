@@ -21,12 +21,15 @@ WORKDIR /workspace/pytorch-max-series-rnnt-training/models
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
+    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
-        intel-oneapi-mpi-devel=2021.11.0-49493  \
-        intel-oneapi-ccl=2021.11.2-5 && \
+        intel-oneapi-mpi-devel \
+        intel-oneapi-ccl && \
     rm -rf /var/lib/apt/lists/*
     
 COPY models_v2/pytorch/rnnt/training/gpu .
