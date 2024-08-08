@@ -8,6 +8,18 @@ This document provides instructions for running  GPT-J inference using Intel® E
 ```bash
 docker pull intel/generative-ai:pytorch-cpu-gptj-inference
 ```
+## Quick Start Scripts
+
+# Quick Start Scripts
+
+|  DataType   | Throughput  |  Latency    |   Accuracy  |
+| ----------- | ----------- | ----------- | ----------- |
+| FP32        | bash run_multi_instance_throughput.sh fp32 | bash run_multi_instance_realtime.sh fp32 | bash run_accuracy.sh fp32 |
+| BF32        | bash run_multi_instance_throughput.sh bf32 | bash run_multi_instance_realtime.sh bf32 | bash run_accuracy.sh bf32 |
+| BF16        | bash run_multi_instance_throughput.sh bf16 | bash run_multi_instance_realtime.sh bf16 | bash run_accuracy.sh bf16 |
+| FP16        | bash run_multi_instance_throughput.sh fp16 | bash run_multi_instance_realtime.sh fp16 | bash run_accuracy.sh fp16 |
+| INT8-FP32        | bash run_multi_instance_throughput.sh int8-fp32 | bash run_multi_instance_realtime.sh int8-fp32 | bash run_accuracy.sh int8-fp32 |
+| INT8-BF16       | bash run_multi_instance_throughput.sh int8-bf16 | bash run_multi_instance_realtime.sh int8-bf16 | bash run_accuracy.sh int8-bf16 |
 
 > [!NOTE]
 > The container has been performance validated on fp32,bf16,fp16 and int8-fp32 precisions,`TORCH_INDUCTOR=0`, input tokens 1024 and 2016 and output tokens 128 and 32.
@@ -31,8 +43,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
-To run GPT-J inference, set environment variables to specify the precision and an output directory. The following commands are provided as an example to run `int8-fp32` realtime inference. 
-
+To run GPT-J inference, set environment variables to specify the precision and an output directory. For workloads with int8 precision, an additional quantization step is required before inference. The following commands are provided as an example to run `int8-fp32` realtime inference. 
 ```bash
 ##Optional
 export BATCH_SIZE=<provide batch size, otherwise (default: 1)>
@@ -42,15 +53,13 @@ export OUTPUT_DIR=<path to output directory>
 export PRECISION=<provide either fp32, int8-fp32, int8-fp16, bf16, fp16, or bf32>
 export INPUT_TOKEN=<provide input token>
 export OUTPUT_TOKEN=<provide output token>
-export TEST_MODE=<provide either REALTIME,THROUGHPUT OR ACCURACY mode>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/generative-ai:pytorch-cpu-gptj-inference
-SCRIPT="./run_model.sh"
+SCRIPT="./quickstart/do_quantization.sh calibration sq && ./quickstart/run_multi_instance_realtime.sh int8-fp32"
 
 docker run \
   --cap-add 'SYS_NICE' \
-  --env TEST_MODE=${TEST_MODE} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env BATCH_SIZE=${BATCH_SIZE} \
