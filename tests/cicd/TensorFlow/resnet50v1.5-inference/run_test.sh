@@ -22,7 +22,7 @@ elif [[ "${PRECISION}" == "int8" ]]; then
 fi
 
 if [[ "${is_lkg_drop}" == "true" ]]; then
-  #export PATH=${WORKSPACE}/miniconda3/bin:$PATH
+  #export PATH=${WORKSPACE}/miniforge/bin:$PATH
   #source ${WORKSPACE}/tensorflow_setup/setvars.sh
   #source ${WORKSPACE}/tensorflow_setup/compiler/latest/env/vars.sh
   #source ${WORKSPACE}/tensorflow_setup/mkl/latest/env/vars.sh

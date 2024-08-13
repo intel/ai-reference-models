@@ -344,7 +344,7 @@ To enable a service account, from the left side navigation menu go to "APIs & Se
 ### Installing Into Docker Container
 To be able to run data connector inside a Docker container execute the following command changing options as needed:
 ```bash
-docker run  -it  --name <container_name> --net=host -v <path to frameworks.ai.models.intel-mode.data-connector>:/workspace/model-zoo --env HTTPS_PROXY=$HTTPS_PROXY --env no_proxy=$no_proxy --env HTTP_PROXY=$HTTP_PROXY --env http_proxy=$http_proxy  --entrypoint bash conda/miniconda3:latest
+docker run  -it  --name <container_name> --net=host -v <path to frameworks.ai.models.intel-mode.data-connector>:/workspace/model-zoo --env HTTPS_PROXY=$HTTPS_PROXY --env no_proxy=$no_proxy --env HTTP_PROXY=$HTTP_PROXY --env http_proxy=$http_proxy  --entrypoint bash condaforge/miniforge3:latest
 ```
 
 Inside the docker container set source to activate conda:

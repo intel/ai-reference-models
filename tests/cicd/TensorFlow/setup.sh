@@ -9,12 +9,12 @@ WORKSPACE=$3
 AIKIT_RELEASE=$4
 
 if [[ "${is_lkg_drop}" == "true" ]]; then
-  if [ ! -d "${WORKSPACE}/miniconda3" ]; then
+  if [ ! -d "${WORKSPACE}/miniforge" ]; then
     cd ${WORKSPACE}
-    curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o Miniconda3-latest-Linux-x86_64.sh
-    rm -rf miniconda3
-    chmod +x Miniconda3-latest-Linux-x86_64.sh
-    ./Miniconda3-latest-Linux-x86_64.sh -b -f -p miniconda3
+    curl https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o Miniforge-latest-Linux-x86_64.sh
+    rm -rf miniforge
+    chmod +x Miniforge-latest-Linux-x86_64.sh
+    ./Miniforge-latest-Linux-x86_64.sh -b -f -p miniforge
   fi
   rm -rf ${WORKSPACE}/tensorflow_setup
   if [ ! -d "${WORKSPACE}/tensorflow_setup" ]; then

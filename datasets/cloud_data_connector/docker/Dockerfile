@@ -28,7 +28,7 @@ SHELL ["/bin/bash", "-c"]
 # Runtime variables
 ARG DEBIAN_FRONTEND=noninteractive
 
-ENV MINICONDA_VERSION="https://repo.anaconda.com/miniconda/Miniconda3-py310_23.1.0-1-Linux-x86_64.sh"
+ENV MINIFORGE_VERSION="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh"
 ENV PATH="${PATH}:/opt/conda/bin"
 
 # Adding metadata to image
@@ -55,7 +55,7 @@ RUN apt-get clean
 # RUN apt -y install ncurses-term
 RUN apt-get install ncurses-term -y
 
-RUN curl --output conda_installer.sh --location $MINICONDA_VERSION
+RUN curl --output conda_installer.sh --location $MINIFORGE_VERSION
 RUN bash conda_installer.sh -b -p /opt/conda
 RUN rm conda_installer.sh
 
