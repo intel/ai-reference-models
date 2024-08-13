@@ -38,7 +38,7 @@ To enable a service account, from the left side navigation menu go to "APIs & Se
 
 To be able to run cloud data connector inside a Docker container execute the following command changing options as needed:
 ```bash
-docker run  -it  --name <container_name> --net=host -v <path to IntelAI/models>:/workspace/model-zoo --entrypoint bash conda/miniconda3:latest
+docker run  -it  --name <container_name> --net=host -v <path to IntelAI/models>:/workspace/model-zoo --entrypoint bash condaforge/miniforge3:latest
 ```
 
 Inside the docker container set source to activate conda:

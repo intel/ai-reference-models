@@ -19,7 +19,7 @@ set +x
 : ${model=${1:-""}}
 : ${dtype=${2:-"int8"}}
 : ${output_dir=${3:-"/data/mlperf_data1"}}
-: ${conda_path=${4:-"${HOME}/miniconda3"}}
+: ${conda_path=${4:-"${HOME}/miniforge"}}
 
 echo "model: ${model}, dtype: ${dtype}, output_dir: ${output_dir}, conda_path:${conda_path}"
 

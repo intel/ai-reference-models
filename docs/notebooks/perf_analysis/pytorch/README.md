@@ -16,7 +16,7 @@ The Jupyter notebook helps users to analyze the performance benefit from using I
     * Users do not need to change those configurations. The just have to select from one of them using topo_index in the notebook.
 
 # Getting Started
-To run this experiment please install miniconda3 4.8.3 with python 3.8. The installer can be downloaded from following [link](https://repo.anaconda.com/miniconda/Miniconda3-py38_4.8.3-Linux-x86_64.sh)
+To run this experiment please install the latest version of miniforge with python 3.8. The installer can be downloaded from following [link](https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh)
 ## Environment Setup
 
 ##### Stock PyTorch 
@@ -27,9 +27,9 @@ To run this experiment please install miniconda3 4.8.3 with python 3.8. The inst
 3. Install stock PyTorch with a specific version: `(stock-torch) $conda install pytorch==1.7.0 torchvision cpuonly -c pytorch`
 4. Install extra needed package: `(stock-torch) $pip install cxxfilt`
 5. Deactivate conda env: `(stock-torch) $conda deactivate`
-6. Register the kernel to Jupyter NB: `$~/miniconda3/envs/stock-torch/bin/python  -m ipykernel install --user --name=stock-torch`
+6. Register the kernel to Jupyter NB: `$~/miniforge/envs/stock-torch/bin/python  -m ipykernel install --user --name=stock-torch`
 
-> NOTE: Please change the python path if you have a different folder path for anaconda3/miniconda3. 
+> NOTE: Please change the python path if you have a different folder path for anaconda3/miniforge. 
   After profiling, users can remove the kernel from Jupyter NB with `$jupyter kernelspec uninstall stock-torch`.
 
 ##### Intel PyTorch 
@@ -43,9 +43,9 @@ To run this experiment please install miniconda3 4.8.3 with python 3.8. The inst
 7. Install Torchvision from PyTorch's channel: `(intel-torch) $conda install torchvision cpuonly -c pytorch`
 8. Install extra needed package: `(intel-torch) $pip install cxxfilt`
 9. Deactivate conda env: `(intel-torch) $conda deactivate`
-10. Register the kernel to Jupyter NB: `$~/miniconda3/envs/intel-torch/bin/python  -m ipykernel install --user --name=intel-torch`
+10. Register the kernel to Jupyter NB: `$~/miniforge/envs/intel-torch/bin/python  -m ipykernel install --user --name=intel-torch`
 
-> NOTE: Please change the python path if you have a different folder path for anaconda3/miniconda3. 
+> NOTE: Please change the python path if you have a different folder path for anaconda3/miniforge. 
   After profiling, users can remove the kernel from Jupyter NB with `$jupyter kernelspec uninstall intel-torch`.
 
 ## How to Run
