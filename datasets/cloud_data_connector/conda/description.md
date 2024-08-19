@@ -10,7 +10,7 @@ Cloud data connector is a tool to connect to AzureML, Azure blob, GCP storage, G
 
 ### Installation Command 
 ```bash
-conda install --solver libmamba cloud-data-connector -c intel -c conda-forge -c microsoft 
+conda install --solver libmamba cloud-data-connector -c https://software.repos.intel.com/python/conda/ -c conda-forge -c microsoft 
 ```
 
 ***
