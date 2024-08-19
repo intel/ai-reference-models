@@ -37,9 +37,9 @@ To run this experiment please install the latest version of miniforge with pytho
 1. Create conda env: `$conda create -n intel-torch python=3.7 matplotlib psutil pandas gitpython`
 2. Activate the created conda env: `$conda activate intel-torch`
 3. Install ipython: `(intel-torch) $conda install 'ipython<7.0.0' ipykernel`
-4. Update the mkl from Intel's channel" `(intel-torch) $conda update -c intel mkl`
-5. Install Intel-optimized torch with a specific version: `(intel-torch) $conda install -c intel pytorch`
-6. Install IPEX from intel's conda channel: `(intel-torch) $conda install -c intel intel-extension-for-pytorch`
+4. Update the mkl from Intel's channel" `(intel-torch) $conda update -c https://software.repos.intel.com/python/conda/ mkl`
+5. Install Intel-optimized torch with a specific version: `(intel-torch) $conda install -c https://software.repos.intel.com/python/conda/ pytorch`
+6. Install IPEX from intel's conda channel: `(intel-torch) $conda install -c https://software.repos.intel.com/python/conda/ intel-extension-for-pytorch`
 7. Install Torchvision from PyTorch's channel: `(intel-torch) $conda install torchvision cpuonly -c pytorch`
 8. Install extra needed package: `(intel-torch) $pip install cxxfilt`
 9. Deactivate conda env: `(intel-torch) $conda deactivate`

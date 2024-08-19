@@ -62,9 +62,9 @@ RUN wget -O ~/miniforge.sh https://github.com/conda-forge/miniforge/releases/lat
     rm ~/miniforge.sh && \
     /opt/conda/bin/conda install python=${PYTHON_VERSION} -y && \
     /opt/conda/bin/conda config --add channels intel && \
-    /opt/conda/bin/conda install -c intel mkl==2023.2.0 mkl-include==2023.2.0 -y && \
+    /opt/conda/bin/conda install -c https://software.repos.intel.com/python/conda/ mkl==2023.2.0 mkl-include==2023.2.0 -y && \
     /opt/conda/bin/conda install -c conda-forge jemalloc==5.2.1 gperftools==2.10 pybind11==2.10.4 llvm-openmp==16.0.6 -y && \
-    /opt/conda/bin/conda install -c intel intel-openmp==2022.2.1 --yes && \
+    /opt/conda/bin/conda install -c https://software.repos.intel.com/python/conda/ intel-openmp==2022.2.1 --yes && \
     /opt/conda/bin/conda install -c conda-forge gcc==12.3 gxx==12.3 cxx-compiler==1.7.0 ninja==1.11.1 zlib==1.2.13 -y && \
     /opt/conda/bin/conda install conda-forge::sysroot_linux-64==2.28 -y && \
     #/opt/conda/bin/conda install -c conda-forge libstdcxx-ng=12.3.0 -y && \
