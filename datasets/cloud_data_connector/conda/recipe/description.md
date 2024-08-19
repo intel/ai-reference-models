@@ -10,7 +10,7 @@ Cloud Data Connector is a tool to connect to AzureML, Azure blob, GCP storage, G
 
 ### Installation Command 
 ```bash
-conda install --solver libmamba cloud-data-connector -c intel -c conda-forge -c microsoft 
+conda install --solver libmamba cloud-data-connector -c https://software.repos.intel.com/python/conda/ -c conda-forge -c microsoft 
 ```
 
 ***
@@ -23,7 +23,7 @@ pip install azureml>=0.2.7 azureml-core>=1.49.0
 
 ⚠️ **Combining Conda and PyPI packages**: Installing packages from both PyPI and Conda could be unstable. If environment is unstable, try installing them in an empty one as follows:
 ```bash
-conda create -n venv --solver libmamba cloud-data-connector -c intel -c conda-forge -c microsoft 
+conda create -n venv --solver libmamba cloud-data-connector -c https://software.repos.intel.com/python/conda/ -c conda-forge -c microsoft 
 çonda activate venv
 pip install azureml>=0.2.7 azureml-core>=1.49.0
 ```
