@@ -51,6 +51,7 @@ Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch
 ```
   export INT8_CONFIG=#/path/configure.json
   run_calibration.sh
+```
 
 # Prepare Dataset
 ## Datasets

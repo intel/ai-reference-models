@@ -65,6 +65,8 @@ bash download_dataset.sh
 | **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)              | `export TEST_MODE=THROUGHPUT`                  |
 | **DISTRIBUTED** (Only for ACCURACY)              | `export DISTRIBUTED=TRUE`                  |
 | **OUTPUT_DIR**               |                               `export OUTPUT_DIR=$(pwd)`                               |
+| **DATASET_DIR**       |          `export DATASET_DIR=<path_to_dataset_dir>`             |
+| **MODE**      | `export MODE=<choose from: eager, ipex-jit, compile-ipex, compile-inductor>`     |
 | **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8-fp32, int8-bf16) |
 | **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
