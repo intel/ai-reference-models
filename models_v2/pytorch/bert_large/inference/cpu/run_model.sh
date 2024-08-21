@@ -73,16 +73,6 @@ else
     exit
 fi
 
-if [[ -z ${PRETRAINED_MODEL} ]]; then
-    echo "Please set environment variable PRETRAINED_MODEL"
-    exit 1
-fi
-
-if [[ ! -d ${PRETRAINED_MODEL} ]]; then
-    echo "Provide the pre-trained model directory folder"
-    exit 1
-fi 
-
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     rm -rf ${OUTPUT_DIR}/throughput_log*
     BATCH_SIZE=${BATCH_SIZE:-56}

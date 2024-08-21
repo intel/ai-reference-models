@@ -32,7 +32,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         HOSTFILE=${HOSTFILE:-./hostfile}
         NUM_RANKS=$(( NNODES * SOCKETS ))
 
-        if [[ !-z ${LOCAL_BATCH_SIZE} ]]; then
+        if [[ -n ${LOCAL_BATCH_SIZE} ]]; then
             GLOBAL_BATCH_SIZE=$(( LOCAL_BATCH_SIZE * NNODES * SOCKETS ))
         fi
 
@@ -95,10 +95,15 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-if [ ! -d "${OUTPUT_DIR}" ]; then
-  echo "The OUTPUT_DIR '${OUTPUT_DIR}' does not exist"
+if [ -z "${OUTPUT_DIR}" ]; then
+  echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
 fi
+
+# Create the output directory in case it doesn't already exist
+mkdir -p ${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/summary.log
+rm -rf ${OUTPUT_DIR}/results.yaml
 
 if [[ "${PRECISION}" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
@@ -225,7 +230,9 @@ if [[ "${TEST_MODE}" == "REALTIME" ]]; then
             sum = sum / i * INSTANCES_PER_SOCKET;
             printf("%.4f", sum);
     }')
-else
+    echo "--------------------------------Performance Summary per Socket--------------------------------"
+    echo ""stable_diffusion";"latency";${PRECISION};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+elif [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
     BEGIN {
             sum = 0;
@@ -239,23 +246,12 @@ else
             sum = sum / i;
             printf("%.4f", sum);
     }')
+    echo "--------------------------------Performance Summary per Socket--------------------------------"
+    echo ""stable_diffusion";"throughput";${PRECISION};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
+    accuracy=$(grep 'FID:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*FID//;s/[^0-9.]//g')
+    echo ""stable_diffusion";"FID";${PRECISION};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 fi
-
-accuracy=$(grep 'FID:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*FID//;s/[^0-9.]//g')
-
-latency=$(grep 'Latency:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Latency//;s/[^0-9.]//g' |awk '
-BEGIN {
-        sum = 0;
-        i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
-        sum = sum / i;
-        printf("%.4f", sum);
-}')
 
 if [[ -z $throughput ]]; then
     throughput="N/A"
@@ -266,8 +262,6 @@ fi
 if [[ -z $latency ]]; then
     latency="N/A"
 fi
-
-echo ""stable_diffusion";"throughput";"accuracy";"latency";${PRECISION};${throughput};${accuracy};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
 
 yaml_content=$(cat << EOF
 results:
