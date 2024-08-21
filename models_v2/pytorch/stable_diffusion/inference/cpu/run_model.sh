@@ -217,7 +217,7 @@ if [[ "${TEST_MODE}" == "REALTIME" ]]; then
     INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
     INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
 
-    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    latency=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
     BEGIN {
             sum = 0;
             i = 0;
@@ -231,7 +231,7 @@ if [[ "${TEST_MODE}" == "REALTIME" ]]; then
             printf("%.4f", sum);
     }')
     echo "--------------------------------Performance Summary per Socket--------------------------------"
-    echo ""stable_diffusion";"latency";${PRECISION};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+    echo ""stable_diffusion";"latency";${PRECISION};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
 elif [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
     BEGIN {
