@@ -17,6 +17,7 @@
 
 pip install torchmetrics pycocotools transformers==4.35.2 peft==0.6.2
 pip install torch-fidelity --no-deps
+pip install scipy
 
 git clone https://github.com/huggingface/diffusers.git
 cd diffusers
