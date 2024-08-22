@@ -53,6 +53,15 @@ op_total_avg = [
     'throughput'
 ]
 
+def get_jit_method():
+    if args.jit_trace:
+        return 'trace'
+    elif args.jit_script:
+        return 'script'
+    elif args.compile:
+        return 'compile'
+    return 'no'
+
 # Write single result
 def write_results(batches_tested, throughput, latency, top1, top5):
     output_dict = {
@@ -70,7 +79,7 @@ def write_results(batches_tested, throughput, latency, top1, top5):
                     'batch-size': args.batch_size,
                     'device': args.device,
                     'amp': 'false' if args.no_amp else 'true',
-                    'jit': 'trace' if args.jit_trace else 'script' if args.jit_script else 'no',
+                    'jit': get_jit_method(),
                     'dummy': 'true' if args.dummy else 'false',
                     'framework': 'PyTorch'
                 },
@@ -156,7 +165,7 @@ def show_test_conditions():
     if args.dtype_str not in ['float32', 'tfloat32', 'bfloat32']:
         io_utils.stdout_helper('    using amp:          {0}'.format(not args.no_amp))
     io_utils.stdout_helper('  [PERF ARGS]')
-    io_utils.stdout_helper('    JIT method:         {0}'.format('trace' if args.jit_trace else 'script' if args.jit_script else 'none'))
+    io_utils.stdout_helper('    JIT method:         {0}'.format(get_jit_method()))
     io_utils.stdout_helper('    gradients:          {0}'.format('none' if args.no_grad else 'zero' if args.zero_grad else 'true'))
     io_utils.stdout_helper('  [BENCHMARK PARAMS]')
     io_utils.stdout_helper('    warm up batches:    {0}'.format(args.warm_up))

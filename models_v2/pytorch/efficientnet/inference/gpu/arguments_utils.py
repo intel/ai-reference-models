@@ -69,6 +69,8 @@ def parse_arguments():
                         help='enable PyTorch JIT trace graph mode')
     parser.add_argument('--jit-script', action='store_true',
                         help='enable PyTorch JIT script graph mode')
+    parser.add_argument('--compile', action='store_true',
+                        help='enable PyTorch compile')
     parser.add_argument('--zero-grad', action='store_true',
                         help='set model gradients to zero')
     parser.add_argument('--no-grad', action='store_true',
