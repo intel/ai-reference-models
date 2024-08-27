@@ -3,13 +3,13 @@
 ## Description
 
 This document has instructions for running YOLOv7 inference using
-Intel-optimized PyTorch and PyTorch inductor.
+Intel-optimized PyTorch.
 
 ## Model Information
 
 | Use Case    | Framework   | Model Repository| Branch/Commit| Patch |
 |-------------|-------------|-----------------|--------------|--------------|
-| Inference   | Pytorch     | https://github.com/WongKinYiu/yolov7 | main/a207844 | [`yolov7_ipex_and_inductor.patch`](/models/object_detection/pytorch/yolov7/yolov7_ipex_and_inductor.patch). Enable yolov7 inference with IPEX and torch inductor for specified precision (fp32, int8, bf16, fp16, or bf32). |
+| Inference   | Pytorch     | https://github.com/WongKinYiu/yolov7 | main/a207844 | [`yolov7_ipex.patch`](/models/object_detection/pytorch/yolov7/yolov7_ipex.patch). Enable yolov7 inference with IPEX for specified precision (fp32, int8, bf16, fp16, or bf32). |
 
 ## Quick Start Scripts
 
@@ -94,9 +94,6 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
     # Optional environemnt variables:
     export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>
-
-    # [optional] Compile model with PyTorch Inductor backend
-    export TORCH_INDUCTOR=1
     ```
 
     #### Run quickstart script
@@ -104,6 +101,12 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
     ```
     ./<script.sh>
     ```
+    **NOTE**: [`yolov7_int8_default_qparams.json`](/models/object_detection/pytorch/yolov7/yolov7_int8_default_qparams.json) is a default qparams json file for int8, which including the quantization state, such as scales, zero points and inference dtype.
+    If you want to tuning accuracy for IPEX int8, you can do the int8 calibration:
+    ```
+    ./calibration.sh <file where to save the calibrated file> <steps to run calibration>
+    ```
+    For eaxmple: `./calibration.sh new_int8_config.json 10`
 
 <!--- 80. License -->
 ## License

@@ -66,11 +66,6 @@ cd ${OUTPUT_DIR}
 OUTPUT_DIR=$(pwd)
 cd -
 
-if [ -z "${PRECISION}" ]; then
-  echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to int8, fp32, bf32, bf16, or fp16."
-  exit 1
-fi
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
@@ -78,64 +73,26 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 BATCH_SIZE=${BATCH_SIZE:-40}
 
-rm -rf ${OUTPUT_DIR}/yolov7_accuracy_log*
+rm -rf ${OUTPUT_DIR}/yolov7_int8_calibration.log
 
 cd "${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7"
 
 ARGS="--checkpoint-dir $CHECKPOINT_DIR --weights yolov7.pt"
 ARGS="$ARGS --img 640 -e --data data/coco.yaml --dataset-dir $DATASET_DIR --conf-thres 0.001 --iou 0.65 --device cpu"
 
-if [[ $PRECISION == "int8" ]]; then
-    echo "running int8 path"
-    ARGS="$ARGS --int8 --configure-dir ${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7/yolov7_int8_default_qparams.json"
-elif [[ $PRECISION == "bf16" ]]; then
-    ARGS="$ARGS --bf16 --jit"
-    echo "running bf16 path"
-elif [[ $PRECISION == "bf32" ]]; then
-    ARGS="$ARGS --bf32 --jit"
-    echo "running bf32 path"
-elif [[ $PRECISION == "fp16" ]]; then
-    ARGS="$ARGS --fp16 --jit"
-    echo "running fp16 path"
-elif [[ $PRECISION == "fp32" ]]; then
-    ARGS="$ARGS --jit"
-    echo "running fp32 path"
-else
-    echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, bf16, bf32, int8"
-    exit 1
-fi
+echo "running int8 calibration"
 
+ARGS="$ARGS --int8 --calibration --configure-dir $1 --calibration-steps $2"
 
-TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+python -m intel_extension_for_pytorch.cpu.launch \
+    --memory-allocator default \
+    --ninstances 1 \
+    ${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7/yolov7.py \
+    $ARGS \
+    --ipex \
+    --batch-size $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/yolov7_int8_calibration.log
 
-if [[ "0" == ${TORCH_INDUCTOR} ]];then
-    python -m intel_extension_for_pytorch.cpu.launch \
-      --memory-allocator jemalloc \
-      --skip-cross-node-cores \
-      --log_path=${OUTPUT_DIR} \
-      --log_file_prefix="./yolov7_accuracy_log_${PRECISION}" \
-      ${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7/yolov7.py \
-      $ARGS \
-      --ipex \
-      --batch-size $BATCH_SIZE
-else
-    echo "Running yolov7 inference with torch.compile inductor backend."
-    export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch \
-      --memory-allocator jemalloc \
-      --skip-cross-node-cores \
-      --log_path=${OUTPUT_DIR} \
-      --log_file_prefix="./yolov7_accuracy_log_${PRECISION}" \
-      ${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7/yolov7.py \
-      $ARGS \
-      --inductor \
-      --batch-size $BATCH_SIZE
-fi
 wait
 cd -
 
-accuracy=$(grep -F 'Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = ' \
-    ${OUTPUT_DIR}/yolov7_accuracy_log_${PRECISION}_*.log | \
-    awk -F '=' '{print $NF}')
-echo "yolov7;"accuracy";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
+echo "calibrated file is save to ${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7/${1}"

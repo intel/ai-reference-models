@@ -33,9 +33,9 @@ CHECKPOINT_DIR=$(pwd)
 cd -
 
 MODEL_DIR=${MODEL_DIR-$PWD}
-if [ ! -e "${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7_ipex_and_inductor.patch"  ]; then
-    echo "Could not find the script of yolov7_ipex_and_inductor.patch. Please set environment variable '\${MODEL_DIR}'."
-    echo "From which the yolov7_ipex_and_inductor.patch exist at the: \${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7_ipex_and_inductor.patch"
+if [ ! -e "${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7_ipex.patch"  ]; then
+    echo "Could not find the script of yolov7_ipex.patch. Please set environment variable '\${MODEL_DIR}'."
+    echo "From which the yolov7_ipex.patch exist at the: \${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7_ipex.patch"
     exit 1
 else
     TMP_PATH=$(pwd)
@@ -43,10 +43,11 @@ else
     if [ ! -d "yolov7" ]; then
         git clone https://github.com/WongKinYiu/yolov7.git yolov7
         cd yolov7
+        cp ../yolov7_int8_default_qparams.json .
         cp ../yolov7.py .
         pip install -r requirements.txt
         git checkout a207844
-        git apply ../yolov7_ipex_and_inductor.patch
+        git apply ../yolov7_ipex.patch
     else
         cd yolov7
     fi
@@ -82,7 +83,7 @@ ARGS="$ARGS --img 640 -e --performance --data data/coco.yaml --dataset-dir $DATA
 
 if [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
-    ARGS="$ARGS --int8"
+    ARGS="$ARGS --int8 --configure-dir ${MODEL_DIR}/models/object_detection/pytorch/yolov7/yolov7/yolov7_int8_default_qparams.json"
 elif [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16 --jit"
     echo "running bf16 path"

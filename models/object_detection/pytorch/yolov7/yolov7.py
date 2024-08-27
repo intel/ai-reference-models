@@ -252,47 +252,12 @@ def test(opt,
         if ipex:
             model.eval()
             if int8:
-                from torch._inductor import config as inductor_config
-                inductor_config.cpp_wrapper = True
-                inductor_config.freezing=True
-                from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
-                import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
-                from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-                from torch._export import capture_pre_autograd_graph
-
-                use_dynamic_batch = not performance and (len(dataloader.dataset) % batch_size) != 0
-                assert not use_dynamic_batch, \
-                    f"Doesn't support dynamic shapes for inductor int8 now. "\
-                    f"Please make sure dataset length {len(dataloader.dataset)} % batch_size == 0."
-
-                with torch.no_grad():
-                    example_inputs = (x, augment)
-                    exported_model = capture_pre_autograd_graph(
-                        model,
-                        example_inputs,
-                    )
-                    quantizer = X86InductorQuantizer()
-                    quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
-                    prepared_model = prepare_pt2e(exported_model, quantizer)
-
-                    if dataloader:
-                        for i, (img, targets, paths, shapes)  in enumerate(dataloader):
-                            img = img.float().contiguous(memory_format=torch.channels_last)  # uint8 to fp32
-                            img /= 255.0  # 0 - 255 to 0.0 - 1.0
-                            prepared_model(img, augment)
-                            if i==4: break
-                    else:
-                        for _ in range(4):
-                            x = torch.rand(batch_size, 3, imgsz, imgsz)
-                            x = x.contiguous(memory_format=torch.channels_last)
-                            prepared_model(x, augment)
-                    converted_model = convert_pt2e(prepared_model)
-                    torch.ao.quantization.move_exported_model_to_eval(converted_model)
-                    print('[Info] Running torch.compile() with IPEX backend')
-                    model = torch.compile(
-                        converted_model, backend="ipex",
-                        dynamic=rect
-                    )
+                if not calibration:
+                    qconfig_mapping = ipex.quantization.default_static_qconfig_mapping
+                    prepared_model = ipex.quantization.prepare(model, qconfig_mapping, x, inplace=True)
+                    prepared_model.load_qconf_summary(qconf_summary=configure_dir)
+                    model = ipex.quantization.convert(prepared_model)
+                    model = TracedModel(model=model, sample_input=x)
                     print("running int8 evalation step\n")
             else:
                 if bf16:
@@ -405,13 +370,10 @@ def test(opt,
     if ipex and int8 and calibration:
         print("runing int8 calibration step\n")
         import intel_extension_for_pytorch as ipex
-        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
-        qconfig = QConfig(
-                activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8),
-                weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
         x = torch.rand(batch_size, 3, imgsz, imgsz).contiguous(memory_format=torch.channels_last)
         inputs = (x, augment)
-        prepared_model = ipex.quantization.prepare(model, qconfig, inputs, inplace=True)
+        qconfig_mapping = ipex.quantization.default_static_qconfig_mapping
+        prepared_model = ipex.quantization.prepare(model, qconfig_mapping, x, inplace=True)
         with torch.no_grad():
             if dataloader:
                 for batch_i, (img, targets, paths, shapes) in enumerate(dataloader):
