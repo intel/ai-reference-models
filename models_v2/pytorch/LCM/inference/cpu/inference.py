@@ -172,14 +172,16 @@ def main():
                 pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=args.dtype, inplace=True)
             else:
                 if not args.calibration:
+                    # pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=args.dtype, inplace=True, sample_input=text_encoder_input)
                     qconfig_mapping = ipex.quantization.default_static_qconfig_mapping
-                    pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig_mapping, input, inplace=True)
+                    pipe.unet = ipex.quantization.prepare(pipe.unet.eval(), qconfig_mapping, input, inplace=True)
                     pipe.unet.load_qconf_summary(qconf_summary=args.configure_dir)
                     if args.precision == "int8-fp32":
                         pipe.unet = ipex.quantization.convert(pipe.unet)
                     else:
                         with torch.cpu.amp.autocast():
                             pipe.unet = ipex.quantization.convert(pipe.unet)
+                    pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=args.dtype, inplace=True)
                     print("running int8 evalation step\n")
         else:
             raise ValueError("--precision needs to be the following:: fp32, bf32, bf16, fp16, int8-bf16, int8-fp32")
