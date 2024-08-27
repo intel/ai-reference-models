@@ -17,7 +17,7 @@ import os
 import multiprocessing as mp
 import sys
 import torch
-from packaging.version import Version
+from packaging import version
 from pathlib import Path
 
 # sample modules
@@ -140,8 +140,8 @@ def main():
     if args.device.startswith('xpu'):
         available = False
         if not args.ipex:
-            if Version(torch.__version__) < Version('2.4.0a'):
-                io_utils.write_warning(f"XPU backend not available in this PyTorch version (requires v2.4.0a or later): " + torch.__version__)
+            if version.parse(torch.__version__).release < version.parse('2.4').release:
+                io_utils.write_warning(f"XPU backend not available in this PyTorch version (requires v2.4 or later): " + torch.__version__)
             elif hasattr(torch, "xpu") and torch.xpu.is_available():
                 available = True
         else:
