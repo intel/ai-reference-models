@@ -142,6 +142,7 @@ while [ : ]; do
         echo "  --load              [LOAD_PATH]        : If specified model will be loaded from this saved location (default: disabled)"
         echo "  --jit               [JIT]              : JIT method to use (default: '${JIT}')"
         echo "                                           * none"
+        echo "                                           * compile"
         echo "                                           * script"
         echo "                                           * trace"
         echo "  --max-test-duration [MAX_TEST_DURATION]: Maximum duration in seconds to run benchmark"
@@ -344,6 +345,8 @@ elif [[ ${JIT} == "trace" ]]; then
     _jit_arg="--jit-trace"
 elif [[ ${JIT} == "script" ]]; then
     _jit_arg="--jit-script"
+elif [[ ${JIT} == "compile" ]]; then
+    _jit_arg="--compile"
 else
     echo "ERROR: Invalid value entered for 'JIT': ${JIT}"
     exit 1

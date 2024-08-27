@@ -53,8 +53,8 @@ def parse_arguments():
     parser.add_argument('--uint8', default=0, type=int, help='Use unsigned int8 quantization to do inference')
     parser.add_argument('--asymmetric-quantization', dest='asymmetric_quantization', action='store_true',
                         help='Enable asymmetric quantization (default is symmetric).')
-    parser.add_argument('--use-jit', type= str, choices=['none', 'trace', 'script'], default='trace', required=False,
-                        help='enable JIT trace/script graph mode (Default=trace)')
+    parser.add_argument('--use-jit', type= str, choices=['none', 'trace', 'script', 'compile'], default='trace', required=False,
+                        help='enable JIT trace/script/compile graph mode (Default=trace)')
     parser.add_argument('--no-amp', action='store_true',
                         help='Do not use autocast. Direct conversion from native data type to desired data type')
     parser.add_argument('--calib-iters', default=8, type=int,

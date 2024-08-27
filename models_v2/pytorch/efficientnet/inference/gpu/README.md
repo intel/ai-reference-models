@@ -241,8 +241,9 @@ Other arguments and/or environment variables are optional and should be used acc
 | `--data`              | `DATASET_DIR`        | String            | Location to load images from                                                                                                             |
 | `--dummy`             | `DUMMY`              |                   | Use randomly generated dummy dataset in place of `--data` argument                                                                       |
 | `--jit`               | `JIT`                | `none`            | JIT method to use (default: `trace`)                                                                                                     |
-|                       |                      | `trace`           |                                                                                                                                          |
+|                       |                      | `compile`         |                                                                                                                                          |
 |                       |                      | `script`          |                                                                                                                                          |
+|                       |                      | `trace`           |                                                                                                                                          |
 | `--load`              | `LOAD_PATH`          |                   | Local path to load model from (default: disabled)                                                                                        |
 | `--max-test-duration` | `MAX_TEST_DURATION`  | >=0               | Maximum duration in seconds to run benchmark. Testing will be truncated once maximum test duration has been reached. (default: disabled) |
 | `--min-test-duration` | `MIN_TEST_DURATION`  | >=0               | Minimum duration in seconds to run benchmark. Images will be repeated until minimum test duration has been reached. (default: disabled)  |

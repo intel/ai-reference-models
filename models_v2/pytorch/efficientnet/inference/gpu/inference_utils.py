@@ -147,6 +147,10 @@ class Inference:
         elif args.jit_script and not args.load:
             io_utils.write_info('Model using JIT script')
             self.model = torch.jit.script(self.model)
+        elif args.compile and not args.load:
+            io_utils.write_info('Model using torch.compile')
+            self.model = torch.compile(self.model)
+
 
     def process_images(self, images, dtype=None):
         if args.channels_last:
