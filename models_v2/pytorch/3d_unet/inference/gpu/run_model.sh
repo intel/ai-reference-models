@@ -97,6 +97,7 @@ while [ : ]; do
         echo "  --dummy                          : Use randomly generated dummy dataset in place of '--data' argument (default: disabled)"
         echo "  --jit            [JIT]           : JIT method to use (default: '${JIT}')"
         echo "                                     * none"
+        echo "                                     * compile"
         echo "                                     * script"
         echo "                                     * trace"
         echo "  --multi-tile                     : Run benchmark in multi-tile configuration (default: '${MULTI_TILE}')"
@@ -203,10 +204,12 @@ fi
 # Specify if JIT should be used
 if [[ ${JIT} == "none" ]]; then
     _jit_arg="--use-jit none"
-elif [[ ${JIT} == "trace" ]]; then # Only specifiable through environment variables.
+elif [[ ${JIT} == "trace" ]]; then
     _jit_arg="--use-jit trace"
-elif [[ ${JIT} == "script" ]]; then # Only specifiable through environment variables.
+elif [[ ${JIT} == "script" ]]; then
     _jit_arg="--use-jit script"
+elif [[ ${JIT} == "compile" ]]; then
+    _jit_arg="--use-jit compile"
 else
     echo "ERROR: Invalid value entered for 'JIT': ${JIT}"
     exit 1
