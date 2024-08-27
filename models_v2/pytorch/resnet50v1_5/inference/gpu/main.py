@@ -63,7 +63,6 @@ from enum import Enum
 import torch
 import torch.nn as nn
 import torch.nn.parallel
-import torch.backends.cudnn as cudnn
 import torch.distributed as dist
 import torch.optim
 from torch.optim.lr_scheduler import StepLR
@@ -73,7 +72,6 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
-from torch.utils.data import Subset
 import math
 
 torch._C._jit_set_profiling_mode(False)
@@ -150,6 +148,8 @@ parser.add_argument('--bf32', default=0, type=int, help='Datatype used: BF32')
 parser.add_argument('--fp16', default=0, type=int, help='Datatype used: FP16')
 parser.add_argument('--bf16', default=0, type=int, help='Datatype used: BF16')
 parser.add_argument('--int8', default=0, type=int, help='Use int8 quantization to do inference')
+parser.add_argument('--optimize', action='store_true', help='Use torch.xpu.optimize for training/inference xpu model')
+parser.add_argument("--kineto_profile", action="store_true", help="Whether to running kineto profiler",)
 parser.add_argument('--disable-broadcast-buffers', action='store_true', help='disable syncing buffers')
 parser.add_argument('--bucket-cap', default=25, type=int, help='controls the bucket size in MegaBytes')
 parser.add_argument('--large-first-bucket', action="store_true", help='Configure a large capacity of the first bucket in DDP for allreduce')
@@ -164,13 +164,12 @@ parser.add_argument('--calib-bs', default=32, type=int,
                     metavar='N', help='mini-batch size for calibration')
 parser.add_argument('--perchannel-weight', default=False,
                     help='do calibration with weight per channel quantization')
-# TODO: when fix non blocking H2D perf regression, we will remove here option
 parser.add_argument('--non-blocking', default=False, action='store_true',
                     help='non blocking H2D for input and target, now for int8, default False')
 parser.add_argument('--channels-last', action='store_true', help='enable channels last')
 parser.add_argument('--num-iterations', default=0, type=int)
 parser.add_argument('--converge', default=None, action='store_true',
-                    help='Run convergence and use Tensorboard to visualize the training metrics')
+                    help='Use Tensorboard to visualize the training metrics')
 parser.add_argument('--step-size', default=30, type=int, help='LR decay step size')
 parser.add_argument('--step-gamma', default=0.1, type=float, help='set the step gamma')
 parser.add_argument('--last-step-boundary', default=80, type=int, help='last epoch to decay the LR')
@@ -215,6 +214,8 @@ global_num_iter = 0
 
 def main():
     args = parser.parse_args()
+
+    # print all info for running convergence
     if args.converge:
         print('[info] ------------------ converge arguments ------------------')
         print('running model:  ', args.arch)
@@ -253,39 +254,25 @@ def main():
         print('use grad as bucket view: ', args.use_gradient_as_bucket_view)
         print('[info] --------------------------------------------------------')
 
-    if args.xpu is not None and args.gpu is not None:
-        print('You need to choose running on NV GPU or XPU.')
-        sys.exit()
-
-    if args.gpu is not None and not torch.cuda.is_available():
-        print('Make sure cuda is enabled in torch.')
-        sys.exit()
-
     if args.xpu is not None:
         import intel_extension_for_pytorch as ipex
 
-    # only for training
-    if not args.evaluate:
-        if args.tf32:
-            print('doing TF32 training')
-            torch.xpu.set_fp32_math_mode(torch.xpu.FP32MathMode.TF32)
-        elif args.bf32:
-            args.bf16 = 1
-            print('doing BF32 training')
-            torch.xpu.set_fp32_math_mode(torch.xpu.FP32MathMode.BF32)
-        else:
-            torch.xpu.set_fp32_math_mode(torch.xpu.FP32MathMode.FP32)
+    # only for xpu training to set the math mode
+    if args.xpu is not None:
+        if not args.evaluate:
+            if args.tf32:
+                torch.xpu.set_fp32_math_mode(torch.xpu.FP32MathMode.TF32)
+            elif args.bf32:
+                args.bf16 = 1
+                torch.xpu.set_fp32_math_mode(torch.xpu.FP32MathMode.BF32)
+            else:
+                torch.xpu.set_fp32_math_mode(torch.xpu.FP32MathMode.FP32)
 
-    if args.dist_backend == 'ccl':
-        try:
-            import oneccl_bindings_for_pytorch
-        except ImportError:
-            print("oneccl_bindings_for_pytorch not available!")
-
-    if args.int8 and (not args.evaluate or args.xpu is None):
-        print('For int8 quantization, it is only used in XPU inference, '
-              'you need to pass -e and --xpu [dev_id] in your command')
-        sys.exit()
+        if args.dist_backend == 'ccl':
+            try:
+                import oneccl_bindings_for_pytorch
+            except ImportError:
+                pass
 
     if args.converge is not None:
         from torch.utils.tensorboard import SummaryWriter
@@ -295,22 +282,9 @@ def main():
             warnings.warn('Tensorboard is displaying at epoch unit.')
 
     if args.seed is not None:
-        print('Setting the seed: ', args.seed)
+        print('[info] setting the seed: ', args.seed)
         random.seed(args.seed)
         torch.manual_seed(args.seed)
-        if args.xpu is not None:
-            torch.xpu.manual_seed(args.seed)
-        if torch.cuda.is_available():
-            cudnn.deterministic = True
-            warnings.warn('You have chosen to seed training. '
-                        'This will turn on the CUDNN deterministic setting, '
-                        'which can slow down your training considerably! '
-                        'You may see unexpected behavior when restarting '
-                        'from checkpoints.')
-
-    if args.gpu is not None:
-        warnings.warn('You have chosen a specific GPU. This will completely '
-                      'disable data parallelism.')
 
     if args.world_size == -1:
         mpi_world_size = int(os.environ.get('PMI_SIZE', -1))
@@ -421,18 +395,12 @@ def main_worker(ngpus_per_node, args):
             print('world_size:{}, rank:{}, local_rank:{}'.format(args.world_size, args.rank, local_rank))
 
     if args.gpu is not None:
-        print("Use GPU: {}".format(args.gpu))
         args.gpu = "cuda:{}".format(args.gpu)
     elif args.xpu is not None:
-        print("Use XPU: {}".format(args.xpu))
         args.xpu = "xpu:{}".format(args.xpu)
-    else:
-        print("Use CPU")
 
     # define loss function (criterion)
     criterion = nn.CrossEntropyLoss(label_smoothing=args.label_smoothing)
-    if args.label_smoothing:
-        print('using label smoothing: ', args.label_smoothing)
 
     # create model
     if args.load:
@@ -445,7 +413,8 @@ def main_worker(ngpus_per_node, args):
             else:
                 model = torch.load(load_path)
                 optimizer = torch.optim.SGD(model.parameters(), lr=args.lr,
-                                momentum=args.momentum, weight_decay=args.weight_decay)
+                                            momentum=args.momentum,
+                                            weight_decay=args.weight_decay)
                 scheduler = StepLR(optimizer, step_size=args.step_size, gamma=0.1)
         else:
             print("=> no saved model found at '{}'".format(args.load))
@@ -459,9 +428,8 @@ def main_worker(ngpus_per_node, args):
             model = models.__dict__[args.arch]()
 
         # channels last
-        # TODO: this will be default memory format in future
         if args.channels_last:
-            print('model is converted to channels last')
+            print('[info] model is converted to channels last')
             model = model.to(memory_format=torch.channels_last)
 
         if args.distributed:
@@ -483,47 +451,48 @@ def main_worker(ngpus_per_node, args):
         elif args.gpu is not None:
             torch.cuda.set_device(args.gpu)
             model = model.cuda(args.gpu)
-            print('model to cuda')
+            print('[info] running on cuda')
         elif args.xpu is not None:
             torch.xpu.set_device(args.xpu)
             model = model.xpu(args.xpu)
-            print('model to xpu')
+            print('[info] running on xpu')
         else:
-            # do training or inference on CPU
-            pass
+            print('[info] running on cpu')
 
         # define optimizer, and learning rate scheduler
         optimizer = torch.optim.SGD(model.parameters(), lr=args.lr,
                                     momentum=args.momentum, weight_decay=args.weight_decay)
 
-        if args.lars:
+        # for xpu, lars can be used for training
+        if args.lars and args.xpu is not None:
             eeta = args.lars_eta
-            print('using lars, eeta = ', eeta)
-            optimizer = torch.xpu.optim.Lars(model.parameters(), lr=args.lr,
-                                             momentum=args.momentum, weight_decay=args.weight_decay,
+            print('[info] using lars, eeta = ', eeta)
+            optimizer = torch.xpu.optim.Lars(model.parameters(),
+                                             lr=args.lr,
+                                             momentum=args.momentum,
+                                             weight_decay=args.weight_decay,
                                              eeta=eeta)
 
-        # TODO: when change the oob of auto channels last function, here need change
-        using_block_layout = os.environ.get("IPEX_XPU_ONEDNN_LAYOUT", "OFF").upper() in ["1", "Y", "ON", "YES", "TRUE"]
-        if using_block_layout:
-            import intel_extension_for_pytorch as ipex
-            ipex.disable_auto_channels_last()
-            print('using block layout and disable the auto channels last')
-
-        # torch.xpu.optimize is only for device xpu and no jit script
+        # xpu model optimize solution
         if args.xpu is not None:
+            import intel_extension_for_pytorch as ipex
+            using_block_layout = os.environ.get("IPEX_XPU_ONEDNN_LAYOUT", "OFF").upper() in ["1", "Y", "ON", "YES", "TRUE"]
+            if using_block_layout:
+                ipex.disable_auto_channels_last()
+                print('[info] using block layout and disable the auto channels last')
             if args.evaluate:
-                if not args.int8:
-                    print('doing torch xpu optimize for inference')
+                if not args.int8 and args.optimize:
+                    print('[info] doing ipex.optimize for inference')
                     model.eval()
                     dtype = torch.float16 if args.fp16 else torch.float32
                     dtype = torch.bfloat16 if args.bf16 else dtype
-                    model = torch.xpu.optimize(model=model, dtype=dtype, level="O1")
+                    model = ipex.optimize(model=model, dtype=dtype, level="O1")
             else:
-                model.train()
-                print('doing torch xpu optimize for training')
-                model, optimizer = torch.xpu.optimize(model=model, optimizer=optimizer, level="O1",
-                                                      dtype=torch.bfloat16 if args.bf16 else torch.float32)
+                if args.optimize:
+                    model.train()
+                    print('[info] doing ipex.optimize for training')
+                    model, optimizer = ipex.optimize(model=model, optimizer=optimizer, level="O1",
+                                                     dtype=torch.bfloat16 if args.bf16 else torch.float32)
 
         if args.distributed:
             if args.xpu is not None:
@@ -536,57 +505,72 @@ def main_worker(ngpus_per_node, args):
                 if args.large_first_bucket:
                     # set the first bucket with maximal size to cover all parameters for allreduce
                     dist._DEFAULT_FIRST_BUCKET_BYTES = sys.maxsize
-                model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.xpu], broadcast_buffers=False if args.disable_broadcast_buffers else True, bucket_cap_mb=args.bucket_cap, gradient_as_bucket_view=args.use_gradient_as_bucket_view)
+                model = torch.nn.parallel.DistributedDataParallel(model,
+                                                                  device_ids=[args.xpu],
+                                                                  broadcast_buffers=False if args.disable_broadcast_buffers else True,
+                                                                  bucket_cap_mb=args.bucket_cap,
+                                                                  gradient_as_bucket_view=args.use_gradient_as_bucket_view)
+            elif args.gpu is not None:
+                # When using a single GPU per process and per
+                # DistributedDataParallel, we need to divide the batch size
+                # ourselves based on the total number of GPUs we have
+                args.batch_size = int(args.batch_size / ngpus_per_node)
+                args.workers = int(args.workers / ngpus_per_node)
 
-        """Sets the learning rate to the initial LR decayed by 10 every configured epochs"""
+                if args.large_first_bucket:
+                    # set the first bucket with maximal size to cover all parameters for allreduce
+                    dist._DEFAULT_FIRST_BUCKET_BYTES = sys.maxsize
+                model = torch.nn.parallel.DistributedDataParallel(model,
+                                                                  device_ids=[args.gpu],
+                                                                  broadcast_buffers=False if args.disable_broadcast_buffers else True,
+                                                                  bucket_cap_mb=args.bucket_cap,
+                                                                  gradient_as_bucket_view=args.use_gradient_as_bucket_view)
+
+        # LR scheduler
         scheduler = StepLR(optimizer=optimizer, step_size=args.step_size, gamma=args.step_gamma)
-
-        if not args.evaluate:
-            print('Using StepLR for training, step size ', args.step_size)
 
         # optionally resume from a checkpoint
         if args.resume:
             if os.path.isfile(args.resume):
-                print("=> loading checkpoint '{}'".format(args.resume))
-                if args.gpu is None and args.xpu is None:
-                    # CPU load
-                    checkpoint = torch.load(args.resume)
-                elif args.gpu is not None:
+                print("[info] loading checkpoint '{}'".format(args.resume))
+                if args.gpu is not None:
                     # Map model to be loaded to specified single gpu.
-                    print('loading checkpoint to ', str(args.gpu))
+                    print('[info] loading checkpoint to ', str(args.gpu))
                     checkpoint = torch.load(args.resume, map_location=args.gpu)
                 elif args.xpu is not None:
-                    # Map model to be loaded to specified single gpu.
-                    print('loading checkpoint to ', str(args.xpu))
+                    # Map model to be loaded to specified single xpu.
+                    print('[info] loading checkpoint to ', str(args.xpu))
                     checkpoint = torch.load(args.resume, map_location=args.xpu)
+                else:
+                    # cpu load
+                    checkpoint = torch.load(args.resume)
                 args.start_epoch = checkpoint['epoch']
-                # keep best_acc1 on cpu for comparing acc after validation
                 best_acc1 = checkpoint['best_acc1']
                 model.load_state_dict(checkpoint['state_dict'])
                 optimizer.load_state_dict(checkpoint['optimizer'])
                 scheduler.load_state_dict(checkpoint['scheduler'])
             else:
-                print("=> no checkpoint found at '{}'".format(args.resume))
+                raise RuntimeError("[error] no checkpoint found at '{}'".format(args.resume))
 
-        if args.gpu is not None:
-            cudnn.benchmark = True
-
-    # Data loading code
+    # create dataset
     traindir = os.path.join(args.data, 'train')
     valdir = os.path.join(args.data, 'val')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-
     if args.dummy:
-        print("Dummy data is used!")
-        train_dataset = datasets.FakeData(1281167, (3, 224, 224), 1000, transforms.ToTensor())
+        print("[info] dummy dataset is used")
+        if args.num_iterations > 0:
+            train_dataset_size = args.num_iterations * args.batch_size  * (args.world_size if args.distributed else 1)
+        else:
+            train_dataset_size = 1281167
+        train_dataset = datasets.FakeData(train_dataset_size, (3, 224, 224), 1000, transforms.ToTensor())
         val_dataset_size = args.num_iterations * args.batch_size if (args.dummy and args.num_iterations) else 50000
         val_dataset = datasets.FakeData(val_dataset_size, (3, 224, 224), 1000, transforms.ToTensor())
     else:
         traindir = os.path.join(args.data, 'train')
         valdir = os.path.join(args.data, 'val')
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+                                         std=[0.229, 0.224, 0.225])
         train_dataset = datasets.ImageFolder(
             traindir,
             transforms.Compose([
@@ -604,6 +588,7 @@ def main_worker(ngpus_per_node, args):
                 normalize,
             ]))
 
+    # create dataloader sampler
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
         val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset, shuffle=False, drop_last=True)
@@ -611,24 +596,54 @@ def main_worker(ngpus_per_node, args):
         train_sampler = None
         val_sampler = None
 
-    # [watch out] The pin memory is default enabled on CUDA for now in torch.
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
-        num_workers=args.workers, pin_memory=True, pin_memory_device="xpu", sampler=train_sampler, drop_last=True)
+    # create dataloader
+    train_loader = torch.utils.data.DataLoader(train_dataset,
+                                               batch_size=args.batch_size,
+                                               shuffle=(train_sampler is None),
+                                               num_workers=args.workers,
+                                               sampler=train_sampler,drop_last=True)
+    val_loader = torch.utils.data.DataLoader(val_dataset,
+                                             batch_size=args.batch_size,
+                                             shuffle=False,
+                                             num_workers=args.workers,
+                                             sampler=val_sampler)
+    if args.xpu is not None:
+        train_loader = torch.utils.data.DataLoader(train_dataset,
+                                                   batch_size=args.batch_size,
+                                                   shuffle=(train_sampler is None),
+                                                   num_workers=args.workers,
+                                                   pin_memory=True,
+                                                   pin_memory_device="xpu",
+                                                   sampler=train_sampler,drop_last=True)
+        val_loader = torch.utils.data.DataLoader(val_dataset,
+                                                 batch_size=args.batch_size,
+                                                 shuffle=False,
+                                                 num_workers=args.workers,
+                                                 pin_memory=True,
+                                                 pin_memory_device="xpu",
+                                                 sampler=val_sampler)
 
-    val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True, pin_memory_device="xpu", sampler=val_sampler)
-
-    # Profiling
+    # profiling, support both 2 methods to enable profiler
+    if args.kineto_profile:
+        os.environ["PROFILE"] = "1"
     profiling = os.environ.get("PROFILE", "OFF").upper() in ["1", "Y", "ON", "YES", "TRUE"]
 
+    # autocast
     use_autocast = False
     if args.bf16 or args.fp16:
-        print('using autocast')
         use_autocast = True
+    autocast_dtype = torch.float32
+    if args.fp16:
+        autocast_dtype = torch.float16
+        print('[info] running autocast: fp16')
+    elif args.bf16:
+        autocast_dtype = torch.bfloat16
+        print('[info] running autocast: bf16')
+    else:
+        pass
 
     if args.evaluate:
+        print('[info] running inference')
         if args.int8:
             # calibration dataloader
             val_loader_calib = torch.utils.data.DataLoader(
@@ -642,28 +657,24 @@ def main_worker(ngpus_per_node, args):
                 model_calib = jit_calib(model, val_loader_calib, args)
             if args.save:
                 torch.jit.save(model_calib, args.save)
-            val_loader_inf = torch.utils.data.DataLoader(
-                val_dataset, batch_size=args.batch_size, shuffle=False,
-                num_workers=args.workers, pin_memory=True, pin_memory_device="xpu")
-
-            print('doing int8 inference')
-            validate_quantization(val_loader_inf, model_calib, criterion, profiling, args)
+            validate_quantization(val_loader, model_calib, criterion, profiling, args)
         else:
-            # epoch pass 0
-            validate(val_loader, model, criterion, 0, profiling, use_autocast, args)
+            validate(val_loader, model, criterion, 0, profiling, use_autocast, autocast_dtype, args)
         return
+    else:
+        print('[info] running training')
 
     global_start_time = time.time()
 
-    # warm up for convergence
+    # warm up for running convergence
     if args.converge and not args.resume and args.warm_up_epoch > 0:
         warm_up_epoch = args.warm_up_epoch
         warm_up_portion = args.lr / float(warm_up_epoch)
         for epoch in range(0, warm_up_epoch):
             if args.lars == False:
                 optimizer.param_groups[0]['lr'] = (epoch + 1) * warm_up_portion
-            train(train_loader, model, criterion, optimizer, epoch, profiling, use_autocast, args, mode='warming')
-            print('Warmup [', (epoch + 1), '][', warm_up_epoch, '] lr = ', optimizer.param_groups[0]['lr'])
+            train(train_loader, model, criterion, optimizer, epoch, profiling, use_autocast, autocast_dtype, args, mode='warming')
+            print('[info] warmup [', (epoch + 1), '][', warm_up_epoch, '] lr = ', optimizer.param_groups[0]['lr'])
 
     last_acc = best_acc1
     for epoch in range(args.start_epoch, args.epochs):
@@ -672,7 +683,7 @@ def main_worker(ngpus_per_node, args):
         global global_lr
         global_lr = optimizer.param_groups[0]['lr']
 
-        if not args.distributed or (args.distributed and args.rank == 0):
+        if args.converge and (not args.distributed or (args.distributed and args.rank == 0)):
             print('[info] Epoch[', epoch, '] start time = ', time.asctime(time.localtime(epoch_start_time)))
 
         if args.distributed:
@@ -681,17 +692,16 @@ def main_worker(ngpus_per_node, args):
         if epoch == args.last_step_boundary and args.lr_scheduler == 'step':
             optimizer.param_groups[0]['lr'] *= args.step_gamma
 
-        if not args.distributed or (args.distributed and args.rank == 0):
+        if args.converge and (not args.distributed or (args.distributed and args.rank == 0)):
             print('[info] Epoch[', epoch, '] lr = ', optimizer.param_groups[0]['lr'])
 
-        # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch, profiling, use_autocast, args, mode='training')
+        train(train_loader, model, criterion, optimizer, epoch, profiling, use_autocast, autocast_dtype, args, mode='training')
 
         # evaluate on validation set
         acc1 = last_acc
         if (epoch >= args.eval_start_epoch) and (epoch % args.eval_period == args.eval_offset):
-            print('epoch: ', epoch, ' is doing evaluation')
-            acc1 = validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
+            print('[info] Epoch: ', epoch, ' is doing evaluation')
+            acc1 = validate(val_loader, model, criterion, epoch, profiling, use_autocast, autocast_dtype, args)
             last_acc = acc1
 
         # update the LR
@@ -737,7 +747,7 @@ def main_worker(ngpus_per_node, args):
         if not args.distributed or (args.distributed and args.rank == 0):
             writer.close()
 
-def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autocast, args, mode='training'):
+def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autocast, autocast_dtype, args, mode='training'):
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
@@ -749,8 +759,18 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
         prefix="Epoch: [{}]".format(epoch))
     global global_num_iter
 
-    def one_iter(model, images):
-        with torch.xpu.amp.autocast(enabled=use_autocast, dtype=torch.bfloat16):
+    non_blocking = False
+    if args.non_blocking:
+        non_blocking = True
+
+    # for xpu + dynamo
+    def one_iter(model, images, target):
+        if autocast_dtype == torch.bfloat16 or autocast_dtype == torch.float16:
+            with torch.autocast(device_type="xpu", enabled=use_autocast, dtype=autocast_dtype):
+                # compute output
+                output = model(images)
+                loss = criterion(output, target)
+        else:
             # compute output
             output = model(images)
             loss = criterion(output, target)
@@ -762,12 +782,15 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
         optimizer.step()
         return [output, loss]
 
-    # switch to train mode
+    # set the train mode
     model.train()
 
     if args.dynamo:
+        # TODO: here backend should be 'ipex'
+        print('[info] running graph mode')
         train_opt = torch.compile(one_iter, backend="inductor")
     else:
+        print('[info] running eager mode')
         train_opt = one_iter
 
     # record time
@@ -799,14 +822,18 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
         elif args.bf16:
             profile_name = 'bf16'
         if args.distributed:
-            profile_name += '.xpu.' + str(args.rank)
+            if args.xpu is not None:
+                profile_name += '.xpu.' + str(args.rank)
+            elif args.gpu is not None:
+                profile_name += '.cuda.' + str(args.rank)
+            else:
+                profile_name += '.cpu.' + str(args.rank)
         if args.xpu is not None:
             torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), './profiling.' + profile_name + '.train.pt')
         elif args.gpu is not None:
             torch.save(prof.key_averages().table(sort_by="self_cuda_time_total"), './profiling.card.' + str(args.xpu) + '.pt')
         else:
             torch.save(prof.key_averages().table(sort_by="self_cpu_time_total"), './profiling.card.' + str(args.xpu) + '.pt')
-
 
     # start profiler, or none while profiling is false
     with profiler_setup(profiling, activities=activities, schedule=schedule, on_trace_ready=trace_handle) as prof:
@@ -817,9 +844,8 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
             data_time.update(time.time() - data_start)
 
             if args.channels_last:
-                print('input to channels last')
+                print('[info] input to channels last')
                 images = images.to(memory_format=torch.channels_last)
-
 
             if args.xpu is not None:
                 try:
@@ -828,38 +854,39 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
                 except:
                     pass
                 start_time = time.time()
-                images = images.to(args.xpu, non_blocking=True)
-                target = target.to(args.xpu, non_blocking=True)
+                images = images.to(args.xpu, non_blocking=non_blocking)
+                target = target.to(args.xpu, non_blocking=non_blocking)
 
-                [output, loss] = train_opt(model, images)
-                # D2H
+                [output, loss] = train_opt(model, images, target)
+
                 loss = loss.cpu()
                 output = output.cpu()
                 target = target.cpu()
-
-            else:
+            elif args.gpu is not None:
                 start_time = time.time()
-                activities = None
-                prof_sort = None
+                images = images.to(args.gpu, non_blocking=non_blocking)
+                target = target.to(args.gpu, non_blocking=non_blocking)
 
-                if args.gpu is not None:
-                    images = images.cuda(args.gpu, non_blocking=True)
-                    target = target.cuda(args.gpu, non_blocking=True)
+                with torch.cuda.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                    output = model(images)
+                    loss = criterion(output, target)
 
-                # compute output
-                output = model(images)
-                loss = criterion(output, target)
-
-                # compute gradient and do SGD step
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-                # D2H, as sync
-                if args.gpu is not None:
-                    loss = loss.cpu()
-                    output = output.cpu()
-                    target = target.cpu()
+                loss = loss.cpu()
+                output = output.cpu()
+                target = target.cpu()
+            else:
+                start_time = time.time()
+                with torch.cpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                    output = model(images)
+                    loss = criterion(output, target)
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
             if profiling:
                 prof.step()
@@ -878,7 +905,7 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
                 progress.display(i + 1)
 
             # exclude first iteration for calculating througput
-            if i >= warmup_iter:
+            if i >= warmup_iter or args.num_iterations == 0 and len(train_loader) <= warmup_iter:
                 duration_total += duration_train
             data_start = time.time()
 
@@ -887,8 +914,9 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
                       % (args.batch_size, (args.batch_size / (duration_total / (args.num_iterations - warmup_iter)))))
                 sys.exit(0)
             elif args.num_iterations == 0 and i == len(train_loader) - 1:
+                iters = len(train_loader) - warmup_iter if len(train_loader) > warmup_iter else len(train_loader)
                 print('Training performance: batch size:%d, throughput:%.2f image/sec'
-                      % (args.batch_size, (args.batch_size / (duration_total / (len(train_loader) - warmup_iter)))))
+                      % (args.batch_size, (args.batch_size / (duration_total / iters))))
                 if args.converge is None:
                     sys.exit(0)
 
@@ -899,18 +927,21 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
         tensorboard_data['train']['top1'] = top1.avg
         tensorboard_data['train']['top5'] = top5.avg
 
-def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args):
+def validate(val_loader, model, criterion, epoch, profiling, use_autocast, autocast_dtype, args):
     from torch._inductor import config
 
     def compile_model(model, val_loader):
         print("====Before compile model====")
         compiled_model = torch.compile(model, backend="inductor", options={"freezing": True})
         return compiled_model
-    def run_validate(loader, model, autocast_dtype, base_progress=0):
+
+    def run_validate(loader, model, non_blocking, base_progress=0):
 
         # record time
         duration_total = 0.0
         warmup_iter = 5
+        if (not args.num_iterations == 0) and (args.num_iterations <= warmup_iter):
+            raise RuntimeError('At least {} iterations required for performance measure'.format(warmup_iter))
 
         # config profiler
         import contextlib
@@ -955,46 +986,44 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
 
                 if args.channels_last:
                     images = images.to(memory_format=torch.channels_last)
-                    print('images convert to channels last')
+                    print('[info] images convert to channels last')
 
-
-                if args.xpu:
+                if args.xpu is not None:
                     try:
                         import memory_check
                         memory_check.display_mem("xpu:0")
                     except:
                         pass
                     start_time = time.time()
-                    images = images.to(args.xpu, non_blocking=True)
+                    images = images.to(args.xpu, non_blocking=non_blocking)
 
                     if args.jit_trace:
-                        # compute output
                         output = model(images)
                     elif args.dynamo:
-                        with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                        if autocast_dtype == torch.bfloat16 or autocast_dtype == torch.float16:
+                            with torch.autocast(device_type="xpu", enabled=use_autocast, dtype=autocast_dtype):
+                                output = model(images)
+                        else:
                             output = model(images)
                     else:
-                        with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
-                            # compute output
+                        if autocast_dtype == torch.bfloat16 or autocast_dtype == torch.float16:
+                            with torch.autocast(device_type="xpu", enabled=use_autocast, dtype=autocast_dtype):
+                                output = model(images)
+                        else:
                             output = model(images)
 
-                    # sync for time measurement
-                    if not args.converge:
-                        torch.xpu.synchronize(args.xpu)
+                    torch.xpu.synchronize(args.xpu)
+                elif args.gpu is not None:
+                    start_time = time.time()
+                    images = images.to(args.gpu, non_blocking=non_blocking)
+                    with torch.cuda.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                        output = model(images)
 
+                    torch.cuda.synchronize(args.gpu)
                 else:
                     start_time = time.time()
-                    activities = None
-                    prof_sort = None
-                    if args.gpu is not None:
-                        images = images.cuda(args.gpu, non_blocking=True)
-
-                    # compute output
-                    output = model(images)
-
-                    # sync for time measurement
-                    if args.gpu is not None:
-                        torch.cuda.synchronize(args.gpu)
+                    with torch.cpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                        output = model(images)
 
                 if profiling:
                     prof.step()
@@ -1020,10 +1049,6 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
                 # exclude first iteration for calculating througput
                 if i >= warmup_iter and not (args.num_iterations == 0 and i == len(val_loader) - 1):
                     duration_total += duration_eval
-
-                if (not args.num_iterations == 0) and (args.num_iterations <= warmup_iter):
-                    print("At least ", warmup_iter, " iteartions required for performance measure")
-                    sys.exit(0)
 
                 if i == (args.num_iterations - 1) and args.num_iterations >= warmup_iter:
                     print('Evalution performance: batch size:%d, throughput:%.2f image/sec, Acc@1:%.2f, Acc@5:%.2f'
@@ -1058,27 +1083,33 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
     # switch to evaluate mode
     model.eval()
 
-    autocast_dtype = torch.float32
-    if args.fp16:
-        autocast_dtype = torch.float16
-    elif args.bf16:
-        autocast_dtype = torch.bfloat16
-
-    if args.jit_trace and not args.load:
-        trace_input = torch.randn(args.batch_size, 3, 224, 224).to(args.xpu)
-        print('jit trace')
-        with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
-            model = torch.jit.trace(model, trace_input)
-    elif args.dynamo:
-        model = compile_model(model, val_loader)
-
+    if args.xpu is not None:
+        # TODO: jit will be deprecated
+        if args.jit_trace and not args.load:
+            trace_input = torch.randn(args.batch_size, 3, 224, 224).to(args.xpu)
+            print('[info] running jit mode')
+            if autocast_dtype == torch.bfloat16 or autocast_dtype == torch.float16:
+                with torch.autocast(device_type="xpu", enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
+                    model = torch.jit.trace(model, trace_input)
+            else:
+                model = torch.jit.trace(model, trace_input)
+        elif args.dynamo:
+            print('[info] running graph mode')
+            model = compile_model(model, val_loader)
+        else:
+            print('[info] running eager mode')
 
     if args.save:
         if args.jit_trace:
             torch.jit.save(model, args.save)
         else:
             torch.save(model, args.save)
-    run_validate(val_loader, model, autocast_dtype)
+
+    non_blocking = False
+    if args.non_blocking:
+        non_blocking = True
+
+    run_validate(val_loader, model, non_blocking)
 
     progress.display_summary()
 
@@ -1110,7 +1141,6 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
     # record time
     duration_total = 0.0
 
-    # TODO: will fix non blocking H2D perf regression, then remove here option
     non_blocking = False
     if args.non_blocking:
         non_blocking = True
@@ -1141,27 +1171,31 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
     with profiler_setup(profiling, activities=activities, schedule=schedule, on_trace_ready=trace_handle) as prof, torch.inference_mode():
         for i, (images, target) in enumerate(val_loader):
             if args.xpu is not None and args.benchmark == 1:
-                images = images.to(args.xpu, non_blocking = non_blocking)
+                images = images.to(args.xpu, non_blocking=non_blocking)
 
             try:
                 import memory_check
                 memory_check.display_mem("xpu:0")
             except:
                 pass
+
             start = time.time()
+
             if args.xpu is not None and args.benchmark == 0:
-                images = images.to(args.xpu, non_blocking = non_blocking)
+                images = images.to(args.xpu, non_blocking=non_blocking)
+
             if args.channels_last:
                 images = images.to(memory_format=torch.channels_last)
 
             # compute output
             output = model(images)
 
-            # D2H
-            output = output.to("cpu")
+            if args.xpu is not None:
+                # D2H
+                output = output.to("cpu")
 
-            # sync for time measurement
-            torch.xpu.synchronize(args.xpu)
+                # sync for time measurement
+                torch.xpu.synchronize(args.xpu)
 
             # measure elapsed time
             end = time.time()
@@ -1204,10 +1238,10 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
 
 def save_checkpoint(state, is_best, args, filename='checkpoint.pth.tar'):
     if args.distributed:
-        print('rank ', str(args.rank), ' saving checkpoint')
+        print('[info] rank ', str(args.rank), ' saving checkpoint')
         filename = 'checkpoint.rank.' + str(args.rank) + '.pth.tar'
     else:
-        print('single tile saving checkpoint')
+        print('[info] single tile saving checkpoint')
     torch.save(state, filename)
 
     if is_best:
