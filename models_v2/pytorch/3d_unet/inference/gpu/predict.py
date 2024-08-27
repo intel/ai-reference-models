@@ -71,7 +71,7 @@ def quantize_model(model):
         io_utils.write_info('Using JIT script for quantization')
         model = torch.jit.script(model)
     else:
-        io_utils.write_error('Quantization is only support for JIT models!')
+        io_utils.write_error('Quantization is only support for JIT script and trace models!')
         sys.exit(1)
 
     model = wrap_cpp_module(torch._C._jit_pass_fold_convbn(model._c))
@@ -181,6 +181,9 @@ def inference_config(model):
         elif args.use_jit == 'script':
             io_utils.write_info('Using JIT script')
             model = torch.jit.script(model)
+        elif args.use_jit == 'compile':
+            io_utils.write_info('Using JIT compile')
+            model = torch.compile(model)
 
     return use_autocast, autocast_dtype, model
 

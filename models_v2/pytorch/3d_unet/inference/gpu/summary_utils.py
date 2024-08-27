@@ -22,6 +22,15 @@ import numpy as np
 import io_utils
 from arguments_utils import args
 
+def get_jit_method():
+    if args.use_jit == 'trace':
+        return 'trace'
+    elif args.use_jit == 'script':
+        return 'script'
+    elif args.use_jit == 'compile':
+        return 'compile'
+    return 'no'
+
 def write_results(batches_tested, throughput, latency, overall, whole, core, enhancing, throughput_overhead, latency_overhead):
     output_dict = {
         'SAME:Model': '{0}'.format(args.arch),
@@ -35,7 +44,7 @@ def write_results(batches_tested, throughput, latency, overall, whole, core, enh
         'SAME:Warmup Batches': args.warm_up,
         'SAME:Data Type': args.dtype_str,
         'SAME:AMP': 'no' if args.no_amp else 'yes',
-        'SAME:JIT': 'trace' if args.use_jit == 'trace' else 'script' if args.use_jit == 'script' else 'no',
+        'SAME:JIT': get_jit_method(),
         'MAX:Latency (ms)': float(latency),
         'MAX:Latency with Overhead (ms)': float(latency_overhead),
         'SUM_MIN:Throughput (img/s)': float(throughput),
@@ -81,7 +90,7 @@ def show_test_conditions():
         io_utils.stdout_helper('    calib iters:         {0}'.format(args.calib_iters))
         io_utils.stdout_helper('    calib batch size:    {0}'.format(args.calib_bs))
     io_utils.stdout_helper('  [PERF ARGS]')
-    io_utils.stdout_helper('    JIT method:         {0}'.format('trace' if args.use_jit == 'trace' else 'script' if args.use_jit == 'script' else 'none'))
+    io_utils.stdout_helper('    JIT method:         {0}'.format(get_jit_method()))
     io_utils.stdout_helper('    gradients:          zero')
     io_utils.stdout_helper('  [BENCHMARK PARAMS]')
     io_utils.stdout_helper('    warm up batches:    {0}'.format(args.warm_up))
