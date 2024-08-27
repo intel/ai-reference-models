@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fc9411e95..937d84325 100644
+index fc9411e95..cdc3cdbeb 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -43,7 +43,7 @@ index fc9411e95..937d84325 100644
  try:
      from torch.utils.tensorboard import SummaryWriter
  except ImportError:
-@@ -265,6 +290,219 @@ def train(args, train_dataset, model, tokenizer):
+@@ -265,6 +290,217 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -171,8 +171,6 @@ index fc9411e95..937d84325 100644
 +                    model(**torch_compile_inputs)
 +                    model(**torch_compile_inputs)
 +        else:
-+            if args.fp16_cpu:
-+                torch._C._set_sdp_use_flash(False)
 +            with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
 +                if args.ipex:
 +                    print('[Info] Running torch.compile() with IPEX backend')
@@ -263,7 +261,7 @@ index fc9411e95..937d84325 100644
  
  def evaluate(args, model, tokenizer, prefix=""):
      dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
-@@ -278,6 +516,8 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -278,6 +514,8 @@ def evaluate(args, model, tokenizer, prefix=""):
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
  
@@ -272,7 +270,7 @@ index fc9411e95..937d84325 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -286,12 +526,63 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -286,12 +524,63 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
@@ -337,7 +335,7 @@ index fc9411e95..937d84325 100644
          batch = tuple(t.to(args.device) for t in batch)
  
          with torch.no_grad():
-@@ -314,13 +605,20 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -314,13 +603,20 @@ def evaluate(args, model, tokenizer, prefix=""):
                      inputs.update(
                          {"langs": (torch.ones(batch[0].shape, dtype=torch.int64) * args.lang_id).to(args.device)}
                      )
@@ -360,7 +358,7 @@ index fc9411e95..937d84325 100644
  
              # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
              # models only use two.
-@@ -671,7 +969,68 @@ def main():
+@@ -671,7 +967,68 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -429,7 +427,7 @@ index fc9411e95..937d84325 100644
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
          logger.warning(
-@@ -742,11 +1101,13 @@ def main():
+@@ -742,11 +1099,13 @@ def main():
      args.model_type = args.model_type.lower()
      config = AutoConfig.from_pretrained(
          args.config_name if args.config_name else args.model_name_or_path,
@@ -443,7 +441,7 @@ index fc9411e95..937d84325 100644
          cache_dir=args.cache_dir if args.cache_dir else None,
          use_fast=False,  # SquadDataset is not compatible with Fast tokenizers which have a smarter overflow handeling
      )
-@@ -824,7 +1185,7 @@ def main():
+@@ -824,7 +1183,7 @@ def main():
          for checkpoint in checkpoints:
              # Reload the model
              global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
@@ -1075,7 +1073,7 @@ index 474b92f72..094ea6eb0 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499b0..097002838 100755
+index cf71499b0..0ff7236bd 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,29 @@ from .utils import (
@@ -1255,7 +1253,7 @@ index cf71499b0..097002838 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -1415,6 +1487,75 @@ class Trainer:
+@@ -1415,6 +1487,74 @@ class Trainer:
              model = self.torch_jit_model_eval(model, dataloader, training)
              self.jit_compilation_time = round(time.time() - start_time, 4)
  
@@ -1307,7 +1305,6 @@ index cf71499b0..097002838 100755
 +                    y = model(**example_batch)
 +                    y = model(**example_batch)
 +            elif self.args.fp16_cpu:
-+                torch._C._set_sdp_use_flash(False)
 +                with torch.no_grad(), torch.cpu.amp.autocast(dtype=torch.half):
 +                    if self.args.use_ipex:
 +                        print('[Info] Running torch.compile() float16 with IPEX backend')
@@ -1331,7 +1328,7 @@ index cf71499b0..097002838 100755
          # Note: in torch.distributed mode, there's no point in wrapping the model
          # inside a DistributedDataParallel as we'll be under `no_grad` anyways.
          if not training:
-@@ -1575,8 +1716,9 @@ class Trainer:
+@@ -1575,8 +1715,9 @@ class Trainer:
  
          # torch.compile() needs to be called after wrapping the model with FSDP or DDP
          # to ensure that it accounts for the graph breaks required by those wrappers
@@ -1343,7 +1340,7 @@ index cf71499b0..097002838 100755
  
          return model
  
-@@ -1993,7 +2135,11 @@ class Trainer:
+@@ -1993,7 +2134,11 @@ class Trainer:
                          scale_after = self.scaler.get_scale()
                          optimizer_was_run = scale_before <= scale_after
                      else:
@@ -1356,7 +1353,7 @@ index cf71499b0..097002838 100755
  
                      if optimizer_was_run and not self.deepspeed:
                          self.lr_scheduler.step()
-@@ -2714,7 +2860,10 @@ class Trainer:
+@@ -2714,7 +2859,10 @@ class Trainer:
              # loss gets scaled under gradient_accumulation_steps in deepspeed
              loss = self.deepspeed.backward(loss)
          else:
@@ -1368,7 +1365,7 @@ index cf71499b0..097002838 100755
  
          return loss.detach()
  
-@@ -3085,7 +3234,65 @@ class Trainer:
+@@ -3085,7 +3233,65 @@ class Trainer:
          self._memory_tracker.stop_and_update_metrics(output.metrics)
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
@@ -1435,7 +1432,7 @@ index cf71499b0..097002838 100755
      def evaluation_loop(
          self,
          dataloader: DataLoader,
-@@ -3133,7 +3340,12 @@ class Trainer:
+@@ -3133,7 +3339,12 @@ class Trainer:
              logger.info("  Num examples: Unknown")
          logger.info(f"  Batch size = {batch_size}")
  
@@ -1449,7 +1446,7 @@ index cf71499b0..097002838 100755
  
          self.callback_handler.eval_dataloader = dataloader
          # Do this before wrapping.
-@@ -3158,6 +3370,20 @@ class Trainer:
+@@ -3158,6 +3369,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.

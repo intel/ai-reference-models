@@ -295,7 +295,6 @@ def main():
                 pipe.text_encoder = torch.compile(pipe.text_encoder)
                 pipe.vae.decode = torch.compile(pipe.vae.decode)
         elif args.precision == "fp16":
-            torch._C._set_sdp_use_flash(False)
             with torch.cpu.amp.autocast(dtype=torch.half), torch.no_grad():
                 pipe.unet = torch.compile(pipe.unet)
                 pipe.unet(*input)
