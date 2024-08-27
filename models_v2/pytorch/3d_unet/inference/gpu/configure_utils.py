@@ -19,7 +19,7 @@ import random
 import warnings
 import torch
 import torch.backends.cudnn as cudnn
-from packaging.version import Version
+from packaging import version
 
 # sample modules
 import io_utils
@@ -45,8 +45,8 @@ def enum_device():
         io_utils.write_info('Use GPU: {0}'.format(args.device))
     elif device == 'xpu':
         if not args.ipex:
-            if Version(torch.__version__) < Version('2.4.0'):
-                io_utils.write_error('XPU backend not available in this PyTorch version (requires v2.4.0 or later): ' + torch.__version__)
+            if version.parse(torch.__version__).release < version.parse('2.4').release:
+                io_utils.write_error('XPU backend not available in this PyTorch version (requires v2.4 or later): ' + torch.__version__)
             elif torch.xpu.is_available():
                 args.xpu = True
         elif args.ipex:
