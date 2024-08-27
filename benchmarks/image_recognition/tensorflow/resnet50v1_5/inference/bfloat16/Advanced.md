@@ -32,7 +32,7 @@ the model zoo and set environment variables pointing to the directory for the
 dataset, pretrained model frozen graph, and an output directory where log
 files will be written.
 
-```
+```bash
 # cd to the benchmarks directory in the model zoo
 cd benchmarks
 
@@ -47,7 +47,7 @@ Use one of the following examples below, depending on your use case.
 * For accuracy run the following command that uses the `DATASET_DIR`, a batch
   size of 100, and the `--accuracy-only` flag:
 
-```
+```bash
 python launch_benchmark.py \
   --data-location ${DATASET_DIR} \
   --in-graph ${PRETRAINED_MODEL} \
@@ -61,10 +61,10 @@ python launch_benchmark.py \
   --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
-* For batch inference, use the command below that uses the `DATASET_DIR`, a batch 
+* For batch inference, use the command below that uses the `DATASET_DIR`, a batch
   size of 128, and the `--benchmark-only` flag:
 
-```
+```bash
 python launch_benchmark.py \
   --in-graph ${PRETRAINED_MODEL} \
   --model-name resnet50v1_5 \
@@ -78,10 +78,10 @@ python launch_benchmark.py \
   --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
-* For online inference, use the command below that uses the `DATASET_DIR`, a batch 
+* For online inference, use the command below that uses the `DATASET_DIR`, a batch
   size of 1, and the `--benchmark-only` flag:
-  
-```
+
+```bash
 python launch_benchmark.py \
   --in-graph ${PRETRAINED_MODEL} \
   --model-name resnet50v1_5 \
@@ -96,7 +96,7 @@ python launch_benchmark.py \
 ```
 
 Example log file snippet when testing accuracy:
-```
+```bash
 ...
 Iteration time: ... ms
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7672, 0.9314)
@@ -107,7 +107,7 @@ Log file location: {--output-dir value}/benchmark_resnet50v1_5_inference_bfloat1
 ```
 
 Example log file snippet when testing batch inference:
-```
+```bash
 ...
 Iteration 48: ... sec
 Iteration 49: ... sec
@@ -120,7 +120,7 @@ Log file location: {--output-dir value}/benchmark_resnet50v1_5_inference_bfloat1
 ```
 
 Example log file snippet when testing online inference:
-```
+```bash
 ...
 Iteration 48: ... sec
 Iteration 49: ... sec
@@ -142,7 +142,7 @@ To use synthetic data, you can omit that argument.
 * For multi-instance batch inference, the recommended configuration uses all
   the cores on a socket for each instance (this means that if you have 2 sockets,
   you would be running 2 instances - one per socket) and a batch size of 128.
-  ```  
+  ```bash
   python launch_benchmark.py \
     --model-name resnet50v1_5 \
     --precision bfloat16 \
@@ -156,10 +156,10 @@ To use synthetic data, you can omit that argument.
     --docker-image intel/intel-optimized-tensorflow:latest \
     -- warmup_steps=50 steps=1500
   ```
-  
+
 * For multi-instance online inference, the recommended configuration is using
   4 cores per instance and a batch size of 1.
-  ```
+  ```bash
   python launch_benchmark.py \
     --model-name resnet50v1_5 \
     --precision bfloat16 \
@@ -173,4 +173,3 @@ To use synthetic data, you can omit that argument.
     --docker-image intel/intel-optimized-tensorflow:latest \
     -- warmup_steps=50 steps=1500
   ```
-
