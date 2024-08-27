@@ -62,9 +62,9 @@ else
         git clone https://github.com/WongKinYiu/yolov7.git yolov7
         cd yolov7
         cp ../yolov7.py .
-        pip install -r requirements.txt
         git checkout a207844
         git apply ../yolov7_ipex_and_inductor.patch
+        pip install -r requirements.txt
     else
         cd yolov7
     fi
