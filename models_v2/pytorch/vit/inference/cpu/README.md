@@ -53,6 +53,10 @@ Vision Transformer inference best known configurations with Intel® Extension fo
   huggingface-cli login
   {your huggingface token}
 
+* [Optional] Use dummy input for performance collection
+  ```
+  export DUMMY_INPUT=1
+  ```
 
 # Inference
 1. `git clone https://github.com/IntelAI/models.git`
@@ -83,6 +87,7 @@ Vision Transformer inference best known configurations with Intel® Extension fo
 | **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8-fp32, int8-bf16) |
 | **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
+| **DUMMY_INPUT**(optional)     |     `export DUMMY_INPUT=1` (This is optional; for performance collection)    |
 | **CORE_PER_INSTANCE** (required for REALTIME)    |                               `export CORE_PER_INSTANCE=4`                                |
 7. Run `run_model.sh`
 
