@@ -99,7 +99,9 @@ BATCH_SIZE=${BATCH_SIZE:-`expr 4 \* $CORES`}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"google/vit-base-patch16-224"}
 DATASET_DIR=${DATASET_DIR:-"None"}
 DATASET_ARGS=""
-if [[ "None" == ${DATASET_DIR} ]];then
+if [[ "1" == ${DUMMY_INPUT} && "${TEST_MODE}" != "ACCURACY" ]];then
+    DATASET_ARGS="--dataset_name dummy"
+elif [[ "None" == ${DATASET_DIR} ]];then
     DATASET_ARGS="--dataset_name imagenet-1k"
 else
     DATASET_ARGS="--train_dir ${DATASET_DIR}/train --validation_dir ${DATASET_DIR}/val"

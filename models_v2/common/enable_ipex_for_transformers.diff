@@ -451,18 +451,84 @@ index fc9411e95..cdc3cdbeb 100644
  
              # Evaluate
 diff --git a/examples/pytorch/image-classification/run_image_classification.py b/examples/pytorch/image-classification/run_image_classification.py
-index e2ce9f1c5..e0666475c 100644
+index e2ce9f1c5..c996c3423 100644
 --- a/examples/pytorch/image-classification/run_image_classification.py
 +++ b/examples/pytorch/image-classification/run_image_classification.py
-@@ -230,6 +230,7 @@ def main():
-             cache_dir=model_args.cache_dir,
-             task="image-classification",
-             use_auth_token=True if model_args.use_auth_token else None,
-+            revision="014711311cec8b5959350c373878a3311caeb764",
-         )
+@@ -221,28 +221,52 @@ def main():
+ 
+     # Set seed before initializing model.
+     set_seed(training_args.seed)
+-
+-    # Initialize our dataset and prepare it for the 'image-classification' task.
+-    if data_args.dataset_name is not None:
+-        dataset = load_dataset(
+-            data_args.dataset_name,
+-            data_args.dataset_config_name,
+-            cache_dir=model_args.cache_dir,
+-            task="image-classification",
+-            use_auth_token=True if model_args.use_auth_token else None,
+-        )
++    if data_args.dataset_name is not None and data_args.dataset_name == "dummy":
++        from datasets import ClassLabel
++        class DummyImageDataset(torch.utils.data.Dataset):
++            def __init__(self, num_samples=1000, image_size=(3, 224, 224), num_classes=1000):
++                self.num_samples = num_samples
++                self.image_size = image_size
++                self.num_classes = num_classes
++                self.data = [torch.randn(*self.image_size) for i in range(num_samples)]
++                self.labels = [torch.randint(0, self.num_classes, (1,)).item() for i in range(num_samples)]
++
++            def __len__(self):
++                return self.num_samples
++
++            def __getitem__(self, idx):
++                return {"pixel_values": self.data[idx], "labels": self.labels[idx]}
++
++            @property
++            def features(self):
++                return {"labels": ClassLabel(names=[str(i) for i in range(self.num_classes)])}
++
++            def set_transform(self, transform=None):
++                pass
++        dataset = {'train': DummyImageDataset(), 'validation': DummyImageDataset()}
      else:
-         data_files = {}
-@@ -275,6 +276,7 @@ def main():
+-        data_files = {}
+-        if data_args.train_dir is not None:
+-            data_files["train"] = os.path.join(data_args.train_dir, "**")
+-        if data_args.validation_dir is not None:
+-            data_files["validation"] = os.path.join(data_args.validation_dir, "**")
+-        dataset = load_dataset(
+-            "imagefolder",
+-            data_files=data_files,
+-            cache_dir=model_args.cache_dir,
+-            task="image-classification",
+-        )
++        # Initialize our dataset and prepare it for the 'image-classification' task.
++        if data_args.dataset_name is not None:
++            dataset = load_dataset(
++                data_args.dataset_name,
++                data_args.dataset_config_name,
++                cache_dir=model_args.cache_dir,
++                task="image-classification",
++                use_auth_token=True if model_args.use_auth_token else None,
++                revision="014711311cec8b5959350c373878a3311caeb764",
++            )
++        else:
++            data_files = {}
++            if data_args.train_dir is not None:
++                data_files["train"] = os.path.join(data_args.train_dir, "**")
++            if data_args.validation_dir is not None:
++                data_files["validation"] = os.path.join(data_args.validation_dir, "**")
++            dataset = load_dataset(
++                "imagefolder",
++                data_files=data_files,
++                cache_dir=model_args.cache_dir,
++                task="image-classification",
++            )
+ 
+     # If we don't have a validation split, split off a percentage of train as validation.
+     data_args.train_val_split = None if "validation" in dataset.keys() else data_args.train_val_split
+@@ -275,6 +299,7 @@ def main():
          id2label=id2label,
          finetuning_task="image-classification",
          cache_dir=model_args.cache_dir,
