@@ -19,7 +19,7 @@
 # Clone the Transformers repo in the VIT Base inference directory
 git clone https://github.com/huggingface/transformers.git
 cd transformers
-git checkout v4.28.1
+git checkout v4.38.1
 pip install -r examples/pytorch/image-classification/requirements.txt
 pip install cchardet
 pip install scikit-learn
