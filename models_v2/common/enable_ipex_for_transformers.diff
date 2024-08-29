@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fc9411e95..cdc3cdbeb 100644
+index 999752485..066f0a367 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -89,7 +89,7 @@ index fc9411e95..cdc3cdbeb 100644
 +        # enable fusion path work(need to run two interation).
 +        with torch.no_grad():
 +            y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
-+            y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor) 
++            y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
 +            #dumpy_tensor = torch.ones((128, 384), dtype=torch.long)
 +            #y = model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
 +            #dumpy_tensor = torch.ones((81, 384), dtype=torch.long)
@@ -150,7 +150,7 @@ index fc9411e95..cdc3cdbeb 100644
 +                        "input_ids": {0: torch.export.Dim("dim", max=1024 * 1024)},
 +                        "attention_mask": {0: torch.export.Dim("dim", max=1024 * 1024)},
 +                        "token_type_ids": {0: torch.export.Dim("dim", max=1024 * 1024)}
-+                    }                    
++                    }
 +                exported_model = capture_pre_autograd_graph(
 +                    model,
 +                    (),
@@ -193,7 +193,7 @@ index fc9411e95..cdc3cdbeb 100644
 +                                                cpu_pool=cpu_pool,
 +                                                input_split_hint = multi_stream_input_hint,
 +                                                output_concat_hint = multi_stream_output_hint)
-+    return model 
++    return model
 +
 +def benchmark_evaluate(args, model, eval_dataloader):
 +    steps_per_epoch = len(eval_dataloader)
@@ -226,7 +226,7 @@ index fc9411e95..cdc3cdbeb 100644
 +                    timeBuff = np.asarray(timeBuff)
 +                    p99 = np.percentile(timeBuff, 99)
 +                    print('P99 Latency {:.2f} ms'.format(p99*1000))
-+                    print("Throughput: {:.3f} sentence/s".format(throughput))     
++                    print("Throughput: {:.3f} sentence/s".format(throughput))
 +                    break
 +                import contextlib
 +                maybe_autocast = torch.cpu.amp.autocast(enabled=args.bf16 or args.int8_bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16) if args.inductor else contextlib.nullcontext()
@@ -241,7 +241,7 @@ index fc9411e95..cdc3cdbeb 100644
 +                    #print("inputs type is: {}".format(type(inputs)))
 +                    #print("inputs is: {}".format(inputs))
 +
-+                    outputs = model(**inputs)          
++                    outputs = model(**inputs)
 +
 +                    # print("outputs type is: {}".format(type(outputs)))
 +                    # print("outputs len is: {}".format(len(outputs)))
@@ -322,7 +322,7 @@ index fc9411e95..cdc3cdbeb 100644
 +            for t in threads:
 +                t.join()
 +        else:
-+            benchmark_evaluate(args, model, eval_dataloader)        
++            benchmark_evaluate(args, model, eval_dataloader)
 +        exit()
  
      all_results = []
@@ -386,7 +386,7 @@ index fc9411e95..cdc3cdbeb 100644
 +                        help='use int8 fp32 mix precision')
 +    parser.add_argument('--int8_bf16', dest='int8_bf16', action='store_true',
 +                        help='use int8 bf16 mix precision')
-+    parser.add_argument("--int8_config", type=str, default="config.json", 
++    parser.add_argument("--int8_config", type=str, default="config.json",
 +                        help="quantization config file for int8 mode")
 +    parser.add_argument('--fp8', dest='fp8', action='store_true',
 +                        help='use FP8')
@@ -451,10 +451,10 @@ index fc9411e95..cdc3cdbeb 100644
  
              # Evaluate
 diff --git a/examples/pytorch/image-classification/run_image_classification.py b/examples/pytorch/image-classification/run_image_classification.py
-index e2ce9f1c5..c996c3423 100644
+index 27e9223b8..2135dc138 100755
 --- a/examples/pytorch/image-classification/run_image_classification.py
 +++ b/examples/pytorch/image-classification/run_image_classification.py
-@@ -221,28 +221,52 @@ def main():
+@@ -250,40 +250,64 @@ def main():
  
      # Set seed before initializing model.
      set_seed(training_args.seed)
@@ -465,8 +465,7 @@ index e2ce9f1c5..c996c3423 100644
 -            data_args.dataset_name,
 -            data_args.dataset_config_name,
 -            cache_dir=model_args.cache_dir,
--            task="image-classification",
--            use_auth_token=True if model_args.use_auth_token else None,
+-            token=model_args.token,
 -        )
 +    if data_args.dataset_name is not None and data_args.dataset_name == "dummy":
 +        from datasets import ClassLabel
@@ -475,22 +474,22 @@ index e2ce9f1c5..c996c3423 100644
 +                self.num_samples = num_samples
 +                self.image_size = image_size
 +                self.num_classes = num_classes
-+                self.data = [torch.randn(*self.image_size) for i in range(num_samples)]
-+                self.labels = [torch.randint(0, self.num_classes, (1,)).item() for i in range(num_samples)]
++                self.data = [torch.randn(*self.image_size) for i in range(self.num_samples)]
++                self.labels = [torch.randint(0, self.num_classes, (1,)).item() for i in range(self.num_samples)]
 +
 +            def __len__(self):
 +                return self.num_samples
 +
 +            def __getitem__(self, idx):
-+                return {"pixel_values": self.data[idx], "labels": self.labels[idx]}
++                return {"pixel_values": self.data[idx], "label": self.labels[idx]}
 +
 +            @property
 +            def features(self):
-+                return {"labels": ClassLabel(names=[str(i) for i in range(self.num_classes)])}
++                return {"label": ClassLabel(names=[str(i) for i in range(self.num_classes)])}
 +
 +            def set_transform(self, transform=None):
 +                pass
-+        dataset = {'train': DummyImageDataset(), 'validation': DummyImageDataset()}
++        dataset = {'train': DummyImageDataset(),'validation': DummyImageDataset()}
      else:
 -        data_files = {}
 -        if data_args.train_dir is not None:
@@ -501,7 +500,6 @@ index e2ce9f1c5..c996c3423 100644
 -            "imagefolder",
 -            data_files=data_files,
 -            cache_dir=model_args.cache_dir,
--            task="image-classification",
 -        )
 +        # Initialize our dataset and prepare it for the 'image-classification' task.
 +        if data_args.dataset_name is not None:
@@ -509,8 +507,7 @@ index e2ce9f1c5..c996c3423 100644
 +                data_args.dataset_name,
 +                data_args.dataset_config_name,
 +                cache_dir=model_args.cache_dir,
-+                task="image-classification",
-+                use_auth_token=True if model_args.use_auth_token else None,
++                token=model_args.token,
 +                revision="014711311cec8b5959350c373878a3311caeb764",
 +            )
 +        else:
@@ -523,49 +520,75 @@ index e2ce9f1c5..c996c3423 100644
 +                "imagefolder",
 +                data_files=data_files,
 +                cache_dir=model_args.cache_dir,
-+                task="image-classification",
 +            )
  
-     # If we don't have a validation split, split off a percentage of train as validation.
-     data_args.train_val_split = None if "validation" in dataset.keys() else data_args.train_val_split
-@@ -275,6 +299,7 @@ def main():
+-    dataset_column_names = dataset["train"].column_names if "train" in dataset else dataset["validation"].column_names
+-    if data_args.image_column_name not in dataset_column_names:
+-        raise ValueError(
+-            f"--image_column_name {data_args.image_column_name} not found in dataset '{data_args.dataset_name}'. "
+-            "Make sure to set `--image_column_name` to the correct audio column - one of "
+-            f"{', '.join(dataset_column_names)}."
+-        )
+-    if data_args.label_column_name not in dataset_column_names:
+-        raise ValueError(
+-            f"--label_column_name {data_args.label_column_name} not found in dataset '{data_args.dataset_name}'. "
+-            "Make sure to set `--label_column_name` to the correct text column - one of "
+-            f"{', '.join(dataset_column_names)}."
+-        )
++        dataset_column_names = dataset["train"].column_names if "train" in dataset else dataset["validation"].column_names
++        if data_args.image_column_name not in dataset_column_names:
++            raise ValueError(
++                f"--image_column_name {data_args.image_column_name} not found in dataset '{data_args.dataset_name}'. "
++                "Make sure to set `--image_column_name` to the correct audio column - one of "
++                f"{', '.join(dataset_column_names)}."
++            )
++        if data_args.label_column_name not in dataset_column_names:
++            raise ValueError(
++                f"--label_column_name {data_args.label_column_name} not found in dataset '{data_args.dataset_name}'. "
++                "Make sure to set `--label_column_name` to the correct text column - one of "
++                f"{', '.join(dataset_column_names)}."
++            )
+ 
+     def collate_fn(examples):
+         pixel_values = torch.stack([example["pixel_values"] for example in examples])
+@@ -321,6 +345,7 @@ def main():
          id2label=id2label,
          finetuning_task="image-classification",
          cache_dir=model_args.cache_dir,
 +        return_dict = False,
          revision=model_args.model_revision,
-         use_auth_token=True if model_args.use_auth_token else None,
-     )
+         token=model_args.token,
+         trust_remote_code=model_args.trust_remote_code,
 diff --git a/examples/pytorch/question-answering/run_qa.py b/examples/pytorch/question-answering/run_qa.py
-index 9dc3b2c81..0c21b2dd9 100755
+index 9edca7b13..f3fde52fa 100755
 --- a/examples/pytorch/question-answering/run_qa.py
 +++ b/examples/pytorch/question-answering/run_qa.py
-@@ -322,6 +322,7 @@ def main():
-         model_args.config_name if model_args.config_name else model_args.model_name_or_path,
-         cache_dir=model_args.cache_dir,
+@@ -350,6 +350,7 @@ def main():
          revision=model_args.model_revision,
+         token=model_args.token,
+         trust_remote_code=model_args.trust_remote_code,
 +        return_dict=False,
-         use_auth_token=True if model_args.use_auth_token else None,
      )
      tokenizer = AutoTokenizer.from_pretrained(
+         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
 diff --git a/examples/pytorch/text-classification/run_glue.py b/examples/pytorch/text-classification/run_glue.py
-index c14107d89..fdc7d03f6 100755
+index 054fcd776..4ad27e7a2 100755
 --- a/examples/pytorch/text-classification/run_glue.py
 +++ b/examples/pytorch/text-classification/run_glue.py
-@@ -360,6 +360,7 @@ def main():
+@@ -386,6 +386,7 @@ def main():
          num_labels=num_labels,
          finetuning_task=data_args.task_name,
          cache_dir=model_args.cache_dir,
 +        return_dict = False,
          revision=model_args.model_revision,
-         use_auth_token=True if model_args.use_auth_token else None,
-     )
-@@ -487,7 +488,12 @@ def main():
-     if data_args.task_name is not None:
-         metric = evaluate.load("glue", data_args.task_name)
+         token=model_args.token,
+         trust_remote_code=model_args.trust_remote_code,
+@@ -518,7 +519,12 @@ def main():
+     elif is_regression:
+         metric = evaluate.load("mse", cache_dir=model_args.cache_dir)
      else:
--        metric = evaluate.load("accuracy")
-+        #metric = evaluate.load("accuracy")
+-        metric = evaluate.load("accuracy", cache_dir=model_args.cache_dir)
++        #metric = evaluate.load("accuracy", cache_dir=model_args.cache_dir)
 +        curpath = os.path.abspath(os.path.dirname(__file__))
 +        curpath  = curpath.replace("/transformers/examples/pytorch/text-classification", '')
 +        accuracy_path = os.path.join( curpath, "accuracy.py")
@@ -574,7 +597,7 @@ index c14107d89..fdc7d03f6 100755
  
      # You can define your custom compute_metrics function. It takes an `EvalPrediction` object (a namedtuple with a
      # predictions and label_ids field) and has to return a dictionary string to float.
-@@ -575,6 +581,7 @@ def main():
+@@ -601,6 +607,7 @@ def main():
  
              trainer.log_metrics("eval", metrics)
              trainer.save_metrics("eval", combined if task is not None and "mnli" in task else metrics)
@@ -583,21 +606,21 @@ index c14107d89..fdc7d03f6 100755
      if training_args.do_predict:
          logger.info("*** Predict ***")
 diff --git a/src/transformers/activations.py b/src/transformers/activations.py
-index 587dc2e59..b4e331e28 100644
+index 22f5fe9b1..12d20f226 100644
 --- a/src/transformers/activations.py
 +++ b/src/transformers/activations.py
-@@ -53,8 +53,7 @@ class NewGELUActivation(nn.Module):
+@@ -54,8 +54,7 @@ class NewGELUActivation(nn.Module):
      """
  
      def forward(self, input: Tensor) -> Tensor:
 -        return 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
 -
-+        return nn.functional.gelu(input, approximate='tanh') 
++        return nn.functional.gelu(input, approximate='tanh')
  
  class GELUActivation(nn.Module):
      """
 diff --git a/src/transformers/generation/utils.py b/src/transformers/generation/utils.py
-index ae12ae293..e6a08d367 100644
+index 08fde5850..0f71175f6 100644
 --- a/src/transformers/generation/utils.py
 +++ b/src/transformers/generation/utils.py
 @@ -16,6 +16,8 @@
@@ -609,7 +632,7 @@ index ae12ae293..e6a08d367 100644
  import warnings
  from dataclasses import dataclass
  from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
-@@ -700,6 +702,9 @@ class GenerationMixin:
+@@ -629,6 +631,9 @@ class GenerationMixin:
  
      def _extract_past_from_model_output(self, outputs: ModelOutput, standardize_cache_format: bool = False):
          past_key_values = None
@@ -619,7 +642,7 @@ index ae12ae293..e6a08d367 100644
          if "past_key_values" in outputs:
              past_key_values = outputs.past_key_values
          elif "mems" in outputs:
-@@ -1208,6 +1213,11 @@ class GenerationMixin:
+@@ -1321,6 +1326,11 @@ class GenerationMixin:
  
          # 1. Handle `generation_config` and kwargs that might update it, and validate the `.generate()` call
          self._validate_model_class()
@@ -631,7 +654,7 @@ index ae12ae293..e6a08d367 100644
  
          # priority: `generation_config` argument > `model.generation_config` (the default generation config)
          if generation_config is None:
-@@ -2186,6 +2196,7 @@ class GenerationMixin:
+@@ -2341,6 +2351,7 @@ class GenerationMixin:
          ["It might be possible to get a better understanding of the nature of the problem, but it's not"]
          ```"""
          # init values
@@ -639,7 +662,7 @@ index ae12ae293..e6a08d367 100644
          logits_processor = logits_processor if logits_processor is not None else LogitsProcessorList()
          stopping_criteria = stopping_criteria if stopping_criteria is not None else StoppingCriteriaList()
          if max_length is not None:
-@@ -2231,6 +2242,7 @@ class GenerationMixin:
+@@ -2387,6 +2398,7 @@ class GenerationMixin:
  
          this_peer_finished = False  # used by synced_gpus only
          while True:
@@ -647,7 +670,7 @@ index ae12ae293..e6a08d367 100644
              if synced_gpus:
                  # Under synced_gpus the `forward` call must continue until all gpus complete their sequence.
                  # The following logic allows an early break if all peers finished generating their sequence
-@@ -2243,19 +2255,95 @@ class GenerationMixin:
+@@ -2399,19 +2411,95 @@ class GenerationMixin:
  
              # prepare model inputs
              model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
@@ -756,33 +779,35 @@ index ae12ae293..e6a08d367 100644
  
              # pre-process distribution
              next_tokens_scores = logits_processor(input_ids, next_token_logits)
-@@ -2302,6 +2390,7 @@ class GenerationMixin:
-                 )
+@@ -2463,6 +2551,8 @@ class GenerationMixin:
+                 if unfinished_sequences.max() == 0:
+                     this_peer_finished = True
  
-             # stop when each sentence is finished, or if we exceed the maximum length
 +            latency_list.append(time.time() - tic)
-             if unfinished_sequences.max() == 0 or stopping_criteria(input_ids, scores):
-                 if not synced_gpus:
-                     break
-@@ -2313,7 +2402,7 @@ class GenerationMixin:
++
+             # stop if we exceed the maximum length
+             if stopping_criteria(input_ids, scores):
+                 this_peer_finished = True
+@@ -2475,7 +2565,7 @@ class GenerationMixin:
  
          if return_dict_in_generate:
              if self.config.is_encoder_decoder:
--                return GreedySearchEncoderDecoderOutput(
-+                output_result = GreedySearchEncoderDecoderOutput(
+-                return GenerateEncoderDecoderOutput(
++                output_result = GenerateEncoderDecoderOutput(
                      sequences=input_ids,
                      scores=scores,
-                     encoder_attentions=encoder_attentions,
-@@ -2323,14 +2412,19 @@ class GenerationMixin:
-                     decoder_hidden_states=decoder_hidden_states,
+                     logits=raw_logits,
+@@ -2487,7 +2577,7 @@ class GenerationMixin:
+                     past_key_values=model_kwargs.get("past_key_values"),
                  )
              else:
--                return GreedySearchDecoderOnlyOutput(
-+                output_result = GreedySearchDecoderOnlyOutput(
+-                return GenerateDecoderOnlyOutput(
++                output_result = GenerateDecoderOnlyOutput(
                      sequences=input_ids,
                      scores=scores,
-                     attentions=decoder_attentions,
-                     hidden_states=decoder_hidden_states,
+                     logits=raw_logits,
+@@ -2496,7 +2586,12 @@ class GenerationMixin:
+                     past_key_values=model_kwargs.get("past_key_values"),
                  )
          else:
 -            return input_ids
@@ -795,171 +820,179 @@ index ae12ae293..e6a08d367 100644
  
      def sample(
          self,
-@@ -2733,6 +2827,7 @@ class GenerationMixin:
+@@ -2950,6 +3045,7 @@ class GenerationMixin:
          ['Wie alt bist du?']
          ```"""
          # init values
 +        latency_list = []
          logits_processor = logits_processor if logits_processor is not None else LogitsProcessorList()
          stopping_criteria = stopping_criteria if stopping_criteria is not None else StoppingCriteriaList()
-         if max_length is not None:
-@@ -2795,6 +2890,7 @@ class GenerationMixin:
+         sequential = sequential if sequential is not None else self.generation_config.low_memory
+@@ -3017,6 +3113,7 @@ class GenerationMixin:
  
-         this_peer_finished = False  # used by synced_gpus only
+         decoder_prompt_len = input_ids.shape[-1]  # record the prompt length of decoder
          while True:
 +            tic = time.time()
              if synced_gpus:
                  # Under synced_gpus the `forward` call must continue until all gpus complete their sequence.
                  # The following logic allows an early break if all peers finished generating their sequence
-@@ -2806,19 +2902,134 @@ class GenerationMixin:
-                     break
+@@ -3063,20 +3160,143 @@ class GenerationMixin:
+                 ]
  
-             model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
--
--            outputs = self(
--                **model_inputs,
--                return_dict=True,
--                output_attentions=output_attentions,
--                output_hidden_states=output_hidden_states,
--            )
+                 outputs = stack_model_outputs(outputs_per_sub_batch)
++                if synced_gpus and this_peer_finished:
++                    cur_len = cur_len + 1
++                    continue  # don't waste resources running the code we don't need
+ 
+-            else:  # Unchanged original behavior
+-                outputs = self(
+-                    **model_inputs,
+-                    return_dict=True,
+-                    output_attentions=output_attentions,
+-                    output_hidden_states=output_hidden_states,
+-                )
 -
 -            if synced_gpus and this_peer_finished:
 -                cur_len = cur_len + 1
 -                continue  # don't waste resources running the code we don't need
--
++                next_token_logits = outputs.logits[:, -1, :]
+ 
 -            next_token_logits = outputs.logits[:, -1, :]
-+            if re.search("GPTJ", self.config.architectures[0]) or re.search("llama", self.config.architectures[0], re.IGNORECASE) or re.search("chatglm", self.config.architectures[0], re.IGNORECASE):
-+                if self.jit == False:
-+                    outputs = self(
-+                        **model_inputs,
-+                        return_dict=True,
-+                        output_attentions=output_attentions,
-+                        output_hidden_states=output_hidden_states,
-+                        )
-+                    if synced_gpus and this_peer_finished:
-+                        cur_len = cur_len + 1
-+                        continue  # don't waste resources running the code we don't need
-+                    next_token_logits = outputs.logits[:, -1, :]
-+                else:
-+                    first_token = False
-+                    input_bs = input_ids.size()[0]
-+                    if model_inputs["past_key_values"] is None:
-+                        first_token = True
-+                    if first_token:
-+                        seq_len = input_ids.size()[1]
-+                        if re.search("GPTJ", self.config.architectures[0]):
-+                            # beam_idx_tmp=torch.zeros(int(batch_size * num_beams), dtype=torch.int)
-+                            # model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)]), torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)]), beam_idx_tmp) for i in range(self.config.n_layer)])
-+                            model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)]), torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)])) for i in range(self.config.n_layer)])
-+                        elif re.search("llama", self.config.architectures[0], re.IGNORECASE):
-+                            model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)]), torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)])) for i in range(self.config.num_hidden_layers)])
-+                        elif re.search("chatglm", self.config.architectures[0], re.IGNORECASE):
-+                            model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)]), torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)])) for i in range(self.config.num_layers)])
-+
-+                        model_inputs["attention_mask"] = model_inputs["attention_mask"][:1,:]
-+                        model_inputs["input_ids"] = model_inputs["input_ids"][:1,:]
-+                        model_inputs["position_ids"] = model_inputs["position_ids"][:1,:]
-+                        model_inputs["attention_mask"] = torch.cat([torch.zeros(1, 1), model_inputs["attention_mask"]], dim=-1)
++            else:  # Unchanged original behavior
++                if re.search("GPTJ", self.config.architectures[0]) or re.search("llama", self.config.architectures[0], re.IGNORECASE) or re.search("chatglm", self.config.architectures[0], re.IGNORECASE):
++                    if self.jit == False:
++                        outputs = self(
++                            **model_inputs,
++                            return_dict=True,
++                            output_attentions=output_attentions,
++                            output_hidden_states=output_hidden_states,
++                            )
++                        if synced_gpus and this_peer_finished:
++                            cur_len = cur_len + 1
++                            continue  # don't waste resources running the code we don't need
++                        next_token_logits = outputs.logits[:, -1, :]
 +                    else:
-+                        model_inputs["attention_mask"] = torch.cat([torch.zeros(input_bs, 1), model_inputs["attention_mask"]], dim=-1)
-+                    model_inputs.pop("use_cache", None)
-+                    model_inputs.pop("token_type_ids", None)
++                        first_token = False
++                        input_bs = input_ids.size()[0]
++                        if model_inputs["past_key_values"] is None:
++                            first_token = True
++                        if first_token:
++                            seq_len = input_ids.size()[1]
++                            if re.search("GPTJ", self.config.architectures[0]):
++                                # beam_idx_tmp=torch.zeros(int(batch_size * num_beams), dtype=torch.int)
++                                # model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)]), torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)]), beam_idx_tmp) for i in range(self.config.n_layer)])
++                                model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)]), torch.zeros([1,int(self.config.n_head/self.tp_number),1,int(self.config.n_embd/self.config.n_head)])) for i in range(self.config.n_layer)])
++                            elif re.search("llama", self.config.architectures[0], re.IGNORECASE):
++                                model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)]), torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)])) for i in range(self.config.num_hidden_layers)])
++                            elif re.search("chatglm", self.config.architectures[0], re.IGNORECASE):
++                                model_inputs["past_key_values"] = tuple([(torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)]), torch.zeros([1,int(self.config.num_attention_heads/self.tp_number),1,int(self.config.hidden_size/self.config.num_attention_heads)])) for i in range(self.config.num_layers)])
 +
-+                    if not hasattr(self, "trace_graph") and self.jit and self.ipex_int8:
-+                        print("load_int8_model")
-+                        self_jit = torch.jit.load(self.quantized_model_path)
-+                        self_jit = torch.jit.freeze(self_jit.eval())
-+                        setattr(self, "trace_graph", self_jit)
-+                    if not hasattr(self,"trace_graph") and self.jit and not self.ipex_int8:
++                            model_inputs["attention_mask"] = model_inputs["attention_mask"][:1,:]
++                            model_inputs["input_ids"] = model_inputs["input_ids"][:1,:]
++                            model_inputs["position_ids"] = model_inputs["position_ids"][:1,:]
++                            model_inputs["attention_mask"] = torch.cat([torch.zeros(1, 1), model_inputs["attention_mask"]], dim=-1)
++                        else:
++                            model_inputs["attention_mask"] = torch.cat([torch.zeros(input_bs, 1), model_inputs["attention_mask"]], dim=-1)
++                        model_inputs.pop("use_cache", None)
++                        model_inputs.pop("token_type_ids", None)
++
++                        if not hasattr(self, "trace_graph") and self.jit and self.ipex_int8:
++                            print("load_int8_model")
++                            self_jit = torch.jit.load(self.quantized_model_path)
++                            self_jit = torch.jit.freeze(self_jit.eval())
++                            setattr(self, "trace_graph", self_jit)
++                        if not hasattr(self,"trace_graph") and self.jit and not self.ipex_int8:
++                            if hasattr(self, "forward"):
++                                sig = inspect.signature(self.forward)
++                            else:
++                                sig = inspect.signature(self.call)
++                            example_inputs = tuple(model_inputs[key] for key in sig.parameters
++                                if model_inputs.get(key, None) is not None and not isinstance(model_inputs.get(key, None), bool))
++                            self_jit = torch.jit.trace(self, example_inputs, strict=False)
++                            self_jit = torch.jit.freeze(self_jit.eval())
++                            setattr(self, "trace_graph", self_jit)
++                        outputs = self.trace_graph(**model_inputs)
++                        if synced_gpus and this_peer_finished:
++                            cur_len = cur_len + 1
++                            continue  # don't waste resources running the code we don't need
++                        if first_token:
++                            outputs = list(outputs)
++                            outputs[0] = outputs[0].expand(input_bs, -1, -1)
++                            past_key_values = []
++                            for key, value in outputs[1]:
++                                key_dim = key.dim()
++                                value_dim = value.dim()
++                                key = key.expand(input_bs, -1, -1, -1).contiguous()
++                                value = value.expand(input_bs, -1, -1, -1).contiguous()
++                                if key_dim == 3:
++                                    key = key.view(key.size(1) * key.size(0), key.size(2), key.size(3))
++                                if value_dim == 3:
++                                    value = value.view(value.size(1) * value.size(0), value.size(2), value.size(3))
++                                past_key_values.append(tuple([key, value]))
++                            outputs[1] = tuple(past_key_values)
++                            outputs = tuple(outputs)
++                        if synced_gpus and this_peer_finished:
++                            cur_len = cur_len + 1
++                            continue  # don't waste resources running the code we don't need
++                        next_token_logits = outputs[0][:, -1, :]
++                else:
++                    if model_inputs["past_key_values"] is None or self.jit == False:
++                        if re.search("T5", self.config.architectures[0]):
++                            first_token = False
++                        else:
++                            first_token = model_inputs["input_ids"].size()[1] != 1
++                        if first_token:
++                            input_bs = input_ids.size()[0]
++                            seq_len = input_ids.size()[1]
++                            model_inputs["attention_mask"] = model_inputs["attention_mask"][:1,:]
++                            model_inputs["input_ids"] = model_inputs["input_ids"][:1,:]
++                        outputs = self(
++                            **model_inputs,
++                            return_dict=True,
++                            output_attentions=output_attentions,
++                            output_hidden_states=output_hidden_states,
++                        )
++                        if first_token:
++                            outputs.logits = outputs.logits.expand(input_bs, seq_len, -1)
++                            past_key_values = []
++                            for key, value in outputs["past_key_values"]:
++                                key_dim = key.dim()
++                                value_dim = value.dim()
++                                key = key.expand(input_bs, -1, -1, -1).contiguous()
++                                value = value.expand(input_bs, -1, -1, -1).contiguous()
++                                if key_dim == 3:
++                                    key = key.view(key.size(1) * key.size(0), key.size(2), key.size(3))
++                                if value_dim == 3:
++                                    value = value.view(value.size(1) * value.size(0), value.size(2), value.size(3))
++                                past_key_values.append(tuple([key, value]))
++                            outputs.past_key_values = tuple(past_key_values)
++                        if synced_gpus and this_peer_finished:
++                            cur_len = cur_len + 1
++                            continue  # don't waste resources running the code we don't need
++                        next_token_logits = outputs.logits[:, -1, :]
++                    else:
 +                        if hasattr(self, "forward"):
 +                            sig = inspect.signature(self.forward)
 +                        else:
 +                            sig = inspect.signature(self.call)
 +                        example_inputs = tuple(model_inputs[key] for key in sig.parameters
 +                            if model_inputs.get(key, None) is not None and not isinstance(model_inputs.get(key, None), bool))
-+                        self_jit = torch.jit.trace(self, example_inputs, strict=False)
-+                        self_jit = torch.jit.freeze(self_jit.eval())
-+                        setattr(self, "trace_graph", self_jit)
-+                    outputs = self.trace_graph(**model_inputs)
-+                    if synced_gpus and this_peer_finished:
-+                        cur_len = cur_len + 1
-+                        continue  # don't waste resources running the code we don't need
-+                    if first_token:
-+                        outputs = list(outputs)
-+                        outputs[0] = outputs[0].expand(input_bs, -1, -1)
-+                        past_key_values = []
-+                        for key, value in outputs[1]:
-+                            key_dim = key.dim()
-+                            value_dim = value.dim()
-+                            key = key.expand(input_bs, -1, -1, -1).contiguous()
-+                            value = value.expand(input_bs, -1, -1, -1).contiguous()
-+                            if key_dim == 3:
-+                                key = key.view(key.size(1) * key.size(0), key.size(2), key.size(3))
-+                            if value_dim == 3:
-+                                value = value.view(value.size(1) * value.size(0), value.size(2), value.size(3))
-+                            past_key_values.append(tuple([key, value]))
-+                        outputs[1] = tuple(past_key_values)
-+                        outputs = tuple(outputs)
-+                    if synced_gpus and this_peer_finished:
-+                        cur_len = cur_len + 1
-+                        continue  # don't waste resources running the code we don't need
-+                    next_token_logits = outputs[0][:, -1, :]
-+            else:
-+                if model_inputs["past_key_values"] is None or self.jit == False:
-+                    if re.search("T5", self.config.architectures[0]):
-+                        first_token = False
-+                    else:
-+                        first_token = model_inputs["input_ids"].size()[1] != 1
-+                    if first_token: 
-+                        input_bs = input_ids.size()[0]
-+                        seq_len = input_ids.size()[1]
-+                        model_inputs["attention_mask"] = model_inputs["attention_mask"][:1,:]
-+                        model_inputs["input_ids"] = model_inputs["input_ids"][:1,:]
-+                    outputs = self(
-+                        **model_inputs,
-+                        return_dict=True,
-+                        output_attentions=output_attentions,
-+                        output_hidden_states=output_hidden_states,
-+                    )
-+                    if first_token: 
-+                        outputs.logits = outputs.logits.expand(input_bs, seq_len, -1)
-+                        past_key_values = []
-+                        for key, value in outputs["past_key_values"]:
-+                            key_dim = key.dim()
-+                            value_dim = value.dim()
-+                            key = key.expand(input_bs, -1, -1, -1).contiguous()
-+                            value = value.expand(input_bs, -1, -1, -1).contiguous()
-+                            if key_dim == 3:
-+                                key = key.view(key.size(1) * key.size(0), key.size(2), key.size(3))
-+                            if value_dim == 3:
-+                                value = value.view(value.size(1) * value.size(0), value.size(2), value.size(3))
-+                            past_key_values.append(tuple([key, value]))
-+                        outputs.past_key_values = tuple(past_key_values)
-+                    if synced_gpus and this_peer_finished:
-+                        cur_len = cur_len + 1
-+                        continue  # don't waste resources running the code we don't need               
-+                    next_token_logits = outputs.logits[:, -1, :]          
-+                else:
-+                    if hasattr(self, "forward"):
-+                        sig = inspect.signature(self.forward)
-+                    else:
-+                        sig = inspect.signature(self.call)
-+                    example_inputs = tuple(model_inputs[key] for key in sig.parameters
-+                        if model_inputs.get(key, None) is not None and not isinstance(model_inputs.get(key, None), bool))
-+                    if not hasattr(self,"trace_graph") and self.jit and not self.ipex_int8:
-+                        self_jit = torch.jit.trace(self, example_inputs, strict=False)
-+                        self_jit = torch.jit.freeze(self_jit.eval())
-+                        setattr(self, "trace_graph", self_jit)
++                        if not hasattr(self,"trace_graph") and self.jit and not self.ipex_int8:
++                            self_jit = torch.jit.trace(self, example_inputs, strict=False)
++                            self_jit = torch.jit.freeze(self_jit.eval())
++                            setattr(self, "trace_graph", self_jit)
 +
-+                    outputs = self.trace_graph(*example_inputs)
-+                    if synced_gpus and this_peer_finished:
-+                        cur_len = cur_len + 1
-+                        continue  # don't waste resources running the code we don't need
-+                    next_token_logits = outputs[0][:, -1, :]               
-             # hack: adjust tokens for Marian. For Marian we have to make sure that the `pad_token_id`
-             # cannot be generated both before and after the `nn.functional.log_softmax` operation.
-             next_token_logits = self.adjust_logits_during_generation(next_token_logits, cur_len=cur_len)
-@@ -2887,6 +3098,7 @@ class GenerationMixin:
++                        outputs = self.trace_graph(*example_inputs)
++                        if synced_gpus and this_peer_finished:
++                            cur_len = cur_len + 1
++                            continue  # don't waste resources running the code we don't need
++                        next_token_logits = outputs[0][:, -1, :]
++            # hack: adjust tokens for Marian. For Marian we have to make sure that the `pad_token_id`
++            # cannot be generated both before and after the `nn.functional.log_softmax` operation.
+             next_token_scores = nn.functional.log_softmax(
+                 next_token_logits, dim=-1
+             )  # (batch_size * num_beams, vocab_size)
+@@ -3149,6 +3369,7 @@ class GenerationMixin:
  
              # increase cur_len
              cur_len = cur_len + 1
@@ -967,26 +1000,26 @@ index ae12ae293..e6a08d367 100644
  
              if beam_scorer.is_done or stopping_criteria(input_ids, scores):
                  if not synced_gpus:
-@@ -2910,7 +3122,7 @@ class GenerationMixin:
+@@ -3173,7 +3394,7 @@ class GenerationMixin:
                  sequence_outputs["sequence_scores"] = None
  
              if self.config.is_encoder_decoder:
--                return BeamSearchEncoderDecoderOutput(
-+                output_result = BeamSearchEncoderDecoderOutput(
+-                return GenerateBeamEncoderDecoderOutput(
++                output_result = GenerateBeamEncoderDecoderOutput(
                      sequences=sequence_outputs["sequences"],
                      sequences_scores=sequence_outputs["sequence_scores"],
                      scores=scores,
-@@ -2922,7 +3134,7 @@ class GenerationMixin:
-                     decoder_hidden_states=decoder_hidden_states,
+@@ -3187,7 +3408,7 @@ class GenerationMixin:
+                     past_key_values=model_kwargs.get("past_key_values"),
                  )
              else:
--                return BeamSearchDecoderOnlyOutput(
-+                output_result = BeamSearchDecoderOnlyOutput(
+-                return GenerateBeamDecoderOnlyOutput(
++                output_result = GenerateBeamDecoderOnlyOutput(
                      sequences=sequence_outputs["sequences"],
                      sequences_scores=sequence_outputs["sequence_scores"],
                      scores=scores,
-@@ -2931,7 +3143,9 @@ class GenerationMixin:
-                     hidden_states=decoder_hidden_states,
+@@ -3198,7 +3419,9 @@ class GenerationMixin:
+                     past_key_values=model_kwargs.get("past_key_values"),
                  )
          else:
 -            return sequence_outputs["sequences"]
@@ -997,15 +1030,21 @@ index ae12ae293..e6a08d367 100644
      def beam_sample(
          self,
 diff --git a/src/transformers/modeling_utils.py b/src/transformers/modeling_utils.py
-index 0df8d7e25..d14c9eede 100644
+index b3102a37d..a3d232b1d 100644
 --- a/src/transformers/modeling_utils.py
 +++ b/src/transformers/modeling_utils.py
-@@ -298,8 +298,13 @@ def shard_checkpoint(
-     current_block_size = 0
+@@ -362,6 +362,7 @@ def shard_checkpoint(
      total_size = 0
+     storage_id_to_block = {}
  
 +    import io
      for key, weight in state_dict.items():
+         # when bnb serialization is used the weights in the state dict can be strings
+         # check: https://github.com/huggingface/transformers/pull/24416 for more details
+@@ -376,7 +377,11 @@ def shard_checkpoint(
+             sharded_state_dicts[block_id][key] = weight
+             continue
+ 
 -        weight_size = weight.numel() * dtype_byte_size(weight.dtype)
 +        if isinstance(weight, io.BytesIO):
 +            # FP8 has extra state with io.BytesIO
@@ -1013,9 +1052,9 @@ index 0df8d7e25..d14c9eede 100644
 +        else:
 +            weight_size = weight.numel() * dtype_byte_size(weight.dtype)
  
-         # If this weight is going to tip up over the maximal size, we split.
-         if current_block_size + weight_size > max_shard_size:
-@@ -1831,7 +1836,10 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
+         # If this weight is going to tip up over the maximal size, we split, but only if we have put at least one
+         # weight in the current shard.
+@@ -2438,7 +2443,10 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
                  and is_main_process
                  and reg.fullmatch(filename_no_suffix) is not None
              ):
@@ -1028,10 +1067,10 @@ index 0df8d7e25..d14c9eede 100644
          # Save the model
          for shard_file, shard in shards.items():
 diff --git a/src/transformers/models/bert/modeling_bert.py b/src/transformers/models/bert/modeling_bert.py
-index ee7dcd5e4..5ead9c989 100755
+index 4c068c4d4..ca4c33cbf 100755
 --- a/src/transformers/models/bert/modeling_bert.py
 +++ b/src/transformers/models/bert/modeling_bert.py
-@@ -346,6 +346,8 @@ class BertSelfAttention(nn.Module):
+@@ -348,6 +348,8 @@ class BertSelfAttention(nn.Module):
  
          attention_scores = attention_scores / math.sqrt(self.attention_head_size)
          if attention_mask is not None:
@@ -1040,7 +1079,7 @@ index ee7dcd5e4..5ead9c989 100755
              # Apply the attention mask is (precomputed for all layers in BertModel forward() function)
              attention_scores = attention_scores + attention_mask
  
-@@ -1063,6 +1065,7 @@ class BertForPreTraining(BertPreTrainedModel):
+@@ -1056,6 +1058,7 @@ class BertForPreTraining(BertPreTrainedModel):
  
          # Initialize weights and apply final processing
          self.post_init()
@@ -1048,7 +1087,7 @@ index ee7dcd5e4..5ead9c989 100755
  
      def get_output_embeddings(self):
          return self.cls.predictions.decoder
-@@ -1133,12 +1136,24 @@ class BertForPreTraining(BertPreTrainedModel):
+@@ -1126,12 +1129,24 @@ class BertForPreTraining(BertPreTrainedModel):
          )
  
          sequence_output, pooled_output = outputs[:2]
@@ -1075,10 +1114,10 @@ index ee7dcd5e4..5ead9c989 100755
              total_loss = masked_lm_loss + next_sentence_loss
  
 diff --git a/src/transformers/models/distilbert/modeling_distilbert.py b/src/transformers/models/distilbert/modeling_distilbert.py
-index 84db89e0f..cb986d7ea 100755
+index 481e4c427..d2ac0b3aa 100755
 --- a/src/transformers/models/distilbert/modeling_distilbert.py
 +++ b/src/transformers/models/distilbert/modeling_distilbert.py
-@@ -216,12 +216,11 @@ class MultiHeadSelfAttention(nn.Module):
+@@ -239,12 +239,11 @@ class MultiHeadSelfAttention(nn.Module):
          k = shape(self.k_lin(key))  # (bs, n_heads, k_length, dim_per_head)
          v = shape(self.v_lin(value))  # (bs, n_heads, k_length, dim_per_head)
  
@@ -1094,7 +1133,7 @@ index 84db89e0f..cb986d7ea 100755
  
          weights = nn.functional.softmax(scores, dim=-1)  # (bs, n_heads, q_length, k_length)
          weights = self.dropout(weights)  # (bs, n_heads, q_length, k_length)
-@@ -743,11 +742,11 @@ class DistilBertForSequenceClassification(DistilBertPreTrainedModel):
+@@ -982,11 +981,11 @@ class DistilBertForSequenceClassification(DistilBertPreTrainedModel):
      )
      def forward(
          self,
@@ -1108,7 +1147,7 @@ index 84db89e0f..cb986d7ea 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/models/vit/modeling_vit.py b/src/transformers/models/vit/modeling_vit.py
-index 474b92f72..094ea6eb0 100644
+index 734ccf6a9..5914d4e2b 100644
 --- a/src/transformers/models/vit/modeling_vit.py
 +++ b/src/transformers/models/vit/modeling_vit.py
 @@ -129,14 +129,14 @@ class ViTEmbeddings(nn.Module):
@@ -1128,7 +1167,7 @@ index 474b92f72..094ea6eb0 100644
  
          embeddings = self.dropout(embeddings)
  
-@@ -779,8 +779,8 @@ class ViTForImageClassification(ViTPreTrainedModel):
+@@ -776,8 +776,8 @@ class ViTForImageClassification(ViTPreTrainedModel):
      def forward(
          self,
          pixel_values: Optional[torch.Tensor] = None,
@@ -1139,16 +1178,18 @@ index 474b92f72..094ea6eb0 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499b0..0ff7236bd 100755
+index a2436dadc..23773d49a 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
-@@ -158,6 +158,29 @@ from .utils import (
+@@ -152,6 +152,31 @@ from .utils import (
+     strtobool,
  )
- from .utils.generic import ContextManagers
- 
+ from .utils.quantization_config import QuantizationMethod
++from tqdm import tqdm
++
 +def trace_handler(prof):
 +    print(prof.key_averages().table(
-+        sort_by="self_cpu_time_total", row_limit=10))
++        sort_by="self_cpu_time_total", row_limit=-1))
 +    import datetime
 +    now = datetime.datetime.now()
 +    log_path = os.path.join(os.getcwd(), "vit_profiling_{}_step_{}.json".format(now.strftime("%Y%m%d%H%M%S"), str(prof.step_num)))
@@ -1170,45 +1211,40 @@ index cf71499b0..0ff7236bd 100755
 +        with_modules=True
 +    )
  
- _is_native_cpu_amp_available = is_torch_greater_or_equal_than_1_10
  
-@@ -336,7 +359,7 @@ class Trainer:
-         self.hp_name = None
-         self.deepspeed = None
-         self.is_in_train = False
--
+ DEFAULT_CALLBACKS = [DefaultFlowCallback]
+@@ -366,6 +391,7 @@ class Trainer:
+ 
+         self.create_accelerator_and_postprocess()
+ 
 +        self.fp16_scaler = None
          # memory metrics - must set up as early as possible
          self._memory_tracker = TrainerMemoryTracker(self.args.skip_memory_metrics)
          self._memory_tracker.start()
-@@ -606,7 +629,7 @@ class Trainer:
+@@ -592,7 +618,7 @@ class Trainer:
+                         f"FP16 provided in SM_HP_MP_PARAMETERS is {smp.state.cfg.fp16}, "
                          "but SageMaker Model Parallelism < 1.10 does not support FP16 in trainer."
                      )
- 
--        if args.fp16 or args.bf16:
-+        if args.fp16 or args.bf16 or args.fp16_cpu:
-             if args.half_precision_backend == "auto":
-                 if args.device == torch.device("cpu"):
-                     if args.fp16:
-@@ -621,7 +644,7 @@ class Trainer:
+-        if (args.fp16 or args.bf16) and args.half_precision_backend == "auto":
++        if (args.fp16 or args.bf16 or args.fp16_cpu) and args.half_precision_backend == "auto":
+             if args.device == torch.device("cpu"):
+                 if args.fp16:
+                     raise ValueError("Tried to use `fp16` but it is not supported on cpu")
+@@ -600,11 +626,11 @@ class Trainer:
+                     args.half_precision_backend = "cpu_amp"
              logger.info(f"Using {args.half_precision_backend} half precision backend")
  
-         self.do_grad_scaling = False
--        if (args.fp16 or args.bf16) and not (args.deepspeed or is_sagemaker_mp_enabled()):
-+        if (args.fp16 or args.bf16 or args.fp16_cpu) and not (args.deepspeed or is_sagemaker_mp_enabled()):
+-        if (args.fp16 or args.bf16) and not (self.is_deepspeed_enabled or is_sagemaker_mp_enabled()):
++        if (args.fp16 or args.bf16 or args.fp16_cpu) and not (self.is_deepspeed_enabled or is_sagemaker_mp_enabled()):
              # deepspeed and SageMaker Model Parallel manage their own half precision
-             if args.half_precision_backend == "cuda_amp":
-                 self.use_cuda_amp = True
-@@ -645,7 +668,7 @@ class Trainer:
-                         self.scaler = torch.cuda.amp.GradScaler()
-             elif args.half_precision_backend == "cpu_amp":
+             if args.half_precision_backend == "cpu_amp":
                  self.use_cpu_amp = True
 -                self.amp_dtype = torch.bfloat16
 +                self.amp_dtype = torch.bfloat16 if not args.fp16_cpu else torch.half
-             else:
+             elif args.half_precision_backend == "apex":
                  if not is_apex_available():
                      raise ImportError(
-@@ -695,7 +718,7 @@ class Trainer:
+@@ -642,7 +668,7 @@ class Trainer:
          self._memory_tracker.stop_and_update_metrics()
  
          # torch.compile
@@ -1216,8 +1252,8 @@ index cf71499b0..0ff7236bd 100755
 +        if args.inductor and not is_torch_compile_available():
              raise RuntimeError("Using torch.compile requires PyTorch 2.0 or higher.")
  
-     def add_callback(self, callback):
-@@ -1323,15 +1346,45 @@ class Trainer:
+         self.is_fsdp_xla_v2_enabled = args.fsdp_config["xla_fsdp_v2"]
+@@ -1306,13 +1332,39 @@ class Trainer:
          return model
  
      def torch_jit_model_eval(self, model, dataloader, training=False):
@@ -1230,7 +1266,7 @@ index cf71499b0..0ff7236bd 100755
              example_batch = self._prepare_inputs(example_batch)
 +            int8_inputs=[]
 +            if (self.args.int8 or self.args.do_calibration) and self.args.use_ipex:
-+                import intel_extension_for_pytorch as ipex 
++                import intel_extension_for_pytorch as ipex
 +                from intel_extension_for_pytorch.quantization import prepare, convert
 +                from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
 +                qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
@@ -1254,16 +1290,21 @@ index cf71499b0..0ff7236bd 100755
              try:
 +                if self.args.int8:
 +                    model = prepared_model
-                 jit_model = model.eval()
-                 with ContextManagers([self.autocast_smart_context_manager(cache_enabled=False), torch.no_grad()]):
+                 jit_model = copy.copy(model)
+                 jit_model.eval()
+                 original_forward = jit_model.__dict__.pop("_original_forward", None)
+@@ -1320,6 +1372,10 @@ class Trainer:
+                 if original_forward:
+                     jit_model.forward = original_forward
+                 with self.accelerator.autocast(cache_enabled=False), torch.no_grad():
 +                    if self.args.int8 and self.args.use_ipex:
 +                        jit_model = convert(jit_model)
 +                        if self.args.smooth_quant:
 +                            jit_model(*int8_inputs)
-                     if version.parse(version.parse(torch.__version__).base_version) >= version.parse("1.14.0"):
+                     if version.parse(version.parse(torch.__version__).base_version) >= version.parse("2.0.0"):
                          if isinstance(example_batch, dict):
                              jit_model = torch.jit.trace(jit_model, example_kwarg_inputs=example_batch, strict=False)
-@@ -1361,6 +1414,7 @@ class Trainer:
+@@ -1348,6 +1404,7 @@ class Trainer:
          return model
  
      def ipex_optimize_model(self, model, training=False, dtype=torch.float32):
@@ -1271,7 +1312,7 @@ index cf71499b0..0ff7236bd 100755
          if not is_ipex_available():
              raise ImportError(
                  "Using IPEX but IPEX is not installed or IPEX's version does not match current PyTorch, please refer"
-@@ -1372,22 +1426,40 @@ class Trainer:
+@@ -1359,22 +1416,40 @@ class Trainer:
          if not training:
              model.eval()
              dtype = torch.bfloat16 if not self.is_in_train and self.args.bf16_full_eval else dtype
@@ -1319,7 +1360,7 @@ index cf71499b0..0ff7236bd 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -1415,6 +1487,74 @@ class Trainer:
+@@ -1398,6 +1473,74 @@ class Trainer:
              model = self.torch_jit_model_eval(model, dataloader, training)
              self.jit_compilation_time = round(time.time() - start_time, 4)
  
@@ -1337,7 +1378,7 @@ index cf71499b0..0ff7236bd 100755
 +                from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
 +                import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
 +                from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-+                from torch._export import capture_pre_autograd_graph
++                from torch._export import capture_pre_autograd_graph, dynamic_dim
 +                print('[Info] Running torch.compile() INT8 quantization')
 +                with torch.no_grad():
 +                    exported_model = capture_pre_autograd_graph(
@@ -1394,49 +1435,45 @@ index cf71499b0..0ff7236bd 100755
          # Note: in torch.distributed mode, there's no point in wrapping the model
          # inside a DistributedDataParallel as we'll be under `no_grad` anyways.
          if not training:
-@@ -1575,8 +1715,9 @@ class Trainer:
+@@ -1517,6 +1660,9 @@ class Trainer:
+                 kwargs["broadcast_buffers"] = self.args.ddp_broadcast_buffers
  
-         # torch.compile() needs to be called after wrapping the model with FSDP or DDP
-         # to ensure that it accounts for the graph breaks required by those wrappers
--        if self.args.torch_compile:
--            model = torch.compile(model, backend=self.args.torch_compile_backend, mode=self.args.torch_compile_mode)
+             self.accelerator.ddp_handler = DistributedDataParallelKwargs(**kwargs)
 +        if self.args.inductor:
 +            with torch.cpu.amp.autocast(enabled=self.args.bf16 or self.args.fp16_cpu, dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
 +                model = torch.compile(model, backend=self.args.torch_compile_backend, mode=self.args.torch_compile_mode)
  
          return model
  
-@@ -1993,7 +2134,11 @@ class Trainer:
-                         scale_after = self.scaler.get_scale()
-                         optimizer_was_run = scale_before <= scale_after
-                     else:
--                        self.optimizer.step()
-+                        if self.args.fp16_cpu:
-+                            self.fp16_scaler.step(self.optimizer)
-+                            self.fp16_scaler.update()
-+                        else:
-+                            self.optimizer.step()
+@@ -2014,7 +2160,11 @@ class Trainer:
+                             grad_norm = _grad_norm.item() if _grad_norm is not None else None
  
-                     if optimizer_was_run and not self.deepspeed:
-                         self.lr_scheduler.step()
-@@ -2714,7 +2859,10 @@ class Trainer:
-             # loss gets scaled under gradient_accumulation_steps in deepspeed
-             loss = self.deepspeed.backward(loss)
+                     # Optimizer step
+-                    self.optimizer.step()
++                    if self.args.fp16_cpu:
++                        self.fp16_scaler.step(self.optimizer)
++                        self.fp16_scaler.update()
++                    else:
++                        self.optimizer.step()
+                     optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
+                     if optimizer_was_run:
+                         # Delay optimizer scheduling until metrics are generated
+@@ -2908,7 +3058,10 @@ class Trainer:
+             with amp.scale_loss(loss, self.optimizer) as scaled_loss:
+                 scaled_loss.backward()
          else:
--            loss.backward()
+-            self.accelerator.backward(loss)
 +            if self.args.fp16_cpu:
 +                self.fp16_scaler.scale(loss).backward()
 +            else:
-+                loss.backward()
++                self.accelerator.backward(loss)
  
-         return loss.detach()
+         return loss.detach() / self.args.gradient_accumulation_steps
  
-@@ -3085,7 +3233,65 @@ class Trainer:
-         self._memory_tracker.stop_and_update_metrics(output.metrics)
+@@ -3322,6 +3475,66 @@ class Trainer:
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
--
-+   
+ 
 +    def benchmark_evaluate(self, model, dataloader):
 +        steps_per_epoch = len(dataloader)
 +        total_steps = (self.args.perf_run_iters + self.args.perf_begin_iter)
@@ -1445,18 +1482,25 @@ index cf71499b0..0ff7236bd 100755
 +        i = 0;
 +        timeBuff = []
 +        import time
-+        # with torch.profiler.profile(
-+        #   activities=[
-+        #      torch.profiler.ProfilerActivity.CPU],
-+        #      schedule=torch.profiler.schedule(
-+        #      wait=1,
-+        #      warmup=9,
-+        #      active=5),
-+        #   on_trace_ready=trace_handler
-+        # ) as prof:
++        if self.args.profile:
++            batch = next(iter(dataloader))
++            if 'pixel_values' in batch:
++                if self.args.fp16_cpu:
++                    batch['pixel_values'] = batch['pixel_values'].to(torch.half)
++                elif self.args.bf16 or self.args.int8_bf16:
++                    batch['pixel_values'] = batch['pixel_values'].to(torch.bfloat16)
++            
++            prof = profile_ctx.__enter__()
++            with torch.no_grad():
++                for i in range(40):
++                    if (self.args.bf16 or self.args.int8_bf16 or self.args.fp16_cpu) and self.args.inductor:
++                        with torch.cpu.amp.autocast(dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
++                            outputs = model(**batch)
++                    else:
++                        outputs = model(**batch)
++                    prof.step()
++            prof.__exit__(None, None, None)
 +        with tqdm(total=total_steps, desc="Evaluating") as pbar:
-+            if self.args.profile:
-+                prof = profile_ctx.__enter__()
 +            for epoch in range(test_epoches + 1):
 +                for it, batch in enumerate(dataloader):
 +                    if 'pixel_values' in batch:
@@ -1481,24 +1525,19 @@ index cf71499b0..0ff7236bd 100755
 +                            with torch.cpu.amp.autocast(dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
 +                                start = time.time()
 +                                outputs = model(**batch)
-+                                #prof.step()
 +                                end = time.time()
 +                        else:
 +                            start = time.time()
 +                            outputs = model(**batch)
-+                            #prof.step()
 +                            end = time.time()
 +                        if epoch * steps_per_epoch + it > self.args.perf_begin_iter:
 +                            timeBuff.append(end-start)
 +                        pbar.update(1)
-+                        if self.args.profile:
-+                            prof.step()
-+            if self.args.profile:
-+                profile_ctx.__exit__(None, None, None)
++
      def evaluation_loop(
          self,
          dataloader: DataLoader,
-@@ -3133,7 +3339,12 @@ class Trainer:
+@@ -3380,7 +3593,12 @@ class Trainer:
              logger.info("  Num examples: Unknown")
          logger.info(f"  Batch size = {batch_size}")
  
@@ -1512,7 +1551,7 @@ index cf71499b0..0ff7236bd 100755
  
          self.callback_handler.eval_dataloader = dataloader
          # Do this before wrapping.
-@@ -3158,6 +3369,20 @@ class Trainer:
+@@ -3402,6 +3620,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.
@@ -1534,10 +1573,10 @@ index cf71499b0..0ff7236bd 100755
          observed_num_examples = 0
          # Main evaluation loop
 diff --git a/src/transformers/training_args.py b/src/transformers/training_args.py
-index 088eb06b7..887cfec22 100644
+index 19ab24c20..b19eea005 100644
 --- a/src/transformers/training_args.py
 +++ b/src/transformers/training_args.py
-@@ -777,10 +777,121 @@ class TrainingArguments:
+@@ -930,10 +930,121 @@ class TrainingArguments:
              )
          },
      )
@@ -1659,18 +1698,17 @@ index 088eb06b7..887cfec22 100644
      fp16_opt_level: str = field(
          default="O1",
          metadata={
-@@ -963,7 +1074,9 @@ class TrainingArguments:
-     label_smoothing_factor: float = field(
+@@ -1139,6 +1250,9 @@ class TrainingArguments:
          default=0.0, metadata={"help": "The label smoothing epsilon to apply (zero means no label smoothing)."}
      )
--
+ 
 +    profile: bool = field(
 +        default=False, metadata={"help": "enable profile"}
 +    )
-     default_optim = "adamw_hf"
+     default_optim = "adamw_torch"
      # XXX: enable when pytorch==2.0.1 comes out - we want to give it time to get all the bugs sorted out
      # if is_torch_available() and version.parse(version.parse(torch.__version__).base_version) >= version.parse("2.1.0"):
-@@ -1253,17 +1366,17 @@ class TrainingArguments:
+@@ -1522,19 +1636,19 @@ class TrainingArguments:
              if version.parse(version.parse(torch.__version__).base_version) == version.parse("2.0.0") and self.fp16:
                  raise ValueError("--optim adamw_torch_fused with --fp16 requires PyTorch>2.0")
  
@@ -1678,24 +1716,28 @@ index 088eb06b7..887cfec22 100644
 -            self.framework == "pt"
 -            and is_torch_available()
 -            and (self.device.type != "cuda")
+-            and (self.device.type != "npu")
+-            and (self.device.type != "xpu")
 -            and (get_xla_device_type(self.device) != "GPU")
 -            and (self.fp16 or self.fp16_full_eval)
 -        ):
 -            raise ValueError(
 -                "FP16 Mixed precision training with AMP or APEX (`--fp16`) and FP16 half precision evaluation"
--                " (`--fp16_full_eval`) can only be used on CUDA devices."
+-                " (`--fp16_full_eval`) can only be used on CUDA or NPU devices or certain XPU devices (with IPEX)."
 -            )
-+        #if (
-+        #    self.framework == "pt"
-+        #    and is_torch_available()
-+        #    and (self.device.type != "cuda")
-+        #    and (get_xla_device_type(self.device) != "GPU")
-+        #    and (self.fp16 or self.fp16_full_eval)
-+        #):
-+        #    raise ValueError(
-+        #        "FP16 Mixed precision training with AMP or APEX (`--fp16`) and FP16 half precision evaluation"
-+        #        " (`--fp16_full_eval`) can only be used on CUDA devices."
-+        #    )
++        # if (
++        #     self.framework == "pt"
++        #     and is_torch_available()
++        #     and (self.device.type != "cuda")
++        #     and (self.device.type != "npu")
++        #     and (self.device.type != "xpu")
++        #     and (get_xla_device_type(self.device) != "GPU")
++        #     and (self.fp16 or self.fp16_full_eval)
++        # ):
++        #     raise ValueError(
++        #         "FP16 Mixed precision training with AMP or APEX (`--fp16`) and FP16 half precision evaluation"
++        #         " (`--fp16_full_eval`) can only be used on CUDA or NPU devices or certain XPU devices (with IPEX)."
++        #     )
  
          if (
              self.framework == "pt"
