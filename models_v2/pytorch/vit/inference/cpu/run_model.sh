@@ -118,8 +118,9 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     mode="jit"
     ARGS="$ARGS --jit_mode_eval"
     echo "### running with jit mode"
-    python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} --log_dir=${OUTPUT_DIR} --log_file_prefix="${OUTPUT_DIR}/${LOG_PREFIX}_${path}_${precision}_${mode}" \
-        ${EVAL_SCRIPT} $ARGS \
+    python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} --log_dir=${OUTPUT_DIR} --log_file_prefix="./${LOG_PREFIX}_${path}_${precision}_${mode}" \
+        ${EVAL_SCRIPT} \
+	${ARGS} \
         --model_name_or_path   ${FINETUNED_MODEL} \
         --do_eval \
         --output_dir ${OUTPUT_DIR} \
