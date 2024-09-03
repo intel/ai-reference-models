@@ -174,7 +174,7 @@ def convert_int8(args, model, dataloader):
     from torch.ao.quantization import HistogramObserver, PerChannelMinMaxObserver, QConfig
     from intel_extension_for_pytorch.quantization import prepare, convert
     qconfig = QConfig(
-        activation=HistogramObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8, bins=127, upsample_rate=256, quant_min= -127, quant_max=126),
+        activation=HistogramObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8, bins=127, quant_min= -127, quant_max=126),
         weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric)
     )
     batch = fetch_batch(dataloader)
