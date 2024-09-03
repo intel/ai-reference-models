@@ -148,7 +148,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         LOG_PREFIX="stable_diffusion_${PRECISION}_dist_inference_accuracy"
         oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
         source $oneccl_bindings_for_pytorch_path/env/setvars.sh
-        ARGS_IPEX="$ARGS_IPEX --distributed --nnodes ${NNODES} --hostfile ${HOSTFILE} --logical-cores-for-ccl --ccl-worker-count 8"
+        ARGS_IPEX="$ARGS_IPEX --nnodes ${NNODES} --hostfile ${HOSTFILE} --logical-cores-for-ccl --ccl-worker-count 8"
         ARGS="$ARGS --accuracy --dist-backend ccl"
     else
         LOG_PREFIX="stable_diffusion_${PRECISION}_inference_accuracy"
