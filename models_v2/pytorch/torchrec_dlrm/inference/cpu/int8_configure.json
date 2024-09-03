@@ -932,12 +932,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -946,7 +946,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
@@ -2073,12 +2074,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2087,11 +2088,12 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
+                "op_type": "<built-in method relu of type object at 0x7f21fb8f82e0>",
                 "op_type_is_module": false,
                 "fqn": "dense_arch.model._mlp.0",
                 "input_tensor_infos": [
@@ -2125,12 +2127,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2139,7 +2141,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
@@ -2716,12 +2719,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2730,11 +2733,12 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
+                "op_type": "<built-in method relu of type object at 0x7f21fb8f82e0>",
                 "op_type_is_module": false,
                 "fqn": "dense_arch.model._mlp.1",
                 "input_tensor_infos": [
@@ -2768,12 +2772,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2782,7 +2786,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
@@ -3103,12 +3108,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3117,11 +3122,12 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
+                "op_type": "<built-in method relu of type object at 0x7f21fb8f82e0>",
                 "op_type_is_module": false,
                 "fqn": "dense_arch.model._mlp.2",
                 "input_tensor_infos": [
@@ -3155,12 +3161,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3169,7 +3175,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
@@ -4269,12 +4276,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -4283,7 +4290,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "1": {
@@ -11236,12 +11244,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -11250,7 +11258,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "2": {
@@ -11300,12 +11309,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -11314,7 +11323,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "3": {
@@ -12385,12 +12395,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -12399,7 +12409,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "4": {
@@ -19352,12 +19363,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -19366,7 +19377,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "5": {
@@ -19416,12 +19428,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -19430,7 +19442,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "6": {
@@ -20501,12 +20514,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -20515,7 +20528,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "7": {
@@ -27468,12 +27482,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -27482,7 +27496,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "8": {
@@ -27526,12 +27541,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -27540,7 +27555,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
@@ -27686,12 +27702,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -27700,7 +27716,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
@@ -29829,12 +29846,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -29843,11 +29860,12 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
+                "op_type": "<built-in method relu of type object at 0x7f21fb8f82e0>",
                 "op_type_is_module": false,
                 "fqn": "over_arch.model.0._mlp.0",
                 "input_tensor_infos": [
@@ -29881,12 +29899,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -29895,7 +29913,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
@@ -32008,12 +32027,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -32022,11 +32041,12 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
+                "op_type": "<built-in method relu of type object at 0x7f21fb8f82e0>",
                 "op_type_is_module": false,
                 "fqn": "over_arch.model.0._mlp.1",
                 "input_tensor_infos": [
@@ -32060,12 +32080,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -32074,7 +32094,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
@@ -33163,12 +33184,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -33177,11 +33198,12 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
+                "op_type": "<built-in method relu of type object at 0x7f21fb8f82e0>",
                 "op_type_is_module": false,
                 "fqn": "over_arch.model.0._mlp.2",
                 "input_tensor_infos": [
@@ -33215,12 +33237,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -33229,7 +33251,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
@@ -33806,12 +33829,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -33820,11 +33843,12 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x7fe360e70da0>",
+                "op_type": "<built-in method relu of type object at 0x7f21fb8f82e0>",
                 "op_type_is_module": false,
                 "fqn": "over_arch.model.0._mlp.3",
                 "input_tensor_infos": [
@@ -33858,12 +33882,12 @@
                 "activation_observer": {
                     "name": "HistogramObserver",
                     "bins": 127,
-                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
                     "quant_min": -127,
-                    "quant_max": 126
+                    "quant_max": 126,
+                    "is_dynamic": false
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -33872,7 +33896,8 @@
                     "qscheme": "torch.per_channel_symmetric",
                     "reduce_range": false,
                     "quant_min": -128,
-                    "quant_max": 127
+                    "quant_max": 127,
+                    "is_dynamic": false
                 }
             }
         },
