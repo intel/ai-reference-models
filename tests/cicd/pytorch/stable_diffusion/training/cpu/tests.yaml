@@ -1,0 +1,28 @@
+training-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/stable_diffusion/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DISTRIBUTED}
+  env:
+    PRECISION: "fp32"
+    DISTRIBUTED: ""
+training-bf32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/stable_diffusion/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DISTRIBUTED}
+  env:
+    PRECISION: "bf32"
+    DISTRIBUTED: ""
+training-fp16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/stable_diffusion/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DISTRIBUTED}
+  env:
+    PRECISION: "fp16"
+    DISTRIBUTED: ""
+training-bf16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/stable_diffusion/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DISTRIBUTED}
+  env:
+    PRECISION: "bf16"
+    DISTRIBUTED: ""
