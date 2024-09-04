@@ -70,7 +70,7 @@ export CHECKPOINT_DIR=<directory where to save the pretrained model>
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
-| **THROUHGPUT** (leave unset if accuracy)              |                               `export THROUGHPUT=true`                                  |
+| **TEST_MODE** (THROUGHPUT OR ACCURACY)              |                               `export TEST_MODE=THROUGHPUT`                                  |
 | **DISTRIBUTED** (leave unset if training single node)              |                               `export DISTRIBUTED=true`                                  |
 | **NNODES** (leave unset if training single node)              |                               `export NNODES=2`                                  |
 | **HOSTFILE** (leave unset if training single node)              |                               `export HOSTFILE=<your-host-file>`                                  |

@@ -17,6 +17,15 @@
 
 MODEL_DIR=${MODEL_DIR:-$PWD}
 
+if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
+    echo "TEST_MODE set to THROUGHPUT"
+elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
+    echo "TEST_MODE set to ACCURACY"
+else
+    echo "Please set TEST_MODE to THROUGHPUT or ACCURACY"
+    exit
+fi
+
 if [ ! -e "${MODEL_DIR}/train.py" ]; then
   echo "Could not find the script of train.py. Please set environment variable '\${MODEL_DIR}'."
   echo "From which the train.py exist at."
@@ -80,7 +89,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 ARGS_IPEX=""
 
-if [ "$THROUGHPUT" ]; then
+if [ "${TEST_MODE}" == "THROUGHPUT" ]; then
     echo "Running throughput training mode"
     ARGS_IPEX="$ARGS_IPEX --nodes-list 0"
     BATCH_SIZE=${BATCH_SIZE:-224}
