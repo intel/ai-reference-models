@@ -21,7 +21,7 @@ export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:aut
 export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 
 # Install dependency
-cd models_v2/pytorch/bert_large/inference/cpu
+cd models_v2/pytorch/bert_large/training/cpu
 ./setup.sh
 
 # Get CONFIG_FILE:
