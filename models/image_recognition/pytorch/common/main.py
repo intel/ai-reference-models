@@ -495,7 +495,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
                 import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
                 from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-                from torch._export import capture_pre_autograd_graph, dynamic_dim
+                from torch._export import capture_pre_autograd_graph
                 print('[Info] Running torch.compile() INT8 quantization')
                 with torch.no_grad():
                     example_inputs = (x,)

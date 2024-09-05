@@ -1178,7 +1178,7 @@ index 734ccf6a9..5914d4e2b 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2436dadc..23773d49a 100755
+index a2436dadc..189742484 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -152,6 +152,31 @@ from .utils import (
@@ -1378,7 +1378,7 @@ index a2436dadc..23773d49a 100755
 +                from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
 +                import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
 +                from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-+                from torch._export import capture_pre_autograd_graph, dynamic_dim
++                from torch._export import capture_pre_autograd_graph
 +                print('[Info] Running torch.compile() INT8 quantization')
 +                with torch.no_grad():
 +                    exported_model = capture_pre_autograd_graph(
