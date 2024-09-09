@@ -22,6 +22,7 @@ export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     echo "Running Multi-instance Throughput Inference"
+    export LOG_PREFIX="throughput_log"
     BATCH_SIZE=${BATCH_SIZE:-1}
     export KMP_BLOCKTIME=1
     rm -rf ${OUTPUT_DIR}/throughput_log*
@@ -34,6 +35,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
 
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     echo "Running Multi-instance Realtime Inference"
+    export LOG_PREFIX="latency_log"
     BATCH_SIZE=${BATCH_SIZE:-1}
     export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
     export KMP_BLOCKTIME=1
@@ -47,6 +49,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
 
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     echo "TEST_MODE set to ACCURACY"
+    export LOG_PREFIX="accuracy_log"
     ARGS="$ARGS --accuracy_only  --lambada"
     rm -rf ${OUTPUT_DIR}/*accuracy*
 else
@@ -60,8 +63,6 @@ if [ -z "${OUTPUT_DIR}" ]; then
 fi
 
 mkdir -p ${OUTPUT_DIR}
-rm -rf ${OUTPUT_DIR}/results.yaml
-rm -rf ${OUTPUT_DIR}/summary.log
 
 if [[ "${PRECISION}" == "int8-fp32" ]] || [[ "${PRECISION}" == "int8-fp16"  ]]; then
     if [ ! -f "${OUTPUT_DIR}/qconfig.json" ]; then
@@ -232,12 +233,12 @@ if [[ "$TEST_MODE" != "ACCURACY" ]]; then
     '))
 
     echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
-    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};latency;"total-latency";${PRECISION};${BATCH_SIZE}; ${latency} " |tee -a ${OUTPUT_DIR}/summary.log
-    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};latency;"first-token-latency";${PRECISION};${BATCH_SIZE}; ${first_latency} " |tee -a ${OUTPUT_DIR}/summary.log
-    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};latency;"rest-token-latency";${PRECISION};${BATCH_SIZE}; ${rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
-    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};latency;"P90-rest-token-latency";${PRECISION};${BATCH_SIZE}; ${P90_rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
-    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};latency;"token_per_sec";${PRECISION};${BATCH_SIZE}; ${token_per_sec} " |tee -a ${OUTPUT_DIR}/summary.log
-    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};latency;"first_token_thp";${PRECISION};${BATCH_SIZE}; ${first_token_thp} " |tee -a ${OUTPUT_DIR}/summary.log
+    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"total-latency";${PRECISION};${BATCH_SIZE}; ${latency} " |tee -a ${OUTPUT_DIR}/summary.log
+    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"first-token-latency";${PRECISION};${BATCH_SIZE}; ${first_latency} " |tee -a ${OUTPUT_DIR}/summary.log
+    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"rest-token-latency";${PRECISION};${BATCH_SIZE}; ${rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
+    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"P90-rest-token-latency";${PRECISION};${BATCH_SIZE}; ${P90_rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
+    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"token_per_sec";${PRECISION};${BATCH_SIZE}; ${token_per_sec} " |tee -a ${OUTPUT_DIR}/summary.log
+    echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"first_token_thp";${PRECISION};${BATCH_SIZE}; ${first_token_thp} " |tee -a ${OUTPUT_DIR}/summary.log
 
     first_token_latency=$( grep "first-token-latency;" ${OUTPUT_DIR}/summary.log | awk '{print $NF}' )
     rest_token_latency=$( grep ";rest-token-latency;" ${OUTPUT_DIR}/summary.log | awk '{print $NF}' )
