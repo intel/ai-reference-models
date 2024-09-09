@@ -74,11 +74,9 @@ else
 fi
 
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
-    rm -rf ${OUTPUT_DIR}/throughput_log*
     BATCH_SIZE=${BATCH_SIZE:-56}
     #export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000";
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
-    rm -rf ${OUTPUT_DIR}/latency_log*
     #export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000";
     export OMP_NUM_THREADS=4
     CORES=`lscpu | grep Core | awk '{print $4}'`
@@ -87,7 +85,6 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
     BATCH_SIZE=${BATCH_SIZE:-1}
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
-    rm -rf ${OUTPUT_DIR}/accuracy_log*
     BATCH_SIZE=${BATCH_SIZE:-8}
 fi
 
