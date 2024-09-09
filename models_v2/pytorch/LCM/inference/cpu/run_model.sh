@@ -51,8 +51,6 @@ fi
 DISTRIBUTED=${DISTRIBUTED:-'false'}
 
 mkdir -p ${OUTPUT_DIR}
-rm -rf ${OUTPUT_DIR}/summary.log
-rm -rf ${OUTPUT_DIR}/results.yaml
 
 if [[ "${PRECISION}" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA

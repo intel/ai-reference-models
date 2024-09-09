@@ -103,8 +103,6 @@ fi
 EVAL_SCRIPT=${MODEL_DIR}/run_llm.py
 FINETUNED_MODEL=${FINETUNED_MODEL:-"THUDM/chatglm3-6b"}
 rm -rf ${OUTPUT_DIR}/*${LOG_PREFIX}*
-rm -rf ${OUTPUT_DIR}/results.yaml
-rm -rf ${OUTPUT_DIR}/summary.log
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 if [[ "0" == ${TORCH_INDUCTOR} ]];then
     path="ipex"

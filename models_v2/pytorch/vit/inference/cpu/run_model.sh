@@ -15,13 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 ARGS=""
 ARGS_IPEX=""
 
 if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     echo "TEST_MODE set to THROUGHPUT"
-    ARGS=" --profile"
     num_warmup=${num_warmup:-"10"}
     num_iter=${num_iter:-"100"}
     ARGS="$ARGS --benchmark --perf_begin_iter ${num_warmup} --perf_run_iters ${num_iter}"
@@ -91,11 +89,8 @@ if [ -z "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 mkdir -p ${OUTPUT_DIR}
-rm -rf ${OUTPUT_DIR}/summary.log
-rm -rf ${OUTPUT_DIR}/results.yaml
-
 CORES=`lscpu | grep Core | awk '{print $4}'`
-BATCH_SIZE=${BATCH_SIZE:-`expr 4 \* $CORES`}
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 FINETUNED_MODEL=${FINETUNED_MODEL:-"google/vit-base-patch16-224"}
 DATASET_DIR=${DATASET_DIR:-"None"}
 DATASET_ARGS=""
@@ -111,44 +106,102 @@ WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 
 rm -rf ${OUTPUT_DIR}/${LOG_PREFIX}*
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
-if [[ "0" == ${TORCH_INDUCTOR} ]];then
-    path="ipex"
-    ARGS="$ARGS --use_ipex"
-    echo "### running with intel extension for pytorch"
-    mode="jit"
-    ARGS="$ARGS --jit_mode_eval"
-    echo "### running with jit mode"
-    python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} --log_dir=${OUTPUT_DIR} --log_file_prefix="./${LOG_PREFIX}_${path}_${precision}_${mode}" \
-        ${EVAL_SCRIPT} \
-	${ARGS} \
-        --model_name_or_path   ${FINETUNED_MODEL} \
-        --do_eval \
-        --output_dir ${OUTPUT_DIR} \
-        --per_device_eval_batch_size ${BATCH_SIZE} \
-        ${DATASET_ARGS} \
-        --remove_unused_columns False
-else
-    echo "Running inference with torch.compile inductor backend."
-    export TORCHINDUCTOR_FREEZING=1
-    if [[ "${TEST_MODE}" == "REALTIME" ]]; then
-        ARGS_IPEX=""
+if [[ "${TEST_MODE}" == "REALTIME" ]]; then
+    BATCH_SIZE=${BATCH_SIZE:-1}
+    CORES_PER_INSTANCE=${OMP_NUM_THREADS}
+    TOTAL_CORES=`expr $CORES \* $SOCKETS`
+    INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
+    INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
+    if [[ "0" == ${TORCH_INDUCTOR} ]];then
+        path="ipex"
+        ARGS="$ARGS --use_ipex"
+        echo "### running with intel extension for pytorch"
+        mode="jit"
+        ARGS="$ARGS --jit_mode_eval"
+        echo "### running with jit mode"
+        python -m intel_extension_for_pytorch.cpu.launch --latency-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+            ${EVAL_SCRIPT} $ARGS \
+            --model_name_or_path   ${FINETUNED_MODEL} \
+            --do_eval \
+            --output_dir ./tmp \
+            --per_device_eval_batch_size $BATCH_SIZE \
+            ${DATASET_ARGS} \
+            --remove_unused_columns False
+    else
+        echo "Running inference with torch.compile inductor backend."
+        export TORCHINDUCTOR_FREEZING=1
         ARGS="$ARGS --use_share_weight --total_cores ${CORES_PER_NUMA} --cores_per_instance ${OMP_NUM_THREADS}"
-        ARGS_IPEX="${ARGS_IPEX} --throughput-mode --enable_tcmalloc"
-    elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
-        ARGS_IPEX=""
-        ARGS_IPEX="${ARGS_IPEX} --ninstances 1 --node_id 0  --enable_jemalloc"
+        python -m torch.backends.xeon.run_cpu --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
+            ${EVAL_SCRIPT} $ARGS \
+            --inductor \
+            --model_name_or_path   ${FINETUNED_MODEL} \
+            --do_eval \
+            --output_dir ./tmp \
+            --per_device_eval_batch_size $BATCH_SIZE \
+            ${DATASET_ARGS} \
+            --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/latency_log_${path}_${precision}_${mode}.log
     fi
-    python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} --log_path=${OUTPUT_DIR} \
-        ${EVAL_SCRIPT} $ARGS \
-        --inductor \
-        --model_name_or_path   ${FINETUNED_MODEL} \
-        --do_eval \
-        --output_dir ${OUTPUT_DIR} \
-        --per_device_eval_batch_size ${BATCH_SIZE} \
-        ${DATASET_ARGS} \
-        --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/${LOG_PREFIX}_${path}_${precision}_${mode}.log
-fi
+elif [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
+    BATCH_SIZE=${BATCH_SIZE:-`expr 4 \* $CORES`}
+    if [[ "0" == ${TORCH_INDUCTOR} ]];then
+        path="ipex"
+        ARGS="$ARGS --use_ipex"
+        echo "### running with intel extension for pytorch"
+        mode="jit"
+        ARGS="$ARGS --jit_mode_eval"
+        echo "### running with jit mode"
+        python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+            ${EVAL_SCRIPT} $ARGS \
+            --model_name_or_path   ${FINETUNED_MODEL} \
+            --do_eval \
+            --output_dir ./tmp \
+            --per_device_eval_batch_size $BATCH_SIZE \
+            ${DATASET_ARGS} \
+            --remove_unused_columns False
+    else
+        echo "Running inference with torch.compile inductor backend."
+        export TORCHINDUCTOR_FREEZING=1
+        python -m torch.backends.xeon.run_cpu --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
+            ${EVAL_SCRIPT} $ARGS \
+            --inductor \
+            --model_name_or_path   ${FINETUNED_MODEL} \
+            --do_eval \
+            --output_dir ./tmp \
+            --per_device_eval_batch_size $BATCH_SIZE \
+            ${DATASET_ARGS} \
+            --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/throughput_log_${path}_${precision}_${mode}.log
+    fi
+elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
+    if [[ "0" == ${TORCH_INDUCTOR} ]];then
+        path="ipex"
+        ARGS="$ARGS --use_ipex"
+        echo "### running with intel extension for pytorch"
 
+        mode="jit"
+        ARGS="$ARGS --jit_mode_eval"
+        echo "### running with jit mode"
+        python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
+            ${EVAL_SCRIPT} $ARGS \
+            --model_name_or_path   ${FINETUNED_MODEL} \
+            --do_eval \
+            --output_dir ./tmp \
+            --per_device_eval_batch_size $BATCH_SIZE \
+            ${DATASET_ARGS} \
+            --remove_unused_columns False
+    else
+        echo "Running inference with torch.compile inductor backend."
+        export TORCHINDUCTOR_FREEZING=1
+        python -m torch.backends.xeon.run_cpu --ninstances 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} \
+            ${EVAL_SCRIPT} $ARGS \
+            --inductor \
+            --model_name_or_path   ${FINETUNED_MODEL} \
+            --do_eval \
+            --output_dir ./tmp \
+            --per_device_eval_batch_size $BATCH_SIZE \
+            ${DATASET_ARGS} \
+            --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/accuracy_log_${path}_${precision}_${mode}.log
+    fi
+fi
 latency="N/A"
 throughput="N/A"
 accuracy="N/A"

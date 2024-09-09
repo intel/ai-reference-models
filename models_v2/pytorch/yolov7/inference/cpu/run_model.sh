@@ -82,8 +82,7 @@ mkdir -p ${OUTPUT_DIR}
 cd ${OUTPUT_DIR}
 OUTPUT_DIR=$(pwd)
 cd -
-rm -rf ${OUTPUT_DIR}/summary.log
-rm -rf ${OUTPUT_DIR}/results.yaml
+
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"

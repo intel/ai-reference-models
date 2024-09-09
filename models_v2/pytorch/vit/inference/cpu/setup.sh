@@ -23,6 +23,6 @@ git checkout v4.38.1
 pip install -r examples/pytorch/image-classification/requirements.txt
 pip install cchardet
 pip install scikit-learn
-git apply ../../../../common/enable_ipex_for_transformers.diff
+git apply ../../../../../common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
