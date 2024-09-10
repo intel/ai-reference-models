@@ -30,6 +30,10 @@ Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch
   pip install packaging intel-openmp
   export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
 ```
+* Install dependencies
+```
+pip install protobuf==3.20.3 numpy==1.20
+```
 
 * Set ENV to use fp16 AMX if you are using a supported platform
 ```
