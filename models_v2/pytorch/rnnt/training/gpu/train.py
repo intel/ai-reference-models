@@ -29,6 +29,7 @@
 # limitations under the License.
 
 import argparse
+import contextlib
 import itertools
 import os
 import time
@@ -230,8 +231,14 @@ def train(
 
             t_audio_signal_t_con = t_audio_signal_t.contiguous()
 
-
-            with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
+            with (
+                contextlib.nullcontext(None) if not profiling else
+                torch.profiler.profile(
+                    activities=[torch.profiler.ProfilerActivity.CPU,
+                                torch.profiler.ProfilerActivity.XPU],
+                    record_shapes=False,
+                )
+            ) as prof:
                 try:
                     import memory_check
                     memory_check.display_mem("xpu:0")
@@ -306,7 +313,8 @@ def train(
                 if args.distributed:
                     profile_name += '.xpu.' + str(args.rank)
                 torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), './rnnt_profiling.' + profile_name + '.train.pt')
-                torch.save(prof.table(sort_by="id", row_limit=100000), './rnnt_profiling.' + profile_name + '.train.detailed.pt')
+                # Cannot sort by id when using kineto
+                # torch.save(prof.table(sort_by="id", row_limit=100000), './rnnt_profiling.' + profile_name + '.train.detailed.pt')
                 prof.export_chrome_trace('./rnnt_profiling' + profile_name + '.json')
 
             t1 = time.perf_counter()
