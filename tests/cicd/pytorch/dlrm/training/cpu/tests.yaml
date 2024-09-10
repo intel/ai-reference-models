@@ -1,0 +1,21 @@
+training-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/dlrm_terabyte_preprocessed/"
+inference-bf32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "bf32"
+    DATASET_DIR: "/pytorch/dlrm_terabyte_preprocessed/"
+inference-bf16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR}
+  env:
+    PRECISION: "bf16"
+    DATASET_DIR: "/pytorch/dlrm_terabyte_preprocessed/"
