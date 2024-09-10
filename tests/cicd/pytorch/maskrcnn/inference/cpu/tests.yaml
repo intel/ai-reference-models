@@ -1,0 +1,132 @@
+inference-fp32-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "fp32"
+    TEST_MODE: "THROUGHPUT"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "256"
+inference-avx-fp32-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "avx-fp32"
+    TEST_MODE: "THROUGHPUT"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "256"
+inference-bf16-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "bf16"
+    TEST_MODE: "THROUGHPUT"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "256"
+inference-bf32-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "bf32"
+    TEST_MODE: "THROUGHPUT"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "256"
+inference-fp32-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "fp32"
+    TEST_MODE: "ACCURACY"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "256"
+inference-avx-fp32-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "avx-fp32"
+    TEST_MODE: "ACCURACY"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "256"
+inference-bf16-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "bf16"
+    TEST_MODE: "ACCURACY"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "256"
+inference-bf32-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "bf32"
+    TEST_MODE: "ACCURACY"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "256"
+inference-fp32-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "fp32"
+    TEST_MODE: "REALTIME"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "1"
+inference-avx-fp32-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "avx-fp32"
+    TEST_MODE: "REALTIME"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "1"
+inference-bf16-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "bf16"
+    TEST_MODE: "REALTIME"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "1"
+inference-bf32-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/maskrcnn/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${CHECKPOINT_DIR} ${MODE} ${BATCH_SIZE}
+  env:
+    PRECISION: "bf32"
+    TEST_MODE: "REALTIME"
+    DATASET_DIR: "/pytorch/coco/"
+    CHECKPOINT_DIR: "/pytorch/pretrained_models/maskrcnn/"
+    MODE: "jit"
+    BATCH_SIZE: "1"
