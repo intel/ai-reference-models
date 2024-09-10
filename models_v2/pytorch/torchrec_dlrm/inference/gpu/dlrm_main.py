@@ -20,6 +20,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
+import contextlib
 import itertools
 import os
 import sys
@@ -47,7 +48,7 @@ from torchrec.distributed.comm import get_local_size
 #from torchrec.distributed.planner.storage_reservations import (
 #    HeuristicalStorageReservation,
 #)
-from dist_models import DIST_DLRM_DCN
+from dist_models import DIST_DLRM_DCN, replace_embeddingbag_collection
 from torchrec.models.dlrm import DLRM, DLRM_DCN, DLRM_Projection, DLRMTrain
 from torchrec.modules.embedding_configs import EmbeddingBagConfig
 from torchrec.optim.apply_optimizer_in_backward import apply_optimizer_in_backward
@@ -61,6 +62,7 @@ from jit_trace_able_utils import unpack, SparseArchTraceAbleWrapper
 import logging
 import sharding
 
+logging.basicConfig(level=logging.DEBUG)
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(1)
 
@@ -388,6 +390,16 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument("--num_nodes", type=int, default=1)
     parser.add_argument("--trans_data", action="store_true", default=False)
     parser.add_argument(
+        "--ipex_optimize",
+        action="store_true",
+        help="Whether optimize model by ipex.optimize",
+    )
+    parser.add_argument(
+        "--ipex_dist_merged_emb_adagrad",
+        action="store_true",
+        help="whether use ipex customer op for distributed merged embedding",
+    )
+    parser.add_argument(
     "--sharding_plan",
     help="Sharding plan to use",
     type=str,
@@ -441,12 +453,15 @@ def _evaluate(
     eval_model.eval()
     global n_emb, local_emb_indices, default_embedding_names, idx_name
 
-    if args.dynamo:
+    if args.dynamo and (not args.ipex_optimize):
         if args.amp:
             if args.use_device == "xpu":
                 with torch.no_grad():
-                    with torch.xpu.amp.autocast(enabled=args.amp, dtype=args.amp_dtype):
-                        print(" Use dynamo for compiling")
+                    print(" Use dynamo for compiling")
+                    if args.amp_dtype == torch.bfloat16 or args.amp_dtype == torch.float16:
+                        with torch.autocast(device_type="xpu", enabled=args.amp, dtype=args.amp_dtype):
+                            eval_model = torch.compile(eval_model, backend="inductor", options={"freezing": True} )
+                    else:
                         eval_model = torch.compile(eval_model, backend="inductor", options={"freezing": True} )
 
     def eval_step(model, batch):
@@ -456,16 +471,20 @@ def _evaluate(
         else:
             batch.dense_features = batch.dense_features[ext_dist.get_my_slice(batch_size)].to(device).to(args.amp_dtype)
         batch.labels = batch.labels[ext_dist.get_my_slice(batch_size)].to(device)
-        for k, v in batch.sparse_features.items():
-            batch.sparse_features[k]['values'] = batch.sparse_features[k]['values'].to(device)
-            batch.sparse_features[k]['offsets'] = batch.sparse_features[k]['offsets'].to(device)
+        if not args.ipex_optimize:
+            for k, v in batch.sparse_features.items():
+                batch.sparse_features[k]['values'] = batch.sparse_features[k]['values'].to(device)
+                batch.sparse_features[k]['offsets'] = batch.sparse_features[k]['offsets'].to(device)
 
         #if args.converge and args.dense and (args.use_device == "xpu"):
         #    torch.xpu.empty_cache()
         with torch.no_grad():
             if args.amp:
                 if args.use_device == "xpu":
-                    with torch.xpu.amp.autocast(enabled=args.amp, dtype=args.amp_dtype):
+                    if args.amp_dtype == torch.bfloat16 or args.amp_dtype == torch.float16:
+                        with torch.autocast(device_type="xpu", enabled=args.amp, dtype=args.amp_dtype):
+                            logits = model(batch.dense_features, batch.sparse_features)
+                    else:
                         logits = model(batch.dense_features, batch.sparse_features)
                 elif args.use_device == "cuda":
                     with torch.cuda.amp.autocast(enabled=args.amp, dtype=args.amp_dtype):
@@ -492,7 +511,8 @@ def _evaluate(
         while True:
             try:
                 batch = next(iterator)
-                batch.sparse_features = unpack(batch.sparse_features, default_embedding_names)
+                if not args.ipex_optimize:
+                    batch.sparse_features = unpack(batch.sparse_features, default_embedding_names)
                 #ext_dist.barrier()
                 if args.use_device == "xpu":
                     torch.xpu.synchronize()
@@ -501,7 +521,18 @@ def _evaluate(
                 else:
                     pass
                 t1 = time.time()
-                with (torch.autograd.profiler_legacy.profile(args.enable_profiling, use_xpu=True) if args.use_xpu else torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA])) as prof:
+                with (
+                    contextlib.nullcontext(None) if not args.enable_profiling else
+                    torch.profiler.profile(
+                        activities=[torch.profiler.ProfilerActivity.CPU,
+                                    torch.profiler.ProfilerActivity.XPU],
+                        record_shapes=False,
+                    ) if args.use_xpu else
+                    torch.profiler.profile(
+                        activities=[torch.profiler.ProfilerActivity.CPU],
+                        record_shapes=False,
+                    )
+                ) as prof:
                     logits, labels = eval_step(eval_model, batch)
                     preds = torch.sigmoid(logits)
                     auroc(preds, labels)
@@ -525,7 +556,8 @@ def _evaluate(
                     torch.save(prof.key_averages().table(sort_by="self_xpu_time_total", row_limit=100000), \
                         path + '.pt')
                     prof.export_chrome_trace(path + '.json')
-                    torch.save(prof.table(sort_by="id", row_limit=100000), path + '_detail.pt')
+                    # Cannot sort by id when using kineto
+                    # torch.save(prof.table(sort_by="id", row_limit=100000), path + '_detail.pt')
                 elif args.use_device == "cuda":
                     torch.save(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=100000), \
                         path + '.pt')
@@ -586,14 +618,19 @@ def _train(
             next_batch.dense_features = next_batch.dense_features[ext_dist.get_my_slice(batch_size)].to(device).to(args.amp_dtype)
         next_batch.labels = next_batch.labels[ext_dist.get_my_slice(batch_size)].to(device)
 
-        for k, v in next_batch.sparse_features.items():
-            next_batch.sparse_features[k]['values'] = next_batch.sparse_features[k]['values'].to(device)
-            next_batch.sparse_features[k]['offsets'] = next_batch.sparse_features[k]['offsets'].to(device)
+        if not args.ipex_optimize:
+            for k, v in next_batch.sparse_features.items():
+                next_batch.sparse_features[k]['values'] = next_batch.sparse_features[k]['values'].to(device)
+                next_batch.sparse_features[k]['offsets'] = next_batch.sparse_features[k]['offsets'].to(device)
         #if args.converge and args.dense and (args.use_device == "xpu"):
         #    torch.xpu.empty_cache()
         if args.amp:
             if args.use_device == "xpu":
-                with torch.xpu.amp.autocast(enabled=args.amp, dtype=args.amp_dtype):
+                if args.amp_dtype == torch.bfloat16 or args.amp_dtype == torch.float16:
+                    with torch.autocast(device_type="xpu", enabled=args.amp, dtype=args.amp_dtype):
+                        losses, _ = model(next_batch)
+                        loss = torch.sum(losses, dim=0)
+                else:
                     losses, _ = model(next_batch)
                     loss = torch.sum(losses, dim=0)
             elif args.use_device == "cuda":
@@ -626,7 +663,8 @@ def _train(
                 for i, g in enumerate(train_pipeline._optimizer.param_groups):
                     print(f"lr: {it} {i} {g['lr']:.6f}")
             next_batch = next(iterator)
-            next_batch.sparse_features = unpack(next_batch.sparse_features, default_embedding_names)
+            if not args.ipex_optimize:
+                next_batch.sparse_features = unpack(next_batch.sparse_features, default_embedding_names)
             #ext_dist.barrier()
             if args.use_device == "xpu":
                 torch.xpu.synchronize()
@@ -635,7 +673,18 @@ def _train(
             else:
                 pass
             t1 = time.time()
-            with (torch.autograd.profiler_legacy.profile(args.enable_profiling, use_xpu=True, record_shapes=False) if args.use_xpu else torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA])) as prof:
+            with (
+                contextlib.nullcontext(None) if not args.enable_profiling else
+                torch.profiler.profile(
+                    activities=[torch.profiler.ProfilerActivity.CPU,
+                                torch.profiler.ProfilerActivity.XPU],
+                    record_shapes=False,
+                ) if args.use_xpu else
+                torch.profiler.profile(
+                    activities=[torch.profiler.ProfilerActivity.CPU],
+                    record_shapes=False,
+                )
+            ) as prof:
                 train_step(train_model, train_optimizer, next_batch)
                 if args.use_device == "xpu":
                     torch.xpu.synchronize()
@@ -657,7 +706,8 @@ def _train(
                     torch.save(prof.key_averages().table(sort_by="self_xpu_time_total", row_limit=100000), \
                         path + '.pt')
                     prof.export_chrome_trace(path + '.json')
-                    torch.save(prof.table(sort_by="id", row_limit=100000), path + '_detail.pt')
+                    # Cannot sort by id when using kineto
+                    # torch.save(prof.table(sort_by="id", row_limit=100000), path + '_detail.pt')
                 elif args.use_device == "cuda":
                     torch.save(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=100000), \
                         path + '.pt')
@@ -902,25 +952,38 @@ def main(argv: List[str]) -> None:
     #if dist.get_world_size() == 8 and dist.get_rank() == 7:
     #    local_emb_indices[2] = 21
 
-    shard_matrix_str, shard_strategy_str, shard_matrix, shard_strategy = sharding.generate_plan(
-    args.num_embeddings_per_feature, args.multi_hot_sizes, args.num_nodes, dist.get_world_size(), args, dist.get_rank() == 0)
-    #local_emb_slice = ext_dist.get_my_slice(n_emb)
-    local_emb_indices = shard_matrix[rank]
-    default_embedding_names = [DEFAULT_CAT_NAMES[i] for i in local_emb_indices]
-    idx_name = zip(local_emb_indices, default_embedding_names)
+    if args.ipex_optimize:
+        eb_configs = [
+            EmbeddingBagConfig(
+                name=f"t_{feature_name}",
+                embedding_dim=args.embedding_dim,
+                num_embeddings=none_throws(args.num_embeddings_per_feature)[feature_idx]
+                if args.num_embeddings is None
+                else args.num_embeddings,
+                feature_names=[feature_name],
+            )
+            for feature_idx, feature_name in enumerate(DEFAULT_CAT_NAMES)
+        ]
+    else:
+        shard_matrix_str, shard_strategy_str, shard_matrix, shard_strategy = sharding.generate_plan(
+        args.num_embeddings_per_feature, args.multi_hot_sizes, args.num_nodes, dist.get_world_size(), args, dist.get_rank() == 0)
+        #local_emb_slice = ext_dist.get_my_slice(n_emb)
+        local_emb_indices = shard_matrix[rank]
+        default_embedding_names = [DEFAULT_CAT_NAMES[i] for i in local_emb_indices]
+        idx_name = zip(local_emb_indices, default_embedding_names)
 
-    eb_configs = [
-        EmbeddingBagConfig(
-            name=f"t_{feature_name}",
-            embedding_dim=args.embedding_dim,
-            num_embeddings=none_throws(args.num_embeddings_per_feature)[feature_idx]
-            if args.num_embeddings is None
-            else args.num_embeddings,
-            feature_names=[feature_name],
-        )
-        #for feature_idx, feature_name in enumerate(DEFAULT_CAT_NAMES)
-        for feature_idx, feature_name in idx_name
-    ]
+        eb_configs = [
+            EmbeddingBagConfig(
+                name=f"t_{feature_name}",
+                embedding_dim=args.embedding_dim,
+                num_embeddings=none_throws(args.num_embeddings_per_feature)[feature_idx]
+                if args.num_embeddings is None
+                else args.num_embeddings,
+                feature_names=[feature_name],
+            )
+            #for feature_idx, feature_name in enumerate(DEFAULT_CAT_NAMES)
+            for feature_idx, feature_name in idx_name
+        ]
     sharded_module_kwargs = {}
     if args.over_arch_layer_sizes is not None:
         sharded_module_kwargs["over_arch_layer_sizes"] = args.over_arch_layer_sizes
@@ -936,24 +999,42 @@ def main(argv: List[str]) -> None:
             dense_device=device,
         )
     elif args.interaction_type == InteractionType.DCN:
-        #dlrm_model = DLRM_DCN(
-        dlrm_model = DIST_DLRM_DCN(
-            embedding_bag_collection=EmbeddingBagCollection(
-                #tables=eb_configs, device=torch.device("meta")
-                tables=eb_configs, device="cpu"
-            ),
-            dense_in_features=len(DEFAULT_INT_NAMES),
-            num_total_sparse_features=n_emb,
-            dense_arch_layer_sizes=args.dense_arch_layer_sizes,
-            over_arch_layer_sizes=args.over_arch_layer_sizes,
-            dcn_num_layers=args.dcn_num_layers,
-            dcn_low_rank_dim=args.dcn_low_rank_dim,
-            n_emb=n_emb,
-            shard_matrix=shard_matrix, 
-            shard_strategy = shard_strategy,
-            args=args,
-            dense_device="cpu",
-        )
+        if args.ipex_optimize:
+            dlrm_model = DLRM_DCN(
+                embedding_bag_collection=EmbeddingBagCollection(
+                    tables=eb_configs, device=torch.device("meta")
+                ),
+                dense_in_features=len(DEFAULT_INT_NAMES),
+                dense_arch_layer_sizes=args.dense_arch_layer_sizes,
+                over_arch_layer_sizes=args.over_arch_layer_sizes,
+                dcn_num_layers=args.dcn_num_layers,
+                dcn_low_rank_dim=args.dcn_low_rank_dim,
+                dense_device=device,
+            )
+        else:
+            dlrm_model = DIST_DLRM_DCN(
+                embedding_bag_collection=EmbeddingBagCollection(
+                    tables=eb_configs, device="cpu"
+                ),
+                dense_in_features=len(DEFAULT_INT_NAMES),
+                num_total_sparse_features=n_emb,
+                dense_arch_layer_sizes=args.dense_arch_layer_sizes,
+                over_arch_layer_sizes=args.over_arch_layer_sizes,
+                dcn_num_layers=args.dcn_num_layers,
+                dcn_low_rank_dim=args.dcn_low_rank_dim,
+                n_emb=n_emb,
+                shard_matrix=shard_matrix, 
+                shard_strategy = shard_strategy,
+                args=args,
+                dense_device="cpu",
+            )
+            for embedding_bag in dlrm_model.sparse_arch.embedding_bag_collection.embedding_bags.values():
+                _W = np.random.uniform(
+                    low=-np.sqrt(1 / embedding_bag.num_embeddings),
+                    high=np.sqrt(1 / embedding_bag.num_embeddings),
+                    size=(embedding_bag.num_embeddings, embedding_bag.embedding_dim)).astype(np.float32)
+                embedding_bag.weight.data = torch.tensor(_W, requires_grad=True)
+
     elif args.interaction_type == InteractionType.PROJECTION:
         dlrm_model = DLRM_Projection(
             embedding_bag_collection=EmbeddingBagCollection(
@@ -970,13 +1051,6 @@ def main(argv: List[str]) -> None:
         raise ValueError(
             "Unknown interaction option set. Should be original, dcn, or projection."
         )
-
-    for embedding_bag in dlrm_model.sparse_arch.embedding_bag_collection.embedding_bags.values():
-        _W = np.random.uniform(
-            low=-np.sqrt(1 / embedding_bag.num_embeddings),
-            high=np.sqrt(1 / embedding_bag.num_embeddings),
-            size=(embedding_bag.num_embeddings, embedding_bag.embedding_dim)).astype(np.float32)
-        embedding_bag.weight.data = torch.tensor(_W, requires_grad=True)
 
     if not args.amp:
         dlrm_model.to(args.amp_dtype)
@@ -998,7 +1072,13 @@ def main(argv: List[str]) -> None:
         optimizer_kwargs["eps"] = args.eps
 
     model = train_model
-    model.model.sparse_arch = SparseArchTraceAbleWrapper(model.model.sparse_arch, args.dense)
+    optimizer_param = None
+    if args.ipex_optimize:
+        model.model, optimizer_param = replace_embeddingbag_collection(model.model, device, args)
+    else:
+        model.model.sparse_arch = SparseArchTraceAbleWrapper(model.model.sparse_arch, args.dense)
+        optimizer_param = model.parameters()
+    print(model)
     checkpoint = None
     args.epoch = 0
     args.step = 0
@@ -1012,13 +1092,12 @@ def main(argv: List[str]) -> None:
         logger.info(f"The start epoch is : {args.epoch}")
         logger.info(f"The start step is : {args.step}")
 
-
     optimizer = None
     if not args.inference_only:
         if args.adagrad:
-            optimizer = torch.optim.Adagrad(model.parameters(), lr=args.learning_rate, eps=args.eps)
+            optimizer = torch.optim.Adagrad(optimizer_param, lr=args.learning_rate, eps=args.eps)
         else:
-            optimizer = torch.optim.SGD(model.parameters(), lr=args.learning_rate)
+            optimizer = torch.optim.SGD(optimizer_param, lr=args.learning_rate)
         if args.converge and checkpoint is not None:
             print('[info] loadind optimizer state dict...')
             optimizer.load_state_dict(checkpoint['optimizer'])
@@ -1041,7 +1120,7 @@ def main(argv: List[str]) -> None:
             model.model.dense_arch = ext_dist.DDP(model.model.dense_arch, device_ids=device_ids)
             model.model.inter_arch = ext_dist.DDP(model.model.inter_arch, device_ids=device_ids)
             model.model.over_arch = ext_dist.DDP(model.model.over_arch, device_ids=device_ids)
-            if not args.inference_only:
+            if (not args.inference_only):
                 for k, v in optimizer.state.items():
                     for name, value in v.items():
                         if isinstance(value, torch.Tensor):
