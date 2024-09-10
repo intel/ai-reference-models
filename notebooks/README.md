@@ -1,20 +1,13 @@
 # Run Intel® AI Reference Models in a Jupyter Notebook
- 
+
 This Jupyter notebook helps you choose and run a comparison between two models from the [Intel® AI Reference Models repo](https://github.com/IntelAI/models) using Intel® Optimizations for TensorFlow*. When you run the notebook, it installs required package dependencies, displays information about your platform, lets you choose the two models to compare, runs those models, and finally displays a performance comparison chart.
-  
+
 ## Supported Models
 
-| Model | Framework | Mode | Script Type | Supported Precisions |
+| Model | Framework | Mode |  Supported Precisions |
 | ----- | --------- | ---- | ----------- | -------------------- |
-| ResNet50v1.5 | TensorFlow | Inference | throughput_multi_instance | [FP32, BFloat32, FP16, INT8, BFloat16](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu) |
-| ResNet50v1.5 | TensorFlow | Inference | accuracy | [FP32, BFloat32, FP16, INT8, BFloat16](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu) |
-| ResNet50v1.5 | TensorFlow | Inference | realtime_weightsharing | [INT8, BFloat16](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu) |
-| ResNet50 | TensorFlow | Inference | batch_inference | [FP32, INT8](/quickstart/image_recognition/tensorflow/resnet50/inference/cpu) |
-| ResNet50 | TensorFlow | Inference | accuracy | [FP32, INT8](/quickstart/image_recognition/tensorflow/resnet50/inference/cpu) |
-| Mobilenet_v1 | TensorFlow | Inference | throughput_multi_instance | [FP32, BFloat32, INT8, BFloat16](/quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu) |
-| MobileNet_v1 | TensorFlow | Inference | accuracy | [FP32, BFloat32, INT8, BFloat16](/quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu) |
-| SSD-MobileNet | TensorFlow | Inference | throughput_multi_instance | [FP32, BFloat32, INT8, BFloat16](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu) |
-| SSD-MobileNet | TensorFlow | Inference | accuracy | [FP32, BFloat32, INT8, BFloat16](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu) |
+| ResNet50v1.5 | TensorFlow | Inference | [FP32, BFloat32, FP16, INT8, BFloat16](/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/README.md) |
+| BERT Large | TensorFlow | Inference | [FP32, BFLOAT16, FP16](/benchmarks/language_modeling/tensorflow/bert_large/inference/README.md)
 
 ## Environment Setup
 
@@ -34,7 +27,7 @@ The jupyter notebook runs on Ubuntu distribution for Linux.
        ```
        virtualenv -p python ai_ref_models
        source ai_ref_models/bin/activate
-       ``` 
+       ```
 
  2. **Jupyter Notebook Support**:
 
@@ -47,7 +40,7 @@ The jupyter notebook runs on Ubuntu distribution for Linux.
 
 ## How to Run the Notebook
 
-1. Clone the Intel® AI Reference Models repo: 
+1. Clone the Intel® AI Reference Models repo:
    ```
    git clone https://github.com/IntelAI/models.git
    ```
