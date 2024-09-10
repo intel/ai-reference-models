@@ -1,0 +1,72 @@
+inference-fp32-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${WEIGHT_PATH}
+  env:
+    PRECISION: "FP32"
+    TEST_MODE: "THROUGHPUT"
+    DATASET_DIR: "/pytorch/dlrm_data/"
+    WEIGHT_PATH: "/pytorch/dlrm_weights/"
+inference-bf32-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${WEIGHT_PATH}
+  env:
+    PRECISION: "BF32"
+    TEST_MODE: "THROUGHPUT"
+    DATASET_DIR: "/pytorch/dlrm_data/"
+    WEIGHT_PATH: "/pytorch/dlrm_weights/"
+inference-bf16-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${WEIGHT_PATH}
+  env:
+    PRECISION: "BF16"
+    TEST_MODE: "THROUGHPUT"
+    DATASET_DIR: "/pytorch/dlrm_data/"
+    WEIGHT_PATH: "/pytorch/dlrm_weights/"
+inference-int8-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${WEIGHT_PATH}
+  env:
+    PRECISION: "INT8"
+    TEST_MODE: "THROUGHPUT"
+    DATASET_DIR: "/pytorch/dlrm_data/"
+    WEIGHT_PATH: "/pytorch/dlrm_weights/"
+inference-fp32-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${WEIGHT_PATH}
+  env:
+    PRECISION: "FP32"
+    TEST_MODE: "ACCURACY"
+    DATASET_DIR: "/pytorch/dlrm_data/"
+    WEIGHT_PATH: "/pytorch/dlrm_weights/"
+inference-bf32-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${WEIGHT_PATH}
+  env:
+    PRECISION: "BF32"
+    TEST_MODE: "ACCURACY"
+    DATASET_DIR: "/pytorch/dlrm_data/"
+    WEIGHT_PATH: "/pytorch/dlrm_weights/"
+inference-bf16-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${WEIGHT_PATH}
+  env:
+    PRECISION: "BF16"
+    TEST_MODE: "ACCURACY"
+    DATASET_DIR: "/pytorch/dlrm_data/"
+    WEIGHT_PATH: "/pytorch/dlrm_weights/"
+inference-int8-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/dlrm/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE} ${DATASET_DIR} ${WEIGHT_PATH}
+  env:
+    PRECISION: "INT8"
+    TEST_MODE: "ACCURACY"
+    DATASET_DIR: "/pytorch/dlrm_data/"
+    WEIGHT_PATH: "/pytorch/dlrm_weights/"

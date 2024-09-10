@@ -66,7 +66,7 @@ export WEIGHT_PATH=<path to the tb00_40M.pt file>
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
-| **THROUHGPUT** (leave unset if accuracy)              |                               `export THROUGHPUT=true`                                  |
+| **TEST_MODE** (THROUGHPUT, ACCURACY)              |                               `export TEST_MODE=THROUGHPUT`                                  |
 | **DATASET_DIR**              |                               `export DATASET_DIR=<path-to-dlrm_data> or <path-to-preprocessed-data>`                                  |
 | **WEIGHT_PATH**      |                 `export WEIGHT_PATH=<path to the tb00_40M.pt file>`        |
 | **BATCH_SIZE** (optional)  |                               `export BATCH_SIZE=10000`                                |
