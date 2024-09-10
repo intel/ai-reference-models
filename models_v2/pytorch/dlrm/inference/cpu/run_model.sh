@@ -14,6 +14,15 @@
 # limitations under the License.
 #
 
+if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
+    echo "TEST_MODE set to THROUGHPUT"
+elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
+    echo "TEST_MODE set to ACCURACY"
+else
+    echo "Please set TEST_MODE to THROUGHPUT or ACCURACY"
+    exit
+fi
+
 MODEL_DIR=${MODEL_DIR-$PWD}
 if [ ! -e "${MODEL_DIR}/../../common/dlrm_s_pytorch.py"  ]; then
     echo "Could not find the script of dlrm_s_pytorch.py. Please set environment variable '\${MODEL_DIR}'."
@@ -21,10 +30,6 @@ if [ ! -e "${MODEL_DIR}/../../common/dlrm_s_pytorch.py"  ]; then
     exit 1
 fi
 MODEL_SCRIPT=${MODEL_DIR}/../../common/dlrm_s_pytorch.py
-
-echo "PRECISION: ${PRECISION}"
-echo "DATASET_DIR: ${DATASET_DIR}"
-echo "OUTPUT_DIR: ${OUTPUT_DIR}"
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -82,7 +87,7 @@ else
 fi
 
 export OMP_NUM_THREADS=$CORES_PER_SOCKET
-if [ "$THROUGHPUT" ]; then
+if [ "$TEST_MODE" == "THROUGHPUT" ]; then
     LOG="${LOG}/throughput.log"
 else
     LOG="${LOG}/accuracy.log"
@@ -90,7 +95,7 @@ fi
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 
-if [ "$THROUGHPUT" ]; then
+if [ "$TEST_MODE" == "THROUGHPUT" ]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --memory-allocator tcmalloc $MODEL_SCRIPT \
             --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
@@ -146,7 +151,7 @@ throughput="N/A"
 accuracy="N/A"
 latency="N/A"
 
-if [ "$THROUGHPUT" ]; then
+if [ "$TEST_MODE" == "THROUGHPUT" ]; then
   throughput=$(grep 'Throughput:' ${LOG} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
   BEGIN {
           sum = 0;
