@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 # Copyright (c) 2019, NVIDIA CORPORATION. All rights reserved.
+# Copyright (c) 2019, Myrtle Software Limited. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -259,7 +260,11 @@ def eval_profiling(
             t_audio_signal_e_con = t_audio_signal_e.contiguous()
 
             # start to eval profiling perf
-            with torch.autograd.profiler_legacy.profile(use_xpu=True, record_shapes=False) as prof:
+            with torch.profiler.profile(
+                activities=[torch.profiler.ProfilerActivity.CPU,
+                            torch.profiler.ProfilerActivity.XPU],
+                record_shapes=False,
+            ) as prof:
                 try:
                     import memory_check
                     memory_check.display_mem("xpu:0")
@@ -284,6 +289,7 @@ def eval_profiling(
             t1 = time.perf_counter()
             # print(prof.key_averages().table(sort_by="self_cpu_time_total"))
             # print(prof.key_averages(group_by_input_shape=True).table())
+            # Cannot sort by id when using kineto
             # print(prof.table(sort_by="id", row_limit=100000))
 
             if args.warm_up == 0 or it >= args.warm_up:
