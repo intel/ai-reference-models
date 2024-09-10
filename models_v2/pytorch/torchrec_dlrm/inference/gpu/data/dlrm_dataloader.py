@@ -111,7 +111,7 @@ def _get_in_memory_dataloader(
         if args.converge:
             stage_files: List[List[str]] = [
                 [os.path.join(dir_path, f"day_{i}_dense.npy") for i in range(DAYS - 1)],
-                [os.path.join(dir_path, "multihot", f"day_{i}_{sparse_part}") for i in range(DAYS - 1)],
+                [os.path.join(dir_path, f"day_{i}_{sparse_part}") for i in range(DAYS - 1)],
                 [os.path.join(dir_path, f"day_{i}_labels.npy") for i in range(DAYS - 1)],
             ]
         else:
@@ -125,7 +125,7 @@ def _get_in_memory_dataloader(
         if args.converge:
             stage_files: List[List[str]] = [
                 [os.path.join(dir_path, f"day_{DAYS-1}_dense.npy")],
-                [os.path.join(dir_path, "multihot", f"day_{DAYS-1}_{sparse_part}")],
+                [os.path.join(dir_path, f"day_{DAYS-1}_{sparse_part}")],
                 [os.path.join(dir_path, f"day_{DAYS-1}_labels.npy")],
             ]
         else:
