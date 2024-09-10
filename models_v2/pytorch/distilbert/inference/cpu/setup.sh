@@ -21,11 +21,12 @@ pip install scikit-learn scipy
 
 # Check the operating system type
 os_type=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+echo "My OS type: ${os_type}"
 
 # Install model specific dependencies:
 if [[ "$os_name" == *"CentOS"* ]]; then
     yum install -y git-lfs
-elif [[ "$os_name" == *"Ubuntu"* ]]; then
+elif [[ "$os_name" == *"Ubuntu"* || "os_name" == *"Linux"* ]]; then
     apt install -y git-lfs
 fi
 
