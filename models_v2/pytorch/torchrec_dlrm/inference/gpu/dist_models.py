@@ -14,14 +14,77 @@
 # limitations under the License.
 #
 import argparse
+from functools import partial
 import torch
 from torchrec import EmbeddingBagCollection
 import extend_distributed as ext_dist
 from torchrec.models.dlrm import DLRM, InteractionDCNArch, OverArch
 from typing import Dict, List, Optional, Tuple
-from torchrec.sparse.jagged_tensor import KeyedJaggedTensor
+from torchrec.sparse.jagged_tensor import KeyedJaggedTensor, JaggedTensor
 from torchrec.modules.crossnet import LowRankCrossNet
 import time
+
+def dist_embedding_forward(
+        self,
+        dense_features: torch.Tensor,
+        sparse_features: KeyedJaggedTensor,
+    ) -> torch.Tensor:
+    """
+    Args:
+        dense_features (torch.Tensor): the dense features.
+        sparse_features (KeyedJaggedTensor): the sparse features.
+
+    Returns:
+        torch.Tensor: logits.
+    """
+    indices = tuple([sf.values().to(self.input_device) for _, sf in sparse_features.to_dict().items()])
+    offsets = tuple([sf.offsets().to(self.input_device) for _, sf in sparse_features.to_dict().items()])
+    embedded_sparse = self.sparse_arch(indices, offsets)
+    embedded_dense = self.dense_arch(dense_features)
+
+    if self.fp16:
+        embedded_sparse = embedded_sparse.half() if embedded_sparse.dtype != torch.float16 else embedded_sparse
+        embedded_dense = embedded_dense.half() if embedded_dense.dtype != torch.float16 else embedded_dense
+    elif self.bf16:
+        embedded_sparse = embedded_sparse.bfloat16() if embedded_sparse.dtype != torch.bfloat16 else embedded_sparse
+        embedded_dense = embedded_dense.bfloat16() if embedded_dense.dtype != torch.bfloat16 else embedded_dense
+
+    concatenated_dense = self.inter_arch(
+        dense_features=embedded_dense, sparse_features=embedded_sparse
+    )
+    logits = self.over_arch(concatenated_dense)
+    return logits
+
+
+def replace_embeddingbag_collection(model, device, args):
+    from intel_extension_for_pytorch.nn import DistMergeEmbeddingBagWithAdaGrad
+    optimizer_param = model.parameters()
+    if args.ipex_optimize:
+        new_collection = None
+        new_forward_func = None
+        params = []
+        collection = list(model.sparse_arch.embedding_bag_collection.embedding_bags.values())
+        if not args.inference_only:
+            if args.ipex_dist_merged_emb_adagrad:
+                new_collection = DistMergeEmbeddingBagWithAdaGrad.from_embeddingbag_list(collection, device=device,lr=args.learning_rate, eps=args.eps)
+                new_forward_func = dist_embedding_forward
+            else:
+                pass
+
+        if new_collection:
+            model.sparse_arch = new_collection
+            if args.ipex_dist_merged_emb_adagrad:
+                setattr(model, "forward", partial(new_forward_func, model))
+                setattr(model, "input_device", device)
+                setattr(model, "bf16", args.bf16)
+                setattr(model, "fp16", args.fp16)
+                for name, param in model.named_parameters():
+                    if name != "sparse_arch.weights.0":
+                        params.append(param)
+                optimizer_param = params
+            del(collection)
+    return model, optimizer_param
+
 
 class DIST_DLRM_DCN(DLRM):
     """
