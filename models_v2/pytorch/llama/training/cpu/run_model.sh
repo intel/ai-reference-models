@@ -60,7 +60,7 @@ if [[ "${DDP}" == "True" ]]; then
     done
 
     export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
-    EOF
+EOF
 
     #DDP settings
     export TORCH_CPP_LOG_LEVEL=INFO

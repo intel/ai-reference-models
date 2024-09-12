@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+set -x
 ARGS=""
 EXTRA_ARGS=""
 
@@ -25,10 +25,10 @@ if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     LOG_PREFIX=dlrm_inference_performance_log
     if [ -z "${DATASET_DIR}" ]; then
         echo "DATASET_DIR are not set, will use dummy generated dataset"
-        EXTRA_ARGS="$EXTRA_ARGS --multi_hot_distribution_type uniform "
-        EXTRA_ARGS="$EXTRA_ARGS --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 "
+        export EXTRA_ARGS="$EXTRA_ARGS --multi_hot_distribution_type uniform "
+        export EXTRA_ARGS="$EXTRA_ARGS --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 "
     else
-        EXTRA_ARGS="$EXTRA_ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
+        export EXTRA_ARGS="$EXTRA_ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
     fi
 elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
     echo "TEST_MODE set to ACCURACY"
@@ -42,7 +42,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         echo "The required environment variable WEIGHT_DIR has not been set"
         exit 1
     fi
-    EXTRA_ARGS="$EXTRA_ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
+    export EXTRA_ARGS="$EXTRA_ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
 else
     echo "Please set TEST_MODE to THROUGHPUT or ACCURACY"
     exit 1
@@ -54,8 +54,8 @@ if [ ! -e "${MODEL_DIR}/dlrm_main.py"  ]; then
     exit 1
 fi
 
-MODEL_SCRIPT=${MODEL_DIR}/dlrm_main.py
-INT8_CONFIG=${MODEL_DIR}/int8_configure.json
+export MODEL_SCRIPT=${MODEL_DIR}/dlrm_main.py
+export INT8_CONFIG=${MODEL_DIR}/int8_configure.json
 
 echo "PRECISION: ${PRECISION}"
 echo "OUTPUT_DIR: ${OUTPUT_DIR}"
@@ -85,9 +85,9 @@ elif [[ $PRECISION == "fp16" ]]; then
     echo "running fp16 path"
     ARGS="$ARGS --dtype fp16"
 elif [[ $PRECISION == "int8" ]]; then
-    if [ ! -e "${MODEL_DIR}/int8_weight.json"  ]; then
-        echo "int8_weight.json not found in MODEL_DIR, will run weight conversion"
-        ARGS="$ARGS --int8-prepare"
+    if [[ "0" == ${TORCH_INDUCTOR} ]];then
+      echo "prepare int8 weight"
+      bash ${MODEL_DIR}/prepare_int8.sh
     fi
     echo "running int8 path"
     ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"
