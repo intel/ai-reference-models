@@ -41,7 +41,7 @@ elif [[ "${TEST_MODE}" == "REALTIME" ]]; then
     export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
     BATCH_SIZE=1
     NUM_ITER=${NUM_ITER:-20}
-    export KMP_BLOCKTIME=1
+    export KMP_BLOCKTIME=-1
     rm -rf ${OUTPUT_DIR}/latency_log*
     export USECASE=latency
     ARGS="$ARGS  --benchmark --num-warmup 10 --num-iter $NUM_ITER --token-latency"

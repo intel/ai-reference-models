@@ -150,7 +150,7 @@ else
             }
         }
     '))
-    first_token_latency=($(grep -i 'first-token-latency:' ${OUTPUT_DIR}/ChatGLM_${PRECISION}_${LOG_PREFIX}*  |sed -e 's/.first-token-latency: //;s/[^0-9.]//g;s/\.$//' |awk '
+    first_token_latency=($(grep -i 'first-token-latency:' ${OUTPUT_DIR}/ChatGLM_${PRECISION}_${LOG_PREFIX}*  |sed -e 's/.*first-token-latency: //;s/[^0-9.]//g;s/\.$//' |awk '
         BEGIN {
             num = 0;
             sum = 0;
