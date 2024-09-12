@@ -187,10 +187,10 @@ else
     export TORCHINDUCTOR_FREEZING=1
     python -m torch.backends.xeon.run_cpu \
 	    --enable-jemalloc \
+        $MODE_ARGS \
         --log_path=${OUTPUT_DIR} \
         ${MODEL_DIR}/yolov7/yolov7.py \
         $ARGS \
-        $MODE_ARGS \
         --inductor \
         --batch-size $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/yolov7_${mode}_log_${PRECISION}.log
 fi
