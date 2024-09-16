@@ -2021,6 +2021,7 @@ function graphsage() {
         fi
 
         CMD="${CMD} $(add_arg "--pretrained-model" ${PRETRAINED_MODEL})"
+	CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
         CMD="${CMD} $(add_arg "--steps" ${STEPS})"
         CMD=${CMD} run_model
       else
