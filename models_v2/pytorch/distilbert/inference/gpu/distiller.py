@@ -24,6 +24,7 @@ import psutil
 import torch
 import random
 import h5py
+import contextlib
 from torch import nn
 from torch.optim import AdamW
 from torch.utils.data import BatchSampler, DataLoader, RandomSampler, SequentialSampler, Dataset
@@ -762,11 +763,15 @@ class Distiller:
                 for batch in iter_bar:
                     if nb_eval_steps == self.num_iteration:
                         break
-
                     (token_ids, segment_ids, attn_mask, lm_labels, next_sentence_labels,) = batch
-
-                    with torch.autograd.profiler_legacy.profile(do_profiling, use_xpu=True) if self.device== "xpu" else torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
-
+                    with (
+                        contextlib.nullcontext(None) if not do_profiling else
+                        torch.profiler.profile(
+                            activities=[torch.profiler.ProfilerActivity.CPU,
+                                        torch.profiler.ProfilerActivity.XPU]) if self.device == "xpu" else
+                        torch.profiler.profile(
+                            activities=[torch.profiler.ProfilerActivity.CPU])
+                    ) as prof:
                         if self.device == "xpu":
                             try:
                                 import memory_check
@@ -776,19 +781,20 @@ class Distiller:
 
                         start_time = time.time()
                         if self.params.n_gpu > 0 and self.device == "cuda":
-                            #batch = tuple(t.to(f"cuda:{self.params.local_rank}") for t in batch)
+                            # batch = tuple(t.to(f"cuda:{self.params.local_rank}") for t in batch)
                             token_ids = token_ids.to(f"cuda:{self.params.local_rank}")
                             attn_mask = attn_mask.to(f"cuda:{self.params.local_rank}")
                             lm_labels = lm_labels.to(f"cuda:{self.params.local_rank}")
                         elif self.params.n_gpu > 0 and self.device == "xpu":
-                            #batch = tuple(t.to(self.device) for t in batch)
+                            # batch = tuple(t.to(self.device) for t in batch)
                             token_ids = token_ids.to(self.device)
                             attn_mask = attn_mask.to(self.device)
                             lm_labels = lm_labels.to(self.device)
                         if nb_eval_steps == 0:
-                            if self.params.jit and self.device== "xpu":
+                            if self.params.jit and self.device == "xpu":
                                 with torch.xpu.amp.autocast(enabled=self.amp, dtype=MAP_TORCH_DTYPE[self.dtype]):
-                                    self.student = torch.jit.trace(self.student, (token_ids, attn_mask), strict = False, check_trace=False)
+                                    self.student = torch.jit.trace(self.student, (token_ids, attn_mask),
+                                                                   strict=False, check_trace=False)
                                     self.student = torch.jit.freeze(self.student)
                         student_outputs = self.student(
                             input_ids=token_ids, attention_mask=attn_mask
@@ -805,8 +811,9 @@ class Distiller:
                         torch.save(prof.key_averages().table(sort_by=sort_key),
                                    './distilbert_profiling.pt')
                         prof.export_chrome_trace('./distilbert_profiling.json')
-                        if self.device == "xpu":
-                            torch.save(prof.table(sort_by="id", row_limit=100000), './distilbert_profiling_detailed.pt')
+                        # Cannot trace by id when using kineto
+                        # if self.device == "xpu":
+                        #     torch.save(prof.table(sort_by="id", row_limit=100000), './distilbert_profiling_detailed.pt')
                     eval_loss += loss.item()
                     nb_eval_steps += 1
         if self.is_master:
