@@ -1,0 +1,28 @@
+training-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/llama/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DDP}
+  env:
+    PRECISION: "fp32"
+    DDP: "False"
+training-bf32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/llama/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DDP}
+  env:
+    PRECISION: "bf32"
+    DDP: "False"
+training-bf16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/llama/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DDP}
+  env:
+    PRECISION: "bf16"
+    DDP: "False"
+training-fp16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/llama/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DDP}
+  env:
+    PRECISION: "fp32"
+    DDP: "False"
