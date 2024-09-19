@@ -68,9 +68,9 @@ sudo apt-get update && apt-get install -y  build-essential python3-opencv python
 |:---                               |:---
 |format2json.py| A Translation Script to convert the result of benchmark from text format to JSON format.
 |local_benchmark.sh| A bash script to test the model benchmark (Throughput, Latency & Accuracy). It is wrapper layer for launch_benchmark.py provided by Model Zoo for Intel(R) Architecture.
-|inc_for_tensorflow.ipynb| A Jupyter notebook file for this tutorial. 
+|inc_for_tensorflow.ipynb| A Jupyter notebook file for this tutorial.
 |inc_quantize_model.py| A python script to quantize the FP32 model to INT8 by calling Intel® Neural Compressor API.
-|requirements.txt| A PIP installation dependency file. List all of packages needed by this sample.
+|pyproject.toml| List all of packages needed by this sample.
 |resnet50_v1.yaml| A default YAML file for Intel® Neural Compressor. No update needed.
 |run_jupyter.sh| A script to start running Jupyter notebook.
 |tf_2012_val | A default folder to save the dataset. Put the TFRecord format dataset files into it.
@@ -86,16 +86,16 @@ sudo apt-get update && apt-get install -y  build-essential python3-opencv python
 Steps:
 
 ```
-./run_jupyter.sh 
+./run_jupyter.sh
 
-(tensorflow) xxx@yyy:$ [I 09:48:12.622 NotebookApp] Serving notebooks from local directory: 
+(tensorflow) xxx@yyy:$ [I 09:48:12.622 NotebookApp] Serving notebooks from local directory:
 ...
 [I 09:48:12.622 NotebookApp] Jupyter Notebook 6.1.4 is running at:
 [I 09:48:12.622 NotebookApp] http://yyy:8888/?token=<token>
 [I 09:48:12.622 NotebookApp]  or http://127.0.0.1:8888/?token=<token>
 [I 09:48:12.622 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
-[C 09:48:12.625 NotebookApp] 
-    
+[C 09:48:12.625 NotebookApp]
+
     To access the notebook, open this file in a browser:
         ...
     Or copy and paste one of these URLs:

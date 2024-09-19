@@ -35,7 +35,10 @@ python3 -m build .
 cd dist/
 pip install cloud_data_connector-1.0.2-py3-none-any.whl
 cd ..
-pip install -r samples/interoperability/requirements.txt
+sudo apt-get update -y && sudo apt-get install -y curl git vim
+# Download and run the Poetry installation script
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install --file samples/interoperability/pyproject.toml
 cd samples/interoperability
 ipython kernel install --user --name=intel_sample_env1
 jupyter notebook Interoperability.ipynb

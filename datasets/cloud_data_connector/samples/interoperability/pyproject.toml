@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "datasets-cloud-data-connector-samples-interoperability"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+build = "^1.2.2"
+mlflow = "^2.16.2"
+notebook = "^7.2.2"
+pandas-gbq = "^0.23.1"
+scikit-learn = "^1.5.2"
+xlrd = "^2.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

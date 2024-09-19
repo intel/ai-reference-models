@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "docs-notebooks-low-precision-optimization-tensorflow"
+version = "0.1.0"
+description = ""
+authors = ["Clayne B. Robison <clayne.b.robison@intel.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+tensorflow = "^2.17.0"
+ipykernel = "^6.29.5"
+matplotlib = "^3.9.2"
+notebook = "^7.2.2"
+runipy = "^0.1.5"
+wheel = "^0.44.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
