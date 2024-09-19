@@ -1,0 +1,126 @@
+inference-fp32-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "fp32"
+    TEST_MODE: "THROUGHPUT"
+inference-bf32-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "bf32"
+    TEST_MODE: "THROUGHPUT"
+inference-bf16-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "bf16"
+    TEST_MODE: "THROUGHPUT"
+inference-fp16-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "fp16"
+    TEST_MODE: "THROUGHPUT"
+inference-int8-fp32-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "int8-fp32"
+    TEST_MODE: "THROUGHPUT"
+inference-int8-bf16-throughput:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "int8-bf16"
+    TEST_MODE: "THROUGHPUT"
+inference-fp32-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "fp32"
+    TEST_MODE: "ACCURACY"
+inference-bf32-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "bf32"
+    TEST_MODE: "ACCURACY"
+inference-bf16-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "bf16"
+    TEST_MODE: "ACCURACY"
+inference-fp16-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "fp16"
+    TEST_MODE: "ACCURACY"
+inference-int8-fp32-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "int8-fp32"
+    TEST_MODE: "ACCURACY"
+inference-int8-bf16-accuracy:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "int8-bf16"
+    TEST_MODE: "ACCURACY"
+inference-fp32-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "fp32"
+    TEST_MODE: "REALTIME"
+inference-bf32-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "bf32"
+    TEST_MODE: "REALTIME"
+inference-bf16-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "bf16"
+    TEST_MODE: "REALTIME"
+inference-fp16-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "fp16"
+    TEST_MODE: "REALTIME"
+inference-int8-fp32-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "int8-fp32"
+    TEST_MODE: "REALTIME"
+inference-int8-bf16-realtime:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/gptj/inference/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${TEST_MODE}
+  env:
+    PRECISION: "int8-bf16"
+    TEST_MODE: "REALTIME"
