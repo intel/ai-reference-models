@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "pytorch-distilbert-inf-gpu"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+transformers = "^4.44.2"
+gitpython = "^3.1.43"
+tensorboard = "^2.17.1"
+tensorboardx = "^2.6.2.2"
+psutil = "^6.0.0"
+scipy = "^1.14.1"
+h5py = "^3.11.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
