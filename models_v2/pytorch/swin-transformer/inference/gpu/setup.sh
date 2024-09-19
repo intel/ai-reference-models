@@ -21,9 +21,11 @@
 #  - git clones & applying patches
 
 set -e
-apt-get update && apt-get install -y python3-venv 
+apt-get update && apt-get install -y python3-venv
 
-pip install -r requirements.txt
+# Download and run the Poetry installation script
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install
 pip install --no-deps -r requirements-no-deps.txt
 
 export no_proxy=""

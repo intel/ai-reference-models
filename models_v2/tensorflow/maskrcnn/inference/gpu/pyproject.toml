@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "tf-maskrcnn-inf-gpu"
+version = "0.1.0"
+description = ""
+authors = ["Robison, Clayne B <clayne.b.robison@intel.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+opencv-python-headless = "^4.10.0.84"
+pybind11 = "^2.13.6"
+pycocotools = "^2.0.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

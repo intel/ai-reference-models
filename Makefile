@@ -54,7 +54,7 @@ unit_test:
 	tox -e py3-py.test
 
 test_tl_tf_notebook: venv
-	@. $(ACTIVATE) && pip install -r docs/notebooks/transfer_learning/requirements.txt && \
+	@. $(ACTIVATE) && poetry install --file docs/notebooks/transfer_learning/pyproject.toml && \
 	bash docs/notebooks/transfer_learning/run_tl_notebooks.sh $(CURDIR)/docs/notebooks/transfer_learning/text_classification/tfhub_bert_text_classification/BERT_Binary_Text_Classification.ipynb remove_for_custom_dataset && \
 	bash docs/notebooks/transfer_learning/run_tl_notebooks.sh $(CURDIR)/docs/notebooks/transfer_learning/image_classification/tf_image_classification/Image_Classification_Transfer_Learning.ipynb remove_for_custom_dataset && \
 	bash docs/notebooks/transfer_learning/run_tl_notebooks.sh $(CURDIR)/docs/notebooks/transfer_learning/image_classification/huggingface_image_classification/HuggingFace_Image_Classification_Transfer_Learning.ipynb && \
@@ -62,7 +62,7 @@ test_tl_tf_notebook: venv
 	bash docs/notebooks/transfer_learning/run_tl_notebooks.sh $(CURDIR)/docs/notebooks/transfer_learning/text_classification/tfhub_bert_text_classification/BERT_Multi_Text_Classification.ipynb remove_for_custom_dataset
 
 test_tl_pyt_notebook: venv
-	@. $(ACTIVATE) && pip install -r docs/notebooks/transfer_learning/requirements.txt && \
+	@. $(ACTIVATE) && poetry install --file docs/notebooks/transfer_learning/pyproject.toml && \
 	bash docs/notebooks/transfer_learning/run_tl_notebooks.sh $(CURDIR)/docs/notebooks/transfer_learning/image_classification/pytorch_image_classification/PyTorch_Image_Classification_Transfer_Learning.ipynb remove_for_custom_dataset && \
 	bash docs/notebooks/transfer_learning/run_tl_notebooks.sh $(CURDIR)/docs/notebooks/transfer_learning/object_detection/pytorch_object_detection/PyTorch_Object_Detection_Transfer_Learning.ipynb remove_for_custom_dataset && \
 	bash docs/notebooks/transfer_learning/run_tl_notebooks.sh $(CURDIR)/docs/notebooks/transfer_learning/text_classification/pytorch_text_classification/PyTorch_Text_Classifier_fine_tuning.ipynb remove_for_custom_dataset
