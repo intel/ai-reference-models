@@ -1,0 +1,45 @@
+training-fp32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DISTRIBUTED} ${TRAINING_EPOCHS}
+  env:
+    PRECISION: "fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    DISTRIBUTED: "false"
+    TRAINING_EPOCHS: "1"
+training-fp32-avx:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DISTRIBUTED} ${TRAINING_EPOCHS}
+  env:
+    PRECISION: "avx-fp32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    DISTRIBUTED: "false"
+    TRAINING_EPOCHS: "1"
+training-bf16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DISTRIBUTED} ${TRAINING_EPOCHS}
+  env:
+    PRECISION: "bf16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    DISTRIBUTED: "false"
+    TRAINING_EPOCHS: "1"
+training-bf32:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DISTRIBUTED} ${TRAINING_EPOCHS}
+  env:
+    PRECISION: "bf32"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    DISTRIBUTED: "false"
+    TRAINING_EPOCHS: "1"
+training-fp16:
+  cmd:
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/pyt_cpu_setup.sh ${FRAMEWORK_VERSION} ${IS_LKG_DROP} ${AIKIT_VERSION};
+    bash $GITHUB_WORKSPACE/tests/cicd/pytorch/resnet50/training/cpu/test_model.sh ${PRECISION} ${IS_LKG_DROP} ${DATASET_DIR} ${DISTRIBUTED} ${TRAINING_EPOCHS}
+  env:
+    PRECISION: "fp16"
+    DATASET_DIR: "/pytorch/Imagenet_FullData/"
+    DISTRIBUTED: "false"
+    TRAINING_EPOCHS: "1"
