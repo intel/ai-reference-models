@@ -1,6 +1,0 @@
-build==0.10.0
-mlflow
-notebook==6.5.4
-pandas-gbq==0.19.1
-scikit-learn>=1.5.0
-xlrd==2.0.1
