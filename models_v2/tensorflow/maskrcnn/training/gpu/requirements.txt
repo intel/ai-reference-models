@@ -1,5 +1,0 @@
--e "git+https://github.com/NVIDIA/dllogger#egg=dllogger"
-intel-optimization-for-horovod==0.28.1.4
-opencv-python-headless
-pybind11
-pycocotools

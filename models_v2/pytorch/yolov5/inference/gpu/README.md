@@ -156,7 +156,7 @@ Mind the following `docker run` arguments:
 1. Install sample python dependencies:
 
     ```
-    python3 -m pip install -r requirements.txt
+    ./setup.sh
     ```
 
 1. Install [Intel® Extension for PyTorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation)

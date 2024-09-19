@@ -23,7 +23,9 @@
 set -e
 apt-get update && apt-get install -y python3-venv protobuf-compiler
 apt-get install -y --no-install-recommends parallel pciutils numactl
-pip install -r requirements.txt
+# Download and run the Poetry installation script
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install
 
 current_dir=$(pwd)
 if [ -d "DeepLearningExamples" ]; then

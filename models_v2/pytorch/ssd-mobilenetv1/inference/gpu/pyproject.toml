@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pyt-ssd-mobilenetv1-inf-gpu"
+version = "0.1.0"
+description = ""
+authors = ["Robison, Clayne B <clayne.b.robison@intel.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+opencv-python = "^4.10.0.84"
+pandas = "^2.2.2"
+pillow = "^10.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

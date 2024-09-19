@@ -23,8 +23,8 @@ Use the instructions below to install the dependencies required to run the noteb
    ```
    Then, from inside the activated virtualenv or conda environment run these steps:
    ```
-   pip install --upgrade pip
-   pip install -r ${MODEL_ZOO_DIR}/docs/notebooks/transfer_learning/requirements.txt
+   curl -sSL https://install.python-poetry.org | python3 -
+   poetry install --directory ${MODEL_ZOO_DIR}/docs/notebooks/transfer_learning
    ```
 3. Set environment variables for the path to the dataset folder and an output directory.
    The dataset and output directories can be empty. The notebook will download the
