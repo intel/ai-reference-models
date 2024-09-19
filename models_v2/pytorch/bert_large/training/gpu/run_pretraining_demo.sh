@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 python -u run_pretrain_mlperf.py \
     --config_name=bert_config.json \
     --input_dir=miniwiki/hdf5 \
@@ -20,9 +21,11 @@ python -u run_pretrain_mlperf.py \
     --eval_dir=miniwiki/hdf5 \
     --device=xpu \
     --do_train \
-    --train_batch_size=16 \
+    --train_batch_size=32 \
     --gradient_accumulation_steps=1 \
     --bf16 \
+    --seed 123 \
+    --sdp \
     --adamw --num-iterations 10
 
 # DDP training
@@ -37,7 +40,9 @@ mpiexec -n 2 -l python -u run_pretrain_mlperf.py \
     --eval_dir=miniwiki/hdf5 \
     --device=xpu \
     --do_train \
-    --train_batch_size=16 \
+    --train_batch_size=32 \
     --gradient_accumulation_steps=1 \
     --bf16 \
+    --seed 123 \
+    --sdp \
     --adamw --num-iterations 10

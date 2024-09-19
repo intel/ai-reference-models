@@ -66,9 +66,11 @@ from lamb import Lamb
 
 try:
     import intel_extension_for_pytorch as ipex
-    from intel_extension_for_pytorch.xpu.fp8.fp8 import fp8_autocast
-    from intel_extension_for_pytorch.xpu.fp8.recipe import DelayedScaling
-    from intel_extension_for_pytorch.nn.utils._fp8_convert import convert_fp8_model
+    from intel_extension_for_pytorch.quantization.fp8 import (
+	fp8_autocast,
+	DelayedScaling,
+	Format,
+	prepare_fp8)
 except:
     ipex = None
 
@@ -670,8 +672,14 @@ def parse_args():
     parser.add_argument("--adamw", action="store_true")
     parser.add_argument("--num-iterations", default='10000000000', type=str)
     parser.add_argument("--info", action="store_true")
+    parser.add_argument("--compile", action="store_true")
+    parser.add_argument("--sdp", action="store_true")
+    parser.add_argument("--kineto_profile", action="store_true", help="Whether to running kineto profiler",)
 
     args = parser.parse_args()
+    # profiling, support both 2 methods to enable profiler
+    if args.kineto_profile:
+        os.environ["PROFILE"] = "1"
     if os.environ.get("PROFILE", "OFF").upper() in ["1", "Y", "ON", "YES", "TRUE"]:
         args.profile = True
     if args.output_dir is not None:
@@ -779,7 +787,7 @@ optimize_dtype = None
 
 def prepare_model_and_optimizer(args, device):
     global optimize_dtype
-    if args.bf16 or args.fp8:
+    if args.bf16:
         optimize_dtype = torch.bfloat16
     else:
         optimize_dtype = torch.float32
@@ -856,9 +864,14 @@ def prepare_model_and_optimizer(args, device):
     else:
         raise NotImplementedError('Please use valid optimizer')
 
-    print("Doing torch xpu optimize, dtype: ", optimize_dtype)
-    model, optimizer = torch.xpu.optimize(
-        model=model, optimizer=optimizer, dtype=optimize_dtype)
+    if args.sdp:
+        model, optimizer = ipex.optimize_transformers(
+            model, optimizer, dtype=optimize_dtype, device=args.device, inplace=True)
+
+    if args.device == 'xpu':
+        print("Doing torch xpu optimize, dtype: ", optimize_dtype)
+        model, optimizer = torch.xpu.optimize(
+            model=model, optimizer=optimizer, dtype=optimize_dtype)
 
     if args.warmup_steps == 0:
         warmup_steps = int(args.max_steps_for_scheduler *
@@ -903,6 +916,9 @@ def prepare_model_and_optimizer(args, device):
                                                           bucket_cap_mb=args.bucket_cap,
                                                           broadcast_buffers=False if args.disable_broadcast_buffers else True,
                                                           gradient_as_bucket_view=args.use_gradient_as_bucket_view)
+
+    if args.compile:
+        model = torch.compile(model, mode='reduce-overhead')
 
     return model, optimizer, lr_scheduler, checkpoint, global_step
 
@@ -1183,105 +1199,134 @@ def main():
             gloss_list = []
             acc_list = []
 
-            # this file loop train: f_id
-            for step, batch in enumerate(train_dataloader):
-                if not args.converge:
-                    if training_steps >= 10 + int(args.num_iterations):
-                        latency_list = latency_list[10:]
-                        avg = sum(latency_list) / len(latency_list)
-                        print('bert_train latency:  ' + str(avg) + '  s')
-                        print('bert_train throughput:  ' + str(total_batch_size /
-                                                               args.world_size / avg) + '  sentences/s')
-                        print('perplexity = ' + str(gloss))
-                        return
-                training_steps += 1
+            # config profiler
+            import contextlib
+            def profiler_setup(profiling=False, *args, **kwargs):
+                if profiling:
+                    return torch.profiler.profile(*args, **kwargs)
+                else:
+                    return contextlib.nullcontext()
+            activities = [torch.profiler.ProfilerActivity.CPU]
+            if args.device == "xpu":
+                activities.append(torch.profiler.ProfilerActivity.XPU)
+            elif args.device == "cuda":
+                activities.append(torch.profiler.ProfilerActivity.CUDA)
+            # fixed wait iters = 1, active iters = 1, warmup_iters = 3, at_least 5 iters
+            # more iters will be skipped, and repeat will be fixed to 1
+            num_iters = int(args.num_iterations) if args.num_iterations else len(train_dataloader)
+            skip_iters = max(num_iters - 5, 0)
+            schedule = torch.profiler.schedule(skip_first=skip_iters,
+                                               wait=1, warmup=3, active=1)
+            def trace_handle(prof):
+                if args.device == "xpu":
+                    print(str(prof.key_averages().table(
+                        sort_by="self_xpu_time_total")))
+                else:
+                    print(str(prof.key_averages().table(
+                        sort_by="self_cuda_time_total")))
+                if args.export_chrome_trace:
+                    print('export_chrome_trace', flush=True)
+                    prof.export_chrome_trace('./profile_trace.json')
 
-                # H2D
-                start_h2d = get_time_sync(args.device)
-                input_ids, segment_ids, input_mask, masked_lm_labels, next_sentence_labels = batch
-                input_ids = input_ids.to(device)
-                segment_ids = segment_ids.to(device)
-                input_mask = input_mask.to(device)
-                masked_lm_labels = masked_lm_labels.to(device)
-                next_sentence_labels = next_sentence_labels.to(device)
-                end_h2d = get_time_sync(args.device)
+            # start profiler, or none while profiling is false
+            with profiler_setup(args.profile, activities=activities, schedule=schedule, on_trace_ready=trace_handle, record_shapes=True) as prof:
+                # this file loop train: f_id
+                for step, batch in enumerate(train_dataloader):
+                    if not args.converge:
+                        if training_steps >= 10 + int(args.num_iterations):
+                            latency_list = latency_list[10:]
+                            avg = sum(latency_list) / len(latency_list)
+                            print('bert_train latency:  ' + str(avg) + '  s')
+                            print('bert_train throughput:  ' + str(total_batch_size /
+                                                                   args.world_size / avg) + '  sentences/s')
+                            print('perplexity = ' + str(gloss))
+                            return
+                    training_steps += 1
 
-                info = {
-                    "input_ids": [input_ids.shape, input_ids.dtype],
-                    "segment_ids": [segment_ids.shape, segment_ids.dtype],
-                    "input_mask": [input_mask.shape, input_mask.dtype],
-                    "masked_lm_labels": [masked_lm_labels.shape, masked_lm_labels.dtype],
-                    "next_sentence_labels": [next_sentence_labels.shape, next_sentence_labels.dtype]
-                }
-                if args.info:
-                    print("datainfo", info)
+                    # H2D
+                    start_h2d = get_time_sync(args.device)
+                    input_ids, segment_ids, input_mask, masked_lm_labels, next_sentence_labels = batch
+                    input_ids = input_ids.to(device)
+                    segment_ids = segment_ids.to(device)
+                    input_mask = input_mask.to(device)
+                    masked_lm_labels = masked_lm_labels.to(device)
+                    next_sentence_labels = next_sentence_labels.to(device)
+                    end_h2d = get_time_sync(args.device)
 
-                def step_training():
-                    outputs = None
-                    if args.bf16 and args.amp:
-                        if args.device == 'cpu':
-                            with torch.cpu.amp.autocast():
-                                outputs = model(input_ids=input_ids,
+                    info = {
+                        "input_ids": [input_ids.shape, input_ids.dtype],
+                        "segment_ids": [segment_ids.shape, segment_ids.dtype],
+                        "input_mask": [input_mask.shape, input_mask.dtype],
+                        "masked_lm_labels": [masked_lm_labels.shape, masked_lm_labels.dtype],
+                        "next_sentence_labels": [next_sentence_labels.shape, next_sentence_labels.dtype]
+                    }
+                    if args.info:
+                        print("datainfo", info)
+
+                    def step_training():
+                        outputs = None
+                        if args.amp:
+                            if args.device == 'cpu':
+                                with torch.cpu.amp.autocast():
+                                    outputs = model(input_ids=input_ids,
+                                                    token_type_ids=segment_ids,
+                                                    attention_mask=input_mask,
+                                                    labels=masked_lm_labels,
+                                                    next_sentence_label=next_sentence_labels)
+                            elif args.device == 'xpu':
+                                with torch.xpu.amp.autocast(enabled=True, dtype=optimize_dtype):
+                                    outputs = model(input_ids=input_ids,
+                                                    token_type_ids=segment_ids,
+                                                    attention_mask=input_mask,
+                                                    labels=masked_lm_labels,
+                                                    next_sentence_label=next_sentence_labels)
+                            elif args.device == 'cuda':
+                                with torch.cuda.amp.autocast():
+                                    outputs = model(input_ids=input_ids,
+                                                    token_type_ids=segment_ids,
+                                                    attention_mask=input_mask,
+                                                    labels=masked_lm_labels,
+                                                    next_sentence_label=next_sentence_labels)
+                        elif args.fp8:
+                            # most used path for current xpu OOB solution
+                            fp8_model = prepare_fp8(model)
+                            with fp8_autocast(enabled=True, fp8_recipe=DelayedScaling()):
+                                outputs = fp8_model(input_ids=input_ids,
                                                 token_type_ids=segment_ids,
                                                 attention_mask=input_mask,
                                                 labels=masked_lm_labels,
                                                 next_sentence_label=next_sentence_labels)
-                        elif args.device == 'xpu':
+                        else:
+                            # most used path for current xpu OOB solution
                             with torch.xpu.amp.autocast(enabled=True, dtype=optimize_dtype):
                                 outputs = model(input_ids=input_ids,
                                                 token_type_ids=segment_ids,
                                                 attention_mask=input_mask,
                                                 labels=masked_lm_labels,
                                                 next_sentence_label=next_sentence_labels)
-                        elif args.device == 'cuda':
-                            with torch.cuda.amp.autocast():
-                                outputs = model(input_ids=input_ids,
-                                                token_type_ids=segment_ids,
-                                                attention_mask=input_mask,
-                                                labels=masked_lm_labels,
-                                                next_sentence_label=next_sentence_labels)
-                    elif args.fp8:
-                        # most used path for current xpu OOB solution
-                        with torch.xpu.amp.autocast(enabled=True, dtype=optimize_dtype):
-                            with fp8_autocast(enabled=True, fp8_recipe=DelayedScaling()):
-                                convert_fp8_model(model)
-                                outputs = model(input_ids=input_ids,
-                                                token_type_ids=segment_ids,
-                                                attention_mask=input_mask,
-                                                labels=masked_lm_labels,
-                                                next_sentence_label=next_sentence_labels)
-                    else:
-                        # most used path for current xpu OOB solution
-                        with torch.xpu.amp.autocast(enabled=True, dtype=optimize_dtype):
-                            outputs = model(input_ids=input_ids,
-                                            token_type_ids=segment_ids,
-                                            attention_mask=input_mask,
-                                            labels=masked_lm_labels,
-                                            next_sentence_label=next_sentence_labels)
-                    loss = outputs.loss
-                    loss = loss / args.gradient_accumulation_steps
-                    loss.backward()
+                        loss = outputs.loss
+                        loss = loss / args.gradient_accumulation_steps
+                        loss.backward()
 
-                    # clip grad norm
-                    if hasattr(optimizer, "clip_grad_norm_"):
-                        ggnorm = optimizer.clip_grad_norm_(1.0)
-                    else:
-                        ggnorm = torch.nn.utils.clip_grad_norm_(
-                            model.parameters(), 1.0)
+                        # clip grad norm
+                        if hasattr(optimizer, "clip_grad_norm_"):
+                            ggnorm = optimizer.clip_grad_norm_(1.0)
+                        else:
+                            ggnorm = torch.nn.utils.clip_grad_norm_(
+                                model.parameters(), 1.0)
 
-                    if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
-                        start_opt = get_time_sync(args.device)
-                        optimizer.step()
-                        lr_scheduler.step()
-                        optimizer.zero_grad()
-                        end_opt = get_time_sync(args.device)
+                        if (step + 1) % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
+                            start_opt = get_time_sync(args.device)
+                            optimizer.step()
+                            lr_scheduler.step()
+                            optimizer.zero_grad()
+                            end_opt = get_time_sync(args.device)
 
-                    return outputs, end_opt - start_opt
+                        return outputs, end_opt - start_opt
 
 
-                # train and profile
-                if args.device == 'xpu':
-                    with torch.autograd.profiler_legacy.profile(args.profile, use_xpu=True) as prof:
+                    # train and profile
+                    if args.device == 'xpu':
                         try:
                             import memory_check
                             memory_check.display_mem("xpu:0")
@@ -1289,228 +1334,208 @@ def main():
                             pass
                         start_training_time = get_time_sync(args.device)
                         outputs, opt_time = step_training()
-                    if args.profile:
-                        print(str(prof.key_averages().table(
-                            sort_by="self_xpu_time_total")))
-                        if args.export_chrome_trace and step > 20:
-                            with open('./profile_trace.txt', 'w') as f:
-                                f.write(
-                                    str(prof.table(sort_by="id", row_limit=100000)))
-                            prof.export_chrome_trace('./profile_trace.json')
-                            raise
-                elif args.device == 'cuda':
-                    start_training_time = get_time_sync(args.device)
-                    if args.profile:
-                        with torch.profiler.profile(
-                            activities=[
-                                # torch.profiler.ProfilerActivity.CPU,
-                                torch.profiler.ProfilerActivity.CUDA,
-                            ]
-                        ) as prof:
-                            outputs, opt_time = step_training()
-                    else:
+                    elif args.device == 'cuda':
+                        start_training_time = get_time_sync(args.device)
                         outputs, opt_time = step_training()
+                    end_training_time = get_time_sync(args.device)
+
                     if args.profile:
-                        print(str(prof.key_averages().table(
-                            sort_by="self_cuda_time_total")))
-                        if args.export_chrome_trace and step > 20:
-                            prof.export_chrome_trace('./profile_trace.json')
-                            raise
-                end_training_time = get_time_sync(args.device)
+                        prof.step()
 
-                timeinfo = {
-                    'h2d': end_h2d - start_h2d,
-                    'training': end_training_time - start_training_time,
-                    'opt': opt_time,  # training include opt_time
-                }
-
-                timeinfo['total'] = timeinfo['h2d'] + timeinfo['training']
-                timeinfo['total'] = timeinfo['training']
-                latency_list.append(timeinfo['total']/1000.0)
-                if args.info:
-                    print('timeinfo', timeinfo)
-
-                # no need to calculate loss and acc of each iter
-                if args.converge and global_step % PRINT_ITER_FACTOR == 0:
-                    gloss, lm_acc, num_masked, seq_acc, seq_tot = calc_accuracy(
-                        outputs, masked_lm_labels, next_sentence_labels, args)
-                    gloss_list.append(gloss)
-                    acc_list.append(lm_acc.item())
-                    avg_gloss = round(sum(gloss_list) / len(gloss_list), 3)
-                    avg_acc = round(sum(acc_list) / len(acc_list), 3)
-                    print('Global Step [', global_step, '/', args.max_steps, '] perf:', str(round(timeinfo['total']/1000.0, 4)),
-                          ' s/it', ', gloss:', round(gloss, 4), '(', avg_gloss, '), lm acc:', round(lm_acc.item(), 4), '(', avg_acc, ')')
-                elif args.converge:
-                    print('Global Step [', global_step,
-                          '/', args.max_steps, ']')
-                else:
-                    gloss, lm_acc, num_masked, seq_acc, seq_tot = calc_accuracy(
-                        outputs, masked_lm_labels, next_sentence_labels, args)
-
-                if not args.converge:
-                    if args.benchmark_steps > 0 and global_step + 1 >= args.benchmark_steps:
-                        synchronize(args.device)
-                        if args.rank == 0:
-                            print(
-                                f"Done Benchmarking {args.benchmark_steps} steps.")
-                        sys.exit(0)
-
-                if args.info:
-                    info = {
-                        "gloss": gloss,
-                        "lm_acc": lm_acc,
-                        "num_masked": num_masked,
-                        "seq_acc": seq_acc,
-                        "seq_tot": seq_tot
+                    timeinfo = {
+                        'h2d': end_h2d - start_h2d,
+                        'training': end_training_time - start_training_time,
+                        'opt': opt_time,  # training include opt_time
                     }
-                    print("outinfo", info)
 
-                update_step = training_steps % args.gradient_accumulation_steps == 0
-                if update_step:
-                    now_lr = optimizer.param_groups[0]["lr"]
-                    global_step += 1
+                    timeinfo['total'] = timeinfo['h2d'] + timeinfo['training']
+                    timeinfo['total'] = timeinfo['training']
+                    latency_list.append(timeinfo['total']/1000.0)
+                    if args.info:
+                        print('timeinfo', timeinfo)
+
+                    # no need to calculate loss and acc of each iter
                     if args.converge and global_step % PRINT_ITER_FACTOR == 0:
-                        print('global step = ', global_step, '. next eval step = ',
-                              next_eval_step, '. now lr = ', now_lr)
-                    # global_step == next_eval_step, means this step needs do evaluaion
-                    if (args.eval_dir and args.eval_iter_samples > 0 and global_step == next_eval_step):
-                        # first do validation or load ckpt
-                        if eval_count == 0 or args.resume_from_checkpoint:
-                            eval_dataloader = create_eval_dataset(
-                                args, worker_init_fn=worker_init)
-                        samples_trained = (
-                            global_step * args.train_batch_size * args.gradient_accumulation_steps * args.world_size)
-                        print('\n\nBefore eval, samples trained = ',
-                              samples_trained)
-                        print('Before eval, samples trained prev for eval = ',
-                              samples_trained_prev_for_eval)
+                        gloss, lm_acc, num_masked, seq_acc, seq_tot = calc_accuracy(
+                            outputs, masked_lm_labels, next_sentence_labels, args)
+                        gloss_list.append(gloss)
+                        acc_list.append(lm_acc.item())
+                        avg_gloss = round(sum(gloss_list) / len(gloss_list), 3)
+                        avg_acc = round(sum(acc_list) / len(acc_list), 3)
+                        print('Global Step [', global_step, '/', args.max_steps, '] perf:', str(round(timeinfo['total']/1000.0, 4)),
+                              ' s/it', ', gloss:', round(gloss, 4), '(', avg_gloss, '), lm acc:', round(lm_acc.item(), 4), '(', avg_acc, ')')
+                    elif args.converge:
+                        print('Global Step [', global_step,
+                              '/', args.max_steps, ']')
+                    else:
+                        gloss, lm_acc, num_masked, seq_acc, seq_tot = calc_accuracy(
+                            outputs, masked_lm_labels, next_sentence_labels, args)
 
-                        # update samples trained prev in validation
-                        samples_trained_prev_for_eval = samples_trained
+                    if not args.converge:
+                        if args.benchmark_steps > 0 and global_step + 1 >= args.benchmark_steps:
+                            synchronize(args.device)
+                            if args.rank == 0:
+                                print(
+                                    f"Done Benchmarking {args.benchmark_steps} steps.")
+                            sys.exit(0)
 
-                        print('This step [', global_step, '] begin to do validation')
-                        eval_avg_loss, eval_avg_mlm_accuracy = run_eval(
-                            model,
-                            eval_dataloader,
-                            device,
-                            args.num_eval_examples,
-                            args,
-                            first_eval=(eval_count == 0))
-                        if args.converge:
-                            print('Finish validation, this step [', global_step, '] loss: ', round(eval_avg_loss.item(), 4), \
-                                ' final acc: ', round(eval_avg_mlm_accuracy.item(), 4), '\n\n')
+                    if args.info:
+                        info = {
+                            "gloss": gloss,
+                            "lm_acc": lm_acc,
+                            "num_masked": num_masked,
+                            "seq_acc": seq_acc,
+                            "seq_tot": seq_tot
+                        }
+                        print("outinfo", info)
 
-                        if not args.converge and (args.rank == 0 or args.rank == -1):
-                            print(
-                                {
-                                    "global_steps": global_step,
-                                    "eval_loss": eval_avg_loss,
-                                    "eval_mlm_accuracy": eval_avg_mlm_accuracy,
-                                }
-                            )
+                    update_step = training_steps % args.gradient_accumulation_steps == 0
+                    if update_step:
+                        now_lr = optimizer.param_groups[0]["lr"]
+                        global_step += 1
+                        if args.converge and global_step % PRINT_ITER_FACTOR == 0:
+                            print('global step = ', global_step, '. next eval step = ',
+                                  next_eval_step, '. now lr = ', now_lr)
+                        # global_step == next_eval_step, means this step needs do evaluaion
+                        if (args.eval_dir and args.eval_iter_samples > 0 and global_step == next_eval_step):
+                            # first do validation or load ckpt
+                            if eval_count == 0 or args.resume_from_checkpoint:
+                                eval_dataloader = create_eval_dataset(
+                                    args, worker_init_fn=worker_init)
+                            samples_trained = (
+                                global_step * args.train_batch_size * args.gradient_accumulation_steps * args.world_size)
+                            print('\n\nBefore eval, samples trained = ',
+                                  samples_trained)
+                            print('Before eval, samples trained prev for eval = ',
+                                  samples_trained_prev_for_eval)
 
-                        if args.converge:
-                            # judge convergence or not
-                            if args.target_mlm_accuracy:
-                                if eval_avg_mlm_accuracy >= args.target_mlm_accuracy:
-                                    if utils.is_main_process():
+                            # update samples trained prev in validation
+                            samples_trained_prev_for_eval = samples_trained
+
+                            print('This step [', global_step, '] begin to do validation')
+                            eval_avg_loss, eval_avg_mlm_accuracy = run_eval(
+                                model,
+                                eval_dataloader,
+                                device,
+                                args.num_eval_examples,
+                                args,
+                                first_eval=(eval_count == 0))
+                            if args.converge:
+                                print('Finish validation, this step [', global_step, '] loss: ', round(eval_avg_loss.item(), 4), \
+                                    ' final acc: ', round(eval_avg_mlm_accuracy.item(), 4), '\n\n')
+
+                            if not args.converge and (args.rank == 0 or args.rank == -1):
+                                print(
+                                    {
+                                        "global_steps": global_step,
+                                        "eval_loss": eval_avg_loss,
+                                        "eval_mlm_accuracy": eval_avg_mlm_accuracy,
+                                    }
+                                )
+
+                            if args.converge:
+                                # judge convergence or not
+                                if args.target_mlm_accuracy:
+                                    if eval_avg_mlm_accuracy >= args.target_mlm_accuracy:
                                         end_training, converged = True, True
-                                        print("%f > %f, [Successfully] Target MLM Accuracy reached at %d" % (
-                                            eval_avg_mlm_accuracy, args.target_mlm_accuracy, global_step))
-                        eval_count += 1
-                        next_eval_step = eval_steps[eval_count]
+                                        if utils.is_main_process():
+                                            print("%f > %f, [Successfully] Target MLM Accuracy reached at %d" % (
+                                                eval_avg_mlm_accuracy, args.target_mlm_accuracy, global_step))
+                            eval_count += 1
+                            next_eval_step = eval_steps[eval_count]
 
-                # update samples trained each step
-                samples_trained = (global_step * args.train_batch_size *
-                                   args.gradient_accumulation_steps * args.world_size)
+                    # update samples trained each step
+                    samples_trained = (global_step * args.train_batch_size *
+                                       args.gradient_accumulation_steps * args.world_size)
 
-                # for save/load ckpt
-                if args.converge:
-                    if args.converge and global_step % PRINT_ITER_FACTOR == 0:
-                        print('samples trained: ', samples_trained, '. samples trained prev for save: ',
-                              samples_trained_prev_for_save, '. this round trained: ', (samples_trained - samples_trained_prev_for_save))
-                    if end_training or (samples_trained - samples_trained_prev_for_save >= args.num_samples_per_checkpoint
-                                        and samples_trained >= args.min_samples_to_start_checkpoints):
+                    # for save/load ckpt
+                    if args.converge:
+                        if args.converge and global_step % PRINT_ITER_FACTOR == 0:
+                            print('samples trained: ', samples_trained, '. samples trained prev for save: ',
+                                  samples_trained_prev_for_save, '. this round trained: ', (samples_trained - samples_trained_prev_for_save))
+                        if end_training or (samples_trained - samples_trained_prev_for_save >= args.num_samples_per_checkpoint
+                                            and samples_trained >= args.min_samples_to_start_checkpoints):
 
-                        # update samples trained prev in save ckpt
-                        samples_trained_prev_for_save = samples_trained
+                            # update samples trained prev in save ckpt
+                            samples_trained_prev_for_save = samples_trained
 
-                        # main process save ckpt to save disk space
-                        if utils.is_main_process() and not args.skip_checkpoint:
-                            print('Prepare to save model')
-                            # Save a trained model
-                            model_to_save = (
-                                model.module if hasattr(
-                                    model, "module") else model
-                            )  # Only save the model it-self
+                            # main process save ckpt to save disk space
+                            if utils.is_main_process() and not args.skip_checkpoint:
+                                print('Prepare to save model')
+                                # Save a trained model
+                                model_to_save = (
+                                    model.module if hasattr(
+                                        model, "module") else model
+                                )  # Only save the model it-self
 
-                            device_info_for_ckpt = "samples_"
-                            if torch.distributed.is_initialized():
-                                device_info_for_ckpt = "rank_" + str(args.rank) + "_samples_"
-                            if end_training and converged:
-                                if args.phase2:
-                                    output_save_file = os.path.join(
-                                        args.output_dir,
-                                        "phase2_ckpt_" + device_info_for_ckpt + str(samples_trained) + ".converged.pt",
-                                    )
+                                device_info_for_ckpt = "samples_"
+                                if torch.distributed.is_initialized():
+                                    device_info_for_ckpt = "rank_" + str(args.rank) + "_samples_"
+                                if end_training and converged:
+                                    if args.phase2:
+                                        output_save_file = os.path.join(
+                                            args.output_dir,
+                                            "phase2_ckpt_" + device_info_for_ckpt + str(samples_trained) + ".converged.pt",
+                                        )
+                                    else:
+                                        output_save_file = os.path.join(
+                                            args.output_dir,
+                                            "phase1_ckpt_" + device_info_for_ckpt + str(samples_trained) + ".converged.pt",
+                                        )
                                 else:
-                                    output_save_file = os.path.join(
-                                        args.output_dir,
-                                        "phase1_ckpt_" + device_info_for_ckpt + str(samples_trained) + ".converged.pt",
-                                    )
-                            else:
-                                if args.phase2:
-                                    output_save_file = os.path.join(
-                                        args.output_dir,
-                                        "phase2_ckpt_" + device_info_for_ckpt + str(samples_trained) + ".pt",
-                                    )
-                                else:
-                                    output_save_file = os.path.join(
-                                        args.output_dir,
-                                        "phase1_ckpt_" + device_info_for_ckpt + str(samples_trained) + ".pt",
-                                    )
-                            if args.do_train:
-                                print('\n\n[info] save checkpoint: ',
-                                      output_save_file, '\n')
-                                torch.save({
-                                    "model": model_to_save.state_dict(),
-                                    "optimizer": optimizer.state_dict(),
-                                    "lr_scheduler": lr_scheduler.state_dict(),
-                                    "files": [f_id] + files,
-                                    "epoch": epoch,
-                                    "global_step": global_step,
-                                    "samples_trained": samples_trained,
-                                    "samples_trained_prev_for_eval": samples_trained_prev_for_eval,
-                                    "samples_trained_prev_for_save": samples_trained_prev_for_save,
-                                    "eval_count": eval_count,
-                                    "eval_steps": eval_steps},
-                                    output_save_file)
+                                    if args.phase2:
+                                        output_save_file = os.path.join(
+                                            args.output_dir,
+                                            "phase2_ckpt_" + device_info_for_ckpt + str(samples_trained) + ".pt",
+                                        )
+                                    else:
+                                        output_save_file = os.path.join(
+                                            args.output_dir,
+                                            "phase1_ckpt_" + device_info_for_ckpt + str(samples_trained) + ".pt",
+                                        )
+                                if args.do_train:
+                                    print('\n\n[info] save checkpoint: ',
+                                          output_save_file, '\n')
+                                    torch.save({
+                                        "model": model_to_save.state_dict(),
+                                        "optimizer": optimizer.state_dict(),
+                                        "lr_scheduler": lr_scheduler.state_dict(),
+                                        "files": [f_id] + files,
+                                        "epoch": epoch,
+                                        "global_step": global_step,
+                                        "samples_trained": samples_trained,
+                                        "samples_trained_prev_for_eval": samples_trained_prev_for_eval,
+                                        "samples_trained_prev_for_save": samples_trained_prev_for_save,
+                                        "eval_count": eval_count,
+                                        "eval_steps": eval_steps},
+                                        output_save_file)
 
-                                most_recent_ckpts_paths.append(
-                                    output_save_file)
-                                if (len(most_recent_ckpts_paths) > args.keep_n_most_recent_checkpoints):
-                                    print('\n\nkeep ckpt number:',
-                                          args.keep_n_most_recent_checkpoints)
-                                    ckpt_to_be_removed = most_recent_ckpts_paths.pop(
-                                        0)
-                                    print('remove ckpt:',
-                                          ckpt_to_be_removed, '\n\n')
-                                    os.remove(ckpt_to_be_removed)
+                                    most_recent_ckpts_paths.append(
+                                        output_save_file)
+                                    if (len(most_recent_ckpts_paths) > args.keep_n_most_recent_checkpoints):
+                                        print('\n\nkeep ckpt number:',
+                                              args.keep_n_most_recent_checkpoints)
+                                        ckpt_to_be_removed = most_recent_ckpts_paths.pop(
+                                            0)
+                                        print('remove ckpt:',
+                                              ckpt_to_be_removed, '\n\n')
+                                        os.remove(ckpt_to_be_removed)
 
-                        if samples_trained >= args.max_samples_termination or end_training:
-                            status = "success" if converged else "aborted"
-                            end_training = True
-                            break
+                            if samples_trained >= args.max_samples_termination or end_training:
+                                status = "success" if converged else "aborted"
+                                end_training = True
+                                break
 
             del train_dataloader
-            if args.converge:
+            if args.converge and utils.is_main_process():
                 print('\nfinish one file, global step = ', global_step)
                 print('finish one file, samples trained = ', samples_trained)
                 print('finish one file, max samples termination = ',
                       args.max_samples_termination, '\n')
             if samples_trained >= args.max_samples_termination or end_training:
                 status = 'success' if converged else 'aborted'
-                print('eventual status = ', status)
+                if utils.is_main_process():
+                    print('eventual status = ', status)
                 end_training = True
                 break
             train_dataloader, data_file = create_pretraining_dataset(
@@ -1524,7 +1549,8 @@ def main():
         epoch += 1
 
     global_end_time = time.time()
-    print('[info] total consume time: ', ((global_end_time - global_start_time) / 60.0), ' min.')
+    if utils.is_main_process():
+        print('[info] total consume time: ', ((global_end_time - global_start_time) / 60.0), ' min.')
     return args, final_loss, train_time_raw
 
 

@@ -99,6 +99,8 @@ if [[ ${NUM_DEVICES} == 1 ]]; then
         -d xpu \
         -t ${PRECISION} \
         -o ${OUTPUT_DIR} \
+	-s ${DATASET_DIR} \
+	-w ${BERT_WEIGHT} \
         -n ${NUM_ITERATIONS} 2>&1 | tee ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log
     python common/parse_result.py -m $modelname -l ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0_raw.log -b ${BATCH_SIZE}
     throughput=$(cat ${OUTPUT_DIR}/${modelname}_${PRECISION}_inf_t0.log | grep Performance | awk -F ' ' '{print $2}')

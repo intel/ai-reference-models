@@ -1,18 +1,20 @@
 # Python dependencies required for development
-absl-py
 astunparse
-dataclasses; python_version<"3.7"
 expecttest
 future
-h5py
-nltk
 numpy
 psutil
 pyyaml
 requests
 setuptools
 six
-tensorboardX
-transformers
 types-dataclasses
 typing_extensions
+dataclasses; python_version<"3.7"
+transformers>=4.31.0
+tensorboardX
+absl-py
+h5py
+nltk
+diffusers
+einops==0.8.0

@@ -34,7 +34,7 @@ function Parser() {
                 ;;
             -n)
                 shift
-                if [[ $1 -gt 0 ]];then
+                if [ $1 -gt 0 ];then
                    NUM_ITER="$1"
                 fi
                 ;;
@@ -42,8 +42,27 @@ function Parser() {
                 shift
                 OUTPUT_DIR="$1"
                 ;;
+	    -s)
+		shift
+                dataset="$1"
+                ;;
+	    -w)
+		shift
+                model_path="$1"
+                ;;
             -g)
                 GDB_ARGS="gdb --args "
+                ;;
+	    -p)
+		PROFILER_ARGS="--kineto_profile"
+		;;
+            --jit)
+                JIT=true
+                TRITON=false
+                ;;
+            --triton)
+                TRITON=true
+                JIT=false
                 ;;
             -h | --help)
                 echo "Usage: cmd_infer.sh [OPTION...] PAGE..."
@@ -54,6 +73,9 @@ function Parser() {
                 echo "-n, Optional    Specify the number of iterations to run evaluation"
                 echo "-o, Optional    Specify the output dir. The default value is /tmp/debug_squad/"
                 echo "-g, Optional    use gdb"
+		echo "-p, Optional    use PTI as profiler"
+                echo "--triton, Optional use torch.compile to accelerate inference process (Conflict with --jit)"
+                echo "--jit, Optional use jit to accelerate inference process (Conflict with --triton)"
                 exit
                 ;;
             --*|-*)
@@ -72,9 +94,13 @@ DEVICE=cpu
 BATCH=32
 DTYPE=FP32
 NUM_ITER=-1
-OUTPUT_DIR=$OUTPUT_DIR
+OUTPUT_DIR=/tmp/debug_squad/
 GDB_ARGS=""
+PROFILER_ARGS=""
 NUMA_ARGS=""
+TRITON=false
+JIT=false
+ACCELERATE_FLAG=""
 
 Parser $@
 
@@ -97,17 +123,71 @@ else
 fi
 fi
 
-$NUMA_RAGS $GDB_ARGS python -u run_squad.py \
-  --model_type bert \
-  --model_name_or_path $BERT_WEIGHT \
-  --do_eval \
-  --do_lower_case \
-  --do_jit \
-  --device_choice ${DEVICE} \
-  --dtype ${DTYPE}    \
-  --predict_file $DATASET_DIR/dev-v1.1.json \
-  --per_gpu_eval_batch_size ${BATCH} \
-  --max_seq_length 384 \
-  --doc_stride 128 \
-  --num_iterations ${NUM_ITER} \
-  --output_dir ${OUTPUT_DIR}
+# set dataset and model_path
+if test -z $dataset || ! test -d $dataset ; then
+  if test -d ./SQUAD1 ; then
+    dataset=./SQUAD1
+  else
+    echo "Unable to find dataset path"
+    exit 1
+  fi
+fi
+
+
+if test -z $model_path || ! test -d $model_path ; then
+  if [ "$MODEL" == "bert_base" ] ; then
+    if test -d ./squad_base_finetuned_checkpoint ; then
+      :
+    else
+      ./download_squad_base_fine_tuned_model.sh
+    fi
+    model_path=./squad_base_finetuned_checkpoint
+  elif [ "$MODEL" == "bert_large" ] ; then
+    if test -d ./squad_large_finetuned_checkpoint ; then
+      :
+    else
+      ./download_squad_large_fine_tuned_model.sh
+    fi
+    model_path=./squad_large_finetuned_checkpoint
+  else
+    echo "The modle (${MODEL}) does not exist."
+    exit
+  fi
+fi
+
+if [ "$TRITON" == "true" ] ; then
+  ACCELERATE_FLAG="--do_dynamo"
+elif [ "$JIT" == "true" ] ; then
+  ACCELERATE_FLAG="--do_jit"
+fi
+
+if [ "x$PROFILER_ARGS" != "x" ] ; then
+  $NUMA_RAGS $GDB_ARGS python -u run_squad.py \
+    --model_type bert \
+    --model_name_or_path $model_path \
+    --do_eval \
+    --do_lower_case ${ACCELERATE_FLAG} \
+    --device_choice ${DEVICE} \
+    --dtype ${DTYPE}    \
+    --predict_file $dataset/dev-v1.1.json \
+    --per_gpu_eval_batch_size ${BATCH} \
+    --max_seq_length 384 \
+    --doc_stride 128 \
+    --num_steps ${NUM_ITER} \
+    --output_dir ${OUTPUT_DIR} \
+    $PROFILER_ARGS
+else
+  $NUMA_RAGS $GDB_ARGS python -u run_squad.py \
+    --model_type bert \
+    --model_name_or_path $model_path \
+    --do_eval \
+    --do_lower_case ${ACCELERATE_FLAG} \
+    --device_choice ${DEVICE} \
+    --dtype ${DTYPE}    \
+    --predict_file $dataset/dev-v1.1.json \
+    --per_gpu_eval_batch_size ${BATCH} \
+    --max_seq_length 384 \
+    --doc_stride 128 \
+    --num_steps ${NUM_ITER} \
+    --output_dir ${OUTPUT_DIR}
+fi
