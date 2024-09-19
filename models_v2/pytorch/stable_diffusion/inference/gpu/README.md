@@ -59,8 +59,6 @@ The scripts will download the dataset automatically. It uses nateraw/parti-promp
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=1`                                |
 | **PRECISION** (optional)     |           `export PRECISION=fp16` (fp16 and fp32 are supported for all platform)|
 | **OUTPUT_DIR** (optional)    |                               `export OUTPUT_DIR=$PWD`                               |
-| **HEIGHT** (optional)        | `export HEIGHT=256` (must be divisible by 8, default to 0 which is model defaults) |
-| **WIDTH** (optional)         | `export WIDTH=256`  (must be divisible by 8, default to 0 which is model defaults) |
 | **MODEL** (optional)         | `export MODEL='stabilityai/stable-diffusion-2-1'` (must be one of 'stabilityai/stable-diffusion-2-1' (default), "CompVis/stable-diffusion-v1-4" or "stabilityai/stable-diffusion-xl-base-1.0"- note that the xl-base-1.0 will use the StableDiffusionXL pipeline instead)|
 
 
