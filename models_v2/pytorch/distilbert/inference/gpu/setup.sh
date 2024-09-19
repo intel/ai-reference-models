@@ -21,9 +21,10 @@
 #  - git clones & applying patches
 
 set -e
-apt-get update && apt-get install -y python3-venv
+apt-get update && apt-get install -y python3-venv curl
 
 pip uninstall google-auth-oauthlib tb-nightly -y
-pip install -r requirements.txt
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install 
 
 cp -r ../../../../common .
