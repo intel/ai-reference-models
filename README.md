@@ -3,9 +3,6 @@
        src="https://scan.coverity.com/projects/30278/badge.svg"/>
 </a>
 
-<a href="https://scan.coverity.com/projects/intel-models">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/30278/badge.svg"/>
 </a>
 <a href="https://www.bestpractices.dev/projects/8925"><img src="https://www.bestpractices.dev/projects/8925/badge"></a>
 
