@@ -145,6 +145,9 @@ if [[ "$TEST_MODE" != "ACCURACY" ]]; then
         --batch-size $BATCH_SIZE
     else
         echo "### running with torch.compile inductor backend"
+        if [[ "$1" == "int8-bf16" || "$1" == "int8-fp32" ]];then
+            ARGS="$ARGS --torchao  --weight-only-quant --weight-dtype INT8 "
+        fi
         export TORCHINDUCTOR_FREEZING=1
         python -m torch.backends.xeon.run_cpu --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
