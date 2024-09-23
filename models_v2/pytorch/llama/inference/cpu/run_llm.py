@@ -172,6 +172,10 @@ else:
     amp_enabled = True if args.int8_bf16_mixed else False
     amp_dtype = torch.bfloat16 if args.int8_bf16_mixed else torch.float
 
+if args.weight_only_quant and args.torchao and args.weight_dtype and args.int8_bf16_mixed:
+    amp_enabled = True
+    amp_dtype = torch.bfloat16
+
 has_position_id = False
 if "llama" in args.model_name_or_path:
     user_model = LlamaForCausalLM.from_pretrained(
@@ -214,24 +218,6 @@ if args.dtype == "bf16" or args.dtype == "fp32":
             else:
                 print("[Info] Running torch.compile() BFloat16 with default backend")
                 user_model.forward = torch.compile(user_model.forward, dynamic=True)
-
-    if args.weight_only_quant and args.torchao and args.weight_dtype:
-        from torch._inductor import config as inductor_config
-        from torchao.quantization import quant_api
-        from torchao.utils import unwrap_tensor_subclass
-        inductor_config.cpp_wrapper = True
-        with torch.no_grad(),torch.cpu.amp.autocast(
-                enabled=True, dtype=torch.bfloat16
-        ):
-            if args.weight_dtype == "INT8":
-                quant_api.quantize_(user_model, quant_api.int8_weight_only(), set_inductor_config=False)
-                unwrap_tensor_subclass(user_model)
-            elif args.weight_dtype == "INT4":
-                quant_api.quantize_(user_model, quant_api.int4_weight_only(), set_inductor_config=False)
-                unwrap_tensor_subclass(user_model)
-
-            user_model.forward = torch.compile(user_model.forward)
-
 elif args.dtype == "fp16":
     if args.ipex:
         user_model = ipex.llm.optimize(
@@ -629,40 +615,26 @@ elif args.dtype == "int8" and args.inductor:
     from torch._inductor import config as inductor_config
 
     inductor_config.cpp_wrapper = True
-    from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
-    import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
-    from torch.ao.quantization.quantizer.x86_inductor_quantizer import (
-        X86InductorQuantizer,
-    )
-    from torch._export import capture_pre_autograd_graph
+    if args.weight_only_quant and args.torchao and args.weight_dtype:
+        from torch._inductor import config as inductor_config
+        from torchao.quantization import quant_api
+        from torchao.utils import unwrap_tensor_subclass
+        inductor_config.cpp_wrapper = True
+        with torch.no_grad(),torch.cpu.amp.autocast(
+                enabled=True, dtype=torch.bfloat16
+        ):
+            if args.weight_dtype == "INT8":
+                print("---- apply torchao woq int8 api ----", flush=True)
+                quant_api.quantize_(user_model, quant_api.int8_weight_only(), set_inductor_config=False)
+                unwrap_tensor_subclass(user_model)
+            elif args.weight_dtype == "INT4":
+                quant_api.quantize_(user_model, quant_api.int4_weight_only(), set_inductor_config=False)
+                unwrap_tensor_subclass(user_model)
 
-    print("[Info] Running torch.compile() INT8 quantization")
-    with torch.no_grad():
-        encoded_input = tokenizer(prompt, return_tensors="pt")
-        print("encoded_input is: {}".format(encoded_input), flush=True)
-        exported_model = capture_pre_autograd_graph(
-            user_model,
-            (),
-            kwargs=encoded_input.data,
-        )
-        quantizer = X86InductorQuantizer()
-        quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
-        prepared_model = prepare_pt2e(exported_model, quantizer)
-        prepared_model(**encoded_input)
-        converted_model = convert_pt2e(prepared_model)
-        torch.ao.quantization.move_exported_model_to_eval(converted_model)
-        with torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
-            if args.ipex:
-                print("[Info] Running torch.compile() with IPEX backend")
-                user_model = torch.compile(
-                    converted_model, dynamic=True, backend="ipex"
-                )
-            else:
-                print("[Info] Running torch.compile() with default backend")
-                user_model = torch.compile(converted_model, dynamic=True)
-            user_model(**encoded_input)
-            user_model(**encoded_input)
-
+            user_model.forward = torch.compile(user_model.forward)
+    else:
+        print("---- to run inductor quant, please use --weight-only-quant and --torchao, and choose --weight_dtype in INT8 or INT4 ", flush=True)
+        
 
 def benchmark_warmup(prompt):
     # start
