@@ -451,7 +451,7 @@ index 999752485..066f0a367 100644
  
              # Evaluate
 diff --git a/examples/pytorch/image-classification/run_image_classification.py b/examples/pytorch/image-classification/run_image_classification.py
-index 27e9223b8..2135dc138 100755
+index 27e9223b8..af831af20 100755
 --- a/examples/pytorch/image-classification/run_image_classification.py
 +++ b/examples/pytorch/image-classification/run_image_classification.py
 @@ -250,40 +250,64 @@ def main():
@@ -489,7 +489,7 @@ index 27e9223b8..2135dc138 100755
 +
 +            def set_transform(self, transform=None):
 +                pass
-+        dataset = {'train': DummyImageDataset(),'validation': DummyImageDataset()}
++        dataset = {'train': DummyImageDataset(),'validation': DummyImageDataset(training_args.per_device_eval_batch_size)}
      else:
 -        data_files = {}
 -        if data_args.train_dir is not None:
@@ -1147,26 +1147,9 @@ index 481e4c427..d2ac0b3aa 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/models/vit/modeling_vit.py b/src/transformers/models/vit/modeling_vit.py
-index 734ccf6a9..5914d4e2b 100644
+index 734ccf6a9..641814bf2 100644
 --- a/src/transformers/models/vit/modeling_vit.py
 +++ b/src/transformers/models/vit/modeling_vit.py
-@@ -129,14 +129,14 @@ class ViTEmbeddings(nn.Module):
-             embeddings = embeddings * (1.0 - mask) + mask_tokens * mask
- 
-         # add the [CLS] token to the embedded patch tokens
--        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
-+        cls_tokens = self.cls_token.to(embeddings.dtype).expand(batch_size, -1, -1)
-         embeddings = torch.cat((cls_tokens, embeddings), dim=1)
- 
-         # add positional encoding to each token
-         if interpolate_pos_encoding:
-             embeddings = embeddings + self.interpolate_pos_encoding(embeddings, height, width)
-         else:
--            embeddings = embeddings + self.position_embeddings
-+            embeddings = embeddings + self.position_embeddings.to(embeddings.dtype)
- 
-         embeddings = self.dropout(embeddings)
- 
 @@ -776,8 +776,8 @@ class ViTForImageClassification(ViTPreTrainedModel):
      def forward(
          self,
@@ -1178,7 +1161,7 @@ index 734ccf6a9..5914d4e2b 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2436dadc..189742484 100755
+index a2436dadc..d93c89c36 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -152,6 +152,31 @@ from .utils import (
@@ -1312,7 +1295,7 @@ index a2436dadc..189742484 100755
          if not is_ipex_available():
              raise ImportError(
                  "Using IPEX but IPEX is not installed or IPEX's version does not match current PyTorch, please refer"
-@@ -1359,22 +1416,40 @@ class Trainer:
+@@ -1359,22 +1416,48 @@ class Trainer:
          if not training:
              model.eval()
              dtype = torch.bfloat16 if not self.is_in_train and self.args.bf16_full_eval else dtype
@@ -1345,6 +1328,14 @@ index a2436dadc..189742484 100755
      def _wrap_model(self, model, training=True, dataloader=None):
 -        if self.args.use_ipex:
 -            dtype = torch.bfloat16 if self.use_cpu_amp else torch.float32
++        if hasattr(model, "vit"):
++            cvt_dtype = torch.float32
++            if self.args.bf16 or self.args.int8_bf16:
++                cvt_dtype = torch.bfloat16
++            elif self.args.fp16_cpu:
++                cvt_dtype = torch.half
++            model.vit.embeddings.cls_token=torch.nn.Parameter(model.vit.embeddings.cls_token.to(cvt_dtype))
++            model.vit.embeddings.position_embeddings=torch.nn.Parameter(model.vit.embeddings.position_embeddings.to(cvt_dtype))
 +        if self.args.use_ipex and not self.args.int8 and not self.args.do_calibration:
 +            dtype=torch.float32
 +            if self.args.bf16:
@@ -1360,7 +1351,7 @@ index a2436dadc..189742484 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -1398,6 +1473,74 @@ class Trainer:
+@@ -1398,6 +1481,74 @@ class Trainer:
              model = self.torch_jit_model_eval(model, dataloader, training)
              self.jit_compilation_time = round(time.time() - start_time, 4)
  
@@ -1435,7 +1426,7 @@ index a2436dadc..189742484 100755
          # Note: in torch.distributed mode, there's no point in wrapping the model
          # inside a DistributedDataParallel as we'll be under `no_grad` anyways.
          if not training:
-@@ -1517,6 +1660,9 @@ class Trainer:
+@@ -1517,6 +1668,9 @@ class Trainer:
                  kwargs["broadcast_buffers"] = self.args.ddp_broadcast_buffers
  
              self.accelerator.ddp_handler = DistributedDataParallelKwargs(**kwargs)
@@ -1445,7 +1436,7 @@ index a2436dadc..189742484 100755
  
          return model
  
-@@ -2014,7 +2160,11 @@ class Trainer:
+@@ -2014,7 +2168,11 @@ class Trainer:
                              grad_norm = _grad_norm.item() if _grad_norm is not None else None
  
                      # Optimizer step
@@ -1458,7 +1449,7 @@ index a2436dadc..189742484 100755
                      optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
                      if optimizer_was_run:
                          # Delay optimizer scheduling until metrics are generated
-@@ -2908,7 +3058,10 @@ class Trainer:
+@@ -2908,7 +3066,10 @@ class Trainer:
              with amp.scale_loss(loss, self.optimizer) as scaled_loss:
                  scaled_loss.backward()
          else:
@@ -1470,7 +1461,7 @@ index a2436dadc..189742484 100755
  
          return loss.detach() / self.args.gradient_accumulation_steps
  
-@@ -3322,6 +3475,66 @@ class Trainer:
+@@ -3322,6 +3483,66 @@ class Trainer:
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
  
@@ -1537,7 +1528,7 @@ index a2436dadc..189742484 100755
      def evaluation_loop(
          self,
          dataloader: DataLoader,
-@@ -3380,7 +3593,12 @@ class Trainer:
+@@ -3380,7 +3601,12 @@ class Trainer:
              logger.info("  Num examples: Unknown")
          logger.info(f"  Batch size = {batch_size}")
  
@@ -1551,7 +1542,7 @@ index a2436dadc..189742484 100755
  
          self.callback_handler.eval_dataloader = dataloader
          # Do this before wrapping.
-@@ -3402,6 +3620,20 @@ class Trainer:
+@@ -3402,6 +3628,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.
