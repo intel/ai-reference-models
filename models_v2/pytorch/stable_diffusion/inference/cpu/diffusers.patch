@@ -1,5 +1,19 @@
+diff --git a/src/diffusers/models/attention_processor.py b/src/diffusers/models/attention_processor.py
+index 1234dbd2d..f9a0a1d6c 100644
+--- a/src/diffusers/models/attention_processor.py
++++ b/src/diffusers/models/attention_processor.py
+@@ -1246,7 +1246,8 @@ class AttnProcessor2_0:
+         if attn.residual_connection:
+             hidden_states = hidden_states + residual
+ 
+-        hidden_states = hidden_states / attn.rescale_output_factor
++        if attn.rescale_output_factor != 1:
++            hidden_states = hidden_states / attn.rescale_output_factor
+ 
+         return hidden_states
+ 
 diff --git a/src/diffusers/models/transformer_2d.py b/src/diffusers/models/transformer_2d.py
-index 24abf54d..3fa7df5f 100644
+index 24abf54d6..3fa7df5f3 100644
 --- a/src/diffusers/models/transformer_2d.py
 +++ b/src/diffusers/models/transformer_2d.py
 @@ -385,7 +385,7 @@ class Transformer2DModel(ModelMixin, ConfigMixin):
@@ -21,7 +35,7 @@ index 24abf54d..3fa7df5f 100644
              output = hidden_states + residual
          elif self.is_input_vectorized:
 diff --git a/src/diffusers/models/unet_2d_condition.py b/src/diffusers/models/unet_2d_condition.py
-index f248b243..27d4802d 100644
+index f248b243f..27d4802d3 100644
 --- a/src/diffusers/models/unet_2d_condition.py
 +++ b/src/diffusers/models/unet_2d_condition.py
 @@ -799,8 +799,8 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
@@ -35,7 +49,7 @@ index f248b243..27d4802d 100644
          cross_attention_kwargs: Optional[Dict[str, Any]] = None,
          added_cond_kwargs: Optional[Dict[str, torch.Tensor]] = None,
 diff --git a/src/diffusers/pipelines/latent_consistency_models/pipeline_latent_consistency_text2img.py b/src/diffusers/pipelines/latent_consistency_models/pipeline_latent_consistency_text2img.py
-index ff5eea2d..10ea4af1 100644
+index ff5eea2d5..10ea4af11 100644
 --- a/src/diffusers/pipelines/latent_consistency_models/pipeline_latent_consistency_text2img.py
 +++ b/src/diffusers/pipelines/latent_consistency_models/pipeline_latent_consistency_text2img.py
 @@ -701,17 +701,33 @@ class LatentConsistencyModelPipeline(
@@ -91,7 +105,7 @@ index ff5eea2d..10ea4af1 100644
          if not output_type == "latent":
              image = self.vae.decode(denoised / self.vae.config.scaling_factor, return_dict=False)[0]
 diff --git a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-index 9911cbe7..98c7f2ab 100644
+index 9911cbe75..98c7f2ab7 100644
 --- a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 +++ b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 @@ -832,19 +832,33 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
