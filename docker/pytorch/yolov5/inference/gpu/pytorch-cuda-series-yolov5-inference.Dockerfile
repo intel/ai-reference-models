@@ -32,8 +32,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends pciutils numactl && \
     rm -rf /var/lib/apt/lists/*
 
-RUN python3 -m pip install -r requirements.txt
-
 RUN pip install --no-cache-dir --upgrade pip
 
 # Required to fix "fatal: module 'cv2.dnn' has no attribute 'DictValue'" in CUDA container

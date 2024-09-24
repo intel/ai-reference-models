@@ -146,8 +146,8 @@ services:
     build:
       context: ../../
       args:
-        BASE_IMAGE: ${REGISTRY}/aiops/mlops
-        BASE_TAG: srf-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pyt-2.3-py310
+        BASE_IMAGE: intel/intel-extension-for-pytorch
+        BASE_TAG: 2.3.0-pip-base
       dockerfile: docker/pytorch/llama/inference/cpu/pytorch-llama-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     extends: bert-large-training-cpu
     command: >
@@ -158,8 +158,8 @@ services:
     build:
       context: ../../
       args:
-        BASE_IMAGE: ${REGISTRY}/aiops/mlops
-        BASE_TAG: srf-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pyt-2.3-py310
+        BASE_IMAGE: intel/intel-extension-for-pytorch
+        BASE_TAG: 2.3.0-pip-base
       dockerfile: docker/pytorch/torchrec_dlrm/inference/cpu/pytorch-dlrm-v2-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     extends: bert-large-training-cpu
     command: >
@@ -170,8 +170,8 @@ services:
     build:
       context: ../../
       args:
-        BASE_IMAGE: ${REGISTRY}/aiops/mlops
-        BASE_TAG: srf-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pyt-2.3-py310
+        BASE_IMAGE: intel/intel-extension-for-pytorch
+        BASE_TAG: 2.3.0-pip-base
       dockerfile: docker/pytorch/gptj/inference/cpu/pytorch-gpt-j-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     extends: bert-large-training-cpu
     command: >
@@ -182,8 +182,8 @@ services:
     build:
       context: ../../
       args:
-        BASE_IMAGE: ${REGISTRY}/aiops/mlops
-        BASE_TAG: srf-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pyt-2.3-py310
+        BASE_IMAGE: intel/intel-extension-for-pytorch
+        BASE_TAG: 2.3.0-pip-base
       dockerfile: docker/pytorch/yolov7/inference/cpu/pytorch-yolov7-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     extends: bert-large-training-cpu
     command: >
