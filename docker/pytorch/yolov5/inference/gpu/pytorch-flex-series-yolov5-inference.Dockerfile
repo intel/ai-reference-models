@@ -45,8 +45,6 @@ COPY models_v2/common common
 
 ENV PYTHONPATH=$WORKDIR/common
 
-RUN pip install --no-cache-dir -r requirements.txt
-
 RUN python -m pip install --no-cache-dir --upgrade pip \
         protobuf==4.21.6
 
