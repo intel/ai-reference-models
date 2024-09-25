@@ -622,6 +622,8 @@ elif args.dtype == "int8" and args.inductor:
         from torchao.quantization import quant_api
         from torchao.utils import unwrap_tensor_subclass
         inductor_config.cpp_wrapper = True
+        inductor_config.max_autotune = True
+        inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
         with torch.no_grad(),torch.cpu.amp.autocast(
                 enabled=True, dtype=torch.bfloat16
         ):
