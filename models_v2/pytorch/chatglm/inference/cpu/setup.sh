@@ -17,7 +17,7 @@
 #
 
 pip install datasets
-pip install dcpm-kernels
+pip install cpm-kernels
 ./prepare.sh
 
 git clone https://github.com/huggingface/transformers.git
