@@ -111,6 +111,22 @@ if args.ipex:
     import intel_extension_for_pytorch as ipex
     from intel_extension_for_pytorch.quantization import convert, prepare
 
+
+def trace_handler(prof):
+    print(prof.key_averages().table(sort_by="self_cpu_time_total", row_limit=-1))
+    import datetime
+    import threading
+
+    now = datetime.datetime.now()
+    record_id = threading.current_thread().ident
+    log_path = os.path.join(
+        args.output_dir,
+        "llama_profiling_{}_{}_step_{}.json".format(
+            now.strftime("%Y%m%d%H%M%S"), record_id, str(prof.step_num)
+        ),
+    )
+    prof.export_chrome_trace(log_path)
+
 # beam search = 4
 num_beams = 4
 generate_kwargs = dict(do_sample=False, temperature=0.9, num_beams=num_beams)
@@ -665,11 +681,6 @@ elif args.dtype == "int8" and args.inductor:
 def benchmark_warmup(prompt):
     # start
     if args.profile:
-
-        def trace_handler(prof):
-            print(
-                prof.key_averages().table(sort_by="self_cpu_time_total", row_limit=-1)
-            )
 
         with torch.profiler.profile(
             activities=[torch.profiler.ProfilerActivity.CPU],
