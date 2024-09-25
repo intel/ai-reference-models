@@ -120,14 +120,16 @@ if args.ipex:
 
 
 def trace_handler(prof):
-    print(prof.key_averages().table(sort_by="self_cpu_time_total", row_limit=10))
+    print(prof.key_averages().table(sort_by="self_cpu_time_total", row_limit=-1))
     import datetime
+    import threading
 
     now = datetime.datetime.now()
+    record_id = threading.current_thread().ident
     log_path = os.path.join(
-        os.getcwd(),
-        "llama_profiling_{}_step_{}.json".format(
-            now.strftime("%Y%m%d%H%M%S"), str(prof.step_num)
+        args.output_dir,
+        "llama_profiling_{}_{}_step_{}.json".format(
+            now.strftime("%Y%m%d%H%M%S"), record_id, str(prof.step_num)
         ),
     )
     prof.export_chrome_trace(log_path)
