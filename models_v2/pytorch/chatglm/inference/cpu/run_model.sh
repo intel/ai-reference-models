@@ -110,7 +110,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     ARGS="$ARGS --jit"
     ARGS_IPEX="$ARGS_IPEX --log_file_prefix=./ChatGLM_${PRECISION}_${LOG_PREFIX}_${mode}"
     echo "### running with jit mode"
-    if [[ "$1" == "int8-bf16" || "$1" == "int8-fp32" ]];then
+    if [[ "$PRECISION" == "int8-bf16" || "$PRECISION" == "int8-fp32" ]];then
         ARGS="$ARGS --ipex_smooth_quant"
     fi
     python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} \
@@ -196,14 +196,14 @@ else
         }
     '))
 
-    token_per_sec=($(awk -v output_token=$OUTPUT_TOKEN -v total=$latency -v batch=$BATCH_SIZE -v first_token=${first_latency}} '
+    token_per_sec=($(awk -v output_token=$OUTPUT_TOKEN -v total=$latency -v batch=$BATCH_SIZE -v first_token=${first_token_latency}} '
         BEGIN {
             thp = batch*(output_token-1)/(total-first_token);
             printf("%.3f", thp);
         }
     '))
 
-    first_token_thp=($(awk -v output_token=$OUTPUT_TOKEN -v total=$latency -v batch=$BATCH_SIZE -v first_token=${first_latency}} '
+    first_token_thp=($(awk -v output_token=$OUTPUT_TOKEN -v total=$latency -v batch=$BATCH_SIZE -v first_token=${first_token_latency}} '
         BEGIN {
             thp = batch*(1)/(first_token);
             printf("%.3f", thp);

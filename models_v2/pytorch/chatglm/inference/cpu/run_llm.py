@@ -692,7 +692,7 @@ def benchmark_warmup(prompt):
             for i in range(5):
                 input_ids = tokenizer(prompt, return_tensors="pt").input_ids
                 output = user_model.generate(
-                    input_ids, max_new_tokens=args.max_new_tokens, **generate_kwargs
+                    input_ids, max_new_tokens=args.max_new_tokens, min_new_tokens=args.max_new_tokens, **generate_kwargs
                 )
                 prof.step()
 
@@ -705,7 +705,7 @@ def benchmark_warmup(prompt):
 
             input_ids = tokenizer(prompt, return_tensors="pt").input_ids
             output = user_model.generate(
-                input_ids, max_new_tokens=args.max_new_tokens, **generate_kwargs
+                input_ids, max_new_tokens=args.max_new_tokens, min_new_tokens=args.max_new_tokens, **generate_kwargs
             )
     print("warmup done")
 
@@ -723,7 +723,7 @@ def benchmark_evaluate(prompt):
             tic = time.time()
             input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(args.device)
             output = user_model.generate(
-                input_ids, max_new_tokens=args.max_new_tokens, **generate_kwargs
+                input_ids, max_new_tokens=args.max_new_tokens, min_new_tokens=args.max_new_tokens, **generate_kwargs
             )
             gen_ids = output[0] if args.token_latency else output
             gen_text = tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
