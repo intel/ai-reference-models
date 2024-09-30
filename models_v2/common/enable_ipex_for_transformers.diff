@@ -1169,7 +1169,7 @@ index 734ccf6a9..641814bf2 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2436dadc..d93c89c36 100755
+index a2436dadc..0af351d01 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -152,6 +152,31 @@ from .utils import (
@@ -1212,16 +1212,17 @@ index a2436dadc..d93c89c36 100755
          # memory metrics - must set up as early as possible
          self._memory_tracker = TrainerMemoryTracker(self.args.skip_memory_metrics)
          self._memory_tracker.start()
-@@ -592,7 +618,7 @@ class Trainer:
+@@ -592,19 +618,19 @@ class Trainer:
                          f"FP16 provided in SM_HP_MP_PARAMETERS is {smp.state.cfg.fp16}, "
                          "but SageMaker Model Parallelism < 1.10 does not support FP16 in trainer."
                      )
 -        if (args.fp16 or args.bf16) and args.half_precision_backend == "auto":
+-            if args.device == torch.device("cpu"):
 +        if (args.fp16 or args.bf16 or args.fp16_cpu) and args.half_precision_backend == "auto":
-             if args.device == torch.device("cpu"):
++            if torch.device(args.device).type == torch.device("cpu").type:
                  if args.fp16:
                      raise ValueError("Tried to use `fp16` but it is not supported on cpu")
-@@ -600,11 +626,11 @@ class Trainer:
+                 else:
                      args.half_precision_backend = "cpu_amp"
              logger.info(f"Using {args.half_precision_backend} half precision backend")
  
