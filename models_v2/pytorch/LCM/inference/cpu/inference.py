@@ -108,6 +108,7 @@ def main():
 
     # load model
     pipe = DiffusionPipeline.from_pretrained(args.model_name_or_path)
+    pipe.safety_checker = None
 
     # data type
     if args.precision == "fp32":
