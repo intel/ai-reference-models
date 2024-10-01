@@ -13,10 +13,10 @@
 # limitations under the License.
 # ============================================================================
 
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="2.0.0-pip-base"
+ARG BASE_IMAGE
+ARG BASE_TAG
 
-FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-extension-for-pytorch
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /workspace/pytorch-bert-large-inference
 
@@ -36,7 +36,7 @@ RUN apt-get update && \
 
 RUN git clone  https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
-    git checkout c8209150f9d219a137412b06431c9d52839c7272 && \
+    git checkout 5.2.1 && \
     ./autogen.sh && \
     ./configure --prefix=/workspace/lib/jemalloc && \
     make && \
@@ -56,13 +56,18 @@ COPY models_v2/pytorch/bert_large/inference/cpu .
 RUN git clone https://github.com/huggingface/transformers.git && \
     cd transformers && \
     git checkout v4.38.1 && \
-    git apply ../enable_ipex_for_transformers.diff && \
+    git apply /workspace/pytorch-bert-large-inference/enable_ipex_for_transformers.diff && \
     pip install -e ./
 
-RUN pip install packaging intel-openmp tensorboardX
+RUN pip install packaging \
+        intel-openmp \
+        tensorboardX \
+        protobuf==3.20.3 \
+        numpy==1.23.5 \
+        pillow==10.3.0
 
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD 
-ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+#ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \

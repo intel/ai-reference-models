@@ -28,7 +28,7 @@ services:
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
         BASE_IMAGE: intel/intel-extension-for-pytorch
-        BASE_TAG: 2.3.0-pip-base
+        BASE_TAG: 2.5.0-pip-base
       dockerfile: docker/pytorch/bert_large/inference/cpu/pytorch-bert-large-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
@@ -145,11 +145,8 @@ services:
     pull_policy: always
     build:
       context: ../../
-      args:
-        BASE_IMAGE: intel/intel-extension-for-pytorch
-        BASE_TAG: 2.3.0-pip-base
       dockerfile: docker/pytorch/llama/inference/cpu/pytorch-llama-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-training-cpu
+    extends: bert-large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   torchrec_dlrm-inference-cpu:
@@ -157,11 +154,8 @@ services:
     pull_policy: always
     build:
       context: ../../
-      args:
-        BASE_IMAGE: intel/intel-extension-for-pytorch
-        BASE_TAG: 2.3.0-pip-base
       dockerfile: docker/pytorch/torchrec_dlrm/inference/cpu/pytorch-dlrm-v2-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-training-cpu
+    extends: bert-large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   gptj-inference-cpu:
@@ -169,11 +163,8 @@ services:
     pull_policy: always
     build:
       context: ../../
-      args:
-        BASE_IMAGE: intel/intel-extension-for-pytorch
-        BASE_TAG: 2.3.0-pip-base
       dockerfile: docker/pytorch/gptj/inference/cpu/pytorch-gpt-j-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-training-cpu
+    extends: bert-large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   yolov7-inference-cpu:
@@ -181,11 +172,8 @@ services:
     pull_policy: always
     build:
       context: ../../
-      args:
-        BASE_IMAGE: intel/intel-extension-for-pytorch
-        BASE_TAG: 2.3.0-pip-base
       dockerfile: docker/pytorch/yolov7/inference/cpu/pytorch-yolov7-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-training-cpu
+    extends: bert-large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   stable-diffusion-inference-gpu:
