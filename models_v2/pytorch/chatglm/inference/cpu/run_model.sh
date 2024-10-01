@@ -132,7 +132,7 @@ first_token_latency="N/A"
 rest_token_latency="N/A"
 
 if [[ "${TEST_MODE}" == "ACCURACY" ]]; then
-    accuracy=$(cat ${OUTPUT_DIR}/ChatGLM_${PRECISION}_${LOG_PREFIX}* | grep "Accuracy:" |sed -e 's/.*= //;s/[^0-9.]//g')
+    accuracy=$(cat ${OUTPUT_DIR}/ChatGLM_${PRECISION}_accuracy* | grep "Accuracy:" |sed -e 's/.*= //;s/[^0-9.]//g')
     echo "${FINETUNED_MODEL};"accuracy";${precision};${BATCH_SIZE};${accuracy}" | tee -a ${WORK_SPACE}/summary.log
 else
     latency=($(grep -i 'inference-latency:' ${OUTPUT_DIR}/ChatGLM_${PRECISION}_${LOG_PREFIX}* |sed -e 's/.*inference-latency: //;s/[^0-9.]//g;s/\.$//' |awk '

@@ -129,7 +129,7 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
         num_iter=${num_iter-"10"}
         rm -rf ${OUTPUT_DIR}/LCM_${PRECISION}_inference_accuracy*
         rm -rf ${PRECISION}_results
-        MODE_ARGS="--ninstances 1 --nodes-list=0 --accuracy"
+        MODE_ARGS="--ninstances 1 --nodes-list=0 "
     else
         CORES=`lscpu | grep Core | awk '{print $4}'`
         SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
