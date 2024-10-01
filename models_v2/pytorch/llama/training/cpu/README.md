@@ -55,14 +55,16 @@ cd ../..
 # Dataset
   ```
   # Get the dataset here: https://github.com/tloen/alpaca-lora/blob/main/alpaca_data.json
+  wget https://raw.githubusercontent.com/tloen/alpaca-lora/main/alpaca_data.json
   mv alpaca_data.json <clone of the AI Reference models>/models_v2/pytorch/llama/training/cpu
 
   # Get the dataset template here: https://github.com/tloen/alpaca-lora/blob/main/templates/alpaca.json
+  wget https://raw.githubusercontent.com/tloen/alpaca-lora/main/templates/alpaca.json
   mkdir <clone of the AI Reference models>/models_v2/pytorch/llama/training/cpu/templates
   mv alpaca.json <clone of the AI Reference models>/models_v2/pytorch/llama/training/cpu/templates
   ```
 
-# Inference
+# Training
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/pytorch/llama/training/cpu`
 3. Create virtual environment `venv` and activate it:
@@ -88,9 +90,9 @@ cd ../..
 | **DDP**                    | `export DDP=False (True or False)`                  |
 | **OUTPUT_DIR**               |                               `export OUTPUT_DIR=<path to an output directory>`                               |
 | **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16) |
-| **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
-| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
-| **NNODES** (Optional)     |                               `export NNODES=1`                                |
+| **MODEL_DIR**               |        `export MODEL_DIR=$(pwd)`                               |
+| **BATCH_SIZE** (optional)    |          `export BATCH_SIZE=256`                                |
+| **NNODES** (Optional)     |                 `export NNODES=1`                                |
 
 ## Output
 
