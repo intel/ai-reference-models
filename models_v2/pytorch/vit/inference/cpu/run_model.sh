@@ -28,12 +28,12 @@ if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
 elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
     echo "TEST_MODE set to ACCURACY"
     LOG_PREFIX="accuracy_log"
-    ARGS_IPEX="${ARGS_IPEX} --ninstances 1 --nodes-list 0 --memory-allocator tcmalloc"
+    ARGS_IPEX="${ARGS_IPEX} --ninstances 1 --nodes-list 0 --memory-allocator tcmalloc --trust_remote_code=True"
 elif [[ "${TEST_MODE}" == "REALTIME" ]]; then
     echo "TEST_MODE set to REALTIME"
     num_warmup=${num_warmup:-"10"}
     num_iter=${num_iter:-"100"}
-    ARGS="$ARGS --benchmark --perf_begin_iter ${num_warmup} --perf_run_iters ${num_iter}"
+    ARGS="$ARGS --benchmark --perf_begin_iter ${num_warmup} --perf_run_iters ${num_iter} "
     LOG_PREFIX="realtime_log"
     ARGS_IPEX="${ARGS_IPEX} --latency-mode --memory-allocator tcmalloc"
     if [[ -z "${CORE_PER_INSTANCE}" ]]; then
@@ -180,6 +180,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         mode="jit"
         ARGS="$ARGS --jit_mode_eval"
         echo "### running with jit mode"
+        BATCH_SIZE=${BATCH_SIZE:-1}
         python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
             ${EVAL_SCRIPT} $ARGS \
             --model_name_or_path   ${FINETUNED_MODEL} \
@@ -191,6 +192,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
     else
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
+        BATCH_SIZE=${BATCH_SIZE:-1}
         python -m torch.backends.xeon.run_cpu --ninstances 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \

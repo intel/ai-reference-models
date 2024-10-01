@@ -256,20 +256,20 @@ else
         if [[ "$PRECISION" == "int8-bf16" || "$PRECISION" == "int8-fp32" ]];then
             ARGS="$ARGS --ipex_smooth_quant"
         fi
-        python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./LLaMa_${PRECISION}_accuracy_${MODE}" \
+        python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./GPTJ_${PRECISION}_accuracy_${MODE}" \
             ${EVAL_SCRIPT} $ARGS \
             --ipex \
             --model-name-or-path   ${FINETUNED_MODEL} 
     else
         echo "### running with torch.compile inductor backend"
         export TORCHINDUCTOR_FREEZING=1
-        python -m torch.backends.xeon.run_cpu --nodes-list 0 --memory-allocator tcmalloc --log_path=${OUTPUT_DIR} \
+        python -m torch.backends.xeon.run_cpu --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             --model-name-or-path ${FINETUNED_MODEL}
     fi
 
-    accuracy=$(cat ${OUTPUT_DIR}/LLaMa_${PRECISION}_accuracy* | grep "Accuracy:" |sed -e 's/.*= //;s/[^0-9.]//g')
+    accuracy=$(cat ${OUTPUT_DIR}/GPTJ_${PRECISION}_accuracy* | grep "Accuracy:" |sed -e 's/.*= //;s/[^0-9.]//g')
 
     echo "${FINETUNED_MODEL};"accuracy";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
 fi

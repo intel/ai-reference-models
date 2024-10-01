@@ -33,7 +33,6 @@ from peft import (
     LoraConfig,
     get_peft_model,
     get_peft_model_state_dict,
-    prepare_model_for_int8_training,
     set_peft_model_state_dict,
 )
 from transformers import LlamaForCausalLM, LlamaTokenizer
@@ -192,7 +191,6 @@ def train(
             ]  # could be sped up, probably
         return tokenized_full_prompt
 
-    model = prepare_model_for_int8_training(model)
     config = LoraConfig(
         r=lora_r,
         lora_alpha=lora_alpha,
@@ -278,7 +276,7 @@ def train(
             no_cuda=True,
             use_ipex=True,
             max_steps=max_steps,
-            xpu_backend="ccl",
+            ddp_backend="ccl",
             disable_tqdm=disable_tqdm,
         ),
         data_collator=transformers.DataCollatorForSeq2Seq(
