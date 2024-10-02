@@ -20,12 +20,12 @@
 
 version: '3'
 services:
-  resnet50v1-5-inference-gpu:
+  resnet50v1_5-inference-gpu:
     build:
       context: ../../
       args:
         TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-extension-for-tensorflow}
-        TF_BASE_TAG: ${TF_BASE_TAG:-2.15.0.0-xpu}
+        TF_BASE_TAG: ${TF_BASE_TAG:-2.15.0.1-xpu}
         no_proxy: ''
         NO_PROXY: ''
         INT8_MODEL_URL: ${INT8_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
@@ -37,45 +37,43 @@ services:
   maskrcnn-inference-gpu:
     build:
       dockerfile: docker/tensorflow/maskrcnn/inference/gpu/tf-flex-series-maskrcnn-inference.Dockerfile
-    extends: resnet50v1-5-inference-gpu
+    extends: resnet50v1_5-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-flex-gpu-maskrcnn-inference
-  wide-deep-large-inference-gpu:
+  wide_deep-_large_ds-inference-gpu:
     build:
       dockerfile: docker/tensorflow/wide_deep_large_ds/inference/gpu/tf-flex-series-wide-deep-large-inference.Dockerfile
-    extends: resnet50v1-5-inference-gpu
+    extends: resnet50v1_5-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-wide-deep-large-inference
-  stable-diffusion-inference-gpu:
+  stable_diffusion-inference-gpu:
     build:
       dockerfile: docker/tensorflow/stable_diffusion/inference/gpu/tf-flex-series-stable-diffusion-inference.Dockerfile
-    extends: resnet50v1-5-inference-gpu
+    extends: resnet50v1_5-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-tf-flex-gpu-stable-diffusion-inference
   efficientnet-inference-gpu:
     build:
       dockerfile: docker/tensorflow/efficientnet/inference/gpu/tf-flex-series-efficientnet-inference.Dockerfile
-    extends: resnet50v1-5-inference-gpu
+    extends: resnet50v1_5-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
-  resnet50v1-5-training-gpu:
+  resnet50v1_5-training-gpu:
     build:
       args:
-        MPI_VERSION: ${MPI_VERSION:-2021.12.1-5}
-        CCL_VERSION: ${CCL_VERSION:-2021.12.0-309}
-        NO_PROXY: ''
-        no_proxy: ''
+        MPI_VER: ${MPI_VER:-2021.13.1-767}
+        CCL_VER: ${CCL_VER:-2021.13.1-31}
       dockerfile: docker/tensorflow/resnet50v1_5/training/gpu/tf-max-series-resnet50v1-5-training.Dockerfile
-    extends: resnet50v1-5-inference-gpu
+    extends: resnet50v1_5-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
   bert-large-training-gpu:
     build:
       dockerfile: docker/tensorflow/bert_large/training/gpu/tf-max-series-bert-large-training.Dockerfile
-    extends: resnet50v1-5-training-gpu
+    extends: resnet50v1_5-training-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
   maskrcnn-training-gpu:
     build:
       dockerfile: docker/tensorflow/maskrcnn/training/gpu/tf-max-series-maskrcnn-training.Dockerfile
-    extends: resnet50v1-5-training-gpu
+    extends: resnet50v1_5-training-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-maskrcnn-training
-  3d-unet-training-gpu:
+  3d_unet-training-gpu:
     build:
       dockerfile: docker/tensorflow/3d_unet/training/gpu/tf-max-series-3d-unet-training.Dockerfile
-    extends: resnet50v1-5-training-gpu
+    extends: resnet50v1_5-training-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-3d-unet-training

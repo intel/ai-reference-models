@@ -13,19 +13,13 @@
 # limitations under the License.
 
 ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
+ARG PYT_BASE_TAG="2.3.110-xpu"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 WORKDIR /workspace/pytorch-flex-series-unetpp-inference/models
 
 ENV DEBIAN_FRONTEND=noninteractive
-
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
-    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
 
 COPY models_v2/pytorch/unetpp/inference/gpu .
 COPY models_v2/common common

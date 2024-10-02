@@ -13,14 +13,11 @@
 # limitations under the License.
 
 ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG TF_BASE_TAG="2.15.0.0-xpu"
+ARG TF_BASE_TAG="2.15.0.1-xpu"
 
 FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
-
-RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
-    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
     
 WORKDIR /workspace/tf-flex-series-efficientnet-inference/models
 

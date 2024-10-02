@@ -18,7 +18,7 @@
 
 version: '3'
 services:
-  bert-large-inference-cpu:
+  bert_large-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
     pull_policy: always
     build:
@@ -32,13 +32,13 @@ services:
       dockerfile: docker/pytorch/bert_large/inference/cpu/pytorch-bert-large-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  bert-large-training-cpu:
+  bert_large-training-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
     pull_policy: always
     build:
       context: ../../
       dockerfile: docker/pytorch/bert_large/training/cpu/pytorch-bert-large-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   maskrcnn-inference-cpu:
@@ -47,7 +47,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/maskrcnn/inference/cpu/pytorch-maskrcnn-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   maskrcnn-training-cpu:
@@ -56,7 +56,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/maskrcnn/training/cpu/pytorch-maskrcnn-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   resnet50-training-cpu:
@@ -65,7 +65,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/resnet50/training/cpu/pytorch-resnet50-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   resnet50-inference-cpu:
@@ -74,7 +74,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/resnet50/inference/cpu/pytorch-resnet50-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   ssd-resnet34-inference-cpu:
@@ -83,7 +83,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/ssd-resnet34/inference/cpu/pytorch-ssd-resnet34-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   ssd-resnet34-training-cpu:
@@ -92,7 +92,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/ssd-resnet34/training/cpu/pytorch-ssd-resnet34-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   dlrm-inference-cpu:
@@ -101,7 +101,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/dlrm/inference/cpu/pytorch-dlrm-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   dlrm-training-cpu:
@@ -110,7 +110,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/dlrm/training/cpu/pytorch-dlrm-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   rnnt-training-cpu:
@@ -119,7 +119,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/rnnt/training/cpu/pytorch-rnnt-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   rnnt-inference-cpu:
@@ -128,7 +128,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/rnnt/inference/cpu/pytorch-rnnt-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   distilbert-inference-cpu:
@@ -137,7 +137,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/distilbert/inference/cpu/pytorch-distilbert-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   llama-inference-cpu:
@@ -146,7 +146,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/llama/inference/cpu/pytorch-llama-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   torchrec_dlrm-inference-cpu:
@@ -155,7 +155,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/torchrec_dlrm/inference/cpu/pytorch-dlrm-v2-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   gptj-inference-cpu:
@@ -164,7 +164,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/gptj/inference/cpu/pytorch-gpt-j-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   yolov7-inference-cpu:
@@ -173,10 +173,10 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/yolov7/inference/cpu/pytorch-yolov7-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-    extends: bert-large-inference-cpu
+    extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  stable-diffusion-inference-gpu:
+  stable_diffusion-inference-gpu:
     build:
       context: ../../
       args:
@@ -185,91 +185,94 @@ services:
         no_proxy: ""
         NO_PROXY: ""
         PYT_BASE_IMAGE: ${PYT_BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        PYT_BASE_TAG: ${PYT_BASE_TAG:-2.1.30-xpu}
+        PYT_BASE_TAG: ${PYT_BASE_TAG:-2.3.110-xpu}
       dockerfile: docker/pytorch/stable_diffusion/inference/gpu/pytorch-gpu-stable-diffusion-inference.Dockerfile
     command: >
-      sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__);print(ipex.xpu.is_available())'"
+      sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__);print(torch.xpu.has_xpu())'"
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-gpu-stable-diffusion-inference
     pull_policy: always
   resnet50v1-5-inference-gpu:
     build:
       dockerfile: docker/pytorch/resnet50v1_5/inference/gpu/pytorch-gpu-resnet50v1-5-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-inference
   resnet50v1_5-training-gpu:
     build:
+      args:
+        MPI_VER: ${MPI_VER:-2021.13.1-767}
+        CCL_VER: ${CCL_VER:-2021.13.1-31}
       dockerfile: docker/pytorch/resnet50v1_5/training/gpu/pytorch-max-series-resnet50v1-5-training.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-training
   efficientnet-inference-gpu:
     build:
       dockerfile: docker/pytorch/efficientnet/inference/gpu/pytorch-flex-series-efficientnet-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-efficientnet-inference
   yolov5-inference-gpu:
     build:
       dockerfile: docker/pytorch/yolov5/inference/gpu/pytorch-flex-series-yolov5-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-flex-gpu-yolov5-inference
   dlrm-inference-gpu:
     build:
       dockerfile: docker/pytorch/dlrm/inference/gpu/pytorch-flex-series-dlrm-v1-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-flex-gpu-dlrm-v1-inference
   distilbert-inference-gpu:
     build:
       dockerfile: docker/pytorch/distilbert/inference/gpu/pytorch-gpu-distilbert-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-gpu-distilbert-inference
   unetpp-inference-gpu:
     build:
       dockerfile: docker/pytorch/unetpp/inference/gpu/pytorch-flex-series-unetpp-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-pytorch-flex-gpu-unetpp-inference
-  fast-pitch-inference-gpu:
+  fastpitch-inference-gpu:
     build:
       dockerfile: docker/pytorch/fastpitch/inference/gpu/pytorch-flex-series-fast-pitch-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-generation-pytorch-flex-gpu-fast-pitch-inference
   swin-transformer-inference-gpu:
     build:
       dockerfile: docker/pytorch/swin-transformer/inference/gpu/pytorch-flex-series-swin-transformer-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-swin-transformer-inference
   bert_large-inference-gpu:
     build:
       dockerfile: docker/pytorch/bert_large/inference/gpu/pytorch-max-series-bert-large-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
   bert_large-training-gpu:
     build:
       dockerfile: docker/pytorch/bert_large/training/gpu/pytorch-max-series-bert-large-training.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: resnet50v1_5-training-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   rnnt-inference-gpu:
     build:
       dockerfile: docker/pytorch/rnnt/inference/gpu/pytorch-max-series-rnnt-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-inference
   rnnt-training-gpu:
     build:
       dockerfile: docker/pytorch/rnnt/training/gpu/pytorch-max-series-rnnt-training.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: resnet50v1_5-training-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-training
   fbnet-inference-gpu:
     build:
       dockerfile: docker/pytorch/fbnet/inference/gpu/pytorch-flex-series-fbnet-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-fbnet-inference
   ifrnet-inference-gpu:
     build:
       dockerfile: docker/pytorch/ifrnet/inference/gpu/pytorch-flex-series-ifrnet-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-flex-gpu-ifrnet-inference
   rife-inference-gpu:
     build:
       dockerfile: docker/pytorch/rife/inference/gpu/pytorch-flex-series-rife-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-flex-gpu-rife-inference
   efficientnet-cuda-inference:
     build:
@@ -303,5 +306,5 @@ services:
   rife-cuda-inference:
     build:
       dockerfile: docker/pytorch/rife/inference/gpu/pytorch-cuda-series-rife-inference.Dockerfile
-    extends: stable-diffusion-inference-gpu
+    extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-cuda-gpu-rife-inference

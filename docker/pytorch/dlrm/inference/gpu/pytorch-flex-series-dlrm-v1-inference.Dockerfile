@@ -13,14 +13,11 @@
 # limitations under the License.
 
 ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
+ARG PYT_BASE_TAG="2.3.110-xpu"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
-
-RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
-    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
 
 WORKDIR /workspace/pytorch-flex-series-dlrm-v1-inference/models
 
