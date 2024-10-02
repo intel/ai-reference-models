@@ -18,6 +18,7 @@ fp32-realtime-inference:
 fp32-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: SYS_NICE
   env:
     PRECISION: fp32
     OUTPUT_DIR: /tmp
@@ -35,6 +36,7 @@ fp32-throughput-inference:
 fp32-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: SYS_NICE
   env:
     PRECISION: fp32
     OUTPUT_DIR: /tmp
@@ -52,6 +54,7 @@ fp32-accuracy-inference:
 fp16-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: SYS_NICE
   env:
     PRECISION: fp16
     OUTPUT_DIR: /tmp
@@ -69,6 +72,7 @@ fp16-realtime-inference:
 fp16-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: SYS_NICE
   env:
     PRECISION: fp16
     OUTPUT_DIR: /tmp
@@ -86,6 +90,7 @@ fp16-throughput-inference:
 fp16-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: SYS_NICE
   env:
     PRECISION: fp16
     OUTPUT_DIR: /tmp
@@ -103,6 +108,7 @@ fp16-accuracy-inference:
 bf16-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: SYS_NICE
   env:
     PRECISION: bf16
     OUTPUT_DIR: /tmp
@@ -120,6 +126,7 @@ bf16-realtime-inference:
 bf16-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: SYS_NICE
   env:
     PRECISION: bf16
     OUTPUT_DIR: /tmp
@@ -155,6 +162,7 @@ bf16-accuracy-inference:
 int8-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: SYS_NICE
   env:
     PRECISION: int8
     OUTPUT_DIR: /tmp
@@ -172,6 +180,7 @@ int8-realtime-inference:
 int8-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: SYS_NICE
   env:
     PRECISION: int8
     OUTPUT_DIR: /tmp
@@ -192,6 +201,60 @@ int8-accuracy-inference:
   cap_add: SYS_NICE
   env:
     PRECISION: int8
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: ACCURACY
+    DATASET_DIR: /localdisk/yolov7_data
+    CHECKPOINT_DIR: /localdisk/yolov7_model
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/yolov7_data
+      dst: /localdisk/yolov7_data
+    - src: /localdisk/yolov7_model
+      dst: /localdisk/yolov7_model
+bf32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash run_model.sh
+  cap_add: SYS_NICE
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: REALTIME
+    DATASET_DIR: /localdisk/yolov7_data
+    CHECKPOINT_DIR: /localdisk/yolov7_model
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/yolov7_data
+      dst: /localdisk/yolov7_data
+    - src: /localdisk/yolov7_model
+      dst: /localdisk/yolov7_model
+bf32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash run_model.sh
+  cap_add: SYS_NICE
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: THROUGHPUT
+    DATASET_DIR: /localdisk/yolov7_data
+    CHECKPOINT_DIR: /localdisk/yolov7_model
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/yolov7_data
+      dst: /localdisk/yolov7_data
+    - src: /localdisk/yolov7_model
+      dst: /localdisk/yolov7_model
+bf32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash run_model.sh
+  cap_add: SYS_NICE
+  env:
+    PRECISION: bf32
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
