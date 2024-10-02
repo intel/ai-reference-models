@@ -13,7 +13,7 @@
 # limitations under the License.
 
 ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
+ARG PYT_BASE_TAG="2.3.110-xpu"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
@@ -21,15 +21,20 @@ WORKDIR /workspace/pytorch-max-series-rnnt-training/models
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
-    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
+RUN wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+   | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null && \
+   echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+   | tee /etc/apt/sources.list.d/oneAPI.list
+
+ARG MPI_VER
+ARG CCL_VER
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
-        intel-oneapi-mpi-devel \
-        intel-oneapi-ccl && \
+        intel-oneapi-mpi-devel=${MPI_VER} \
+        intel-oneapi-ccl=${CCL_VER} && \
     rm -rf /var/lib/apt/lists/*
     
 COPY models_v2/pytorch/rnnt/training/gpu .
@@ -39,12 +44,12 @@ RUN python -m pip install -r requirements.txt
 
 RUN python -m pip install --no-cache-dir --upgrade pip
 
-ENV LD_LIBRARY_PATH=/opt/intel/oneapi/ccl/2021.11/lib/:/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.11/lib:$LD_LIBRARY_PATH
-ENV LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.11/lib:/opt/intel/oneapi/ccl/2021.11/lib/
-ENV PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/bin:/opt/intel/oneapi/mpi/2021.11/bin:$PATH
-ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.11
-ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.11
-ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.11/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
+ENV LD_LIBRARY_PATH=/opt/intel/oneapi/ccl/2021.13/lib/:/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.13/lib:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.13/lib:/opt/intel/oneapi/ccl/2021.13/lib/
+ENV PATH=/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/bin:/opt/intel/oneapi/mpi/2021.13/bin:$PATH
+ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.13
+ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.13
+ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

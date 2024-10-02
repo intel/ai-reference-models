@@ -13,25 +13,22 @@
 # limitations under the License.
 
 ARG TF_BASE_IMAGE="intel/intel-extension-for-tensorflow"
-ARG TF_BASE_TAG="2.15.0.0-xpu"
+ARG TF_BASE_TAG="2.15.0.1-xpu"
 
 FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
-    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
-    
-ARG MPI_VERSION
-ARG CCL_VERSION
+ARG MPI_VER
+ARG CCL_VER
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         bc \
-        intel-oneapi-mpi-devel=${MPI_VERSION} \
-        intel-oneapi-ccl=${CCL_VERSION} && \
+        intel-oneapi-mpi-devel=${MPI_VER} \
+        intel-oneapi-ccl=${CCL_VER} && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace/tf-max-series-resnet50v1-5-training/models
@@ -54,11 +51,11 @@ RUN mkdir -p resnet50_hvd && \
     cd tensorflow-models && \
     git apply /workspace/tf-max-series-resnet50v1-5-training/models/hvd_support.patch
 
-ENV LD_LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.12/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.12/lib:/opt/intel/oneapi/ccl/2021.12/lib/:$LD_LIBRARY_PATH
-ENV PATH=/opt/intel/oneapi/mpi/2021.12/opt/mpi/libfabric/bin:/opt/intel/oneapi/mpi/2021.12/bin:$PATH
-ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.12
-ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.12
-ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.12/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
+ENV LD_LIBRARY_PATH=/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/lib:/opt/intel/oneapi/mpi/2021.13/lib:/opt/intel/oneapi/ccl/2021.13/lib/:$LD_LIBRARY_PATH
+ENV PATH=/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/bin:/opt/intel/oneapi/mpi/2021.13/bin:$PATH
+ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.13
+ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.13
+ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party 

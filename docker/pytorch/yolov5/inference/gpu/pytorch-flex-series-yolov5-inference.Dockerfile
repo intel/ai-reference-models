@@ -14,15 +14,11 @@
 # ============================================================================
 
 ARG PYT_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYT_BASE_TAG="2.1.10-xpu-pip-base"
+ARG PYT_BASE_TAG="2.3.110-xpu"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
 ARG WORKDIR=/workspace/pytorch-flex-series-yolov5-inference
-
-
-RUN wget -qO - https://repositories.intel.com/gpu/intel-graphics.key | \
-    gpg --yes --dearmor --output /usr/share/keyrings/intel-graphics.gpg
 
 WORKDIR $WORKDIR
 
