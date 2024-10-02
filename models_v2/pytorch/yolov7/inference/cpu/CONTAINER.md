@@ -47,7 +47,7 @@ DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/object-detection:pytorch-cpu-yolov7-inference
 
 docker run \
-  --cap_add SYS_NICE \
+  --cap-add SYS_NICE \
   --env TEST_MODE=${TEST_MODE} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
@@ -66,7 +66,7 @@ docker run \
 ```
 
 > [!NOTE]
-> Only `TORCH_INDUCTOR=0` is currently supported and validated on PyTorch* and Intel® Extension for PyTorch* 2.3.0 for this workload.
+> The workload container was validated for `TORCH_INDUCTOR=0`. 
 
 ## Documentation and Sources
 #### Get Started​
@@ -77,10 +77,10 @@ docker run \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/object_detection/pytorch/yolov7/inference/cpu/CONTAINER.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/models_v2/pytorch/yolov7/inference/cpu/CONTAINER.md)
 
 #### Code Sources
-[Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pyt-cpu)
+[Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pytorch)
 
 [Report Issue](https://community.intel.com/t5/Intel-Optimized-AI-Frameworks/bd-p/optimized-ai-frameworks)
 
