@@ -43,6 +43,10 @@ export DATASET_DIR=<directory where the dataset will be saved>
 bash download_dataset.sh
 ```
 
+### **NOTE**:Int8 model
+
+Please get a quant_model.pt before run INT8-BF16 model or INT8-FP32 model. Please refer the [link](https://github.com/intel/intel-extension-for-transformers/blob/v1.5/examples/huggingface/pytorch/text-to-image/quantization/qat/README.md).
+
 # Inference
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/pytorch/stable_diffusion/inference/cpu`
