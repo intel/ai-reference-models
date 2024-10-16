@@ -200,7 +200,32 @@ if [[ "$TEST_MODE" == "ACCURACY" && "${DISTRIBUTED}" == "true" ]]; then
     # For the summary of results
     wait
 
-else
+elif [[ "${TEST_MODE}" == "ACCURACY" && "${DISTRIBUTED}" == "false" ]]; then
+    if [[ "0" == ${TORCH_INDUCTOR} ]];then
+        python -m intel_extension_for_pytorch.cpu.launch \
+            --memory-allocator tcmalloc \
+            $MODE_ARGS \
+            --log-dir ${OUTPUT_DIR} \
+            --log_file_prefix LCM_${PRECISION}_inference_${mode} \
+            ${MODEL_DIR}/inference.py \
+            --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
+            --dataset_path=${DATASET_DIR} \
+            --accuracy \
+            -w ${num_warmup} -i ${num_iter} \
+            $ARGS
+    else
+        python -m torch.backends.xeon.run_cpu \
+            --enable_tcmalloc \
+            $MODE_ARGS \
+            --log_path ${OUTPUT_DIR} \
+            ${MODEL_DIR}/inference.py \
+            --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
+            --dataset_path=${DATASET_DIR} \
+            --accuracy \
+            -w ${num_warmup} -i ${num_iter} \
+            $ARGS
+    fi
+elif [[ "${TEST_MODE}" != "ACCURACY" && "${DISTRIBUTED}" == "false" ]]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         python -m intel_extension_for_pytorch.cpu.launch \
             --memory-allocator tcmalloc \
@@ -268,7 +293,7 @@ if [[ "$TEST_MODE" == "REALTIME" ]]; then
     echo ""LCM";"throughput";${PRECISION};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
     echo ""LCM";"latency";${PRECISION};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
 
-else
+elif [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/LCM_${PRECISION}_inference_throughput* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
     BEGIN {
             sum = 0;

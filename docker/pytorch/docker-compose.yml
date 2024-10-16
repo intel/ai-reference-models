@@ -176,6 +176,15 @@ services:
     extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  lcm-inference-cpu:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
+    pull_policy: always
+    build:
+      context: ../../
+      dockerfile: docker/pytorch/LCM/inference/cpu/pytorch-lcm-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
+    extends: bert_large-inference-cpu
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   stable_diffusion-inference-gpu:
     build:
       context: ../../
