@@ -634,17 +634,6 @@ def main():
     elif args.fp8 and args.ipex:
         model, optimizer = prepare_fp8(model, optimizer)
 
-    if args.inductor:
-        if args.fp8 or args.bf32:
-            print('[Info] torch.compile() training does not support fp8 or bf32 yet, exiting...')
-            exit(0) 
-        from torch._inductor import config as inductor_config
-        inductor_config.cpp_wrapper = True
-        amp_dtype = torch.half if args.fp16 else torch.bfloat16
-        with torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16, dtype=amp_dtype):
-            print('[Info] Running training steps torch.compile() with default backend')
-            model = torch.compile(model)
-
     worker_seeds, shuffling_seeds = utils.setup_seeds(args.seed, args.num_epochs_to_generate_seeds_for, device)
     worker_seed = worker_seeds[args.local_rank]
 
@@ -697,6 +686,19 @@ def main():
                                                           find_unused_parameters=True,
                                                           bucket_cap_mb=8192,
                                                           gradient_as_bucket_view=args.use_gradient_as_bucket_view)
+
+    if args.inductor:
+        if args.fp8 or args.bf32:
+            print('[Info] torch.compile() training does not support fp8 or bf32 yet, exiting...')
+            exit(0)
+        from torch._inductor import config as inductor_config
+        inductor_config.cpp_wrapper = True
+        # torch._inductor.config.profiler_mark_wrapper_call = True
+        # torch._inductor.config.cpp.enable_kernel_profile = True
+        amp_dtype = torch.half if args.fp16 else torch.bfloat16
+        with torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16, dtype=amp_dtype):
+            print('[Info] Running training steps torch.compile() with default backend')
+            model = torch.compile(model)
 
     
     now_step, now_skipped, skip_interval = 0, 0, 0
@@ -802,6 +804,41 @@ def main():
                 if args.benchmark and completed_steps > 50:
                     throughput = 40 * args.train_batch_size / bench_total_time
                     print("Throughput: {:.3f} sentence/s".format(throughput), flush=True)
+                    if args.profile:
+                        print("Running profiling ...")
+                        with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
+                            if args.fp16:
+                                with torch.cpu.amp.autocast(enabled=True, dtype=torch.half):
+                                    outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
+                                            labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
+                            elif args.bf16:
+                                with torch.cpu.amp.autocast():
+                                    outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
+                                         labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
+                            elif args.fp8 and args.ipex:
+                                with fp8_autocast(enabled=True, calibrating=False, fp8_recipe=DelayedScaling(fp8_format=Format.E4M3)):
+                                    outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
+                                            labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
+                            else: #bf32 or fp32
+                                outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
+                                         labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
+                            loss = outputs.loss
+                            loss = loss / args.gradient_accumulation_steps
+                            if args.fp16 and args.ipex:
+                                scaler.scale(loss).backward()
+                            else:
+                                loss.backward()
+                            if step % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
+                                if args.fp16 and args.ipex:
+                                    scaler.step(optimizer)
+                                    scaler.update()
+                                else:
+                                    optimizer.step()
+                                lr_scheduler.step()
+                                optimizer.zero_grad()
+
+                        output = p.key_averages().table(sort_by="self_cpu_time_total")
+                        print(output)
                     exit()
 
                 gloss, lm_acc, num_masked, seq_acc, seq_tot = calc_accuracy(outputs, masked_lm_labels, next_sentence_labels, args)
