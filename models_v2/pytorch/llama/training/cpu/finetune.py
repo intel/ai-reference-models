@@ -15,7 +15,7 @@
 # limitations under the License.
 import os
 import sys
-from typing import List
+from typing import List, Optional
 
 import fire
 import torch
@@ -48,6 +48,9 @@ def train(
     bf16: bool = False,
     fp16: bool = False,
     bf32: bool = False,
+    ipex: bool = False,
+    inductor: bool = False,
+    ddp_backend: Optional[str] = None,
     # training hyperparams
     batch_size: int = 128,
     max_steps: int = -1,
@@ -85,6 +88,9 @@ def train(
             f"bf16: {bf16}\n"
             f"fp16: {fp16}\n"
             f"bf32: {bf32}\n"
+            f"ipex: {ipex}\n"
+            f"inductor: {inductor}\n"
+            f"ddp_backend: {ddp_backend}\n"
             f"batch_size: {batch_size}\n"
             f"max_steps: {max_steps}\n"
             f"micro_batch_size: {micro_batch_size}\n"
@@ -274,9 +280,10 @@ def train(
             report_to="wandb" if use_wandb else None,
             run_name=wandb_run_name if use_wandb else None,
             no_cuda=True,
-            use_ipex=True,
+            use_ipex=ipex,
+            inductor=inductor,
             max_steps=max_steps,
-            ddp_backend="ccl",
+            ddp_backend=ddp_backend,
             disable_tqdm=disable_tqdm,
         ),
         data_collator=transformers.DataCollatorForSeq2Seq(

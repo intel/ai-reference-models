@@ -28,7 +28,7 @@ if [ -z "${OUTPUT_DIR}" ]; then
 fi
 
 if [[ "${DDP}" == "True" ]]; then
-    "Running with Distributed training"
+    echo "### running with Distributed training"
     CORES=`lscpu | grep Core | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     TOTAL_CORES=`expr $CORES \* $SOCKETS`
@@ -40,53 +40,51 @@ if [[ "${DDP}" == "True" ]]; then
     export KMP_BLOCKTIME=1
     export KMP_AFFINITY=granularity=fine,compact,1,0
 
-    << EOF
-    #oneCCL settings
-    export CCL_WORKER_COUNT=8
-    export CCL_LOG_LEVEL=info
-    export CCL_BF16=avx512bf
-    export CCL_ATL_TRANSPORT=ofi
-    export CCL_MNIC_COUNT=2
-    export CCL_MNIC=local
-    export CCL_MNIC_NAME=irdma1,irdma5
-    export CCL_ALLREDUCE=ring
-    export CCL_WORKER_COUNT=8
+    # #oneCCL settings
+    # export CCL_WORKER_COUNT=8
+    # export CCL_LOG_LEVEL=info
+    # export CCL_BF16=avx512bf
+    # export CCL_ATL_TRANSPORT=ofi
+    # export CCL_MNIC_COUNT=2
+    # export CCL_MNIC=local
+    # export CCL_MNIC_NAME=irdma1,irdma5
+    # export CCL_ALLREDUCE=ring
+    # export CCL_WORKER_COUNT=8
 
-    for (( i = $SOCKETS; i < 2*$SOCKETS; i++ )); do  # pin CCL workers to HT
-    START_CORE=$(( i * CORES ))
-    for (( j = 0; j < $CCL_WORKER_COUNT; j++)); do
-    CCL_WORKER_AFFINITY="${CCL_WORKER_AFFINITY} $((START_CORE + j))"
-    done
-    done
+    # for (( i = $SOCKETS; i < 2*$SOCKETS; i++ )); do  # pin CCL workers to HT
+    # START_CORE=$(( i * CORES ))
+    # for (( j = 0; j < $CCL_WORKER_COUNT; j++)); do
+    # CCL_WORKER_AFFINITY="${CCL_WORKER_AFFINITY} $((START_CORE + j))"
+    # done
+    # done
 
-    export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
-EOF
+    # export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
 
-    #DDP settings
-    export TORCH_CPP_LOG_LEVEL=INFO
-    export TORCH_DISTRIBUTED_DEBUG=INFO
-    export MASTER_ADDR=`head -1 hostfile`
+    # #DDP settings
+    # export TORCH_CPP_LOG_LEVEL=INFO
+    # export TORCH_DISTRIBUTED_DEBUG=INFO
+    # export MASTER_ADDR=`head -1 hostfile`
 
-    # Fabric settings
-    export FI_PROVIDER=psm3
-    export PSM3_IDENTIFY=1
-    export PSM3_ALLOW_ROUTERS=1
-    export PSM3_RDMA=1
-    export PSM3_PRINT_STATS=0
-    export PSM3_RV_MR_CACHE_SIZE=8192
-    export PSM3_KASSIST_MODE=none
-    #export PSM3_NIC='irdma*
-    export FI_PSM3_CONN_TIMEOUT=100
-    export PSM3_HAL=sockets
-
+    # # Fabric settings
+    # export FI_PROVIDER=psm3
+    # export PSM3_IDENTIFY=1
+    # export PSM3_ALLOW_ROUTERS=1
+    # export PSM3_RDMA=1
+    # export PSM3_PRINT_STATS=0
+    # export PSM3_RV_MR_CACHE_SIZE=8192
+    # export PSM3_KASSIST_MODE=none
+    # #export PSM3_NIC='irdma*
+    # export FI_PSM3_CONN_TIMEOUT=100
+    # export PSM3_HAL=sockets
 
     oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
     source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
-    ARGS_IPEX="${ARGS_IPEX} --nnodes ${NNODES} --hostfile ${HOSTFILE} --logical-cores-for-ccl --ccl-worker-count 8
+    ARGS_IPEX="${ARGS_IPEX} --nnodes ${NNODES} --hostfile ${HOSTFILE} --logical-cores-for-ccl --ccl-worker-count 8 "
+    ARGS="$ARGS --ddp_backend ccl "
 else
-    "Running with Single Socket"
-     ARGS_IPEX="${ARGS_IPEX} --throughput-mode
+    echo "### running with Single Socket"
+    ARGS_IPEX="${ARGS_IPEX} --throughput-mode "
 fi
 
 if [[ "${PRECISION}" == "bf16" ]]
@@ -111,6 +109,13 @@ else
     echo "The specified precision '${PRECISION}' is unsupported."
     echo "Supported precisions are: fp32, bf32, bf16, fp16"
     exit 1
+fi
+
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    ARGS="$ARGS --ipex "
+else
+    ARGS="$ARGS --inductor "
 fi
 
 python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./llama2_training_log_${precision}"  finetune.py  $ARGS \

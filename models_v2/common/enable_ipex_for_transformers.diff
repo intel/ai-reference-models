@@ -1169,7 +1169,7 @@ index 734ccf6a9..641814bf2 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2436dadc..0af351d01 100755
+index a2436dadc..c2fe1fa3d 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -152,6 +152,31 @@ from .utils import (
@@ -1364,7 +1364,7 @@ index a2436dadc..0af351d01 100755
              model = self.torch_jit_model_eval(model, dataloader, training)
              self.jit_compilation_time = round(time.time() - start_time, 4)
  
-+        if self.args.inductor:
++        if self.args.inductor and not training:
 +            from torch._inductor import config as inductor_config
 +            inductor_config.cpp_wrapper = True
 +            example_batch = next(iter(dataloader))
@@ -1435,17 +1435,19 @@ index a2436dadc..0af351d01 100755
          # Note: in torch.distributed mode, there's no point in wrapping the model
          # inside a DistributedDataParallel as we'll be under `no_grad` anyways.
          if not training:
-@@ -1517,6 +1668,9 @@ class Trainer:
+@@ -1517,6 +1668,11 @@ class Trainer:
                  kwargs["broadcast_buffers"] = self.args.ddp_broadcast_buffers
  
              self.accelerator.ddp_handler = DistributedDataParallelKwargs(**kwargs)
 +        if self.args.inductor:
++            from torch._inductor import config as inductor_config
++            inductor_config.cpp_wrapper = True
 +            with torch.cpu.amp.autocast(enabled=self.args.bf16 or self.args.fp16_cpu, dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
-+                model = torch.compile(model, backend=self.args.torch_compile_backend, mode=self.args.torch_compile_mode)
++                model = torch.compile(model)
  
          return model
  
-@@ -2014,7 +2168,11 @@ class Trainer:
+@@ -2014,7 +2170,11 @@ class Trainer:
                              grad_norm = _grad_norm.item() if _grad_norm is not None else None
  
                      # Optimizer step
@@ -1458,7 +1460,7 @@ index a2436dadc..0af351d01 100755
                      optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
                      if optimizer_was_run:
                          # Delay optimizer scheduling until metrics are generated
-@@ -2908,7 +3066,10 @@ class Trainer:
+@@ -2908,7 +3068,10 @@ class Trainer:
              with amp.scale_loss(loss, self.optimizer) as scaled_loss:
                  scaled_loss.backward()
          else:
@@ -1470,7 +1472,7 @@ index a2436dadc..0af351d01 100755
  
          return loss.detach() / self.args.gradient_accumulation_steps
  
-@@ -3322,6 +3483,66 @@ class Trainer:
+@@ -3322,6 +3485,66 @@ class Trainer:
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
  
@@ -1537,7 +1539,7 @@ index a2436dadc..0af351d01 100755
      def evaluation_loop(
          self,
          dataloader: DataLoader,
-@@ -3380,7 +3601,12 @@ class Trainer:
+@@ -3380,7 +3603,12 @@ class Trainer:
              logger.info("  Num examples: Unknown")
          logger.info(f"  Batch size = {batch_size}")
  
@@ -1551,7 +1553,7 @@ index a2436dadc..0af351d01 100755
  
          self.callback_handler.eval_dataloader = dataloader
          # Do this before wrapping.
-@@ -3402,6 +3628,20 @@ class Trainer:
+@@ -3402,6 +3630,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.
