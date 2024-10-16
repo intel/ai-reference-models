@@ -67,8 +67,6 @@ fi
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
-rm -rf ${OUTPUT_DIR}/summary.log
-rm -rf ${OUTPUT_DIR}/results.yaml
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 

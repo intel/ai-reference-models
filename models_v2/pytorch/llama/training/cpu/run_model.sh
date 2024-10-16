@@ -80,11 +80,10 @@ if [[ "${DDP}" == "True" ]]; then
     oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
     source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
-    ARGS_IPEX="${ARGS_IPEX} --nnodes ${NNODES} --hostfile ${HOSTFILE} --logical-cores-for-ccl --ccl-worker-count 8 "
-    ARGS="$ARGS --ddp_backend ccl "
+ ARGS_IPEX="${ARGS_IPEX} --nnodes ${NNODES} --hostfile ${HOSTFILE} --logical-cores-for-ccl --ccl-worker-count 8"
 else
-    echo "### running with Single Socket"
-    ARGS_IPEX="${ARGS_IPEX} --throughput-mode "
+    echo "Running with Single Socket"
+    ARGS_IPEX="${ARGS_IPEX} --throughput-mode"
 fi
 
 if [[ "${PRECISION}" == "bf16" ]]

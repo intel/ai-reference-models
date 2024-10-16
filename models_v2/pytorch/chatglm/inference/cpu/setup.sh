@@ -23,7 +23,7 @@ pip install cpm-kernels
 git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.38.1
-git apply ../../../../enable_ipex_for_transformers.diff
+git apply ${MODEL_DIR}/../../../../common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
 
