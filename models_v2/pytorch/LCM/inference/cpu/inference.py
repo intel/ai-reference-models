@@ -309,61 +309,64 @@ def main():
             with torch.no_grad():
                 pipe.traced_unet = capture_pre_autograd_graph(pipe.unet, input)
                 quantizer = X86InductorQuantizer()
-                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config()) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("up_blocks[2].resnets[0].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[2].resnets[1].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[2].resnets[2].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].resnets[0].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].resnets[1].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].resnets[2].time_emb_proj", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_q", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_k", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_v", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_out[0]", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("mid_block.resnets[0].time_emb_proj", None) \
-                    .set_module_name_qconfig("mid_block.resnets[slice(1, None, None)]._modules['0'].time_emb_proj", None) \
+                if args.model_name_or_path == "SimianLuo/LCM_Dreamshaper_v7":
+                    quantizer.set_global(xiq.get_default_x86_inductor_quantization_config()) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("up_blocks[2].resnets[0].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[2].resnets[1].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[2].resnets[2].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].resnets[0].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].resnets[1].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].resnets[2].time_emb_proj", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_q", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_k", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_v", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_out[0]", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("mid_block.resnets[0].time_emb_proj", None) \
+                        .set_module_name_qconfig("mid_block.resnets[slice(1, None, None)]._modules['0'].time_emb_proj", None)
+                else:
+                    quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
 
                 pipe.traced_unet = prepare_pt2e(pipe.traced_unet, quantizer)
                 # calibration
@@ -390,61 +393,64 @@ def main():
             with torch.no_grad():
                 pipe.traced_unet = capture_pre_autograd_graph(pipe.unet, input)
                 quantizer = X86InductorQuantizer()
-                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config()) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("up_blocks[2].resnets[0].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[2].resnets[1].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[2].resnets[2].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].resnets[0].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].resnets[1].time_emb_proj", None) \
-                    .set_module_name_qconfig("up_blocks[3].resnets[2].time_emb_proj", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_q", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_k", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_v", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_out[0]", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_q", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_k", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_v", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_out[0]", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].ff.net[2]", None) \
-                    .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].ff.net[0].proj", None) \
-                    .set_module_name_qconfig("mid_block.resnets[0].time_emb_proj", None) \
-                    .set_module_name_qconfig("mid_block.resnets[slice(1, None, None)]._modules['0'].time_emb_proj", None) \
+                if args.model_name_or_path == "SimianLuo/LCM_Dreamshaper_v7":
+                    quantizer.set_global(xiq.get_default_x86_inductor_quantization_config()) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("up_blocks[2].attentions[2].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("up_blocks[2].resnets[0].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[2].resnets[1].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[2].resnets[2].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn1.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[0].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn1.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[1].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn1.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("up_blocks[3].attentions[2].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].resnets[0].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].resnets[1].time_emb_proj", None) \
+                        .set_module_name_qconfig("up_blocks[3].resnets[2].time_emb_proj", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_q", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_k", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_v", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn1.to_out[0]", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_q", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_k", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_v", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].attn2.to_out[0]", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].ff.net[2]", None) \
+                        .set_module_name_qconfig("mid_block.attentions[0].transformer_blocks[0].ff.net[0].proj", None) \
+                        .set_module_name_qconfig("mid_block.resnets[0].time_emb_proj", None) \
+                        .set_module_name_qconfig("mid_block.resnets[slice(1, None, None)]._modules['0'].time_emb_proj", None)
+                else:
+                    quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
 
                 pipe.traced_unet = prepare_pt2e(pipe.traced_unet, quantizer)
                 # calibration
