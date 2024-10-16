@@ -118,7 +118,11 @@ elif [[ "${PRECISION}" == "int8-bf16" ]]; then
     ARGS="$ARGS --precision=int8-bf16"
     echo "### running int8-bf16 datatype"
 elif [[ "${PRECISION}" == "int8-fp32" ]]; then
-    ARGS="$ARGS --precision=int8-fp32"
+    if [ ! -f "${INT8_MODEL}" ]; then
+        echo "The required file INT8_MODEL does not exist"
+        exit 1
+    fi
+    ARGS="$ARGS --precision=int8-fp32 --int8_model_path=${INT8_MODEL}"
     echo "### running int8-fp32 datatype"
 elif [[ "${PRECISION}" == "bf32" ]]; then
     ARGS="$ARGS --precision=bf32"
@@ -229,7 +233,7 @@ if [[ "${TEST_MODE}" == "REALTIME" ]]; then
             sum = sum / i * INSTANCES_PER_SOCKET;
             printf("%.4f", sum);
     }')
-    echo "--------------------------------Performance Summary per Socket--------------------------------"
+    echo "--------------------------------Performance Summary per Instance --------------------------------"
     echo ""stable_diffusion";"latency";${PRECISION};${latency}" | tee -a ${OUTPUT_DIR}/summary.log
 elif [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
@@ -245,7 +249,7 @@ elif [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
             sum = sum / i;
             printf("%.4f", sum);
     }')
-    echo "--------------------------------Performance Summary per Socket--------------------------------"
+    echo "--------------------------------Performance Summary per Instance --------------------------------"
     echo ""stable_diffusion";"throughput";${PRECISION};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
     accuracy=$(grep 'FID:' ${OUTPUT_DIR}/${LOG_PREFIX}* |sed -e 's/.*FID//;s/[^0-9.]//g')
