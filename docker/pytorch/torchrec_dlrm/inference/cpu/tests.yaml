@@ -7,6 +7,7 @@ fp32-performance-inference:
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
+    BATCH_SIZE: '512'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -16,18 +17,18 @@ fp32-accuracy-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
-    DATASET_DIR: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-    WEIGHT_DIR: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    WEIGHT_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-      dst: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-    - src: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
-      dst: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
 fp16-performance-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-v2-inference
   cmd: bash run_model.sh
@@ -37,6 +38,8 @@ fp16-performance-inference:
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
+    BATCH_SIZE: '512'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
@@ -46,18 +49,19 @@ fp16-accuracy-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
-    DATASET_DIR: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-    WEIGHT_DIR: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    WEIGHT_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-      dst: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-    - src: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
-      dst: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
 bf16-performance-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-v2-inference
   cmd: bash run_model.sh
@@ -67,6 +71,7 @@ bf16-performance-inference:
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
+    BATCH_SIZE: '512'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -76,18 +81,18 @@ bf16-accuracy-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
-    DATASET_DIR: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-    WEIGHT_DIR: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    WEIGHT_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-      dst: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-    - src: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
-      dst: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
 int8-performance-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-v2-inference
   cmd: bash run_model.sh
@@ -97,6 +102,7 @@ int8-performance-inference:
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
+    BATCH_SIZE: '128'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -106,15 +112,47 @@ int8-accuracy-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8
-    DATASET_DIR: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-    WEIGHT_DIR: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    WEIGHT_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: ACCURACY
+
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
+bf32-performance-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-v2-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: THROUGHPUT
+    BATCH_SIZE: '512'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf32-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-v2-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    DATASET_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    WEIGHT_DIR: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-      dst: /localdisk/pytorch_dataset/dlrm_v2/dataset/
-    - src: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
-      dst: /localdisk/pytorch_dataset/dlrm_v2/model_weights/
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/dataset/
+    - src: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/
+      dst: /localdisk/datasets/lz_dataset/dlrm-v2/model_weights/

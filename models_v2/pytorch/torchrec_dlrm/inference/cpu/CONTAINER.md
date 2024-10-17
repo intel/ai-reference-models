@@ -9,16 +9,6 @@ This document provides instructions for running DLRMv2 inference using Intel® E
 docker pull intel/recommendation:pytorch-cpu-dlrmv2-inference
 ```
 
-## Quick Start Scripts
-
-| Script name | Description |
-|-------------|-------------|
-| `inference_performance.sh` | Run inference to verify performance for the specified precision (fp32, bf32, bf16, fp16, or int8). |
-| `test_accuracy.sh` | Run inference to verify auroc for the specified precision (fp32, bf32, bf16, fp16, or int8). |
-
-> [!NOTE]
-> The container has been performance validated on fp32,bf16,fp16 and int8 precisions and for `TORCH_INDUCTOR=0`.
-
 * Set ENV for fp16 to leverage AMX if you are using a supported platform.
 
 ```bash
@@ -31,7 +21,7 @@ export DNNL_MAX_CPU_ISA=AVX2_VNNI_2
 
 ## Datasets and Pre-Trained Model
 
-Refer to instructions [here](README.md#datasets) and [here](README.md#pre-trained-checkpoint) to download datasets and pre-trained model respectively. 
+Refer to instructions [here](README.md#datasets) and [here](README.md#pre-trained-checkpoint) to download datasets and pre-trained model respectively. These two inputs are required only when testing accuracy and not required for performance calculations. 
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -43,22 +33,21 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
-To run DLRMv2 inference, set environment variables to specify the precision, dataset directory,pre-trained models and an output directory. For performance inference, `DATASET_DIR` is optional as dummy data will be generated and used for inference. 
+To run DLRMv2 inference, set environment variables to specify the precision, dataset directory,pre-trained models and an output directory. For performance inference, `DATASET_DIR` and `WEIGHT_DIR` are optional as dummy data will be generated and model will be downloaded and used for inference. 
 
 ```bash
 ##Optional
 export TORCH_INDUCTOR=<provide either 0 or 1, otherwise (default:0)>
-export BATCH_SIZE=<provide batch size, otherwise (default:512)>
+export BATCH_SIZE=<provide batch size, otherwise (default:256)>
 ## Required
 export OUTPUT_DIR=<path to output directory>
-export DATASET_DIR=<path to dataset directory required for accuracy test>
-export WEIGHT_DIR=<path to pre-trained model directory required for accuracy test>
+export DATASET_DIR=<path to dataset directory only required for accuracy test>
+export WEIGHT_DIR=<path to pre-trained model directory only required for accuracy test>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 export PRECISION=<provide either fp32, int8, bf16 , bf32 or fp16>
 
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/recommendation:pytorch-cpu-dlrmv2-inference
-SCRIPT=quickstart/<specify the quickstart script>
 
 docker run \
   --env PRECISION=${PRECISION} \
@@ -74,10 +63,11 @@ docker run \
   ${DOCKER_RUN_ENVS} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  /bin/bash $SCRIPT
+  /bin/bash run_model.sh
   ```
+
 > [!NOTE]
-> The throughput and realtime tests are offloaded on two sockets as two instances and the results are averaged. Hence, the results reflect single-socket performance.
+> The container has been validated with`TORCH_INDUCTOR=0`.
 
 ## Documentation and Sources
 #### Get Started​
@@ -87,7 +77,7 @@ docker run \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu/CONTAINER.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/models_v2/pytorch/torchrec_dlrm/inference/cpu/CONTAINER.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pyt-cpu)
