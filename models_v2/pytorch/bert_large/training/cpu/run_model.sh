@@ -111,6 +111,7 @@ if [ "$DDP" == 'false' ]; then
     if [[ "$TRAINING_PHASE" == '1' ]]; then
         BERT_MODEL_CONFIG=${BERT_MODEL_CONFIG-~/dataset/checkpoint/config.json}
         rm -rf ${OUTPUT_DIR}/throughput_log_phase1_*
+        rm -rf ${OUTPUT_DIR}/model_save_${PRECISION}
     elif [[ "$TRAINING_PHASE" == '2' ]]; then
         PRETRAINED_MODEL=${PRETRAINED_MODEL:-~/dataset/checkpoint/}
         rm -rf ${OUTPUT_DIR}/throughput_log_phase2_*
@@ -148,17 +149,17 @@ if [[ "$DDP" == "false" ]]; then
 
         TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
         if [[ "0" == ${TORCH_INDUCTOR} ]];then
-            python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0 --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
+            python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator jemalloc --log_file_prefix="${OUTPUT_DIR}/throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
                 --model_type 'bert' \
                 --benchmark \
                 --ipex \
-                --output_dir $OUTPUT_DIR/model_save \
+                --output_dir $OUTPUT_DIR/model_save_${PRECISION} \
                 --dense_seq_output \
                 --config_name ${BERT_MODEL_CONFIG} \
                 $ARGS \
-                $params
+                $params 2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase1_${precision}.log
         else
             python -m torch.backends.xeon.run_cpu --ninstances 1 --node_id 0 --enable-jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
@@ -166,7 +167,7 @@ if [[ "$DDP" == "false" ]]; then
                 --model_type 'bert' \
                 --benchmark \
                 --inductor \
-                --output_dir $OUTPUT_DIR/model_save \
+                --output_dir $OUTPUT_DIR/model_save_${PRECISION} \
                 --dense_seq_output \
                 --config_name ${BERT_MODEL_CONFIG} \
                 $ARGS \
@@ -194,7 +195,7 @@ if [[ "$DDP" == "false" ]]; then
 
         TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
         if [[ "0" == ${TORCH_INDUCTOR} ]];then
-            python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0 --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+            python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator jemalloc --log_file_prefix="${OUTPUT_DIR}/throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
                 --model_type 'bert' \
@@ -202,9 +203,9 @@ if [[ "$DDP" == "false" ]]; then
                 --benchmark \
                 --ipex \
                 --dense_seq_output \
-                --output_dir $OUTPUT_DIR/model_save \
+                --output_dir $OUTPUT_DIR/model_save_${PRECISION} \
                 $ARGS \
-                $params
+                $params 2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase2_${precision}.log
         else
             python -m torch.backends.xeon.run_cpu --ninstances 1 --node_id 0 --enable-jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
@@ -214,7 +215,7 @@ if [[ "$DDP" == "false" ]]; then
                 --benchmark \
                 --inductor \
                 --dense_seq_output \
-                --output_dir $OUTPUT_DIR/model_save \
+                --output_dir $OUTPUT_DIR/model_save_${PRECISION} \
                 $ARGS \
                 $params 2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase2_${precision}.log
         fi
@@ -250,7 +251,7 @@ elif [[ "$DDP" == "true" ]]; then
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
                 --model_type 'bert' \
                 --ipex \
-                --output_dir model_save \
+                --output_dir $OUTPUT_DIR/model_save_${PRECISION}  \
                 --dense_seq_output \
                 --config_name ${BERT_MODEL_CONFIG} \
                 $ARGS \
@@ -262,7 +263,7 @@ elif [[ "$DDP" == "true" ]]; then
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
                 --model_type 'bert' \
                 --inductor \
-                --output_dir model_save \
+                --output_dir $OUTPUT_DIR/model_save_${PRECISION}  \
                 --dense_seq_output \
                 --config_name ${BERT_MODEL_CONFIG} \
                 $ARGS \
@@ -301,7 +302,7 @@ elif [[ "$DDP" == "true" ]]; then
                 --model_type 'bert' \
                 --ipex \
                 --model_name_or_path ${PRETRAINED_MODEL} \
-                --output_dir model_save \
+                --output_dir $OUTPUT_DIR/model_save_${PRECISION} \
                 --dense_seq_output \
                 $ARGS \
                 $params \
@@ -313,7 +314,7 @@ elif [[ "$DDP" == "true" ]]; then
                 --model_type 'bert' \
                 --inductor \
                 --model_name_or_path ${PRETRAINED_MODEL} \
-                --output_dir model_save \
+                --output_dir $OUTPUT_DIR/model_save_${PRECISION} \
                 --dense_seq_output \
                 $ARGS \
                 $params \
@@ -353,5 +354,5 @@ results:
 EOF
 )
 
-echo "$yaml_content" >  $OUTPUT_DIR/${LOG_PREFIX}_results.yaml
+echo "$yaml_content" >  $OUTPUT_DIR/results.yaml
 echo "YAML file created."
