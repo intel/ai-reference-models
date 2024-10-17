@@ -13,10 +13,10 @@
 # limitations under the License.
 # ============================================================================
 
-ARG BASE_IMAGE="intel/intel-optimized-pytorch"
-ARG BASE_TAG="ubuntu-pt2.3-py310"
+ARG BASE_IMAGE
+ARG BASE_TAG
 
-FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-extension-for-pytorch
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 SHELL ["/bin/bash", "-c"]
 
@@ -42,29 +42,25 @@ RUN apt-get update && \
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
-    git checkout c8209150f9d219a137412b06431c9d52839c7272 && \
+    git checkout 5.2.1 && \
     ./autogen.sh && \
     ./configure --prefix=/workspace/lib/jemalloc && \
     make && \ 
     make install
 
-RUN python -m pip install intel-openmp \
+RUN pip install torchrec==0.3.2 --no-deps \
         torchmetrics==0.11.0 \
+        fbgemm-gpu==0.3.2 \
         torchsnapshot \
         pyre_extensions \
+        iopath \
+        typing-inspect \
+        mypy_extensions \
+        portalocker \
         tqdm
 
-RUN python -m pip install torchrec==0.3.2 --no-deps \
-        arrow==1.2.3 Cython==0.29.32 distro==1.8.0 \
-        docker==6.0.1 docstring-parser==0.8.1 fbgemm-gpu==0.3.2 \
-        iopath==0.1.10 pandas==1.3.5 portalocker==2.6.0 \
-        pyarrow==10.0.1 pyDeprecate==0.3.2 pytz==2022.6 \
-        scikit-build==0.16.3 tabulate==0.9.0 torchx==0.3.0 \
-        usort==1.0.5 websocket-client==1.4.2 attrs==22.1.0 \
-        certifi==2022.12.7 charset-normalizer==2.1.1
-
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
-#ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto"
+ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 COPY models_v2/pytorch/torchrec_dlrm/inference/cpu .
 
@@ -72,12 +68,6 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
         numactl \
         libegl1-mesa 
-
-RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.3.0 \
-        jinja2==3.1.4 \
-        certifi==2023.7.22 \
-        pyarrow==14.0.1 \
-        setuptools==65.5.1 
         
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
