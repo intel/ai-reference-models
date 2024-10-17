@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="2.0.0-pip-base"
+ARG BASE_IMAGE
+ARG BASE_TAG
 
-FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-optimized-pytorch
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /workspace/pytorch-bert-large-training
 
@@ -62,7 +62,7 @@ RUN python -m pip install tensorboardX \
         numpy
 
 RUN python -m pip install --upgrade huggingface_hub
-        
+
 RUN apt-get update && \
     apt-get install -y git-lfs \
         libopenblas-dev
@@ -77,7 +77,7 @@ RUN git clone https://github.com/huggingface/transformers.git && \
     cd transformers && \
     git checkout v4.38.1 && \
     git lfs pull && \
-    git apply ../enable_ipex_for_transformers.diff && \
+    git apply /workspace/pytorch-bert-large-training/enable_ipex_for_transformers.diff && \
     pip install -e ./
 
 RUN apt-get update && \

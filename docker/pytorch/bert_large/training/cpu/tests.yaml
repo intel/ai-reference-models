@@ -1,14 +1,14 @@
 fp32-training-phase1:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
-  shm-size: 8G
+  shm_size: 16G
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
     BERT_MODEL_CONFIG: /localdisk/bert_config.json
     OUTPUT_DIR: /tmp
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
-    DATASET_DIR: /pytorch/tfrecord_dir/bert_results4_dataset/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
     TRAINING_PHASE: '1'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
@@ -17,41 +17,42 @@ fp32-training-phase1:
       dst: /localdisk/bert_config.json
     - src: /tmp
       dst: /tmp
-    - src: /pytorch/tfrecord_dir/bert_results4_dataset/
-      dst: /pytorch/tfrecord_dir/bert_results4_dataset/
+    - src: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+      dst: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
 fp32-training-phase2:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
-  shm-size: 8G
+  shm_size: 16G
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
     BERT_MODEL_CONFIG: /localdisk/bert_config.json
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /tmp/model_save
+    PRETRAINED_MODEL: /tmp/model_save_fp32
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
-    DATASET_DIR: /pytorch/tfrecord_dir/bert_results4_dataset/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
     TRAINING_PHASE: '2'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
+    batch_size: '28'
   volumes:
     - src: /localdisk/bert_config.json
       dst: /localdisk/bert_config.json
-    - src: /tmp/model_save
-      dst: /tmp/model_save
-    - src: /pytorch/tfrecord_dir/bert_results4_dataset/
-      dst: /pytorch/tfrecord_dir/bert_results4_dataset/
+    - src: /tmp/model_save_fp32
+      dst: /tmp/model_save_fp32
+    - src: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+      dst: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
 bf16-training-phase1:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
-  shm-size: 8G
+  shm_size: 16G
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
     BERT_MODEL_CONFIG: /localdisk/bert_config.json
     OUTPUT_DIR: /tmp
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
-    DATASET_DIR: /pytorch/tfrecord_dir/bert_results4_dataset/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
     TRAINING_PHASE: '1'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
@@ -60,41 +61,42 @@ bf16-training-phase1:
       dst: /localdisk/bert_config.json
     - src: /tmp
       dst: /tmp
-    - src: /pytorch/tfrecord_dir/bert_results4_dataset/
-      dst: /pytorch/tfrecord_dir/bert_results4_dataset/
+    - src: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+      dst: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
 bf16-training-phase2:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
-  shm-size: 8G
+  shm_size: 16G
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
     BERT_MODEL_CONFIG: /localdisk/bert_config.json
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /tmp/model_save
+    PRETRAINED_MODEL: /tmp/model_save_bf16
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
-    DATASET_DIR: /pytorch/tfrecord_dir/bert_results4_dataset/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
     TRAINING_PHASE: '2'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
+    batch_size: '56'
   volumes:
     - src: /localdisk/bert_config.json
       dst: /localdisk/bert_config.json
-    - src: /tmp/model_save
-      dst: /tmp/model_save
-    - src: /pytorch/tfrecord_dir/bert_results4_dataset/
-      dst: /pytorch/tfrecord_dir/bert_results4_dataset/
+    - src: /tmp/model_save_bf16
+      dst: /tmp/model_save_bf16
+    - src: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+      dst: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
 bf32-training-phase1:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
-  shm-size: 8G
+  shm_size: 16G
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf32
     BERT_MODEL_CONFIG: /localdisk/bert_config.json
     OUTPUT_DIR: /tmp
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
-    DATASET_DIR: /pytorch/tfrecord_dir/bert_results4_dataset/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
     TRAINING_PHASE: '1'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
@@ -103,70 +105,74 @@ bf32-training-phase1:
       dst: /localdisk/bert_config.json
     - src: /tmp
       dst: /tmp
-    - src: /pytorch/tfrecord_dir/bert_results4_dataset/
-      dst: /pytorch/tfrecord_dir/bert_results4_dataset/
+    - src: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+      dst: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
 bf32-training-phase2:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
-  cmd: quickstart/run_bert_pretrain_phase2.sh bf32
-  shm-size: 8G
+  cmd: bash run_model.sh
+  shm_size: 16G
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf32
     BERT_MODEL_CONFIG: /localdisk/bert_config.json
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /tmp/model_save
+    PRETRAINED_MODEL: /tmp/model_save_bf32
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
-    DATASET_DIR: /pytorch/tfrecord_dir/bert_results4_dataset/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
     TRAINING_PHASE: '2'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
+    batch_size: '28'
   volumes:
     - src: /localdisk/bert_config.json
       dst: /localdisk/bert_config.json
-    - src: /tmp/model_save
-      dst: /tmp/model_save
-    - src: /pytorch/tfrecord_dir/bert_results4_dataset/
-      dst: /pytorch/tfrecord_dir/bert_results4_dataset/
-avx-fp32-training-phase1:
+    - src: /tmp/model_save_bf32
+      dst: /tmp/model_save_bf32
+    - src: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+      dst: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+fp16-training-phase1:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
-  cmd: bash run_model.sh avx
-  shm-size: 8G
+  cmd: bash run_model.sh
+  shm_size: 16G
   cap_add: 'SYS_NICE'
   env:
-    PRECISION: avx-fp32
+    PRECISION: fp16
     BERT_MODEL_CONFIG: /localdisk/bert_config.json
     OUTPUT_DIR: /tmp
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
-    DATASET_DIR: /pytorch/tfrecord_dir/bert_results4_dataset/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
     TRAINING_PHASE: '1'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /localdisk/bert_config.json
       dst: /localdisk/bert_config.json
     - src: /tmp
       dst: /tmp
-    - src: /pytorch/tfrecord_dir/bert_results4_dataset/
-      dst: /pytorch/tfrecord_dir/bert_results4_dataset/
-avx-fp32-training-phase2:
+    - src: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+      dst: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+fp16-training-phase2:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
-  cmd: quickstart/run_bert_pretrain_phase2.sh avx-fp32
-  shm-size: 8G
+  cmd: bash run_model.sh
+  shm_size: 16G
   cap_add: 'SYS_NICE'
   env:
-    PRECISION: avx-fp32
+    PRECISION: fp16
     BERT_MODEL_CONFIG: /localdisk/bert_config.json
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /tmp/model_save
+    PRETRAINED_MODEL: /tmp/model_save_fp16
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
-    DATASET_DIR: /pytorch/tfrecord_dir/bert_results4_dataset/
+    DATASET_DIR: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
     TRAINING_PHASE: '1'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
+    batch_size: '28'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /localdisk/bert_config.json
       dst: /localdisk/bert_config.json
-    - src: /tmp/model_save
-      dst: /tmp/model_save
-    - src: /pytorch/tfrecord_dir/bert_results4_dataset/
-      dst: /pytorch/tfrecord_dir/bert_results4_dataset/
+    - src: /tmp/model_save_fp16
+      dst: /tmp/model_save_fp16
+    - src: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset
+      dst: /localdisk/datasets/lz_dataset/emandab_10100202-ikiwne/bert_results4_dataset

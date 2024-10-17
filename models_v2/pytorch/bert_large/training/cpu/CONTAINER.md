@@ -5,26 +5,21 @@ This document has instructions for running BERT-Large training using Intel Exten
 
 ## Pull Command
 
-```
-docker pull intel/language-modeling:centos-pytorch-cpu-bert-large-training
+```bash
+docker pull intel/language-modeling:pytorch-cpu-bert-large-training
 ```
 
-## Quick Start Scripts
-| Script name | Description |
-|-------------|-------------|
-| `run_bert_pretrain_phase1.sh` | Runs BERT large pretraining phase 1 using max_seq_len=128 for the first 90% dataset for the specified precision (fp32, avx-fp32, bf32 or bf16). The script saves the model to the `OUTPUT_DIR` in a directory called `model_save`. |
-| `run_bert_pretrain_phase2.sh` | Runs BERT large pretraining phase 2 using max_seq_len=512 with the remaining 10% of the dataset for the specified precision (fp32, avx-fp32, bf32 or bf16). Use path to the `model_save` directory from phase one as the `CHECKPOINT_DIR` for phase 2. |
-
-**Note:** The `avx-fp32` precision runs the same scripts as `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
+> [!NOTE]
+> The `avx-fp32` precision runs the same scripts as `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
 
 ## Datasets
-Follow instructions to [download and preprocess](https://github.com/IntelAI/models/blob/v2.9.0/quickstart/language_modeling/pytorch/bert_large/training/cpu/README.md#datasets)  the text dataset and set the `DATASET_DIR` to point to the pre-processed dataset.
+Follow instructions to [download and preprocess](./README.md#download-the-preprocessed-text-dataset)  the text dataset and set the `DATASET_DIR` to point to the pre-processed dataset.
 
 # BERT Config File
-BERT Training happens in two stages. For stage 1, download the BERT Config file from [here](https://drive.google.com/drive/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT) and export `CONFIG_FILE` variable to point to this file path. 
+BERT Training happens in two stages. Download the BERT Config file from [here](https://drive.google.com/drive/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT) and export `BERT_MODEL_CONFIG` variable to point to this file path. 
 
 # Checkpoint Directory
-The checkpoint directory is created as a result of Phase 1 Training. Please set the `CHECKPOINT_DIR` to point to the pre-trained model path and volume mount it for Phase 2 training. 
+The checkpoint directory is created as a result of Phase 1 Training. Please set the `PRETRAINED_MODEL` to point to the pre-trained model path and volume mount it for Phase 2 training. 
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -36,42 +31,50 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
+
 To run the BERT-Large training scripts, set environment variables to specify the dataset directory, precision and an output directory. 
 
 ```bash
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
-export SCRIPT=quickstart/<specify the training script>
 export PRECISION=<specify the precision to run>
 export BERT_MODEL_CONFIG=<path to bert configuration file>
-export CHECKPOINT_DIR=<path to checkpoint to Directory>
+export PRETRAINED_MODEL=<path to checkpoint to directory>
+export TRAINING_PHASE=<set either 1 or 2>
+export DNNL_MAX_CPU_ISA=<provide AVX512_CORE_AMX_FP16 for fp16 precision>
+export TRAIN_SCRIPT=/workspace/pytorch-bert-large-training/run_pretrain_mlperf.py 
+export DDP=false
+export TORCH_INDUCTOR=0
 
-DOCKER_ARGS="--privileged --init -it"
-IMAGE_NAME=intel/language-modeling:centos-pytorch-cpu-bert-large-training
-WORKDIR=/workspace/pytorch-bert-large-training
-TRAIN_SCRIPT=${WORKDIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py  
+DOCKER_ARGS="--rm -it"
+IMAGE_NAME=intel/language-modeling:pytorch-cpu-bert-large-training
 
-docker run --rm \
+docker run \
+  --cap-add SYS_NICE \
+  --shm-size 16G \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env TRAIN_SCRIPT=${TRAIN_SCRIPT} \
   --env DATASET_DIR=${DATASET_DIR} \
+  --env TRAINING_PHASE=${TRAINING_PHASE} \
+  --env DDP=${DDP} \
+  --env TORCH_INDUCTOR=${TORCH_INDUCTOR} \
   --env BERT_MODEL_CONFIG=${BERT_MODEL_CONFIG} \
-  --env PRETRAINED_MODEL=${CHECKPOINT_DIR} \
-  --env http_proxy=${http_proxy} \
-  --env https_proxy=${https_proxy} \
-  --env no_proxy=${no_proxy} \
+  --env PRETRAINED_MODEL=${PRETRAINED_MODEL} \
+  --env DNNL_MAX_CPU_ISA=${DNNL_MAX_CPU_ISA} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${BERT_MODEL_CONFIG}:${BERT_MODEL_CONFIG} \
-  --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
+  --volume ${PRETRAINED_MODEL}:${PRETRAINED_MODEL} \
   ${DOCKER_RUN_ENVS} \
-  --shm-size 8G \
-  -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  /bin/bash $SCRIPT $PRECISION
+  /bin/bash run_model.sh
 ```
+
+> [!NOTE]
+> The workload container was validated on a single node(`DDP=false`) with `TORCH_INDUCTOR=0`.
+
 ## Documentation and Sources
 #### Get Started​
 [Docker* Repository](https://hub.docker.com/r/intel/language-modeling)
@@ -80,10 +83,10 @@ docker run --rm \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/language_modeling/pytorch/bert_large/training/cpu/DEVCATALOG.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/models_v2/pytorch/bert_large/training/cpu/CONTAINER.md)
 
 #### Code Sources
-[Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pyt-cpu)
+[Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pytorch)
 
 [Report Issue](https://community.intel.com/t5/Intel-Optimized-AI-Frameworks/bd-p/optimized-ai-frameworks)
 
