@@ -1,0 +1,73 @@
+fp32-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-training
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    NNODES: '1'
+    DDP: 'False'
+    TORCH_INDUCTOR: '0'
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    BATCH_SIZE: '32'
+    DATASET_DIR: /localdisk/alapaca
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/alapaca
+      dst: /workspace/pytorch-llama-training
+bf32-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-training
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    NNODES: '1'
+    DDP: 'False'
+    TORCH_INDUCTOR: '0'
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    BATCH_SIZE: '32'
+    DATASET_DIR: /localdisk/alapaca
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/alapaca
+      dst: /workspace/pytorch-llama-training
+bf16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-training
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    NNODES: '1'
+    DDP: 'False'
+    TORCH_INDUCTOR: '0'
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    BATCH_SIZE: '32'
+    DATASET_DIR: /localdisk/alapaca
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/alapaca
+      dst: /workspace/pytorch-llama-training
+fp16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-training
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    NNODES: '1'
+    DDP: 'False'
+    TORCH_INDUCTOR: '0'
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    BATCH_SIZE: '32'
+    DNNL_MAX_CPU_ISA: 'AVX512_CORE_AMX_FP16'
+    DATASET_DIR: /localdisk/alapaca
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/alapaca
+      dst: /workspace/pytorch-llama-training

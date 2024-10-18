@@ -20,12 +20,26 @@ ARGS=""
 ARGS_IPEX=""
 
 MAXSTEP=${MAXSTEP:-50}
+BATCH_SIZE=${BATCH_SIZE:-32}
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
   exit 1
 fi
+
+if [ -z "${DATASET_DIR}" ]; then
+  echo "The required environment variable DATASET has not been set, please create the output path and set it to DATASET"
+  exit 1
+fi
+
+if [ ! -f "${DATASET_DIR}/alpaca_data.json" ]; then
+   echo "Dataset path is not valid. Please download the dataset to the path."
+   exit 1
+fi 
+
+mkdir -p templates && \
+cp -r ${DATASET_DIR}/alpaca.json templates 
 
 if [[ "${DDP}" == "True" ]]; then
     echo "### running with Distributed training"
@@ -86,20 +100,20 @@ else
     ARGS_IPEX="${ARGS_IPEX} --throughput-mode"
 fi
 
-if [[ "${PRECISION}" == "bf16" ]]
+if [[ "${PRECISION}" == "bf16" ]];
 then
     precision="bf16"
     ARGS="$ARGS --bf16 "
     echo "### running bf16 mode"
-elif [[ "${PRECISION}" == "fp32" ]]
+elif [[ "${PRECISION}" == "fp32" ]];
 then
     echo "### running fp32 mode"
-elif [[ "${PRECISION}" == "fp16" ]]
+elif [[ "${PRECISION}" == "fp16" ]];
 then
     precision=fp16
     ARGS="$ARGS --fp16 "
     echo "### running fp16 mode"
-elif [[ "${PRECISION}" == "bf32" ]]
+elif [[ "${PRECISION}" == "bf32" ]];
 then
     precision=bf32
     ARGS="$ARGS --bf32 "
@@ -119,10 +133,10 @@ fi
 
 python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./llama2_training_log_${precision}"  finetune.py  $ARGS \
     --base_model 'meta-llama/Llama-2-7b-hf'\
-    --data_path 'alpaca_data.json' \
+    --data_path ${DATASET_DIR}/alpaca_data.json \
     --output_dir ${OUTPUT_DIR} \
-    --batch_size 32 \
-    --micro_batch_size 32 \
+    --batch_size ${BATCH_SIZE} \
+    --micro_batch_size ${BATCH_SIZE} \
     --num_epochs 3 \
     --learning_rate 1e-4 \
     --cutoff_len 512 \
