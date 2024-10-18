@@ -49,6 +49,11 @@ fi
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
+if [ -z "${OUTPUT_DIR}" ]; then
+  echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
+  exit 1
+fi
+
 precision="fp32"
 if [[ "${PRECISION}" == "bf16" ]]
 then
@@ -84,10 +89,6 @@ else
     exit 1
 fi
 
-if [ -z "${OUTPUT_DIR}" ]; then
-  echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
-  exit 1
-fi
 mkdir -p ${OUTPUT_DIR}
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -123,7 +124,7 @@ if [[ "${TEST_MODE}" == "REALTIME" ]]; then
             ${EVAL_SCRIPT} $ARGS \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --do_eval \
-            --output_dir ./tmp \
+            --output_dir ${OUTPUT_DIR} \
             --per_device_eval_batch_size $BATCH_SIZE \
             ${DATASET_ARGS} \
             --remove_unused_columns False
@@ -136,7 +137,7 @@ if [[ "${TEST_MODE}" == "REALTIME" ]]; then
             --inductor \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --do_eval \
-            --output_dir ./tmp \
+            --output_dir ${OUTPUT_DIR} \
             --per_device_eval_batch_size $BATCH_SIZE \
             ${DATASET_ARGS} \
             --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/latency_log_${path}_${precision}_${mode}.log
@@ -154,7 +155,7 @@ elif [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
             ${EVAL_SCRIPT} $ARGS \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --do_eval \
-            --output_dir ./tmp \
+            --output_dir ${OUTPUT_DIR} \
             --per_device_eval_batch_size $BATCH_SIZE \
             ${DATASET_ARGS} \
             --remove_unused_columns False
@@ -166,7 +167,7 @@ elif [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
             --inductor \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --do_eval \
-            --output_dir ./tmp \
+            --output_dir ${OUTPUT_DIR} \
             --per_device_eval_batch_size $BATCH_SIZE \
             ${DATASET_ARGS} \
             --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/throughput_log_${path}_${precision}_${mode}.log
@@ -185,7 +186,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
             ${EVAL_SCRIPT} $ARGS \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --do_eval \
-            --output_dir ./tmp \
+            --output_dir ${OUTPUT_DIR} \
             --per_device_eval_batch_size $BATCH_SIZE \
             ${DATASET_ARGS} \
             --remove_unused_columns False
@@ -198,7 +199,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
             --inductor \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --do_eval \
-            --output_dir ./tmp \
+            --output_dir ${OUTPUT_DIR} \
             --per_device_eval_batch_size $BATCH_SIZE \
             ${DATASET_ARGS} \
             --remove_unused_columns False 2>&1 | tee ${OUTPUT_DIR}/accuracy_log_${path}_${precision}_${mode}.log

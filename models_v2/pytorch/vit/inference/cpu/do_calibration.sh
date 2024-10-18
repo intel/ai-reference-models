@@ -38,7 +38,7 @@ python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0 -
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \
   --do_eval \
-  --output_dir ./tmp \
+  --output_dir ${OUTPUT_DIR} \
   --per_device_eval_batch_size $BATCH_SIZE \
   --dataset_name imagenet-1k \
   --remove_unused_columns False \

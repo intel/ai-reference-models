@@ -1,0 +1,170 @@
+fp32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+    CORE_PER_INSTANCE: '4'
+    DUMMY_INPUT: '1'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+    CORE_PER_INSTANCE: '4'
+    DUMMY_INPUT: '1'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+    CORE_PER_INSTANCE: '4'
+    DUMMY_INPUT: '1'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+    CORE_PER_INSTANCE: '4'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+    DUMMY_INPUT: '1'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-fp32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-fp32
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+    CORE_PER_INSTANCE: '4'
+    DUMMY_INPUT: '1'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-bf16-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-bf16
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+    CORE_PER_INSTANCE: '4'
+    DUMMY_INPUT: '1'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'THROUGHPUT'
+    DUMMY_INPUT: '1'
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '224'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'THROUGHPUT'
+    DUMMY_INPUT: '1'
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '224'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf16-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'THROUGHPUT'
+    DUMMY_INPUT: '1'
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '224'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+fp16-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'THROUGHPUT'
+    DUMMY_INPUT: '1'
+    TORCH_INDUCTOR: '0'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+    BATCH_SIZE: '224'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-fp32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-fp32
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'THROUGHPUT'
+    DUMMY_INPUT: '1'
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '224'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+int8-bf16-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-bf16
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'THROUGHPUT'
+    DUMMY_INPUT: '1'
+    TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '224'
+  volumes:
+    - src: /tmp
+      dst: /tmp
