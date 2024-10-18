@@ -22,6 +22,9 @@ export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     echo "Running Multi-instance Throughput Inference"
+    if [[ "${PRECISION}" == "bf16" ]]; then
+        export BF16_OPTIMIZED_THROUGHPUT=1
+    fi
     export LOG_PREFIX="throughput_log"
     BATCH_SIZE=${BATCH_SIZE:-1}
     export KMP_BLOCKTIME=1

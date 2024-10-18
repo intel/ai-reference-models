@@ -144,7 +144,7 @@ def train(
         os.environ["WANDB_LOG_MODEL"] = wandb_log_model
 
     model = LlamaForCausalLM.from_pretrained(
-        base_model,
+        base_model, attn_implementation="eager"
     )
 
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
@@ -301,7 +301,8 @@ def train(
     print("Start Training")
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
     print("Finish Training")
-    model.save_pretrained(output_dir)
+    # skip since open issue for PEFT: https://github.com/tloen/alpaca-lora/issues/319
+    # model.save_pretrained(output_dir)
 
     print(
         "\n If there's a warning about missing keys above, please disregard :)"
