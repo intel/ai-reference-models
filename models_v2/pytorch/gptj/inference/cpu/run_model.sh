@@ -57,7 +57,7 @@ fi
 
 
 if [[ "$PRECISION" == "int8-fp32" ]] || [[ "$PRECISION" == "int8-fp16"  ]]; then
-    if [ ! -f "${OUTPUT_DIR}/qconfig.json" ]; then
+    if [ ! -f "${OUTPUT_DIR}/qconfig-gptj.json" ]; then
     echo "Performing quantization"
     ./do_quantization.sh calibration sq
     fi
@@ -80,10 +80,10 @@ elif [[ "${PRECISION}" == "bf32" ]]; then
     ARGS="$ARGS --dtype 'bf32'"
     echo "### running bf32 mode"
 elif [[ "${PRECISION}" == "int8-fp32" ]]; then
-    ARGS="$ARGS --dtype 'int8' --int8-qconfig  '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype 'int8' --int8-qconfig  '${OUTPUT_DIR}/qconfig-gptj.json'"
     echo "### running int8-fp32 mode"
 elif [[ "${PRECISION}" == "int8-bf16" ]]; then
-    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --int8-qconfig '${OUTPUT_DIR}/qconfig-gptj.json'"
     echo "### running int8-bf16 mode"
 elif [[ "${PRECISION}" == "fp8" ]]; then
     if [[ "${TEST_MODE}" == "ACCURACY" ]]; then
@@ -224,6 +224,7 @@ if [[ "${TEST_MODE}" != "ACCURACY" ]]; then
             printf("%.3f", thp);
         }
     '))
+    rm -rf ${OUTPUT_DIR}/summary.log
     echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
     echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"total-latency";${PRECISION};${BATCH_SIZE}; ${latency} " |tee -a ${OUTPUT_DIR}/summary.log
     echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"first-token-latency";${PRECISION};${BATCH_SIZE}; ${first_latency} " |tee -a ${OUTPUT_DIR}/summary.log
@@ -235,7 +236,7 @@ if [[ "${TEST_MODE}" != "ACCURACY" ]]; then
     first_token_latency=$( grep "first-token-latency;" ${OUTPUT_DIR}/summary.log | awk '{print $NF}' )
     rest_token_latency=$( grep ";rest-token-latency;" ${OUTPUT_DIR}/summary.log | awk '{print $NF}' )
 
-    ## Single-socket throughput calculation
+    ## Single instance throughput calculation
     first_token_throughput=$( echo "(1/$first_token_latency)*${BATCH_SIZE}" | bc -l )
     rest_token_throughput=$( echo "(1/$rest_token_latency)*${BATCH_SIZE}" | bc -l )
     accuracy="N/A"
