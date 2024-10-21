@@ -8,31 +8,19 @@ This document provides instructions for running  GPT-J inference using Intel® E
 ```bash
 docker pull intel/generative-ai:pytorch-cpu-gptj-inference
 ```
-## Quick Start Scripts
-
-# Quick Start Scripts
-
-|  DataType   | Throughput  |  Latency    |   Accuracy  |
-| ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash run_multi_instance_throughput.sh fp32 | bash run_multi_instance_realtime.sh fp32 | bash run_accuracy.sh fp32 |
-| BF32        | bash run_multi_instance_throughput.sh bf32 | bash run_multi_instance_realtime.sh bf32 | bash run_accuracy.sh bf32 |
-| BF16        | bash run_multi_instance_throughput.sh bf16 | bash run_multi_instance_realtime.sh bf16 | bash run_accuracy.sh bf16 |
-| FP16        | bash run_multi_instance_throughput.sh fp16 | bash run_multi_instance_realtime.sh fp16 | bash run_accuracy.sh fp16 |
-| INT8-FP32        | bash run_multi_instance_throughput.sh int8-fp32 | bash run_multi_instance_realtime.sh int8-fp32 | bash run_accuracy.sh int8-fp32 |
-| INT8-BF16       | bash run_multi_instance_throughput.sh int8-bf16 | bash run_multi_instance_realtime.sh int8-bf16 | bash run_accuracy.sh int8-bf16 |
-
-> [!NOTE]
-> The container has been performance validated on fp32,bf16,fp16 and int8-fp32 precisions,`TORCH_INDUCTOR=0`, input tokens 1024 and 2016 and output tokens 128 and 32.
 
 * Set ENV for fp16 to leverage AMX if you are using a supported platform.
 
 ```bash
 export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
+
 * Set ENV for int8/bf32 to leverage VNNI if you are using a supported platform.
+
 ```bash
 export DNNL_MAX_CPU_ISA=AVX2_VNNI_2
 ```
+
 ## Docker Run
 (Optional) Export related proxy into docker environment.
 ```bash
@@ -43,20 +31,20 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
-To run GPT-J inference, set environment variables to specify the precision and an output directory. For workloads with int8 precision, an additional quantization step is required before inference. The following commands are provided as an example to run `int8-fp32` realtime inference. 
+To run GPT-J inference, set environment variables to specify the precision and an output directory.
+
 ```bash
 ##Optional
 export BATCH_SIZE=<provide batch size, otherwise (default: 1)>
 export TORCH_INDUCTOR=<provide either 0 or 1, otherwise (default:0)>
 ##Required
 export OUTPUT_DIR=<path to output directory>
-export PRECISION=<provide either fp32, int8-fp32, int8-fp16, bf16, fp16, or bf32>
+export PRECISION=<provide either fp32, int8-fp32, bf16, fp16, or bf32>
 export INPUT_TOKEN=<provide input token>
 export OUTPUT_TOKEN=<provide output token>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/generative-ai:pytorch-cpu-gptj-inference
-SCRIPT="./quickstart/do_quantization.sh calibration sq && ./quickstart/run_multi_instance_realtime.sh int8-fp32"
 
 docker run \
   --cap-add 'SYS_NICE' \
@@ -71,10 +59,11 @@ docker run \
   ${DOCKER_RUN_ENVS} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  sh -c "$SCRIPT"
+  sh -c run_model.sh
 ```
+
 > [!NOTE]
-> The throughput and realtime tests are offloaded on two sockets as two instances and the results are averaged. Hence, the results reflect single-socket performance.
+> The container has been validated with `TORCH_INDUCTOR=0`, input tokens 1024 and 2016 and output tokens 128 and 32.
 
 ## Documentation and Sources
 #### Get Started​
@@ -85,10 +74,10 @@ docker run \
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/language_modeling/pytorch/gptj/inference/cpu/CONTAINER.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/models_v2/pytorch/gptj/inference/cpu/CONTAINER.md)
 
 #### Code Sources
-[Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pyt-cpu)
+[Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pytorch)
 
 [Report Issue](https://community.intel.com/t5/Intel-Optimized-AI-Frameworks/bd-p/optimized-ai-frameworks)
 

@@ -32,7 +32,7 @@ echo "### running with intel extension for pytorch"
 if [[ "$1" == "calibration" ]]
 then
     precision="calibration"
-    ARGS="$ARGS --dtype 'int8' --do-calibration --int8-qconfig '${OUTPUT_DIR}/qconfig.json' "
+    ARGS="$ARGS --dtype 'int8' --do-calibration --int8-qconfig '${OUTPUT_DIR}/qconfig-gptj.json' "
     echo "### running calibration to get qconfig"
 
     if [[ "$2" == "default" ]]
