@@ -11,14 +11,20 @@ The tables below link to documentation on how to run each use case using docker 
 ### Generative AI
 | Framework | Model                                                  | Precisions | Mode |  Dataset |
 | --------| ------------------------------------------------------ | ---------- | ------| --------------------- |
-| PyTorch | [GPT-J](../../models_v2/pytorch/gptj/inference/cpu/CONTAINER.md) | FP32,BF16,FP16,INT8-FP32 | Inference | LAMBADA |
-| PyTorch | [Llama 2](../../models_v2/pytorch/llama/inference/cpu/CONTAINER.md) 7B,13B | FP32,BF16,FP16,INT8-FP32 | Inference | LAMBADA |
+| PyTorch | [GPT-J](../../models_v2/pytorch/gptj/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,FP16,INT8-FP32 | Inference | LAMBADA |
+| PyTorch | [Llama 2](../../models_v2/pytorch/llama/inference/cpu/CONTAINER.md) 7B,13B | FP32,BF32,BF16,FP16,INT8-FP32 | Inference | LAMBADA |
+| PyTorch | [Llama 2](../../models_v2/pytorch/llama/training/cpu/CONTAINER.md) 7B | FP32,BF32,BF16,FP16 | Training | LAMBADA | 
+| PyTorch | [ChatGLM](../../models_v2/pytorch/chatglm/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,FP16,INT8-FP32 | Inference | LAMBADA | 
+| PyTorch | [LCM](../../models_v2/pytorch/LCM/inference/cpu/CONTAINER.md) |  FP32,BF32,BF16,FP16,INT8-FP32,INT8-BF16 | Inference | COCO 2017 |
+| PyTorch | [Stable Diffusion](../../models_v2/pytorch/stable_diffusion/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,FP16,INT8-FP32,INT8-BF16 | Inference | COCO 2017 |
+
 ### Image Recognition
 
 | Framework | Model                                                  | Precisions | Mode |  Dataset |
 | --------| ------------------------------------------------------ | ---------- | ------| --------------------- |
 | PyTorch | [ResNet 50](../../models_v2/pytorch/resnet50/training/cpu/CONTAINER.md) | FP32,BF32,BF16 | Training | ImageNet 2012 |
 | PyTorch | [ResNet 50](../../models_v2/pytorch/resnet50/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,INT8 | Inference | ImageNet 2012 |
+| PyTorch | [Vision Transformer](../../models_v2/pytorch/vit/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,INT8-FP32,INT8-BF16 | Inference | ImageNet 2012 |
 | TensorFlow | [MobileNet V1*](../../quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/README_DEV_CAT.md) | FP32,BF32,FP16,INT8 | Inference | ImageNet 2012 |
 
 ## Image Segmentation
@@ -35,6 +41,7 @@ The tables below link to documentation on how to run each use case using docker 
 | PyTorch |[Mask R-CNN](../../models_v2/pytorch/maskrcnn/inference/cpu/CONTAINER.md) | FP32,BF32,BF16 | Inference | COCO 2017 |
 | PyTorch |[SSD-ResNet34](../../models_v2/pytorch/ssd-resnet34/training/cpu/CONTAINER.md) | FP32,BF32,BF16 | Training | COCO 2017 |
 | PyTorch |[SSD-ResNet34](../../models_v2/pytorch/ssd-resnet34/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,INT8 | Inference | COCO 2017 |
+| PyTorch |[YOLO v7](../../models_v2/pytorch/yolov7/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,FP16,INT8 | Inference | COCO 2017 |
 | TensorFlow | [SSD-ResNet34](../../quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/README_DEV_CAT.md) | FP32,BF32,BF16 |Training | COCO 2017 |
 | TensorFlow | [SSD-ResNet34](../../quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/README_DEV_CAT.md) | FP32,BF16,INT8 |Inference | COCO 2017  |
 | TensorFlow | [SSD-MobileNet*](../../quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/README_DEV_CAT.md) | FP32,BF32,BF16,INT8 | Inference | COCO 2017 |
@@ -43,7 +50,7 @@ The tables below link to documentation on how to run each use case using docker 
 
 | Framework | Model                                                  | Precisions | Mode |  Dataset |
 | --------| ------------------------------------------------------ | ---------- | ------| --------------------- |
-| PyTorch | [BERT large](../../models_v2/pytorch/bert_large/training/cpu/CONTAINER.md) | FP32,BF32,BF16 | Training | Preprocessed Text dataset |
+| PyTorch | [BERT large](../../models_v2/pytorch/bert_large/training/cpu/CONTAINER.md) | FP32,BF32,BF16,FP16 | Training | Preprocessed Text dataset |
 | PyTorch |[BERT large](../../models_v2/pytorch/bert_large/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,INT8 | Inference | SQuAD1.0 |
 | PyTorch | [RNN-T](../../models_v2/pytorch/rnnt/training/cpu/CONTAINER.md) | FP32,BF32,BF16,INT8 | Inference | LibriSpeech |
 | PyTorch |[RNN-T](../../models_v2/pytorch/rnnt/inference/cpu/CONTAINER.md) | FP32,BF32,FP16 | Training | LibriSpeech |
