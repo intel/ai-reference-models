@@ -42,6 +42,7 @@ export OUTPUT_DIR=<path to output directory>
 export PRECISION=<provide either fp32, int8-fp32, bf16, fp16, or bf32>
 export INPUT_TOKEN=<provide input token>
 export OUTPUT_TOKEN=<provide output token>
+export TEST_MODE=<provide REALTIME,THROUGHPUT or ACCURACY>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/generative-ai:pytorch-cpu-gptj-inference
@@ -53,6 +54,7 @@ docker run \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env INPUT_TOKEN=${INPUT_TOKEN} \
   --env OUTPUT_TOKEN=${OUTPUT_TOKEN} \
+  --env TEST_MODE=${TEST_MODE} \
   --env TORCH_INDUCTOR=${TORCH_INDUCTOR} \
   --env DNNL_MAX_CPU_ISA=${DNNL_MAX_CPU_ISA} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
