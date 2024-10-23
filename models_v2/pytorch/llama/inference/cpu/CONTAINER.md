@@ -8,33 +8,22 @@ This document provides instructions for running Llama2 7B and Llama2 13B inferen
 ```bash
 docker pull intel/generative-ai:pytorch-cpu-llama2-inference
 ```
-## Quick Start Scripts
-
-# Quick Start Scripts
-
-|  DataType   | Throughput  |  Latency    |   Accuracy  |
-| ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash run_multi_instance_throughput.sh fp32 | bash run_multi_instance_realtime.sh fp32 | bash run_accuracy.sh fp32 |
-| BF32        | bash run_multi_instance_throughput.sh bf32 | bash run_multi_instance_realtime.sh bf32 | bash run_accuracy.sh bf32 |
-| BF16        | bash run_multi_instance_throughput.sh bf16 | bash run_multi_instance_realtime.sh bf16 | bash run_accuracy.sh bf16 |
-| FP16        | bash run_multi_instance_throughput.sh fp16 | bash run_multi_instance_realtime.sh fp16 | bash run_accuracy.sh fp16 |
-| INT8-FP32        | bash run_multi_instance_throughput.sh int8-fp32 | bash run_multi_instance_realtime.sh int8-fp32 | bash run_accuracy.sh int8-fp32 |
-| INT8-BF16       | bash run_multi_instance_throughput.sh int8-bf16 | bash run_multi_instance_realtime.sh int8-bf16 | bash run_accuracy.sh int8-bf16 |
-
-> [!NOTE]
-> The container has been performance validated on fp32,bf16,fp16 and int8-fp32 precisions,`TORCH_INDUCTOR=0`, input tokens 1024 and 2016 and output tokens 128 and 32.
 
 * Set ENV for fp16 to leverage AMX if you are using a supported platform.
 
 ```bash
 export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
+
 * Set ENV for int8/bf32 to leverage VNNI if you are using a supported platform.
+
 ```bash
 export DNNL_MAX_CPU_ISA=AVX2_VNNI_2
 ```
+
 ## Docker Run
 (Optional) Export related proxy into docker environment.
+
 ```bash
 export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e FTP_PROXY=${FTP_PROXY} -e http_proxy=${http_proxy} \
@@ -43,6 +32,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
+
 > [!NOTE]
 > To run Llama2 7b and/or Llama2 13b inference tests, you will need to apply for access in the pages with your huggingface account:
 
@@ -50,22 +40,24 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
     
     - LLaMA2 13B : https://huggingface.co/meta-llama/Llama-2-13b-hf
 
-To run Llama2 7B and Llama2 13B Inference inference, set environment variables to specify the precision and an output directory. For workloads with int8 precision, an additional quantization step is required before inference. The following commands are provided as an example to run `int8-fp32` realtime inference. 
+To run Llama2 7B and Llama2 13B Inference inference, set environment variables to specify the precision and an output directory.
+
 ```bash
 ##Optional
 export BATCH_SIZE=<provide batch size, otherwise (default: 1)>
-export TORCH_INDUCTOR=<provide either 0 or 1, otherwise (default:0)>
+export TORCH_INDUCTOR=0
 export FINETUNED_MODEL=<provide either meta-llama/Llama-2-7b-hf or meta-llama/Llama-2-13b-hf, otherwise (default:meta-llama/Llama-2-7b-hf)>
 ##Required
 export OUTPUT_DIR=<path to output directory>
 export PRECISION=<provide either fp32, int8-fp32, int8-fp16, bf16, fp16, or bf32>
 export INPUT_TOKEN=<provide input token>
 export OUTPUT_TOKEN=<provide output token>
+export TEST_MODE=<provide REALTIME,THROUGHPUT or ACCURACY>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/generative-ai:pytorch-cpu-llama2-inference
-TOKEN=<provide hugging face token">
-SCRIPT="huggingface-cli login --token ${TOKEN} && ./quickstart/do_quantization.sh calibration sq && ./quickstart/run_multi_instance_realtime.sh int8-fp32"
+TOKEN=<provide hugging face token>
+SCRIPT="huggingface-cli login --token ${TOKEN} && ./run_model.sh"
 
 docker run \
   --cap-add 'SYS_NICE' \
@@ -74,7 +66,8 @@ docker run \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env INPUT_TOKEN=${INPUT_TOKEN} \
   --env OUTPUT_TOKEN=${OUTPUT_TOKEN} \
-  --env FINETUNED_MODEL=${FINETUNED_MODEL}
+  --env TEST_MODE=${TEST_MODE} \
+  --env FINETUNED_MODEL=${FINETUNED_MODEL} \
   --env TORCH_INDUCTOR=${TORCH_INDUCTOR} \
   --env DNNL_MAX_CPU_ISA=${DNNL_MAX_CPU_ISA} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
@@ -83,22 +76,22 @@ docker run \
   $IMAGE_NAME \
   sh -c "$SCRIPT"
 ```
+
 > [!NOTE]
-> The throughput and realtime tests are offloaded on two sockets as two instances and the results are averaged. Hence, the results reflect single-socket performance.
+> The container has been performance validated on fp32,bf16,fp16 and int8-fp32 precisions,`TORCH_INDUCTOR=0`, input tokens 1024 and 2016 and output tokens 128 and 32.
 
 ## Documentation and Sources
 #### Get Started​
 [Docker* Repository](https://hub.docker.com/r/intel/generative-ai)
 
-
 [Main GitHub*](https://github.com/IntelAI/models)
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/quickstart/quickstart/language_modeling/pytorch/llama/inference/cpu/CONTAINER.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/models_v2/pytorch/llama/inference/cpu/CONTAINER.md)
 
 #### Code Sources
-[Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pyt-cpu)
+[Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pytorch)
 
 [Report Issue](https://community.intel.com/t5/Intel-Optimized-AI-Frameworks/bd-p/optimized-ai-frameworks)
 

@@ -20,6 +20,8 @@ ARGS=""
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 
+FINETUNED_MODEL=${FINETUNED_MODEL:-"meta-llama/Llama-2-7b-hf"}
+
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     echo "Running Multi-instance Throughput Inference"
     if [[ "${PRECISION}" == "bf16" ]]; then
@@ -68,7 +70,8 @@ fi
 mkdir -p ${OUTPUT_DIR}
 
 if [[ "${PRECISION}" == "int8-fp32" ]] || [[ "${PRECISION}" == "int8-fp16"  ]]; then
-    if [ ! -f "${OUTPUT_DIR}/qconfig.json" ]; then
+    MODEL_HF=$(echo ${FINETUNED_MODEL} | cut -d'/' -f2 | tr -d "'")
+    if [ ! -f "${OUTPUT_DIR}/${MODEL_HF}-qconfig.json" ]; then
     echo "Performing quantization"
     ./do_quantization.sh calibration sq
     fi
@@ -100,21 +103,18 @@ then
 elif [[ "${PRECISION}" == "int8-fp32" ]]
 then
     precision="int8-fp32"
-    ARGS="$ARGS --dtype int8 --int8-qconfig   ${OUTPUT_DIR}/qconfig.json"
+    ARGS="$ARGS --dtype int8 --int8-qconfig   ${OUTPUT_DIR}/${MODEL_HF}-qconfig.json"
     echo "### running int8-fp32 mode"
 elif [[ "${PRECISION}" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --dtype int8 --int8_bf16_mixed --int8-qconfig ${OUTPUT_DIR}/qconfig.json"
+    ARGS="$ARGS --dtype int8 --int8_bf16_mixed --int8-qconfig ${OUTPUT_DIR}/${MODEL_HF}-qconfig.json"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
     echo "Supported precisions are: fp32, bf32, bf16, fp16, int8-fp32, int8-bf16"
     exit 1
 fi
-
-
-FINETUNED_MODEL=${FINETUNED_MODEL:-"meta-llama/Llama-2-7b-hf"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
@@ -238,6 +238,7 @@ if [[ "$TEST_MODE" != "ACCURACY" ]]; then
     }
     '))
 
+    rm -rf ${OUTPUT_DIR}/summary.log 
     echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
     echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"total-latency";${PRECISION};${BATCH_SIZE}; ${latency} " |tee -a ${OUTPUT_DIR}/summary.log
     echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"first-token-latency";${PRECISION};${BATCH_SIZE}; ${first_latency} " |tee -a ${OUTPUT_DIR}/summary.log
@@ -249,7 +250,7 @@ if [[ "$TEST_MODE" != "ACCURACY" ]]; then
     first_token_latency=$( grep "first-token-latency;" ${OUTPUT_DIR}/summary.log | awk '{print $NF}' )
     rest_token_latency=$( grep ";rest-token-latency;" ${OUTPUT_DIR}/summary.log | awk '{print $NF}' )
 
-    ## Single-socket throughput calculation
+    ## Single instance throughput calculation
     first_token_throughput=$( echo "(1/$first_token_latency)*${BATCH_SIZE}" | bc -l )
     rest_token_throughput=$( echo "(1/$rest_token_latency)*${BATCH_SIZE}" | bc -l )
     accuracy="N/A"
