@@ -13,10 +13,10 @@
 # limitations under the License.
 # ============================================================================
 
-ARG BASE_IMAGE="intel/intel-optimized-pytorch"
-ARG BASE_TAG="centos-pt2.3-py310"
+ARG BASE_IMAGE
+ARG BASE_TAG
 
-FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-extension-for-pytorch
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 SHELL ["/bin/bash", "-c"]
 
@@ -26,24 +26,24 @@ WORKDIR /workspace/pytorch-llama-inference
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    gcc \
-    cmake \
-    build-essential \
-    ca-certificates \
-    git \
-    wget \
-    make \
-    cmake \
-    curl \
-    autoconf \ 
-    bzip2 \
-    tar \
-    unzip \
-    bc
+        gcc \
+        cmake \
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        curl \
+        autoconf \ 
+        bzip2 \
+        tar \
+        unzip \
+        bc
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
-    git checkout c8209150f9d219a137412b06431c9d52839c7272 && \
+    git checkout 5.2.1 && \
     ./autogen.sh && \
     ./configure --prefix=/workspace/lib/jemalloc && \
     make && \ 
@@ -61,7 +61,8 @@ RUN pip install packaging \
         datasets \
         sentencepiece \
         psutil \
-        accelerate
+        accelerate \
+        protobuf
 
 RUN pip install -U "huggingface_hub[cli]"
 
@@ -82,12 +83,8 @@ RUN git clone https://github.com/huggingface/transformers.git && \
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
-    numactl \
-    libegl1-mesa 
-
-RUN python -m pip install --no-cache-dir --upgrade pip Pillow==10.3.0 \
-        jinja2==3.1.4 \
-        setuptools==65.5.1
+        numactl \
+        libegl1-mesa 
 
 RUN rm -rf gperftools-2.7.90* jemalloc 
 

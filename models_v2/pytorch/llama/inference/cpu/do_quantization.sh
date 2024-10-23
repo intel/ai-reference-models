@@ -19,6 +19,9 @@
 
 ARGS=""
 
+FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
+MODEL_HF=$(echo ${FINETUNED_MODEL} | cut -d'/' -f2 | tr -d "'")
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 #export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 if [ -z "${OUTPUT_DIR}" ]; then
@@ -33,7 +36,7 @@ echo "### running with intel extension for pytorch"
 if [[ "$1" == "calibration" ]]
 then
     precision="calibration"
-    ARGS="$ARGS --dtype 'int8' --do-calibration --int8-qconfig '${OUTPUT_DIR}/qconfig.json' "
+    ARGS="$ARGS --dtype 'int8' --do-calibration --int8-qconfig '${OUTPUT_DIR}/${MODEL_HF}-qconfig.json' "
     echo "### running calibration to get qconfig"
 else
     echo "The specified precision '$1' is unsupported."
@@ -75,8 +78,6 @@ mode="jit"
 ARGS="$ARGS --jit --profile"
 echo "### running with jit mode"
 
-
-FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}

@@ -1,6 +1,6 @@
 fp32-t1-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -15,7 +15,7 @@ fp32-t1-realtime-inference:
       dst: /tmp
 fp16-t1-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -25,12 +25,13 @@ fp16-t1-realtime-inference:
     TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
 bf16-t1-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -45,7 +46,7 @@ bf16-t1-realtime-inference:
       dst: /tmp
 int8-fp32-t1-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
@@ -58,9 +59,24 @@ int8-fp32-t1-realtime-inference:
   volumes:
     - src: /tmp
       dst: /tmp
+bf32-t1-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: 'REALTIME'
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+  volumes:
+    - src: /tmp
+      dst: /tmp
 fp32-t1-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -76,7 +92,7 @@ fp32-t1-throughput-inference:
       dst: /tmp
 bf16-t1-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -86,13 +102,13 @@ bf16-t1-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '24'
   volumes:
     - src: /tmp
       dst: /tmp
 fp16-t1-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -102,13 +118,14 @@ fp16-t1-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
-    BATCH_SIZE: '4'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+    BATCH_SIZE: '24'
   volumes:
     - src: /tmp
       dst: /tmp
 int8-fp32-t1-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
@@ -118,13 +135,29 @@ int8-fp32-t1-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '24'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf32-t1-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: "THROUGHPUT"
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    BATCH_SIZE: '24'
   volumes:
     - src: /tmp
       dst: /tmp
 fp32-t2-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -139,7 +172,7 @@ fp32-t2-realtime-inference:
       dst: /tmp
 fp16-t2-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -149,12 +182,13 @@ fp16-t2-realtime-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: 'REALTIME'
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
 bf16-t2-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -169,7 +203,7 @@ bf16-t2-realtime-inference:
       dst: /tmp
 int8-fp32-t2-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
@@ -182,9 +216,24 @@ int8-fp32-t2-realtime-inference:
   volumes:
     - src: /tmp
       dst: /tmp
+bf32-t2-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: 'REALTIME'
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+  volumes:
+    - src: /tmp
+      dst: /tmp
 fp32-t2-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -200,7 +249,7 @@ fp32-t2-throughput-inference:
       dst: /tmp
 bf16-t2-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -210,13 +259,13 @@ bf16-t2-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '8'
   volumes:
     - src: /tmp
       dst: /tmp
 fp16-t2-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -226,13 +275,14 @@ fp16-t2-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
-    BATCH_SIZE: '4'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+    BATCH_SIZE: '8'
   volumes:
     - src: /tmp
       dst: /tmp
 int8-fp32-t2-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
@@ -242,13 +292,29 @@ int8-fp32-t2-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '8'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf32-t2-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: "THROUGHPUT"
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    BATCH_SIZE: '8'
   volumes:
     - src: /tmp
       dst: /tmp
 fp32-t3-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -263,7 +329,7 @@ fp32-t3-realtime-inference:
       dst: /tmp
 fp16-t3-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -273,12 +339,13 @@ fp16-t3-realtime-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: 'REALTIME'
     FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
 bf16-t3-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -293,7 +360,7 @@ bf16-t3-realtime-inference:
       dst: /tmp
 int8-fp32-t3-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
@@ -306,9 +373,24 @@ int8-fp32-t3-realtime-inference:
   volumes:
     - src: /tmp
       dst: /tmp
+bf32-t3-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: 'REALTIME'
+    FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
+  volumes:
+    - src: /tmp
+      dst: /tmp
 fp32-t3-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -324,7 +406,7 @@ fp32-t3-throughput-inference:
       dst: /tmp
 bf16-t3-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -334,13 +416,13 @@ bf16-t3-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '24'
   volumes:
     - src: /tmp
       dst: /tmp
 fp16-t3-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -350,13 +432,14 @@ fp16-t3-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '24'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
 int8-fp32-t3-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
@@ -366,13 +449,29 @@ int8-fp32-t3-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '24'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf32-t3-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: "THROUGHPUT"
+    FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
+    BATCH_SIZE: '24'
   volumes:
     - src: /tmp
       dst: /tmp
 fp32-t4-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -387,7 +486,7 @@ fp32-t4-realtime-inference:
       dst: /tmp
 fp16-t4-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -397,12 +496,13 @@ fp16-t4-realtime-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: 'REALTIME'
     FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
 bf16-t4-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -417,7 +517,7 @@ bf16-t4-realtime-inference:
       dst: /tmp
 int8-fp32-t4-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
@@ -430,9 +530,24 @@ int8-fp32-t4-realtime-inference:
   volumes:
     - src: /tmp
       dst: /tmp
+bf32-t4-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: 'REALTIME'
+    FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
+  volumes:
+    - src: /tmp
+      dst: /tmp
 fp32-t4-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -448,7 +563,7 @@ fp32-t4-throughput-inference:
       dst: /tmp
 bf16-t4-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -458,13 +573,13 @@ bf16-t4-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '8'
   volumes:
     - src: /tmp
       dst: /tmp
 fp16-t4-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -474,13 +589,14 @@ fp16-t4-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '8'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
 int8-fp32-t4-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
@@ -490,13 +606,29 @@ int8-fp32-t4-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
-    BATCH_SIZE: '4'
+    BATCH_SIZE: '8'
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf32-t4-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '2016'
+    OUTPUT_TOKEN: '32'
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: "THROUGHPUT"
+    FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
+    BATCH_SIZE: '8'
   volumes:
     - src: /tmp
       dst: /tmp
 fp32-t1-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -509,7 +641,7 @@ fp32-t1-accuracy-inference:
       dst: /tmp
 bf16-t1-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -522,7 +654,7 @@ bf16-t1-accuracy-inference:
       dst: /tmp
 fp16-t1-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -530,12 +662,13 @@ fp16-t1-accuracy-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: 'ACCURACY'
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
 int8-fp32-t1-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
@@ -546,9 +679,22 @@ int8-fp32-t1-accuracy-inference:
   volumes:
     - src: /tmp
       dst: /tmp
+bf32-t1-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: 'ACCURACY'
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+  volumes:
+    - src: /tmp
+      dst: /tmp
 fp32-t3-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
@@ -561,7 +707,7 @@ fp32-t3-accuracy-inference:
       dst: /tmp
 bf16-t3-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh bf16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
@@ -574,7 +720,7 @@ bf16-t3-accuracy-inference:
       dst: /tmp
 fp16-t3-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh fp16"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
@@ -582,15 +728,29 @@ fp16-t3-accuracy-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: 'ACCURACY'
     FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
 int8-fp32-t3-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
-  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh int8-fp32"
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: 'ACCURACY'
+    FINETUNED_MODEL: meta-llama/Llama-2-13b-hf
+  volumes:
+    - src: /tmp
+      dst: /tmp
+bf32-t3-accuracy-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
     OUTPUT_DIR: /tmp
     TORCH_INDUCTOR: '0'
     TEST_MODE: 'ACCURACY'
