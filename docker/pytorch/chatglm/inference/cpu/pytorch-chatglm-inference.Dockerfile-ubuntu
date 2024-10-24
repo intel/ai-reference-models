@@ -1,0 +1,87 @@
+# Copyright (c) 2024 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============================================================================
+
+ARG BASE_IMAGE
+ARG BASE_TAG
+
+FROM ${BASE_IMAGE}:${BASE_TAG}
+
+WORKDIR /workspace/pytorch-chatglm-inference
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+        gcc \
+        cmake \
+        build-essential \
+        ca-certificates \
+        git \
+        wget \
+        make \
+        cmake \
+        curl \
+        autoconf \ 
+        bzip2 \
+        tar \
+        unzip \
+        bc \
+        python3-dev
+
+RUN git clone https://github.com/jemalloc/jemalloc.git && \
+    cd jemalloc && \
+    git checkout 5.2.1 && \
+    ./autogen.sh && \
+    ./configure --prefix=/workspace/lib/jemalloc && \
+    make && \ 
+    make install
+
+RUN wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz && \
+    tar -xzf gperftools-2.7.90.tar.gz && \
+    cd gperftools-2.7.90 && \
+    ./configure --prefix=/workspace/lib/tcmalloc && \
+    make && \
+    make install
+
+RUN python -m pip install packaging \
+    intel-openmp \
+    accelerate \
+    datasets \
+    sentencepiece
+
+ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
+
+COPY models_v2/pytorch/chatglm/inference/cpu .
+COPY models_v2/common/enable_ipex_for_transformers.diff .
+
+RUN python -m pip install datasets \
+        cpm-kernels && \
+        bash prepare.sh
+
+RUN git clone https://github.com/huggingface/transformers.git && \
+    cd transformers && \
+    git checkout v4.38.1 && \
+    git apply /workspace/pytorch-chatglm-inference/enable_ipex_for_transformers.diff && \
+    pip install -e ./
+
+RUN wget https://intel-extension-for-pytorch.s3.amazonaws.com/miscellaneous/llm/prompt.json
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y \
+        numactl \
+        libegl1-mesa 
+
+RUN rm -rf gperftools-2.7.90* jemalloc 
+
+COPY LICENSE licenses/LICENSE
+COPY third_party licenses/third_party

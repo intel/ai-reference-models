@@ -1,12 +1,12 @@
-# Running YOLOv7 Inference using Intel® Extension for PyTorch*
+# Running ChatGLM v3 6B Inference using Intel® Extension for PyTorch*
 
 ## Description 
-This document provides instructions for running YOLOv7 inference using Intel® Extension for PyTorch on Intel® Xeon® Scalable Processors. 
+This document provides instructions for running ChatGLM v3 GB inference using Intel® Extension for PyTorch on Intel® Xeon® Scalable Processors. 
 
 ## Pull Command
 
 ```bash
-docker pull intel/object-detection:pytorch-cpu-yolov7-inference
+docker pull intel/generative-ai:pytorch-cpu-chatglm-inference
 ```
 
 * Set ENV for fp16 to leverage AMX if you are using a supported platform.
@@ -15,12 +15,14 @@ docker pull intel/object-detection:pytorch-cpu-yolov7-inference
 export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
 * Set ENV for int8/bf32 to leverage VNNI if you are using a supported platform.
+
 ```bash
 export DNNL_MAX_CPU_ISA=AVX2_VNNI_2
 ```
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
+
 ```bash
 export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e FTP_PROXY=${FTP_PROXY} -e http_proxy=${http_proxy} \
@@ -29,22 +31,22 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
-To run YOLOv7 inference, set environment variables to specify the precision and an output directory. Refer to instructions [here](./README.md#prepare-dataset) and [here](./README.md#download-pretrained-model) to download datasets and pre-trained models.
+To run ChatGLM inference, set environment variables to specify the precision and an output directory.
 
 ```bash
 ##Optional
-export BATCH_SIZE=<provide batch size for throughput inference, otherwise (default: 40)>
+export BATCH_SIZE=<provide batch size for throughput inference, otherwise (default: 1)>
 ##Required
 export OUTPUT_DIR=<path to output directory>
-export PRECISION=<provide either fp32, int8, bf16, fp16, or bf32>
+export PRECISION=<provide either fp32, int8-fp32, bf16, fp16, or bf32>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
-export DATASET_DIR=<path to COCO dataset>
-export CHECKPOINT_DIR=<path to yolov7 pre-trained model>
+export INPUT_TOKEN=<provide input token length>
+export OUTPUT_TOKEN=<provide output token length>
 export TORCH_INDUCTOR=0
-export TEST_MODE=<provide either REALTIME, THROUGHPUT or ACCURACY mode>
+export TEST_MODE=<provide either REALTIME, THROUGHPUT or ACCURACY>
 
 DOCKER_ARGS="--rm -it"
-IMAGE_NAME=intel/object-detection:pytorch-cpu-yolov7-inference
+IMAGE_NAME=intel/generative-ai:pytorch-cpu-chatglm-inference
 
 docker run \
   --cap-add SYS_NICE \
@@ -53,12 +55,10 @@ docker run \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env TORCH_INDUCTOR=${TORCH_INDUCTOR} \
-  --env DATASET_DIR=${DATASET_DIR} \
-  --env CHECKPOINT_DIR=${CHECKPOINT_DIR}
   --env DNNL_MAX_CPU_ISA=${DNNL_MAX_CPU_ISA} \
+  --env INPUT_TOKEN=${INPUT_TOKEN} \
+  --env OUTPUT_TOKEN=${OUTPUT_TOKEN} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
   ${DOCKER_RUN_ENVS} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
@@ -66,18 +66,18 @@ docker run \
 ```
 
 > [!NOTE]
-> The workload container was validated for `TORCH_INDUCTOR=0`. 
+> The workload container was validated for `TORCH_INDUCTOR=0`.
 
 ## Documentation and Sources
 #### Get Started​
-[Docker* Repository](https://hub.docker.com/r/intel/object-detection)
+[Docker* Repository](https://hub.docker.com/r/intel/generative-ai)
 
 
 [Main GitHub*](https://github.com/IntelAI/models)
 
 [Release Notes](https://github.com/IntelAI/models/releases)
 
-[Get Started Guide](https://github.com/IntelAI/models/blob/master/models_v2/pytorch/yolov7/inference/cpu/CONTAINER.md)
+[Get Started Guide](https://github.com/IntelAI/models/blob/master/models_v2/pytorch/chatglm/inference/cpu/CONTAINER.md)
 
 #### Code Sources
 [Dockerfile](https://github.com/IntelAI/models/tree/master/docker/pytorch)
