@@ -19,7 +19,7 @@
 ARGS=${ARGS:-""}
 ARGS_IPEX=${ARGS_IPEX:-""}
 
-
+MODEL_DIR=${MODEL_DIR-$PWD}
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 
 if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
@@ -40,6 +40,13 @@ elif [[ "${TEST_MODE}" == "REALTIME" ]]; then
 else
     echo "Please set TEST_MODE to THROUGHPUT, ACCURACY, OR REALTIME"
     exit 1
+fi
+
+if [[ "$PRECISION" == "int8-fp32" ]] || [[ "$PRECISION" == "int8-fp16"  ]]; then
+    if [ ! -f "${OUTPUT_DIR}/qconfig-chatglm.json" ]; then
+    echo "Performing quantization"
+    ./do_quantization.sh calibration sq
+    fi
 fi
 
 if [[ "${PRECISION}" == "fp32" ]]
@@ -63,11 +70,11 @@ then
     echo "### running bf32 mode"
 elif [[ "${PRECISION}" == "int8-fp32" ]]
 then
-    ARGS="$ARGS --dtype 'int8' --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype 'int8' --int8-qconfig '${OUTPUT_DIR}/qconfig-chatglm.json'"
     echo "### running int8-fp32 mode"
 elif [[ "${PRECISION}" == "int8-bf16" ]]
 then
-    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
+    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --int8-qconfig '${OUTPUT_DIR}/qconfig-chatglm.json'"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '${PRECISION}' is unsupported."

@@ -32,7 +32,7 @@ echo "### running with intel extension for pytorch"
 if [[ "$1" == "calibration" ]]
 then
     precision="calibration"
-    ARGS="$ARGS --dtype 'int8' --do-calibration --int8-qconfig '${OUTPUT_DIR}/qconfig.json' "
+    ARGS="$ARGS --dtype 'int8' --do-calibration --int8-qconfig '${OUTPUT_DIR}/qconfig-chatglm.json' "
     echo "### running calibration to get qconfig"
 else
     echo "The specified precision '$1' is unsupported."
@@ -85,4 +85,3 @@ rm -rf ${OUTPUT_DIR}/latency_log*
 python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
   ${EVAL_SCRIPT} $ARGS \
   --model-name-or-path   ${FINETUNED_MODEL} \
-
