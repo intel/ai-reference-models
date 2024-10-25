@@ -108,7 +108,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     rm -rf ${OUTPUT_DIR}/yolov7_latency_log*
     BATCH_SIZE=${BATCH_SIZE:-1}
-    ARGS="--checkpoint-dir $CHECKPOINT_DIR --weights yolov7.pt"
+    ARGS="--checkpoint-dir $CHECKPOINT_DIR --weights yolov7.pt --weight-sharing"
     ARGS="$ARGS --img 640 -e --performance --data data/coco.yaml --dataset-dir $DATASET_DIR --conf-thres 0.001 --iou 0.65 --device cpu --drop-last"
     CORES=`lscpu | grep Core | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -120,6 +120,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     export KMP_AFFINITY=granularity=fine,compact,1,0
     export OMP_NUM_THREADS=$CORES_PER_INSTANCE
     NUMBER_INSTANCE=`expr $CORES_PER_NUMA / $CORES_PER_INSTANCE`
+    ARGS="$ARGS --number-instance $NUMBER_INSTANCE"
     MODE_ARGS="$MODE_ARGS --ninstances $NUMAS --latency-mode"
 
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
