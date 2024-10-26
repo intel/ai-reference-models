@@ -104,7 +104,11 @@ if [[ "${TEST_MODE}" == "THROUGHPUT" || "${TEST_MODE}" == "REALTIME" ]]; then
     ARGS="$ARGS --max-new-tokens ${OUTPUT_TOKEN} --input-tokens ${INPUT_TOKEN} --batch-size ${BATCH_SIZE}"
     ARGS_IPEX="$ARGS_IPEX --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
 else
-    ARGS_IPEX="$ARGS_IPEX --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
+    if [[ "0" == ${TORCH_INDUCTOR} ]];then
+        ARGS_IPEX="$ARGS_IPEX --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
+    else
+        ARGS_IPEX="$ARGS_IPEX --node-id 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
+    fi
 fi
 
 EVAL_SCRIPT=${MODEL_DIR}/run_llm.py

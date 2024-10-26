@@ -131,8 +131,8 @@ if [[ "${TEST_MODE}" == "REALTIME" ]]; then
     else
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
-        ARGS="$ARGS --use_share_weight --total_cores ${CORES_PER_NUMA} --cores_per_instance ${OMP_NUM_THREADS}"
-        python -m torch.backends.xeon.run_cpu --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
+        # ARGS="$ARGS --use_share_weight --total_cores ${CORES_PER_NUMA} --cores_per_instance ${OMP_NUM_THREADS}"
+        python -m torch.backends.xeon.run_cpu --disable-numactl --latency-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             --model_name_or_path   ${FINETUNED_MODEL} \
@@ -162,7 +162,7 @@ elif [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     else
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
-        python -m torch.backends.xeon.run_cpu --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             --model_name_or_path   ${FINETUNED_MODEL} \
@@ -194,7 +194,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
         BATCH_SIZE=${BATCH_SIZE:-1}
-        python -m torch.backends.xeon.run_cpu --ninstances 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --ninstances 1 --node-id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             --model_name_or_path   ${FINETUNED_MODEL} \

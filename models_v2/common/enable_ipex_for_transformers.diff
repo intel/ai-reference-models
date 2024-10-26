@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index 999752485..43cbe7624 100644
+index 999752485..5469c2d95 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -43,7 +43,7 @@ index 999752485..43cbe7624 100644
  try:
      from torch.utils.tensorboard import SummaryWriter
  except ImportError:
-@@ -265,6 +290,217 @@ def train(args, train_dataset, model, tokenizer):
+@@ -265,10 +290,222 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -261,7 +261,12 @@ index 999752485..43cbe7624 100644
  
  def evaluate(args, model, tokenizer, prefix=""):
      dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
-@@ -278,6 +514,8 @@ def evaluate(args, model, tokenizer, prefix=""):
+ 
++    args.output_dir = args.output_dir + "/" + str(threading.get_ident())
+     if not os.path.exists(args.output_dir) and args.local_rank in [-1, 0]:
+         os.makedirs(args.output_dir)
+ 
+@@ -278,6 +515,8 @@ def evaluate(args, model, tokenizer, prefix=""):
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
  
@@ -270,7 +275,7 @@ index 999752485..43cbe7624 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -286,12 +524,63 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -286,12 +525,63 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
@@ -335,7 +340,7 @@ index 999752485..43cbe7624 100644
          batch = tuple(t.to(args.device) for t in batch)
  
          with torch.no_grad():
-@@ -314,13 +603,20 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -314,13 +604,20 @@ def evaluate(args, model, tokenizer, prefix=""):
                      inputs.update(
                          {"langs": (torch.ones(batch[0].shape, dtype=torch.int64) * args.lang_id).to(args.device)}
                      )
@@ -358,7 +363,7 @@ index 999752485..43cbe7624 100644
  
              # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
              # models only use two.
-@@ -671,7 +967,68 @@ def main():
+@@ -671,7 +968,69 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -415,6 +420,7 @@ index 999752485..43cbe7624 100644
 +    parser.add_argument('--profile', action='store_true', default=False,
 +                        help='profile')
      args = parser.parse_args()
++    args.output_dir = args.output_dir + '/' + str(os.getpid())
 +    if args.ipex:
 +        import intel_extension_for_pytorch as ipex
 +        from intel_extension_for_pytorch.quantization.fp8 import (
@@ -427,7 +433,7 @@ index 999752485..43cbe7624 100644
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
          logger.warning(
-@@ -718,6 +1075,7 @@ def main():
+@@ -718,6 +1077,7 @@ def main():
          datefmt="%m/%d/%Y %H:%M:%S",
          level=logging.INFO if args.local_rank in [-1, 0] else logging.WARN,
      )
@@ -435,7 +441,7 @@ index 999752485..43cbe7624 100644
      logger.warning(
          "Process rank: %s, device: %s, n_gpu: %s, distributed training: %s, 16-bits training: %s",
          args.local_rank,
-@@ -742,11 +1100,13 @@ def main():
+@@ -742,11 +1102,13 @@ def main():
      args.model_type = args.model_type.lower()
      config = AutoConfig.from_pretrained(
          args.config_name if args.config_name else args.model_name_or_path,
@@ -449,7 +455,7 @@ index 999752485..43cbe7624 100644
          cache_dir=args.cache_dir if args.cache_dir else None,
          use_fast=False,  # SquadDataset is not compatible with Fast tokenizers which have a smarter overflow handeling
      )
-@@ -824,7 +1184,7 @@ def main():
+@@ -824,7 +1186,7 @@ def main():
          for checkpoint in checkpoints:
              # Reload the model
              global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
