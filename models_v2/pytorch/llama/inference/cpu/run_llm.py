@@ -209,6 +209,8 @@ if args.dtype == "bf16" or args.dtype == "fp32":
         from torch._inductor import config as inductor_config
 
         inductor_config.cpp_wrapper = True
+        inductor_config.max_autotune = True
+        inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
         with torch.no_grad(), torch.cpu.amp.autocast(
             enabled=amp_enabled, dtype=amp_dtype
         ):
@@ -232,6 +234,8 @@ elif args.dtype == "fp16":
         from torch._inductor import config as inductor_config
 
         inductor_config.cpp_wrapper = True
+        inductor_config.max_autotune = True
+        inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
         with torch.no_grad(), torch.cpu.amp.autocast(
             enabled=amp_enabled, dtype=amp_dtype
         ):
