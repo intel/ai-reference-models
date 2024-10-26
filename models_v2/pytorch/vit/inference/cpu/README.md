@@ -16,7 +16,7 @@ Vision Transformer inference best known configurations with Intel® Extension fo
 
 * Install Intel OpenMP
   ```
-  pip install packaging intel-openmp accelerate
+  pip install packaging intel-openmp accelerate==0.34.1
   ```
 * Set IOMP, jemalloc and tcmalloc Preload for better performance
   ```
