@@ -1,5 +1,5 @@
 fp16-t1-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -14,7 +14,7 @@ fp16-t1-realtime-inference:
     - src: /tmp
       dst: /tmp
 bf16-t1-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -28,7 +28,7 @@ bf16-t1-realtime-inference:
     - src: /tmp
       dst: /tmp
 fp32-t1-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -42,7 +42,7 @@ fp32-t1-realtime-inference:
     - src: /tmp
       dst: /tmp
 bf32-t1-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -56,7 +56,7 @@ bf32-t1-realtime-inference:
     - src: /tmp
       dst: /tmp
 int8-fp32-t1-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -70,7 +70,7 @@ int8-fp32-t1-realtime-inference:
     - src: /tmp
       dst: /tmp
 fp32-t1-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -85,7 +85,7 @@ fp32-t1-throughput-inference:
     - src: /tmp
       dst: /tmp
 bf16-t1-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -100,7 +100,7 @@ bf16-t1-throughput-inference:
     - src: /tmp
       dst: /tmp
 fp16-t1-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -116,7 +116,7 @@ fp16-t1-throughput-inference:
     - src: /tmp
       dst: /tmp
 bf32-t1-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -132,7 +132,7 @@ bf32-t1-throughput-inference:
     - src: /tmp
       dst: /tmp
 int8-fp32-t1-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -147,7 +147,7 @@ int8-fp32-t1-throughput-inference:
     - src: /tmp
       dst: /tmp
 fp32-t2-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -161,7 +161,7 @@ fp32-t2-realtime-inference:
     - src: /tmp
       dst: /tmp
 bf32-t2-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -175,7 +175,7 @@ bf32-t2-realtime-inference:
     - src: /tmp
       dst: /tmp
 fp16-t2-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -190,7 +190,7 @@ fp16-t2-realtime-inference:
     - src: /tmp
       dst: /tmp
 bf16-t2-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -204,7 +204,7 @@ bf16-t2-realtime-inference:
     - src: /tmp
       dst: /tmp
 int8-fp32-t2-realtime-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -218,7 +218,7 @@ int8-fp32-t2-realtime-inference:
     - src: /tmp
       dst: /tmp
 fp32-t2-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -233,7 +233,7 @@ fp32-t2-throughput-inference:
     - src: /tmp
       dst: /tmp
 bf32-t2-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -248,7 +248,7 @@ bf32-t2-throughput-inference:
     - src: /tmp
       dst: /tmp
 bf16-t2-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -263,7 +263,7 @@ bf16-t2-throughput-inference:
     - src: /tmp
       dst: /tmp
 fp16-t2-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -279,7 +279,7 @@ fp16-t2-throughput-inference:
     - src: /tmp
       dst: /tmp
 int8-fp32-t2-throughput-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -294,7 +294,7 @@ int8-fp32-t2-throughput-inference:
     - src: /tmp
       dst: /tmp
 fp32-accuracy-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -306,7 +306,7 @@ fp32-accuracy-inference:
     - src: /tmp
       dst: /tmp
 bf32-accuracy-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -318,7 +318,7 @@ bf32-accuracy-inference:
     - src: /tmp
       dst: /tmp
 bf16-accuracy-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -330,7 +330,7 @@ bf16-accuracy-inference:
     - src: /tmp
       dst: /tmp
 fp16-accuracy-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
@@ -343,7 +343,7 @@ fp16-accuracy-inference:
     - src: /tmp
       dst: /tmp
 int8-fp32-accuracy-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-gpt-j-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
   cmd: bash run_model.sh
   cap_add: 'SYS_NICE'
   env:
