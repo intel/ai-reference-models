@@ -137,7 +137,7 @@ if [[ "${TEST_MODE}" != "ACCURACY" ]]; then
     else
         export TORCHINDUCTOR_FREEZING=1
         echo "### running with torch.compile inductor backend"
-        python -m torch.backends.xeon.run_cpu --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             -m ${FINETUNED_MODEL} \
@@ -264,7 +264,7 @@ else
     else
         echo "### running with torch.compile inductor backend"
         export TORCHINDUCTOR_FREEZING=1
-        python -m torch.backends.xeon.run_cpu --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --node-id 0 --memory-allocator tcmalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             --model-name-or-path ${FINETUNED_MODEL}

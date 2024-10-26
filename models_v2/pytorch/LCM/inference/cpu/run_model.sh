@@ -129,7 +129,11 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
         num_iter=${num_iter-"10"}
         rm -rf ${OUTPUT_DIR}/LCM_${PRECISION}_inference_accuracy*
         rm -rf ${PRECISION}_results
-        MODE_ARGS="--ninstances 1 --nodes-list=0 "
+        if [[ "0" == ${TORCH_INDUCTOR} ]];then
+            MODE_ARGS="--ninstances 1 --nodes-list=0"
+        else
+            MODE_ARGS="--ninstances 1 --node-id=0"
+        fi
     else
         CORES=`lscpu | grep Core | awk '{print $4}'`
         SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -211,10 +215,9 @@ elif [[ "${TEST_MODE}" == "ACCURACY" && "${DISTRIBUTED}" == "false" ]]; then
             --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
             --dataset_path=${DATASET_DIR} \
             --accuracy \
-            -w ${num_warmup} -i ${num_iter} \
             $ARGS
     else
-        python -m torch.backends.xeon.run_cpu \
+        python -m torch.backends.xeon.run_cpu --disable-numactl \
             --enable_tcmalloc \
             $MODE_ARGS \
             --log_path ${OUTPUT_DIR} \
@@ -222,10 +225,11 @@ elif [[ "${TEST_MODE}" == "ACCURACY" && "${DISTRIBUTED}" == "false" ]]; then
             --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
             --dataset_path=${DATASET_DIR} \
             --accuracy \
-            -w ${num_warmup} -i ${num_iter} \
             $ARGS
     fi
-elif [[ "${TEST_MODE}" != "ACCURACY" && "${DISTRIBUTED}" == "false" ]]; then
+    # For the summary of results
+    wait
+else
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         python -m intel_extension_for_pytorch.cpu.launch \
             --memory-allocator tcmalloc \
@@ -239,7 +243,7 @@ elif [[ "${TEST_MODE}" != "ACCURACY" && "${DISTRIBUTED}" == "false" ]]; then
             -w ${num_warmup} -i ${num_iter} \
             $ARGS
     else
-        python -m torch.backends.xeon.run_cpu \
+        python -m torch.backends.xeon.run_cpu --disable-numactl \
             --enable_tcmalloc \
             $MODE_ARGS \
             --log_path ${OUTPUT_DIR} \

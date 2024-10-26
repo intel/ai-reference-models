@@ -186,7 +186,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
 else
     echo "Running yolov7 inference with torch.compile inductor backend."
     export TORCHINDUCTOR_FREEZING=1
-    python -m torch.backends.xeon.run_cpu \
+    python -m torch.backends.xeon.run_cpu --disable-numactl \
 	    --enable-jemalloc \
         $MODE_ARGS \
         --log_path=${OUTPUT_DIR} \

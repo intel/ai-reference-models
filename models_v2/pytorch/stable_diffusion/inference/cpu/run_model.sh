@@ -158,8 +158,12 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         ARGS="$ARGS --accuracy --dist-backend ccl"
     else
         LOG_PREFIX="stable_diffusion_${PRECISION}_inference_accuracy"
-        ARGS_IPEX="$ARGS_IPEX --ninstances 1 --nodes-list=0"
-        ARGS="$ARGS --accuracy -i=10"
+        if [[ "0" == ${TORCH_INDUCTOR} ]]; then
+            ARGS_IPEX="$ARGS_IPEX --ninstances 1 --nodes-list=0"
+        else
+            ARGS_IPEX="$ARGS_IPEX --ninstances 1 --node-id=0"
+        fi
+        ARGS="$ARGS --accuracy"
     fi
 else
     CORES=`lscpu | grep Core | awk '{print $4}'`
@@ -208,7 +212,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]]; then
         --dataset_path=${DATASET_DIR} \
         $ARGS
 else
-    python -m torch.backends.xeon.run_cpu \
+    python -m torch.backends.xeon.run_cpu --disable-numactl \
         --enable_tcmalloc \
         ${ARGS_IPEX} \
         --log_path=${OUTPUT_DIR} \

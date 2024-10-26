@@ -108,7 +108,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         export launcher_cmd="-m intel_extension_for_pytorch.cpu.launch --throughput-mode --memory-allocator jemalloc"
     fi
 else
-    export launcher_cmd="-m torch.backends.xeon.run_cpu --throughput-mode --memory-allocator jemalloc"
+    export launcher_cmd="-m torch.backends.xeon.run_cpu --disable-numactl --throughput-mode --enable-jemalloc"
 fi
 
 if [[ $PLOTMEM == "true" ]]; then
@@ -154,7 +154,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --ipex-optimize --jit --ipex-merged-emb-cat 2>&1 | tee $LOG
 else
     export TORCHINDUCTOR_FREEZING=1
-    if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
+    if [[ "${TEST_MODE}" != "THROUGHPUT" ]]; then
         $mrun_cmd python $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
     else
         $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
