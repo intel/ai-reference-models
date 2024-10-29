@@ -88,7 +88,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
 | **OUTPUT_TOKEN**    |   `export OUTPUT_TOKEN=32 (32 is preferred, while you could set any other length)`      |
 | **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
-| **CORE_PER_INSTANCE** (required for REALTIME)    |                               `export CORE_PER_INSTANCE=4`                                |
+
 
 ## Output
 
