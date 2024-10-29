@@ -243,7 +243,7 @@ elif [[ "${TEST_MODE}" == "REALTIME" ]]; then
     sum = sum / i * INSTANCES_PER_SOCKET;
         printf("%.2f", sum);
     }')
-    latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    p99_latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
     BEGIN {
         sum = 0;
         i = 0;
