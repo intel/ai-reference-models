@@ -42,7 +42,6 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     echo "Running Multi-instance Realtime Inference"
     export LOG_PREFIX="latency_log"
     BATCH_SIZE=${BATCH_SIZE:-1}
-    export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
     export KMP_BLOCKTIME=-1
     rm -rf ${OUTPUT_DIR}/latency_log*
     export usecase=latency
