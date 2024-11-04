@@ -273,6 +273,170 @@ def ipex_optimize(args, model, optimizer, dataloader):
         ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
     return model, optimizer
 
+def aoti_benchmark_compile(args, tmp_dir):
+    import textwrap
+    inference_template = textwrap.dedent(
+        """
+        #include <vector>
+
+        #include <torch/torch.h>
+        #include <torch/script.h>
+        #include <torch/csrc/inductor/aoti_runner/model_container_runner_cpu.h>
+
+        #include <iostream>
+
+        int main() {
+            c10::InferenceMode mode;
+            size_t ninstances = %s;
+            size_t niters = %s;
+            size_t total_iters = ninstances * niters;
+            size_t bs = %s;
+            auto module = torch::jit::load("%s");
+            std::vector<torch::Tensor> _input_vec = module.attr("tensor_list").toTensorList().vec();
+            std::vector<torch::Tensor> input_vec;
+            for (const auto t : _input_vec) {
+                input_vec.push_back(t.clone());
+            }
+            torch::inductor::AOTIModelContainerRunnerCpu runner("%s", ninstances * 2);
+            std::vector<torch::Tensor> outputs = runner.run(input_vec);
+
+            using Input = std::vector<torch::Tensor>;
+            std::vector<std::vector<Input>> thread_inputs(ninstances);
+            std::vector<size_t> input_iters(ninstances);
+            for (const auto thread_id : c10::irange(ninstances)) {
+                for (const auto i [[maybe_unused]] : c10::irange(niters * 2 + 100))  {
+                    thread_inputs[thread_id].push_back(input_vec);
+                }
+                input_iters[thread_id] = 0;
+            }
+            std::atomic<int64_t> num_attempted_iters{0};
+            std::mutex m;
+            std::condition_variable worker_main_cv;
+            std::condition_variable main_worker_cv;
+            int64_t initialized{0};
+            int64_t finished{0};
+            bool start{false};
+            std::vector<std::thread> callers;
+            callers.reserve(ninstances);
+            std::cout << "init done, benchmark start" << std::endl;
+            for (const auto thread_id : c10::irange(ninstances)) {
+                callers.emplace_back([&, thread_id]() {
+                    // warmup 100 iters
+                    for (const auto j : c10::irange(100)) {
+                        (void)j;
+                        runner.run(thread_inputs[thread_id][input_iters[thread_id]]);
+                        ++input_iters[thread_id];
+                    }
+                    {
+                        std::unique_lock<std::mutex> lock(m);
+                        ++initialized;
+                        worker_main_cv.notify_one();
+                        while (!start) {
+                            main_worker_cv.wait(lock);
+                        }
+                    }
+                    while (num_attempted_iters.fetch_add(1) < total_iters) {
+                        runner.run(thread_inputs[thread_id][input_iters[thread_id]]);
+                        ++input_iters[thread_id];
+                    }
+
+                    {
+                        std::unique_lock<std::mutex> lock(m);
+                        ++finished;
+                        worker_main_cv.notify_one();
+                    }
+                });
+            }
+
+            using Clock = std::chrono::high_resolution_clock;
+            using RecordProfile = torch::autograd::profiler::RecordProfile;
+            using TimePoint = std::chrono::time_point<Clock>;
+            TimePoint start_time;
+            {
+                std::unique_lock<std::mutex> lock(m);
+                while (initialized != ninstances) {
+                    worker_main_cv.wait(lock);
+                }
+                start = true;
+                start_time = Clock::now();
+            }
+            main_worker_cv.notify_all();
+            {
+                std::unique_lock<std::mutex> lock(m);
+                worker_main_cv.wait(
+                    lock, [&]() { return finished == ninstances; });
+            }
+            auto end_time = std::chrono::high_resolution_clock::now();
+
+            float total_time_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                        end_time - start_time)
+                                        .count() / 1000.0 / 1000.0;
+            float fps = bs * ninstances * niters / total_time_ms * 1000;
+            std::cout << "Throughput: " << fps << std::endl;
+            for (auto& t : callers) {
+                t.join();
+            }
+            return 0;
+        }
+        """
+    )
+    t = time.time()
+    pid = os.getpid()
+    model_dir = f"{tmp_dir}/model.so"
+    inputs_dir = f"{tmp_dir}/inputs.pt"
+    src_code = inference_template % (
+        args.share_weight_instance,
+        args.limit_val_batches,
+        args.batch_size,
+        inputs_dir,
+        model_dir,
+    )
+    with open(f"{tmp_dir}/bench.cpp", "w") as f:
+        f.write(src_code)
+    os.system(f"cp ./CMakeLists.txt {tmp_dir}/CMakeLists.txt")
+    cmake_prefix_path = torch.utils.cmake_prefix_path
+    pytorch_install_dir = os.path.dirname(os.path.abspath(torch.__file__))
+    torch_libraries = os.path.join(pytorch_install_dir, "lib")
+    os.system(f"export CMAKE_PREFIX_PATH={cmake_prefix_path} && export TORCH_LIBRARIES={torch_libraries} && cd {tmp_dir} && cmake . && make")
+    os.system(f"cp {tmp_dir}/aoti_example {tmp_dir}/aoti_bench_bin")
+    print(f"{tmp_dir}/aoti_bench_bin")
+    exit()
+
+def aot_inductor_benchmark(args, model, dtype, example_inputs):
+    t = time.time()
+    pid = os.getpid()
+    tmp_dir = os.path.join(os.getcwd(), f"./aoti-model-{dtype}-{t}-{pid}")
+    model_dir = f"{tmp_dir}/model.so"
+    inputs_dir = f"{tmp_dir}/inputs.pt"
+    torch._export.aot_compile(
+        model, example_inputs,
+        options={"aot_inductor.output_path":model_dir}
+    )
+    logger.info(f"AOTI model saved to : {model_dir}")
+    # save example inputs and loaded it in cpp later
+    runner = torch._C._aoti.AOTIModelContainerRunnerCpu(model_dir, 1)  # type: ignore[call-arg]
+    call_spec = runner.get_call_spec()  # type: ignore[attr-defined]
+    import torch.utils._pytree as pytree
+    in_spec = pytree.treespec_loads(call_spec[0])
+    from torch.export._tree_utils import reorder_kwargs
+    flat_inputs = pytree.tree_flatten((example_inputs, reorder_kwargs({}, in_spec)))[0]
+    flat_inputs = [x for x in flat_inputs if isinstance(x, torch.Tensor)]
+    class TensorListModule(torch.nn.Module):
+        def __init__(self, tensor_list):
+            super(TensorListModule, self).__init__()
+            self.tensor_list = tensor_list
+
+        def forward(self):
+            return self.tensor_list
+
+    # Create an instance of the module
+    module = TensorListModule(flat_inputs)
+    # Save the module
+    torch.jit.save(torch.jit.script(module), inputs_dir)
+    logger.info(f"example inputs saved to : {inputs_dir}")
+    # gen/compile benchmark
+    aoti_benchmark_compile(args, tmp_dir)
+
 def stock_pt_optimize(args, model, optimizer, dataloader):
     example_batch = fetch_batch(dataloader)
     example_batch.sparse_features = unpack(example_batch.sparse_features)
@@ -316,17 +480,23 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
                     model = torch.compile(converted_model, backend="ipex")
                 else:
                     print('[Info] Running torch.compile() with default backend')
-                    model(dense, sparse)
-                    model = torch.compile(converted_model)
+                    if args.aot_inductor:
+                        aot_inductor_benchmark(args, converted_model, torch.int8, (dense, sparse, ))
+                    else:
+                        model(dense, sparse)
+                        model = torch.compile(converted_model)
                 model(dense, sparse)
                 model(dense, sparse)
         else:
             with torch.no_grad(), torch.cpu.amp.autocast(enabled=autocast, dtype=dtype):
                 print('[Info] Running torch.compile() with default backend')
-                model(dense, sparse)
-                model = torch.compile(model)
-                model(dense, sparse)
-                model(dense, sparse)
+                if args.aot_inductor:
+                    aot_inductor_benchmark(args, model, dtype, (dense, sparse, ))
+                else:
+                    model(dense, sparse)
+                    model = torch.compile(model)
+                    model(dense, sparse)
+                    model(dense, sparse)
     return model, optimizer
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
@@ -693,6 +863,19 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "--ipex-merged-emb-adagrad",
         action="store_true",
         help="whether use ipex customer op for merged embedding with adagrad",
+    )
+    parser.add_argument(
+        "--aot-inductor",
+        action="store_true",
+        help="whether use AOT Inductor path to benchmark",
+    )
+    parser.add_argument(
+        "--cpu-lists",
+        type=str,
+    )
+    parser.add_argument(
+        "--node-id",
+        type=str,
     )
     return parser.parse_args(argv)
 
