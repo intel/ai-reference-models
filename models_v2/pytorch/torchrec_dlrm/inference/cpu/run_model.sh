@@ -69,6 +69,7 @@ fi
 mkdir -p ${OUTPUT_DIR}
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
+AOT_INDUCTOR=${AOT_INDUCTOR:-"0"}
 
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --dtype bf16"
@@ -117,7 +118,7 @@ export mrun_cmd="mprof run --python -o ${MEMLOG}"
 unset launcher_cmd
 fi
 
-COMMON_ARGS=""
+export COMMON_ARGS=""
 
 if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     if [[ $ENABLE_TORCH_PROFILE == "true" ]]; then
@@ -154,10 +155,14 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --ipex-optimize --jit --ipex-merged-emb-cat 2>&1 | tee $LOG
 else
     export TORCHINDUCTOR_FREEZING=1
-    if [[ "${TEST_MODE}" != "THROUGHPUT" ]]; then
-        $mrun_cmd python $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
+    if [[ "0" == ${AOT_INDUCTOR} ]];then
+        if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
+            $mrun_cmd python $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
+        else
+            $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
+        fi
     else
-        $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
+        bash run_aoti.sh 2>&1 | tee $LOG
     fi
 fi
 
