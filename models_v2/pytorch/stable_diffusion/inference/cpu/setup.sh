@@ -24,3 +24,5 @@ cd diffusers
 git checkout v0.23.1
 git apply ../diffusers.patch
 pip install -e .
+cd ..
+pip install huggingface_hub==0.25.2
