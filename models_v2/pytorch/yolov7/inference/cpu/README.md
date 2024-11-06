@@ -12,14 +12,13 @@ Intel-optimized PyTorch and PyTorch inductor.
 | Inference   | Pytorch     | https://github.com/WongKinYiu/yolov7 | main/a207844 | [`yolov7_ipex_and_inductor.patch`](/models_v2/pytorch/yolov7/inference/cpu/yolov7_ipex_and_inductor.patch). Enable yolov7 inference with IPEX and torch inductor for specified precision (fp32, int8, bf16, fp16, or bf32). |
 
 ## Pre-Requisite
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniforge and build Pytorch, IPEX, TorchVison and Jemalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniforge and build Pytorch, IPEX, TorchVison and Tcmalloc.
 
-* Set Jemalloc Preload for better performance
+* Set Tcmalloc Preload for better performance
 
-  After [Jemalloc setup](/docs/general/pytorch/BareMetalSetup.md#build-jemalloc), set the following environment variables.
+  After [Tcmalloc setup](/docs/general/pytorch/BareMetalSetup.md#build-tcmalloc), set the following environment variables.
   ```
-  export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":$LD_PRELOAD
-  export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+  export LD_PRELOAD="<path to the tcmalloc directory>/lib/libtcmalloc.so":$LD_PRELOAD
   ```
 
 * Set IOMP preload for better performance
