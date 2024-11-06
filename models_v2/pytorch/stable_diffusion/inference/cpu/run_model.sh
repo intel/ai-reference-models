@@ -115,18 +115,24 @@ elif [[ "${PRECISION}" == "fp16" ]]; then
     ARGS="$ARGS --precision=fp16"
     echo "### running fp16 datatype"
 elif [[ "${PRECISION}" == "int8-bf16" ]]; then
-    if [ ! -f "${INT8_MODEL}" ]; then
-        echo "The required file INT8_MODEL does not exist"
-        exit 1
+    ARGS="$ARGS --precision=int8-bf16"
+    if [ "${MODE}" == "ipex-jit" ]; then
+        if [ ! -f "${INT8_MODEL}" ]; then
+            echo "The required file INT8_MODEL does not exist"
+            exit 1
+        fi
+        ARGS="$ARGS --int8_model_path=${INT8_MODEL}"
     fi
-    ARGS="$ARGS --precision=int8-bf16 --int8_model_path=${INT8_MODEL}"
     echo "### running int8-bf16 datatype"
 elif [[ "${PRECISION}" == "int8-fp32" ]]; then
-    if [ ! -f "${INT8_MODEL}" ]; then
-        echo "The required file INT8_MODEL does not exist"
-        exit 1
+    ARGS="$ARGS --precision=int8-fp32"
+    if [ "${MODE}" == "ipex-jit" ]; then
+        if [ ! -f "${INT8_MODEL}" ]; then
+            echo "The required file INT8_MODEL does not exist"
+            exit 1
+        fi
+        ARGS="$ARGS --int8_model_path=${INT8_MODEL}"
     fi
-    ARGS="$ARGS --precision=int8-fp32 --int8_model_path=${INT8_MODEL}"
     echo "### running int8-fp32 datatype"
 elif [[ "${PRECISION}" == "bf32" ]]; then
     ARGS="$ARGS --precision=bf32"
