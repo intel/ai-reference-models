@@ -42,7 +42,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         echo "The required environment variable WEIGHT_DIR has not been set"
         exit 1
     fi
-    export EXTRA_ARGS="$EXTRA_ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
+    export EXTRA_ARGS="$EXTRA_ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR --test_auroc --snapshot-dir $WEIGHT_DIR "
 else
     echo "Please set TEST_MODE to THROUGHPUT or ACCURACY"
     exit 1
@@ -156,7 +156,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
 else
     export TORCHINDUCTOR_FREEZING=1
     if [[ "0" == ${AOT_INDUCTOR} ]];then
-        if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
+        if [[ "${TEST_MODE}" != "THROUGHPUT" ]]; then
             $mrun_cmd python $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
         else
             $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
