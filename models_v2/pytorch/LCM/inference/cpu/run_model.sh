@@ -121,7 +121,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     num_warmup=${num_warmup:-"1"}
     num_iter=${num_iter:-"1"}
     rm -rf ${OUTPUT_DIR}/LCM_${PRECISION}_inference_latency*
-    MODE_ARGS="--ninstances $NUMAS --latency-mode --instance-idx $NUMBER_INSTANCE"
+    MODE_ARGS="--ninstances $NUMAS --instance-idx $NUMBER_INSTANCE"
 
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     if [[ "$DISTRIBUTED" == "false" ]]; then
@@ -129,11 +129,7 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
         num_iter=${num_iter-"10"}
         rm -rf ${OUTPUT_DIR}/LCM_${PRECISION}_inference_accuracy*
         rm -rf ${PRECISION}_results
-        if [[ "0" == ${TORCH_INDUCTOR} ]];then
-            MODE_ARGS="--ninstances 1 --nodes-list=0"
-        else
-            MODE_ARGS="--ninstances 1 --node-id=0"
-        fi
+        MODE_ARGS=" "
     else
         CORES=`lscpu | grep Core | awk '{print $4}'`
         SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -190,7 +186,6 @@ fi
 
 if [[ "$TEST_MODE" == "ACCURACY" && "${DISTRIBUTED}" == "true" ]]; then
     python -m intel_extension_for_pytorch.cpu.launch \
-        --memory-allocator tcmalloc \
         --nnodes ${NNODES} \
         --hostfile ${HOSTFILE} \
         --logical-cores-for-ccl --ccl-worker-count 8 \
@@ -207,8 +202,6 @@ if [[ "$TEST_MODE" == "ACCURACY" && "${DISTRIBUTED}" == "true" ]]; then
 elif [[ "${TEST_MODE}" == "ACCURACY" && "${DISTRIBUTED}" == "false" ]]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         python -m intel_extension_for_pytorch.cpu.launch \
-            --memory-allocator tcmalloc \
-            $MODE_ARGS \
             --log-dir ${OUTPUT_DIR} \
             --log_file_prefix LCM_${PRECISION}_inference_${mode} \
             ${MODEL_DIR}/inference.py \
@@ -218,8 +211,6 @@ elif [[ "${TEST_MODE}" == "ACCURACY" && "${DISTRIBUTED}" == "false" ]]; then
             $ARGS
     else
         python -m torch.backends.xeon.run_cpu --disable-numactl \
-            --enable_tcmalloc \
-            $MODE_ARGS \
             --log_path ${OUTPUT_DIR} \
             ${MODEL_DIR}/inference.py \
             --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \

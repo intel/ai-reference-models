@@ -93,7 +93,11 @@ NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
 CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
 CORES_PER_INSTANCE=4
 
-ARGS_IPEX="$ARGS_IPEX --memory-allocator jemalloc --log_dir="${OUTPUT_DIR}" --log_file_prefix="./${LOG_PREFIX}_${PRECISION}""
+if [[ "0" == ${TORCH_INDUCTOR} ]];then
+    ARGS_IPEX="$ARGS_IPEX --memory-allocator jemalloc --log_dir="${OUTPUT_DIR}" --log_file_prefix="./${LOG_PREFIX}_${PRECISION}""
+else
+    ARGS_IPEX="$ARGS_IPEX --disable-numactl --enable-jemalloc --log_path="${OUTPUT_DIR}" "
+fi
 
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     ARGS="$ARGS -e -a resnet50 ../ --dummy"
@@ -165,7 +169,7 @@ elif [[ "0" == ${TORCH_INDUCTOR} ]];then
 else
     echo "Running RN50 inference with torch.compile inductor backend."
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch \
+    python -m torch.backends.xeon.run_cpu \
         ${ARGS_IPEX} \
         ${MODEL_DIR}/../../common/main.py \
         $ARGS \

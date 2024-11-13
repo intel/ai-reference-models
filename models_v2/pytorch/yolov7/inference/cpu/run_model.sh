@@ -120,14 +120,15 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     export KMP_AFFINITY=granularity=fine,compact,1,0
     export OMP_NUM_THREADS=$CORES_PER_INSTANCE
     NUMBER_INSTANCE=`expr $CORES_PER_NUMA / $CORES_PER_INSTANCE`
-    MODE_ARGS="$MODE_ARGS --ninstances $NUMAS --latency-mode"
+    ARGS="$ARGS --number-instance $NUMBER_INSTANCE"
+    MODE_ARGS="$MODE_ARGS --ninstances $NUMAS"
 
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     rm -rf ${OUTPUT_DIR}/yolov7_accuracy_log*
     BATCH_SIZE=${BATCH_SIZE:-40}
     ARGS="--checkpoint-dir $CHECKPOINT_DIR --weights yolov7.pt"
     ARGS="$ARGS --img 640 -e --data data/coco.yaml --dataset-dir $DATASET_DIR --conf-thres 0.001 --iou 0.65 --device cpu"
-    MODE_ARGS="$MODE_ARGS --skip-cross-node-cores"
+    MODE_ARGS="$MODE_ARGS"
 fi
 
 

@@ -147,7 +147,7 @@ if [[ "$TEST_MODE" != "ACCURACY" ]]; then
         --batch-size $BATCH_SIZE
     else
         echo "### running with torch.compile inductor backend"
-        if [[ "$1" == "int8-bf16" || "$1" == "int8-fp32" ]];then
+        if [[ "${PRECISION}" == "int8-bf16" || "${PRECISION}" == "int8-fp32" ]];then
             ARGS="$ARGS --torchao  --weight-only-quant --weight-dtype INT8 "
         fi
         export TORCHINDUCTOR_FREEZING=1
@@ -270,14 +270,14 @@ else
         if [[ "${PRECISION}" == "int8-bf16" || "${PRECISION}" == "int8-fp32" ]];then
             ARGS="$ARGS --ipex_smooth_quant"
         fi
-        python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./LLaMa_${PRECISION}_accuracy_${mode}" \
+        python -m intel_extension_for_pytorch.cpu.launch --log_dir=${OUTPUT_DIR} --log_file_prefix="./LLaMa_${PRECISION}_accuracy_${mode}" \
             ${EVAL_SCRIPT} $ARGS \
             --ipex \
             --model-name-or-path ${FINETUNED_MODEL}
     else
         echo "### running with torch.compile inductor backend"
         export TORCHINDUCTOR_FREEZING=1
-        python -m torch.backends.xeon.run_cpu --disable-numactl --node_id 0 --enable_tcmalloc --log_path=${OUTPUT_DIR} \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             --model-name-or-path ${FINETUNED_MODEL}

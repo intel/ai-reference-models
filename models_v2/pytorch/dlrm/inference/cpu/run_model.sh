@@ -97,7 +97,7 @@ TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 
 if [ "$TEST_MODE" == "THROUGHPUT" ]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
-        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --memory-allocator tcmalloc $MODEL_SCRIPT \
+        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --memory-allocator tcmalloc --log-dir ${OUTPUT_DIR} $MODEL_SCRIPT \
             --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
             --data-set=terabyte \
             --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
@@ -109,7 +109,7 @@ if [ "$TEST_MODE" == "THROUGHPUT" ]; then
     else
         echo "### running with torch.compile inductor backend"
         export TORCHINDUCTOR_FREEZING=1
-        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --memory-allocator tcmalloc $MODEL_SCRIPT \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput_mode --enable-tcmalloc --log-path ${OUTPUT_DIR} $MODEL_SCRIPT \
             --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
             --data-set=terabyte \
             --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
@@ -121,7 +121,7 @@ if [ "$TEST_MODE" == "THROUGHPUT" ]; then
     fi
 else
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
-        python -m intel_extension_for_pytorch.cpu.launch --nodes-list=0 --memory-allocator tcmalloc $MODEL_SCRIPT \
+        python -m intel_extension_for_pytorch.cpu.launch --log-dir ${OUTPUT_DIR} $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
         --data-set=terabyte \
         --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
@@ -134,7 +134,7 @@ else
     else
     echo "### running with torch.compile inductor backend"
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch --nodes-list=0 --memory-allocator tcmalloc $MODEL_SCRIPT \
+    python -m torch.backends.xeon.run_cpu --disable-numactl --log-path ${OUTPUT_DIR} -- $MODEL_SCRIPT \
         --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
         --data-set=terabyte \
         --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
