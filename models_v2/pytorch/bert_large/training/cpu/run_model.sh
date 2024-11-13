@@ -161,7 +161,6 @@ if [[ "$DDP" == "false" ]]; then
                 $ARGS \
                 $params 2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase1_${precision}.log
         else
-            export TORCHINDUCTOR_FREEZING=1
             python -m torch.backends.xeon.run_cpu --disable-numactl --node_id 0 --enable-jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_128/ \
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
@@ -208,7 +207,6 @@ if [[ "$DDP" == "false" ]]; then
                 $ARGS \
                 $params 2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase2_${precision}.log
         else
-            export TORCHINDUCTOR_FREEZING=1
             python -m torch.backends.xeon.run_cpu --disable-numactl --node_id 0 --enable-jemalloc --log_path=${OUTPUT_DIR} ${TRAIN_SCRIPT} \
                 --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
                 --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
