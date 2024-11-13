@@ -257,14 +257,14 @@ else
         if [[ "$PRECISION" == "int8-bf16" || "$PRECISION" == "int8-fp32" ]];then
             ARGS="$ARGS --ipex_smooth_quant"
         fi
-        python -m intel_extension_for_pytorch.cpu.launch --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./GPTJ_${PRECISION}_accuracy_${MODE}" \
+        python -m intel_extension_for_pytorch.cpu.launch --log_dir=${OUTPUT_DIR} --log_file_prefix="./GPTJ_${PRECISION}_accuracy_${MODE}" \
             ${EVAL_SCRIPT} $ARGS \
             --ipex \
             --model-name-or-path   ${FINETUNED_MODEL} 
     else
         echo "### running with torch.compile inductor backend"
         export TORCHINDUCTOR_FREEZING=1
-        python -m torch.backends.xeon.run_cpu --disable-numactl --node-id 0 --memory-allocator tcmalloc --log_path=${OUTPUT_DIR} \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             --model-name-or-path ${FINETUNED_MODEL}

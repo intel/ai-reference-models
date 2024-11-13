@@ -102,12 +102,16 @@ if [[ "${TEST_MODE}" == "THROUGHPUT" || "${TEST_MODE}" == "REALTIME" ]]; then
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     BATCH_SIZE=${BATCH_SIZE:-1}
     ARGS="$ARGS --max-new-tokens ${OUTPUT_TOKEN} --input-tokens ${INPUT_TOKEN} --batch-size ${BATCH_SIZE}"
-    ARGS_IPEX="$ARGS_IPEX --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
+    if [[ "0" == ${TORCH_INDUCTOR} ]];then
+        ARGS_IPEX="$ARGS_IPEX --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
+    else
+        ARGS_IPEX="$ARGS_IPEX --throughput-mode --enable-tcmalloc --log-path=${OUTPUT_DIR}"
+    fi
 else
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
-        ARGS_IPEX="$ARGS_IPEX --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
+        ARGS_IPEX="$ARGS_IPEX --log_dir=${OUTPUT_DIR}"
     else
-        ARGS_IPEX="$ARGS_IPEX --node-id 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
+        ARGS_IPEX="$ARGS_IPEX --log-path=${OUTPUT_DIR}"
     fi
 fi
 
@@ -131,7 +135,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
 else
     echo "### running with torch.compile inductor backend"
     export TORCHINDUCTOR_FREEZING=1
-    python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} \
+    python -m torch.backends.xeon.run_cpu --disable-numactl ${ARGS_IPEX} \
         ${EVAL_SCRIPT} $ARGS \
         --inductor \
         --model-name-or-path ${FINETUNED_MODEL}

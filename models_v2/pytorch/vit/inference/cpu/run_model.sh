@@ -182,7 +182,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         ARGS="$ARGS --jit_mode_eval"
         echo "### running with jit mode"
         BATCH_SIZE=${BATCH_SIZE:-1}
-        python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0 --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
+        python -m intel_extension_for_pytorch.cpu.launch --log_dir=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
             ${EVAL_SCRIPT} $ARGS \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --do_eval \
@@ -194,7 +194,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
         BATCH_SIZE=${BATCH_SIZE:-1}
-        python -m torch.backends.xeon.run_cpu --disable-numactl --ninstances 1 --node-id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             --model_name_or_path   ${FINETUNED_MODEL} \

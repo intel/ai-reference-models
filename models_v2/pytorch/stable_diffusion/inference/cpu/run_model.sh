@@ -164,11 +164,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
         ARGS="$ARGS --accuracy --dist-backend ccl"
     else
         LOG_PREFIX="stable_diffusion_${PRECISION}_inference_accuracy"
-        if [[ "0" == ${TORCH_INDUCTOR} ]]; then
-            ARGS_IPEX="$ARGS_IPEX --ninstances 1 --nodes-list=0"
-        else
-            ARGS_IPEX="$ARGS_IPEX --ninstances 1 --node-id=0"
-        fi
+        ARGS_IPEX="$ARGS_IPEX --ninstances 1"
         ARGS="$ARGS --accuracy"
     fi
 else
@@ -209,7 +205,7 @@ fi
 rm -rf ${OUTPUT_DIR}/${LOG_PREFIX}*
 
 if [[ "0" == ${TORCH_INDUCTOR} ]]; then
-    python -m intel_extension_for_pytorch.cpu.launch \
+    python -m intel_extension_for_pytorch.cpu.launch --log-dir ${OUTPUT_DIR} \
         --memory-allocator tcmalloc \
         ${ARGS_IPEX} \
         --log-dir ${OUTPUT_DIR} \
@@ -218,7 +214,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]]; then
         --dataset_path=${DATASET_DIR} \
         $ARGS
 else
-    python -m torch.backends.xeon.run_cpu --disable-numactl \
+    python -m torch.backends.xeon.run_cpu --disable-numactl --log-path ${OUTPUT_DIR} \
         --enable_tcmalloc \
         ${ARGS_IPEX} \
         --log_path=${OUTPUT_DIR} \

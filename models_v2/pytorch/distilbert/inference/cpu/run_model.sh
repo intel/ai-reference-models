@@ -118,7 +118,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
         ARGS="$ARGS --inductor"
-        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_throughput_${path}_${precision}_${mode}" \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput-mode  --enable-jemalloc --log-path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --task_name sst2 \
@@ -136,7 +136,7 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
         mode="jit"
         ARGS="$ARGS --jit_mode_eval"
         echo "### running with jit mode"
-        python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_accuracy_${precision}_${mode}" \
+        python -m intel_extension_for_pytorch.cpu.launch --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_accuracy_${precision}_${mode}" \
             ${EVAL_SCRIPT} $ARGS \
             --use_ipex \
             --model_name_or_path   ${FINETUNED_MODEL} \
@@ -149,7 +149,7 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
         ARGS="$ARGS --inductor"
-        python -m intel_extension_for_pytorch.cpu.launch --ninstances 1 --nodes-list 0  --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_accuracy_${precision}_${mode}" \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --log-path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --model_name_or_path   ${FINETUNED_MODEL} \
             --task_name sst2 \
@@ -177,7 +177,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
         echo "Running inference with torch.compile inductor backend."
         export TORCHINDUCTOR_FREEZING=1
         ARGS="$ARGS --inductor"
-        python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./distilbert_latency_${precision}_${mode}" \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --ninstances $NUMAS --enable-jemalloc --log-path=${OUTPUT_DIR} \
              ${EVAL_SCRIPT} $ARGS \
              --model_name_or_path   ${FINETUNED_MODEL} \
              --task_name sst2 \
