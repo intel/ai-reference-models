@@ -1,3 +1,16 @@
+diff --git a/models/experimental.py b/models/experimental.py
+index 735d7aa..a81196c 100644
+--- a/models/experimental.py
++++ b/models/experimental.py
+@@ -249,7 +249,7 @@ def attempt_load(weights, map_location=None):
+     model = Ensemble()
+     for w in weights if isinstance(weights, list) else [weights]:
+         attempt_download(w)
+-        ckpt = torch.load(w, map_location=map_location)  # load
++        ckpt = torch.load(w, map_location=map_location, weights_only=False)  # load
+         model.append(ckpt['ema' if ckpt.get('ema') else 'model'].float().fuse().eval())  # FP32 model
+     
+     # Compatibility updates
 diff --git a/models/yolo.py b/models/yolo.py
 index 95a019c..048fef0 100644
 --- a/models/yolo.py
@@ -58,7 +71,7 @@ index f4d2182..cf1cc75 100644
  protobuf<4.21.3
  
 diff --git a/utils/datasets.py b/utils/datasets.py
-index 5fe4f7b..aa55efd 100644
+index 5fe4f7b..39c80f9 100644
 --- a/utils/datasets.py
 +++ b/utils/datasets.py
 @@ -86,6 +86,7 @@ def create_dataloader(path, imgsz, batch_size, stride, opt, hyp=None, augment=Fa
@@ -69,6 +82,15 @@ index 5fe4f7b..aa55efd 100644
                          pin_memory=True,
                          collate_fn=LoadImagesAndLabels.collate_fn4 if quad else LoadImagesAndLabels.collate_fn)
      return dataloader, dataset
+@@ -389,7 +390,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
+         self.label_files = img2label_paths(self.img_files)  # labels
+         cache_path = (p if p.is_file() else Path(self.label_files[0]).parent).with_suffix('.cache')  # cached labels
+         if cache_path.is_file():
+-            cache, exists = torch.load(cache_path), True  # load
++            cache, exists = torch.load(cache_path, weights_only=False), True  # load
+             #if cache['hash'] != get_hash(self.label_files + self.img_files) or 'version' not in cache:  # changed
+             #    cache, exists = self.cache_labels(cache_path, prefix), False  # re-cache
+         else:
 diff --git a/utils/torch_utils.py b/utils/torch_utils.py
 index 1e631b5..46ec837 100644
 --- a/utils/torch_utils.py
