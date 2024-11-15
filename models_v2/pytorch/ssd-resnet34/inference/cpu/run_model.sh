@@ -247,8 +247,7 @@ else
     elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
         BATCH_SIZE=${BATCH_SIZE:- 16}
         LOG_0=ssdresnet34_${PRECISION}_inference_accuracy.log
-        python -m intel_extension_for_pytorch.cpu.launch \
-            --memory-allocator jemalloc \
+        python -m intel_extension_for_pytorch.cpu.launch --log-dir ${OUTPUT_DIR} \
             ${MODEL_DIR}/infer.py \
             --data ${DATASET_DIR}/coco \
             --device 0 \

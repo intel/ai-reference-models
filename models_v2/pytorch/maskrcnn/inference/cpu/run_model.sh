@@ -130,8 +130,7 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     IPEX_ARGS=""
     pip list | grep intel-extension-for-pytorch
     if [[ "$?" == 0 ]]; then
-        IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
-          --memory-allocator jemalloc"
+        IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch"
     fi
 fi
 
