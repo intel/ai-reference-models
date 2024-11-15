@@ -1,0 +1,6 @@
+repos:
+  - repo: https://github.com/pre-commit/mirrors-pylint
+    rev: v2.7.4
+    hooks:
+      - id: pylint
+        args: [--rcfile=.github/linters/.pylintrc]
