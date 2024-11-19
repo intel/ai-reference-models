@@ -1,2 +1,2 @@
 intel-tensorflow>=2.5.0
-wheel==0.38.0 # upgraded to avoid a vulnerability
+wheel==0.38.1 # upgraded to avoid a vulnerability
