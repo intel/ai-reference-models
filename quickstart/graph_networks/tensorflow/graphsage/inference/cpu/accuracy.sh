@@ -59,20 +59,6 @@ BATCH_SIZE="${BATCH_SIZE:-"128"}"
 
 MODE="inference"
 
-if [ -z "${WARMUP_STEPS}" ]; then
-  WARMUP_STEPS="warmup-steps=10"
-else
-  WARMUP_STEPS="warmup-steps=${WARMUP_STEPS}"
-fi
-echo "WARMUP_STEPS: ${WARMUP_STEPS}"
-
-if [ -z "${STEPS}" ]; then
-  STEPS="steps=5524"
-else
-  STEPS="steps=$STEPS"
-fi
-echo "STEPS: $STEPS"
-
 export OMP_NUM_THREADS=${omp_num_threads}
 
 # If cores per instance env is not mentioned, then the workload will run with the default value.
