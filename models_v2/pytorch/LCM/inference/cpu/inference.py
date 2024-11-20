@@ -279,6 +279,7 @@ def main():
         print("torch.compile with inductor backend ...")
         # torch._inductor.config.profiler_mark_wrapper_call = True
         # torch._inductor.config.cpp.enable_kernel_profile = True
+        torch._inductor.config.cpp.enable_concat_linear = True
         from torch._inductor import config as inductor_config
         inductor_config.cpp_wrapper = True
         if args.precision == "fp32":
