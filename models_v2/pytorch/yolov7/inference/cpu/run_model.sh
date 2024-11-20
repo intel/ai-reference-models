@@ -113,15 +113,12 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     CORES=`lscpu | grep Core | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
-    CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
     CORES_PER_INSTANCE=4
     export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
     export KMP_BLOCKTIME=1
     export KMP_AFFINITY=granularity=fine,compact,1,0
     export OMP_NUM_THREADS=$CORES_PER_INSTANCE
-    NUMBER_INSTANCE=`expr $CORES_PER_NUMA / $CORES_PER_INSTANCE`
-    ARGS="$ARGS --number-instance $NUMBER_INSTANCE"
-    MODE_ARGS="$MODE_ARGS --ninstances $NUMAS"
+    MODE_ARGS="$MODE_ARGS --latency-mode"
 
 elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     rm -rf ${OUTPUT_DIR}/yolov7_accuracy_log*
