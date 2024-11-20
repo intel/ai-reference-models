@@ -7,5 +7,5 @@ sox
 tensorboard==2.0.0
 toml
 tqdm==4.66.3
-wheel==0.38.0 # Included this to avoid a vulnerability
+wheel==0.38.1 # Included this to avoid a vulnerability
 wrapt==1.10.11
