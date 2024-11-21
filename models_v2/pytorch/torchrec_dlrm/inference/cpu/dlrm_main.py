@@ -288,6 +288,7 @@ def aoti_benchmark_compile(args, tmp_dir):
         int main() {
             c10::InferenceMode mode;
             size_t ninstances = %s;
+            if (ninstances == 0) ninstances = 1;
             size_t niters = %s;
             size_t total_iters = ninstances * niters;
             size_t bs = %s;
