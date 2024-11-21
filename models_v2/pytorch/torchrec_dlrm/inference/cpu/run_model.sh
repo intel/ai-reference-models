@@ -162,7 +162,8 @@ else
             $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
         fi
     else
-        bash run_aoti.sh 2>&1 | tee $LOG
+        bench=$(python $MODEL_SCRIPT $COMMON_ARGS --inductor --aot-inductor | grep aoti_bench_bin)
+        $bench 2>&1 | tee $LOG
     fi
 fi
 
