@@ -49,9 +49,9 @@ export TORCH_INDUCTOR=0
 export FINETUNED_MODEL=<provide either meta-llama/Llama-2-7b-hf or meta-llama/Llama-2-13b-hf, otherwise (default:meta-llama/Llama-2-7b-hf)>
 ##Required
 export OUTPUT_DIR=<path to output directory>
-export PRECISION=<provide either fp32, int8-fp32, int8-fp16, bf16, fp16, or bf32>
-export INPUT_TOKEN=<provide input token>
-export OUTPUT_TOKEN=<provide output token>
+export PRECISION=<For Throughput and 1024/128 token sizes provide fp32, bf32 and fp16. For Realtime and 1024/128 token sizes fp32, bf32, bf16 and fp16. For Throughput and 2016/32 token sizes provide fp32, bf16 and fp16. For Realtime and 2016/32 token sizes provide fp32, bf32, bf16 and fp16. For Accuracy fp32, bf32, bf16, fp16, int8-fp32. For Throughput and 1024/128 token sizes provide fp32, bf16 and fp16. For Realtime and 1024/128 token sizes bf32, bf16 and fp16. For Accuracy fp32, bf32, bf16, fp16, int8-fp32. >
+export INPUT_TOKEN=<provide input token. For Llama 13b, 2016 token size is not performant>
+export OUTPUT_TOKEN=<provide input token. For Llama 13b, 32 token size is not performant>
 export TEST_MODE=<provide REALTIME,THROUGHPUT or ACCURACY>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 DOCKER_ARGS="--rm -it"
@@ -76,9 +76,6 @@ docker run \
   $IMAGE_NAME \
   sh -c "$SCRIPT"
 ```
-
-> [!NOTE]
-> The container has been performance validated on fp32,bf16,fp16 and int8-fp32 precisions,`TORCH_INDUCTOR=0`, input tokens 1024 and 2016 and output tokens 128 and 32.
 
 ## Documentation and Sources
 #### Get Started​

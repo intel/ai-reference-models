@@ -39,7 +39,7 @@ export BATCH_SIZE=<provide batch size, otherwise (default: 1)>
 export TORCH_INDUCTOR=<provide either 0 or 1, otherwise (default:0)>
 ##Required
 export OUTPUT_DIR=<path to output directory>
-export PRECISION=<provide either fp32, int8-fp32, bf16, fp16, or bf32>
+export PRECISION=<For Throughput and 1024/128 token sizes provide bf32, fp16, int8-bf16. For Realtime and 1024/128 token sizes fp32, bf32, bf16, fp16, int8-fp32.  For Throughput and 2016/32 token sizes provide bf16, fp16. For Realtime and 2016/32 token sizes provide fp32, bf32, bf16, fp16. For Accuracy fp32, bf32, bf16, fp16, int8-fp32.>
 export INPUT_TOKEN=<provide input token>
 export OUTPUT_TOKEN=<provide output token>
 export TEST_MODE=<provide REALTIME,THROUGHPUT or ACCURACY>
