@@ -37,7 +37,7 @@ To run ViT inference, set environment variables to specify the precision and an 
 export BATCH_SIZE=<provide batch size for throughput inference, otherwise it assigned based on number of cores>
 ##Required
 export OUTPUT_DIR=<path to output directory>
-export PRECISION=<provide either fp32, int8-fp32, int8-bf16, bf16, fp16, or bf32>
+export PRECISION=<fp32 and int8-fp32 for online,int8-bf16 for throughput and fp32,bf32, bf16, fp16, int8-fp32, int8-bf16 for accuracy>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 export DUMMY_INPUT=<provide 1 for using dummy data and 0 otherwise>
 export DATASET_DIR=<path to ImageNet dataset. Only required if DUMMY_INPUT=0>

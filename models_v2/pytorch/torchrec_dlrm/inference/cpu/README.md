@@ -79,7 +79,7 @@ https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorc
 | **TEST_MODE** (THROUGHPUT, ACCURACY)              | `export TEST_MODE=THROUGHPUT`                  |
 | **DATASET_DIR**             |                               `export DATASET_DIR=<multi-hot dataset dir>`                                  |
 | **WEIGHT_DIR** (ONLY FOR ACCURACY)     |                 `export WEIGHT_DIR=<offical released checkpoint>`        |
-| **PRECISION**    |                               `export PRECISION=int8 <specify the precision to run: int8, fp32, bf32 or bf16>`                             |
+| **PRECISION**    |                               `export PRECISION=int8 <For Throughput: fp32 and bf32. For Accuracy fp32, bf32 ,bf16, fp16, and int8>`                             |
 | **OUTPUT_DIR**    |                               `export OUTPUT_DIR=$PWD`                               |
 | **BATCH_SIZE** (optional) |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
 

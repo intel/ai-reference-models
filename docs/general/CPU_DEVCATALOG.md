@@ -13,7 +13,6 @@ The tables below link to documentation on how to run each use case using docker 
 | --------| ------------------------------------------------------ | ---------- | ------| --------------------- |
 | PyTorch | [GPT-J](../../models_v2/pytorch/gptj/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,FP16,INT8-FP32 | Inference | LAMBADA |
 | PyTorch | [Llama 2](../../models_v2/pytorch/llama/inference/cpu/CONTAINER.md) 7B,13B | FP32,BF32,BF16,FP16,INT8-FP32 | Inference | LAMBADA |
-| PyTorch | [Llama 2](../../models_v2/pytorch/llama/training/cpu/CONTAINER.md) 7B | FP32,BF32,BF16,FP16 | Training | LAMBADA | 
 | PyTorch | [ChatGLM](../../models_v2/pytorch/chatglm/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,FP16,INT8-FP32 | Inference | LAMBADA | 
 | PyTorch | [LCM](../../models_v2/pytorch/LCM/inference/cpu/CONTAINER.md) |  FP32,BF32,BF16,FP16,INT8-FP32,INT8-BF16 | Inference | COCO 2017 |
 | PyTorch | [Stable Diffusion](../../models_v2/pytorch/stable_diffusion/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,FP16,INT8-FP32,INT8-BF16 | Inference | COCO 2017 |
@@ -40,7 +39,6 @@ The tables below link to documentation on how to run each use case using docker 
 
 | Framework | Model                                                  | Precisions | Mode |  Dataset |
 | --------| ------------------------------------------------------ | ---------- | ------| --------------------- |
-| PyTorch | [BERT large](../../models_v2/pytorch/bert_large/training/cpu/CONTAINER.md) | FP32,BF32,BF16,FP16 | Training | Preprocessed Text dataset |
 | PyTorch |[BERT large](../../models_v2/pytorch/bert_large/inference/cpu/CONTAINER.md) | FP32,BF32,BF16,INT8 | Inference | SQuAD1.0 |
 | PyTorch | [RNN-T](../../models_v2/pytorch/rnnt/training/cpu/CONTAINER.md) | FP32,BF32,BF16,INT8 | Inference | LibriSpeech |
 | PyTorch |[RNN-T](../../models_v2/pytorch/rnnt/inference/cpu/CONTAINER.md) | FP32,BF32,FP16 | Training | LibriSpeech |
