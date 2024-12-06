@@ -32,15 +32,15 @@ services:
       dockerfile: docker/pytorch/bert_large/inference/cpu/pytorch-bert-large-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  # bert_large-training-cpu:
-  #   image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
-  #   pull_policy: always
-  #   build:
-  #     context: ../../
-  #     dockerfile: docker/pytorch/bert_large/training/cpu/pytorch-bert-large-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-  #   extends: bert_large-inference-cpu
-  #   command: >
-  #     bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  bert_large-training-cpu:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
+    pull_policy: always
+    build:
+      context: ../../
+      dockerfile: docker/pytorch/bert_large/training/cpu/pytorch-bert-large-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
+    extends: bert_large-inference-cpu
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   maskrcnn-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-maskrcnn-inference
     pull_policy: always
@@ -185,15 +185,15 @@ services:
     extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
-  # llama-training-cpu:
-  #   image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-training
-  #   pull_policy: always
-  #   build:
-  #     context: ../../
-  #     dockerfile: docker/pytorch/llama/training/cpu/pytorch-llama-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
-  #   extends: bert_large-inference-cpu
-  #   command: >
-  #     bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  llama-training-cpu:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-training
+    pull_policy: always
+    build:
+      context: ../../
+      dockerfile: docker/pytorch/llama/training/cpu/pytorch-llama-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
+    extends: bert_large-inference-cpu
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
   vit-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
     pull_policy: always

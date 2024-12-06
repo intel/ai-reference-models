@@ -45,7 +45,7 @@ To run the BERT Large inference scripts, set environment variables to specify th
 ```bash
 export EVAL_DATA_FILE=<path to the eval data>
 export OUTPUT_DIR=<directory where log files will be written>
-export PRECISION=<provide bf16, fp32, fp16, int8, avx-int8, avx-fp32 for throughput and bf16, bf32, fp32, fp16, int8, avx-fp32, avx-int8, fp8 for accuracy and realtime>
+export PRECISION=<specify the precision>
 export FINETUNED_MODELL=<path to pre-trained model>
 export TEST_MODE=<provide either REALTIME,THROUGHPUT OR ACCURACY mode>
 export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16 (for FP16 precision)

@@ -44,7 +44,7 @@ export OUTPUT_DIR=<path to output directory>
 export DATASET_DIR=<path to dataset directory only required for accuracy test>
 export WEIGHT_DIR=<path to pre-trained model directory only required for accuracy test>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
-export PRECISION=<For Throughput: fp32 and bf32. For Accuracy fp32, bf32 ,bf16, fp16 and int8>
+export PRECISION=<provide either fp32, int8, bf16 , bf32 or fp16>
 
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/recommendation:pytorch-cpu-dlrmv2-inference

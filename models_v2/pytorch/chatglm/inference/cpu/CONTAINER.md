@@ -38,7 +38,7 @@ To run ChatGLM inference, set environment variables to specify the precision and
 export BATCH_SIZE=<provide batch size for throughput inference, otherwise (default: 1)>
 ##Required
 export OUTPUT_DIR=<path to output directory>
-export PRECISION=<For Throughput and 1024/128 token sizes provide fp32, bf16, fp16 and int8-fp32. For Realtime and 1024/128 token sizes bf16 and fp16.  For Throughput and 2016/32 token sizes provide bf16 and fp16. For Realtime and 2016/32 token sizes provide bf16 and fp16. For Accuracy fp32, bf32, bf16, fp16, int8-fp32>
+export PRECISION=<provide either fp32, int8-fp32, bf16, fp16, or bf32>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 export INPUT_TOKEN=<provide input token length>
 export OUTPUT_TOKEN=<provide output token length>

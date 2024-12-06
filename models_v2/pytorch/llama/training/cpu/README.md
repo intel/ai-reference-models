@@ -1,10 +1,10 @@
 <!--- 0. Title -->
-# PyTorch LLaMA2 7B/13B inference (generation)
+# PyTorch LLAMA2 7B lora apalca finetuning training
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) and [LLaMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) inference (generation) using Intel-optimized PyTorch.
+This document has instructions for running [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf)  lora apalca finetuning using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
@@ -22,14 +22,51 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
   export LD_PRELOAD="<path_to>/tcmalloc/lib/libtcmalloc.so":"<path_to_iomp>/lib/libiomp5.so":$LD_PRELOAD
   ```
 
-* Set ENV to use fp16 AMX if you are using a supported platform
+* Set ENV to use multi-nodes distributed training (no need for single-node multi-sockets)
+
+In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
+```
+export NNODES=#your_node_number (default using 1 node)
+# create your_ip_list_file, one ip per line, like (or self edit):
+scontrol show hostname > ./hostfile
+
+export HOSTFILE=hostfile
+
+# [Optional] The following is needed if you have not set torch ccl and oneccl
+git clone https://github.com/intel-innersource/frameworks.ai.pytorch.torch-ccl.git
+cd frameworks.ai.pytorch.torch-ccl
+git checkout public_master
+git submodule sync
+git submodule update --init --recursive
+python setup.py install
+cd ../
+
+git clone https://github.com/oneapi-src/oneCCL.git
+cd oneCCL
+mkdir build
+cd build
+cmake ..
+make -j install
+source _install/env/setvars.sh
+cd ../..
+
+```
+
+# Dataset
   ```
-  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+  # Get the dataset here: https://github.com/tloen/alpaca-lora/blob/main/alpaca_data.json
+  wget https://raw.githubusercontent.com/tloen/alpaca-lora/main/alpaca_data.json
+  mv alpaca_data.json <clone of the AI Reference models>/models_v2/pytorch/llama/training/cpu
+
+  # Get the dataset template here: https://github.com/tloen/alpaca-lora/blob/main/templates/alpaca.json
+  wget https://raw.githubusercontent.com/tloen/alpaca-lora/main/templates/alpaca.json
+  mkdir <clone of the AI Reference models>/models_v2/pytorch/llama/training/cpu/templates
+  mv alpaca.json <clone of the AI Reference models>/models_v2/pytorch/llama/training/cpu/templates
   ```
 
-# Inference
+# Training
 1. `git clone https://github.com/IntelAI/models.git`
-2. `cd models/models_v2/pytorch/llama/inference/cpu`
+2. `cd models/models_v2/pytorch/llama/training/cpu`
 3. Create virtual environment `venv` and activate it:
     ```
     python3 -m venv venv
@@ -41,54 +78,21 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
     ```
 5. Install the latest CPU versions of [torch, torchvision and intel_extension_for_pytorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation)
 
-6. Set INPUT_TOKEN before running the model
-   ```
-   export INPUT_TOKEN=32
-   (choice in [32 64 128 256 512 1024 2016], we prefer to benchmark on 32 and 2016)
-   ```
+6. #[optional] you may need to get access to llama2 weights from HF
+    Apply the access in this page [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) with your huggingface account
+    huggingface-cli login
+    {your huggingface token}
 
-   Set OUTPUT_TOKEN before running the model
-   ```
-   export OUTPUT_TOKEN=32
-   (32 is preferred, while you could set any other length)
-   ```
-   Set FINETUNED_MODEL to llama2 7b or llama2 13b before running
-   ```
-   #Test llama2 7b
-   export FINETUNED_MODEL="meta-llama/Llama-2-7b-hf"
-   #Test llama2 13b
-   export FINETUNED_MODEL="meta-llama/Llama-2-13b-hf"
-   ```
-   About the BATCH_SIZE in scripts
-   ```
-   using BATCH_SIZE=1 for realtime mode
-   using BATCH_SIZE=N for throughput mode (N could be further tuned according to the testing host, by default using 1);
-   ```
-   About the BEAM_SIZE in scripts
-   ```
-   using BEAM_SIZE=4 by default
-   ```
-  * Do calibration to get "qconfig.json" before running INT8.
-    ```
-    #optional: qconfig.json is saved in this repo, you can also do calibration by yourself to re-generation it
-    bash do_quantization.sh calibration sq #using smooth quant as default
-
-    #unzip qconfig.zip to get qconfig.json, if you meet error to use this uploaded version of qconfig.zip, please re-generation it as above
-    unzip qconfig.zip
-    ```
 7. Setup required environment paramaters
 
 | **Parameter**                |                                  **export command**                                  |
 |:---------------------------:|:------------------------------------------------------------------------------------:|
-| **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)              | `export TEST_MODE=THROUGHPUT`                  |
+| **DDP**                    | `export DDP=False (True or False)`                  |
 | **OUTPUT_DIR**               |                               `export OUTPUT_DIR=<path to an output directory>`                               |
-| **FINETUNED_MODEL**    | `#Test llama2 7b: export FINETUNED_MODEL="meta-llama/Llama-2-7b-hf";   #Test llama2 13b: export FINETUNED_MODEL="meta-llama/Llama-2-13b-hf"`         |
-| **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8-fp32, int8-bf16) |
-| **INPUT_TOKEN**    |    `export INPUT_TOKEN=32 (choice in [32 64 128 256 512 1024 2016], we prefer to benchmark on 32 and 2016)`    |
-| **OUTPUT_TOKEN**    |   `export OUTPUT_TOKEN=32 (32 is preferred, while you could set any other length)`      |
-| **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
-| **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
-
+| **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16) |
+| **MODEL_DIR**               |        `export MODEL_DIR=$(pwd)`                               |
+| **BATCH_SIZE** (optional)    |          `export BATCH_SIZE=256`                                |
+| **NNODES** (Optional)     |                 `export NNODES=1`                                |
 
 ## Output
 

@@ -36,7 +36,7 @@ For int8 precision,prepare the model [here](./README.md#noteint8-model) and volu
 
 ```bash
 export OUTPUT_DIR=<path to output directory>
-export PRECISION=<provide fp32, bf32, bf16, fp16, int8-fp32, int8-bf16 for realtime and accuracy and bf32, bf16, fp16, int8-bf16 for throughput>
+export PRECISION=<provide either fp32, int8-fp32, int8-bf16, bf16, fp16, or bf32>
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 export DATASET_DIR=<path to COCO dataset>
 export TORCH_INDUCTOR=0
