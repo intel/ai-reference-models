@@ -85,7 +85,7 @@ Vision Transformer inference best known configurations with Intel® Extension fo
 | **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)              | `export TEST_MODE=THROUGHPUT`                  |
 | **OUTPUT_DIR**               |                               `export OUTPUT_DIR=$(pwd)`                               |
 | **DATASET_DIR**          |  `export DATASET_DIR=<path to dataset dir>`    |
-| **PRECISION**     |                  `export PRECISION=bf16` (fp32 and int8-fp32 for online, int8-bf16 for throughput and fp32,bf32, bf16, fp16, int8-fp32, int8-bf16 for accuracy) |
+| **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8-fp32, int8-bf16) |
 | **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
 | **DUMMY_INPUT**(optional)     |     `export DUMMY_INPUT=1` (This is optional; for performance collection)    |

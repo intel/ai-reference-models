@@ -71,7 +71,7 @@ Please get a quant_model.pt before run INT8-BF16 model or INT8-FP32 model. Pleas
 | **OUTPUT_DIR**               |                               `export OUTPUT_DIR=$(pwd)`                               |
 | **DATASET_DIR**       |          `export DATASET_DIR=<path_to_dataset_dir>`             |
 | **MODE**      | `export MODE=<choose from: eager, ipex-jit, compile-ipex, compile-inductor>`     |
-| **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8-fp32, int8-bf16 for realtime and accuracy and bf32, bf16, fp16, int8-bf16 for throughput) |
+| **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8-fp32, int8-bf16) |
 | **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
 | **BATCH_SIZE** (optional)    |                               `export BATCH_SIZE=256`                                |
 | **NNODES** (required for DISTRIBUTED)              | ` export NNODES=#your_node_number`                  |
