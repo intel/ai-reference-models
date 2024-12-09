@@ -92,6 +92,7 @@ elif [ "${RUN_MODE}" == "compile-ipex" ]; then
 elif [[ "${RUN_MODE}" == "compile-inductor" || "1" == "${TORCH_INDUCTOR}" ]]; then
     export TORCHINDUCTOR_FREEZING=1
     export TORCHINDUCTOR_CPP_ENABLE_TILING_HEURISTIC=0
+    export TORCHINDUCTOR_ENABLE_LINEAR_BINARY_FOLDING=1
     ARGS="$ARGS --compile_inductor"
     echo "### running torch.compile with inductor backend"
 else
