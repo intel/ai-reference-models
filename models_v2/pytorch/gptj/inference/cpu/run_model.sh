@@ -227,7 +227,6 @@ if [[ "${TEST_MODE}" != "ACCURACY" ]]; then
             printf("%.3f", thp);
         }
     '))
-    rm -rf ${OUTPUT_DIR}/summary.log
     echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
     echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"total-latency";${PRECISION};${BATCH_SIZE}; ${latency} " |tee -a ${OUTPUT_DIR}/summary.log
     echo "${FINETUNED_MODEL};Input/Output Token;${INPUT_TOKEN}/${OUTPUT_TOKEN};${LOG_PREFIX};"first-token-latency";${PRECISION};${BATCH_SIZE}; ${first_latency} " |tee -a ${OUTPUT_DIR}/summary.log
@@ -251,7 +250,6 @@ else
     rest_token_throughput="N/A"
     BATCH_SIZE=${BATCH_SIZE:-1}
     echo "Running Accuracy Inference"
-    rm -rf ${OUTPUT_DIR}/*accuracy*
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         path="ipex"
         MODE="jit"

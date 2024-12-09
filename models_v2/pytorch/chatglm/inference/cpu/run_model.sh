@@ -105,13 +105,13 @@ if [[ "${TEST_MODE}" == "THROUGHPUT" || "${TEST_MODE}" == "REALTIME" ]]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         ARGS_IPEX="$ARGS_IPEX --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
     else
-        ARGS_IPEX="$ARGS_IPEX --throughput-mode --enable-tcmalloc --log-path=${OUTPUT_DIR}"
+        ARGS_IPEX="$ARGS_IPEX --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
     fi
 else
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         ARGS_IPEX="$ARGS_IPEX --log_dir=${OUTPUT_DIR}"
     else
-        ARGS_IPEX="$ARGS_IPEX --log-path=${OUTPUT_DIR}"
+        ARGS_IPEX="$ARGS_IPEX --log_dir=${OUTPUT_DIR}"
     fi
 fi
 
