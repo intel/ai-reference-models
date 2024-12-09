@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index 999752485..5469c2d95 100644
+index 999752485..fd1232e91 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -77,7 +77,7 @@ index 999752485..5469c2d95 100644
 +            model = convert(prepared_model)
 +            model = torch.jit.trace(model, jit_inputs, strict=False)
 +        elif args.int8_bf16:
-+            with torch.cpu.amp.autocast():
++            with torch.autocast("cpu"):
 +                model = convert(prepared_model)
 +                model = torch.jit.trace(model, jit_inputs, strict=False)
 +        model = torch.jit.freeze(model)
@@ -101,7 +101,7 @@ index 999752485..5469c2d95 100644
 +        else:
 +            torch._C._jit_set_autocast_mode(False)
 +            model = model.to(torch.bfloat16)
-+        with torch.cpu.amp.autocast(),torch.no_grad():
++        with torch.autocast("cpu"),torch.no_grad():
 +            if args.use_jit:
 +                model = torch.jit.trace(model, jit_inputs, strict=False)
 +                model = torch.jit.freeze(model)
@@ -113,7 +113,7 @@ index 999752485..5469c2d95 100644
 +        else:
 +            torch._C._jit_set_autocast_mode(False)
 +            model = model.to(torch.half)
-+        with torch.cpu.amp.autocast(enabled=True, dtype=torch.half):
++        with torch.autocast("cpu", enabled=True, dtype=torch.half):
 +            if args.use_jit:
 +                model = torch.jit.trace(model, jit_inputs, strict=False)
 +                model = torch.jit.freeze(model)
@@ -163,7 +163,7 @@ index 999752485..5469c2d95 100644
 +                prepared_model(**torch_compile_inputs)
 +                converted_model = convert_pt2e(prepared_model)
 +                torch.ao.quantization.move_exported_model_to_eval(converted_model)
-+                with torch.cpu.amp.autocast(enabled=args.int8_bf16):
++                with torch.autocast("cpu", enabled=args.int8_bf16):
 +                    if args.ipex:
 +                        model = torch.compile(converted_model, backend="ipex")
 +                    else:
@@ -171,7 +171,7 @@ index 999752485..5469c2d95 100644
 +                    model(**torch_compile_inputs)
 +                    model(**torch_compile_inputs)
 +        else:
-+            with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
++            with torch.no_grad(), torch.autocast("cpu", enabled=args.bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
 +                if args.ipex:
 +                    print('[Info] Running torch.compile() with IPEX backend')
 +                    model = torch.compile(model, backend="ipex")
@@ -229,7 +229,7 @@ index 999752485..5469c2d95 100644
 +                    print("Throughput: {:.3f} sentence/s".format(throughput))
 +                    break
 +                import contextlib
-+                maybe_autocast = torch.cpu.amp.autocast(enabled=args.bf16 or args.int8_bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16) if args.inductor else contextlib.nullcontext()
++                maybe_autocast = torch.autocast("cpu", enabled=args.bf16 or args.int8_bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16) if args.inductor else contextlib.nullcontext()
 +                with torch.no_grad(), maybe_autocast:
 +                    inputs = {
 +                        "input_ids": batch[0],
@@ -346,7 +346,7 @@ index 999752485..5469c2d95 100644
                      )
 -            outputs = model(**inputs)
 +            if args.inductor:
-+                with torch.cpu.amp.autocast(enabled=args.bf16 or args.int8_bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
++                with torch.autocast("cpu", enabled=args.bf16 or args.int8_bf16 or args.fp16_cpu, dtype=torch.half if args.fp16_cpu else torch.bfloat16):
 +                    outputs = model(**inputs)
 +            elif args.fp8:
 +                with fp8_autocast(enabled=True, calibrating=False, fp8_recipe=DelayedScaling(fp8_format=Format.E4M3, amax_history_len=1024)):
@@ -363,6 +363,15 @@ index 999752485..5469c2d95 100644
  
              # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
              # models only use two.
+@@ -419,7 +716,7 @@ def load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=Fal
+     # Init features and dataset from cache if it exists
+     if os.path.exists(cached_features_file) and not args.overwrite_cache:
+         logger.info("Loading features from cached file %s", cached_features_file)
+-        features_and_dataset = torch.load(cached_features_file)
++        features_and_dataset = torch.load(cached_features_file, weights_only=False)
+         features, dataset, examples = (
+             features_and_dataset["features"],
+             features_and_dataset["dataset"],
 @@ -671,7 +968,69 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
@@ -1175,7 +1184,7 @@ index 734ccf6a9..641814bf2 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2436dadc..894d20fa7 100755
+index a2436dadc..0f2d7433e 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -152,6 +152,31 @@ from .utils import (
@@ -1398,7 +1407,7 @@ index a2436dadc..894d20fa7 100755
 +                    prepared_model(**example_batch)
 +                    converted_model = convert_pt2e(prepared_model)
 +                    torch.ao.quantization.move_exported_model_to_eval(converted_model)
-+                    with torch.cpu.amp.autocast(enabled=(self.args.bf16 or self.args.int8_bf16)):
++                    with torch.autocast("cpu", enabled=(self.args.bf16 or self.args.int8_bf16)):
 +                        if self.args.use_ipex:
 +                            print('[Info] Running torch.compile() with IPEX backend')
 +                            model = torch.compile(converted_model, backend="ipex")
@@ -1408,7 +1417,7 @@ index a2436dadc..894d20fa7 100755
 +                        y = model(**example_batch)
 +                        y = model(**example_batch)
 +            elif self.args.bf16:
-+                with torch.no_grad(), torch.cpu.amp.autocast(dtype=torch.bfloat16):
++                with torch.no_grad(), torch.autocast("cpu", dtype=torch.bfloat16):
 +                    if self.args.use_ipex:
 +                        print('[Info] Running torch.compile() Bfloat16 with IPEX backend')
 +                        model = torch.compile(model, backend="ipex")
@@ -1418,7 +1427,7 @@ index a2436dadc..894d20fa7 100755
 +                    y = model(**example_batch)
 +                    y = model(**example_batch)
 +            elif self.args.fp16_cpu:
-+                with torch.no_grad(), torch.cpu.amp.autocast(dtype=torch.half):
++                with torch.no_grad(), torch.autocast("cpu", dtype=torch.half):
 +                    if self.args.use_ipex:
 +                        print('[Info] Running torch.compile() float16 with IPEX backend')
 +                        model = torch.compile(model, backend="ipex")
@@ -1448,7 +1457,7 @@ index a2436dadc..894d20fa7 100755
 +        if self.args.inductor:
 +            from torch._inductor import config as inductor_config
 +            inductor_config.cpp_wrapper = True
-+            with torch.cpu.amp.autocast(enabled=self.args.bf16 or self.args.fp16_cpu, dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
++            with torch.autocast("cpu", enabled=self.args.bf16 or self.args.fp16_cpu, dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
 +                model = torch.compile(model)
  
          return model
@@ -1477,6 +1486,15 @@ index a2436dadc..894d20fa7 100755
                      optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
                      if optimizer_was_run:
                          # Delay optimizer scheduling until metrics are generated
+@@ -2867,7 +3029,7 @@ class Trainer:
+         arguments, depending on the situation.
+         """
+         if self.use_cpu_amp:
+-            ctx_manager = torch.cpu.amp.autocast(cache_enabled=cache_enabled, dtype=self.amp_dtype)
++            ctx_manager = torch.autocast("cpu", cache_enabled=cache_enabled, dtype=self.amp_dtype)
+         else:
+             ctx_manager = contextlib.nullcontext()
+ 
 @@ -2908,7 +3070,10 @@ class Trainer:
              with amp.scale_loss(loss, self.optimizer) as scaled_loss:
                  scaled_loss.backward()
@@ -1513,7 +1531,7 @@ index a2436dadc..894d20fa7 100755
 +            with torch.no_grad():
 +                for i in range(40):
 +                    if (self.args.bf16 or self.args.int8_bf16 or self.args.fp16_cpu) and self.args.inductor:
-+                        with torch.cpu.amp.autocast(dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
++                        with torch.autocast("cpu", dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
 +                            outputs = model(**batch)
 +                    else:
 +                        outputs = model(**batch)
@@ -1541,7 +1559,7 @@ index a2436dadc..894d20fa7 100755
 +                        break
 +                    with torch.no_grad():
 +                        if (self.args.bf16 or self.args.int8_bf16 or self.args.fp16_cpu) and self.args.inductor:
-+                            with torch.cpu.amp.autocast(dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
++                            with torch.autocast("cpu", dtype=torch.half if self.args.fp16_cpu else torch.bfloat16):
 +                                start = time.time()
 +                                outputs = model(**batch)
 +                                end = time.time()
@@ -1760,3 +1778,16 @@ index 19ab24c20..b19eea005 100644
  
          if (
              self.framework == "pt"
+diff --git a/src/transformers/utils/import_utils.py b/src/transformers/utils/import_utils.py
+index 57b4e8404..992203eb0 100644
+--- a/src/transformers/utils/import_utils.py
++++ b/src/transformers/utils/import_utils.py
+@@ -332,7 +332,7 @@ def is_torch_bf16_cpu_available():
+ 
+     try:
+         # multiple levels of AttributeError depending on the pytorch version so do them all in one check
+-        _ = torch.cpu.amp.autocast
++        _ = torch.autocast
+     except AttributeError:
+         return False
+ 
