@@ -19,12 +19,12 @@ Basic requirements for running all TensorFlow models on Windows include:
      * libsm6
      * libxext6
      * requests
- 
+
 Individual models may have additional dependencies that need to be
-installed before running it. Please follow the instructions in each model documentation. 
+installed before running it. Please follow the instructions in each model documentation.
 
 The following list of models are tested on Windows, please check each model instructions from the `Model Documentation` column based on the available precisions.
->Note that on Windows systems all of the system cores will be used. 
+>Note that on Windows systems all of the system cores will be used.
 >For users of Windows desktop/laptops, it is strongly encouraged to instead use the batch file provided [here](/benchmarks/common/windows_intel1dnn_setenv.bat) to open a Windows command prompt pre-configured with optimized settings to achieve high AI workload performance on Intel hardware (e.g. TigerLake & AlderLake) for image recognition models.
 
 | Use Case                | Model              | Mode      | Model Documentation |
@@ -47,5 +47,5 @@ The following list of models are tested on Windows, please check each model inst
 
 | Use Case                | Model              | Mode      | Model Documentation |
 | ----------------------- | ------------------ | --------- | ------------------- |
-| Image Recognition       | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | Inference | [FP32](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/fp32/README.md) [BFloat16](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/bfloat16/README.md) |
-| Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Inference  | [FP32](/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/README.md) |
+| Image Recognition       | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | Inference | [FP32](/models_v2/pytorch/resnet50/inference/cpu/README.md) [BFloat16](/models_v2/pytorch/resnet50/inference/cpu/README.md) |
+| Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Inference  | [FP32](/models_v2/pytorch/maskrcnn/inference/cpu/README.md) |

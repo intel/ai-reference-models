@@ -1,4 +1,0 @@
-wheel==0.38.1 # Included this to avoid a vulnerability
-evaluate >= 0.2.0
-datasets >= 1.4.0
-git+https://github.com/huggingface/transformers

@@ -1,0 +1,6 @@
+matplotlib
+numpy==1.25.2
+pandas
+scikit-image
+scipy==1.11.1
+keras_cv==0.5.1

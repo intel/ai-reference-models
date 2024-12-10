@@ -18,10 +18,10 @@ ARG TF_BASE_TAG=latest
 
 FROM ${TF_BASE_IMAGE}:${TF_BASE_TAG}
 
-WORKDIR /workspace/tf-resnet50v1-5-inference 
+WORKDIR /workspace/tf-resnet50v1-5-inference
 
 RUN yum update -y && \
-    yum install -y --skip-broken ca-certificates numactl wget 
+    yum install -y --skip-broken ca-certificates numactl wget
 
 RUN mkdir -p pretrained_model && \
     wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50v1_5_int8_pretrained_model.pb -O pretrained_model/bias_resnet50.pb && \
@@ -30,16 +30,16 @@ RUN mkdir -p pretrained_model && \
 
 COPY benchmarks benchmarks
 COPY models models
-COPY quickstart/common quickstart/common
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/accuracy.sh quickstart/accuracy.sh
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_throughput_multi_instance.sh quickstart/inference_throughput.sh
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_multi_instance.sh quickstart/inference_realtime.sh
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_weightsharing.sh quickstart/inference_realtime_weightsharing.sh
+COPY models_v2/common models_v2/common
+COPY models_v2/tensorflow/resnet50v1_5/inference/cpu/accuracy.sh models_v2/accuracy.sh
+COPY models_v2/tensorflow/resnet50v1_5/inference/cpu/inference_throughput_multi_instance.sh models_v2/inference_throughput.sh
+COPY models_v2/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_multi_instance.sh models_v2/inference_realtime.sh
+COPY models_v2/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_weightsharing.sh models_v2/inference_realtime_weightsharing.sh
 
 RUN python -m pip install pillow==10.2.0 \
         cryptography==42.0.4 \
         setuptools==65.5.1 \
         werkzeug==3.0.1
-        
+
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

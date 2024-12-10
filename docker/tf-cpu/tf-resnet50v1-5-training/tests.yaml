@@ -1,6 +1,6 @@
 ResNet50 v1.5 Training fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-training
-  cmd: /bin/bash quickstart/training.sh
+  cmd: /bin/bash models_v2/training.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-training/fp32
@@ -17,7 +17,7 @@ ResNet50 v1.5 Training fp32:
     dst: /output/tf-resnet50v1-5-training/fp32
 ResNet50 v1.5 Training bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-training
-  cmd: /bin/bash quickstart/training.sh
+  cmd: /bin/bash models_v2/training.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-training/bf16

@@ -1,6 +1,6 @@
 BERT-Large Pretraining fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-pretraining
-  cmd: /bin/bash quickstart/pretraining.sh -a 64 -e 2
+  cmd: /bin/bash models_v2/pretraining.sh -a 64 -e 2
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm
     OUTPUT_DIR: /output/tf-bert-large-pretraining/fp32
@@ -18,7 +18,7 @@ BERT-Large Pretraining fp32:
     dst: /output/tf-bert-large-pretraining/fp32
 BERT-Large Pretraining bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-pretraining
-  cmd: /bin/bash quickstart/pretraining.sh -a 64 -e 2
+  cmd: /bin/bash models_v2/pretraining.sh -a 64 -e 2
   env:
     KMP_AFFINITY: granularity=fine,verbose,compact,1,0
     OMP_NUM_THREADS: '64'

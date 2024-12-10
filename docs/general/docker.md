@@ -42,8 +42,3 @@ that docker (running as root) has read/write access to the directory.
 If you really need to use an NFS directory as your volume mount, see the
 [docker volume create](https://docs.docker.com/engine/reference/commandline/volume_create/)
 command where you can use the `--opt` flag to specify the type as nfs.
-
-## Advanced Options
-
-For information on advanced usages, such as running the container as the
-host user instead of root, see [this document](https://github.com/IntelAI/models/blob/master/quickstart/common/tensorflow/ModelPackagesAdvancedOptions.md).

@@ -75,9 +75,9 @@ RUN yum update -y && \
 
 COPY benchmarks benchmarks
 COPY models models
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh quickstart/training.sh
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training_demo.sh quickstart/training_demo.sh
-COPY quickstart/common quickstart/common
+COPY models_v2/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh models_v2/training.sh
+COPY models_v2/tensorflow/resnet50v1_5/training/cpu/multi_instance_training_demo.sh models_v2/training_demo.sh
+COPY models_v2/common models_v2/common
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
