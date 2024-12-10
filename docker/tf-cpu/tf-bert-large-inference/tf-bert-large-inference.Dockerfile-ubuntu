@@ -28,16 +28,16 @@ ENV LD_PRELOAD="/usr/lib/x86_64-linux-gnu/libtcmalloc.so.4.5.9"
 COPY benchmarks benchmarks
 COPY models/common models/common
 COPY models/language_modeling/tensorflow/bert_large/inference models/language_modeling/tensorflow/bert_large/inference
-COPY quickstart/common quickstart/common 
-COPY quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_realtime_multi_instance.sh quickstart/inference_realtime.sh
-COPY quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_realtime_weight_sharing.sh quickstart/inference_realtime_weight_sharing.sh
-COPY quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_throughput_multi_instance.sh quickstart/inference_throughput.sh
-COPY quickstart/language_modeling/tensorflow/bert_large/inference/cpu/accuracy.sh quickstart/accuracy.sh
+COPY models_v2/common models_v2/common
+COPY models_v2/tensorflow/bert_large/inference/cpu/inference_realtime_multi_instance.sh models_v2/inference_realtime.sh
+COPY models_v2/tensorflow/bert_large/inference/cpu/inference_realtime_weight_sharing.sh models_v2/inference_realtime_weight_sharing.sh
+COPY models_v2/tensorflow/bert_large/inference/cpu/inference_throughput_multi_instance.sh models_v2/inference_throughput.sh
+COPY models_v2/tensorflow/bert_large/inference/cpu/accuracy.sh models_v2/accuracy.sh
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party
 
-RUN mkdir -p /workspace/tf-bert-large-inference/pretrained_model && \ 
+RUN mkdir -p /workspace/tf-bert-large-inference/pretrained_model && \
     wget -qO /workspace/tf-bert-large-inference/pretrained_model/bert_large_fp32_pretrained_model.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/fp32_bert_squad.pb && \
     wget -qO /workspace/tf-bert-large-inference/pretrained_model/bert_large_bfloat16_pretrained_model.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/optimized_bf16_bert.pb && \
     wget -qO /workspace/tf-bert-large-inference/pretrained_model/bert_large_int8_pretrained_model.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/per_channel_opt_int8_bf16_bert.pb && \

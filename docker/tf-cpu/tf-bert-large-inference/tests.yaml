@@ -1,6 +1,6 @@
 BERT-Large Realtime Inference fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/inference_realtime.sh
+  cmd: /bin/bash models_v2/inference_realtime.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/realtime_fp32
@@ -19,7 +19,7 @@ BERT-Large Realtime Inference fp32:
     dst: /output/tf-bert-large-inference/realtime_fp32
 BERT-Large Weightsharing Inference fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/inference_realtime_weight_sharing.sh
+  cmd: /bin/bash models_v2/inference_realtime_weight_sharing.sh
   env:
     TF_ONEDNN_USE_SYSTEM_ALLOCATOR: '1'
     OMP_NUM_THREADS: '4'
@@ -39,7 +39,7 @@ BERT-Large Weightsharing Inference fp32:
     dst: /output/tf-bert-large-inference/weightsharing_fp32
 BERT-Large Throughput fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/inference_throughput.sh
+  cmd: /bin/bash models_v2/inference_throughput.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/throughput_fp32
@@ -58,7 +58,7 @@ BERT-Large Throughput fp32:
     dst: /output/tf-bert-large-inference/throughput_fp32
 BERT-Large Accuracy fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/accuracy.sh --verbose
+  cmd: /bin/bash models_v2/accuracy.sh --verbose
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/accuracy_fp32
@@ -74,7 +74,7 @@ BERT-Large Accuracy fp32:
     dst: /output/tf-bert-large-inference/accuracy_fp32
 BERT-Large Accuracy bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/accuracy.sh --verbose
+  cmd: /bin/bash models_v2/accuracy.sh --verbose
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/accuracy_bf16
@@ -90,7 +90,7 @@ BERT-Large Accuracy bf16:
     dst: /output/tf-bert-large-inference/accuracy_bf16
 BERT-Large Realtime Inference bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/inference_realtime.sh
+  cmd: /bin/bash models_v2/inference_realtime.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/realtime_bf16
@@ -110,7 +110,7 @@ BERT-Large Realtime Inference bf16:
     dst: /output/tf-bert-large-inference/realtime_bf16
 BERT-Large Weightsharing Inference bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/inference_realtime_weight_sharing.sh
+  cmd: /bin/bash models_v2/inference_realtime_weight_sharing.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/weightsharing_bf16
@@ -131,7 +131,7 @@ BERT-Large Weightsharing Inference bf16:
     dst: /output/tf-bert-large-inference/weightsharing_bf16
 BERT-Large Throughput bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/inference_throughput.sh
+  cmd: /bin/bash models_v2/inference_throughput.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/throughput_bf16
@@ -150,7 +150,7 @@ BERT-Large Throughput bf16:
     dst: /output/tf-bert-large-inference/throughput_bf16
 BERT-Large Accuracy int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/accuracy.sh
+  cmd: /bin/bash models_v2/accuracy.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/accuracy_int8
@@ -166,7 +166,7 @@ BERT-Large Accuracy int8:
     dst: /output/tf-bert-large-inference/accuracy_int8
 BERT-Large Realtime Inference int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/inference_realtime.sh
+  cmd: /bin/bash models_v2/inference_realtime.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/realtime_int8
@@ -186,7 +186,7 @@ BERT-Large Realtime Inference int8:
     dst: /output/tf-bert-large-inference/realtime_int8
 BERT-Large Weightsharing Inference int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/inference_realtime_weight_sharing.sh
+  cmd: /bin/bash models_v2/inference_realtime_weight_sharing.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/weightsharing_int8
@@ -207,7 +207,7 @@ BERT-Large Weightsharing Inference int8:
     dst: /output/tf-bert-large-inference/weightsharing_int8
 BERT-Large Throughput int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-language-modeling-tf-bert-large-inference
-  cmd: /bin/bash quickstart/inference_throughput.sh
+  cmd: /bin/bash models_v2/inference_throughput.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
     OUTPUT_DIR: /output/tf-bert-large-inference/throughput_int8

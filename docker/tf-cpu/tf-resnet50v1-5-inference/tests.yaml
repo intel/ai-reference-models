@@ -1,6 +1,6 @@
 ResNet50 v1.5 Accuracy bf32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/accuracy.sh
+  cmd: /bin/bash models_v2/accuracy.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_bf32
@@ -16,7 +16,7 @@ ResNet50 v1.5 Accuracy bf32:
     dst: /output/tf-resnet50v1-5-inference/accuracy_bf32
 ResNet50 v1.5 Accuracy bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/accuracy.sh
+  cmd: /bin/bash models_v2/accuracy.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_bf16
@@ -32,7 +32,7 @@ ResNet50 v1.5 Accuracy bf16:
     dst: /output/tf-resnet50v1-5-inference/accuracy_bf16
 ResNet50 v1.5 Accuracy fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/accuracy.sh
+  cmd: /bin/bash models_v2/accuracy.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_fp32
@@ -48,7 +48,7 @@ ResNet50 v1.5 Accuracy fp32:
     dst: /output/tf-resnet50v1-5-inference/accuracy_fp32
 ResNet50 v1.5 Accuracy int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/accuracy.sh
+  cmd: /bin/bash models_v2/accuracy.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/accuracy_int8
@@ -64,7 +64,7 @@ ResNet50 v1.5 Accuracy int8:
     dst: /output/tf-resnet50v1-5-inference/accuracy_int8
 ResNet50 v1.5 Realtime Inference bf32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_realtime.sh
+  cmd: /bin/bash models_v2/inference_realtime.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_bf32
@@ -82,7 +82,7 @@ ResNet50 v1.5 Realtime Inference bf32:
     dst: /output/tf-resnet50v1-5-inference/realtime_bf32
 ResNet50 v1.5 Realtime Inference bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1
+  cmd: /bin/bash models_v2/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_bf16
@@ -100,7 +100,7 @@ ResNet50 v1.5 Realtime Inference bf16:
     dst: /output/tf-resnet50v1-5-inference/realtime_bf16
 ResNet50 v1.5 Realtime Inference fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1
+  cmd: /bin/bash models_v2/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_fp32
@@ -118,7 +118,7 @@ ResNet50 v1.5 Realtime Inference fp32:
     dst: /output/tf-resnet50v1-5-inference/realtime_fp32
 ResNet50 v1.5 Realtime Inference int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1
+  cmd: /bin/bash models_v2/inference_realtime.sh --benchmark-only --num-intra-threads 4 --num-inter-threads 1
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/realtime_int8
@@ -136,7 +136,7 @@ ResNet50 v1.5 Realtime Inference int8:
     dst: /output/tf-resnet50v1-5-inference/realtime_int8
 ResNet50 v1.5 Throughput bf32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_throughput.sh
+  cmd: /bin/bash models_v2/inference_throughput.sh
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/throughput_bf32
@@ -154,7 +154,7 @@ ResNet50 v1.5 Throughput bf32:
     dst: /output/tf-resnet50v1-5-inference/throughput_bf32
 ResNet50 v1.5 Throughput bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_throughput.sh --benchmark-only --num-intra-threads 64 --num-inter-threads 1
+  cmd: /bin/bash models_v2/inference_throughput.sh --benchmark-only --num-intra-threads 64 --num-inter-threads 1
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/throughput_bf16
@@ -172,7 +172,7 @@ ResNet50 v1.5 Throughput bf16:
     dst: /output/tf-resnet50v1-5-inference/throughput_bf16
 ResNet50 v1.5 Throughput fp32:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_throughput.sh --benchmark-only --num-intra-threads 64 --num-inter-threads 1
+  cmd: /bin/bash models_v2/inference_throughput.sh --benchmark-only --num-intra-threads 64 --num-inter-threads 1
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/throughput_fp32
@@ -190,7 +190,7 @@ ResNet50 v1.5 Throughput fp32:
     dst: /output/tf-resnet50v1-5-inference/throughput_fp32
 ResNet50 v1.5 Throughput int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_throughput.sh --benchmark-only --num-intra-threads 64 --num-inter-threads 1
+  cmd: /bin/bash models_v2/inference_throughput.sh --benchmark-only --num-intra-threads 64 --num-inter-threads 1
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/throughput_int8
@@ -208,7 +208,7 @@ ResNet50 v1.5 Throughput int8:
     dst: /output/tf-resnet50v1-5-inference/throughput_int8
 ResNet50 v1.5 Weightsharing Inference bf16:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_realtime_weightsharing.sh --benchmark-only
+  cmd: /bin/bash models_v2/inference_realtime_weightsharing.sh --benchmark-only
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/weightsharing_bf16
@@ -227,7 +227,7 @@ ResNet50 v1.5 Weightsharing Inference bf16:
     dst: /output/tf-resnet50v1-5-inference/weightsharing_bf16
 ResNet50 v1.5 Weightsharing Inference int8:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
-  cmd: /bin/bash quickstart/inference_realtime_weightsharing.sh --benchmark-only
+  cmd: /bin/bash models_v2/inference_realtime_weightsharing.sh --benchmark-only
   env:
     DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
     OUTPUT_DIR: /output/tf-resnet50v1-5-inference/weightsharing_int8

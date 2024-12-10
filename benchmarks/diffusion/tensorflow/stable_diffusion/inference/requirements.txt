@@ -1,5 +1,0 @@
-keras_cv==0.5.1
-matplotlib
-pandas
-scikit-image
-scipy

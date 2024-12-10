@@ -75,8 +75,8 @@ RUN yum update -y && \
 
 COPY benchmarks benchmarks
 COPY models models
-COPY quickstart/common quickstart/common
-COPY quickstart/language_modeling/tensorflow/bert_large/training/cpu/pretraining.sh quickstart/pretraining.sh
+COPY models_v2/common models_v2/common
+COPY models_v2/tensorflow/bert_large/training/cpu/pretraining.sh models_v2/pretraining.sh
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

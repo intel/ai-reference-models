@@ -50,8 +50,8 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 | Model                                                  | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | ------------------------------------------------------ | ---------- | ----------| ------------------- | ---------------------- |
-| [ResNet 50v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet)  [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | TensorFlow | Inference | [Int8 FP32 BFloat16 BFloat32](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
-| [ResNet 50v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet)  [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | TensorFlow | Training |  [FP32 BFloat16 BFloat32](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
+| [ResNet 50v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet)  [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | TensorFlow | Inference | [Int8 FP32 BFloat16 BFloat32](/models_v2/tensorflow/resnet50v1_5/inference/cpu/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
+| [ResNet 50v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet)  [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | TensorFlow | Training |  [FP32 BFloat16 BFloat32](/models_v2/tensorflow/resnet50v1_5/training/cpu/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
 | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Inference | [Int8 FP32 BFloat16 BFloat32](/models_v2/pytorch/resnet50/inference/cpu/README.md) | [ImageNet 2012] |
 | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Training  | [FP32 BFloat16 BFloat32](/models_v2/pytorch/resnet50/training/cpu/README.md) | [ImageNet 2012] |
 | [Vision Transformer](https://huggingface.co/google/vit-base-patch16-224) | PyTorch | Inference | [FP32 BFloat16 BFloat32 FP16 INT8](/models_v2/pytorch/vit/inference/cpu/README.md) | [ImageNet 2012] |
@@ -60,15 +60,15 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 | Model                                                    | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | -------------------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [3D U-Net](https://arxiv.org/pdf/1606.06650.pdf) | TensorFlow | Inference | [FP32 BFloat16 Int8](/benchmarks/image_segmentation/tensorflow/3d_unet/inference/README.md) | [BRATS 2018](https://www.med.upenn.edu/sbia/brats2018/registration.html) |
+| [3D U-Net](https://arxiv.org/pdf/1606.06650.pdf) | TensorFlow | Inference | [FP32 BFloat16 Int8](/models_v2/tensorflow/3d_unet/inference/cpu/README.md) | [BRATS 2018](https://www.med.upenn.edu/sbia/brats2018/registration.html) |
 
 ### Language Modeling
 
 | Model                                        | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | -------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Inference | [FP32 BFloat16 Int8 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
-| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Training | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
-| [BERT large (Hugging Face)](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Inference | [FP32 FP16 BFloat16 BFloat32](/benchmarks/language_modeling/tensorflow/bert_large_hf/inference/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
+| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Inference | [FP32 BFloat16 Int8 BFloat32](/models_v2/tensorflow/bert_large/inference/cpu/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
+| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Training | [FP32 BFloat16 BFloat32](/models_v2/tensorflow/bert_large/training/cpu/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
+| [BERT large (Hugging Face)](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Inference | [FP32 FP16 BFloat16 BFloat32](/models_v2/tensorflow/bert_large_hf/inference/cpu/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | [FP32 Int8 BFloat16 BFloat32](/models_v2/pytorch/bert_large/inference/cpu/README.md) | BERT Large SQuAD1.1 |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Training  | [FP32 BFloat16 BFloat32](/models_v2/pytorch/bert_large/training/cpu/README.md) | [preprocessed text dataset](https://drive.google.com/drive/folders/1cywmDnAsrP5-2vsr8GDc6QUc7VWe-M3v) |
 | [DistilBERT base](https://arxiv.org/abs/1910.01108)  | PyTorch | Inference | [FP32 BF32 BF16Int8-FP32 Int8-BFloat16 BFloat32](/models_v2/pytorch/distilbert/inference/cpu/README.md) | [ DistilBERT Base SQuAD1.1](https://huggingface.co/distilbert-base-uncased-distilled-squad) |
@@ -86,7 +86,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 | Model                                                           | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | --------------------------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [BERT](https://arxiv.org/pdf/1810.04805.pdf)                    | TensorFlow | Inference | [FP32](/benchmarks/language_translation/tensorflow/bert/inference/README.md) | [MRPC](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#classification-training-with-bert) |
+| [BERT](https://arxiv.org/pdf/1810.04805.pdf)                    | TensorFlow | Inference | [FP32](/models_v2/tensorflow/bert/inference/cpu/README.md) | [MRPC](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#classification-training-with-bert) |
 
 ### Object Detection
 
@@ -102,7 +102,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 | Model                                                  | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | ------------------------------------------------------ | ---------- | ----------| ------------------- | ---------------------- |
-| [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf) | TensorFlow | Inference | [FP32](/benchmarks/recommendation/tensorflow/wide_deep/inference/README.md) | [Census Income dataset](https://github.com/IntelAI/models/tree/master/benchmarks/recommendation/tensorflow/wide_deep/inference/fp32#dataset) |
+| [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf) | TensorFlow | Inference | [FP32](/models_v2/tensorflow/wide_deep/inference/cpu/README.md) | [Census Income dataset](https://github.com/IntelAI/models/tree/master/benchmarks/recommendation/tensorflow/wide_deep/inference/fp32#dataset) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 Int8 BFloat16 BFloat32](/models_v2/pytorch/dlrm/inference/cpu/README.md) | [Criteo Terabyte](/models_v2/pytorch/dlrm/inference/cpu/README.md#datasets) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Training  | [FP32 BFloat16 BFloat32](/models_v2/pytorch/dlrm/training/cpu/README.md) | [Criteo Terabyte](/models_v2/pytorch/dlrm/training/cpu/README.md#datasets) |
 | [DLRM v2](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 FP16 BFloat16 BFloat32 Int8](/models_v2/pytorch/torchrec_dlrm/inference/cpu/README.md) | [Criteo 1TB Click Logs dataset](/models_v2/pytorch/torchrec_dlrm/inference/cpu#datasets) |
@@ -111,7 +111,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 | Model                                           | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | ----------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [Stable Diffusion](https://keras.io/guides/keras_cv/generate_images_with_stable_diffusion/) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/diffusion/tensorflow/stable_diffusion/inference/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
+| [Stable Diffusion](https://keras.io/guides/keras_cv/generate_images_with_stable_diffusion/) | TensorFlow | Inference | [FP32 BFloat16 FP16](/models_v2/tensorflow/stable_diffusion/inference/cpu/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
 | [Stable Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1) | PyTorch | Inference | [FP32 BFloat16 FP16 BFloat32 Int8-FP32 Int8-BFloat16](/models_v2/pytorch/stable_diffusion/inference/cpu/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
 | [Stable Diffusion](https://huggingface.co/stabilityai/stable-diffusion-2-1) | PyTorch | Training | [FP32 BFloat16 FP16 BFloat32](/models_v2/pytorch/stable_diffusion/training/cpu/README.md) | [cat images](https://huggingface.co/datasets/diffusers/cat_toy_example)
 | [Latent Consistency Models(LCM)](https://huggingface.co/SimianLuo/LCM_Dreamshaper_v7) | PyTorch | Inference | [FP32 BFloat16 FP16 BFloat32 Int8-FP32 Int8-BFloat16](/models_v2/pytorch/LCM/inference/cpu/README.md) | [COCO 2017 validation dataset](https://github.com/IntelAI/models/tree/master/datasets/coco#download-and-preprocess-the-coco-validation-images)
@@ -120,7 +120,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 | Model                                           | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | ----------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [GraphSAGE](https://arxiv.org/pdf/1706.02216.pdf) | TensorFlow | Inference | [FP32 BFloat16 FP16 Int8 BFloat32](/benchmarks/graph_networks/tensorflow/graphsage/inference/README.md) | [Protein Protein Interaction](http://snap.stanford.edu/graphsage) |
+| [GraphSAGE](https://arxiv.org/pdf/1706.02216.pdf) | TensorFlow | Inference | [FP32 BFloat16 FP16 Int8 BFloat32](/models_v2/tensorflow/graphsage/inference/cpu/README.md) | [Protein Protein Interaction](http://snap.stanford.edu/graphsage) |
 
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
 

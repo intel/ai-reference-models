@@ -20,7 +20,7 @@ The table below provides links to run each workload in a docker container. The c
 | [BERT Large](https://arxiv.org/pdf/1810.04805.pdf)                                           | PyTorch | [Training](../../models_v2/pytorch/bert_large/training/gpu/CONTAINER.md) | BF16,TF32 and FP32 |
 | [BERT Large](https://arxiv.org/pdf/1810.04805.pdf)                                           | TensorFlow | [Training](../../models_v2/tensorflow/bert_large/training/gpu/CONTAINER.md) | BF16 |
 | [DistilBERT](https://arxiv.org/abs/1910.01108) | PyTorch | [Inference](../../models_v2/pytorch/distilbert/inference/gpu/CONTAINER_MAX.md) | FP16,BF16 and FP32 |
-| [DLRM](https://arxiv.org/abs/1906.00091) | PyTorch | [Inference](../../quickstart/recommendation/pytorch/torchrec_dlrm/inference/gpu/DEVCATALOG.md) | FP16 |
+| [DLRM](https://arxiv.org/abs/1906.00091) | PyTorch | [Inference](../../models_v2/pytorch/torchrec_dlrm/inference/gpu/DEVCATALOG.md) | FP16 |
 | [DLRM](https://arxiv.org/abs/1906.00091) | PyTorch | [Training](../../models_v2/pytorch/torchrec_dlrm/training/gpu/CONTAINER.md) | FP32,TF32 and BF16 |
 | [Mask R-CNN](https://arxiv.org/abs/1703.06870) | TensorFlow | [Training](../../models_v2/tensorflow/maskrcnn/training/gpu/CONTAINER.md) | BF16 |
 | [ResNet50 v1.5](https://arxiv.org/pdf/1512.03385.pdf) | PyTorch | [Inference](../../models_v2/pytorch/resnet50v1_5/inference/gpu/CONTAINER_MAX.md) | INT8,FP16,BF16,FP32 and TF32 |

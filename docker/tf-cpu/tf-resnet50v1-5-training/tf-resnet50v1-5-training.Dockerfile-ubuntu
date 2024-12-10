@@ -27,9 +27,9 @@ RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa -y  && \
     apt install -y python${PY_VERSION} \
-    python${PY_VERSION}-dev 
+    python${PY_VERSION}-dev
 
-RUN apt-get update && apt-get install -y build-essential 
+RUN apt-get update && apt-get install -y build-essential
 RUN apt-get install --no-install-recommends --fix-missing -y curl ca-certificates python${PY_VERSION}-dev && \
     apt-get clean all
 
@@ -86,9 +86,9 @@ RUN python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_
 
 COPY benchmarks benchmarks
 COPY models models
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh quickstart/training.sh
-COPY quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training_demo.sh quickstart/training_demo.sh
-COPY quickstart/common quickstart/common
+COPY models_v2/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh models_v2/training.sh
+COPY models_v2/tensorflow/resnet50v1_5/training/cpu/multi_instance_training_demo.sh models_v2/training_demo.sh
+COPY models_v2/common models_v2/common
 
 RUN apt-get update -y && apt-get install --no-install-recommends --fix-missing -y numactl
 
