@@ -45,11 +45,3 @@ about:
     'Data connector is a tool to connect to AzureML, Azure blob, GCP storage, GCP Big Query and AWS storage S3.
     The goal is provide all cloud managers in one place and provide documentation for an easy integration.'
   about_license_url: https://www.apache.org/licenses/LICENSE-2.0.html
-
-extra:
-  recipe-maintainers:
-    - Jose de Jesus Herrera Ledon <jesus.herrera.ledon@intel.com>
-    - Alberto Gallegos Muro <alberto.gallegos.muro@intel.com>
-    - Felipe Leza Alvarez <felipe.leza.alvarez@intel.com>
-    - Miguel Pineda Juarez <miguel.pineda.juarez@intel.com>
-    - Gerardo Dominguez Aldama <gerardo.dominguez.aldama@intel.com>

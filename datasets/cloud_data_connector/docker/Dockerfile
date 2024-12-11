@@ -15,10 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Command to build: docker build -t $TAG dockerfile/path
-    # Example: docker build -t mpineda_data_connector .
-# Command to run on terminal: docker run -it --name $CONTAINER_NAME $IMAGE bash
-    # Example: docker run -it --name mpineda_data_connector mpineda_data_connector bash
 
 # Reference image
 FROM ubuntu:20.04
@@ -45,8 +41,8 @@ RUN apt-get install -y --no-install-recommends \
     git \
     wget \
     libicu-dev \
-    gawk 
-    
+    gawk
+
 RUN apt-get install -y \
     libsndfile1-dev \
     time
