@@ -38,8 +38,3 @@ about:
   license: 'APACHE'
   about_license_url: https://www.apache.org/licenses/LICENSE-2.0.html
   home: "https://github.com/IntelAI/models/tree/master/datasets/dataset_api"
-
-extra:
-  recipe-maintainers:
-    - Taie, Wafaa S <wafaa.s.taie@intel.com>
-    - Miguel Pineda Juarez <miguel.pineda.juarez@intel.com>
