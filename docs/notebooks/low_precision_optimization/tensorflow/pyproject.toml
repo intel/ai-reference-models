@@ -2,7 +2,6 @@
 name = "docs-notebooks-low-precision-optimization-tensorflow"
 version = "0.1.0"
 description = ""
-authors = ["Clayne B. Robison <clayne.b.robison@intel.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

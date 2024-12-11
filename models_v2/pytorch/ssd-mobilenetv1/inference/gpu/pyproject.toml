@@ -2,7 +2,6 @@
 name = "pyt-ssd-mobilenetv1-inf-gpu"
 version = "0.1.0"
 description = ""
-authors = ["Robison, Clayne B <clayne.b.robison@intel.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
