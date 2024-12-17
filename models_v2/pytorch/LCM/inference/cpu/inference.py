@@ -377,7 +377,7 @@ def main():
                     for i, (images, prompts) in enumerate(tqdm(val_dataloader)):
                         prompt = prompts[0][0]
                         pipe(prompt, generator=torch.manual_seed(args.seed))
-                        if i == 99:
+                        if i == 119:
                             break
                 else:
                     pipe(args.prompt)
@@ -461,7 +461,7 @@ def main():
                     for i, (images, prompts) in enumerate(tqdm(val_dataloader)):
                         prompt = prompts[0][0]
                         pipe(prompt, generator=torch.manual_seed(args.seed))
-                        if i == 99:
+                        if i == 119:
                             break
                 else:
                     pipe(args.prompt)
