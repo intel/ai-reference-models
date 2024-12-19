@@ -23,7 +23,7 @@ index 95a019c..048fef0 100644
 +
 +        # use training = self.training | self.export instead of self.training |= self.export.
 +        # because setting the module attribute self.training will cause error
-+        # during capture_pre_autograd_graph for int8 torch inductor backend:
++        # during export_for_training for int8 torch inductor backend:
 +        # torch._dynamo.exc.Unsupported: setattr(UnspecializedNNModuleVariable(Detect), training, ...)
 +        # See https://github.com/pytorch/pytorch/issues/101168.
 +        # the change will not affect inference.
