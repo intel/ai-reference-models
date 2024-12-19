@@ -35,7 +35,6 @@ import torchvision.transforms as transforms
 
 logging.getLogger().setLevel(logging.INFO)
 
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name_or_path", type=str, default="stabilityai/stable-diffusion-2-1", help="Model path")
@@ -101,7 +100,7 @@ def main():
         args.world_size = int(os.environ["WORLD_SIZE"])
         print("World size: ", args.world_size)
 
-    args.distributed = args.world_size > 1 
+    args.distributed = args.world_size > 1
     if args.distributed:
         if args.dist_url == "env://" and args.rank == -1:
             args.rank = int(os.environ["RANK"])
@@ -194,7 +193,7 @@ def main():
                                 init_method=args.dist_url,
                                 world_size=args.world_size,
                                 rank=args.rank)
-        print("Rank and world size: ", torch.distributed.get_rank()," ", torch.distributed.get_world_size())              
+        print("Rank and world size: ", torch.distributed.get_rank()," ", torch.distributed.get_world_size())
         # print("Create DistributedDataParallel in CPU")
         # pipe = torch.nn.parallel.DistributedDataParallel(pipe)
 
@@ -534,7 +533,7 @@ def main():
 
             fake_image = torch.tensor(output[0]).unsqueeze(0).permute(0, 3, 1, 2)
             real_image = real_image.unsqueeze(0) / 255.0
-            
+
             fid.update(real_image, real=True)
             fid.update(fake_image, real=False)
 
