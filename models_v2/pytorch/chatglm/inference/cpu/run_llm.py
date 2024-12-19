@@ -648,17 +648,17 @@ elif args.dtype == "int8" and args.inductor:
     from torch.ao.quantization.quantizer.x86_inductor_quantizer import (
         X86InductorQuantizer,
     )
-    from torch._export import capture_pre_autograd_graph
+    from torch.export import export_for_training
 
     print("[Info] Running torch.compile() INT8 quantization")
     with torch.no_grad():
         encoded_input = tokenizer(prompt, return_tensors="pt")
         print("encoded_input is: {}".format(encoded_input), flush=True)
-        exported_model = capture_pre_autograd_graph(
+        exported_model = export_for_training(
             user_model,
             (),
             kwargs=encoded_input.data,
-        )
+        ).module()
         quantizer = X86InductorQuantizer()
         quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
         prepared_model = prepare_pt2e(exported_model, quantizer)

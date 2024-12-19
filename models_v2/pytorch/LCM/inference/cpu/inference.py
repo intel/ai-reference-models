@@ -308,9 +308,9 @@ def main():
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
             import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
             from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-            from torch._export import capture_pre_autograd_graph
+            from torch.export import export_for_training
             with torch.no_grad():
-                pipe.traced_unet = capture_pre_autograd_graph(pipe.unet, input)
+                pipe.traced_unet = export_for_training(pipe.unet, input).module()
                 quantizer = X86InductorQuantizer()
                 if args.model_name_or_path == "SimianLuo/LCM_Dreamshaper_v7":
                     quantizer.set_global(xiq.get_default_x86_inductor_quantization_config()) \
@@ -392,9 +392,9 @@ def main():
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
             import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
             from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-            from torch._export import capture_pre_autograd_graph
+            from torch.export import export_for_training
             with torch.no_grad():
-                pipe.traced_unet = capture_pre_autograd_graph(pipe.unet, input)
+                pipe.traced_unet = export_for_training(pipe.unet, input).module()
                 quantizer = X86InductorQuantizer()
                 if args.model_name_or_path == "SimianLuo/LCM_Dreamshaper_v7":
                     quantizer.set_global(xiq.get_default_x86_inductor_quantization_config()) \

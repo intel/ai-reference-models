@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index 999752485..fd1232e91 100644
+index 999752485..2e9cd96cf 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -140,7 +140,7 @@ index 999752485..fd1232e91 100644
 +            from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
 +            import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
 +            from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-+            from torch._export import capture_pre_autograd_graph
++            from torch.export import export_for_training
 +            print('[Info] Running torch.compile() for INT8 quantization')
 +            print('[Info] Running int8_bf16 is: {}'.format(args.int8_bf16))
 +            with torch.no_grad():
@@ -151,12 +151,12 @@ index 999752485..fd1232e91 100644
 +                        "attention_mask": {0: torch.export.Dim("dim", max=1024 * 1024)},
 +                        "token_type_ids": {0: torch.export.Dim("dim", max=1024 * 1024)}
 +                    }
-+                exported_model = capture_pre_autograd_graph(
++                exported_model = export_for_training(
 +                    model,
 +                    (),
 +                    kwargs=torch_compile_inputs,
 +                    dynamic_shapes=dynamic_shapes,
-+                )
++                ).module()
 +                quantizer = X86InductorQuantizer()
 +                quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
 +                prepared_model = prepare_pt2e(exported_model, quantizer)
@@ -1184,7 +1184,7 @@ index 734ccf6a9..641814bf2 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2436dadc..0f2d7433e 100755
+index a2436dadc..850f3fe37 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -152,6 +152,31 @@ from .utils import (
@@ -1393,14 +1393,14 @@ index a2436dadc..0f2d7433e 100755
 +                from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
 +                import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
 +                from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
-+                from torch._export import capture_pre_autograd_graph
++                from torch.export import export_for_training
 +                print('[Info] Running torch.compile() INT8 quantization')
 +                with torch.no_grad():
-+                    exported_model = capture_pre_autograd_graph(
++                    exported_model = export_for_training(
 +                        model,
 +                        (),
 +                        kwargs=example_batch,
-+                    )
++                    ).module()
 +                    quantizer = X86InductorQuantizer()
 +                    quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
 +                    prepared_model = prepare_pt2e(exported_model, quantizer)
