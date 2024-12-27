@@ -24,20 +24,14 @@ import os
 import fnmatch
 import psutil
 import yaml
+from prettytable import PrettyTable
+from IPython.display import display
+import ipywidgets as widgets
 
 from importlib import util
 tensorflow_found = util.find_spec("tensorflow") is not None
 pytorch_found = util.find_spec("torch") is not None
 pytorch_ext_found = util.find_spec("intel_pytorch_extension") is not None
-
-try:
-    import tensorflow as tf
-    from tensorflow.python.client import timeline
-    from tensorflow.python.training import training_util
-except ImportError as e:
-    print(e)
-    print("can't import tensorflow module")
-    pass
 
 try:
     from git import Repo
@@ -47,24 +41,6 @@ except ImportError as e:
     print("can't import git module")
     has_git = False
     pass
-
-class TensorflowUtils:
-
-    def is_mkl_enabled(self):
-        mkl_enabled = False
-        major_version = int(tf.__version__.split(".")[0])
-        minor_version = int(tf.__version__.split(".")[1])
-        if major_version >= 2:
-            if minor_version < 5:
-                from tensorflow.python import _pywrap_util_port
-            else:
-                from tensorflow.python.util import _pywrap_util_port
-                onednn_enabled = int(os.environ.get('TF_ENABLE_ONEDNN_OPTS', '0'))
-            mkl_enabled = _pywrap_util_port.IsMklEnabled() or (onednn_enabled == 1)
-        else:
-            mkl_enabled = tf.pywrap_tensorflow.IsMklEnabled()
-        return mkl_enabled
-
 
 class GitOps:
 
@@ -150,7 +126,6 @@ class PlatformUtils:
         self.cpu_socket_count = cpu_info.sockets
         self.svmem = svmem
 
-
 class CommonUtils:
 
     def __init__(self):
@@ -175,28 +150,137 @@ class CommonUtils:
             foundpaths += paths
         return foundfiles, foundpaths
 
+class GeneralConfigFile:
+    def __init__(self, ai_root):
+        self.root=ai_root
+        self.framework = ''
+        self.device = ''
+        # Empty for CPU
+        self.device_series = ''
+        # only move on to the the proceeding AIReference setup when True
+        self.success = False
+
+        # widgets
+        self.hardware_dropdown = widgets.Dropdown(
+            options=['CPU', 'GPU'],
+            value=None,
+            description='Choose Hardware:',
+            disabled=False,
+        )
+
+        self.framework_dropdown = widgets.Dropdown(
+            options=['PyTorch', 'TensorFlow'],
+            value=None,
+            description='Choose Framework:',
+            disabled=False,
+        )
+
+        self.gpu_series_dropdown = widgets.Dropdown(
+            options=['Flex', 'Max', 'Arc'],
+            value=None,
+            description='Choose GPU Series:',
+            disabled=False,
+        )
+
+        self.intel_oneapi_dropdown = widgets.Dropdown(
+            options=['Yes', 'No'],
+            value=None,
+            description='Intel® oneAPI Base Toolkit installed?:',
+            disabled=False,
+        )
+
+        self.oneapi_path_input = widgets.Text(
+            value='',
+            placeholder='Input oneAPI installation path',
+            description='oneAPI Path:',
+            disabled=False,
+        )
+
+
+    def toggle_events(self):
+        def on_hardware_change(change):
+            if change.new == 'GPU':
+                display(self.gpu_series_dropdown)
+            else:
+                self.gpu_series_dropdown.close()
+                self.intel_oneapi_dropdown.close()
+                self.oneapi_path_input.close()
+
+        def on_framework_change(change):
+            if self.hardware_dropdown.value == 'GPU':
+                if change.new == 'PyTorch':
+                    display(self.intel_oneapi_dropdown)
+                else:
+                    self.intel_oneapi_dropdown.close()
+                    self.oneapi_path_input.close()
+                update_gpu_series_options()
+            else:
+                self.intel_oneapi_dropdown.close()
+                self.oneapi_path_input.close()
+
+        def update_gpu_series_options():
+            if (self.hardware_dropdown.value != 'GPU'):
+                raise Exception("Debugging: Did not selected GPU but proceeded anyways")
+            selected_framework = self.framework_dropdown.value
+            if selected_framework == 'PyTorch':
+                self.gpu_series_dropdown.options = ['Flex', 'Max', 'Arc']
+            elif selected_framework == 'TensorFlow':
+                self.gpu_series_dropdown.options = ['Flex', 'Max']
+            else:
+                self.gpu_series_dropdown.options = ['Please choose the framework']
+
+        def on_intel_oneapi_change(change):
+            if change.new == 'Yes':
+                display(self.oneapi_path_input)
+                print("Default path for oneAPI Base Toolkit is: /opt/intel/oneapi")
+            else:
+                self.oneapi_path_input.close()
+                if change.new == 'No':
+                    # Intel® oneAPI Base Toolkit is not installed
+                    print("Intel® oneAPI Base Toolkit is not installed.")
+                    print("Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.")
+                    print("Once Intel® oneAPI Base Toolkit is installed on the machine, please re-run this cell")
+                    return
+
+
+        self.hardware_dropdown.observe(on_hardware_change, names='value')
+        self.framework_dropdown.observe(on_framework_change, names='value')
+        self.intel_oneapi_dropdown.observe(on_intel_oneapi_change, names='value')
+
+        if (self.hardware_dropdown.value and self.framework_dropdown.value and (self.hardware_dropdown.value == 'CPU' or (self.hardware_dropdown.value == 'GPU' and self.gpu_series_dropdown.value))):
+            self.success = True
+        display(self.hardware_dropdown)
+        display(self.framework_dropdown)
+
+
 class AIReferenceConfigFile:
 
-    def __init__(self, confpath=None):
+    def __init__(self, confpath, AIpath):
         self.configpath = confpath
         self.wget = ''
         self.data_download = ''
         self.data_location = ''
-        if tensorflow_found == True:
-            self.tf_util = TensorflowUtils()
         self.model_name = ''
         self.script = ''
         self.mode = ''
         self.framework = ''
         self.device = ''
         self.precision = ''
-        self.ai_type = ''
+        self.test_mode = ''
+        #self.ai_type = ''
         self.custom_args = ''
         self.json_fname = ''
         self.json_fname = 'stock_'
         self.patches = ''
         self.patched = False
         self.patches_keyword = ''
+
+        # paths can be stored in the config object.
+        self.ai_root = AIpath
+        self.notebook_root = self.ai_root + os.sep + 'notebooks'
+        self.profile_root = self.notebook_root + os.sep + 'profiling'
+        self.exports = []
+        self.additional_commands = []
 
     def read_section(self):
         config = configparser.ConfigParser()
@@ -288,8 +372,8 @@ class AIReferenceConfigFile:
                 for key, value in model_data.items():
                     if key == 'name':
                         configs['name'] = value
-                    elif key == 'ai-type':
-                        configs['ai-type'] = value
+                    #elif key == 'ai-type':
+                    #    configs['ai-type'] = value
                     elif key == 'model-name':
                         configs['model-name'] = value
                     elif key == 'mode':
@@ -300,14 +384,21 @@ class AIReferenceConfigFile:
                         configs['device'] = value
                     elif key == 'data-download':
                         configs['data-download'] = value
+                    elif key == 'precision':
+                        configs['precision'] = value
+                    elif key == 'test_mode':
+                        configs['test_mode'] = value
+                    elif key == 'wget':
+                        configs['wget'] = value
                     elif key == model_name.split()[0]:
                         for sub_entry in value:
                             precision = sub_entry['precision']
+                            test_mode = sub_entry['test_mode']
                             scripts = sub_entry['script']
                             wget = sub_entry['wget']
                             if model_name.split()[0] not in configs:
                                 configs[model_name.split()[0]] = []
-                            configs[model_name.split()[0]].append({'precision': precision, 'script': scripts, 'wget': wget})
+                            configs[model_name.split()[0]].append({'precision': precision, 'test_mode': test_mode, 'script': scripts, 'wget': wget})
 
         return configs
 
@@ -379,12 +470,115 @@ class AIReferenceConfigFile:
         cmd = "wget " + wget + ' -P ' + current_path + os.sep + pretrainfd
         filename = wget.split('/')[-1]
         pretrain_model_path = current_path + os.sep + pretrainfd + os.sep + filename
+        print(pretrain_model_path)
         if os.path.exists(pretrain_model_path) is True:
             return pretrain_model_path
         os.system(cmd)
         if os.path.exists(pretrainfd) is False:
             os.mkdir(pretrainfd)
         if os.path.exists(pretrainfd + os.sep + filename) is False:
+            print(pretrainfd + os.sep + filename)
             shutil.move(filename, pretrainfd)
         print('Downloaded the model in:', pretrain_model_path)
         return pretrain_model_path
+
+    def model_selection(self):
+
+        sections = self.read_supported_section()
+        models_table = PrettyTable(["Index", "Model Name", "Framework", "Mode", "Device"])
+
+        for index, section in enumerate(sections):
+            model_name = section.get('model-name', 'Unknown')
+            #ai_type = section.get('ai-type', 'Unknown')
+            framework = section.get('framework', 'Unknown')
+            mode = section.get('mode', 'Unknown')
+            device = section.get('device', 'Unknown')
+            models_table.add_row([index, model_name, framework, mode, device])
+
+        print("Supported Models: ")
+        display(models_table)
+
+        model_index = int(input('Input an index number of a model: ')) if 'MODEL_1_INDEX' not in os.environ else int(os.environ['MODEL_1_INDEX'])
+
+        if not 0 <= model_index < len(sections):
+            raise Exception("Invalid choice for model index")
+
+        print('Selected: ', sections[model_index]['name'])
+        return sections[model_index]
+
+    def device_specific(self, model_section, device, yaml_file, framework):
+        """
+        Handles model-specific configuration by parsing YAML files with different structures.
+        """
+        # Set initial properties
+        self.model_name = model_section['name']
+        self.framework = model_section['framework']
+        self.mode = model_section['mode'][int(input('0 for training and 1 for inference: '))] if len(model_section['mode']) > 1 else model_section['mode'][0]
+
+        # Load model-specific configuration
+        model_specific_config = AIReferenceConfigFile(yaml_file, self.ai_root)
+        model_specific_section = model_specific_config.read_supported_section()[0]
+
+        # Determine the precision options key dynamically
+        precision_key = model_section.get('model-name', self.model_name.split()[0])  # Use 'model-name' if available, else fallback
+
+        # Get precision options
+        model_precisions = model_specific_section.get(precision_key)
+
+        if not model_precisions:
+            raise ValueError(f"No precision options found for model '{self.model_name}'.")
+
+        # Display precision options
+        model_precision_table = PrettyTable(["Index", "Precision"])
+        for index, precision in enumerate(model_precisions):
+            model_precision_table.add_row([index, precision['precision']])
+        display(model_precision_table)
+
+        # Select precision
+        precision_index = int(input('Select an index number for the precision: '))
+        if not 0 <= precision_index < len(model_precisions):
+            raise ValueError("Invalid index for precision.")
+
+        # Get selected precision details
+        model_precision_section = model_precisions[precision_index]
+        self.precision = model_precision_section['precision']
+        self.wget = model_precision_section.get('wget', '')
+
+        if framework == 'TensorFlow' and device == 'CPU':
+            # TensorFlow-specific handling
+            model_precision_script = model_precision_section.get('script', [])
+            if not model_precision_script:
+                raise ValueError(f"No scripts found for model '{self.model_name}' with precision '{self.precision}'.")
+            print(f"Available Scripts for {self.precision}:")
+            model_script_table = PrettyTable(["Index", "Script"])
+            for index, script in enumerate(model_precision_script):
+                model_script_table.add_row([index, script])
+            display(model_script_table)
+
+            # Select script
+            model_precision_script_index = int(input('Input an index for the available script: '))
+            if not 0 <= model_precision_script_index < len(model_precision_script):
+                raise ValueError("Invalid index for the selected script.")
+            self.script = model_precision_script[model_precision_script_index]
+        else:
+            # Non-TensorFlow-specific handling
+            model_precision_test_mode = model_precision_section.get('test_mode', [])
+            if not model_precision_test_mode:
+                raise ValueError(f"No test modes found for model '{self.model_name}' with precision '{self.precision}'.")
+            print(f"Available Test Modes for {self.precision}:")
+            model_test_mode_table = PrettyTable(["Index", "Test Mode"])
+            for index, test_mode in enumerate(model_precision_test_mode):
+                model_test_mode_table.add_row([index, test_mode])
+            display(model_test_mode_table)
+
+            # Select test mode
+            model_precision_test_mode_index = int(input('Input an index for the available test mode: '))
+            if not 0 <= model_precision_test_mode_index < len(model_precision_test_mode):
+                raise ValueError("Invalid index for the selected test mode.")
+            self.test_mode = model_precision_test_mode[model_precision_test_mode_index]
+
+        # Print selected configuration
+        print(f"Selected {self.model_name} {self.framework} {self.precision} {self.script if framework == 'TensorFlow' else self.test_mode}")
+
+        return model_specific_section
+

@@ -1,0 +1,333 @@
+- name: resnet50v1_5 tensorflow inference
+  model-name: resnet50v1_5
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: Get the Imagenet dataset by following the instructions at "https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md"
+  exports: []
+  additional-commands: []
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  resnet50v1_5:
+    - precision: fp32
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://zenodo.org/record/2535873/files/resnet50_v1.pb
+
+    - precision: bfloat32
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://zenodo.org/record/2535873/files/resnet50_v1.pb
+
+    - precision: fp16
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: https://zenodo.org/record/2535873/files/resnet50_v1.pb
+
+    - precision: int8
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh", "inference_realtime_weightsharing.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bias_resnet50.pb
+
+    - precision: bfloat16
+      script: ["inference_throughput_multi_instance.sh", "accuracy.sh", "inference_realtime_weightsharing.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bf16_resnet50_v1.pb
+
+- name: resnet50v1_5 tensorflow training
+  model-name: resnet50v1_5
+  mode: training
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: Get the Imagenet dataset by following the instructions at "https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md"
+  exports: []
+  additional-commands: []
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  resnet50v1_5:
+    - precision: fp32
+      script: ["training_full.sh", "multi_instance_training.sh"]
+      wget: ""
+
+    - precision: bfloat32
+      script: ["training_full.sh", "multi_instance_training.sh"]
+      wget: ""
+
+    - precision: fp16
+      script: ["training_full.sh", "multi_instance_training.sh"]
+      wget: ""
+
+    - precision: bfloat16
+      script: ["training_full.sh", "multi_instance_training.sh"]
+      wget: ""
+
+- name: 3d_unet tensorflow inference
+  model-name: 3d_unet_mlperf
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: Get the Imagenet dataset by following the instructions at "https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md"
+  additional-commands: []
+  exports: [
+  ]
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  3d_unet:
+  - precision: fp32
+    script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_realtime_weightsharing.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_dynamic_ndhwc.pb
+
+  - precision: bfloat32
+    script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_realtime_weightsharing.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_dynamic_ndhwc.pb
+
+  - precision: bfloat16
+    script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_realtime_weightsharing.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_dynamic_ndhwc.pb
+
+  - precision: int8
+    script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_realtime_weightsharing.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_new_int8_bf16.pb
+
+- name: bert_large tensorflow inference
+  model-name: bert_large
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: "Download and unzip the BERT Large uncased (whole word masking) model from the
+  [google bert repo](https://github.com/google-research/bert#pre-trained-models).
+  Then, download the Stanford Question Answering Dataset (SQuAD) dataset file `dev-v1.1.json` into the `wwm_uncased_L-24_H-1024_A-16` directory that was just unzipped.
+
+  ```
+  wget https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip
+  unzip wwm_uncased_L-24_H-1024_A-16.zip
+
+  wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -P wwm_uncased_L-24_H-1024_A-16
+  ```
+  Set the `DATASET_DIR` to point to that directory when running BERT Large inference using the SQuAD data."
+  additional-commands: [
+  ]
+  exports: [
+    "CHECKPOINT_DIR -i"
+  ]
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  bert_large:
+  - precision: fp32
+    script: ["inference_realtime_multi_instance.sh", "inference_realtime_weightsharing.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/fp32_bert_squad.pb
+
+  - precision: fp16
+    script: ["inference_realtime_multi_instance.sh", "inference_realtime_weightsharing.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/fp32_bert_squad.pb
+
+  - precision: bfloat16
+    script: ["inference_realtime_multi_instance.sh", "inference_realtime_weightsharing.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/optimized_bf16_bert.pb
+
+  - precision: int8
+    script: ["inference_realtime_multi_instance.sh", "inference_realtime_weightsharing.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/bert_itex_int8.pb
+
+- name: bert_large tensorflow training
+  model-name: bert_large
+  mode: training
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: Follow the instructions from the README.md file to get the SQuAD data
+  additional-commands: [
+    "wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/bert_large_checkpoints.zip",
+    "unzip bert_large_checkpoints.zip",
+    "os.environ['CHECKPOINT_DIR'] = os.getcwd() + '/bert_large_checkpoints'",
+    "./quickstart/language_modeling/tensorflow/bert_large/training/cpu/setup.sh",
+    "os.environ['PATH']+=':/tmp/openmpi/bin'",
+    "os.environ['LD_LIBRARY_PATH']='/tmp/openmpi/lib'"
+  ]
+  exports: []
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  bert_large:
+  - precision: fp32
+    script: ["pretraining.sh", "training_squad.sh"]
+    wget: ""
+
+  - precision: fp16
+    script: ["pretraining.sh", "training_squad.sh"]
+    wget: ""
+
+  - precision: bfloat16
+    script: ["pretraining.sh", "training_squad.sh"]
+    wget: ""
+
+- name: bert_large_hf tensorflow inference
+  model-name: bert_large_hf
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: "Check README"
+  additional-commands: [
+  ]
+  exports: [
+    "DATASET_DIR=PRETRAINED_MODEL",
+    "DATASET_NAME=squad"
+  ]
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  bert_large:
+  - precision: fp32
+    script: ["inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: "https://storage.googleapis.com/intel-optimized-tensorflow/models/3_2/bert_hf_pretrained_model.tar.gz
+          tar -xzvf bert_hf_pretrained_model.tar.gz"
+
+  - precision: fp16
+    script: ["inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: "https://storage.googleapis.com/intel-optimized-tensorflow/models/3_2/bert_hf_pretrained_model.tar.gz
+          tar -xzvf bert_hf_pretrained_model.tar.gz"
+
+  - precision: bfloat16
+    script: ["inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: "https://storage.googleapis.com/intel-optimized-tensorflow/models/3_2/bert_hf_pretrained_model.tar.gz
+          tar -xzvf bert_hf_pretrained_model.tar.gz"
+
+  - precision: bfloat32
+    script: ["inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+    wget: "https://storage.googleapis.com/intel-optimized-tensorflow/models/3_2/bert_hf_pretrained_model.tar.gz
+          tar -xzvf bert_hf_pretrained_model.tar.gz"
+
+- name: bert tensorflow inference
+  model-name: bert
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: Get the dataset by following README.md"
+  additional-commands: [
+    "./models_v2/tensorflow/bert/inference/cpu/setup.sh",
+    "os.environ['MODEL_SOURCE'] = os.getcwd() + '/bert'"
+  ]
+  exports: [
+  ]
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  bert:
+  - precision: fp32
+    script: ["inference_realtime.sh", "inference_throughput.sh", "accuracy.sh"]
+    wget: https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip
+
+- name: wide_deep tensorflow inference
+  model-name: wide_deep
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: "Download and preprocess the [income census data](https://archive.ics.uci.edu/ml/datasets/Census+Income) by running
+  following python script, which is a standalone version of [census_dataset.py](https://github.com/tensorflow/models/blob/v2.2.0/official/r1/wide_deep/census_dataset.py)
+  Please note that below program requires `requests` module to be installed. You can install it using `pip install requests`.
+  Dataset will be downloaded in directory provided using `--data_dir`. If you are behind corporate proxy, then you can provide proxy URLs
+  using `--http_proxy` and `--https_proxy` arguments.
+  ```
+  git clone https://github.com/IntelAI/models.git
+  cd models
+  python ./benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
+  ```"
+  additional-commands: [
+    "pip install -r benchmarks/recommendation/tensorflow/wide_deep/inference/requirements.txt"
+  ]
+  exports: [
+    "TF_USE_LEGACY_KERAS 0"
+  ]
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  wide_deep:
+    - precision: fp32
+      script: ["inference_batch.sh", "inference_online.sh", "accuracy.sh"]
+      wget: https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/wide_and_deep.h5
+
+- name: stable_diffusion tensorflow inference
+  model-name: stable_diffusion
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: To get the dataset, please refer to the page "https://github.com/IntelAI/models/tree/master/datasets/coco/README.md"
+  additional-commands: [
+  ]
+  exports: [
+  ]
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  stable_diffusion:
+    - precision: fp32
+      script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: ""
+
+    - precision: bfloat32
+      script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: ""
+
+    - precision: fp16
+      script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: ""
+
+    - precision: bfloat16
+      script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: ""
+
+- name: graphsage tensorflow inference
+  model-name: graphsage
+  mode: inference
+  framework: tensorflow
+  device: cpu
+  data-location:
+  data-download: "Download and preprocess the Protein-Protein Interaction dataset using the [instructions here](https://snap.stanford.edu/graphsage/ppi.zip).
+  ```bash
+  wget https://snap.stanford.edu/graphsage/ppi.zip
+  unzip ppi.zip
+  ```"
+  additional-commands: [
+  ]
+  exports: [
+  ]
+  set-batch-size:
+    cores: False
+    expr: ""
+
+  stable_diffusion:
+    - precision: fp32
+      script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: "wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/graphsage_frozen_model.pb"
+
+    - precision: bfloat32
+      script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: "wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/graphsage_frozen_model.pb"
+
+    - precision: fp16
+      script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: "wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/graphsage_frozen_model.pb"
+
+    - precision: bfloat16
+      script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: "wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/graphsage_frozen_model.pb"
+
+    - precision: int8
+      script: ["inference.sh", "inference_realtime_multi_instance.sh", "inference_throughput_multi_instance.sh", "accuracy.sh"]
+      wget: "wget https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/graphsage_int8.pb"
