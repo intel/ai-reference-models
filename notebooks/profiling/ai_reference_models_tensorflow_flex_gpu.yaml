@@ -1,0 +1,187 @@
+- name: resnet50v1_5 pytorch inference
+  model-name: resnet50v1_5
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["INT8", "FP32", "FP16"]
+  data-location:
+  data-download: Default is dummy dataset. ImageNet is recommended, the download link is https://image-net.org/challenges/LSVRC/2012/2012-downloads.php."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: distilbert pytorch inference
+  model-name: distilbert
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16", "FP32"]
+  data-location:
+  data-download: Please follow the link to download the dataset - https://github.com/IntelAI/models/blob/master/models_v2/pytorch/distilbert/inference/gpu/README.md#dataset."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: distilbert_multi_tile pytorch inference
+  model-name: distilbert_multi_tile
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16", "FP32"]
+  data-location:
+  data-download: Please follow the link to download the dataset - https://github.com/IntelAI/models/blob/master/models_v2/pytorch/distilbert/inference/gpu/README.md#dataset."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MULTI_TILE True"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: DLRM_v1 pytorch inference
+  model-name: dlrm
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16"]
+  data-location:
+  data-download: Please follow the link to download the dataset - https://github.com/IntelAI/models/blob/master/models_v2/pytorch/dlrm/inference/gpu/README.md#prepare-dataset."
+  additional-commands: [
+    "cd $(pwd)",
+    "./bench/dlrm_s_criteo_kaggle.sh [--test-freq=1024]"
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MULTI_TILE False",
+    "CKPT_DIR $(pwd)/"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: efficientnet pytorch inference
+  model-name: efficientnet
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16", "BF16", "FP32"]
+  data-location:
+  data-download: Please follow the link to download the dataset - https://github.com/IntelAI/models/blob/master/models_v2/pytorch/efficientnet/inference/gpu/README.md#dataset."
+  additional-commands: [
+    "model_name = input('Select one model - efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4, efficientnet_b5, efficientnet_b6, efficientnet_b7')"
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MODEL_NAME $(model_name)"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: yolov5 pytorch inference
+  model-name: yolov5
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16"]
+  data-location:
+  data-download: The scripts will download the dataset automatically. You can give random path when prompted to give the path for the dataset."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: stable_diffusion pytorch inference
+  model-name: stable_diffusion
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16", "FP32"]
+  data-location:
+  data-download: The scripts will download the dataset automatically. You can give random path when prompted to give the path for the dataset."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: swin-transformer pytorch inference
+  model-name: swin-transformer
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16"]
+  data-location:
+  data-download: Please follow the link to download the dataset - https://github.com/IntelAI/models/blob/master/models_v2/pytorch/swin-transformer/inference/gpu/README.md#dataset-imagenet."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: fastpitch pytorch inference
+  model-name: fastpitch
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16"]
+  data-location:
+  data-download: Please follow the link to download the dataset - https://github.com/IntelAI/models/blob/master/models_v2/pytorch/fastpitch/inference/gpu/README.md#prepare-dataset-and-pre-trained-models."
+  additional-commands: [
+    "bash scripts/download_models.sh fastpitch",
+    "bash scripts/download_models.sh hifigan",
+    "bash scripts/prepare_dataset.sh"
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MULTI_TILE False",
+    "CKPT_DIR $(pwd)"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: unetpp pytorch inference
+  model-name: unetpp
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16"]
+  data-location:
+  data-download: The scripts will download the dataset automatically. You can give random path when prompted to give the path for the dataset."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Flex",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""

@@ -1,0 +1,120 @@
+- name: resnet50v1_5 pytorch inference
+  model-name: resnet50v1_5
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["INT8", "FP32", "FP16"]
+  data-location:
+  data-download: Default is dummy dataset. ImageNet is recommended, the download link is https://image-net.org/challenges/LSVRC/2012/2012-downloads.php."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Arc",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: resnet50v1_5 pytorch training
+  model-name: resnet50v1_5
+  mode: training
+  framework: pytorch
+  device: gpu
+  precision: ["BF16", "FP32"]
+  data-location:
+  data-download: Default is dummy dataset. ImageNet is recommended, the download link is https://image-net.org/challenges/LSVRC/2012/2012-downloads.php."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Arc",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: ssd-mobilenetv1 pytorch inference
+  model-name: ssd-mobilenetv1
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["INT8", "FP32", "FP16"]
+  data-location:
+  data-download: Default is dummy dataset. ImageNet is recommended, the download link is https://image-net.org/challenges/LSVRC/2012/2012-downloads.php."
+  additional-commands: [
+    "Download to get mobilenet-v1-ssd-mp-0_675.pth and put under WEIGHT_DIR - https://drive.google.com/drive/folders/1pKn-RifvJGWiOx0ZCRLtCXM5GT5lAluu?usp=sharing",
+    "Download to get voc-model-labels.txt and put under LABEL_DIR - https://drive.google.com/drive/folders/1pKn-RifvJGWiOx0ZCRLtCXM5GT5lAluu?usp=sharing",
+    weight_dir = input('Input the path for WEIGHT_DIR where mobilenet-v1-ssd-mp-0_675.pth is downloaded'),
+    label_dir = input('Input the path for LABEL_DIR where voc-model-labels.txt is downloaded')
+    ]
+  exports: [
+    "PLATFORM Arc",
+    "MULTI_TILE False",
+    "WEIGHT_DIR ${weight_dir}",
+    "LABEL_DIR ${label_dir}"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: bert_large pytorch inference
+  model-name: bert_large
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16"]
+  data-location:
+  data-download: Please follow the link to download the dataset - https://github.com/IntelAI/models/tree/master/models_v2/pytorch/bert_large/inference/gpu#datasets."
+  additional-commands: [
+    "mkdir $(pwd)/squad_large_finetuned_checkpoint",
+    "wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/config.json -O $(pwd)/squad_large_finetuned_checkpoint/config.json",
+    "wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/pytorch_model.bin  -O $(pwd)/squad_large_finetuned_checkpoint/pytorch_model.bin",
+    "wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/tokenizer.json -O $(pwd)/squad_large_finetuned_checkpoint/tokenizer.json",
+    "wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/tokenizer_config.json -O $(pwd)/squad_large_finetuned_checkpoint/tokenizer_config.json",
+    "wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/vocab.txt -O $(pwd)/squad_large_finetuned_checkpoint/vocab.txt"
+    ]
+  exports: [
+    "PLATFORM Arc",
+    "MULTI_TILE False",
+    "BERT_WEIGHT $(pwd)/squad_large_finetuned_checkpoint"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: bert_large pytorch training
+  model-name: bert_large
+  mode: training
+  framework: pytorch
+  device: gpu
+  precision: ["BF16"]
+  data-location:
+  data-download: Please follow the link to download the dataset - https://github.com/IntelAI/models/blob/master/models_v2/pytorch/bert_large/training/gpu/README.md#dataset."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Arc",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+- name: stable_diffusion pytorch inference
+  model-name: stable_diffusion
+  mode: inference
+  framework: pytorch
+  device: gpu
+  precision: ["FP16", "FP32"]
+  data-location:
+  data-download: The scripts will download the dataset automatically. You can give random path when prompted to give the path for the dataset."
+  additional-commands: [
+    ]
+  exports: [
+    "PLATFORM Arc",
+    "MULTI_TILE False"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""

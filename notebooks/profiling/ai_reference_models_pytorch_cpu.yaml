@@ -1,0 +1,809 @@
+- name: resnet50 pytorch inference
+  model-name: resnet50
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
+  additional-commands: []
+  exports: [
+    "MODEL_DIR $(pwd)"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  resnet50:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: fp16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: resnet50 pytorch training
+  model-name: resnet50
+  mode: training
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using the valprep.sh shell script"
+  additional-commands: []
+  exports: [
+    "DISTRIBUTED False",
+    "MODEL_DIR $(pwd)",
+    "TRAINING_EPOCHS 1"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  resnet50:
+    - precision: fp32
+      test_mode: ["TRAINING"]
+
+    - precision: bf32
+      test_mode: ["TRAINING"]
+
+    - precision: fp16
+      test_mode: ["TRAINING"]
+
+    - precision: int8
+      test_mode: ["TRAINING"]
+
+    - precision: bf16
+      test_mode: ["TRAINING"]
+
+- name: vit pytorch inference
+  model-name: vit
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "Prepare for downloading access On https://huggingface.co/datasets/imagenet-1k, login your account, and click the aggreement and then generating {your huggingface token}. To get access to llama2 weights from HF Apply the access in the pages with your huggingface account:LLaMA2 7B : https://huggingface.co/meta-llama/Llama-2-7b-hf; LLaMA2 13B : https://huggingface.co/meta-llama/Llama-2-13b-hf; huggingface-cli login {your huggingface token}"
+  additional-commands: [
+    "pip install datasets"
+  ]
+  exports: [
+    "MODEL_DIR $(pwd)",
+    "CORE_PER_INSTANCE 4"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  vit:
+    - precision: fp32
+      test_mode: ["TRAINING"]
+
+    - precision: bf32
+      test_mode: ["TRAINING"]
+
+    - precision: fp16
+      test_mode: ["TRAINING"]
+
+    - precision: int8-fp32
+      test_mode: ["TRAINING"]
+
+    - precision: int8-bf16
+      test_mode: ["TRAINING"]
+
+    - precision: bf16
+      test_mode: ["TRAINING"]
+
+- name: bert_large pytorch inference
+  model-name: bert_large
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "Please following this [link](https://github.com/huggingface/transformers/tree/v3.0.2/examples/question-answering) to get `dev-v1.1.json` and set the `EVAL_DATA_FILE` environment variable to point to the file"
+  additional-commands:
+    [
+      "mkdir bert_squad_model",
+      "mkdir squad1.1",
+      "wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -O squad1.1/dev-v1.1.json",
+      "wget https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-whole-word-masking-finetuned-squad-config.json -O bert_squad_model/config.json",
+      "wget https://cdn.huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad-pytorch_model.bin -O bert_squad_model/pytorch_model.bin",
+      "wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json"
+    ]
+  exports: [
+    "FINETUNED_MODEL $(pwd)/bert_squad_model",
+    "export EVAL_DATA_FILE $(pwd)/dev-v1.1.json",
+    "MODEL_DIR $(pwd)"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  bert_large:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: fp16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: avx-int8
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: bert_large pytorch training
+  model-name: bert_large
+  mode: training
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "This [MLCommons members Google Drive location](https://drive.google.com/drive/u/0/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT) contains the following.
+                  * TensorFlow checkpoint (bert_model.ckpt) containing the pre-trained weights (which is actually 3 files).
+                  * Vocab file (vocab.txt) to map WordPiece to word id.
+                  * Config file (bert_config.json) which specifies the hyperparameters of the model.
+
+                  # Checkpoint conversion
+                  python convert_tf_checkpoint.py --tf_checkpoint /cks/model.ckpt-28252 --bert_config_path /cks/bert_config.json --output_checkpoint model.ckpt-28252.pt
+
+                  # Download the preprocessed text dataset
+
+                  From the [MLCommons BERT Processed dataset
+                  directory](https://drive.google.com/drive/folders/1cywmDnAsrP5-2vsr8GDc6QUc7VWe-M3v?usp=sharing)
+                  download `results_text.tar.gz`, and `bert_reference_results_text_md5.txt`.  Then perform the following steps:
+
+                  ```shell
+                  tar xf results_text.tar.gz
+                  cd results4
+                  md5sum --check ../bert_reference_results_text_md5.txt
+                  cd ..
+                  ```
+                  After completing this step you should have a directory called `results4/` that
+                  contains 502 files for a total of about 13Gbytes."
+  additional-commands:
+    [
+    ]
+  exports: [
+    "DDP false",
+    "TRAINING_PHASE 1",
+    "MODEL_DIR $(pwd)"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  bert_large:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: fp16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: avx-int8
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: distilbert pytorch inference
+  model-name: distilbert_base
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "git clone https://github.com/IntelAI/models.git
+    cd models
+    export DATASET_DIR=<path to download the dataset>
+    wget https://dl.fbaipublicfiles.com/glue/data/SST-2.zip -O $DATASET_DIR/SST-2.zip
+    unzip $DATASET_DIR/SST-2.zip -d $DATASET_DIR/
+    python models_v2/distilbert_base/inference/cpu/convert.py $DATASET_DIR"
+  additional-commands: [
+    "git clone https://huggingface.co/distilbert-base-uncased-finetuned-sst-2-english",
+    "export FINETUNED_MODEL=$(pwd)/distilbert-base-uncased-finetuned-sst-2-english"
+  ]
+  exports: [
+    "MODEL_DIR $(pwd)",
+    "SEQUENCE_LENGTH 128",
+    "CORE_PER_INSTANCE 4"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  distilbert_base:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8-fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8-bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: gptj pytorch inference
+  model-name: gptj
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "No data download required"
+  additional-commands: [
+  ]
+  exports: [
+    "INPUT_TOKEN 32",
+    "OUTPUT_TOKEN 32",
+    "MODEL_DIR $(pwd)"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  gptj:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: fp16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8-fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8-bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: rnnt pytorch inference
+  model-name: rnnt
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "export DATASET_DIR=<Where_to_save_Dataset>
+    cd models/models_v2/pytorch/rnnt/inference/cpu
+    export MODEL_DIR=$(pwd)
+    ./download_dataset.sh"
+  additional-commands: [
+    "export CHECKPOINT_DIR='${PWD}/notebooks/pretrained'",
+    "./models_v2/pytorch/rnnt/inference/cpu/download_model.sh"
+  ]
+  exports: [
+    "CHECKPOINT_DIR -i"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  rnnt:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: avx-fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: rnnt pytorch training
+  model-name: rnnt
+  mode: training
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "export DATASET_DIR=<Where_to_save_Dataset>
+    cd models/models_v2/pytorch/rnnt/inference/cpu
+    export MODEL_DIR=$(pwd)
+    ./download_dataset.sh"
+  additional-commands: [
+  ]
+  exports: [
+    "MODEL_DIR $(pwd)",
+    "DISTRIBUTED False",
+    "profiling=True",
+    "EPOCHS 12"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  rnnt:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["TRAINING"]
+
+    - precision: bf16
+      test_mode: ["TRAINING"]
+
+    - precision: avx-fp32
+      test_mode: ["TRAINING"]
+
+- name: chatglm pytorch inference
+  model-name: chatglm
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "No data download required"
+  additional-commands: [
+  ]
+  exports: [
+    "MODEL_DIR $(pwd)",
+    "INPUT_TOKEN 32",
+    "OUTPUT_TOKEN 32"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  chatglm:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: maskrcnn pytorch inference
+  model-name: maskrcnn
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "  Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
+  Export the `DATASET_DIR` environment variable to specify the directory where the dataset
+  will be downloaded. This environment variable will be used again when running quickstart scripts.
+  ```
+  cd <MODEL_DIR=path_to_maskrcnn_inference_cpu>
+  export DATASET_DIR=<directory where the dataset will be saved>
+  ./download_dataset.sh
+  cd -
+  ```"
+  additional-commands: ["cd MODEL_DIR=$(pwd)/models_v2/pytorch/maskrcnn/inference/cpu
+  export CHECKPOINT_DIR=$(pwd)
+  ./download_model.sh
+  ./setup.sh
+  cd -
+  cd $(pwd)/models_v2/pytorch/maskrcnn/inference/cpu/maskrcnn-benchmark
+  pip install -e setup.py develop
+  pip install -r requirements.txt
+  cd -
+  "]
+  exports: [
+    "MODE jit"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+  maskrcnn:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: avx-fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: maskrcnn pytorch training
+  model-name: maskrcnn
+  mode: training
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
+  Export the `DATASET_DIR` environment variable to specify the directory where the dataset
+  will be downloaded. This environment variable will be used again when running quickstart scripts.
+  ```
+  cd <MODEL_DIR=path_to_maskrcnn_training_cpu>
+  export DATASET_DIR=<directory where the dataset will be saved>
+  ./download_dataset.sh
+  cd -
+  ```"
+  additional-commands: ["cd MODEL_DIR=$(pwd)/models_v2/pytorch/maskrcnn/training/cpu
+  export CHECKPOINT_DIR=$(pwd)
+  ./download_model.sh
+  ./setup.sh
+  cd -
+  cd $(pwd)/models_v2/pytorch/maskrcnn/training/cpu/maskrcnn-benchmark
+  pip install -e setup.py develop
+  pip install -r requirements.txt
+  cd -
+  "]
+  exports: [
+    "MODEL_DIR $PWD",
+    "DISTRIBUTED true",
+
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+  maskrcnn:
+    - precision: fp32
+      test_mode: ["TRAINING"]
+
+    - precision: bf16
+      test_mode: ["TRAINING"]
+
+    - precision: avx-fp32
+      test_mode: ["TRAINING"]
+
+    - precision: bf32
+      test_mode: ["TRAINING"]
+
+- name: ssd-resnet34 pytorch inference
+  model-name: ssd-resnet34
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
+  Export the `DATASET_DIR` environment variable to specify the directory where the dataset
+  will be downloaded. This environment variable will be used again when running quickstart scripts.
+  ```
+  cd <MODEL_DIR=path_to_ssd_resnet34_inference_cpu>
+  export DATASET_DIR=<directory where the dataset will be saved>
+  ./download_dataset.sh
+  cd -
+  ```"
+  additional-commands: ["cd MODEL_DIR=$(pwd)/models_v2/pytorch/ssd_resnet34/inference/cpu
+  export CHECKPOINT_DIR=$(pwd)
+  ./download_model.sh
+  cd -"]
+  exports: [
+    "MODEL_DIR $PWD",
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  ssd-resnet34:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: avx-fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: avx-int8
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: ssd_resnet34 pytorch training
+  model-name: ssd_resnet34
+  mode: training
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
+  Export the `DATASET_DIR` environment variable to specify the directory where the dataset
+  will be downloaded. This environment variable will be used again when running quickstart scripts.
+  ```
+  cd <MODEL_DIR=path_to_ssd_resnet34_training_cpu>
+  export DATASET_DIR=<directory where the dataset will be saved>
+  ./download_dataset.sh
+  cd -
+  ```"
+  additional-commands: ["cd MODEL_DIR=$(pwd)/models_v2/pytorch/ssd_resnet34/training/cpu
+  export CHECKPOINT_DIR=$(pwd)
+  ./download_model.sh
+  cd -
+  "]
+  exports: [
+    "MODEL_DIR $PWD"
+
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+  maskrcnn:
+    - precision: fp32
+      test_mode: ["TRAINING"]
+
+    - precision: bf16
+      test_mode: ["TRAINING"]
+
+    - precision: avx-fp32
+      test_mode: ["TRAINING"]
+
+    - precision: bf32
+      test_mode: ["TRAINING"]
+
+- name: yolov7 pytorch inference
+  model-name: yolov7
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
+  Export the `DATASET_DIR` environment variable to specify the directory where the dataset
+  will be downloaded. This environment variable will be used again when running quickstart scripts.
+  ```
+  cd <MODEL_DIR=path_to_yolov7_inference_cpu>
+  export DATASET_DIR=<directory where the dataset will be saved>
+  ./download_dataset.sh
+  cd -
+  ```"
+  additional-commands: ["cd MODEL_DIR=$(pwd)/models_v2/pytorch/yolov7/inference/cpu
+  export CHECKPOINT_DIR=$(pwd)
+  chmod a+x *.sh
+  ./download_model.sh
+  cd -"]
+  exports: [
+    "MODEL_DIR $PWD",
+    "TORCH_INDUCTOR 1"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  yolov7:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: avx-fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+- name: dlrm pytorch inference
+  model-name: dlrm
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download:
+    Download and extract the Criteo Terabyte Dataset dataset from https://labs.criteo.com/2013/12/download-terabyte-click-logs/,
+    then follow the instructions (to provide publicly) in README"
+  additional-commands: ["pip install -r models_v2/pytorch/dlrm/inference/cpu/requirements.txt"]
+  exports: [
+    "DNNL_MAX_CPU_ISA AVX512_CORE_AMX",
+    "WEIGHT_PATH -i",
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  dlrm:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT"]
+
+    - precision: int8
+      test_mode: ["ACCURACY", "THROUGHPUT"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT"]
+
+- name: dlrm pytorch training
+  model-name: dlrm
+  mode: training
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download:
+    Download and extract the Criteo Terabyte Dataset dataset from https://labs.criteo.com/2013/12/download-terabyte-click-logs/,
+    then follow the instructions (to provide publicly) in README"
+  additional-commands: ["pip install -r models_v2/pytorch/dlrm/training/cpu/requirements.txt"]
+  exports: [
+    "NUM_BATCH 10000"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  dlrm:
+    - precision: fp32
+      test_mode: ["TRAINING"]
+
+    - precision: bf16
+      test_mode: ["TRAINING"]
+
+    - precision: bf32
+      test_mode: ["TRAINING"]
+
+- name: torchrec_dlrm pytorch inference
+  model-name: torchrec_dlrm
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "The dataset can be downloaded and preprocessed by following https://github.com/mlcommons/training/tree/master/recommendation_v2/torchrec_dlrm#create-the-synthetic-multi-hot-dataset.
+  We also provided a preprocessed scripts based on the instruction above. `preprocess_raw_dataset.sh`.
+  After you loading the raw dataset `day_*.gz` and unzip them to RAW_DIR.
+  ```bash
+  cd <AI Reference Models>/models_v2/pytorch/torchrec_dlrm/inference/cpu
+  export MODEL_DIR=$(pwd)
+  export RAW_DIR=<the unziped raw dataset>
+  export TEMP_DIR=<where you choose the put the temp file during preprocess>
+  export PREPROCESSED_DIR=<where you choose the put the one-hot dataset>
+  export MULTI_HOT_DIR=<where you choose the put the multi-hot dataset>
+  bash preprocess_raw_dataset.sh
+  ```"
+  additional-commands: [
+    "echo ## Pre-Trained checkpoint
+    You can download and unzip checkpoint by following
+    https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorch#downloading-model-weights"
+    ]
+  exports: [
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  torchrec_dlrm:
+    - precision: fp32
+      test_mode: ["THROUGHPUT"]
+
+    - precision: int8
+      test_mode: ["THROUGHPUT"]
+
+    - precision: bf16
+      test_mode: ["THROUGHPUT"]
+
+    - precision: bf32
+      test_mode: ["THROUGHPUT"]
+
+    - precision: fp16
+      test_mode: ["THROUGHPUT"]
+
+- name: stable_diffusion pytorch inference
+  model-name: stable_diffusion
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
+  Export the `DATASET_DIR` environment variable to specify the directory where the dataset will be downloaded. This environment variable will be used again when running training scripts.
+  ```
+  export DATASET_DIR=<directory where the dataset will be saved>
+  bash download_dataset.sh
+  ```"
+  additional-commands: [
+    ]
+  exports: [
+    "MODE ipex-jit"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  stable_diffusion:
+    - precision: fp32
+      test_mode: ["THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["THROUGHPUT", "REALTIME"]
+
+    - precision: fp16
+      test_mode: ["THROUGHPUT", "REALTIME"]
+
+    - precision: int8-bf16
+      test_mode: ["THROUGHPUT", "REALTIME"]
+
+    - precision: int8-fp32
+      test_mode: ["THROUGHPUT", "REALTIME"]
+
+- name: stable_diffusion pytorch training
+  model-name: stable_diffusion
+  mode: training
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "Download the [cat-images dataset](https://huggingface.co/datasets/diffusers/cat_toy_example).
+  Export the `DATASET_DIR` environment variable to specify the directory where the dataset will be downloaded.
+  This environment variable will be used again when running training scripts."
+  additional-commands: [
+    ]
+  exports: [
+    "MODE ipex-jit"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  stable_diffusion:
+    - precision: fp32
+      test_mode: ["TRAINING"]
+
+    - precision: bf16
+      test_mode: ["TRAINING"]
+
+    - precision: bf32
+      test_mode: ["TRAINING"]
+
+    - precision: fp16
+      test_mode: ["TRAINING"]
+
+
+- name: LCM pytorch inference
+  model-name: LCM
+  mode: inference
+  framework: pytorch
+  device: cpu
+  data-location:
+  data-download: "Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script.
+  Export the `DATASET_DIR` environment variable to specify the directory where the dataset
+  will be downloaded. This environment variable will be used again when running quickstart scripts.
+  ```
+  export DATASET_DIR=<directory where the dataset will be saved>
+  bash download_dataset.sh
+  ```"
+  additional-commands: [
+    ]
+  exports: [
+    "MODEL_DIR $PWD",
+    "DISTRIBUTED false",
+    "RUN_MODE=ipex-jit"
+  ]
+  set-batch-size:
+    cores: false
+    expr: ""
+
+  LCM:
+    - precision: fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: bf32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: fp16
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
+
+    - precision: int8-fp32
+      test_mode: ["ACCURACY", "THROUGHPUT", "REALTIME"]
