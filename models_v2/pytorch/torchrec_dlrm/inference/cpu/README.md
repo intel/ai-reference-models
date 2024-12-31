@@ -82,6 +82,7 @@ https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorc
 | **PRECISION**    |                               `export PRECISION=int8 <specify the precision to run: int8, fp32, bf32 or bf16>`                             |
 | **OUTPUT_DIR**    |                               `export OUTPUT_DIR=$PWD`                               |
 | **BATCH_SIZE** (optional) |                               `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
+| **TORCH_INDUCTOR** (optional) |                               `export TORCH_INDUCTOR=<0 or 1>`                                |
 
 7. Run `run_model.sh`
 ## Output
