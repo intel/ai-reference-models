@@ -286,9 +286,8 @@ def main():
                 pipe.unet = torch.compile(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
-                if args.model_name_or_path == "stabilityai/stable-diffusion-2-1":
-                    pipe.text_encoder = torch.compile(pipe.text_encoder)
-                    pipe.vae.decode = torch.compile(pipe.vae.decode)
+                pipe.text_encoder = torch.compile(pipe.text_encoder)
+                pipe.vae.decode = torch.compile(pipe.vae.decode)
         elif args.precision == "bf16":
             with torch.cpu.amp.autocast(), torch.no_grad():
                 pipe.unet = torch.compile(pipe.unet)
