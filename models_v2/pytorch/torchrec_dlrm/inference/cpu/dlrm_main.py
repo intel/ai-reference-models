@@ -127,7 +127,8 @@ prof_schedule=torch.profiler.schedule(
 def print_memory(stage):
     import os
     import psutil
-    print("dlrmv2-memory-usage-log: ", time.time(), stage, psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024)
+    logger.info(f"dlrmv2-memory-usage-log: {time.time()}, {stage}, {psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024}")
+    # print("dlrmv2-memory-usage-log: ", time.time(), stage, psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024)
 
 def fetch_batch(dataloader):
     try:
@@ -209,7 +210,7 @@ def convert_int8(args, model, dataloader):
         print_memory("int8 jit optimize")
         model(batch.dense_features, batch.sparse_features)
         model(batch.dense_features, batch.sparse_features)
-        print(model.graph_for(batch.dense_features, batch.sparse_features))
+        # print(model.graph_for(batch.dense_features, batch.sparse_features))
         return model
 
 def ipex_optimize(args, model, optimizer, dataloader):
@@ -273,7 +274,7 @@ def ipex_optimize(args, model, optimizer, dataloader):
         ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
     return model, optimizer
 
-def aoti_benchmark_compile(args, tmp_dir):
+def aoti_benchmark_compile(ninstances, nbatches, bs, tmp_dir, target_dir):
     import textwrap
     inference_template = textwrap.dedent(
         """
@@ -381,27 +382,26 @@ def aoti_benchmark_compile(args, tmp_dir):
         }
         """
     )
-    t = time.time()
-    pid = os.getpid()
-    model_dir = f"{tmp_dir}/model.so"
-    inputs_dir = f"{tmp_dir}/inputs.pt"
+    # os.system(f"cp {tmp_dir}/model.so {target_dir}/model.so")
+    os.system(f"ln -s {tmp_dir}/model.so {target_dir}/model.so")
+    os.system(f"cp {tmp_dir}/inputs.pt {target_dir}/inputs.pt")
+    model_dir = f"{target_dir}/model.so"
+    inputs_dir = f"{target_dir}/inputs.pt"
     src_code = inference_template % (
-        args.share_weight_instance,
-        args.limit_val_batches,
-        args.batch_size,
+        ninstances,
+        nbatches,
+        bs,
         inputs_dir,
         model_dir,
     )
-    with open(f"{tmp_dir}/bench.cpp", "w") as f:
+    with open(f"{target_dir}/bench.cpp", "w") as f:
         f.write(src_code)
-    os.system(f"cp ./CMakeLists.txt {tmp_dir}/CMakeLists.txt")
+    os.system(f"cp ./CMakeLists.txt {target_dir}/CMakeLists.txt")
     cmake_prefix_path = torch.utils.cmake_prefix_path
     pytorch_install_dir = os.path.dirname(os.path.abspath(torch.__file__))
     torch_libraries = os.path.join(pytorch_install_dir, "lib")
-    os.system(f"export CMAKE_PREFIX_PATH={cmake_prefix_path} && export TORCH_LIBRARIES={torch_libraries} && cd {tmp_dir} && cmake . && make")
-    os.system(f"cp {tmp_dir}/aoti_example {tmp_dir}/aoti_bench_bin")
-    print(f"{tmp_dir}/aoti_bench_bin")
-    exit()
+    os.system(f"export CMAKE_PREFIX_PATH={cmake_prefix_path} && export TORCH_LIBRARIES={torch_libraries} && cd {target_dir} && cmake . && make")
+    return f"{target_dir}/aoti_example"
 
 def aot_inductor_benchmark(args, model, dtype, example_inputs):
     t = time.time()
@@ -435,6 +435,8 @@ def aot_inductor_benchmark(args, model, dtype, example_inputs):
     # Save the module
     torch.jit.save(torch.jit.script(module), inputs_dir)
     logger.info(f"example inputs saved to : {inputs_dir}")
+    print(f"{tmp_dir}")
+    exit()
     # gen/compile benchmark
     aoti_benchmark_compile(args, tmp_dir)
 
@@ -472,9 +474,9 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
                 prepared_model(dense, sparse)
                 converted_model = convert_pt2e(prepared_model)
                 torch.ao.quantization.move_exported_model_to_eval(converted_model)
-                print(converted_model.graph)
-                print("===========================")
-                converted_model.graph.print_tabular()
+                # print(converted_model.graph)
+                # print("===========================")
+                # converted_model.graph.print_tabular()
                 if args.ipex:
                     print('[Info] Running torch.compile() with IPEX backend')
                     model(dense, sparse)

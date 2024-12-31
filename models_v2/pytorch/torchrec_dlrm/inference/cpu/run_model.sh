@@ -70,6 +70,16 @@ mkdir -p ${OUTPUT_DIR}
 
 TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 AOT_INDUCTOR=${AOT_INDUCTOR:-"0"}
+# if the number of cores are not equal on different numa node
+# or for TORCHINDUCTOR=1 we will lanuch 2 process per numa
+ENABLE_2ND_PROCESS=${ENABLE_2ND_PROCESS:-"0"}
+MANUALLY_LAUNCH=${MANUALLY_LAUNCH:-"0"}
+if [[ "1" == ${TORCH_INDUCTOR} ]];then
+    ENABLE_2ND_PROCESS=1
+    MANUALLY_LAUNCH=1
+fi
+
+export EVAL_BATCH=300
 
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --dtype bf16"
@@ -129,8 +139,11 @@ if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
     NUMA_NODES=`lscpu | grep "NUMA node(s)" | awk '{print $3}'`
     NUMA_NODES_PER_SOCKETS=`expr $NUMA_NODES / $SOCKETS`
     CORES_PER_NUMA_NODE=`expr $CORES_PER_SOCKET / $NUMA_NODES_PER_SOCKETS`
+    COMMON_ARGS="${COMMON_ARGS} --benchmark --limit_val_batches $EVAL_BATCH"
+    if [[ "0" == ${MANUALLY_LAUNCH} ]]; then
+        COMMON_ARGS="${COMMON_ARGS} --share-weight-instance=$CORES_PER_NUMA_NODE"
+    fi
     export OMP_NUM_THREADS=1
-    COMMON_ARGS="${COMMON_ARGS} --benchmark --share-weight-instance=$CORES_PER_NUMA_NODE --limit_val_batches 300"
 else
     COMMON_ARGS="${COMMON_ARGS} --limit_val_batches 100"
 fi
@@ -159,11 +172,17 @@ else
         if [[ "${TEST_MODE}" != "THROUGHPUT" ]]; then
             $mrun_cmd python $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
         else
-            $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
+            if [[ "0" != ${MANUALLY_LAUNCH} ]];then
+                python launch.py $SOCKETS $NUMA_NODES $CORES_PER_SOCKET $ENABLE_2ND_PROCESS 0 "python $MODEL_SCRIPT $COMMON_ARGS --inductor"  2>&1 | tee $LOG
+            else
+                $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
+            fi
         fi
     else
-        bench=$(python $MODEL_SCRIPT $COMMON_ARGS --inductor --aot-inductor | grep aoti_bench_bin)
-        $bench 2>&1 | tee $LOG
+        aoti_model_dir=$(python $MODEL_SCRIPT $COMMON_ARGS --inductor --aot-inductor | grep "aoti-model")
+        echo $aoti_model_dir
+        python launch.py $SOCKETS $NUMA_NODES $CORES_PER_SOCKET $ENABLE_2ND_PROCESS 1 $aoti_model_dir  2>&1 | tee $LOG
+        # ipexrun --no-python --ninstance=3 --nodes-list=3,4,5 --memory-allocator jemalloc $bench 2>&1 | tee $LOG
     fi
 fi
 
@@ -176,7 +195,7 @@ mprof plot ${MEMLOG} -o ${MEMPIC}
 fi
 
 if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
-    throughput=$(grep 'Throughput:' ${LOG} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+    throughput=$(grep 'Throughput:' ${LOG} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v enable_2nd_process="$ENABLE_2ND_PROCESS" '
     BEGIN {
             sum = 0;
             i = 0;
@@ -187,6 +206,9 @@ if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
         }
     END   {
     sum = sum / i;
+            if (enable_2nd_process == "1") {
+                sum = sum * 2;
+            }
             printf("%.3f", sum);
     }')
     echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
