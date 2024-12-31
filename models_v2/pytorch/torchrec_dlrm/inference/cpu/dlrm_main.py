@@ -128,7 +128,6 @@ def print_memory(stage):
     import os
     import psutil
     logger.info(f"dlrmv2-memory-usage-log: {time.time()}, {stage}, {psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024}")
-    # print("dlrmv2-memory-usage-log: ", time.time(), stage, psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024)
 
 def fetch_batch(dataloader):
     try:
@@ -210,7 +209,6 @@ def convert_int8(args, model, dataloader):
         print_memory("int8 jit optimize")
         model(batch.dense_features, batch.sparse_features)
         model(batch.dense_features, batch.sparse_features)
-        # print(model.graph_for(batch.dense_features, batch.sparse_features))
         return model
 
 def ipex_optimize(args, model, optimizer, dataloader):
@@ -382,7 +380,6 @@ def aoti_benchmark_compile(ninstances, nbatches, bs, tmp_dir, target_dir):
         }
         """
     )
-    # os.system(f"cp {tmp_dir}/model.so {target_dir}/model.so")
     os.system(f"ln -s {tmp_dir}/model.so {target_dir}/model.so")
     os.system(f"cp {tmp_dir}/inputs.pt {target_dir}/inputs.pt")
     model_dir = f"{target_dir}/model.so"
@@ -474,9 +471,6 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
                 prepared_model(dense, sparse)
                 converted_model = convert_pt2e(prepared_model)
                 torch.ao.quantization.move_exported_model_to_eval(converted_model)
-                # print(converted_model.graph)
-                # print("===========================")
-                # converted_model.graph.print_tabular()
                 if args.ipex:
                     print('[Info] Running torch.compile() with IPEX backend')
                     model(dense, sparse)
