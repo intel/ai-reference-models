@@ -228,7 +228,7 @@ def quantize(args):
         state_dict = torch.load(args.state_dict_file)
         os.makedirs(args.output_dir, exist_ok=True)
         convert_model = load_int4_weight_and_convert_woq(user_model.eval(), qconfig, state_dict)
-        with torch.no_grad(), torch.cpu.amp.autocast(enabled=True, dtype=torch.bfloat16):
+        with torch.no_grad(), torch.autocast("cpu", enabled=True, dtype=torch.bfloat16):
             convert_model = ipex.optimize(convert_model, dtype=torch.bfloat16, inplace=True, concat_linear=False)
             self_jit = torch.jit.trace(convert_model.eval(), example_inputs, strict=False)
             self_jit = torch.jit.freeze(self_jit.eval())

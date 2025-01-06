@@ -212,7 +212,7 @@ def main():
             input = prompts_dataset[step]["Prompt"]
             print("input is : ", prompt if args.pipeline_mode == "img2img" else input)
             if args.device == "xpu":
-                with torch.xpu.amp.autocast(enabled=amp_enabled, dtype=datatype):
+                with torch.autocast("xpu", enabled=amp_enabled, dtype=datatype):
                     if args.pipeline_mode == "img2img":
                         images = pipe(prompt=prompt, image=init_image, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type).images
                     else:
@@ -252,7 +252,7 @@ def main():
                     except:
                         pass
                     start_time = time.time()
-                    with torch.xpu.amp.autocast(enabled=amp_enabled, dtype=datatype):
+                    with torch.autocast("xpu", enabled=amp_enabled, dtype=datatype):
                         if args.pipeline_mode == "img2img":
                             images = pipe(prompt=prompt, image=init_image, generator=generator, num_inference_steps=args.num_inference_steps, output_type=out_type).images
                         else:

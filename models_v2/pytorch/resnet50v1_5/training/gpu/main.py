@@ -867,7 +867,7 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
                 images = images.to(args.gpu, non_blocking=non_blocking)
                 target = target.to(args.gpu, non_blocking=non_blocking)
 
-                with torch.cuda.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                with torch.autocast("cuda", enabled=use_autocast, dtype=autocast_dtype):
                     output = model(images)
                     loss = criterion(output, target)
 
@@ -880,7 +880,7 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
                 target = target.cpu()
             else:
                 start_time = time.time()
-                with torch.cpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                with torch.autocast("cpu", enabled=use_autocast, dtype=autocast_dtype):
                     output = model(images)
                     loss = criterion(output, target)
 
@@ -1016,13 +1016,13 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, autoc
                 elif args.gpu is not None:
                     start_time = time.time()
                     images = images.to(args.gpu, non_blocking=non_blocking)
-                    with torch.cuda.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                    with torch.autocast("cuda", enabled=use_autocast, dtype=autocast_dtype):
                         output = model(images)
 
                     torch.cuda.synchronize(args.gpu)
                 else:
                     start_time = time.time()
-                    with torch.cpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype):
+                    with torch.autocast("cpu", enabled=use_autocast, dtype=autocast_dtype):
                         output = model(images)
 
                 if profiling:

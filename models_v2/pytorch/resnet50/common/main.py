@@ -475,11 +475,11 @@ def main_worker(gpu, ngpus_per_node, args):
                     x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
                     if args.bf16:
                         x = x.to(torch.bfloat16)
-                        with torch.cpu.amp.autocast(dtype=torch.bfloat16), torch.no_grad():
+                        with torch.autocast("cpu", dtype=torch.bfloat16), torch.no_grad():
                             model = torch.jit.trace(model, x).eval()
                     elif args.fp16:
                         x = x.to(torch.half)
-                        with torch.cpu.amp.autocast(dtype=torch.half), torch.no_grad():
+                        with torch.autocast("cpu", dtype=torch.half), torch.no_grad():
                             model = torch.jit.trace(model, x).eval()
                     else:
                         with torch.no_grad():
@@ -522,7 +522,7 @@ def main_worker(gpu, ngpus_per_node, args):
                         print('[Info] Running torch.compile() with default backend')
                         model = torch.compile(converted_model)
             elif args.bf16:
-                with torch.no_grad(), torch.cpu.amp.autocast(dtype=torch.bfloat16):
+                with torch.no_grad(), torch.autocast("cpu", dtype=torch.bfloat16):
                     x = x.to(torch.bfloat16)
                     if args.ipex:
                         print('[Info] Running torch.compile() BFloat16 with IPEX backend')
@@ -531,7 +531,7 @@ def main_worker(gpu, ngpus_per_node, args):
                         print('[Info] Running torch.compile() BFloat16 with default backend')
                         model = torch.compile(model)
             elif args.fp16:
-                with torch.no_grad(), torch.cpu.amp.autocast(dtype=torch.half):
+                with torch.no_grad(), torch.autocast("cpu", dtype=torch.half):
                     x = x.to(torch.half)
                     if args.ipex:
                         print('[Info] Running torch.compile() FPloat16 with IPEX backend')
@@ -547,7 +547,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     else:
                         print('[Info] Running torch.compile() Float32 with default backend')
                         model = torch.compile(model)
-            with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16, dtype=torch.half if args.fp16 else torch.bfloat16):
+            with torch.no_grad(), torch.autocast("cpu", enabled=args.bf16 or args.fp16, dtype=torch.half if args.fp16 else torch.bfloat16):
                 y = model(x)
                 y = model(x)
         validate(val_loader, model, criterion, args)
@@ -572,7 +572,7 @@ def main_worker(gpu, ngpus_per_node, args):
             model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, fuse_update_step=False)
 
         if args.inductor:
-            with torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16, dtype=torch.half if args.fp16 else torch.bfloat16):
+            with torch.autocast("cpu", enabled=args.bf16 or args.fp16, dtype=torch.half if args.fp16 else torch.bfloat16):
                 if args.ipex:
                     print('[Info] Running training steps torch.compile() with IPEX backend')
                     model = torch.compile(model, backend="ipex")
@@ -647,11 +647,11 @@ def train(train_loader, val_loader, model, criterion, optimizer, lr_scheduler, a
                 target = target.cuda(args.gpu, non_blocking=True)
 
             if args.bf16:
-                with torch.cpu.amp.autocast(dtype=torch.bfloat16):
+                with torch.autocast("cpu", dtype=torch.bfloat16):
                     output = model(images)
                 output = output.to(torch.float32)
             elif args.fp16:
-                with torch.cpu.amp.autocast(dtype=torch.half):
+                with torch.autocast("cpu", dtype=torch.half):
                     output = model(images)
                 output = output.to(torch.float32)
 
@@ -727,10 +727,10 @@ def run_weights_sharing_model(m, tid, args):
         while num_images < steps:
             start_time = time.time()
             if not args.jit and args.bf16:
-                with torch.cpu.amp.autocast(dtype=torch.bfloat16):
+                with torch.autocast("cpu", dtype=torch.bfloat16):
                     y = m(x)
             elif not args.jit and args.fp16:
-                with torch.cpu.amp.autocast(dtype=torch.half):
+                with torch.autocast("cpu", dtype=torch.half):
                     y = m(x)
             else:
                 y = m(x)
@@ -813,10 +813,10 @@ def validate(val_loader, model, criterion, args):
                         if i >= args.warmup_iterations:
                             end = time.time()
                         if not args.jit and args.bf16:
-                            with torch.cpu.amp.autocast(dtype=torch.bfloat16):
+                            with torch.autocast("cpu", dtype=torch.bfloat16):
                                 output = model(images)
                         elif not args.jit and args.fp16:
-                            with torch.cpu.amp.autocast(dtype=torch.half):
+                            with torch.autocast("cpu", dtype=torch.half):
                                 output = model(images)
                         else:
                             output = model(images)
@@ -852,10 +852,10 @@ def validate(val_loader, model, criterion, args):
                             target = target.cuda(args.gpu, non_blocking=True)
 
                     if not args.jit and args.bf16:
-                        with torch.cpu.amp.autocast(dtype=torch.bfloat16):
+                        with torch.autocast("cpu", dtype=torch.bfloat16):
                             output = model(images)
                     elif not args.jit and args.fp16:
-                        with torch.cpu.amp.autocast(dtype=torch.half):
+                        with torch.autocast("cpu", dtype=torch.half):
                             output = model(images)
 
                     else:

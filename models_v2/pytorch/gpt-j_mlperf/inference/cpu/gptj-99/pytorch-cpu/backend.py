@@ -89,7 +89,7 @@ class Backend(object):
     def predict(self, input_batch, attention_mask=None):
         """ Runs inference on 'input_batch' """
         enable_autocast = self.precision in ["bf16", "mix", "int4_bf16_mixed"]
-        with torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(enabled=enable_autocast, dtype=torch.bfloat16):
+        with torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", enabled=enable_autocast, dtype=torch.bfloat16):
             outputs = self.model.generate(input_batch, attention_mask=attention_mask,
                     **self.generate_kwargs,
                     pad_token_id=self.tokenizer.pad_token_id

@@ -71,7 +71,7 @@ def run_weights_sharing_model(pipe, tid, args):
         # run model
         start = time.time()
         if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
-            with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
+            with torch.autocast("cpu", dtype=args.dtype), torch.no_grad():
                 output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
         else:
             with torch.no_grad():
@@ -180,7 +180,7 @@ def main():
                     if args.precision == "int8-fp32":
                         pipe.unet = ipex.quantization.convert(pipe.unet)
                     else:
-                        with torch.cpu.amp.autocast():
+                        with torch.autocast("cpu", ):
                             pipe.unet = ipex.quantization.convert(pipe.unet)
                     pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=args.dtype, inplace=True)
                     print("running int8 evalation step\n")
@@ -231,14 +231,14 @@ def main():
         print("JIT trace ...")
         # from utils_vis import make_dot, draw
         if args.precision == "bf16" or args.precision == "fp16":
-            with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
+            with torch.autocast("cpu", dtype=args.dtype), torch.no_grad():
                 pipe.traced_unet = torch.jit.trace(pipe.unet, input, strict=False)
                 pipe.traced_unet = torch.jit.freeze(pipe.traced_unet)
                 pipe.traced_unet(*input)
                 pipe.traced_unet(*input)
                 # print(pipe.traced_unet.graph_for(input))
         elif args.precision == "int8-bf16":
-            with torch.cpu.amp.autocast(), torch.no_grad():
+            with torch.autocast("cpu", ), torch.no_grad():
                 pipe.traced_unet = torch.jit.trace(pipe.unet, input, strict=False)
                 pipe.traced_unet = torch.jit.freeze(pipe.traced_unet)
                 pipe.traced_unet(*input)
@@ -289,14 +289,14 @@ def main():
                 pipe.text_encoder = torch.compile(pipe.text_encoder)
                 pipe.vae.decode = torch.compile(pipe.vae.decode)
         elif args.precision == "bf16":
-            with torch.cpu.amp.autocast(), torch.no_grad():
+            with torch.autocast("cpu", ), torch.no_grad():
                 pipe.unet = torch.compile(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
                 pipe.text_encoder = torch.compile(pipe.text_encoder)
                 pipe.vae.decode = torch.compile(pipe.vae.decode)
         elif args.precision == "fp16":
-            with torch.cpu.amp.autocast(dtype=torch.half), torch.no_grad():
+            with torch.autocast("cpu", dtype=torch.half), torch.no_grad():
                 pipe.unet = torch.compile(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
@@ -465,7 +465,7 @@ def main():
                     pipe(args.prompt)
                 pipe.traced_unet = convert_pt2e(pipe.traced_unet)
                 torch.ao.quantization.move_exported_model_to_eval(pipe.traced_unet)
-            with torch.cpu.amp.autocast(), torch.no_grad():
+            with torch.autocast("cpu", ), torch.no_grad():
                 pipe.traced_unet = torch.compile(pipe.traced_unet)
                 pipe.traced_unet(*input)
                 pipe.traced_unet(*input)
@@ -493,7 +493,7 @@ def main():
                 # run model
                 start = time.time()
                 if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
-                    with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
+                    with torch.autocast("cpu", dtype=args.dtype), torch.no_grad():
                         output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
                 else:
                     with torch.no_grad():
@@ -517,7 +517,7 @@ def main():
             real_image = images[0]
             print("prompt: ", prompt)
             if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
-                with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
+                with torch.autocast("cpu", dtype=args.dtype), torch.no_grad():
                     output = pipe(prompt, generator=torch.manual_seed(args.seed), output_type="numpy").images
             else:
                 with torch.no_grad():
@@ -546,7 +546,7 @@ def main():
         print("Running profiling ...")
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
             if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
-                with torch.cpu.amp.autocast(dtype=args.dtype), torch.no_grad():
+                with torch.autocast("cpu", dtype=args.dtype), torch.no_grad():
                     pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
             else:
                 with torch.no_grad():

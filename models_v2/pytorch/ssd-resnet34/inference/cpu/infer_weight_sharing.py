@@ -421,7 +421,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
 
                 if args.jit:
                     print('enable jit')
-                    with torch.cpu.amp.autocast(), torch.no_grad():
+                    with torch.autocast("cpu", ), torch.no_grad():
                         # model = torch.jit.trace(model, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
                         batch_per_stream = (args.batch_size // args.number_instance) if args.use_multi_stream_module else args.batch_size
                         model_decode = torch.jit.trace(model_decode, torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()

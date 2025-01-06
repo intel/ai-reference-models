@@ -166,7 +166,7 @@ def dlrm_wrap(X, lS_o, lS_i, use_gpu, use_xpu, device, args, amp, amp_dtype, nde
                     else lS_o.to(device)
                 )
         if args.dynamo:
-            with torch.xpu.amp.autocast(enabled=amp, dtype=amp_dtype):
+            with torch.autocast("xpu", enabled=amp, dtype=amp_dtype):
                 res = dlrm(X.to(device), lS_o, lS_i)
         else:
             res = dlrm(X.to(device), lS_o, lS_i)
@@ -185,7 +185,7 @@ def dlrm_wrap_dynamo(X, lS_o, lS_i, use_gpu, use_xpu, device, args, amp, amp_dty
                 if isinstance(lS_o, list)
                 else lS_o.to(device)
             )
-        with torch.xpu.amp.autocast(enabled=amp, dtype=amp_dtype):
+        with torch.autocast("xpu", enabled=amp, dtype=amp_dtype):
             res = dlrm(X.to(device), lS_o, lS_i)
         return res
 
@@ -884,11 +884,11 @@ def inference(
                                 with torch.no_grad():
                                     dynamo_inf = torch.compile(dlrm_wrap_dynamo, backend="inductor", options={"freezing":True})
                             else:
-                                with torch.xpu.amp.autocast(enabled=amp, dtype=amp_dtype):
+                                with torch.autocast("xpu", enabled=amp, dtype=amp_dtype):
                                     dlrm = torch.jit.trace(dlrm, (X_test.to(device), lS_o, lS_i), check_trace=False)
                                     dlrm = torch.jit.freeze(dlrm)
                         elif use_gpu:
-                            with torch.cuda.amp.autocast(enabled=amp, dtype=amp_dtype):
+                            with torch.autocast("cuda", enabled=amp, dtype=amp_dtype):
                                 dlrm = torch.jit.trace(dlrm, (X_test.to(device), lS_o, lS_i), check_trace=False)
                                 dlrm = torch.jit.freeze(dlrm)
                         else:
@@ -916,7 +916,7 @@ def inference(
                             pass
                     t1 = time.time()
                     if ext_dist.my_size > 1 and use_xpu:
-                        with torch.xpu.amp.autocast(enabled=amp, dtype=amp_dtype):
+                        with torch.autocast("xpu", enabled=amp, dtype=amp_dtype):
                             Z_test = dlrm_wrap(
                                 X_test,
                                 lS_o_test,
@@ -930,7 +930,7 @@ def inference(
                                 ndevices=ndevices
                             )
                     elif (ext_dist.my_size > 1 and use_gpu):
-                        with torch.cuda.amp.autocast(enabled=amp, dtype=amp_dtype):
+                        with torch.autocast("cuda", enabled=amp, dtype=amp_dtype):
                             Z_test = dlrm_wrap(
                                 X_test,
                                 lS_o_test,
@@ -1038,7 +1038,7 @@ def inference(
                 continue
 
             # forward pass
-            with torch.xpu.amp.autocast(enabled=amp, dtype=amp_dtype):
+            with torch.autocast("xpu", enabled=amp, dtype=amp_dtype):
                 Z_test = dlrm_wrap(
                     X_test,
                     lS_o_test,
@@ -1959,7 +1959,7 @@ def run():
                         # loss
                         E = loss_fn_wrap(Z, T, device)
                     else:
-                        with torch.xpu.amp.autocast(enabled=True, dtype=amp_dtype):
+                        with torch.autocast("xpu", enabled=True, dtype=amp_dtype):
                             Z = dlrm_wrap(
                                 X,
                                 lS_o,

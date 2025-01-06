@@ -1,3 +1,25 @@
+diff --git a/models/common.py b/models/common.py
+index edb5edc..36dc41c 100644
+--- a/models/common.py
++++ b/models/common.py
+@@ -890,7 +890,7 @@ class autoShape(nn.Module):
+         t = [time_synchronized()]
+         p = next(self.model.parameters())  # for device and type
+         if isinstance(imgs, torch.Tensor):  # torch
+-            with amp.autocast(enabled=p.device.type != 'cpu'):
++            with torch.autocast("cuda", enabled=p.device.type != 'cpu'):
+                 return self.model(imgs.to(p.device).type_as(p), augment, profile)  # inference
+ 
+         # Pre-process
+@@ -918,7 +918,7 @@ class autoShape(nn.Module):
+         x = torch.from_numpy(x).to(p.device).type_as(p) / 255.  # uint8 to fp16/32
+         t.append(time_synchronized())
+ 
+-        with amp.autocast(enabled=p.device.type != 'cpu'):
++        with torch.autocast("cuda", enabled=p.device.type != 'cpu'):
+             # Inference
+             y = self.model(x, augment, profile)[0]  # forward
+             t.append(time_synchronized())
 diff --git a/models/experimental.py b/models/experimental.py
 index 735d7aa..a81196c 100644
 --- a/models/experimental.py
@@ -12,7 +34,7 @@ index 735d7aa..a81196c 100644
      
      # Compatibility updates
 diff --git a/models/yolo.py b/models/yolo.py
-index 95a019c..048fef0 100644
+index 95a019c..8267c33 100644
 --- a/models/yolo.py
 +++ b/models/yolo.py
 @@ -42,16 +42,26 @@ class Detect(nn.Module):
@@ -70,6 +92,32 @@ index f4d2182..cf1cc75 100644
  tqdm>=4.41.0
  protobuf<4.21.3
  
+diff --git a/train.py b/train.py
+index 86c7e48..1754e35 100644
+--- a/train.py
++++ b/train.py
+@@ -357,7 +357,7 @@ def train(hyp, opt, device, tb_writer=None):
+                     imgs = F.interpolate(imgs, size=ns, mode='bilinear', align_corners=False)
+ 
+             # Forward
+-            with amp.autocast(enabled=cuda):
++            with torch.autocast("cuda", enabled=cuda):
+                 pred = model(imgs)  # forward
+                 if 'loss_ota' not in hyp or hyp['loss_ota'] == 1:
+                     loss, loss_items = compute_loss_ota(pred, targets.to(device), imgs)  # loss scaled by batch_size
+diff --git a/train_aux.py b/train_aux.py
+index 0e8053f..3cc199b 100644
+--- a/train_aux.py
++++ b/train_aux.py
+@@ -357,7 +357,7 @@ def train(hyp, opt, device, tb_writer=None):
+                     imgs = F.interpolate(imgs, size=ns, mode='bilinear', align_corners=False)
+ 
+             # Forward
+-            with amp.autocast(enabled=cuda):
++            with torch.autocast("cuda", enabled=cuda):
+                 pred = model(imgs)  # forward
+                 loss, loss_items = compute_loss_ota(pred, targets.to(device), imgs)  # loss scaled by batch_size
+                 if rank != -1:
 diff --git a/utils/datasets.py b/utils/datasets.py
 index 5fe4f7b..39c80f9 100644
 --- a/utils/datasets.py
@@ -92,7 +140,7 @@ index 5fe4f7b..39c80f9 100644
              #    cache, exists = self.cache_labels(cache_path, prefix), False  # re-cache
          else:
 diff --git a/utils/torch_utils.py b/utils/torch_utils.py
-index 1e631b5..46ec837 100644
+index 1e631b5..6726dff 100644
 --- a/utils/torch_utils.py
 +++ b/utils/torch_utils.py
 @@ -341,8 +341,8 @@ def revert_sync_batchnorm(module):
@@ -122,7 +170,7 @@ index 1e631b5..46ec837 100644
 +        else:
 +            sample_input = torch.rand(1, 3, img_size, img_size)
 +
-+        with torch.cpu.amp.autocast(enabled = dtype in [torch.bfloat16, torch.float16], dtype=dtype), torch.no_grad():
++        with torch.autocast("cpu", enabled = dtype in [torch.bfloat16, torch.float16], dtype=dtype), torch.no_grad():
 +            traced_script_module = torch.jit.trace(self.model, sample_input, strict=False).eval()
 +            traced_script_module = torch.jit.freeze(traced_script_module)
 +

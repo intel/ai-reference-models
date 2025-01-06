@@ -247,7 +247,7 @@ def ipex_optimize(args, model, optimizer, dataloader):
             if args.dtype == 'bf32':
                 ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
             if args.jit:
-                with torch.cpu.amp.autocast(enabled=autocast, dtype=dtype):
+                with torch.autocast("cpu", enabled=autocast, dtype=dtype):
                     torch._C._jit_set_texpr_fuser_enabled(False)
                     model = torch.jit.trace(model, (dense, sparse))
                     model = torch.jit.freeze(model)
@@ -485,7 +485,7 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
                 model(dense, sparse)
                 model(dense, sparse)
         else:
-            with torch.no_grad(), torch.cpu.amp.autocast(enabled=autocast, dtype=dtype):
+            with torch.no_grad(), torch.autocast("cpu", enabled=autocast, dtype=dtype):
                 print('[Info] Running torch.compile() with default backend')
                 if args.aot_inductor:
                     aot_inductor_benchmark(args, model, dtype, (dense, sparse, ))
@@ -981,7 +981,7 @@ def _evaluate(
     total_t = 0
     it = 0
     ctx1 = torch.no_grad()
-    ctx2 = torch.cpu.amp.autocast(enabled=autocast_enabled, dtype=autocast_dtype)
+    ctx2 = torch.autocast("cpu", enabled=autocast_enabled, dtype=autocast_dtype)
     ctx3 = torch.profiler.profile(activities=[ProfilerActivity.CPU], schedule=prof_schedule, on_trace_ready=trace_handler)
     with ctx1, ctx2:
         if enable_torch_profile:
@@ -1113,7 +1113,7 @@ def _train(
             opt.zero_grad(set_to_none=True)
         with record_function("fw"):
             if autocast_enabled:
-                with torch.cpu.amp.autocast(enabled=autocast_enabled, dtype=autocast_dtype):
+                with torch.autocast("cpu", enabled=autocast_enabled, dtype=autocast_dtype):
                     losses, _ = model(next_batch)
                     loss = torch.sum(losses, dim=0)
             else:
@@ -1219,9 +1219,9 @@ def _share_weight_benchmark(
     print_memory("start to run throughput benchmark")
     ctx = contextlib.suppress()
     if args.dtype == 'bf16':
-        ctx = torch.cpu.amp.autocast(enabled=True, dtype=torch.bfloat16)
+        ctx = torch.autocast("cpu", enabled=True, dtype=torch.bfloat16)
     if args.dtype == 'fp16':
-        ctx = torch.cpu.amp.autocast(enabled=True, dtype=torch.float16)
+        ctx = torch.autocast("cpu", enabled=True, dtype=torch.float16)
     with ctx:
         stats = bench.benchmark(
             num_calling_threads=args.share_weight_instance,

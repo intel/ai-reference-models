@@ -309,11 +309,11 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                 if args.jit:
                     if use_ipex:
                         print('enable IPEX jit path')
-                        with torch.cpu.amp.autocast(), torch.no_grad():
+                        with torch.autocast("cpu", ), torch.no_grad():
                             model = torch.jit.trace(model, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
                     else:
                         print('enable OOB jit path')
-                        with torch.cpu.amp.autocast(cache_enabled=False), torch.no_grad():
+                        with torch.autocast("cpu", cache_enabled=False), torch.no_grad():
                             model = torch.jit.trace(model, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
 
                     model = torch.jit.freeze(model)
@@ -381,7 +381,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                 else:
                     if use_ipex:
                         print('Ipex Autocast imperative path')
-                        with torch.cpu.amp.autocast(), torch.no_grad():
+                        with torch.autocast("cpu", ), torch.no_grad():
                             total_iteration = 0
                             for epoch in range(epoch_number):
                                 for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
@@ -439,7 +439,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                                         total_iteration += 1
                     else:
                         print("OOB Autocast imperative path")
-                        with torch.cpu.amp.autocast(), torch.no_grad():
+                        with torch.autocast("cpu", ), torch.no_grad():
                             total_iteration = 0
                             for epoch in range(epoch_number):
                                 for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
@@ -458,7 +458,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                                         inference_time.update(time.time() - start_time)
                                         end_time = time.time()
 
-                                    with torch.cpu.amp.autocast(enabled=False):
+                                    with torch.autocast("cpu", enabled=False):
                                         try:
                                             results_raw = encoder.decode_batch(ploc, plabel, 0.50, 200, device=device)
                                         except:

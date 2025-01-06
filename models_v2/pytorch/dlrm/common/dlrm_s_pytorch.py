@@ -871,7 +871,7 @@ def trace_model(args, dlrm, test_ld):
             dlrm(X, lS_o, lS_i)
         else:
             if args.ipex_interaction:
-                with torch.cpu.amp.autocast(enabled=args.bf16):
+                with torch.autocast("cpu", enabled=args.bf16):
                     dlrm = torch.jit.trace(dlrm, (X, lS_o, lS_i), check_trace=True)
                     dlrm = torch.jit.freeze(dlrm)
         # torch.compile() path
@@ -899,14 +899,14 @@ def trace_model(args, dlrm, test_ld):
                     print('[Info] Running torch.compile() with default backend')
                     dlrm = torch.compile(dlrm)
             elif args.bf16:
-                with torch.no_grad(), torch.cpu.amp.autocast(dtype=torch.bfloat16):
+                with torch.no_grad(), torch.autocast("cpu", dtype=torch.bfloat16):
                     print('[Info] Running torch.compile() with default backend')
                     dlrm = torch.compile(dlrm)
             else:
                 with torch.no_grad():
                     print('[Info] Running torch.compile() with default backend')
                     dlrm = torch.compile(dlrm)
-        with torch.no_grad(), torch.cpu.amp.autocast(enabled=args.bf16):
+        with torch.no_grad(), torch.autocast("cpu", enabled=args.bf16):
             dlrm(X, lS_o, lS_i)
             dlrm(X, lS_o, lS_i)
         return dlrm
@@ -953,7 +953,7 @@ def inference(
         dlrm = trace_model(args, dlrm, test_ld)
     if args.share_weight_instance != 0:
         run_throughput_benchmark(args, dlrm, test_ld)
-    with torch.cpu.amp.autocast(enabled=args.bf16):
+    with torch.autocast("cpu", enabled=args.bf16):
         if ext_dist.my_size > 1:
             i = 0
             n_test_iter = 2     # exec 2 iter per validation
@@ -1485,7 +1485,7 @@ def run():
             dlrm.emb_dense = ext_dist.DDP(dlrm.emb_dense, gradient_as_bucket_view=True, broadcast_buffers=False)
 
         if args.inductor:
-            with torch.cpu.amp.autocast(enabled=args.bf16):
+            with torch.autocast("cpu", enabled=args.bf16):
                 print('[Info] Running training steps torch.compile() with default backend')
                 dlrm = torch.compile(dlrm)
     training_record = [0, 0]
@@ -1571,7 +1571,7 @@ def run():
                         if args.ipex_merged_emb and hasattr(dlrm, 'emb_sparse') and isinstance(dlrm.emb_sparse, ipex.nn.modules.MergedEmbeddingBagWithSGD):
                             dlrm.emb_sparse.sgd_args = dlrm.emb_sparse.sgd_args._replace(lr=lr_scheduler.get_last_lr()[0]/ext_dist.my_size)
 
-                        with torch.cpu.amp.autocast(enabled=args.bf16):
+                        with torch.autocast("cpu", enabled=args.bf16):
                             Z = dlrm_wrap(
                                 X,
                                 lS_o,

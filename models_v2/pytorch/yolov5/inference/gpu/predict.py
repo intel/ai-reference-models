@@ -206,7 +206,7 @@ def inference_config(model):
             io_utils.write_info('Using JIT trace')
             with torch.inference_mode():
                 if args.xpu and args.ipex:
-                    with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
+                    with torch.autocast("xpu", enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
                         model = torch.jit.trace(model, trace_input, check_trace=False)
                 elif args.gpu:
                     with torch.autocast(enabled=use_autocast, device_type=get_device_type(), dtype=autocast_dtype, cache_enabled=False):

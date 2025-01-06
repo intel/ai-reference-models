@@ -151,7 +151,7 @@ def load_jit_model(model, inputs, dtype, device, jit_trace_path, use_jit_cache):
         in_1 = torch.unsqueeze(inputs["input_ids"][0].clone(), 0)
         in_2 = torch.unsqueeze(inputs["token_type_ids"][0].clone(), 0)
         in_3 = torch.unsqueeze(inputs["attention_mask"][0].clone(), 0)
-        with torch.xpu.amp.autocast(enabled=True, dtype=dtype, cache_enabled=False):
+        with torch.autocast("xpu", enabled=True, dtype=dtype, cache_enabled=False):
             jit_model = torch.jit.trace(model,
                 (in_1.to(device),
                 in_2.to(device),
@@ -396,11 +396,11 @@ def train(args, train_dataset, model, tokenizer):
 
         # autocast context
         if args.device_choice == 'cuda':
-            autocast_context = torch.cuda.amp.autocast(enabled=use_autocast, dtype=autocast_dtype)
+            autocast_context = torch.autocast("cuda", enabled=use_autocast, dtype=autocast_dtype)
         elif args.device_choice == 'xpu':
-            autocast_context = torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype)
+            autocast_context = torch.autocast("xpu", enabled=use_autocast, dtype=autocast_dtype)
         else:
-            autocast_context = torch.cpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype)
+            autocast_context = torch.autocast("cpu", enabled=use_autocast, dtype=autocast_dtype)
 
         import contextlib
         profile_context = contextlib.nullcontext()
