@@ -108,7 +108,7 @@ def do_train(
         if iteration > iter_warmup:
             training_timer.tic()
 
-        with torch.cpu.amp.autocast(enabled=bf16):
+        with torch.autocast("cpu", enabled=bf16):
             loss_dict = model(images.to(memory_format=torch.channels_last), targets)
 
         losses = sum(loss.to(torch.float32) for loss in loss_dict.values())

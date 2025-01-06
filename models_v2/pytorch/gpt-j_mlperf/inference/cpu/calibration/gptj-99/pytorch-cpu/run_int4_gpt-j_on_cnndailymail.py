@@ -330,7 +330,7 @@ elif args.int4_model == "" and not os.path.exists(args.output_dir + "/int4_model
         tuple(global_past_key_value),
         position_ids.unsqueeze(0),
     )
-    with torch.no_grad(), torch.cpu.amp.autocast(enabled=True):
+    with torch.no_grad(), torch.autocast("cpu", enabled=True):
         self_jit = torch.jit.trace(user_model.eval(), example_inputs, strict=False)
         self_jit = torch.jit.freeze(self_jit.eval())
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)

@@ -145,7 +145,7 @@ def eval(
             conf.save(args.configure_dir)
         # Inference (vanilla cpu, dnnl fp32 or dnnl int8)
         else:
-            with torch.cpu.amp.autocast(enabled=args.mix_precision):
+            with torch.autocast("cpu", enabled=args.mix_precision):
                 # warm up
                 if args.warm_up > 0:
                     print("\nstart warm up, warmp_up steps = ", args.warm_up)
@@ -335,7 +335,7 @@ def main(args):
     if args.jit or args.jit_optimize:
         print("running jit path")
         model.joint_net.eval()
-        with torch.cpu.amp.autocast(enabled=args.mix_precision), torch.no_grad():
+        with torch.autocast("cpu", enabled=args.mix_precision), torch.no_grad():
             model.joint_net = torch.jit.trace(model.joint_net, torch.randn(args.batch_size, 1, 1, model_definition['rnnt']['encoder_n_hidden'] + model_definition['rnnt']['pred_n_hidden']), check_trace=False)
         if args.jit_optimize:
             model.joint_net = torch.jit.optimize_for_inference(model.joint_net)

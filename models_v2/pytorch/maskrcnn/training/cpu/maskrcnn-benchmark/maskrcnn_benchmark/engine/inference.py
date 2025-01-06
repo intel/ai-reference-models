@@ -59,7 +59,7 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, p99_tim
         model.rpn = ipex.optimize(model.rpn, dtype=torch.bfloat16 if bf16 else torch.float32, inplace=True)
         model.roi_heads = ipex.optimize(model.roi_heads, dtype=torch.bfloat16 if bf16 else torch.float32, inplace=True)
 
-    with torch.cpu.amp.autocast(enabled=bf16), torch.no_grad():
+    with torch.autocast("cpu", enabled=bf16), torch.no_grad():
         # generate trace model
         if jit:
             print("generate trace model")

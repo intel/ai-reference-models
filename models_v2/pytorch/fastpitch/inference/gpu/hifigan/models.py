@@ -66,7 +66,7 @@ class NoAMPConv1d(Conv1d):
         if not self.no_amp:
             return super().forward(*args)
 
-        with torch.cuda.amp.autocast(enabled=False):
+        with torch.autocast("cuda", enabled=False):
             return self._cast(
                 super().forward(*self._cast(args, torch.float)), args[0].dtype)
 

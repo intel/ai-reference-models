@@ -139,7 +139,7 @@ class Inference:
             io_utils.write_info('Model using JIT trace')
             with torch.inference_mode():
                 if args.xpu and args.ipex:
-                    with torch.xpu.amp.autocast(enabled=self.use_autocast, dtype=self.autocast_dtype, cache_enabled=False):
+                    with torch.autocast("xpu", enabled=self.use_autocast, dtype=self.autocast_dtype, cache_enabled=False):
                         self.model = torch.jit.trace(self.model, trace_input)
                 elif args.gpu:
                     with torch.autocast(enabled=self.use_autocast, device_type=self.get_device_type(), dtype=self.autocast_dtype, cache_enabled=False):
@@ -300,7 +300,7 @@ class Inference:
                 if args.jit_trace:
                     self.inference(images, target)
                 elif args.xpu and args.ipex:
-                    with torch.xpu.amp.autocast(enabled=self.use_autocast, dtype=self.autocast_dtype, cache_enabled=True):
+                    with torch.autocast("xpu", enabled=self.use_autocast, dtype=self.autocast_dtype, cache_enabled=True):
                         self.inference(images, target)
                 else:
                     with torch.autocast(enabled=self.use_autocast, device_type=self.get_device_type(), dtype=self.autocast_dtype, cache_enabled=True):
@@ -376,7 +376,7 @@ class Inference:
                     if args.jit_trace:
                         self.inference(images, target)
                     elif args.xpu and args.ipex:
-                        with torch.xpu.amp.autocast(enabled=self.use_autocast, dtype=self.autocast_dtype, cache_enabled=True):
+                        with torch.autocast("xpu", enabled=self.use_autocast, dtype=self.autocast_dtype, cache_enabled=True):
                             self.inference(images, target)
                     else:
                         with torch.autocast(enabled=self.use_autocast, device_type=self.get_device_type(), dtype=self.autocast_dtype, cache_enabled=True):

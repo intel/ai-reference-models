@@ -124,7 +124,7 @@ def evaluator(model, data_transforms, loss_fn, greedy_decoder, labels, eval_data
 
                     if args.ipex:
                         if args.bf16:
-                            with torch.cpu.amp.autocast():
+                            with torch.autocast("cpu", ):
                                 t_log_probs_t, (x_len, y_len) = model(
                                     ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
                                 )
@@ -231,7 +231,7 @@ def train(
                         if (step - start_step) >= args.warmup:
                             t0 = time.perf_counter()
                         if args.bf16:
-                            with torch.cpu.amp.autocast():
+                            with torch.autocast("cpu", ):
                                 t_log_probs_t, (x_len, y_len) = model(
                                     ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
                                 )
@@ -260,7 +260,7 @@ def train(
                     if (step - start_step) >= args.warmup:
                         t0 = time.perf_counter()
                     if args.bf16:
-                        with torch.cpu.amp.autocast():
+                        with torch.autocast("cpu", ):
                             t_log_probs_t, (x_len, y_len) = model(
                                 ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
                             )

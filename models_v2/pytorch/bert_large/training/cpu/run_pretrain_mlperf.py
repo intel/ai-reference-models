@@ -530,7 +530,7 @@ def run_eval(model, eval_dataloader, device, num_eval_examples, args, first_eval
             input_ids, segment_ids, input_mask, masked_lm_labels, next_sentence_labels = batch
             outputs = None
             if args.bf16:
-                with torch.cpu.amp.autocast():
+                with torch.autocast("cpu", ):
                     outputs = model(
                         input_ids=input_ids, 
                         token_type_ids=segment_ids, 
@@ -696,7 +696,7 @@ def main():
         # torch._inductor.config.profiler_mark_wrapper_call = True
         # torch._inductor.config.cpp.enable_kernel_profile = True
         amp_dtype = torch.half if args.fp16 else torch.bfloat16
-        with torch.cpu.amp.autocast(enabled=args.bf16 or args.fp16, dtype=amp_dtype):
+        with torch.autocast("cpu", enabled=args.bf16 or args.fp16, dtype=amp_dtype):
             print('[Info] Running training steps torch.compile() with default backend')
             model = torch.compile(model)
 
@@ -765,11 +765,11 @@ def main():
                 t2 = time.time()
                 outputs = None
                 if args.fp16:
-                    with torch.cpu.amp.autocast(enabled=True, dtype=torch.half):
+                    with torch.autocast("cpu", enabled=True, dtype=torch.half):
                         outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                                 labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
                 elif args.bf16:
-                    with torch.cpu.amp.autocast():
+                    with torch.autocast("cpu", ):
                         outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                              labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
                 elif args.fp8 and args.ipex:
@@ -808,11 +808,11 @@ def main():
                         print("Running profiling ...")
                         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
                             if args.fp16:
-                                with torch.cpu.amp.autocast(enabled=True, dtype=torch.half):
+                                with torch.autocast("cpu", enabled=True, dtype=torch.half):
                                     outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                                             labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
                             elif args.bf16:
-                                with torch.cpu.amp.autocast():
+                                with torch.autocast("cpu", ):
                                     outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                                          labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
                             elif args.fp8 and args.ipex:

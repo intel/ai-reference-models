@@ -411,7 +411,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     x = torch.randn(batch_per_stream, 3, 224, 224).contiguous(memory_format=torch.channels_last)
                     if args.bf16:
                         x = x.to(torch.bfloat16)
-                        with torch.cpu.amp.autocast(), torch.no_grad():
+                        with torch.autocast("cpu", ), torch.no_grad():
                             model = torch.jit.trace(model, x).eval()
                     else:
                         with torch.no_grad():
@@ -492,7 +492,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         # compute output
 
         if args.bf16:
-            with torch.cpu.amp.autocast():
+            with torch.autocast("cpu", ):
                 output = model(images)
             output = output.to(torch.float32)
         else:
@@ -536,7 +536,7 @@ def run_weights_sharing_model(m, tid, args):
         while num_images < steps:
             start_time = time.time()
             if not args.jit and args.bf16:
-                with torch.cpu.amp.autocast():
+                with torch.autocast("cpu", ):
                     y = m(x)
             else:
                 y = m(x)
@@ -600,7 +600,7 @@ def validate(val_loader, model, criterion, args):
                         if i >= args.warmup_iterations:
                             end = time.time()
                         if not args.jit and args.bf16:
-                            with torch.cpu.amp.autocast():
+                            with torch.autocast("cpu", ):
                                 output = model(images)
                         else:
                             output = model(images)
@@ -632,7 +632,7 @@ def validate(val_loader, model, criterion, args):
                     if args.bf16:
                         images = images.to(torch.bfloat16)
                     if not args.jit and args.bf16:
-                        with torch.cpu.amp.autocast():
+                        with torch.autocast("cpu", ):
                             output = model(images)
                     else:
                         output = model(images)

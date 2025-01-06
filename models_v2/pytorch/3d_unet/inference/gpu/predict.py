@@ -173,7 +173,7 @@ def inference_config(model):
             io_utils.write_info('Using JIT trace')
             with torch.inference_mode():
                 if args.xpu and args.ipex:
-                    with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
+                    with torch.autocast("xpu", enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
                         model = torch.jit.trace(model, trace_input)
                 elif args.gpu or args.xpu:
                     with torch.autocast(enabled=use_autocast, device_type=get_device_type(), dtype=autocast_dtype, cache_enabled=False):
@@ -226,7 +226,7 @@ def do_warmup(model, ds):
                     outputs += [model(images)]
             else:
                 if args.ipex:
-                    with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=True):
+                    with torch.autocast("xpu", enabled=use_autocast, dtype=autocast_dtype, cache_enabled=True):
                         for batch_repeat_index in range(min([args.batch_streaming, args.warm_up - len(outputs)])):
                             outputs += [model(images)]
                 else:
@@ -316,7 +316,7 @@ def do_perf_benchmarking(model, ds, gt_data):
                                 torch.xpu.synchronize(args.device)
                                 statistics_utils.accuracy(args, outputs[0], target, overall, whole, core, enhancing, gt_data)
                     else:
-                        with torch.xpu.amp.autocast(enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
+                        with torch.autocast("xpu", enabled=use_autocast, dtype=autocast_dtype, cache_enabled=False):
                             start_time = time.time()
                             # compute output
                             for batch_repeat_index in range(args.batch_streaming):

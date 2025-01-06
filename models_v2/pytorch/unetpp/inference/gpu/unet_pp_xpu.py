@@ -45,7 +45,7 @@ def create_model(jit=True, dtype=torch.half):
     model = torch.xpu.optimize(model=model, dtype=dtype)
     if jit:
         with torch.no_grad():
-            with torch.xpu.amp.autocast(enabled=True, dtype=dtype):
+            with torch.autocast("xpu", enabled=True, dtype=dtype):
                 print("start tracing")
                 model = torch.jit.trace(model, torch.randn(input_size, device="xpu"))
                 model = torch.jit.freeze(model)

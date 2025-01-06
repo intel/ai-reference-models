@@ -679,7 +679,7 @@ class Distiller:
             return loss
 
         if self.device == "xpu":
-            #with torch.xpu.amp.autocast(enabled=self.amp, dtype=MAP_TORCH_DTYPE[self.dtype]):
+            #with torch.autocast("xpu", enabled=self.amp, dtype=MAP_TORCH_DTYPE[self.dtype]):
             loss = run_model(input_ids_, attention_mask_, lm_labels_)
         else:
             loss = run_model(input_ids_, attention_mask_, lm_labels_)
@@ -792,7 +792,7 @@ class Distiller:
                             lm_labels = lm_labels.to(self.device)
                         if nb_eval_steps == 0:
                             if self.params.jit and self.device == "xpu":
-                                with torch.xpu.amp.autocast(enabled=self.amp, dtype=MAP_TORCH_DTYPE[self.dtype]):
+                                with torch.autocast("xpu", enabled=self.amp, dtype=MAP_TORCH_DTYPE[self.dtype]):
                                     self.student = torch.jit.trace(self.student, (token_ids, attn_mask),
                                                                    strict=False, check_trace=False)
                                     self.student = torch.jit.freeze(self.student)

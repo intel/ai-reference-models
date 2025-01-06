@@ -949,7 +949,7 @@ def run_eval(
             input_mask = input_mask.to(device)
             masked_lm_labels = masked_lm_labels.to(device)
             next_sentence_labels = next_sentence_labels.to(device)
-            with torch.xpu.amp.autocast(enabled=True, dtype=optimize_dtype):
+            with torch.autocast("xpu", enabled=True, dtype=optimize_dtype):
                 outputs = model(
                     input_ids=input_ids,
                     token_type_ids=segment_ids,
@@ -1267,21 +1267,21 @@ def main():
                         outputs = None
                         if args.amp:
                             if args.device == 'cpu':
-                                with torch.cpu.amp.autocast():
+                                with torch.autocast("cpu", ):
                                     outputs = model(input_ids=input_ids,
                                                     token_type_ids=segment_ids,
                                                     attention_mask=input_mask,
                                                     labels=masked_lm_labels,
                                                     next_sentence_label=next_sentence_labels)
                             elif args.device == 'xpu':
-                                with torch.xpu.amp.autocast(enabled=True, dtype=optimize_dtype):
+                                with torch.autocast("xpu", enabled=True, dtype=optimize_dtype):
                                     outputs = model(input_ids=input_ids,
                                                     token_type_ids=segment_ids,
                                                     attention_mask=input_mask,
                                                     labels=masked_lm_labels,
                                                     next_sentence_label=next_sentence_labels)
                             elif args.device == 'cuda':
-                                with torch.cuda.amp.autocast():
+                                with torch.autocast("cuda", ):
                                     outputs = model(input_ids=input_ids,
                                                     token_type_ids=segment_ids,
                                                     attention_mask=input_mask,
@@ -1298,7 +1298,7 @@ def main():
                                                 next_sentence_label=next_sentence_labels)
                         else:
                             # most used path for current xpu OOB solution
-                            with torch.xpu.amp.autocast(enabled=True, dtype=optimize_dtype):
+                            with torch.autocast("xpu", enabled=True, dtype=optimize_dtype):
                                 outputs = model(input_ids=input_ids,
                                                 token_type_ids=segment_ids,
                                                 attention_mask=input_mask,

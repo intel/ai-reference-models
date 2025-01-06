@@ -99,7 +99,7 @@ def inference(model, dataloader, datatype, args):
                 break
         x = x.to(memory_format=torch.channels_last)
         if args.precision == "bf16":
-            with torch.cpu.amp.autocast(), torch.no_grad():
+            with torch.autocast("cpu", ), torch.no_grad():
                 model = torch.jit.trace(model, x, strict=False)
             model = torch.jit.freeze(model)
         else:
@@ -117,7 +117,7 @@ def inference(model, dataloader, datatype, args):
                 else:
                     images = images.to(memory_format=torch.channels_last)
                 if args.ipex and args.precision == "bf16" and not args.jit:
-                    with torch.cpu.amp.autocast():
+                    with torch.autocast("cpu", ):
                         if i == warmup_iters:
                             with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof, record_function("model_inference"):
                                 output = model(images)
@@ -141,7 +141,7 @@ def inference(model, dataloader, datatype, args):
                 if not args.ipex and not args.jit:
                     images = images.to(datatype).to(memory_format=torch.channels_last)
                 if args.ipex and args.precision == "bf16" and not args.jit:
-                    with torch.cpu.amp.autocast():
+                    with torch.autocast("cpu", ):
                         if i == warmup_iters:
                             with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof, record_function("model_inference"):
                                 output = model(images)

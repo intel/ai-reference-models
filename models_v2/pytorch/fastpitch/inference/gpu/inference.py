@@ -497,7 +497,7 @@ def main():
         generator = torch.xpu.optimize(model=generator, dtype=datatype)
 
     if args.torchjit and device == torch.device('xpu'):
-        with torch.xpu.amp.autocast(enabled=True, dtype=datatype):
+        with torch.autocast("xpu", enabled=True, dtype=datatype):
             generator = torch.jit.trace(generator, batches[0]['text'], check_trace=False)
             generator = torch.jit.freeze(generator)
 
@@ -506,7 +506,7 @@ def main():
         vocoder = torch.xpu.optimize(model=vocoder, dtype=datatype)
 
     if args.torchjit and vocoder is not None and device == torch.device('xpu'):
-        with torch.xpu.amp.autocast(enabled=True, dtype=datatype):
+        with torch.autocast("xpu", enabled=True, dtype=datatype):
             mel, *_ = generator(batches[0]['text'])
             vocoder = torch.jit.trace(vocoder, mel, check_trace=False)
             vocoder = torch.jit.freeze(vocoder)
@@ -564,13 +564,13 @@ def main():
                 else:
 
                     with torch.no_grad(), gen_measures:
-                        with torch.xpu.amp.autocast(enabled=True, dtype=datatype):
+                        with torch.autocast("xpu", enabled=True, dtype=datatype):
                             mel, mel_lens, *_ = generator(b['text'])
 
                 # inference 2
                 if vocoder is not None:
                     with torch.no_grad(), vocoder_measures:
-                        with torch.xpu.amp.autocast(enabled=True, dtype=datatype):
+                        with torch.autocast("xpu", enabled=True, dtype=datatype):
                             audios = generate_audio(mel)
                     #D2H
                     audios = audios.to("cpu")

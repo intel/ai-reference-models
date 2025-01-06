@@ -487,10 +487,10 @@ def _evaluate(
                     else:
                         logits = model(batch.dense_features, batch.sparse_features)
                 elif args.use_device == "cuda":
-                    with torch.cuda.amp.autocast(enabled=args.amp, dtype=args.amp_dtype):
+                    with torch.autocast("cuda", enabled=args.amp, dtype=args.amp_dtype):
                         logits = model(batch.dense_features, batch.sparse_features)
                 else:
-                    with torch.cpu.amp.autocast(enabled=args.amp, dtype=args.amp_dtype):
+                    with torch.autocast("cpu", enabled=args.amp, dtype=args.amp_dtype):
                         logits = model(batch.dense_features, batch.sparse_features)
             else:
                 logits = model(batch.dense_features, batch.sparse_features)
@@ -634,11 +634,11 @@ def _train(
                     losses, _ = model(next_batch)
                     loss = torch.sum(losses, dim=0)
             elif args.use_device == "cuda":
-                with torch.cuda.amp.autocast(enabled=args.amp, dtype=args.amp_dtype):
+                with torch.autocast("cuda", enabled=args.amp, dtype=args.amp_dtype):
                     losses, _ = model(next_batch)
                     loss = torch.sum(losses, dim=0)
             else:
-                with torch.cpu.amp.autocast(enabled=args.amp, dtype=args.amp_dtype):
+                with torch.autocast("cpu", enabled=args.amp, dtype=args.amp_dtype):
                     losses, _ = model(next_batch)
                     loss = torch.sum(losses, dim=0)
         else:

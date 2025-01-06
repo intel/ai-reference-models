@@ -328,11 +328,11 @@ def main_worker(args):
 
             # Forward pass
             if args.ipex and args.bf16:
-                with torch.cpu.amp.autocast():
+                with torch.autocast("cpu", ):
                     output = model(images)
                 output = output.to(torch.float32)
             elif args.ipex and args.fp16:
-                with torch.cpu.amp.autocast(dtype=torch.half):
+                with torch.autocast("cpu", dtype=torch.half):
                     output = model(images)
                 output = output.to(torch.float32)
             else:
@@ -472,12 +472,12 @@ def validate(val_loader, model, criterion, epoch, args):
             
             if args.ipex and args.bf16:
                 images = images.to(torch.bfloat16)
-                with torch.cpu.amp.autocast():
+                with torch.autocast("cpu", ):
                     output = model(images)
                 output = output.to(torch.float32)
             if args.ipex and args.fp16:
                 images = images.to(torch.half)
-                with torch.cpu.amp.autocast(dtype=torch.half):
+                with torch.autocast("cpu", dtype=torch.half):
                     output = model(images)
                 output = output.to(torch.float32)
             else: 

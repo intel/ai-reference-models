@@ -211,7 +211,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, threshold,
             # img to nhwc
             img = img.contiguous(memory_format=torch.channels_last)
             if use_autocast:
-                with torch.cpu.amp.autocast(enabled=use_autocast):
+                with torch.autocast("cpu", enabled=use_autocast):
                     ploc, plabel = model(img)
                 ploc = ploc.to(torch.float32)
                 plabel = plabel.to(torch.float32)
@@ -507,7 +507,7 @@ def train300_mlperf_coco(args):
             if args.profile and args.performance_only and iter_num == 30:
                 # Profile Mode
                 with torch.profiler.profile(on_trace_ready=trace_handler) as prof:
-                    with torch.cpu.amp.autocast(enabled=args.autocast):
+                    with torch.autocast("cpu", enabled=args.autocast):
                         ploc, plabel = ssd300(fimg)
                         loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask)
                     loss.backward()
@@ -517,7 +517,7 @@ def train300_mlperf_coco(args):
                     optim.zero_grad(set_to_none=True)
             else:
                 # Non Profile Mode
-                with torch.cpu.amp.autocast(enabled=args.autocast):
+                with torch.autocast("cpu", enabled=args.autocast):
                     ploc, plabel = ssd300(fimg)
                     loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask)
                 loss.backward()

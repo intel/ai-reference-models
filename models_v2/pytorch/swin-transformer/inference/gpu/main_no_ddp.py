@@ -255,13 +255,13 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
 
             # forward
             if device == "cuda":
-                with torch.cuda.amp.autocast(enabled=config.AMP_ENABLE):
+                with torch.autocast("cuda", enabled=config.AMP_ENABLE):
                     outputs = model(samples)
                 loss = criterion(outputs, targets)
                 loss = loss / config.TRAIN.ACCUMULATION_STEPS
             elif device == "xpu":
                 if dtype == "bf16":
-                    with torch.xpu.amp.autocast(enabled=True, dtype=torch.bfloat16):
+                    with torch.autocast("xpu", enabled=True, dtype=torch.bfloat16):
                         outputs = model(samples)
                         loss = criterion(outputs, targets)
                 else:
@@ -399,7 +399,7 @@ def validate(config, data_loader, model):
 
     print("***** start tracing *****")
     with torch.no_grad():
-        with torch.xpu.amp.autocast(enabled=True, dtype=torch.float16):
+        with torch.autocast("xpu", enabled=True, dtype=torch.float16):
             model = torch.jit.trace(model, torch.randn(1, 3, 224, 224).to(args.device).half())
     print("***** finish tracing *****")
 

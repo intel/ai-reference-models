@@ -211,7 +211,7 @@ if args.dtype == "bf16" or args.dtype == "fp32":
         inductor_config.cpp_wrapper = True
         inductor_config.max_autotune = True
         inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
-        with torch.no_grad(), torch.cpu.amp.autocast(
+        with torch.no_grad(), torch.autocast("cpu", 
             enabled=amp_enabled, dtype=amp_dtype
         ):
             if args.ipex:
@@ -236,7 +236,7 @@ elif args.dtype == "fp16":
         inductor_config.cpp_wrapper = True
         inductor_config.max_autotune = True
         inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
-        with torch.no_grad(), torch.cpu.amp.autocast(
+        with torch.no_grad(), torch.autocast("cpu", 
             enabled=amp_enabled, dtype=amp_dtype
         ):
             if args.ipex:
@@ -628,7 +628,7 @@ elif args.dtype == "int8" and args.inductor:
         inductor_config.cpp_wrapper = True
         inductor_config.max_autotune = True
         inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
-        with torch.no_grad(),torch.cpu.amp.autocast(
+        with torch.no_grad(),torch.autocast("cpu", 
                 enabled=True, dtype=torch.bfloat16
         ):
             if args.weight_dtype == "INT8":
@@ -647,7 +647,7 @@ elif args.dtype == "int8" and args.inductor:
 def benchmark_warmup(prompt):
     # start
     if args.profile:
-        with profile_ctx as prof, torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(
+        with profile_ctx as prof, torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
             enabled=amp_enabled, dtype=amp_dtype
         ):
             for i in range(5):
@@ -658,7 +658,7 @@ def benchmark_warmup(prompt):
                 prof.step()
 
     num_iter = args.num_warmup
-    with torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(
+    with torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
         enabled=amp_enabled, dtype=amp_dtype
     ):
         for i in range(num_iter):
@@ -676,7 +676,7 @@ def benchmark_evaluate(prompt):
     total_time = 0.0
     num_iter = args.num_iter - args.num_warmup
     total_list = []
-    with torch.inference_mode(), torch.no_grad(), torch.cpu.amp.autocast(
+    with torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
         enabled=amp_enabled, dtype=amp_dtype
     ):
         for i in range(num_iter):
@@ -754,7 +754,7 @@ if args.accuracy_only:
                     "past_key_values": tuple(global_past_key_value),
                 }
             )
-            with torch.no_grad(), torch.cpu.amp.autocast(
+            with torch.no_grad(), torch.autocast("cpu", 
                 enabled=amp_enabled, dtype=amp_dtype
             ):
                 user_model = torch.jit.trace(
@@ -765,5 +765,5 @@ if args.accuracy_only:
                 )
                 user_model = torch.jit.freeze(user_model.eval())
 
-    with torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
+    with torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype):
         eval_func(user_model)
