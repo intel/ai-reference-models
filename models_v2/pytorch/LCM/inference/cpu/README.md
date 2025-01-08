@@ -62,6 +62,12 @@ bash download_dataset.sh
 | **BATCH_SIZE** (optional)  |                        `export BATCH_SIZE=<set a value for batch size, else it will run with default batch size>`                                |
 | **TORCH_INDUCTOR** (optional)    | `export TORCH_INDUCTOR=< 0 or 1> (Compile model with PyTorch Inductor backend)`   |
 
+* NOTE:
+For `compile-inductor` mode, please do calibration to get quantized model before running `INT8-BF16` or `INT8-FP32`.
+  ```
+  bash do_calibration.sh
+  ```
+
 8. Run `run_model.sh`
 
 ## Output

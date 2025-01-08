@@ -116,22 +116,30 @@ elif [[ "${PRECISION}" == "fp16" ]]; then
     echo "### running fp16 datatype"
 elif [[ "${PRECISION}" == "int8-bf16" ]]; then
     ARGS="$ARGS --precision=int8-bf16"
-    if [ "${MODE}" == "ipex-jit" ]; then
+    if [[ "${MODE}" == "ipex-jit" || "${MODE}" == "compile-inductor" ]]; then
         if [ ! -f "${INT8_MODEL}" ]; then
             echo "The required file INT8_MODEL does not exist"
             exit 1
         fi
-        ARGS="$ARGS --int8_model_path=${INT8_MODEL}"
+        ARGS="$ARGS --quantized_model_path=${INT8_MODEL}"
+    else
+        echo "For int8-bf16 datatype, the specified mode '${MODE}' is unsupported."
+        echo "Supported mode are: ipex-jit, compile-inductor"
+        exit 1
     fi
     echo "### running int8-bf16 datatype"
 elif [[ "${PRECISION}" == "int8-fp32" ]]; then
     ARGS="$ARGS --precision=int8-fp32"
-    if [ "${MODE}" == "ipex-jit" ]; then
+    if [[ "${MODE}" == "ipex-jit" || "${MODE}" == "compile-inductor" ]]; then
         if [ ! -f "${INT8_MODEL}" ]; then
             echo "The required file INT8_MODEL does not exist"
             exit 1
         fi
-        ARGS="$ARGS --int8_model_path=${INT8_MODEL}"
+        ARGS="$ARGS --quantized_model_path=${INT8_MODEL}"
+    else
+        echo "For int8-fp32 datatype, the specified mode '${MODE}' is unsupported."
+        echo "Supported mode are: ipex-jit, compile-inductor"
+        exit 1
     fi
     echo "### running int8-fp32 datatype"
 elif [[ "${PRECISION}" == "bf32" ]]; then

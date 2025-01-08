@@ -64,10 +64,36 @@ elif [ "${PRECISION}" == "fp16" ]; then
     ARGS="$ARGS --precision=fp16"
     echo "### running fp16 datatype"
 elif [ "${PRECISION}" == "int8-bf16" ]; then
-    ARGS="$ARGS --precision=int8-bf16 --configure-dir=conv_and_linear131.json"
+    ARGS="$ARGS --precision=int8-bf16"
+    if [ "${RUN_MODE}" == "ipex-jit" ]; then
+        ARGS="$ARGS --configure-dir=conv_and_linear131.json"
+    elif [ "${RUN_MODE}" == "compile-inductor" ]; then
+        if [ ! -f "${INT8_MODEL}" ]; then
+            echo "The required file INT8_MODEL does not exist"
+            exit 1
+        fi
+        ARGS="$ARGS --quantized_model_path=${INT8_MODEL}"
+    else
+        echo "For int8-bf16 datatype, the specified mode '${RUN_MODE}' is unsupported."
+        echo "Supported mode are: ipex-jit, compile-inductor"
+        exit 1
+    fi
     echo "### running int8-bf16 datatype"
 elif [ "${PRECISION}" == "int8-fp32" ]; then
-    ARGS="$ARGS --precision=int8-fp32 --configure-dir=conv_and_linear131.json"
+    ARGS="$ARGS --precision=int8-fp32"
+    if [ "${RUN_MODE}" == "ipex-jit" ]; then
+        ARGS="$ARGS --configure-dir=conv_and_linear131.json"
+    elif [ "${RUN_MODE}" == "compile-inductor" ]; then
+        if [ ! -f "${INT8_MODEL}" ]; then
+            echo "The required file INT8_MODEL does not exist"
+            exit 1
+        fi
+        ARGS="$ARGS --quantized_model_path=${INT8_MODEL}"
+    else
+        echo "For int8-fp32 datatype, the specified mode '${RUN_MODE}' is unsupported."
+        echo "Supported mode are: ipex-jit, compile-inductor"
+        exit 1
+    fi
     echo "### running int8-fp32 datatype"
 elif [ "${PRECISION}" == "bf32" ]; then
     ARGS="$ARGS --precision=bf32"
