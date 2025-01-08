@@ -43,10 +43,6 @@ export DATASET_DIR=<directory where the dataset will be saved>
 bash download_dataset.sh
 ```
 
-### **NOTE**:Int8 model
-
-Please get a quant_model.pt before run INT8-BF16 model or INT8-FP32 model. Please refer the [link](https://github.com/intel/intel-extension-for-transformers/blob/v1.5/examples/huggingface/pytorch/text-to-image/quantization/qat/README.md).
-
 # Inference
 1. `git clone https://github.com/IntelAI/models.git`
 2. `cd models/models_v2/pytorch/stable_diffusion/inference/cpu`
@@ -60,7 +56,6 @@ Please get a quant_model.pt before run INT8-BF16 model or INT8-FP32 model. Pleas
     ./setup.sh
     ```
 5. Install the latest CPU versions of [torch, torchvision and intel_extension_for_pytorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation)
-
 
 6. Setup required environment paramaters
 
@@ -78,6 +73,14 @@ Please get a quant_model.pt before run INT8-BF16 model or INT8-FP32 model. Pleas
 | **HOSTFILE** (required for DISTRIBUTED)              | `export HOSTFILE=#your_ip_list_file #one ip per line`                  |
 | **LOCAL_BATCH_SIZE** (optional for DISTRIBUTED)    |                               `export LOCAL_BATCH_SIZE=64`                                |
 7. Run `run_model.sh`
+
+* NOTE:
+Please get quantized model before running `INT8-BF16` or `INT8-FP32`.
+For `ipex-jit` mode, please refer the [link](https://github.com/intel/intel-extension-for-transformers/blob/v1.5/examples/huggingface/pytorch/text-to-image/quantization/qat/README.md).
+For `compile-inductor` mode, please do calibration first:
+  ```
+  bash do_calibration.sh
+  ```
 
 ## Output
 
