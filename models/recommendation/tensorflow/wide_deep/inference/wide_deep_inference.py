@@ -126,8 +126,11 @@ class Wide_and_Deep:
                      [self.x_test_categ[:, i] for i in range(self.x_test_categ.shape[1])] +\
                      [self.x_test_categ_poly]
             loaded_model = load_model(os.path.join(self.args.pretrained_model, 'wide_and_deep.h5'))
+            # Warmup run
+            result = loaded_model.predict(input_data,batch_size=self.args.batch_size)
             test_file = os.path.join(self.args.data_location, 'adult.test')
             num_records = sum(1 for line in open(test_file))
+            # Benchmark run
             inference_start = time.time()
             result = loaded_model.predict(input_data,batch_size=self.args.batch_size)
             main_end = time.time()
