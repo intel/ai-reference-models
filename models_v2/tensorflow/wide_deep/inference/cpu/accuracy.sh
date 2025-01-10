@@ -16,6 +16,7 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
+MODE="inference"
 
 # echo 'MODEL_DIR='$MODEL_DIR
 #echo 'OUTPUT_DIR='$OUTPUT_DIR
@@ -62,14 +63,41 @@ if [[ -z "${BATCH_SIZE}" ]]; then
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  # Get number of cores per instance
+  CORES_PER_SOCKET=`lscpu | grep 'Core(s) per socket' | awk '{print $4}'`
+  SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+  NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+  CORES_PER_INSTANCE=`expr $CORES_PER_SOCKET \* $SOCKETS / $NUMAS`
+
+  echo "CORES_PER_SOCKET: $CORES_PER_SOCKET"
+  echo "SOCKETS: $SOCKETS"
+  echo "NUMAS: $NUMAS"
+  echo "CORES_PER_INSTANCE: $CORES_PER_INSTANCE"
+fi
+
 source "$MODEL_DIR/models_v2/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --framework tensorflow \
       --precision ${PRECISION} \
-      --mode inference \
+      --mode ${MODE} \
       --model-name wide_deep \
       --batch-size ${BATCH_SIZE} \
       --data-location ${DATASET_DIR} \
       --output-dir ${OUTPUT_DIR} \
       --accuracy-only \
+      --num-intra-threads=${CORES_PER_INSTANCE} \
+      --num-inter-threads=1 \
+      --numa-cores-per-instance=${CORES_PER_INSTANCE} \
       $@
+
+if [[ $? == 0 ]]; then
+  cat ${OUTPUT_DIR}/wide_deep_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep 'Test Accuracy: ' | sed -e s"/.*: //"
+  echo "Test Accuracy:"
+  grep 'Test Accuracy: ' ${OUTPUT_DIR}/wide_deep_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | awk -F' ' '{sum+=$3; count+=1; print $3;} END{print sum/count} '
+  exit 0
+else
+  exit 1
+fi
+
