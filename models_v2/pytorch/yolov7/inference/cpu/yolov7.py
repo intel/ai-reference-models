@@ -86,10 +86,10 @@ def run_weights_sharing_model(model, dataloader, augment, tid, opt):
                 start_time = time.time()
 
                 if not opt.jit and opt.bf16:
-                    with torch.autocast("cpu", 'cpu', dtype=torch.bfloat16):
+                    with torch.autocast("cpu", dtype=torch.bfloat16):
                         out = model(img, augment=augment)[0]
                 elif not opt.jit and opt.fp16:
-                    with torch.autocast("cpu", 'cpu', dtype=torch.half):
+                    with torch.autocast("cpu", dtype=torch.half):
                         out = model(img, augment=augment)[0]
                 else:
                     out = model(img, augment=augment)[0]
@@ -372,7 +372,7 @@ def test(opt,
                             dynamic=rect
                         )
             elif bf16:
-                with torch.no_grad(), torch.autocast("cpu", 'cpu', dtype=torch.bfloat16):
+                with torch.no_grad(), torch.autocast("cpu", dtype=torch.bfloat16):
                     x = x.to(torch.bfloat16)
                     if ipex:
                         print('[Info] Running torch.compile() BFloat16 with IPEX backend')
@@ -381,7 +381,7 @@ def test(opt,
                         print('[Info] Running torch.compile() BFloat16 with default backend')
                         model = torch.compile(model, dynamic=rect)
             elif fp16:
-                with torch.no_grad(), torch.autocast("cpu", 'cpu', dtype=torch.half):
+                with torch.no_grad(), torch.autocast("cpu", dtype=torch.half):
                     x = x.to(torch.half)
                     if ipex:
                         print('[Info] Running torch.compile() FPloat16 with IPEX backend')
@@ -398,7 +398,7 @@ def test(opt,
                         print('[Info] Running torch.compile() Float32 with default backend')
                         model = torch.compile(model, dynamic=rect)
 
-            with torch.no_grad(), torch.autocast("cpu", 'cpu', enabled=bf16 or fp16, dtype=torch.half if fp16 else torch.bfloat16):
+            with torch.no_grad(), torch.autocast("cpu", enabled=bf16 or fp16, dtype=torch.half if fp16 else torch.bfloat16):
                 _ = model(x, augment)[0]
                 _ = model(x, augment)[0]
 
@@ -472,10 +472,10 @@ def test(opt,
                             end = time.time()
 
                         if not jit and bf16:
-                            with torch.autocast("cpu", 'cpu', dtype=torch.bfloat16):
+                            with torch.autocast("cpu", dtype=torch.bfloat16):
                                 out = model(img, augment=augment)[0]
                         elif not jit and fp16:
-                            with torch.autocast("cpu", 'cpu', dtype=torch.half):
+                            with torch.autocast("cpu", dtype=torch.half):
                                 out = model(img, augment=augment)[0]
                         else:
                             out = model(img, augment=augment)[0]
@@ -526,10 +526,10 @@ def test(opt,
                 # Run model
                 t = time_synchronized()
                 if not jit and bf16:
-                    with torch.autocast("cpu", 'cpu', dtype=torch.bfloat16):
+                    with torch.autocast("cpu", dtype=torch.bfloat16):
                         out, train_out = model(img, augment=augment)
                 elif not jit and fp16:
-                    with torch.autocast("cpu", 'cpu', dtype=torch.half):
+                    with torch.autocast("cpu", dtype=torch.half):
                         out, train_out = model(img, augment=augment)
                 else:
                     out, train_out = model(img, augment=augment)  # inference and training outputs
