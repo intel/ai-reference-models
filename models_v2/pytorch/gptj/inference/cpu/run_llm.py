@@ -68,7 +68,7 @@ parser.add_argument("--output_dir", nargs="?", default="./saved_results")
 parser.add_argument("--ipex_static_quantize", action="store_true")
 parser.add_argument("--ipex", action="store_true")
 parser.add_argument("--inductor", action="store_true")
-parser.add_argument("--ipex_smooth_quant", action="store_true")
+parser.add_argument("--ipex_smooth_quant", "--smooth_quant", action="store_true")
 parser.add_argument("--jit", action="store_true")
 parser.add_argument(
     "--int8_bf16_mixed",
@@ -624,41 +624,63 @@ if args.dtype == "int8" and args.ipex:
         print("model quantization - Done!")
 elif args.dtype == "int8" and args.inductor:
     from torch._inductor import config as inductor_config
-
     inductor_config.cpp_wrapper = True
-    from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
-    import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
-    from torch.ao.quantization.quantizer.x86_inductor_quantizer import (
-        X86InductorQuantizer,
-    )
-    from torch.export import export_for_training
 
-    print("[Info] Running torch.compile() INT8 quantization")
-    with torch.no_grad():
-        encoded_input = tokenizer(prompt, return_tensors="pt")
-        print("encoded_input is: {}".format(encoded_input), flush=True)
-        exported_model = export_for_training(
-            user_model,
-            (),
-            kwargs=encoded_input.data,
-        ).module()
-        quantizer = X86InductorQuantizer()
-        quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
-        prepared_model = prepare_pt2e(exported_model, quantizer)
-        prepared_model(**encoded_input)
-        converted_model = convert_pt2e(prepared_model)
-        torch.ao.quantization.move_exported_model_to_eval(converted_model)
-        with torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype):
-            if args.ipex:
-                print("[Info] Running torch.compile() with IPEX backend")
-                user_model = torch.compile(
-                    converted_model, dynamic=True, backend="ipex"
-                )
-            else:
-                print("[Info] Running torch.compile() with default backend")
-                user_model = torch.compile(converted_model, dynamic=True)
-            user_model(**encoded_input)
-            user_model(**encoded_input)
+    if args.ipex_smooth_quant:
+        from torchao.prototype.smoothquant import (
+            insert_smooth_quant_observer_,
+            SmoothQuantObservedLinear,
+            smooth_quant,
+        )
+        from torchao.quantization import quantize_
+        with torch.no_grad():
+            encoded_input = tokenizer(prompt, return_tensors="pt")
+            print("encoded_input is: {}".format(encoded_input), flush=True)
+            insert_smooth_quant_observer_(user_model, alpha=0.5, quant_mode="static")
+            for i in range(3):
+                user_model(**encoded_input)
+            is_observed_linear = lambda m, fqn: isinstance(m, SmoothQuantObservedLinear)
+            print(f"running SmoothQuant with static quantization")
+            quantize_(user_model, smooth_quant(), is_observed_linear)
+            with torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype):
+                user_model = torch.compile(user_model, dynamic=True)
+                user_model(**encoded_input)
+                user_model(**encoded_input)
+    else:
+        from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
+        import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
+        from torch.ao.quantization.quantizer.x86_inductor_quantizer import (
+            X86InductorQuantizer,
+        )
+        from torch.export import export_for_training
+
+        print("[Info] Running torch.compile() INT8 quantization")
+        with torch.no_grad():
+            encoded_input = tokenizer(prompt, return_tensors="pt")
+            print("encoded_input is: {}".format(encoded_input), flush=True)
+            exported_model = export_for_training(
+                user_model,
+                (),
+                kwargs=encoded_input.data,
+            ).module()
+            quantizer = X86InductorQuantizer()
+            quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
+            prepared_model = prepare_pt2e(exported_model, quantizer)
+            prepared_model(**encoded_input)
+            converted_model = convert_pt2e(prepared_model)
+            torch.ao.quantization.move_exported_model_to_eval(converted_model)
+            with torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype):
+                if args.ipex:
+                    print("[Info] Running torch.compile() with IPEX backend")
+                    user_model = torch.compile(
+                        converted_model, dynamic=True, backend="ipex"
+                    )
+                else:
+                    print("[Info] Running torch.compile() with default backend")
+                    user_model = torch.compile(converted_model, dynamic=True)
+                user_model(**encoded_input)
+                user_model(**encoded_input)
+
 elif args.dtype == "fp8":
     if args.do_calibration:
         example_inputs = None

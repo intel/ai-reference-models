@@ -59,7 +59,7 @@ if [ -z "${OUTPUT_DIR}" ]; then
 fi
 
 
-if [[ "$PRECISION" == "int8-fp32" ]] || [[ "$PRECISION" == "int8-fp16"  ]]; then
+if [[ "${PRECISION}" == *"int8"* ]] && [ "${TORCH_INDUCTOR}" != "1" ]; then
     if [ ! -f "${OUTPUT_DIR}/qconfig-gptj.json" ]; then
     echo "Performing quantization"
     ./do_quantization.sh calibration sq
@@ -85,7 +85,7 @@ elif [[ "${PRECISION}" == "bf32" ]]; then
 elif [[ "${PRECISION}" == "int8-fp32" ]]; then
     ARGS="$ARGS --dtype 'int8' --int8-qconfig  '${OUTPUT_DIR}/qconfig-gptj.json'"
     echo "### running int8-fp32 mode"
-elif [[ "${PRECISION}" == "int8-bf16" ]]; then
+elif [[ "${PRECISION}" == "int8-bf16" ]] || [[ "${PRECISION}" == "int8" ]]; then
     ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --int8-qconfig '${OUTPUT_DIR}/qconfig-gptj.json'"
     echo "### running int8-bf16 mode"
 elif [[ "${PRECISION}" == "fp8" ]]; then
@@ -127,7 +127,7 @@ if [[ "${TEST_MODE}" != "ACCURACY" ]]; then
         MODE="jit"
         ARGS="$ARGS --jit --ipex"
         echo "### running with jit mode"
-        if [[ "$PRECISION" == "int8-bf16" || "$PRECISION" == "int8-fp32" ]];then
+        if [[ "${PRECISION}" == *"int8"* ]];then
             ARGS="$ARGS --ipex_smooth_quant"
     fi
     python -m intel_extension_for_pytorch.cpu.launch --throughput-mode  --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./${USECASE}_log_${PRECISION}_${MODE}" \
@@ -140,7 +140,12 @@ if [[ "${TEST_MODE}" != "ACCURACY" ]]; then
     else
         export TORCHINDUCTOR_FREEZING=1
         echo "### running with torch.compile inductor backend"
-        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
+        if [[ "${PRECISION}" == *"int8"* ]];then
+            if [ "${INT8_QUANT_TYPE}" == "sq" ];then
+                ARGS="$ARGS --smooth_quant "
+            fi
+        fi
+        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput-mode --skip-cross-node-cores --enable_tcmalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             -m ${FINETUNED_MODEL} \

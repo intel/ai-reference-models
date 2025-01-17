@@ -83,7 +83,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
 | **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)              | `export TEST_MODE=THROUGHPUT`                  |
 | **OUTPUT_DIR**               |                               `export OUTPUT_DIR=<path to an output directory>`                               |
 | **FINETUNED_MODEL**    | `#Test llama2 7b: export FINETUNED_MODEL="meta-llama/Llama-2-7b-hf";   #Test llama2 13b: export FINETUNED_MODEL="meta-llama/Llama-2-13b-hf"`         |
-| **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8-fp32, int8-bf16) |
+| **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8) |
 | **INPUT_TOKEN**    |    `export INPUT_TOKEN=32 (choice in [32 64 128 256 512 1024 2016], we prefer to benchmark on 32 and 2016)`    |
 | **OUTPUT_TOKEN**    |   `export OUTPUT_TOKEN=32 (32 is preferred, while you could set any other length)`      |
 | **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |

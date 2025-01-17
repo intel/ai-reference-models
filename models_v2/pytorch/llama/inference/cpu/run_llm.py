@@ -68,7 +68,7 @@ parser.add_argument("--output_dir", nargs="?", default="./saved_results")
 parser.add_argument("--ipex_static_quantize", action="store_true")
 parser.add_argument("--ipex", action="store_true")
 parser.add_argument("--inductor", action="store_true")
-parser.add_argument("--ipex_smooth_quant", action="store_true")
+parser.add_argument("--ipex_smooth_quant", "--smooth_quant", action="store_true")
 parser.add_argument("--jit", action="store_true")
 parser.add_argument(
     "--int8_bf16_mixed",
@@ -619,9 +619,33 @@ if args.dtype == "int8" and args.ipex:
         print("model quantization - Done!")
 elif args.dtype == "int8" and args.inductor:
     from torch._inductor import config as inductor_config
-
     inductor_config.cpp_wrapper = True
-    if args.weight_only_quant and args.torchao and args.weight_dtype:
+    if args.profile:
+        inductor_config.profiler_mark_wrapper_call = True
+        inductor_config.cpp.enable_kernel_profile = True
+
+    if args.ipex_smooth_quant:
+        from torchao.prototype.smoothquant import (
+            insert_smooth_quant_observer_,
+            SmoothQuantObservedLinear,
+            smooth_quant,
+        )
+        from torchao.quantization import quantize_
+        with torch.no_grad():
+            encoded_input = tokenizer(prompt, return_tensors="pt")
+            print("encoded_input is: {}".format(encoded_input), flush=True)
+            insert_smooth_quant_observer_(user_model, alpha=0.5, quant_mode="static")
+            for i in range(3):
+                user_model(**encoded_input)
+            is_observed_linear = lambda m, fqn: isinstance(m, SmoothQuantObservedLinear)
+            print(f"running SmoothQuant with static quantization")
+            quantize_(user_model, smooth_quant(), is_observed_linear)
+            with torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype):
+                # user_model = torch.compile(user_model, dynamic=True)
+                user_model.forward = torch.compile(user_model.forward)
+                user_model(**encoded_input)
+                user_model(**encoded_input)
+    elif args.weight_only_quant and args.torchao and args.weight_dtype:
         from torch._inductor import config as inductor_config
         from torchao.quantization import quant_api
         from torchao.utils import unwrap_tensor_subclass

@@ -26,6 +26,7 @@ git checkout v4.38.1
 git apply ${MODEL_DIR}/../../../../common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
+pip install --no-deps --pre torchao --index-url https://download.pytorch.org/whl/nightly/cpu
 
 # Get prompt.json for gneration inference
 wget https://intel-extension-for-pytorch.s3.amazonaws.com/miscellaneous/llm/prompt.json

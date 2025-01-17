@@ -72,7 +72,7 @@ Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)              | `export TEST_MODE=THROUGHPUT`                  |
 | **OUTPUT_DIR**               |                               `export OUTPUT_DIR=$(pwd)`                               |
-| **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8-fp32, int8-bf16) |
+| **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8) |
 | **MODEL_DIR**               |                               `export MODEL_DIR=$(pwd)`                               |
 | **INPUT_TOKEN** | `export INPUT_TOKEN=32(choice in [32 64 128 256 512 1024 2016], we prefer to benchmark on 32 and 2016)`   |
 | **OUTPUT_TOKEN** | `export OUTPUT_TOKEN=32(32 is preferred, while you could set any other length)`   |

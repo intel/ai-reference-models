@@ -42,7 +42,7 @@ else
     exit 1
 fi
 
-if [[ "$PRECISION" == "int8-fp32" ]] || [[ "$PRECISION" == "int8-fp16"  ]]; then
+if [[ "${PRECISION}" == *"int8"* ]] && [ "${TORCH_INDUCTOR}" != "1" ]; then
     if [ ! -f "${OUTPUT_DIR}/qconfig-chatglm.json" ]; then
     echo "Performing quantization"
     ./do_quantization.sh calibration sq
@@ -72,7 +72,7 @@ elif [[ "${PRECISION}" == "int8-fp32" ]]
 then
     ARGS="$ARGS --dtype 'int8' --int8-qconfig '${OUTPUT_DIR}/qconfig-chatglm.json'"
     echo "### running int8-fp32 mode"
-elif [[ "${PRECISION}" == "int8-bf16" ]]
+elif [[ "${PRECISION}" == "int8-bf16" ]] || [[ "${PRECISION}" == "int8" ]]
 then
     ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --int8-qconfig '${OUTPUT_DIR}/qconfig-chatglm.json'"
     echo "### running int8-bf16 mode"
@@ -105,7 +105,7 @@ if [[ "${TEST_MODE}" == "THROUGHPUT" || "${TEST_MODE}" == "REALTIME" ]]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
         ARGS_IPEX="$ARGS_IPEX --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
     else
-        ARGS_IPEX="$ARGS_IPEX --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
+        ARGS_IPEX="$ARGS_IPEX --throughput-mode --skip-cross-node-cores --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR}"
     fi
 else
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
@@ -125,7 +125,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
     ARGS="$ARGS --jit"
     ARGS_IPEX="$ARGS_IPEX --log_file_prefix=./ChatGLM_${PRECISION}_${LOG_PREFIX}_${mode}"
     echo "### running with jit mode"
-    if [[ "$PRECISION" == "int8-bf16" || "$PRECISION" == "int8-fp32" ]];then
+    if [[ "${PRECISION}" == *"int8"* ]];then
         ARGS="$ARGS --ipex_smooth_quant"
     fi
     python -m intel_extension_for_pytorch.cpu.launch ${ARGS_IPEX} \
@@ -134,6 +134,11 @@ if [[ "0" == ${TORCH_INDUCTOR} ]];then
         --model-name-or-path ${FINETUNED_MODEL}
 else
     echo "### running with torch.compile inductor backend"
+    if [[ "${PRECISION}" == *"int8"* ]];then
+        if [ "${INT8_QUANT_TYPE}" == "sq" ];then
+            ARGS="$ARGS --smooth_quant "
+        fi
+    fi
     export TORCHINDUCTOR_FREEZING=1
     python -m torch.backends.xeon.run_cpu --disable-numactl ${ARGS_IPEX} \
         ${EVAL_SCRIPT} $ARGS \

@@ -21,6 +21,7 @@ ARGS=""
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 
 FINETUNED_MODEL=${FINETUNED_MODEL:-"meta-llama/Llama-2-7b-hf"}
+NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
 
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     echo "Running Multi-instance Throughput Inference"
@@ -68,7 +69,7 @@ fi
 
 mkdir -p ${OUTPUT_DIR}
 
-if [[ "${PRECISION}" == "int8-fp32" ]] || [[ "${PRECISION}" == "int8-bf16"  ]]; then
+if [[ "${PRECISION}" == *"int8"* ]] && [ "${TORCH_INDUCTOR}" != "1" ]; then
     MODEL_HF=$(echo ${FINETUNED_MODEL} | cut -d'/' -f2 | tr -d "'")
     if [ ! -f "${OUTPUT_DIR}/${MODEL_HF}-qconfig.json" ]; then
     echo "Performing quantization"
@@ -104,7 +105,7 @@ then
     precision="int8-fp32"
     ARGS="$ARGS --dtype int8 --int8-qconfig   ${OUTPUT_DIR}/${MODEL_HF}-qconfig.json"
     echo "### running int8-fp32 mode"
-elif [[ "${PRECISION}" == "int8-bf16" ]]
+elif [[ "${PRECISION}" == "int8-bf16" ]] || [[ "${PRECISION}" == "int8" ]]
 then
     precision="int8-bf16"
     ARGS="$ARGS --dtype int8 --int8_bf16_mixed --int8-qconfig ${OUTPUT_DIR}/${MODEL_HF}-qconfig.json"
@@ -135,7 +136,7 @@ if [[ "$TEST_MODE" != "ACCURACY" ]]; then
         mode="jit"
         ARGS="$ARGS --jit"
         echo "### running with jit mode"
-        if [[ "${PRECISION}" == "int8-bf16" || "${PRECISION}" == "int8-fp32" ]];then
+        if [[ "${PRECISION}" == *"int8"* ]];then
             ARGS="$ARGS --ipex_smooth_quant"
     fi
     python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --memory-allocator tcmalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./${usecase}_log_${precision}_${mode}" \
@@ -147,11 +148,18 @@ if [[ "$TEST_MODE" != "ACCURACY" ]]; then
         --batch-size $BATCH_SIZE
     else
         echo "### running with torch.compile inductor backend"
-        if [[ "${PRECISION}" == "int8-bf16" || "${PRECISION}" == "int8-fp32" ]];then
-            ARGS="$ARGS --torchao  --weight-only-quant --weight-dtype INT8 "
+        if [[ "${PRECISION}" == *"int8"* ]];then
+            if [ "${INT8_QUANT_TYPE}" == "sq" ];then
+                ARGS="$ARGS --smooth_quant "
+            else
+                ARGS="$ARGS --torchao  --weight-only-quant --weight-dtype INT8 "
+            fi
+        fi
+        if [ "${INDUCTOR_PROFILE}" == "1" ];then
+            ARGS+=" --profile "
         fi
         export TORCHINDUCTOR_FREEZING=1
-        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} \
+        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput-mode --skip-cross-node-cores --enable_tcmalloc --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
             -m ${FINETUNED_MODEL} \
@@ -274,6 +282,13 @@ else
             --model-name-or-path ${FINETUNED_MODEL}
     else
         echo "### running with torch.compile inductor backend"
+        if [[ "${PRECISION}" == *"int8"* ]];then
+            if [ "${INT8_QUANT_TYPE}" == "sq" ];then
+                ARGS="$ARGS --smooth_quant "
+            else
+                ARGS="$ARGS --torchao  --weight-only-quant --weight-dtype INT8 "
+            fi
+        fi
         export TORCHINDUCTOR_FREEZING=1
         python -m torch.backends.xeon.run_cpu --disable-numactl --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
