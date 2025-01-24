@@ -1,0 +1,17 @@
+fp32-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-stable-diffusion-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    MODE: ipex-jit
+    TEST_MODE: 'THROUGHPUT'
+    TORCH_INDUCTOR: '0'
+    DISTRIBUTED: 'False'
+    DATASET_DIR: /localdisk/coco
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/coco
+      dst: /localdisk/coco
