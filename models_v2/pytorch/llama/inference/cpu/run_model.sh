@@ -68,6 +68,9 @@ if [ -z "${OUTPUT_DIR}" ]; then
 fi
 
 mkdir -p ${OUTPUT_DIR}
+EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/run_llm.py"}
+WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
+TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 
 if [[ "${PRECISION}" == *"int8"* ]] && [ "${TORCH_INDUCTOR}" != "1" ]; then
     MODEL_HF=$(echo ${FINETUNED_MODEL} | cut -d'/' -f2 | tr -d "'")
@@ -116,9 +119,6 @@ else
     exit 1
 fi
 
-EVAL_SCRIPT=${EVAL_SCRIPT:-"${PWD}/run_llm.py"}
-WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
-TORCH_INDUCTOR=${TORCH_INDUCTOR:-"0"}
 
 if [[ "$TEST_MODE" != "ACCURACY" ]]; then
     if [ -z "${OUTPUT_TOKEN}" ]; then

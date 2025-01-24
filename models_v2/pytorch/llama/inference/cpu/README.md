@@ -37,7 +37,10 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
     ```
 4. Run setup.sh
     ```
+    # Default setup to run peak performance with IPEX
     ./setup.sh
+    # Choice: If to run peak performance with PyTorch only with inductor (only support greedy search for now)
+    source ./inductor/setup.sh
     ```
 5. Install the latest CPU versions of [torch, torchvision and intel_extension_for_pytorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation)
 
