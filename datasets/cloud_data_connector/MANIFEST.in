@@ -1,8 +1,0 @@
-prune deprecated
-prune docker
-prune samples
-prune tests
-prune docs
-prune conda
-prune cloud_data_connector.egg-info
-exclude *.txt __init__.py .gitignore poetry.lock tox.ini MANIFEST.in
