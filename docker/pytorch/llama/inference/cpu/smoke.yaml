@@ -1,0 +1,16 @@
+fp16-t1-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-inference
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+  volumes:
+    - src: /tmp
+      dst: /tmp
