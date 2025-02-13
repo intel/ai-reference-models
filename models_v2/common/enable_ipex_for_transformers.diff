@@ -224,15 +224,8 @@ index 999752485..2e9cd96cf 100644
 +                if epoch * steps_per_epoch + it >= total_steps:
 +                    throughput = args.eval_batch_size * args.perf_run_iters / total_time
 +                    timeBuff = np.asarray(timeBuff)
-+                    p50 = np.percentile(timeBuff, 50)
-+                    p90 = np.percentile(timeBuff, 90)
-+                    p95 = np.percentile(timeBuff, 95)
 +                    p99 = np.percentile(timeBuff, 99)
-+                    print('\n')
-+                    print("P50_Latency: {:.2f} ms".format(p50*1000))
-+                    print("P90_Latency: {:.2f} ms".format(p90*1000))
-+                    print("P95_Latency: {:.2f} ms".format(p95*1000))
-+                    print("P99_Latency: {:.2f} ms".format(p99*1000))
++                    print('P99 Latency {:.2f} ms'.format(p99*1000))
 +                    print("Throughput: {:.3f} sentence/s".format(throughput))
 +                    break
 +                import contextlib
