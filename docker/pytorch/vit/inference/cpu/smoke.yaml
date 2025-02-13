@@ -1,0 +1,14 @@
+bf16-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+    CORE_PER_INSTANCE: '4'
+    DUMMY_INPUT: '1'
+  volumes:
+    - src: /tmp
+      dst: /tmp
