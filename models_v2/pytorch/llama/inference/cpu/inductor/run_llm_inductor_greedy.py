@@ -119,16 +119,14 @@ if args.dtype in ["fp32","bf16"]:
         inductor_config.cpp.enable_grouped_gemm_template = True
     elif not args.disable_concat_linear:
         inductor_config.cpp.enable_concat_linear = True
-    with torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled):
+    with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
         model.forward=torch.compile(model.forward)
 elif args.dtype == "int8":
     from torch._inductor import config as inductor_config
     from torchao.quantization import quant_api
     from torchao.utils import unwrap_tensor_subclass
     
-    with torch.no_grad(),torch.cpu.amp.autocast(
-            enabled=True, dtype=torch.bfloat16
-    ):
+    with torch.no_grad(),torch.autocast("cpu", enabled=True, dtype=torch.bfloat16):
         if args.weight_dtype == "INT8":
             print("---- apply torchao woq int8 api ----", flush=True)
             quant_api.quantize_(model, quant_api.int8_weight_only(), set_inductor_config=False)
@@ -237,7 +235,7 @@ if args.accuracy_only:
         return acc
 
     model.eval()
-    with torch.cpu.amp.autocast(enabled=amp_enabled):
+    with torch.autocast("cpu", enabled=amp_enabled):
         eval_func(model)
     print("Acc test done, exit..")
     exit(0)
@@ -268,7 +266,7 @@ print("---- Prompt size:", input_size)
 prompt = [prompt] * args.batch_size
 
 # warmup
-with torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled):
+with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
     for i in range(args.num_warmup):
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids
         model.generate(
@@ -284,7 +282,7 @@ if args.profile:
             active=1),
         on_trace_ready=trace_handler
         ) as prof:
-            with torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled):
+            with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
                 for i in range(3):
                     input_ids = tokenizer(prompt, return_tensors="pt").input_ids
                     model.generate(
@@ -295,7 +293,7 @@ if args.profile:
 num_iter = args.num_iter - args.num_warmup
 total_time = 0.0
 total_list = []
-with torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled):
+with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
     for i in range(num_iter):
         tic = time.time()
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids

@@ -27,7 +27,7 @@ cd ..
 
 # Get prompt.json for gneration inference
 wget https://intel-extension-for-pytorch.s3.amazonaws.com/miscellaneous/llm/prompt.json
-mv prompt.json ${MODEL_DIR}
+mv prompt.json ${MODEL_DIR}/inductor/
 
-export EVAL_SCRIPT="./inductor/run_llm_inductor_greedy.py"
+export EVAL_SCRIPT="${MODEL_DIR}/inductor/run_llm_inductor_greedy.py"
 export TORCH_INDUCTOR=1
