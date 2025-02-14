@@ -17,7 +17,7 @@ ARG PYT_BASE_TAG="2.3.110-xpu"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-WORKDIR /workspace/pytorch-flex-series-stable-diffusion-inference/models
+WORKDIR /workspace/pytorch-gpu-stable-diffusion-inference/models
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -34,7 +34,8 @@ RUN python -m pip install datasets \
             transformers \
             accelerate \
             pytorch-fid \
-            scipy==1.10.0
+            scipy==1.10.0 \
+            einops
 
 COPY models_v2/pytorch/stable_diffusion/inference/gpu .
 COPY models_v2/common common
