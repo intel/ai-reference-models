@@ -1,0 +1,17 @@
+fp32-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
+  cmd: bash run_model.sh
+  env:
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: REALTIME
+    DATASET_DIR: /pytorch/yolov7/data
+    CHECKPOINT_DIR: /pytorch/yolov7/model
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /pytorch/yolov7/data
+      dst: /pytorch/yolov7/data
+    - src: /pytorch/yolov7/model
+      dst: /pytorch/yolov7/model
