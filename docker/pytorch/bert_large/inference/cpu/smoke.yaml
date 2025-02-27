@@ -1,0 +1,19 @@
+fp16-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    OUTPUT_DIR: /tmp
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/model
+    TEST_MODE: 'REALTIME'
+    TORCH_INDUCTOR: '0'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+  volumes:
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/model
+      dst: /pytorch/bert_squad/large-inference/model
+    - src: /tmp
+      dst: /tmp

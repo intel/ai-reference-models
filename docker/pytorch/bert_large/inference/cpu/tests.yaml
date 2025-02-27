@@ -4,16 +4,16 @@ fp32-online-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
 fp32-throughput-inference:
@@ -22,17 +22,17 @@ fp32-throughput-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'THROUGHPUT'
     TORCH_INDUCTOR: '0'
     BATCH_SIZE: '120'
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
 bf32-online-inference:
@@ -41,16 +41,16 @@ bf32-online-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf32
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
 bf32-throughput-inference:
@@ -59,17 +59,17 @@ bf32-throughput-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf32
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'THROUGHPUT'
     TORCH_INDUCTOR: '0'
     BATCH_SIZE: '120'
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
 int8-online-inference:
@@ -78,16 +78,16 @@ int8-online-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
 int8-throughput-inference:
@@ -96,17 +96,17 @@ int8-throughput-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'THROUGHPUT'
     TORCH_INDUCTOR: '0'
     BBATCH_SIZE: '120'
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
 bf16-online-inference:
@@ -115,16 +115,16 @@ bf16-online-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
 bf16-throughput-inference:
@@ -133,17 +133,17 @@ bf16-throughput-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'THROUGHPUT'
     TORCH_INDUCTOR: '0'
     BATCH_SIZE: '120'
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
 fp16-online-inference:
@@ -152,17 +152,17 @@ fp16-online-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'REALTIME'
     TORCH_INDUCTOR: '0'
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
 fp16-throughput-inference:
@@ -171,17 +171,17 @@ fp16-throughput-inference:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp16
-    EVAL_DATA_FILE: /localdisk/dev-v1.1.json
+    EVAL_DATA_FILE: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
     OUTPUT_DIR: /tmp
-    FINETUNED_MODEL: /localdisk/bert_squad_model
+    FINETUNED_MODEL: /pytorch/bert_squad/large-inference/dataset/model
     TEST_MODE: 'THROUGHPUT'
     TORCH_INDUCTOR: '0'
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
     BATCH_SIZE: '120'
   volumes:
-    - src: /localdisk/dev-v1.1.json
-      dst: /localdisk/dev-v1.1.json
-    - src: /localdisk/bert_squad_model
-      dst: /localdisk/bert_squad_model
+    - src: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+      dst: /pytorch/bert_squad/large-inference/dataset/dev-v1.1.json
+    - src: /pytorch/bert_squad/large-inference/dataset/model
+      dst: /pytorch/bert_squad/large-inference/dataset/model
     - src: /tmp
       dst: /tmp
