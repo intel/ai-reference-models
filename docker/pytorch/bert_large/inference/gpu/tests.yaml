@@ -1,126 +1,126 @@
-# single-device-fp16-inference:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
-#   cmd: bash run_model.sh
-#   ipc: host
-#   device: /dev/dri
-#   env:
-#     PRECISION: FP16
-#     BATCH_SIZE: '256'
-#     PLATFORM: Max
-#     OUTPUT_DIR: /tmp
-#     MULTI_TILE: 'False'
-#     NUM_DEVICES: 1
-#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
-#     DATASET_DIR: /dataset/squad_dir
-#   volumes:
-#     - src: /dataset/squad_dir
-#       dst: /dataset/squad_dir
-#     - src: /dataset/squad_large_finetuned_checkpoint
-#       dst: /dataset/squad_large_finetuned_checkpoint
-#     - src: /tmp
-#       dst: /tmp
-# multi-device-fp16-inference:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
-#   cmd: bash run_model.sh
-#   ipc: host
-#   device: /dev/dri
-#   env:
-#     PRECISION: FP16
-#     BATCH_SIZE: '256'
-#     PLATFORM: Max
-#     OUTPUT_DIR: /tmp
-#     MULTI_TILE: 'True'
-#     NUM_DEVICES: 2
-#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
-#     DATASET_DIR: /dataset/squad_dir
-#   volumes:
-#     - src: /dataset/squad_dir
-#       dst: /dataset/squad_dir
-#     - src: /dataset/squad_large_finetuned_checkpoint
-#       dst: /dataset/squad_large_finetuned_checkpoint
-#     - src: /tmp
-#       dst: /tmp
-# single-device-bf16-inference:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
-#   cmd: bash run_model.sh
-#   ipc: host
-#   device: /dev/dri
-#   env:
-#     PRECISION: BF16
-#     BATCH_SIZE: '256'
-#     PLATFORM: Max
-#     OUTPUT_DIR: /tmp
-#     MULTI_TILE: 'False'
-#     NUM_DEVICES: 1
-#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
-#     DATASET_DIR: /dataset/squad_dir
-#   volumes:
-#     - src: /dataset/squad_dir
-#       dst: /dataset/squad_dir
-#     - src: /dataset/squad_large_finetuned_checkpoint
-#       dst: /dataset/squad_large_finetuned_checkpoint
-#     - src: /tmp
-#       dst: /tmp
-# multi-device-bf16-inference:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
-#   cmd: bash run_model.sh
-#   ipc: host
-#   device: /dev/dri
-#   env:
-#     PRECISION: BF16
-#     BATCH_SIZE: '256'
-#     PLATFORM: Max
-#     OUTPUT_DIR: /tmp
-#     MULTI_TILE: 'True'
-#     NUM_DEVICES: 2
-#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
-#     DATASET_DIR: /dataset/squad_dir
-#   volumes:
-#     - src: /dataset/squad_dir
-#       dst: /dataset/squad_dir
-#     - src: /dataset/squad_large_finetuned_checkpoint
-#       dst: /dataset/squad_large_finetuned_checkpoint
-#     - src: /tmp
-#       dst: /tmp
-# single-device-fp32-inference:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
-#   cmd: bash run_model.sh
-#   ipc: host
-#   device: /dev/dri
-#   env:
-#     PRECISION: FP32
-#     BATCH_SIZE: '256'
-#     PLATFORM: Max
-#     OUTPUT_DIR: /tmp
-#     MULTI_TILE: 'False'
-#     NUM_DEVICES: 1
-#     BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
-#     DATASET_DIR: /dataset/squad_dir
-#   volumes:
-#     - src: /dataset/squad_dir
-#       dst: /dataset/squad_dir
-#     - src: /dataset/squad_large_finetuned_checkpoint
-#       dst: /dataset/squad_large_finetuned_checkpoint
-#     - src: /tmp
-#       dst: /tmp
+single-device-fp16-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: ["/dev/dri"]
+  env:
+    PRECISION: FP16
+    BATCH_SIZE: '256'
+    PLATFORM: Max
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'False'
+    NUM_DEVICES: '1'
+    BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint
+    DATASET_DIR: /pytorch/squad_dir
+  volumes:
+    - src: /pytorch/squad_dir
+      dst: /pytorch/squad_dir
+    - src: /pytorch/squad_large_finetuned_checkpoint
+      dst: /pytorch/squad_large_finetuned_checkpoint
+    - src: /tmp
+      dst: /tmp
+multi-device-fp16-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: ["/dev/dri"]
+  env:
+    PRECISION: FP16
+    BATCH_SIZE: '256'
+    PLATFORM: Max
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'True'
+    NUM_DEVICES: '2'
+    BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint
+    DATASET_DIR: /pytorch/squad_dir
+  volumes:
+    - src: /pytorch/squad_dir
+      dst: /pytorch/squad_dir
+    - src: /pytorch/squad_large_finetuned_checkpoint
+      dst: /pytorch/squad_large_finetuned_checkpoint
+    - src: /tmp
+      dst: /tmp
+single-device-bf16-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: ["/dev/dri"]
+  env:
+    PRECISION: BF16
+    BATCH_SIZE: '256'
+    PLATFORM: Max
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'False'
+    NUM_DEVICES: '1'
+    BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint
+    DATASET_DIR: /pytorch/squad_dir
+  volumes:
+    - src: /pytorch/squad_dir
+      dst: /pytorch/squad_dir
+    - src: /pytorch/squad_large_finetuned_checkpoint
+      dst: /pytorch/squad_large_finetuned_checkpoint
+    - src: /tmp
+      dst: /tmp
+multi-device-bf16-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: ["/dev/dri"]
+  env:
+    PRECISION: BF16
+    BATCH_SIZE: '256'
+    PLATFORM: Max
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'True'
+    NUM_DEVICES: '2'
+    BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint
+    DATASET_DIR: /pytorch/squad_dir
+  volumes:
+    - src: /pytorch/squad_dir
+      dst: /pytorch/squad_dir
+    - src: /pytorch/squad_large_finetuned_checkpoint
+      dst: /pytorch/squad_large_finetuned_checkpoint
+    - src: /tmp
+      dst: /tmp
+single-device-fp32-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: ["/dev/dri"]
+  env:
+    PRECISION: FP32
+    BATCH_SIZE: '256'
+    PLATFORM: Max
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'False'
+    NUM_DEVICES: '1'
+    BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint
+    DATASET_DIR: /pytorch/squad_dir
+  volumes:
+    - src: /pytorch/squad_dir
+      dst: /pytorch/squad_dir
+    - src: /pytorch/squad_large_finetuned_checkpoint
+      dst: /pytorch/squad_large_finetuned_checkpoint
+    - src: /tmp
+      dst: /tmp
 multi-device-fp32-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: FP32
     BATCH_SIZE: '256'
     PLATFORM: Max
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
-    NUM_DEVICES: 2
-    BERT_WEIGHT: /dataset/squad_large_finetuned_checkpoint
-    DATASET_DIR: /dataset/squad_dir
+    NUM_DEVICES: '2'
+    BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint
+    DATASET_DIR: /pytorch/squad_dir
   volumes:
-    - src: /dataset/squad_dir
-      dst: /dataset/squad_dir
-    - src: /dataset/squad_large_finetuned_checkpoint
-      dst: /dataset/squad_large_finetuned_checkpoint
+    - src: /pytorch/squad_dir
+      dst: /pytorch/squad_dir
+    - src: /pytorch/squad_large_finetuned_checkpoint
+      dst: /pytorch/squad_large_finetuned_checkpoint
     - src: /tmp
       dst: /tmp

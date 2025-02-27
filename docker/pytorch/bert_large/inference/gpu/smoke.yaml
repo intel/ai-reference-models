@@ -1,0 +1,21 @@
+single-device-bf16-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: ["/dev/dri"]
+  env:
+    PRECISION: BF16
+    BATCH_SIZE: '256'
+    PLATFORM: Max
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'False'
+    NUM_DEVICES: '1'
+    BERT_WEIGHT: /pytorch/squad1/squad_large_finetuned_checkpoint
+    DATASET_DIR: /pytorch/squad1/dataset
+  volumes:
+    - src: /pytorch/squad1/dataset
+      dst: /pytorch/squad1/dataset
+    - src: /pytorch/squad1/squad_large_finetuned_checkpoint
+      dst: /pytorch/squad1/squad_large_finetuned_checkpoint
+    - src: /tmp
+      dst: /tmp

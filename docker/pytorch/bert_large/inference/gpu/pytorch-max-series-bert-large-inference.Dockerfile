@@ -17,13 +17,11 @@ ARG PYT_BASE_TAG="2.3.110-xpu"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         parallel && \
     rm -rf /var/lib/apt/lists/*
-
-FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
-
-ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /workspace/pytorch-max-series-bert-large-inference/models
 
