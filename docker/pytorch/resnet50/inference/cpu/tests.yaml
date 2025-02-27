@@ -7,6 +7,7 @@ fp32-online_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -19,6 +20,7 @@ avx-fp32-online_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -31,6 +33,7 @@ bf16-online_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -43,6 +46,7 @@ int8-online_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -55,6 +59,7 @@ avx-int8-online_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -67,6 +72,7 @@ bf32-online_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -79,6 +85,7 @@ fp32-throughput_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -91,6 +98,7 @@ avx-fp32-throughput_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -103,6 +111,7 @@ bf16-throughput_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -115,6 +124,7 @@ int8-throughput_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -127,6 +137,7 @@ avx-int8-throughput_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -139,6 +150,7 @@ bf32-throughput_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -151,6 +163,7 @@ fp32-accuracy_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -163,6 +176,7 @@ avx-fp32-accuracy_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -175,6 +189,7 @@ bf16-accuracy_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -187,6 +202,7 @@ int8-accuracy_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -199,6 +215,7 @@ avx-int8-accuracy_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -211,6 +228,7 @@ bf32-accuracy_inference:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
+    TORCH_INDUCTOR: '0'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData

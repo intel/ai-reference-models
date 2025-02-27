@@ -1,6 +1,7 @@
 fp32-realtime:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
   cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
     SEQUENCE_LENGTH: '128'
@@ -9,6 +10,7 @@ fp32-realtime:
     OUTPUT_DIR: /tmp
     PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'REALTIME'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/

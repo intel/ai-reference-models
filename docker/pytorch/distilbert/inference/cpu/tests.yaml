@@ -8,269 +8,292 @@ fp32-accuracy:
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
     TEST_MODE: 'ACCURACY'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-      dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
     - src: /tmp
       dst: /tmp
-# fp32-realtime:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: fp32
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '4'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# fp32-throughput:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: fp32
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '32'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# bf32-accuracy:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: bf32
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '32'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#     TEST_MODE: 'ACCURACY'
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# bf32-realtime:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: bf32
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '4'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# bf32-throughput:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd:bash run_model.sh
-#   env:
-#     PRECISION: bf32
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '32'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# int8-bf16-accuracy:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: int8-bf16
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '32'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#     TEST_MODE: 'ACCURACY'
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# int8-bf16-realtime:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: int8-bf16
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '4'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# int8-bf16-throughput:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: int8-bf16
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '32'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# int8-fp32-accuracy:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: int8-fp32
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '32'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#     TEST_MODE: 'ACCURACY'
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# int8-fp32-realtime:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: int8-fp32
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '4'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# int8-fp32-throughput:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd:bash run_model.sh
-#   env:
-#     PRECISION: int8-fp32
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '32'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# bf16-accuracy:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: bf16
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '32'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#     TEST_MODE: 'ACCURACY'
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# bf16-realtime:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd: bash run_model.sh
-#   env:
-#     PRECISION: bf16
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '4'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
-# bf16-throughput:
-#   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
-#   cmd:bash run_model.sh
-#   env:
-#     PRECISION: bf16
-#     SEQUENCE_LENGTH: '128'
-#     CORE_PER_INSTANCE: '32'
-#     HF_DATASETS_OFFLINE: '0'
-#     OUTPUT_DIR: /tmp
-#     PRETRAINED_MODEL: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-#   volumes:
-#     - src: /pytorch/distilbert_dataset/SST-2/
-#       dst: /pytorch/distilbert_dataset/SST-2/
-#     - src: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#       dst: /localdisk/distilbert-base-uncased-finetuned-sst-2-english
-#     - src: /tmp
-#       dst: /tmp
+fp32-realtime:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '4'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'REALTIME'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+fp32-throughput:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp32
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '32'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'THROUGHPUT'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+bf32-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '32'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'ACCURACY'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+bf32-realtime:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '4'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'REALTIME'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+bf32-throughput:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf32
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '32'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'THROUGHPUT'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+int8-bf16-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-bf16
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '32'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'ACCURACY'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+int8-bf16-realtime:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-bf16
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '4'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'REALTIME'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+int8-bf16-throughput:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-bf16
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '32'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'THROUGHPUT'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+int8-fp32-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-fp32
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '32'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'ACCURACY'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+int8-fp32-realtime:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-fp32
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '4'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'REALTIME'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+int8-fp32-throughput:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: int8-fp32
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '32'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'THROUGHPUT'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+bf16-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '32'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'ACCURACY'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+bf16-realtime:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '4'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'REALTIME'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
+bf16-throughput:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
+  cmd: bash run_model.sh
+  env:
+    PRECISION: bf16
+    SEQUENCE_LENGTH: '128'
+    CORE_PER_INSTANCE: '32'
+    HF_DATASETS_OFFLINE: '0'
+    OUTPUT_DIR: /tmp
+    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
+    TEST_MODE: 'THROUGHPUT'
+  volumes:
+    - src: /pytorch/distilbert_dataset/SST-2/
+      dst: /pytorch/distilbert_dataset/SST-2/
+    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
+      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /tmp
+      dst: /tmp
