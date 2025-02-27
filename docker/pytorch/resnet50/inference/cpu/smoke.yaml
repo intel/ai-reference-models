@@ -1,0 +1,13 @@
+bf16-online_inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
+  cmd: sh -c "cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
+  shm-size: 8G
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData
+    TEST_MODE: REALTIME
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
