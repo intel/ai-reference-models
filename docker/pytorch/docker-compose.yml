@@ -21,6 +21,8 @@ services:
   bert_large-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       args:
@@ -35,6 +37,8 @@ services:
   bert_large-training-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/bert_large/training/cpu/pytorch-bert-large-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -44,6 +48,8 @@ services:
   maskrcnn-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-maskrcnn-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/maskrcnn/inference/cpu/pytorch-maskrcnn-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -53,6 +59,8 @@ services:
   maskrcnn-training-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-maskrcnn-training
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/maskrcnn/training/cpu/pytorch-maskrcnn-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -62,6 +70,8 @@ services:
   resnet50-training-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-training
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/resnet50/training/cpu/pytorch-resnet50-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -71,6 +81,8 @@ services:
   resnet50-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/resnet50/inference/cpu/pytorch-resnet50-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -80,6 +92,8 @@ services:
   ssd-resnet34-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/ssd-resnet34/inference/cpu/pytorch-ssd-resnet34-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -89,6 +103,8 @@ services:
   ssd-resnet34-training-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-ssd-resnet34-training
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/ssd-resnet34/training/cpu/pytorch-ssd-resnet34-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -98,6 +114,8 @@ services:
   dlrm-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/dlrm/inference/cpu/pytorch-dlrm-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -107,6 +125,8 @@ services:
   dlrm-training-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-dlrm-training-${BASE_IMAGE_NAME:-ubuntu}
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/dlrm/training/cpu/pytorch-dlrm-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -116,6 +136,8 @@ services:
   rnnt-training-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-training
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/rnnt/training/cpu/pytorch-rnnt-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -125,6 +147,8 @@ services:
   rnnt-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-rnnt-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/rnnt/inference/cpu/pytorch-rnnt-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -134,6 +158,8 @@ services:
   distilbert-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/distilbert/inference/cpu/pytorch-distilbert-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -143,6 +169,8 @@ services:
   llama-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/llama/inference/cpu/pytorch-llama-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -152,6 +180,8 @@ services:
   torchrec_dlrm-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-v2-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/torchrec_dlrm/inference/cpu/pytorch-dlrm-v2-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -161,6 +191,8 @@ services:
   gptj-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-gpt-j-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/gptj/inference/cpu/pytorch-gpt-j-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -170,6 +202,8 @@ services:
   yolov7-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/yolov7/inference/cpu/pytorch-yolov7-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -179,6 +213,8 @@ services:
   chatglm-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-chatglm-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/chatglm/inference/cpu/pytorch-chatglm-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -188,6 +224,8 @@ services:
   llama-training-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-training
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/llama/training/cpu/pytorch-llama-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -197,6 +235,8 @@ services:
   vit-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-image-recognition-vit-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/vit/inference/cpu/pytorch-vit-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -206,6 +246,8 @@ services:
   stable_diffusion-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-stable-diffusion-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/stable_diffusion/inference/cpu/pytorch-stable-diffusion-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -215,6 +257,8 @@ services:
   LCM-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
     build:
       context: ../../
       dockerfile: docker/pytorch/LCM/inference/cpu/pytorch-lcm-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
@@ -236,11 +280,15 @@ services:
       sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__);print(torch.xpu.has_xpu())'"
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-gpu-stable-diffusion-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
   resnet50v1-5-inference-gpu:
     build:
       dockerfile: docker/pytorch/resnet50v1_5/inference/gpu/pytorch-gpu-resnet50v1-5-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-inference
+    cap_drop:
+      - NET_RAW
   resnet50v1_5-training-gpu:
     build:
       args:
@@ -249,76 +297,106 @@ services:
       dockerfile: docker/pytorch/resnet50v1_5/training/gpu/pytorch-max-series-resnet50v1-5-training.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-training
+    cap_drop:
+      - NET_RAW
   efficientnet-inference-gpu:
     build:
       dockerfile: docker/pytorch/efficientnet/inference/gpu/pytorch-flex-series-efficientnet-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-efficientnet-inference
+    cap_drop:
+      - NET_RAW
   yolov5-inference-gpu:
     build:
       dockerfile: docker/pytorch/yolov5/inference/gpu/pytorch-flex-series-yolov5-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-flex-gpu-yolov5-inference
+    cap_drop:
+      - NET_RAW
   dlrm-inference-gpu:
     build:
       dockerfile: docker/pytorch/dlrm/inference/gpu/pytorch-flex-series-dlrm-v1-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-flex-gpu-dlrm-v1-inference
+    cap_drop:
+      - NET_RAW
   distilbert-inference-gpu:
     build:
       dockerfile: docker/pytorch/distilbert/inference/gpu/pytorch-gpu-distilbert-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-gpu-distilbert-inference
+    cap_drop:
+      - NET_RAW
   unetpp-inference-gpu:
     build:
       dockerfile: docker/pytorch/unetpp/inference/gpu/pytorch-flex-series-unetpp-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-pytorch-flex-gpu-unetpp-inference
+    cap_drop:
+      - NET_RAW
   fastpitch-inference-gpu:
     build:
       dockerfile: docker/pytorch/fastpitch/inference/gpu/pytorch-flex-series-fast-pitch-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-generation-pytorch-flex-gpu-fast-pitch-inference
+    cap_drop:
+      - NET_RAW
   swin-transformer-inference-gpu:
     build:
       dockerfile: docker/pytorch/swin-transformer/inference/gpu/pytorch-flex-series-swin-transformer-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-swin-transformer-inference
+    cap_drop:
+      - NET_RAW
   bert_large-inference-gpu:
     build:
       dockerfile: docker/pytorch/bert_large/inference/gpu/pytorch-max-series-bert-large-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-inference
+    cap_drop:
+      - NET_RAW
   bert_large-training-gpu:
     build:
       dockerfile: docker/pytorch/bert_large/training/gpu/pytorch-max-series-bert-large-training.Dockerfile
     extends: resnet50v1_5-training-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
+    cap_drop:
+      - NET_RAW
   rnnt-inference-gpu:
     build:
       dockerfile: docker/pytorch/rnnt/inference/gpu/pytorch-max-series-rnnt-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-inference
+    cap_drop:
+      - NET_RAW
   rnnt-training-gpu:
     build:
       dockerfile: docker/pytorch/rnnt/training/gpu/pytorch-max-series-rnnt-training.Dockerfile
     extends: resnet50v1_5-training-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-training
+    cap_drop:
+      - NET_RAW
   fbnet-inference-gpu:
     build:
       dockerfile: docker/pytorch/fbnet/inference/gpu/pytorch-flex-series-fbnet-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-fbnet-inference
+    cap_drop:
+      - NET_RAW
   ifrnet-inference-gpu:
     build:
       dockerfile: docker/pytorch/ifrnet/inference/gpu/pytorch-flex-series-ifrnet-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-flex-gpu-ifrnet-inference
+    cap_drop:
+      - NET_RAW
   rife-inference-gpu:
     build:
       dockerfile: docker/pytorch/rife/inference/gpu/pytorch-flex-series-rife-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-flex-gpu-rife-inference
+    cap_drop:
+      - NET_RAW
   efficientnet-cuda-inference:
     build:
       context: ../../
@@ -332,24 +410,34 @@ services:
       dockerfile: docker/pytorch/efficientnet/inference/gpu/pytorch-cuda-series-efficientnet-inference.Dockerfile
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-cuda-gpu-efficientnet-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
   yolov5-cuda-inference:
     build:
       dockerfile: docker/pytorch/yolov5/inference/gpu/pytorch-cuda-series-yolov5-inference.Dockerfile
     extends: efficientnet-cuda-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-cuda-gpu-yolov5-inference
     pull_policy: always
+    cap_drop:
+      - NET_RAW
   fbnet-cuda-inference:
     build:
       dockerfile: docker/pytorch/fbnet/inference/gpu/pytorch-cuda-series-fbnet-inference.Dockerfile
     extends: efficientnet-cuda-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-cuda-gpu-fbnet-inference
+    cap_drop:
+      - NET_RAW
   ifrnet-cuda-inference:
     build:
       dockerfile: docker/pytorch/ifrnet/inference/gpu/pytorch-cuda-series-ifrnet-inference.Dockerfile
     extends: efficientnet-cuda-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-cuda-gpu-ifrnet-inference
+    cap_drop:
+      - NET_RAW
   rife-cuda-inference:
     build:
       dockerfile: docker/pytorch/rife/inference/gpu/pytorch-cuda-series-rife-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-cuda-gpu-rife-inference
+    cap_drop:
+      - NET_RAW
