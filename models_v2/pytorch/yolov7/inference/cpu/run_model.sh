@@ -49,6 +49,12 @@ cd $CHECKPOINT_DIR
 CHECKPOINT_DIR=$(pwd)
 cd -
 
+
+# Sometimes data may be mounted on read-only paths like NFS. So, workaround is to copy data to /tmp to enable script write val2017.cache to /tmp
+
+cp -r ${DATASET_DIR} /tmp 
+export DATASET_DIR=/tmp/data
+
 MODEL_DIR=${MODEL_DIR-$PWD}
 
 if [ ! -e "${MODEL_DIR}/yolov7_ipex_and_inductor.patch"  ]; then
@@ -276,3 +282,7 @@ EOF
 
 echo "$yaml_content" >  $OUTPUT_DIR/results.yaml
 echo "YAML file created."
+
+# # Clean copied data and cache
+
+rm -rf /tmp/data

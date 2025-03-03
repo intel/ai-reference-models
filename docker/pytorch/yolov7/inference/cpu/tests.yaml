@@ -1,6 +1,7 @@
 fp32-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-object-detection-yolov7-inference
   cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
     OUTPUT_DIR: /tmp
