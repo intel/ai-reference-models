@@ -2,36 +2,36 @@ single-device-bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     MULTI_TILE: 'False'
     NUM_DEVICES: '1'
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    DATASET_DIR: /pytorch/hdf5_seq_512/
     PRECISION: BF16
   volumes:
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
     - src: /tmp
       dst: /tmp
 multi-device-bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     MULTI_TILE: 'False'
     NUM_DEVICES: '2'
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    DATASET_DIR: /pytorch/hdf5_seq_512/
     PRECISION: BF16
   volumes:
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
     - src: /dev/dri
       dst: /dev/dri
     - src: /tmp
@@ -40,36 +40,36 @@ single-device-fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     MULTI_TILE: 'False'
     NUM_DEVICES: '1'
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    DATASET_DIR: /pytorch/hdf5_seq_512/
     PRECISION: FP32
   volumes:
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
     - src: /tmp
       dst: /tmp
 multi-device-fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     MULTI_TILE: 'False'
     NUM_DEVICES: '2'
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    DATASET_DIR: /pytorch/hdf5_seq_512/
     PRECISION: FP32
   volumes:
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
     - src: /dev/dri
       dst: /dev/dri
     - src: /tmp
@@ -78,36 +78,36 @@ single-device-tf32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     MULTI_TILE: 'False'
     NUM_DEVICES: '1'
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    DATASET_DIR: /pytorch/hdf5_seq_512/
     PRECISION: TF32
   volumes:
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
     - src: /tmp
       dst: /tmp
 multi-device-tf32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     MULTI_TILE: 'False'
     NUM_DEVICES: '2'
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    DATASET_DIR: /pytorch/hdf5_seq_512/
     PRECISION: TF32
   volumes:
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
     - src: /dev/dri
       dst: /dev/dri
     - src: /tmp
@@ -116,18 +116,18 @@ multi-device-bf16-multi-tile-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     MULTI_TILE: 'True'
     NUM_DEVICES: '2'
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    DATASET_DIR: /pytorch/hdf5_seq_512/
     PRECISION: BF16
   volumes:
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
     - src: /dev/dri
       dst: /dev/dri
     - src: /tmp
@@ -136,18 +136,18 @@ multi-device-fp32-multi-tile-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     MULTI_TILE: 'True'
     NUM_DEVICES: '2'
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    DATASET_DIR: /pytorch/hdf5_seq_512/
     PRECISION: FP32
   volumes:
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
     - src: /dev/dri
       dst: /dev/dri
     - src: /tmp
@@ -156,18 +156,18 @@ multi-device-tf32-multi-tile-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     MULTI_TILE: 'True'
     NUM_DEVICES: '2'
     PLATFORM: Max
     BATCH_SIZE: '16'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    DATASET_DIR: /pytorch/hdf5_seq_512/
     PRECISION: TF32
   volumes:
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/hdf5_seq_512/
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
     - src: /dev/dri
       dst: /dev/dri
     - src: /tmp
