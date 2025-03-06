@@ -1,0 +1,20 @@
+single-device-bf16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-max-gpu-bert-large-training
+  cmd: bash run_model.sh
+  ipc: host
+  device: ["/dev/dri"]
+  env:
+    MULTI_TILE: 'False'
+    NUM_DEVICES: '1'
+    PLATFORM: Max
+    BATCH_SIZE: '16'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/hdf5_seq_512/
+    PRECISION: BF16
+  volumes:
+    - src: /pytorch/hdf5_seq_512/
+      dst: /pytorch/hdf5_seq_512/
+    - src: /tmp
+      dst: /tmp
+    - src: /dev/dri/by-path
+      dst: /dev/dri/by-path
