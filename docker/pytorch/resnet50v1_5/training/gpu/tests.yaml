@@ -1,14 +1,14 @@
 bf16-two-tile-training:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: BF16
     NUM_ITERATIONS: '20'
     BATCH_SIZE: '256'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    DATASET_DIR: /pytorch/Imagenet_FullData
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
     NUM_DEVICES: '2'
@@ -17,19 +17,19 @@ bf16-two-tile-training:
       dst: /tmp
     - src: /dev/dri
       dst: /dev/dri
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
 fp32-two-tile-training:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: FP32
     NUM_ITERATIONS: '20'
     BATCH_SIZE: '256'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    DATASET_DIR: /pytorch/Imagenet_FullData
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
     NUM_DEVICES: '2'
@@ -38,19 +38,19 @@ fp32-two-tile-training:
       dst: /tmp
     - src: /dev/dri
       dst: /dev/dri
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
 tf32-two-tile-training:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: TF32
     NUM_ITERATIONS: '20'
     BATCH_SIZE: '256'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    DATASET_DIR: /pytorch/Imagenet_FullData
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
     NUM_DEVICES: '2'
@@ -59,19 +59,19 @@ tf32-two-tile-training:
       dst: /tmp
     - src: /dev/dri
       dst: /dev/dri
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
 bf16-single-tile-training:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: BF16
     NUM_ITERATIONS: '20'
     BATCH_SIZE: '256'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    DATASET_DIR: /pytorch/Imagenet_FullData
     MULTI_TILE: 'False'
     PLATFORM: 'Max'
     NUM_DEVICES: '1'
@@ -80,19 +80,19 @@ bf16-single-tile-training:
       dst: /tmp
     - src: /dev/dri
       dst: /dev/dri
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
 fp32-single-tile-training:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: FP32
     NUM_ITERATIONS: '20'
     BATCH_SIZE: '256'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    DATASET_DIR: /pytorch/Imagenet_FullData
     MULTI_TILE: 'False'
     PLATFORM: 'Max'
     NUM_DEVICES: '1'
@@ -101,19 +101,19 @@ fp32-single-tile-training:
       dst: /tmp
     - src: /dev/dri
       dst: /dev/dri
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
 tf32-single-tile-training:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-training
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-training
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: TF32
     NUM_ITERATIONS: '20'
     BATCH_SIZE: '256'
     OUTPUT_DIR: /tmp
-    DATASET_DIR: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    DATASET_DIR: /pytorch/Imagenet_FullData
     MULTI_TILE: 'False'
     PLATFORM: 'Max'
     NUM_DEVICES: '1'
@@ -122,5 +122,5 @@ tf32-single-tile-training:
       dst: /tmp
     - src: /dev/dri
       dst: /dev/dri
-    - src: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
-      dst: /nfs/pdx/disks/mlp_pytorch_dataset/Imagenet_FullData
+    - src: /pytorch/Imagenet_FullData
+      dst: /pytorch/Imagenet_FullData
