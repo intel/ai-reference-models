@@ -19,5 +19,4 @@ tools/docker/models*
 nc_workspace
 benchmarks/horovod
 cloud_data_connector/credentials.json
-**/poetry.lock
 .pre-commit-config.yaml
