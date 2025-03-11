@@ -1319,13 +1319,13 @@ test = ["hatch", "ipykernel", "openapi-core (>=0.18.0,<0.19.0)", "openapi-spec-v
 
 [[package]]
 name = "keras"
-version = "3.5.0"
+version = "3.9.0"
 description = "Multi-backend Keras."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "keras-3.5.0-py3-none-any.whl", hash = "sha256:d37a3c623935713473ceb25241b52bce9d1e0ff5b36e5d0f6f47ed55f8500c9a"},
-    {file = "keras-3.5.0.tar.gz", hash = "sha256:53ae4f9472ec9d9c6941c82a3fda86969724ace3b7630a94ba0a1f17ba1065c3"},
+    {file = "keras-3.9.0-py3-none-any.whl", hash = "sha256:d37a3c623935713473ceb25241b52bce9d1e0ff5b36e5d0f6f47ed55f8500c9a"},
+    {file = "keras-3.9.0.tar.gz", hash = "sha256:53ae4f9472ec9d9c6941c82a3fda86969724ace3b7630a94ba0a1f17ba1065c3"},
 ]
 
 [package.dependencies]
@@ -2944,7 +2944,7 @@ gast = ">=0.2.1,<0.5.0 || >0.5.0,<0.5.1 || >0.5.1,<0.5.2 || >0.5.2"
 google-pasta = ">=0.1.1"
 grpcio = ">=1.24.3,<2.0"
 h5py = ">=3.10.0"
-keras = ">=3.2.0"
+keras = ">=3.9.0"
 libclang = ">=13.0.0"
 ml-dtypes = ">=0.3.1,<0.5.0"
 numpy = [
