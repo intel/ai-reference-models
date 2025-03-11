@@ -37,7 +37,7 @@ tensorflow-hub = "^0.16.1"
 tf-models-official = "^2.17.0"
 torch = "^2.4.1"
 torchvision = "^0.19.1"
-transformers = "^4.44.2"
+transformers = "^4.48.0"
 urllib3 = "^2.2.3"
 wget = "^3.2"
 
