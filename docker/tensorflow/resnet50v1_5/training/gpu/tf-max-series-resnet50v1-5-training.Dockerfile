@@ -31,13 +31,14 @@ RUN apt-get update && \
         intel-oneapi-ccl=${CCL_VER} && \
     rm -rf /var/lib/apt/lists/*
 
+RUN curl -sSL https://install.python-poetry.org | python3 -
 WORKDIR /workspace/tf-max-series-resnet50v1-5-training/models
 
 COPY models_v2/tensorflow/resnet50v1_5/training/gpu .
 
-RUN pip install -r requirements.txt
+RUN /root/.local/bin/poetry install
 
-RUN python -m pip install --no-cache-dir intel-optimization-for-horovod
+RUN /root/.local/bin/poetry add intel-optimization-for-horovod
 
 RUN mkdir -p resnet50 && \
     cd resnet50 && \

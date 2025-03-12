@@ -1,0 +1,27 @@
+[project]
+name = "root"
+version = "3.4"
+description = "AIRM - root"
+authors = [
+    {name = "Intel(R) AI Reference Models",email = "ai.reference.models@intel.com"}
+]
+readme = "README.md"
+requires-python = ">=3.9,<=3.11"
+dependencies = [
+    "atheris (>=2.3.0,<3.0.0)",
+    "conditional (>=2.0,<3.0)",
+    "flake8 (==3.7.5)",
+    "mock (>=5.1.0,<6.0.0)",
+    "pytest (>=6.2.5)",
+    "pytest-cov (>=6.0.0,<7.0.0)",
+    "pytest-xdist (>=3.6.1,<4.0.0)",
+    "tox (==3.28.0)",
+    "virtualenv (>=20.29.2,<21.0.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

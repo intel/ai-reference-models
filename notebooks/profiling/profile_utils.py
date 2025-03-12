@@ -19,7 +19,6 @@
 #
 import sys
 import configparser
-import json
 import os
 import fnmatch
 import psutil
@@ -42,6 +41,7 @@ except ImportError as e:
     has_git = False
     pass
 
+
 class GitOps:
 
     def __init__(self, repopath='./'):
@@ -49,7 +49,7 @@ class GitOps:
         if has_git is True:
             try:
                 self.repo = Repo(repopath)
-            except:
+            except Exception:
                 print('no repo, init one')
                 self.repo = Repo.init(repopath)
                 self.repo.git.add(A=True)
@@ -70,7 +70,7 @@ class GitOps:
             return ret
         try:
             repo = Repo(self.repopath)
-        except:
+        except Exception:
             print('no repo, init one')
             repo = Repo.init(self.repopath)
             repo.git.add(A=True)
@@ -126,6 +126,7 @@ class PlatformUtils:
         self.cpu_socket_count = cpu_info.sockets
         self.svmem = svmem
 
+
 class CommonUtils:
 
     def __init__(self):
@@ -150,9 +151,10 @@ class CommonUtils:
             foundpaths += paths
         return foundfiles, foundpaths
 
+
 class GeneralConfigFile:
     def __init__(self, ai_root):
-        self.root=ai_root
+        self.root = ai_root
         self.framework = ''
         self.device = ''
         # Empty for CPU
@@ -196,7 +198,6 @@ class GeneralConfigFile:
             disabled=False,
         )
 
-
     def toggle_events(self):
         def on_hardware_change(change):
             if change.new == 'GPU':
@@ -238,16 +239,22 @@ class GeneralConfigFile:
                 if change.new == 'No':
                     # Intel® oneAPI Base Toolkit is not installed
                     print("Intel® oneAPI Base Toolkit is not installed.")
-                    print("Follow instructions at [Intel® oneAPI Base Toolkit Download page](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux) to setup the package manager repository.")
+                    print(
+                        "Follow instructions at [Intel® oneAPI Base Toolkit Download page]"
+                        "(https://www.intel.com/content/www/us/en/developer/tools/oneapi"
+                        "/base-toolkit-download.html?operatingsystem=linux) "
+                        "to setup the package manager repository."
+                    )
                     print("Once Intel® oneAPI Base Toolkit is installed on the machine, please re-run this cell")
                     return
-
 
         self.hardware_dropdown.observe(on_hardware_change, names='value')
         self.framework_dropdown.observe(on_framework_change, names='value')
         self.intel_oneapi_dropdown.observe(on_intel_oneapi_change, names='value')
 
-        if (self.hardware_dropdown.value and self.framework_dropdown.value and (self.hardware_dropdown.value == 'CPU' or (self.hardware_dropdown.value == 'GPU' and self.gpu_series_dropdown.value))):
+        if (self.hardware_dropdown.value and self.framework_dropdown.value and
+                (self.hardware_dropdown.value == 'CPU' or
+                    (self.hardware_dropdown.value == 'GPU' and self.gpu_series_dropdown.value))):
             self.success = True
         display(self.hardware_dropdown)
         display(self.framework_dropdown)
@@ -267,7 +274,7 @@ class AIReferenceConfigFile:
         self.device = ''
         self.precision = ''
         self.test_mode = ''
-        #self.ai_type = ''
+        # self.ai_type = ''
         self.custom_args = ''
         self.json_fname = ''
         self.json_fname = 'stock_'
@@ -372,7 +379,7 @@ class AIReferenceConfigFile:
                 for key, value in model_data.items():
                     if key == 'name':
                         configs['name'] = value
-                    #elif key == 'ai-type':
+                    # elif key == 'ai-type':
                     #    configs['ai-type'] = value
                     elif key == 'model-name':
                         configs['model-name'] = value
@@ -398,7 +405,10 @@ class AIReferenceConfigFile:
                             wget = sub_entry['wget']
                             if model_name.split()[0] not in configs:
                                 configs[model_name.split()[0]] = []
-                            configs[model_name.split()[0]].append({'precision': precision, 'test_mode': test_mode, 'script': scripts, 'wget': wget})
+                            configs[model_name.split()[0]].append({'precision': precision,
+                                                                   'test_mode': test_mode,
+                                                                   'script': scripts,
+                                                                   'wget': wget})
 
         return configs
 
@@ -489,7 +499,7 @@ class AIReferenceConfigFile:
 
         for index, section in enumerate(sections):
             model_name = section.get('model-name', 'Unknown')
-            #ai_type = section.get('ai-type', 'Unknown')
+            # ai_type = section.get('ai-type', 'Unknown')
             framework = section.get('framework', 'Unknown')
             mode = section.get('mode', 'Unknown')
             device = section.get('device', 'Unknown')
@@ -498,7 +508,8 @@ class AIReferenceConfigFile:
         print("Supported Models: ")
         display(models_table)
 
-        model_index = int(input('Input an index number of a model: ')) if 'MODEL_1_INDEX' not in os.environ else int(os.environ['MODEL_1_INDEX'])
+        model_index = int(input('Input an index number of a model: ')) \
+            if 'MODEL_1_INDEX' not in os.environ else int(os.environ['MODEL_1_INDEX'])
 
         if not 0 <= model_index < len(sections):
             raise Exception("Invalid choice for model index")
@@ -513,14 +524,16 @@ class AIReferenceConfigFile:
         # Set initial properties
         self.model_name = model_section['name']
         self.framework = model_section['framework']
-        self.mode = model_section['mode'][int(input('0 for training and 1 for inference: '))] if len(model_section['mode']) > 1 else model_section['mode'][0]
+        self.mode = model_section['mode'][int(input('0 for training and 1 for inference: '))] \
+            if len(model_section['mode']) > 1 else model_section['mode'][0]
 
         # Load model-specific configuration
         model_specific_config = AIReferenceConfigFile(yaml_file, self.ai_root)
         model_specific_section = model_specific_config.read_supported_section()[0]
 
         # Determine the precision options key dynamically
-        precision_key = model_section.get('model-name', self.model_name.split()[0])  # Use 'model-name' if available, else fallback
+        # Use 'model-name' if available, else fallback
+        precision_key = model_section.get('model-name', self.model_name.split()[0])
 
         # Get precision options
         model_precisions = model_specific_section.get(precision_key)
@@ -564,7 +577,9 @@ class AIReferenceConfigFile:
             # Non-TensorFlow-specific handling
             model_precision_test_mode = model_precision_section.get('test_mode', [])
             if not model_precision_test_mode:
-                raise ValueError(f"No test modes found for model '{self.model_name}' with precision '{self.precision}'.")
+                raise ValueError(
+                    f"No test modes found for model '{self.model_name}' with precision '{self.precision}'."
+                )
             print(f"Available Test Modes for {self.precision}:")
             model_test_mode_table = PrettyTable(["Index", "Test Mode"])
             for index, test_mode in enumerate(model_precision_test_mode):
@@ -578,7 +593,7 @@ class AIReferenceConfigFile:
             self.test_mode = model_precision_test_mode[model_precision_test_mode_index]
 
         # Print selected configuration
-        print(f"Selected {self.model_name} {self.framework} {self.precision} {self.script if framework == 'TensorFlow' else self.test_mode}")
+        print(f"Selected {self.model_name} {self.framework} {self.precision} "
+              "{self.script if framework == 'TensorFlow' else self.test_mode}")
 
         return model_specific_section
-

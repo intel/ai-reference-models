@@ -15,10 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-#
-
-version: '3'
 services:
   resnet50v1_5-inference-gpu:
     build:
@@ -28,6 +24,10 @@ services:
         TF_BASE_TAG: ${TF_BASE_TAG:-2.15.0.1-xpu}
         no_proxy: ''
         NO_PROXY: ''
+        https_proxy: '${https_proxy}'
+        http_proxy: '${http_proxy}'
+        HTTP_PROXY: '${HTTP_PROXY}'
+        HTTPS_PROXY: '${HTTPS_PROXY}'
         INT8_MODEL_URL: ${INT8_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
         MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/3_1/resnet50_v1.pb}
       dockerfile: docker/tensorflow/resnet50v1_5/inference/gpu/tf-gpu-resnet50v1-5-inference.Dockerfile
@@ -69,6 +69,12 @@ services:
       args:
         MPI_VER: ${MPI_VER:-2021.13.1-767}
         CCL_VER: ${CCL_VER:-2021.13.1-31}
+        no_proxy: ''
+        NO_PROXY: ''
+        https_proxy: '${https_proxy}'
+        http_proxy: '${http_proxy}'
+        HTTP_PROXY: '${HTTP_PROXY}'
+        HTTPS_PROXY: '${HTTPS_PROXY}'
       dockerfile: docker/tensorflow/resnet50v1_5/training/gpu/tf-max-series-resnet50v1-5-training.Dockerfile
     extends: resnet50v1_5-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training

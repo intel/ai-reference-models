@@ -13,45 +13,65 @@
 # limitations under the License.
 #
 
+# Check if poetry is available
+POETRY_EXISTS := $(shell command -v poetry >/dev/null 2>&1 && echo yes || echo no)
 
-PY_VERSION := 2
 # if py_version is 2, use virtualenv, else python3 venv
 VIRTUALENV_EXE=$(if $(subst 2,,$(PY_VERSION)),python3 -m venv,virtualenv)
-VIRTUALENV_DIR=$(if $(subst 2,,$(PY_VERSION)),.venv3,.venv)
-ACTIVATE="$(VIRTUALENV_DIR)/bin/activate"
+#VIRTUALENV_DIR=$(if $(subst 2,,$(PY_VERSION)),.venv3,.venv)
+VIRTUALENV_DIR=$(shell poetry env info --path)
+VIRTUAL_ENV_ACTIVATE="$(VIRTUALENV_DIR)/bin/activate"
 
 .PHONY: venv
 
-all: venv lint unit_test
+all: check-poetry venv lint unit_test
+
+check-poetry:
+ifeq ($(POETRY_EXISTS),yes)
+	@echo "Poetry is installed. Ready to go!"
+else
+	@echo "Poetry is not installed. Please install it first."
+	# Optionally, you can add commands to handle the absence of poetry
+endif
+
+
 
 # we need to update pip and setuptools because venv versions aren't latest
 # need to prepend $(ACTIVATE) everywhere because all make calls are in subshells
 # otherwise we won't be installing anything in the venv itself
 $(ACTIVATE):
-	@echo "Updating virtualenv dependencies in: $(VIRTUALENV_DIR)..."
-	@test -d $(VIRTUALENV_DIR) || $(VIRTUALENV_EXE) $(VIRTUALENV_DIR)
-	@. $(ACTIVATE) && python -m pip install -r requirements.txt
-	@touch $(ACTIVATE)
+	. ~/.bashrc && echo "Updating virtualenv dependencies in: $(VIRTUALENV_DIR)..."
+ifeq ($(POETRY_EXISTS),yes)
+	@echo "Poetry is installed. Ready to go!"
+	VIRTUALENV_DIR=$(shell poetry env info --path)
+else
+	@echo "Poetry is not installed. Please install it first."
+	VIRTUALENV_DIR=$(if $(subst 2,,$(PY_VERSION)),.venv3,.venv)
+	python3 -m venv $(VIRTUALENV_DIR)
+endif
+	@echo "Activating virtualenv..."
+	@. $(VIRTUAL_ENV_ACTIVATE)
+	@touch $(VIRTUAL_ENV_ACTIVATE)
 
 venv: $(ACTIVATE)
 	@echo -n "Using "
-	@. $(ACTIVATE) && python --version
+	@. $(VIRTUAL_ENV_ACTIVATE) && python --version
 
 venv3: PY_VERSION=3
 venv3: $(ACTIVATE)
 	@echo -n "Using "
-	@. $(ACTIVATE) && python3 --version
+	@. $(VIRTUAL_ENV_ACTIVATE) && python3 --version
 
 tox:
 	tox
 
 lint:
 	@echo "Running style check..."
-	tox -e py3-flake8
+	@. $(VIRTUAL_ENV_ACTIVATE) && tox -e py3-flake8
 
 unit_test:
 	@echo "Running unit tests..."
-	tox -e py3-py.test
+	@. $(VIRTUAL_ENV_ACTIVATE) && tox -e py3-py.test
 
 test_tl_tf_notebook: venv
 	@. $(ACTIVATE) && poetry install --file docs/notebooks/transfer_learning/pyproject.toml && \
