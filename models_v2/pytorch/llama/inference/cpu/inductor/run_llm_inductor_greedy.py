@@ -40,7 +40,7 @@ parser.add_argument(
 parser.add_argument(
     "--dtype",
     type=str,
-    choices=["fp32", "bf16", "int8"],
+    choices=["fp32", "bf16", "int8-bf16", "int8"],
     help="bf16 or fp32",
     default="bf16",
 )
@@ -91,12 +91,12 @@ if args.dtype == "bf16":
 elif args.dtype == "fp32":
     amp_enabled = False
     load_dtype = torch.float
-elif args.dtype == "int8":
+elif args.dtype in ["int8-bf16", "int8"]:
     # mixed bf16
     amp_enabled = True
     load_dtype = torch.bfloat16
 else:
-    assert False, "This script (inductor peak perf with flexAttention) only support int8, bf16 and fp32 as dtype"
+    assert False, "This script (inductor peak perf with flexAttention) only support int8, bf16, int8-bf16, int8 (da8w8) and fp32 as dtype"
 
 attn_type = "paged_attention"
 tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
@@ -110,6 +110,7 @@ from torch._inductor import config as inductor_config
 if args.profile:
     inductor_config.profiler_mark_wrapper_call = True
     inductor_config.cpp.enable_kernel_profile = True
+    inductor_config.cpp.descriptive_names = "inductor_node"
 inductor_config.cpp_wrapper = True
 inductor_config.max_autotune = True
 inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
@@ -121,21 +122,25 @@ if args.dtype in ["fp32","bf16"]:
         inductor_config.cpp.enable_concat_linear = True
     with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
         model.forward=torch.compile(model.forward)
-elif args.dtype == "int8":
+elif args.dtype in ["int8", "int8-bf16"]:
     from torch._inductor import config as inductor_config
     from torchao.quantization import quant_api
     from torchao.utils import unwrap_tensor_subclass
     
     with torch.no_grad(),torch.autocast("cpu", enabled=True, dtype=torch.bfloat16):
         if args.weight_dtype == "INT8":
-            print("---- apply torchao woq int8 api ----", flush=True)
-            quant_api.quantize_(model, quant_api.int8_weight_only(), set_inductor_config=False)
-            unwrap_tensor_subclass(model)
+            if args.dtype == "int8-bf16":
+                print("---- apply torchao woq int8 api ----", flush=True)
+                quant_api.quantize_(model, quant_api.int8_weight_only(), set_inductor_config=False)
+                unwrap_tensor_subclass(model)
+            elif args.dtype == "int8":
+                print("---- apply torchao int8_dynamic_activation_int8_weight api ----", flush=True)
+                quant_api.quantize_(model, quant_api.int8_dynamic_activation_int8_weight(), set_inductor_config=False)
         elif args.weight_dtype == "INT4":
-            from torchao.dtypes import Int4CPULayout
-            print("---- apply torchao woq int4 api ----", flush=True)
-            quant_api.quantize_(model, quant_api.int4_weight_only(group_size=args.group_size, layout=Int4CPULayout()), set_inductor_config=False)
-            unwrap_tensor_subclass(model)
+                from torchao.dtypes import Int4CPULayout
+                print("---- apply torchao woq int4 api ----", flush=True)
+                quant_api.quantize_(model, quant_api.int4_weight_only(group_size=args.group_size, layout=Int4CPULayout()), set_inductor_config=False)
+                unwrap_tensor_subclass(model)
 
         model.forward = torch.compile(model.forward)
 
@@ -280,7 +285,8 @@ if args.profile:
             wait=1,
             warmup=1,
             active=1),
-        on_trace_ready=trace_handler
+        on_trace_ready=trace_handler,
+        record_shapes = True,
         ) as prof:
             with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
                 for i in range(3):
