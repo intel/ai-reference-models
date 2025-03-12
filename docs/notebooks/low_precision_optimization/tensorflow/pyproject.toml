@@ -3,6 +3,7 @@ name = "docs-notebooks-low-precision-optimization-tensorflow"
 version = "0.1.0"
 description = ""
 readme = "README.md"
+authors = ["Clayne B Robison clayne.b.robison@intel.com", "Srikanth Ramakrishna srikanth.ramakrishna@intel.com"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
