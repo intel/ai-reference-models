@@ -104,7 +104,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     MODE_ARGS="--throughput-mode"
     # default value, you can fine-tune it to get perfect performance.
     BATCH_SIZE=${BATCH_SIZE:-40}
-    CORES=`lscpu | grep Core | awk '{print $4}'`
+    CORES=`lscpu | grep 'Core(s)' | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     TOTAL_CORES=`expr $CORES \* $SOCKETS`
     export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
@@ -116,7 +116,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     BATCH_SIZE=${BATCH_SIZE:-1}
     ARGS="--checkpoint-dir $CHECKPOINT_DIR --weights yolov7.pt"
     ARGS="$ARGS --img 640 -e --performance --data data/coco.yaml --dataset-dir $DATASET_DIR --conf-thres 0.001 --iou 0.65 --device cpu --drop-last"
-    CORES=`lscpu | grep Core | awk '{print $4}'`
+    CORES=`lscpu | grep 'Core(s)' | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
     CORES_PER_INSTANCE=4

@@ -243,7 +243,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" && "${DISTRIBUTED}" == "false" ]]; then
             --model_name_or_path="SimianLuo/LCM_Dreamshaper_v7" \
             --dataset_path=${DATASET_DIR} \
             --accuracy \
-            $ARGS
+            $ARGS 2>&1 | tee ${OUTPUT_DIR}/LCM_${PRECISION}_inference_throughput.log
     fi
     # For the summary of results
     wait

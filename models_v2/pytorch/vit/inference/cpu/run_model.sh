@@ -90,7 +90,7 @@ else
 fi
 
 mkdir -p ${OUTPUT_DIR}
-CORES=`lscpu | grep Core | awk '{print $4}'`
+CORES=`lscpu | grep 'Core(s)' | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 FINETUNED_MODEL=${FINETUNED_MODEL:-"google/vit-base-patch16-224"}
 DATASET_DIR=${DATASET_DIR:-"None"}

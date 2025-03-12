@@ -79,7 +79,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     #export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000";
     export OMP_NUM_THREADS=4
-    CORES=`lscpu | grep Core | awk '{print $4}'`
+    CORES=`lscpu | grep 'Core(s)' | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
     CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
