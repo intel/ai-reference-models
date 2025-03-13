@@ -131,15 +131,15 @@ elif args.dtype in ["int8", "int8-bf16"]:
         if args.weight_dtype == "INT8":
             if args.dtype == "int8-bf16":
                 print("---- apply torchao woq int8 api ----", flush=True)
-                quant_api.quantize_(model, quant_api.int8_weight_only(), set_inductor_config=False)
+                quant_api.quantize_(model, quant_api.int8_weight_only(set_inductor_config=False))
                 unwrap_tensor_subclass(model)
             elif args.dtype == "int8":
                 print("---- apply torchao int8_dynamic_activation_int8_weight api ----", flush=True)
-                quant_api.quantize_(model, quant_api.int8_dynamic_activation_int8_weight(), set_inductor_config=False)
+                quant_api.quantize_(model, quant_api.int8_dynamic_activation_int8_weight(set_inductor_config=False))
         elif args.weight_dtype == "INT4":
                 from torchao.dtypes import Int4CPULayout
                 print("---- apply torchao woq int4 api ----", flush=True)
-                quant_api.quantize_(model, quant_api.int4_weight_only(group_size=args.group_size, layout=Int4CPULayout()), set_inductor_config=False)
+                quant_api.quantize_(model, quant_api.int4_weight_only(group_size=args.group_size, layout=Int4CPULayout(), set_inductor_config=False))
                 unwrap_tensor_subclass(model)
 
         model.forward = torch.compile(model.forward)
