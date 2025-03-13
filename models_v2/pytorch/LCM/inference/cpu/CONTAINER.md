@@ -42,7 +42,6 @@ export PRECISION=<provide either fp32, int8-fp32, int8-bf16, bf16, fp16, or bf32
 export DNNL_MAX_CPU_ISA=<provide either AVX512_CORE_AMX_FP16 for fp16 or AVX2_VNNI_2 for int8/bf32 if supported by platform>
 export DATASET_DIR=<path to COCO dataset>
 export RUN_MODE=ipex-jit
-export DISTRIBUTED=false
 export TORCH_INDUCTOR=0
 export TEST_MODE=<provide either REALTIME, THROUGHPUT or ACCURACY mode>
 
@@ -59,7 +58,6 @@ docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env TORCH_INDUCTOR=${TORCH_INDUCTOR} \
   --env DNNL_MAX_CPU_ISA=${DNNL_MAX_CPU_ISA} \
-  --env DISTRIBUTED=${DISTRIBUTED} \
   --env RUN_MODE=${RUN_MODE} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \

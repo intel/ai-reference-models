@@ -1,0 +1,16 @@
+fp16-throughput-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
+  cmd: bash run_model.sh
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    RUN_MODE: ipex-jit
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: THROUGHPUT
+    DATASET_DIR: /pytorch/coco/coco
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco

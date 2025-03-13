@@ -7,13 +7,12 @@ fp32-realtime-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: REALTIME
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 bf32-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -23,13 +22,12 @@ bf32-realtime-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: REALTIME
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 bf16-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -39,13 +37,12 @@ bf16-realtime-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: REALTIME
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 fp16-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -55,14 +52,13 @@ fp16-realtime-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: REALTIME
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 int8-fp32-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -72,13 +68,12 @@ int8-fp32-realtime-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: REALTIME
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 int8-bf16-realtime-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -88,13 +83,12 @@ int8-bf16-realtime-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: REALTIME
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 fp32-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -104,13 +98,12 @@ fp32-throughput-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 bf32-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -120,13 +113,12 @@ bf32-throughput-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 bf16-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -136,13 +128,12 @@ bf16-throughput-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 fp16-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -152,14 +143,13 @@ fp16-throughput-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 int8-fp32-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -169,13 +159,12 @@ int8-fp32-throughput-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 int8-bf16-throughput-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -185,13 +174,12 @@ int8-bf16-throughput-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: THROUGHPUT
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 fp32-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -201,13 +189,12 @@ fp32-accuracy-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 bf32-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -217,13 +204,12 @@ bf32-accuracy-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 bf16-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -233,13 +219,12 @@ bf16-accuracy-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 fp16-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -249,14 +234,13 @@ fp16-accuracy-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 int8-fp32-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -266,13 +250,12 @@ int8-fp32-accuracy-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
 int8-bf16-accuracy-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-lcm-inference
   cmd: bash run_model.sh
@@ -282,10 +265,9 @@ int8-bf16-accuracy-inference:
     RUN_MODE: ipex-jit
     TORCH_INDUCTOR: '0'
     TEST_MODE: ACCURACY
-    DISTRIBUTED: 'false'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
