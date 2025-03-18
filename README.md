@@ -44,7 +44,7 @@ and a list of models that are supported on Windows, see the
 
 Instructions available to run on [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx).
 
-For best performance on Intel® Data Center GPU Flex and Max Series, please check the [list of supported workloads](#intel-data-center-gpu-workloads). It provides instructions to run inference and training using [Intel(R) Extension for PyTorch](https://github.com/intel/intel-extension-for-pytorch) or [Intel(R) Extension for TensorFlow](https://github.com/intel/intel-extension-for-tensorflow).
+For best performance on Intel® Data Center GPU Max Series, please check the [list of supported workloads](#intel-data-center-gpu-workloads). It provides instructions to run inference and training using [Intel(R) Extension for PyTorch](https://github.com/intel/intel-extension-for-pytorch) or [Intel(R) Extension for TensorFlow](https://github.com/intel/intel-extension-for-tensorflow).
 
 ### Image Recognition
 
@@ -128,18 +128,11 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 ## Intel® Data Center GPU Workloads
 | Model                             | Framework  | Mode      | GPU Type | Model Documentation |
 | ----------------------------------| ---------- | ----------| -------- | ------------------- |
-| [ResNet 50v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet) | TensorFlow | Inference | Flex Series | [Float32 TF32 Float16 BFloat16 Int8](/models_v2/tensorflow/resnet50v1_5/inference/gpu/README.md) |
 | [ResNet 50 v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet) | TensorFlow | Training | Max Series | [BFloat16 FP32](/models_v2/tensorflow/resnet50v1_5/training/gpu/README.md) |
-| [ResNet 50 v1.5](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Inference | Flex Series, Max Series, Arc Series |[Int8 FP32 FP16 TF32](/models_v2/pytorch/resnet50v1_5/inference/gpu/README.md) |
+| [ResNet 50 v1.5](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Inference | Max Series, Arc Series |[Int8 FP32 FP16 TF32](/models_v2/pytorch/resnet50v1_5/inference/gpu/README.md) |
 | [ResNet 50 v1.5](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Training | Max Series, Arc Series |[BFloat16 TF32 FP32](/models_v2/pytorch/resnet50v1_5/training/gpu/README.md) |
-| [DistilBERT](https://arxiv.org/pdf/1910.01108.pdf) | PyTorch | Inference | Flex Series, Max Series | [FP32 FP16 BF16 TF32](/models_v2/pytorch/distilbert/inference/gpu/README.md) |
-| [DLRM v1](https://arxiv.org/pdf/1906.00091.pdf) | PyTorch | Inference | Flex Series | [FP16 FP32](/models_v2/pytorch/dlrm/inference/gpu/README.md) |
+| [DistilBERT](https://arxiv.org/pdf/1910.01108.pdf) | PyTorch | Inference | Max Series | [FP32 FP16 BF16 TF32](/models_v2/pytorch/distilbert/inference/gpu/README.md) |
 | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | Arc Series| [INT8 FP16 FP32](/models_v2/pytorch/ssd-mobilenetv1/inference/gpu/README.md) |
-| [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf)  | PyTorch | Inference | Flex Series | [FP16 BF16 FP32](/models_v2/pytorch/efficientnet/inference/gpu/README.md) |
-| [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/models_v2/tensorflow/efficientnet/inference/gpu/README.md) |
-| [FBNet](https://arxiv.org/pdf/1812.03443.pdff)  | PyTorch | Inference | Flex Series | [FP16 BF16 FP32](/models_v2/pytorch/fbnet/inference/gpu/README.md) |
-| [Wide Deep Large Dataset](https://arxiv.org/pdf/2112.10752.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/models_v2/tensorflow/wide_deep_large_ds/inference/gpu/README.md) |
-| [YOLO V5](https://arxiv.org/pdf/2108.11539.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/yolov5/inference/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | Max Series, Arc Series | [BFloat16 FP32 FP16](/models_v2/pytorch/bert_large/inference/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Training  | Max Series, Arc Series | [BFloat16 FP32 TF32](/models_v2/pytorch/bert_large/training/gpu/README.md) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | Max Series | [BFloat16 TF32 FP32](/models_v2/tensorflow/bert_large/training/gpu/README.md) |
@@ -147,17 +140,9 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [DLRM v2](https://arxiv.org/abs/1906.00091) | PyTorch | Training | Max Series | [FP32 TF32 BF16](/models_v2/pytorch/torchrec_dlrm/training/gpu/README.md)
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | PyTorch | Inference | Max Series | [FP16 INT8 FP32](/models_v2/pytorch/3d_unet/inference/gpu/README.md) |
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | TensorFlow | Training | Max Series | [BFloat16 FP32](/models_v2/tensorflow/3d_unet/training/gpu/README.md) |
-| [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | PyTorch | Inference | Flex Series, Max Series, Arc Series | [FP16 FP32](/models_v2/pytorch/stable_diffusion/inference/gpu/README.md) |
-| [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | TensorFlow | Inference | Flex Series | [FP16 FP32](/models_v2/tensorflow/stable_diffusion/inference/gpu/README.md) |
-| [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Inference | Flex Series | [FP32 Float16](/models_v2/tensorflow/maskrcnn/inference/gpu/README.md) |
 | [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Training | Max Series | [FP32 BFloat16](/models_v2/tensorflow/maskrcnn/training/gpu/README.md) |
-| [Swin Transformer](https://arxiv.org/pdf/2103.14030.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/swin-transformer/inference/gpu/README.md) |
-| [FastPitch](https://arxiv.org/pdf/1703.06870.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/fastpitch/inference/gpu/README.md) |
-| [UNet++](https://arxiv.org/pdf/1807.10165.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/unetpp/inference/gpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Inference | Max Series | [FP16 BF16 FP32](/models_v2/pytorch/rnnt/inference/gpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Training | Max Series | [FP32 BF16 TF32](/models_v2/pytorch/rnnt/training/gpu/README.md) |
-| [IFRNet](https://arxiv.org/pdf/2205.14620.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/IFRNet/inference/gpu/README.md) |
-| [RIFE](https://arxiv.org/pdf/2011.06294.pdf)    | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/RIFE/inference/gpu/README.md) |
 
 ## How to Contribute
 If you would like to add a new benchmarking script, please use [this guide](/CONTRIBUTING.md).

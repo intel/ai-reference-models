@@ -1,4 +1,0 @@
-nnunet==1.7.1
-argparse
-numpy==1.23.1
-torchinfo

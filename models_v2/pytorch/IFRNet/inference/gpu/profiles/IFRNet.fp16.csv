@@ -1,4 +1,0 @@
-model_name,batch_size,num_inputs,streams,precision
-IFRNet,1,1024,1,fp16
-IFRNet,1,1024,2,fp16
-IFRNet,1,1024,4,fp16

@@ -1,5 +1,0 @@
-argparse
-numpy
-onnx
-scipy
-torchsummary

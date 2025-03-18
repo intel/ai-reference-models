@@ -299,53 +299,11 @@ services:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-training
     cap_drop:
       - NET_RAW
-  efficientnet-inference-gpu:
-    build:
-      dockerfile: docker/pytorch/efficientnet/inference/gpu/pytorch-flex-series-efficientnet-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-efficientnet-inference
-    cap_drop:
-      - NET_RAW
-  yolov5-inference-gpu:
-    build:
-      dockerfile: docker/pytorch/yolov5/inference/gpu/pytorch-flex-series-yolov5-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-flex-gpu-yolov5-inference
-    cap_drop:
-      - NET_RAW
-  dlrm-inference-gpu:
-    build:
-      dockerfile: docker/pytorch/dlrm/inference/gpu/pytorch-flex-series-dlrm-v1-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-flex-gpu-dlrm-v1-inference
-    cap_drop:
-      - NET_RAW
   distilbert-inference-gpu:
     build:
       dockerfile: docker/pytorch/distilbert/inference/gpu/pytorch-gpu-distilbert-inference.Dockerfile
     extends: stable_diffusion-inference-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-pytorch-gpu-distilbert-inference
-    cap_drop:
-      - NET_RAW
-  unetpp-inference-gpu:
-    build:
-      dockerfile: docker/pytorch/unetpp/inference/gpu/pytorch-flex-series-unetpp-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-pytorch-flex-gpu-unetpp-inference
-    cap_drop:
-      - NET_RAW
-  fastpitch-inference-gpu:
-    build:
-      dockerfile: docker/pytorch/fastpitch/inference/gpu/pytorch-flex-series-fast-pitch-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-generation-pytorch-flex-gpu-fast-pitch-inference
-    cap_drop:
-      - NET_RAW
-  swin-transformer-inference-gpu:
-    build:
-      dockerfile: docker/pytorch/swin-transformer/inference/gpu/pytorch-flex-series-swin-transformer-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-swin-transformer-inference
     cap_drop:
       - NET_RAW
   bert_large-inference-gpu:
@@ -374,70 +332,5 @@ services:
       dockerfile: docker/pytorch/rnnt/training/gpu/pytorch-max-series-rnnt-training.Dockerfile
     extends: resnet50v1_5-training-gpu
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-speech-recognition-pytorch-max-gpu-rnnt-training
-    cap_drop:
-      - NET_RAW
-  fbnet-inference-gpu:
-    build:
-      dockerfile: docker/pytorch/fbnet/inference/gpu/pytorch-flex-series-fbnet-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-fbnet-inference
-    cap_drop:
-      - NET_RAW
-  ifrnet-inference-gpu:
-    build:
-      dockerfile: docker/pytorch/ifrnet/inference/gpu/pytorch-flex-series-ifrnet-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-flex-gpu-ifrnet-inference
-    cap_drop:
-      - NET_RAW
-  rife-inference-gpu:
-    build:
-      dockerfile: docker/pytorch/rife/inference/gpu/pytorch-flex-series-rife-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-flex-gpu-rife-inference
-    cap_drop:
-      - NET_RAW
-  efficientnet-cuda-inference:
-    build:
-      context: ../../
-      args:
-        http_proxy: ${http_proxy}
-        https_proxy: ${https_proxy}
-        no_proxy: ""
-        NO_PROXY: ""
-        CUDA_BASE_IMAGE: ${CUDA_BASE_IMAGE:-nvcr.io/nvidia/pytorch}
-        CUDA_BASE_TAG: ${CUDA_BASE_TAG:-24.01-py3}
-      dockerfile: docker/pytorch/efficientnet/inference/gpu/pytorch-cuda-series-efficientnet-inference.Dockerfile
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-cuda-gpu-efficientnet-inference
-    pull_policy: always
-    cap_drop:
-      - NET_RAW
-  yolov5-cuda-inference:
-    build:
-      dockerfile: docker/pytorch/yolov5/inference/gpu/pytorch-cuda-series-yolov5-inference.Dockerfile
-    extends: efficientnet-cuda-inference
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-cuda-gpu-yolov5-inference
-    pull_policy: always
-    cap_drop:
-      - NET_RAW
-  fbnet-cuda-inference:
-    build:
-      dockerfile: docker/pytorch/fbnet/inference/gpu/pytorch-cuda-series-fbnet-inference.Dockerfile
-    extends: efficientnet-cuda-inference
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-cuda-gpu-fbnet-inference
-    cap_drop:
-      - NET_RAW
-  ifrnet-cuda-inference:
-    build:
-      dockerfile: docker/pytorch/ifrnet/inference/gpu/pytorch-cuda-series-ifrnet-inference.Dockerfile
-    extends: efficientnet-cuda-inference
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-cuda-gpu-ifrnet-inference
-    cap_drop:
-      - NET_RAW
-  rife-cuda-inference:
-    build:
-      dockerfile: docker/pytorch/rife/inference/gpu/pytorch-cuda-series-rife-inference.Dockerfile
-    extends: stable_diffusion-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-interpolation-pytorch-cuda-gpu-rife-inference
     cap_drop:
       - NET_RAW

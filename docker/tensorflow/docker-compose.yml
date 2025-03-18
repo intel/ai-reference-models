@@ -36,34 +36,6 @@ services:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-gpu-resnet50v1-5-inference
     cap_drop:
       - NET_RAW
-  maskrcnn-inference-gpu:
-    build:
-      dockerfile: docker/tensorflow/maskrcnn/inference/gpu/tf-flex-series-maskrcnn-inference.Dockerfile
-    extends: resnet50v1_5-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-flex-gpu-maskrcnn-inference
-    cap_drop:
-      - NET_RAW
-  wide_deep-_large_ds-inference-gpu:
-    build:
-      dockerfile: docker/tensorflow/wide_deep_large_ds/inference/gpu/tf-flex-series-wide-deep-large-inference.Dockerfile
-    extends: resnet50v1_5-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-wide-deep-large-inference
-    cap_drop:
-      - NET_RAW
-  stable_diffusion-inference-gpu:
-    build:
-      dockerfile: docker/tensorflow/stable_diffusion/inference/gpu/tf-flex-series-stable-diffusion-inference.Dockerfile
-    extends: resnet50v1_5-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-tf-flex-gpu-stable-diffusion-inference
-    cap_drop:
-      - NET_RAW
-  efficientnet-inference-gpu:
-    build:
-      dockerfile: docker/tensorflow/efficientnet/inference/gpu/tf-flex-series-efficientnet-inference.Dockerfile
-    extends: resnet50v1_5-inference-gpu
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
-    cap_drop:
-      - NET_RAW
   resnet50v1_5-training-gpu:
     build:
       args:

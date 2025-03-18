@@ -1,6 +1,0 @@
-inflect
-librosa==0.9.2
-matplotlib
-numpy==1.23.5
-scipy
-tensorboard

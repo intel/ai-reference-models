@@ -1,8 +1,0 @@
-future
-numpy
-onnx
-pydot
-scikit-learn>=1.5.0
-torchrec-nightly
-torchx-nightly
-tqdm

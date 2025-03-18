@@ -1,4 +1,0 @@
-model_name,batch_size,num_inputs,streams,precision
-RIFE,1,512,1,fp32
-RIFE,1,512,2,fp32
-RIFE,1,512,4,fp32
