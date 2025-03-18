@@ -1,10 +1,10 @@
 <!--- 0. Title -->
-# PyTorch LLaMA2 7B/13B inference (generation)
+# PyTorch LLaMA2 7B/13B and LLaMA3.1 8B inference (generation)
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) and [LLaMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) inference (generation) using Intel-optimized PyTorch.
+This document has instructions for running [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf), [LLaMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) and [LLaMA3.1 8B](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) inference (generation) using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
@@ -61,6 +61,8 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
    export FINETUNED_MODEL="meta-llama/Llama-2-7b-hf"
    #Test llama2 13b
    export FINETUNED_MODEL="meta-llama/Llama-2-13b-hf"
+   #Test llama3.1 8b
+   export FINETUNED_MODEL="meta-llama/Llama-3.1-8B-Instruct"
    ```
    About the BATCH_SIZE in scripts
    ```
@@ -85,7 +87,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
 |:---------------------------:|:------------------------------------------------------------------------------------:|
 | **TEST_MODE** (THROUGHPUT, ACCURACY, REALTIME)              | `export TEST_MODE=THROUGHPUT`                  |
 | **OUTPUT_DIR**               |                               `export OUTPUT_DIR=<path to an output directory>`                               |
-| **FINETUNED_MODEL**    | `#Test llama2 7b: export FINETUNED_MODEL="meta-llama/Llama-2-7b-hf";   #Test llama2 13b: export FINETUNED_MODEL="meta-llama/Llama-2-13b-hf"`         |
+| **FINETUNED_MODEL**    | `#Test llama2 7b: export FINETUNED_MODEL="meta-llama/Llama-2-7b-hf";   #Test llama2 13b: export FINETUNED_MODEL="meta-llama/Llama-2-13b-hf";   # Test llama3.1 8b: export FINETUNED_MODEL="meta-llama/Llama-3.1-8B-Instruct"`         |
 | **PRECISION**     |                  `export PRECISION=bf16` (fp32, bf32, bf16, fp16, int8) |
 | **INPUT_TOKEN**    |    `export INPUT_TOKEN=32 (choice in [32 64 128 256 512 1024 2016], we prefer to benchmark on 32 and 2016)`    |
 | **OUTPUT_TOKEN**    |   `export OUTPUT_TOKEN=32 (32 is preferred, while you could set any other length)`      |

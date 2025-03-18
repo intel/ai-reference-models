@@ -40,7 +40,7 @@ parser.add_argument(
 parser.add_argument(
     "--dtype",
     type=str,
-    choices=["fp32", "bf16", "int8-bf16", "int8"],
+    choices=["fp32", "bf16", "int8-bf16", "int8", "fp16"],
     help="bf16 or fp32",
     default="bf16",
 )
@@ -95,8 +95,11 @@ elif args.dtype in ["int8-bf16", "int8"]:
     # mixed bf16
     amp_enabled = True
     load_dtype = torch.bfloat16
+elif args.dtype == "fp16":
+    amp_enabled = False
+    load_dtype = torch.float16
 else:
-    assert False, "This script (inductor peak perf with flexAttention) only support int8, bf16, int8-bf16, int8 (da8w8) and fp32 as dtype"
+    assert False, "This script (inductor peak perf with flexAttention) only support int8, bf16, fp16, int8-bf16, int8 (da8w8) and fp32 as dtype"
 
 attn_type = "paged_attention"
 tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
@@ -115,7 +118,7 @@ inductor_config.cpp_wrapper = True
 inductor_config.max_autotune = True
 inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
 
-if args.dtype in ["fp32","bf16"]:
+if args.dtype in ["fp32","bf16", "fp16"]:
     if not args.disable_grouped_gemm and hasattr(inductor_config.cpp, "enable_grouped_gemm_template"):
         inductor_config.cpp.enable_grouped_gemm_template = True
     elif not args.disable_concat_linear:

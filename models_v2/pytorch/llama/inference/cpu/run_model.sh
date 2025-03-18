@@ -165,7 +165,7 @@ if [[ "$TEST_MODE" != "ACCURACY" ]]; then
             -m ${FINETUNED_MODEL} \
             --max-new-tokens ${OUTPUT_TOKEN} \
             --input-tokens  ${INPUT_TOKEN} \
-            --batch-size $BATCH_SIZE
+            --batch-size $BATCH_SIZE > ${OUTPUT_DIR}/${usecase}_log_${precision}.log
     fi
 
     latency=($(grep -i 'inference-latency:' ${OUTPUT_DIR}/${usecase}_log_${PRECISION}* |sed -e 's/.*atency: //;s/[^0-9.]//g;s/\.$//' |awk '
@@ -293,7 +293,7 @@ else
         python -m torch.backends.xeon.run_cpu --disable-numactl --log_path=${OUTPUT_DIR} \
             ${EVAL_SCRIPT} $ARGS \
             --inductor \
-            --model-name-or-path ${FINETUNED_MODEL}
+            --model-name-or-path ${FINETUNED_MODEL} > ${OUTPUT_DIR}/LLaMa_${PRECISION}_accuracy.log
     fi
 
     accuracy=$(cat ${OUTPUT_DIR}/LLaMa_${PRECISION}_accuracy* | grep "Accuracy:" |sed -e 's/.*= //;s/[^0-9.]//g')
