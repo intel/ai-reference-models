@@ -282,7 +282,7 @@ services:
     pull_policy: always
     cap_drop:
       - NET_RAW
-  resnet50v1-5-inference-gpu:
+  resnet50v1_5-inference-gpu:
     build:
       dockerfile: docker/pytorch/resnet50v1_5/inference/gpu/pytorch-gpu-resnet50v1-5-inference.Dockerfile
     extends: stable_diffusion-inference-gpu

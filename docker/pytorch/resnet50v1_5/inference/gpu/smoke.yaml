@@ -1,0 +1,16 @@
+max-bf16-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-inference
+  cmd: bash run_model.sh
+  ipc: host
+  device: ["/dev/dri"]
+  env:
+    PRECISION: BF16
+    NUM_ITERATIONS: '500'
+    BATCH_SIZE: '1024'
+    OUTPUT_DIR: /tmp
+    MULTI_TILE: 'False'
+    PLATFORM: 'Max'
+    NUM_DEVICES: '1'
+  volumes:
+    - src: /tmp
+      dst: /tmp

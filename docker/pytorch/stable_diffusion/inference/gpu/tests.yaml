@@ -1,13 +1,3 @@
-fp16-online-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-gpu-stable-diffusion-inference
-  cmd: bash run_model.sh
-  device: ["/dev/dri"]
-  env:
-    PRECISION: fp16
-    BATCH_SIZE: '1'
-    MULTI_TILE: 'False'
-    OUTPUT_DIR: /tmp
-    PLATFORM: 'Flex'
 max-fp16-online-inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-gpu-stable-diffusion-inference
   cmd: bash run_model.sh

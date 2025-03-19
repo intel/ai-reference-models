@@ -1,98 +1,8 @@
-170-int80online:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
-  cmd: bash run_model.sh
-  ipc: host
-  device: /dev/dri
-  env:
-    PRECISION: INT8
-    NUM_ITERATIONS: '5000'
-    BATCH_SIZE: '1'
-    OUTPUT_DIR: /tmp
-    MULTI_TILE: 'False'
-    PLATFORM: 'Flex'
-  volumes:
-    - src: /tmp
-      dst: /tmp
-170-int8-batch:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
-  cmd: bash run_model.sh
-  ipc: host
-  device: /dev/dri
-  env:
-    PRECISION: INT8
-    NUM_ITERATIONS: '500'
-    BATCH_SIZE: '1024'
-    OUTPUT_DIR: /tmp
-    MULTI_TILE: 'False'
-    PLATFORM: 'Flex'
-  volumes:
-    - src: /tmp
-      dst: /tmp
-170-fp32-online:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
-  cmd: bash run_model.sh
-  ipc: host
-  device: /dev/dri
-  env:
-    PRECISION: FP32
-    NUM_ITERATIONS: '5000'
-    BATCH_SIZE: '1'
-    OUTPUT_DIR: /tmp
-    MULTI_TILE: 'False'
-    PLATFORM: 'Flex'
-  volumes:
-    - src: /tmp
-      dst: /tmp
-170-fp32-batch:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
-  cmd: bash run_model.sh
-  ipc: host
-  device: /dev/dri
-  env:
-    PRECISION: FP32
-    NUM_ITERATIONS: '500'
-    BATCH_SIZE: '1024'
-    OUTPUT_DIR: /tmp
-    MULTI_TILE: 'False'
-    PLATFORM: 'Flex'
-  volumes:
-    - src: /tmp
-      dst: /tmp
-170-fp16-online:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
-  cmd: bash run_model.sh
-  ipc: host
-  device: /dev/dri
-  env:
-    PRECISION: FP16
-    NUM_ITERATIONS: '5000'
-    BATCH_SIZE: '1'
-    OUTPUT_DIR: /tmp
-    MULTI_TILE: 'False'
-    PLATFORM: 'Flex'
-  volumes:
-    - src: /tmp
-      dst: /tmp
-170-fp16-batch:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
-  cmd: bash run_model.sh
-  ipc: host
-  device: /dev/dri
-  env:
-    PRECISION: FP16
-    NUM_ITERATIONS: '500'
-    BATCH_SIZE: '1024'
-    OUTPUT_DIR: /tmp
-    MULTI_TILE: 'False'
-    PLATFORM: 'Flex'
-  volumes:
-    - src: /tmp
-      dst: /tmp
 max-bf16-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: BF16
     NUM_ITERATIONS: '500'
@@ -100,15 +10,15 @@ max-bf16-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
-    NUM_DEVICES: 2
+    NUM_DEVICES: '2'
   volumes:
     - src: /tmp
       dst: /tmp
 max-fp16-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: FP16
     NUM_ITERATIONS: '500'
@@ -116,15 +26,15 @@ max-fp16-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
-    NUM_DEVICES: 2
+    NUM_DEVICES: '2'
   volumes:
     - src: /tmp
       dst: /tmp
 max-fp32-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: FP32
     NUM_ITERATIONS: '500'
@@ -132,15 +42,15 @@ max-fp32-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
-    NUM_DEVICES: 2
+    NUM_DEVICES: '2'
   volumes:
     - src: /tmp
       dst: /tmp
 max-tf32-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: TF32
     NUM_ITERATIONS: '500'
@@ -148,15 +58,15 @@ max-tf32-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
-    NUM_DEVICES: 2
+    NUM_DEVICES: '2'
   volumes:
     - src: /tmp
       dst: /tmp
 int8-inference:
-  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-max-gpu-resnet50v1-5-inference
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-gpu-resnet50v1-5-inference
   cmd: bash run_model.sh
   ipc: host
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: INT8
     NUM_ITERATIONS: '500'
@@ -164,7 +74,7 @@ int8-inference:
     OUTPUT_DIR: /tmp
     MULTI_TILE: 'True'
     PLATFORM: 'Max'
-    NUM_DEVICES: 2
+    NUM_DEVICES: '2'
   volumes:
     - src: /tmp
       dst: /tmp
