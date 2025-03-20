@@ -23,7 +23,6 @@ This Jupyter notebook helps you choose and run a comparison between two models f
 | [RNN-T](https://arxiv.org/abs/2007.15188)            | PyTorch | Inference | [FP32 BFloat16 BFloat32](/../models_v2/pytorch/rnnt/inference/cpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/2007.15188)            | PyTorch | Training  | [FP32 BFloat16 BFloat32](/../models_v2/pytorch/rnnt/training/cpu/README.md) |
 | [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/../models_v2/pytorch/gptj/inference/cpu/README.md) | |
-| [GPTJ 6B MLPerf](https://github.com/mlcommons/inference/tree/master/language/gpt-j#datasets--models) | PyTorch | Inference | [INT4](/../models_v2/pytorch/gpt-j_mlperf/inference/cpu/README.md) |
 | [ChatGLMv3 6B](https://huggingface.co/THUDM/chatglm3-6b) | PyTorch | Inference | [FP32 FP16 BFloat16 BF32 INT8](/../models_v2/pytorch/chatglm/inference/cpu/README.md) |
 | [BERT](https://arxiv.org/pdf/1810.04805.pdf)                    | TensorFlow | Inference | [FP32](/benchmarks/language_translation/tensorflow/bert/inference/README.md) |
 | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | PyTorch | Inference  | [FP32 BFloat16 BFloat32](/../models_v2/pytorch/maskrcnn/inference/cpu/README.md) |
