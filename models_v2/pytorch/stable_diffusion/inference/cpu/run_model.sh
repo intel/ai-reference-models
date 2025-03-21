@@ -24,7 +24,7 @@ elif [[ "${TEST_MODE}" == "ACCURACY" ]]; then
     echo "TEST_MODE set to ACCURACY"
     if [[ "${DISTRIBUTED}" == "True" || "${DISTRIBUTED}" == "TRUE" ]]; then
         echo "Running distributed inference accuracy"
-        CORES=`lscpu | grep Core | awk '{print $4}'`
+        CORES=`lscpu | grep 'Core(s)' | awk '{print $4}'`
         CORES_PER_INSTANCE=$CORES
         SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
         TOTAL_CORES=`expr $CORES \* $SOCKETS`
@@ -221,7 +221,7 @@ if [[ "0" == ${TORCH_INDUCTOR} ]]; then
         --log_file_prefix ${LOG_PREFIX} \
         ${MODEL_DIR}/inference.py \
         --dataset_path=${DATASET_DIR} \
-        $ARGS
+        $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_throughput.log
 else
     python -m torch.backends.xeon.run_cpu --disable-numactl --log-path ${OUTPUT_DIR} \
         --enable_tcmalloc \
@@ -229,7 +229,7 @@ else
         --log_path=${OUTPUT_DIR} \
         ${MODEL_DIR}/inference.py \
         --dataset_path=${DATASET_DIR} \
-        $ARGS
+        $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_throughput.log
 fi
 
 wait

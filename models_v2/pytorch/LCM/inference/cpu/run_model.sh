@@ -138,7 +138,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     MODE_ARGS="--throughput-mode"
 
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
-    CORES=`lscpu | grep Core | awk '{print $4}'`
+    CORES=`lscpu | grep 'Core(s)' | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
     CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
@@ -270,7 +270,7 @@ else
             --dataset_path=${DATASET_DIR} \
             --benchmark \
             -w ${num_warmup} -i ${num_iter} \
-            $ARGS
+            $ARGS 2>&1 | tee ${OUTPUT_DIR}/LCM_${PRECISION}_inference_throughput.log
     fi
     # For the summary of results
     wait
