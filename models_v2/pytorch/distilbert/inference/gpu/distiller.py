@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" The distiller to distil the student.
-    Adapted in part from Facebook, Inc XLM model (https://github.com/facebookresearch/XLM)
+"""The distiller to distil the student.
+Adapted in part from Facebook, Inc XLM model (https://github.com/facebookresearch/XLM)
 """
 import math
 import os
@@ -27,7 +27,13 @@ import h5py
 import contextlib
 from torch import nn
 from torch.optim import AdamW
-from torch.utils.data import BatchSampler, DataLoader, RandomSampler, SequentialSampler, Dataset
+from torch.utils.data import (
+    BatchSampler,
+    DataLoader,
+    RandomSampler,
+    SequentialSampler,
+    Dataset,
+)
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm
 
@@ -86,9 +92,11 @@ class pretraining_dataset_v1(Dataset):
             masked_lm_ids,
             next_sentence_labels,
         ] = [
-            torch.from_numpy(input[index].astype(np.int64))
-            if indice < 5
-            else torch.from_numpy(np.asarray(input[index].astype(np.int64)))
+            (
+                torch.from_numpy(input[index].astype(np.int64))
+                if indice < 5
+                else torch.from_numpy(np.asarray(input[index].astype(np.int64)))
+            )
             for indice, input in enumerate(self.inputs)
         ]
         masked_lm_labels = torch.zeros(input_ids.shape, dtype=torch.long) - 100
@@ -160,9 +168,11 @@ class pretraining_dataset_v2(Dataset):
                 _masked_lm_ids,
                 _next_sentence_labels,
             ] = [
-                input[index].astype(np.int64)
-                if indice < 4
-                else np.asarray(input[index].astype(np.int64))
+                (
+                    input[index].astype(np.int64)
+                    if indice < 4
+                    else np.asarray(input[index].astype(np.int64))
+                )
                 for indice, input in enumerate(self.inputs)
             ]
         else:
@@ -226,7 +236,11 @@ def pretraining_dataset(
 
 class Distiller:
     def __init__(
-        self, params: dict, token_probs: torch.tensor, student: nn.Module, teacher: nn.Module
+        self,
+        params: dict,
+        token_probs: torch.tensor,
+        student: nn.Module,
+        teacher: nn.Module,
     ):
         logger.info("Initializing Distiller")
         self.params = params
@@ -235,7 +249,7 @@ class Distiller:
         self.dtype = params.run_dtype
         self.device = params.device
         self.amp = params.amp
-        #self.fp16 = params.fp16
+        # self.fp16 = params.fp16
 
         self.student = student
         self.teacher = teacher
@@ -260,18 +274,20 @@ class Distiller:
             self.mlm_mask_prop = params.mlm_mask_prop
             assert 0.0 <= self.mlm_mask_prop <= 1.0
             assert params.word_mask + params.word_keep + params.word_rand == 1.0
-            self.pred_probs = torch.FloatTensor([params.word_mask, params.word_keep, params.word_rand])
-            #if self.device == "cuda":
+            self.pred_probs = torch.FloatTensor(
+                [params.word_mask, params.word_keep, params.word_rand]
+            )
+            # if self.device == "cuda":
             #    self.pred_probs = self.pred_probs.to(f"cuda:{params.local_rank}") if params.n_gpu > 0 else self.pred_probs
             #    self.token_probs = token_probs.to(f"cuda:{params.local_rank}") if params.n_gpu > 0 else token_probs
-            #elif self.device == "xpu":
+            # elif self.device == "xpu":
             #    self.pred_probs = self.pred_probs.to(self.device) if params.n_gpu > 0 else self.pred_probs
             #    self.token_probs = token_probs.to(self.device) if params.n_gpu > 0 else token_probs
             self.token_probs = token_probs
-            #if self.dtype == "FP16":
+            # if self.dtype == "FP16":
             #    self.pred_probs = self.pred_probs.half()
             #    self.token_probs = self.token_probs.half()
-            #elif self.dtype == "BF16":
+            # elif self.dtype == "BF16":
             #    self.pred_probs = self.pred_probs.bfloat16()
             #    self.token_probs = self.token_probs.bfloat16()
         else:
@@ -306,13 +322,17 @@ class Distiller:
         optimizer_grouped_parameters = [
             {
                 "params": [
-                    p for n, p in student.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad
+                    p
+                    for n, p in student.named_parameters()
+                    if not any(nd in n for nd in no_decay) and p.requires_grad
                 ],
                 "weight_decay": params.weight_decay,
             },
             {
                 "params": [
-                    p for n, p in student.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad
+                    p
+                    for n, p in student.named_parameters()
+                    if any(nd in n for nd in no_decay) and p.requires_grad
                 ],
                 "weight_decay": 0.0,
             },
@@ -321,9 +341,15 @@ class Distiller:
             "------ Number of trainable parameters (student): %i"
             % sum([p.numel() for p in self.student.parameters() if p.requires_grad])
         )
-        logger.info("------ Number of parameters (student): %i" % sum([p.numel() for p in self.student.parameters()]))
+        logger.info(
+            "------ Number of parameters (student): %i"
+            % sum([p.numel() for p in self.student.parameters()])
+        )
         self.optimizer = AdamW(
-            optimizer_grouped_parameters, lr=params.learning_rate, eps=params.adam_epsilon, betas=(0.9, 0.98)
+            optimizer_grouped_parameters,
+            lr=params.learning_rate,
+            eps=params.adam_epsilon,
+            betas=(0.9, 0.98),
         )
 
         if params.run_mode == "train":
@@ -337,28 +363,47 @@ class Distiller:
                 sampler = DistributedSampler(dataset)
 
             if params.group_by_size:
-                groups = create_lengths_groups(lengths=dataset.lengths, k=params.max_model_input_size)
-                sampler = GroupedBatchSampler(sampler=sampler, group_ids=groups, batch_size=params.batch_size)
+                groups = create_lengths_groups(
+                    lengths=dataset.lengths, k=params.max_model_input_size
+                )
+                sampler = GroupedBatchSampler(
+                    sampler=sampler, group_ids=groups, batch_size=params.batch_size
+                )
             else:
-                sampler = BatchSampler(sampler=sampler, batch_size=params.batch_size, drop_last=False)
+                sampler = BatchSampler(
+                    sampler=sampler, batch_size=params.batch_size, drop_last=False
+                )
 
-            self.dataloader = DataLoader(dataset=dataset, batch_sampler=sampler, collate_fn=dataset.batch_sequences)
+            self.dataloader = DataLoader(
+                dataset=dataset,
+                batch_sampler=sampler,
+                collate_fn=dataset.batch_sequences,
+            )
 
             self.num_steps_epoch = len(self.dataloader)
             num_train_optimization_steps = (
-                int(self.num_steps_epoch / params.gradient_accumulation_steps * params.n_epoch) + 1
+                int(
+                    self.num_steps_epoch
+                    / params.gradient_accumulation_steps
+                    * params.n_epoch
+                )
+                + 1
             )
             warmup_steps = math.ceil(num_train_optimization_steps * params.warmup_prop)
             self.scheduler = get_linear_schedule_with_warmup(
-                self.optimizer, num_warmup_steps=warmup_steps, num_training_steps=num_train_optimization_steps
+                self.optimizer,
+                num_warmup_steps=warmup_steps,
+                num_training_steps=num_train_optimization_steps,
             )
 
-        #if self.fp16:
+        # if self.fp16:
         if self.dtype == "FP16" and self.device == "cuda":
             try:
                 from apex import amp
             except ImportError:
-                raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
+                raise ImportError(
+                    "Please install apex from https://www.github.com/nvidia/apex to use fp16 training."
+                )
             logger.info(f"Using fp16 training: {self.params.fp16_opt_level} level")
             self.student, self.optimizer = amp.initialize(
                 self.student, self.optimizer, opt_level=self.params.fp16_opt_level
@@ -369,12 +414,16 @@ class Distiller:
             if self.dtype == "FP16" and self.device == "cuda":
                 from apex.parallel import DistributedDataParallel
 
-                logger.info("Using apex.parallel.DistributedDataParallel for distributed training.")
+                logger.info(
+                    "Using apex.parallel.DistributedDataParallel for distributed training."
+                )
                 self.student = DistributedDataParallel(self.student)
             else:
                 from torch.nn.parallel import DistributedDataParallel
 
-                logger.info("Using nn.parallel.DistributedDataParallel for distributed training.")
+                logger.info(
+                    "Using nn.parallel.DistributedDataParallel for distributed training."
+                )
                 self.student = DistributedDataParallel(
                     self.student,
                     device_ids=[params.local_rank],
@@ -385,9 +434,17 @@ class Distiller:
         self.is_master = params.is_master
         if self.is_master:
             logger.info("--- Initializing Tensorboard")
-            self.tensorboard = SummaryWriter(log_dir=os.path.join(self.dump_path, "log", "train"))
-            self.tensorboard.add_text(tag="config/training", text_string=str(self.params), global_step=0)
-            self.tensorboard.add_text(tag="config/student", text_string=str(self.student_config), global_step=0)
+            self.tensorboard = SummaryWriter(
+                log_dir=os.path.join(self.dump_path, "log", "train")
+            )
+            self.tensorboard.add_text(
+                tag="config/training", text_string=str(self.params), global_step=0
+            )
+            self.tensorboard.add_text(
+                tag="config/student",
+                text_string=str(self.student_config),
+                global_step=0,
+            )
 
     def prepare_batch_mlm(self, batch):
         """
@@ -409,7 +466,10 @@ class Distiller:
         token_ids, lengths = self.round_batch(x=token_ids, lengths=lengths)
         assert token_ids.size(0) == lengths.size(0)
 
-        attn_mask = torch.arange(token_ids.size(1), dtype=torch.long, device=lengths.device) < lengths[:, None]
+        attn_mask = (
+            torch.arange(token_ids.size(1), dtype=torch.long, device=lengths.device)
+            < lengths[:, None]
+        )
 
         bs, max_seq_len = token_ids.size()
         mlm_labels = token_ids.new(token_ids.size()).copy_(token_ids)
@@ -438,16 +498,22 @@ class Distiller:
 
         _token_ids_real = token_ids[pred_mask]
         _token_ids_rand = _token_ids_real.clone().random_(self.vocab_size)
-        _token_ids_mask = _token_ids_real.clone().fill_(self.params.special_tok_ids["mask_token"])
-        probs = torch.multinomial(self.pred_probs, len(_token_ids_real), replacement=True)
+        _token_ids_mask = _token_ids_real.clone().fill_(
+            self.params.special_tok_ids["mask_token"]
+        )
+        probs = torch.multinomial(
+            self.pred_probs, len(_token_ids_real), replacement=True
+        )
         _token_ids = (
             _token_ids_mask * (probs == 0).long()
             + _token_ids_real * (probs == 1).long()
             + _token_ids_rand * (probs == 2).long()
         )
         token_ids = token_ids.masked_scatter(pred_mask, _token_ids)
-        #if self.params.run_mode == "train":
-        mlm_labels[~pred_mask] = -100  # previously `mlm_labels[1-pred_mask] = -1`, cf pytorch 1.2.0 compatibility
+        # if self.params.run_mode == "train":
+        mlm_labels[~pred_mask] = (
+            -100
+        )  # previously `mlm_labels[1-pred_mask] = -1`, cf pytorch 1.2.0 compatibility
 
         # sanity checks
         assert 0 <= token_ids.min() <= token_ids.max() < self.vocab_size
@@ -474,10 +540,15 @@ class Distiller:
         token_ids, lengths = self.round_batch(x=token_ids, lengths=lengths)
         assert token_ids.size(0) == lengths.size(0)
 
-        attn_mask = torch.arange(token_ids.size(1), dtype=torch.long, device=lengths.device) < lengths[:, None]
+        attn_mask = (
+            torch.arange(token_ids.size(1), dtype=torch.long, device=lengths.device)
+            < lengths[:, None]
+        )
         clm_labels = token_ids.new(token_ids.size()).copy_(token_ids)
-        #if self.params.run_mode == "train":
-        clm_labels[~attn_mask] = -100  # previously `clm_labels[1-attn_mask] = -1`, cf pytorch 1.2.0 compatibility
+        # if self.params.run_mode == "train":
+        clm_labels[~attn_mask] = (
+            -100
+        )  # previously `clm_labels[1-attn_mask] = -1`, cf pytorch 1.2.0 compatibility
 
         # sanity checks
         assert 0 <= token_ids.min() <= token_ids.max() < self.vocab_size
@@ -523,7 +594,9 @@ class Distiller:
                 pad_id = self.params.special_tok_ids["pad_token"]
             else:
                 pad_id = self.params.special_tok_ids["unk_token"]
-            padding_tensor = torch.zeros(bs2, pad, dtype=torch.long, device=x.device).fill_(pad_id)
+            padding_tensor = torch.zeros(
+                bs2, pad, dtype=torch.long, device=x.device
+            ).fill_(pad_id)
             x = torch.cat([x, padding_tensor], 1)
             assert x.size() == (bs2, ml2)
 
@@ -547,23 +620,38 @@ class Distiller:
             if self.multi_gpu:
                 torch.distributed.barrier()
 
-            iter_bar = tqdm(self.dataloader, desc="-Iter", disable=self.params.local_rank not in [-1, 0])
+            iter_bar = tqdm(
+                self.dataloader,
+                desc="-Iter",
+                disable=self.params.local_rank not in [-1, 0],
+            )
             for batch in iter_bar:
-                #if self.params.n_gpu > 0 and self.device == "cuda":
+                # if self.params.n_gpu > 0 and self.device == "cuda":
                 #    batch = tuple(t.to(f"cuda:{self.params.local_rank}") for t in batch)
-                #elif self.params.n_gpu > 0 and self.device == "xpu":
+                # elif self.params.n_gpu > 0 and self.device == "xpu":
                 #    batch = tuple(t.to(self.device) for t in batch)
 
                 if self.mlm:
-                    token_ids, attn_mask, lm_labels = self.prepare_batch_mlm(batch=batch)
+                    token_ids, attn_mask, lm_labels = self.prepare_batch_mlm(
+                        batch=batch
+                    )
                 else:
-                    token_ids, attn_mask, lm_labels = self.prepare_batch_clm(batch=batch)
+                    token_ids, attn_mask, lm_labels = self.prepare_batch_clm(
+                        batch=batch
+                    )
 
-                self.step(input_ids_=token_ids, attention_mask_=attn_mask, lm_labels_=lm_labels)
+                self.step(
+                    input_ids_=token_ids,
+                    attention_mask_=attn_mask,
+                    lm_labels_=lm_labels,
+                )
 
                 iter_bar.update()
                 iter_bar.set_postfix(
-                    {"Last_loss": f"{self.last_loss:.2f}", "Avg_cum_loss": f"{self.total_loss_epoch/self.n_iter:.2f}"}
+                    {
+                        "Last_loss": f"{self.last_loss:.2f}",
+                        "Avg_cum_loss": f"{self.total_loss_epoch/self.n_iter:.2f}",
+                    }
                 )
             iter_bar.close()
 
@@ -576,7 +664,12 @@ class Distiller:
             self.save_checkpoint(checkpoint_name="pytorch_model.bin")
             logger.info("Training is finished")
 
-    def step(self, input_ids_: torch.Tensor, attention_mask_: torch.Tensor, lm_labels_: torch.Tensor):
+    def step(
+        self,
+        input_ids_: torch.Tensor,
+        attention_mask_: torch.Tensor,
+        lm_labels_: torch.Tensor,
+    ):
         """
         One optimization step: forward of student AND teacher, backward on the loss (for gradient accumulation),
         and possibly a parameter update (depending on the gradient accumulation).
@@ -587,14 +680,19 @@ class Distiller:
         attention_mask: `torch.tensor(bs, seq_length)` - The attention mask for self attention.
         lm_labels: `torch.tensor(bs, seq_length)` - The language modeling labels (mlm labels for MLM and clm labels for CLM).
         """
-        def run_model(input_ids: torch.Tensor, attention_mask: torch.Tensor, lm_labels: torch.Tensor):
+
+        def run_model(
+            input_ids: torch.Tensor,
+            attention_mask: torch.Tensor,
+            lm_labels: torch.Tensor,
+        ):
             if self.params.n_gpu > 0 and self.device == "cuda":
-                #batch = tuple(t.to(f"cuda:{self.params.local_rank}") for t in batch)
+                # batch = tuple(t.to(f"cuda:{self.params.local_rank}") for t in batch)
                 input_ids = input_ids.to(f"cuda:{self.params.local_rank}")
                 attention_mask = attention_mask.to(f"cuda:{self.params.local_rank}")
                 lm_labels = lm_labels.to(f"cuda:{self.params.local_rank}")
             elif self.params.n_gpu > 0 and self.device == "xpu":
-                #batch = tuple(t.to(self.device) for t in batch)
+                # batch = tuple(t.to(self.device) for t in batch)
                 input_ids = input_ids.to(self.device)
                 attention_mask = attention_mask.to(self.device)
                 lm_labels = lm_labels.to(self.device)
@@ -608,23 +706,45 @@ class Distiller:
                         input_ids=input_ids, attention_mask=attention_mask
                     )  # (bs, seq_length, voc_size)
             else:
-                student_outputs = self.student(input_ids=input_ids, attention_mask=None)  # (bs, seq_length, voc_size)
+                student_outputs = self.student(
+                    input_ids=input_ids, attention_mask=None
+                )  # (bs, seq_length, voc_size)
                 with torch.no_grad():
-                    teacher_outputs = self.teacher(input_ids=input_ids, attention_mask=None)  # (bs, seq_length, voc_size)
-            s_logits, s_hidden_states = student_outputs["logits"], student_outputs["hidden_states"]
-            t_logits, t_hidden_states = teacher_outputs["logits"], teacher_outputs["hidden_states"]
+                    teacher_outputs = self.teacher(
+                        input_ids=input_ids, attention_mask=None
+                    )  # (bs, seq_length, voc_size)
+            s_logits, s_hidden_states = (
+                student_outputs["logits"],
+                student_outputs["hidden_states"],
+            )
+            t_logits, t_hidden_states = (
+                teacher_outputs["logits"],
+                teacher_outputs["hidden_states"],
+            )
             assert s_logits.size() == t_logits.size()
 
             # https://github.com/peterliht/knowledge-distillation-pytorch/blob/master/model/net.py#L100
             # https://github.com/peterliht/knowledge-distillation-pytorch/issues/2
             if self.params.restrict_ce_to_mask:
-                mask = (lm_labels > -1).unsqueeze(-1).expand_as(s_logits)  # (bs, seq_length, voc_size)
+                mask = (
+                    (lm_labels > -1).unsqueeze(-1).expand_as(s_logits)
+                )  # (bs, seq_length, voc_size)
             else:
-                mask = attention_mask.unsqueeze(-1).expand_as(s_logits)  # (bs, seq_length, voc_size)
-            s_logits_slct = torch.masked_select(s_logits, mask)  # (bs * seq_length * voc_size) modulo the 1s in mask
-            s_logits_slct = s_logits_slct.view(-1, s_logits.size(-1))  # (bs * seq_length, voc_size) modulo the 1s in mask
-            t_logits_slct = torch.masked_select(t_logits, mask)  # (bs * seq_length * voc_size) modulo the 1s in mask
-            t_logits_slct = t_logits_slct.view(-1, s_logits.size(-1))  # (bs * seq_length, voc_size) modulo the 1s in mask
+                mask = attention_mask.unsqueeze(-1).expand_as(
+                    s_logits
+                )  # (bs, seq_length, voc_size)
+            s_logits_slct = torch.masked_select(
+                s_logits, mask
+            )  # (bs * seq_length * voc_size) modulo the 1s in mask
+            s_logits_slct = s_logits_slct.view(
+                -1, s_logits.size(-1)
+            )  # (bs * seq_length, voc_size) modulo the 1s in mask
+            t_logits_slct = torch.masked_select(
+                t_logits, mask
+            )  # (bs * seq_length * voc_size) modulo the 1s in mask
+            t_logits_slct = t_logits_slct.view(
+                -1, s_logits.size(-1)
+            )  # (bs * seq_length, voc_size) modulo the 1s in mask
             assert t_logits_slct.size() == s_logits_slct.size()
 
             loss_ce = (
@@ -637,33 +757,53 @@ class Distiller:
             loss = self.alpha_ce * loss_ce
 
             if self.alpha_mlm > 0.0:
-                loss_mlm = self.lm_loss_fct(s_logits.view(-1, s_logits.size(-1)), lm_labels.view(-1))
+                loss_mlm = self.lm_loss_fct(
+                    s_logits.view(-1, s_logits.size(-1)), lm_labels.view(-1)
+                )
                 loss += self.alpha_mlm * loss_mlm
             if self.alpha_clm > 0.0:
                 shift_logits = s_logits[..., :-1, :].contiguous()
                 shift_labels = lm_labels[..., 1:].contiguous()
-                loss_clm = self.lm_loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+                loss_clm = self.lm_loss_fct(
+                    shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1)
+                )
                 loss += self.alpha_clm * loss_clm
 
             if self.alpha_mse > 0.0:
-                loss_mse = self.mse_loss_fct(s_logits_slct, t_logits_slct) / s_logits_slct.size(
+                loss_mse = self.mse_loss_fct(
+                    s_logits_slct, t_logits_slct
+                ) / s_logits_slct.size(
                     0
                 )  # Reproducing batchmean reduction
                 loss += self.alpha_mse * loss_mse
             if self.alpha_cos > 0.0:
                 s_hidden_states = s_hidden_states[-1]  # (bs, seq_length, dim)
                 t_hidden_states = t_hidden_states[-1]  # (bs, seq_length, dim)
-                mask = attention_mask.unsqueeze(-1).expand_as(s_hidden_states)  # (bs, seq_length, dim)
+                mask = attention_mask.unsqueeze(-1).expand_as(
+                    s_hidden_states
+                )  # (bs, seq_length, dim)
                 assert s_hidden_states.size() == t_hidden_states.size()
                 dim = s_hidden_states.size(-1)
 
-                s_hidden_states_slct = torch.masked_select(s_hidden_states, mask)  # (bs * seq_length * dim)
-                s_hidden_states_slct = s_hidden_states_slct.view(-1, dim)  # (bs * seq_length, dim)
-                t_hidden_states_slct = torch.masked_select(t_hidden_states, mask)  # (bs * seq_length * dim)
-                t_hidden_states_slct = t_hidden_states_slct.view(-1, dim)  # (bs * seq_length, dim)
+                s_hidden_states_slct = torch.masked_select(
+                    s_hidden_states, mask
+                )  # (bs * seq_length * dim)
+                s_hidden_states_slct = s_hidden_states_slct.view(
+                    -1, dim
+                )  # (bs * seq_length, dim)
+                t_hidden_states_slct = torch.masked_select(
+                    t_hidden_states, mask
+                )  # (bs * seq_length * dim)
+                t_hidden_states_slct = t_hidden_states_slct.view(
+                    -1, dim
+                )  # (bs * seq_length, dim)
 
-                target = s_hidden_states_slct.new(s_hidden_states_slct.size(0)).fill_(1)  # (bs * seq_length,)
-                loss_cos = self.cosine_loss_fct(s_hidden_states_slct, t_hidden_states_slct, target)
+                target = s_hidden_states_slct.new(s_hidden_states_slct.size(0)).fill_(
+                    1
+                )  # (bs * seq_length,)
+                loss_cos = self.cosine_loss_fct(
+                    s_hidden_states_slct, t_hidden_states_slct, target
+                )
                 loss += self.alpha_cos * loss_cos
             self.total_loss_epoch += loss.item()
             self.last_loss = loss.item()
@@ -679,7 +819,7 @@ class Distiller:
             return loss
 
         if self.device == "xpu":
-            #with torch.autocast("xpu", enabled=self.amp, dtype=MAP_TORCH_DTYPE[self.dtype]):
+            # with torch.autocast("xpu", enabled=self.amp, dtype=MAP_TORCH_DTYPE[self.dtype]):
             loss = run_model(input_ids_, attention_mask_, lm_labels_)
         else:
             loss = run_model(input_ids_, attention_mask_, lm_labels_)
@@ -715,9 +855,13 @@ class Distiller:
         self.iter()
         if self.n_iter % self.params.gradient_accumulation_steps == 0:
             if self.dtype == "FP16" and self.device == "cuda":
-                nn.utils.clip_grad_norm_(amp.master_params(self.optimizer), self.params.max_grad_norm)
+                nn.utils.clip_grad_norm_(
+                    amp.master_params(self.optimizer), self.params.max_grad_norm
+                )
             else:
-                nn.utils.clip_grad_norm_(self.student.parameters(), self.params.max_grad_norm)
+                nn.utils.clip_grad_norm_(
+                    self.student.parameters(), self.params.max_grad_norm
+                )
             self.optimizer.step()
             self.optimizer.zero_grad()
             self.scheduler.step()
@@ -738,8 +882,14 @@ class Distiller:
         time_collect = []
         self.student.eval()
 
-        do_profiling = os.environ.get("PROFILE", "OFF").upper() in ["1", "Y", "ON", "YES", "TRUE"]
-        if (do_profiling):
+        do_profiling = os.environ.get("PROFILE", "OFF").upper() in [
+            "1",
+            "Y",
+            "ON",
+            "YES",
+            "TRUE",
+        ]
+        if do_profiling:
             if self.device == "xpu":
                 sort_key = "self_xpu_time_total"
             elif self.device == "cuda":
@@ -747,8 +897,10 @@ class Distiller:
             else:
                 sort_key = "self_cpu_time_total"
 
-        if self.device== "xpu":
-            self.student = torch.xpu.optimize(model=self.student, dtype=MAP_TORCH_DTYPE[self.dtype])
+        if self.device == "xpu":
+            self.student = torch.xpu.optimize(
+                model=self.student, dtype=MAP_TORCH_DTYPE[self.dtype]
+            )
         if self.is_master:
             logger.info(f"--- Starting inference")
         with torch.no_grad():
@@ -756,25 +908,48 @@ class Distiller:
                 if nb_eval_steps == self.num_iteration:
                     break
                 data_file = files[file_iter]
-                data = pretraining_dataset(data_file, self.params.max_predictions_per_seq)
+                data = pretraining_dataset(
+                    data_file, self.params.max_predictions_per_seq
+                )
                 sampler = RandomSampler(data)
-                dataloader = DataLoader(data, sampler=sampler, batch_size=self.params.batch_size)
-                iter_bar = tqdm(dataloader, desc="-Iter", disable=self.params.local_rank not in [-1, 0])
+                dataloader = DataLoader(
+                    data, sampler=sampler, batch_size=self.params.batch_size
+                )
+                iter_bar = tqdm(
+                    dataloader,
+                    desc="-Iter",
+                    disable=self.params.local_rank not in [-1, 0],
+                )
                 for batch in iter_bar:
                     if nb_eval_steps == self.num_iteration:
                         break
-                    (token_ids, segment_ids, attn_mask, lm_labels, next_sentence_labels,) = batch
+                    (
+                        token_ids,
+                        segment_ids,
+                        attn_mask,
+                        lm_labels,
+                        next_sentence_labels,
+                    ) = batch
                     with (
-                        contextlib.nullcontext(None) if not do_profiling else
-                        torch.profiler.profile(
-                            activities=[torch.profiler.ProfilerActivity.CPU,
-                                        torch.profiler.ProfilerActivity.XPU]) if self.device == "xpu" else
-                        torch.profiler.profile(
-                            activities=[torch.profiler.ProfilerActivity.CPU])
+                        contextlib.nullcontext(None)
+                        if not do_profiling
+                        else (
+                            torch.profiler.profile(
+                                activities=[
+                                    torch.profiler.ProfilerActivity.CPU,
+                                    torch.profiler.ProfilerActivity.XPU,
+                                ]
+                            )
+                            if self.device == "xpu"
+                            else torch.profiler.profile(
+                                activities=[torch.profiler.ProfilerActivity.CPU]
+                            )
+                        )
                     ) as prof:
                         if self.device == "xpu":
                             try:
                                 import memory_check
+
                                 memory_check.display_mem("xpu:0")
                             except:
                                 pass
@@ -792,9 +967,17 @@ class Distiller:
                             lm_labels = lm_labels.to(self.device)
                         if nb_eval_steps == 0:
                             if self.params.jit and self.device == "xpu":
-                                with torch.autocast("xpu", enabled=self.amp, dtype=MAP_TORCH_DTYPE[self.dtype]):
-                                    self.student = torch.jit.trace(self.student, (token_ids, attn_mask),
-                                                                   strict=False, check_trace=False)
+                                with torch.autocast(
+                                    "xpu",
+                                    enabled=self.amp,
+                                    dtype=MAP_TORCH_DTYPE[self.dtype],
+                                ):
+                                    self.student = torch.jit.trace(
+                                        self.student,
+                                        (token_ids, attn_mask),
+                                        strict=False,
+                                        check_trace=False,
+                                    )
                                     self.student = torch.jit.freeze(self.student)
                         student_outputs = self.student(
                             input_ids=token_ids, attention_mask=attn_mask
@@ -802,15 +985,20 @@ class Distiller:
                         torch.xpu.synchronize()
                     if nb_eval_steps >= 10:
                         time_collect.append(time.time() - start_time)
-                    loss = self.lm_loss_fct(student_outputs[0].view(-1, student_outputs[0].size(-1)), lm_labels.view(-1))
+                    loss = self.lm_loss_fct(
+                        student_outputs[0].view(-1, student_outputs[0].size(-1)),
+                        lm_labels.view(-1),
+                    )
                     lm_acc, num_masked = calc_mlm_acc(student_outputs, lm_labels)
                     lm_acc = lm_acc.item()
                     iter_acc.append(lm_acc)
                     iter_num_mask.append(num_masked)
                     if do_profiling and nb_eval_steps == 150:
-                        torch.save(prof.key_averages().table(sort_by=sort_key),
-                                   './distilbert_profiling.pt')
-                        prof.export_chrome_trace('./distilbert_profiling.json')
+                        torch.save(
+                            prof.key_averages().table(sort_by=sort_key),
+                            "./distilbert_profiling.pt",
+                        )
+                        prof.export_chrome_trace("./distilbert_profiling.json")
                         # Cannot trace by id when using kineto
                         # if self.device == "xpu":
                         #     torch.save(prof.table(sort_by="id", row_limit=100000), './distilbert_profiling_detailed.pt')
@@ -820,14 +1008,18 @@ class Distiller:
             logger.info(f"--- Ending inference")
 
         eval_loss = eval_loss / nb_eval_steps
-        acc = sum([a * b for a, b in zip(iter_acc, iter_num_mask)])/sum(iter_num_mask)
+        acc = sum([a * b for a, b in zip(iter_acc, iter_num_mask)]) / sum(iter_num_mask)
         result = {}
-        result['acc'] = acc
-        result['eval_loss'] = eval_loss
+        result["acc"] = acc
+        result["eval_loss"] = eval_loss
         logger.info("Results: {}".format(result))
         total_time = sum(time_collect[:-10])
         if len(time_collect) >= 10:
-            logger.info("The total_time {} s, and perf {} sentences/s for inference".format(total_time,  (nb_eval_steps - 20) * self.batch_size/ (total_time)))
+            logger.info(
+                "The total_time {} s, and perf {} sentences/s for inference".format(
+                    total_time, (nb_eval_steps - 20) * self.batch_size / (total_time)
+                )
+            )
         else:
             logger.error("The num_iteration must greater then 20")
 
@@ -853,18 +1045,26 @@ class Distiller:
 
         for param_name, param in self.student.named_parameters():
             self.tensorboard.add_scalar(
-                tag="parameter_mean/" + param_name, scalar_value=param.data.mean(), global_step=self.n_total_iter
+                tag="parameter_mean/" + param_name,
+                scalar_value=param.data.mean(),
+                global_step=self.n_total_iter,
             )
             self.tensorboard.add_scalar(
-                tag="parameter_std/" + param_name, scalar_value=param.data.std(), global_step=self.n_total_iter
+                tag="parameter_std/" + param_name,
+                scalar_value=param.data.std(),
+                global_step=self.n_total_iter,
             )
             if param.grad is None:
                 continue
             self.tensorboard.add_scalar(
-                tag="grad_mean/" + param_name, scalar_value=param.grad.data.mean(), global_step=self.n_total_iter
+                tag="grad_mean/" + param_name,
+                scalar_value=param.grad.data.mean(),
+                global_step=self.n_total_iter,
             )
             self.tensorboard.add_scalar(
-                tag="grad_std/" + param_name, scalar_value=param.grad.data.std(), global_step=self.n_total_iter
+                tag="grad_std/" + param_name,
+                scalar_value=param.grad.data.std(),
+                global_step=self.n_total_iter,
             )
 
         self.tensorboard.add_scalar(
@@ -872,28 +1072,44 @@ class Distiller:
             scalar_value=self.total_loss_epoch / self.n_iter,
             global_step=self.n_total_iter,
         )
-        self.tensorboard.add_scalar(tag="losses/loss", scalar_value=self.last_loss, global_step=self.n_total_iter)
         self.tensorboard.add_scalar(
-            tag="losses/loss_ce", scalar_value=self.last_loss_ce, global_step=self.n_total_iter
+            tag="losses/loss",
+            scalar_value=self.last_loss,
+            global_step=self.n_total_iter,
+        )
+        self.tensorboard.add_scalar(
+            tag="losses/loss_ce",
+            scalar_value=self.last_loss_ce,
+            global_step=self.n_total_iter,
         )
         if self.alpha_mlm > 0.0:
             self.tensorboard.add_scalar(
-                tag="losses/loss_mlm", scalar_value=self.last_loss_mlm, global_step=self.n_total_iter
+                tag="losses/loss_mlm",
+                scalar_value=self.last_loss_mlm,
+                global_step=self.n_total_iter,
             )
         if self.alpha_clm > 0.0:
             self.tensorboard.add_scalar(
-                tag="losses/loss_clm", scalar_value=self.last_loss_clm, global_step=self.n_total_iter
+                tag="losses/loss_clm",
+                scalar_value=self.last_loss_clm,
+                global_step=self.n_total_iter,
             )
         if self.alpha_mse > 0.0:
             self.tensorboard.add_scalar(
-                tag="losses/loss_mse", scalar_value=self.last_loss_mse, global_step=self.n_total_iter
+                tag="losses/loss_mse",
+                scalar_value=self.last_loss_mse,
+                global_step=self.n_total_iter,
             )
         if self.alpha_cos > 0.0:
             self.tensorboard.add_scalar(
-                tag="losses/loss_cos", scalar_value=self.last_loss_cos, global_step=self.n_total_iter
+                tag="losses/loss_cos",
+                scalar_value=self.last_loss_cos,
+                global_step=self.n_total_iter,
             )
         self.tensorboard.add_scalar(
-            tag="learning_rate/lr", scalar_value=self.scheduler.get_lr()[0], global_step=self.n_total_iter
+            tag="learning_rate/lr",
+            scalar_value=self.scheduler.get_lr()[0],
+            global_step=self.n_total_iter,
         )
 
         self.tensorboard.add_scalar(
@@ -902,7 +1118,9 @@ class Distiller:
             global_step=self.n_total_iter,
         )
         self.tensorboard.add_scalar(
-            tag="global/speed", scalar_value=time.time() - self.last_log, global_step=self.n_total_iter
+            tag="global/speed",
+            scalar_value=time.time() - self.last_log,
+            global_step=self.n_total_iter,
         )
 
     def end_epoch(self):
@@ -910,12 +1128,16 @@ class Distiller:
         Finally arrived at the end of epoch (full pass on dataset).
         Do some tensorboard logging and checkpoint saving.
         """
-        logger.info(f"{self.n_sequences_epoch} sequences have been trained during this epoch.")
+        logger.info(
+            f"{self.n_sequences_epoch} sequences have been trained during this epoch."
+        )
 
         if self.is_master:
             self.save_checkpoint(checkpoint_name=f"model_epoch_{self.epoch}.pth")
             self.tensorboard.add_scalar(
-                tag="epoch/loss", scalar_value=self.total_loss_epoch / self.n_iter, global_step=self.epoch
+                tag="epoch/loss",
+                scalar_value=self.total_loss_epoch / self.n_iter,
+                global_step=self.epoch,
             )
 
         self.epoch += 1
@@ -929,7 +1151,9 @@ class Distiller:
         """
         if not self.is_master:
             return
-        mdl_to_save = self.student.module if hasattr(self.student, "module") else self.student
+        mdl_to_save = (
+            self.student.module if hasattr(self.student, "module") else self.student
+        )
         mdl_to_save.config.save_pretrained(self.dump_path)
         state_dict = mdl_to_save.state_dict()
         torch.save(state_dict, os.path.join(self.dump_path, checkpoint_name))

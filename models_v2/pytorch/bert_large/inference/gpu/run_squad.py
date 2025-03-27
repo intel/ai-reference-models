@@ -27,7 +27,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Finetuning the library models for question-answering on SQuAD (DistilBERT, Bert, XLM, XLNet)."""
+"""Finetuning the library models for question-answering on SQuAD (DistilBERT, Bert, XLM, XLNet)."""
 
 
 import argparse
@@ -85,13 +85,20 @@ logger = logging.getLogger(__name__)
 MODEL_CONFIG_CLASSES = list(MODEL_FOR_QUESTION_ANSWERING_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
-MAP_TORCH_DTYPE = {"FP32": torch.float32, "FP16": torch.float16,
-                   "BF16": torch.bfloat16, "FP64": torch.float64,
-                   "CF64": torch.cfloat, "CF128": torch.cdouble,
-                   "UINT8": torch.uint8, "INT8": torch.int8,
-                   "INT16": torch.int16, "INT": torch.int32,
-                   "INT64": torch.int64, "BOOL": torch.bool,
-                  }
+MAP_TORCH_DTYPE = {
+    "FP32": torch.float32,
+    "FP16": torch.float16,
+    "BF16": torch.bfloat16,
+    "FP64": torch.float64,
+    "CF64": torch.cfloat,
+    "CF128": torch.cdouble,
+    "UINT8": torch.uint8,
+    "INT8": torch.int8,
+    "INT16": torch.int16,
+    "INT": torch.int32,
+    "INT64": torch.int64,
+    "BOOL": torch.bool,
+}
 
 hub = os.path.expanduser("~/.cache/torch/intel")
 if not os.path.exists(hub):
@@ -110,7 +117,7 @@ def to_list(tensor):
     return tensor.detach().cpu().tolist()
 
 
-def load_model(args, config = None, checkpoint = None):
+def load_model(args, config=None, checkpoint=None):
     model = None
     if checkpoint and args.use_pcl:
         with pcl_bert.pcl_impl(args.use_pcl, args.pcl_bf16, args.unpad):
@@ -140,6 +147,7 @@ def load_model(args, config = None, checkpoint = None):
         )
     return model
 
+
 def load_jit_model(model, inputs, dtype, device, jit_trace_path, use_jit_cache):
     jit_model = None
     if (os.path.isfile(jit_trace_path)) and use_jit_cache:
@@ -152,14 +160,13 @@ def load_jit_model(model, inputs, dtype, device, jit_trace_path, use_jit_cache):
         in_2 = torch.unsqueeze(inputs["token_type_ids"][0].clone(), 0)
         in_3 = torch.unsqueeze(inputs["attention_mask"][0].clone(), 0)
         with torch.autocast("xpu", enabled=True, dtype=dtype, cache_enabled=False):
-            jit_model = torch.jit.trace(model,
-                (in_1.to(device),
-                in_2.to(device),
-                in_3.to(device)),
-                strict = False)
+            jit_model = torch.jit.trace(
+                model, (in_1.to(device), in_2.to(device), in_3.to(device)), strict=False
+            )
         jit_model.save(jit_trace_path)
 
     return jit_model
+
 
 def mkdir(path):
     if not os.path.exists(path):
@@ -170,41 +177,44 @@ def collate_fn_(batch, device=None, dtype=None):
     for key, value in batch.items():
         if device:
             batch[key] = value.to(device)
-        if isinstance(value, torch.Tensor) and value.dtype == torch.float and dtype is not None and dtype != "FP32":
+        if (
+            isinstance(value, torch.Tensor)
+            and value.dtype == torch.float
+            and dtype is not None
+            and dtype != "FP32"
+        ):
             batch[key] = value.to(MAP_TORCH_DTYPE[dtype])
     return batch
 
+
 def model_cast(model, device=None, dtype=None):
     # Set device type
-    if (device):
+    if device:
         model.to(device)
 
     # Set data type
-    if (dtype == None):
+    if dtype == None:
         pass
-    elif (dtype == "FP16"):
+    elif dtype == "FP16":
         model.half()
-    elif (dtype == "BF16"):
+    elif dtype == "BF16":
         model.bfloat16()
-    elif (dtype == "FP64"):
+    elif dtype == "FP64":
         model.double()
-    elif (dtype == "FP32"):
+    elif dtype == "FP32":
         model.float()
     else:
         logger.error("The datatype for model casting not yet supported by pytorch")
 
+
 def get_device(device_choice):
     if device_choice == "xpu":
-        device = torch.device(
-            "xpu" if torch.xpu.is_available() else "cpu"
-        )
+        device = torch.device("xpu" if torch.xpu.is_available() else "cpu")
         n_gpu = torch.xpu.device_count() if torch.xpu.is_available() else 0
     elif device_choice == "cuda":
-        device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         n_gpu = torch.cuda.device_count() if torch.cuda.is_available() else 0
-    else :
+    else:
         device = torch.device("cpu")
         n_gpu = 0
     return device, n_gpu
@@ -268,14 +278,15 @@ def train(args, train_dataset, model, tokenizer):
             optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon
         )
 
-    if args.device_choice == 'xpu' and args.optimize:
+    if args.device_choice == "xpu" and args.optimize:
         optimize_dtype = torch.float32
         if args.dtype == "FP16":
             optimize_dtype = torch.float16
         elif args.dtype == "BF16":
             optimize_dtype = torch.bfloat16
-        model, optimizer = torch.xpu.optimize(model=model, optimizer=optimizer, level="O1",
-                                              dtype=optimize_dtype)
+        model, optimizer = torch.xpu.optimize(
+            model=model, optimizer=optimizer, level="O1", dtype=optimize_dtype
+        )
 
     scheduler = get_linear_schedule_with_warmup(
         optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
@@ -395,14 +406,21 @@ def train(args, train_dataset, model, tokenizer):
             autocast_dtype = torch.bfloat16
 
         # autocast context
-        if args.device_choice == 'cuda':
-            autocast_context = torch.autocast("cuda", enabled=use_autocast, dtype=autocast_dtype)
-        elif args.device_choice == 'xpu':
-            autocast_context = torch.autocast("xpu", enabled=use_autocast, dtype=autocast_dtype)
+        if args.device_choice == "cuda":
+            autocast_context = torch.autocast(
+                "cuda", enabled=use_autocast, dtype=autocast_dtype
+            )
+        elif args.device_choice == "xpu":
+            autocast_context = torch.autocast(
+                "xpu", enabled=use_autocast, dtype=autocast_dtype
+            )
         else:
-            autocast_context = torch.autocast("cpu", enabled=use_autocast, dtype=autocast_dtype)
+            autocast_context = torch.autocast(
+                "cpu", enabled=use_autocast, dtype=autocast_dtype
+            )
 
         import contextlib
+
         profile_context = contextlib.nullcontext()
 
         def profiler_setup(mode="disable", legacy_profilers=[], **prof_kwargs):
@@ -419,8 +437,12 @@ def train(args, train_dataset, model, tokenizer):
                 if args.device_choice:
                     legacy_kwargs[f"use_{args.device_choice}"] = True
                 legacy_profilers.extend(
-                    [torch.autograd.profiler_legacy.profile(**legacy_kwargs, **prof_kwargs)
-                     for _ in range(num_iters)]
+                    [
+                        torch.autograd.profiler_legacy.profile(
+                            **legacy_kwargs, **prof_kwargs
+                        )
+                        for _ in range(num_iters)
+                    ]
                 )
                 return contextlib.nullcontext()
             elif mode == "kineto":
@@ -429,36 +451,53 @@ def train(args, train_dataset, model, tokenizer):
                 )
                 # configure for kineto profiler
                 activities = [torch.profiler.ProfilerActivity.CPU]
-                if args.device_choice == 'cuda':
+                if args.device_choice == "cuda":
                     activities.append(torch.profiler.ProfilerActivity.CUDA)
-                elif args.device_choice == 'xpu':
+                elif args.device_choice == "xpu":
                     activities.append(torch.profiler.ProfilerActivity.XPU)
                 skip_iters = max(num_iters - 5, 0)
-                my_schedule = torch.profiler.schedule(skip_first=skip_iters,
-                                                      wait=1, warmup=3, active=1)
+                my_schedule = torch.profiler.schedule(
+                    skip_first=skip_iters, wait=1, warmup=3, active=1
+                )
+
                 def trace_handle(prof):
-                    profile_name = 'fp32'
+                    profile_name = "fp32"
                     if args.dtype == "FP16":
-                        profile_name = 'fp16'
+                        profile_name = "fp16"
                     elif args.dtype == "BF16":
-                        profile_name = 'bf16'
-                    if args.device_choice == 'xpu':
-                        torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), './profiling.' + profile_name + '.train.pt')
-                    elif args.device_choice == 'cuda':
-                        torch.save(prof.key_averages().table(sort_by="self_cuda_time_total"), './profiling.card.' + str(args.xpu) + '.pt')
+                        profile_name = "bf16"
+                    if args.device_choice == "xpu":
+                        torch.save(
+                            prof.key_averages().table(sort_by="self_xpu_time_total"),
+                            "./profiling." + profile_name + ".train.pt",
+                        )
+                    elif args.device_choice == "cuda":
+                        torch.save(
+                            prof.key_averages().table(sort_by="self_cuda_time_total"),
+                            "./profiling.card." + str(args.xpu) + ".pt",
+                        )
                     else:
-                        torch.save(prof.key_averages().table(sort_by="self_cpu_time_total"), './profiling.card.' + str(args.xpu) + '.pt')
-                return torch.profiler.profile(activities=activities, schedule=my_schedule, on_trace_ready=trace_handle, **prof_kwargs)
+                        torch.save(
+                            prof.key_averages().table(sort_by="self_cpu_time_total"),
+                            "./profiling.card." + str(args.xpu) + ".pt",
+                        )
+
+                return torch.profiler.profile(
+                    activities=activities,
+                    schedule=my_schedule,
+                    on_trace_ready=trace_handle,
+                    **prof_kwargs,
+                )
 
         def legacy_profile_print(prof, sort_item: str):
             print(prof.key_averages().table(sort_by=sort_item))
             print(prof.key_averages(group_by_input_shape=True).table())
 
-
         def train_iter(step, batch):
             # Skip past any already trained steps if resuming training
             try:
                 import memory_check
+
                 memory_check.display_mem("xpu:0")
             except:
                 pass
@@ -530,9 +569,7 @@ def train(args, train_dataset, model, tokenizer):
                             amp.master_params(optimizer), args.max_grad_norm
                         )
                     elif args.use_pcl and args.pcl_bf16:
-                        pcl_bert.clip_grad_norm_(
-                            model.parameters(), args.max_grad_norm
-                        )
+                        pcl_bert.clip_grad_norm_(model.parameters(), args.max_grad_norm)
                     else:
                         torch.nn.utils.clip_grad_norm_(
                             model.parameters(), args.max_grad_norm
@@ -558,7 +595,9 @@ def train(args, train_dataset, model, tokenizer):
                 nonlocal time_collect
                 # kick off the first step
                 if global_step >= 1:
-                    time_collect.append(end_time - start_fwd_time + data_time) # unit: s
+                    time_collect.append(
+                        end_time - start_fwd_time + data_time
+                    )  # unit: s
 
                 # Log metrics
                 if (
@@ -591,9 +630,7 @@ def train(args, train_dataset, model, tokenizer):
                         args.output_dir, "checkpoint-{}".format(global_step)
                     )
                     # Take care of distributed/parallel training
-                    model_to_save = (
-                        model.module if hasattr(model, "module") else model
-                    )
+                    model_to_save = model.module if hasattr(model, "module") else model
                     model_to_save.save_pretrained(output_dir)
                     tokenizer.save_pretrained(output_dir)
 
@@ -619,7 +656,11 @@ def train(args, train_dataset, model, tokenizer):
             return tr_loss
 
         num_step = 0
-        mode = "kineto" if args.kineto_profile else "legacy" if args.legacy_profile else "disable"
+        mode = (
+            "kineto"
+            if args.kineto_profile
+            else "legacy" if args.legacy_profile else "disable"
+        )
         legacy_profilers = []
         with profiler_setup(mode, legacy_profilers, record_shapes=True) as prof:
             for step, batch in enumerate(epoch_iterator):
@@ -629,15 +670,22 @@ def train(args, train_dataset, model, tokenizer):
                 if mode == "kineto":
                     prof.step()
                 elif mode == "legacy":
-                    legacy_profile_print(prof_legacy, f"self_{args.device_choice}_time_total")
+                    legacy_profile_print(
+                        prof_legacy, f"self_{args.device_choice}_time_total"
+                    )
 
                 if args.num_steps != -1 and num_step >= args.num_steps:
                     time_collect_num = len(time_collect)
                     avg_time = sum(time_collect) / time_collect_num
                     print("train avg loss is:", loss)
-                    print("train latency is:", avg_time, ' s')
-                    print("train throughput is:", args.train_batch_size/avg_time, ' sentences/s')
+                    print("train latency is:", avg_time, " s")
+                    print(
+                        "train throughput is:",
+                        args.train_batch_size / avg_time,
+                        " sentences/s",
+                    )
                     import sys
+
                     sys.exit()
 
                 if args.max_steps > 0 and global_step > args.max_steps:
@@ -683,12 +731,21 @@ def evaluate(args, model, tokenizer, prefix=""):
     jit_model = None
     jit_trace_path = os.path.join(
         hub,
-        args.model_type + "_" +
-        args.model_name_or_path.rsplit("/", 1)[-1] + "_trace_" + 
-        args.dtype + ".zip"
+        args.model_type
+        + "_"
+        + args.model_name_or_path.rsplit("/", 1)[-1]
+        + "_trace_"
+        + args.dtype
+        + ".zip",
     )
 
-    do_profiling = os.environ.get("PROFILE", "OFF").upper() in ["1", "Y", "ON", "YES", "TRUE"]
+    do_profiling = os.environ.get("PROFILE", "OFF").upper() in [
+        "1",
+        "Y",
+        "ON",
+        "YES",
+        "TRUE",
+    ]
 
     def inference_profiler_setup(args, mode, **prof_kwargs):
         if mode == "legacy":
@@ -696,38 +753,39 @@ def evaluate(args, model, tokenizer, prefix=""):
             return contextlib.nullcontext()
         elif mode == "kineto":
             activities = [torch.profiler.ProfilerActivity.CPU]
-            if args.device_choice == 'cuda':
+            if args.device_choice == "cuda":
                 activities.append(torch.profiler.ProfilerActivity.CUDA)
-            elif args.device_choice == 'xpu':
+            elif args.device_choice == "xpu":
                 activities.append(torch.profiler.ProfilerActivity.XPU)
 
             def trace_handle(prof):
-                profile_name = 'fp32'
+                profile_name = "fp32"
                 if args.dtype == "FP16":
-                    profile_name = 'fp16'
+                    profile_name = "fp16"
                 elif args.dtype == "BF16":
-                    profile_name = 'bf16'
-                profile_dir = './bert-inference-profile'
+                    profile_name = "bf16"
+                profile_dir = "./bert-inference-profile"
                 if os.path.exists(profile_dir):
                     if not os.path.isdir(profile_dir):
-                        profile_dir = './'
+                        profile_dir = "./"
                 else:
                     os.makedirs(profile_dir, exist_ok=True)
-                if args.device_choice == 'xpu':
+                if args.device_choice == "xpu":
                     torch.save(
                         prof.key_averages().table(sort_by="self_xpu_time_total"),
-                        f'{profile_dir}/inference-profiling.xpu.{profile_name}.step{prof.step_num}.pt'
+                        f"{profile_dir}/inference-profiling.xpu.{profile_name}.step{prof.step_num}.pt",
                     )
-                elif args.device_choice == 'cuda':
+                elif args.device_choice == "cuda":
                     torch.save(
                         prof.key_averages().table(sort_by="self_cuda_time_total"),
-                        f'{profile_dir}/inference-profiling.cuda.{profile_name}.step{prof.step_num}.pt'
+                        f"{profile_dir}/inference-profiling.cuda.{profile_name}.step{prof.step_num}.pt",
                     )
                 else:
                     torch.save(
                         prof.key_averages().table(sort_by="self_cpu_time_total"),
-                        f'{profile_dir}/inference-profiling.cpu.{profile_name}.step{prof.step_num}.pt'
+                        f"{profile_dir}/inference-profiling.cpu.{profile_name}.step{prof.step_num}.pt",
                     )
+
             return torch.profiler.profile(
                 activities=activities,
                 schedule=torch.profiler.schedule(
@@ -744,7 +802,11 @@ def evaluate(args, model, tokenizer, prefix=""):
     start_time = time.time()
     num_step = 0
     time_collect = []
-    mode = "kineto" if args.kineto_profile else "legacy" if args.legacy_profile else "disable"
+    mode = (
+        "kineto"
+        if args.kineto_profile
+        else "legacy" if args.legacy_profile else "disable"
+    )
     with inference_profiler_setup(args, mode, record_shapes=False) as prof:
         for batch in tqdm(eval_dataloader, desc="Evaluating"):
             inputs = {
@@ -805,9 +867,13 @@ def evaluate(args, model, tokenizer, prefix=""):
                 outputs = None
                 batch_start = None
                 batch_end = None
-                with torch.autograd.profiler_legacy.profile(
-                    do_profiling, use_xpu=True, record_shapes=False
-                ) if mode == 'legacy' else contextlib.nullcontext() as legacy_prof:
+                with (
+                    torch.autograd.profiler_legacy.profile(
+                        do_profiling, use_xpu=True, record_shapes=False
+                    )
+                    if mode == "legacy"
+                    else contextlib.nullcontext()
+                ) as legacy_prof:
                     batch_start = time.time()
                     inputs = collate_fn_(inputs, device=args.device)
                     if args.do_jit:
@@ -819,10 +885,16 @@ def evaluate(args, model, tokenizer, prefix=""):
                     for _, v in outputs.items():
                         v = v.to(torch.float32).to("cpu")
                     batch_end = time.time()
-                print("local latency is:", (batch_end - batch_start), ' s')
-                print("local throughput is:", args.eval_batch_size/(batch_end - batch_start), ' sentences/s')
+                print("local latency is:", (batch_end - batch_start), " s")
+                print(
+                    "local throughput is:",
+                    args.eval_batch_size / (batch_end - batch_start),
+                    " sentences/s",
+                )
 
-                if num_step >= 10 and num_step <= (len(dataset)/args.eval_batch_size - 10):
+                if num_step >= 10 and num_step <= (
+                    len(dataset) / args.eval_batch_size - 10
+                ):
                     time_collect.append(batch_end - batch_start)
 
                 if args.do_jit:
@@ -831,20 +903,28 @@ def evaluate(args, model, tokenizer, prefix=""):
                         end_logits=outputs["end_logits"],
                     )
 
-                if num_step == 10 and do_profiling and mode == 'legacy':
-                    profiling_path = os.getenv('PROFILE_PATH')
+                if num_step == 10 and do_profiling and mode == "legacy":
+                    profiling_path = os.getenv("PROFILE_PATH")
                     # if no set PROFILE_PATH, use current dir
                     if profiling_path is None:
-                        profiling_path = './'
-                    if (args.profiling_sub_file != ""):
+                        profiling_path = "./"
+                    if args.profiling_sub_file != "":
                         profiling_path += args.profiling_sub_file
                     mkdir(profiling_path)
-                    torch.save(legacy_prof.key_averages().table(sort_by="self_xpu_time_total"),
-                               profiling_path + '/bert_inference_profile.pt')
-                    print(legacy_prof.key_averages().table(sort_by="self_xpu_time_total"))
-                    torch.save(legacy_prof.table(sort_by="id", row_limit=100000),
-                               profiling_path + '/bert_inference_profile_detailed.pt')
-                    legacy_prof.export_chrome_trace(profiling_path + '/bert_inference_profile.json')
+                    torch.save(
+                        legacy_prof.key_averages().table(sort_by="self_xpu_time_total"),
+                        profiling_path + "/bert_inference_profile.pt",
+                    )
+                    print(
+                        legacy_prof.key_averages().table(sort_by="self_xpu_time_total")
+                    )
+                    torch.save(
+                        legacy_prof.table(sort_by="id", row_limit=100000),
+                        profiling_path + "/bert_inference_profile_detailed.pt",
+                    )
+                    legacy_prof.export_chrome_trace(
+                        profiling_path + "/bert_inference_profile.json"
+                    )
 
             for i, feature_index in enumerate(feature_indices):
                 eval_feature = features[feature_index.item()]
@@ -883,26 +963,28 @@ def evaluate(args, model, tokenizer, prefix=""):
 
     evalTime = time.time() - start_time
 
-    if do_profiling and mode == 'kineto':
-        profiling_path = os.getenv('PROFILE_PATH')
+    if do_profiling and mode == "kineto":
+        profiling_path = os.getenv("PROFILE_PATH")
         # if no set PROFILE_PATH, use current dir
         if profiling_path is None:
-            profiling_path = './'
-        if (args.profiling_sub_file != ""):
+            profiling_path = "./"
+        if args.profiling_sub_file != "":
             profiling_path += args.profiling_sub_file
         mkdir(profiling_path)
         torch.save(
             prof.key_averages().table(sort_by="self_xpu_time_total"),
-            profiling_path + '/bert_inference_profile.pt',
+            profiling_path + "/bert_inference_profile.pt",
         )
         print(prof.key_averages().table(sort_by="self_xpu_time_total"))
-        prof.export_chrome_trace(profiling_path + '/bert_inference_profile.json')
+        prof.export_chrome_trace(profiling_path + "/bert_inference_profile.json")
 
     if len(time_collect) > 0:
-        avg_time = sum(time_collect)/len(time_collect)
-        print("inf latency: ", avg_time, ' s')
-        print("inf throughput: ", args.eval_batch_size/avg_time, ' sentences/s')
-    if args.num_steps != -1 and args.num_steps < (len(dataset)/args.eval_batch_size + 1):
+        avg_time = sum(time_collect) / len(time_collect)
+        print("inf latency: ", avg_time, " s")
+        print("inf throughput: ", args.eval_batch_size / avg_time, " sentences/s")
+    if args.num_steps != -1 and args.num_steps < (
+        len(dataset) / args.eval_batch_size + 1
+    ):
         exit()
     logger.info(
         "  Evaluation done in total %f secs (%f sec per example)",
@@ -1135,7 +1217,7 @@ def main():
         default="FP32",
         type=str,
         choices=["FP32", "BF16", "FP16"],
-        help= "Specify precision to use",
+        help="Specify precision to use",
     )
 
     parser.add_argument(
@@ -1177,10 +1259,14 @@ def main():
         "--do_eval", action="store_true", help="Whether to run eval on the dev set."
     )
     parser.add_argument(
-        "--do_jit", action="store_true", help="Whether to run eval with jit on the dev set."
+        "--do_jit",
+        action="store_true",
+        help="Whether to run eval with jit on the dev set.",
     )
     parser.add_argument(
-        "--do_dynamo", action="store_true", help="Whether to run eval with torch.compile on the dev set."
+        "--do_dynamo",
+        action="store_true",
+        help="Whether to run eval with torch.compile on the dev set.",
     )
     parser.add_argument(
         "--jit_cache",
@@ -1297,7 +1383,7 @@ def main():
         default="cpu",
         type=str,
         choices=["cpu", "xpu", "cuda"],
-        help= "Specify device to use when available",
+        help="Specify device to use when available",
     )
     parser.add_argument(
         "--legacy_profile",
@@ -1383,7 +1469,7 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.device_choice == 'xpu':
+    if args.device_choice == "xpu":
         import intel_extension_for_pytorch
 
     if args.doc_stride >= args.max_seq_length - args.max_query_length:
@@ -1428,7 +1514,9 @@ def main():
             try:
                 import oneccl_bindings_for_pytorch
             except:
-                print("CCL backend requested but import oneccl_bindings_for_pytorch failed")
+                print(
+                    "CCL backend requested but import oneccl_bindings_for_pytorch failed"
+                )
                 raise
         elif args.dist_backend == "mpi":
             if not torch.distributed.is_mpi_available():
@@ -1456,11 +1544,11 @@ def main():
         if args.n_gpu > 1:
             args.n_gpu = 1
     else:
-        if args.device_choice == 'cuda':
+        if args.device_choice == "cuda":
             torch.cuda.set_device(args.local_rank)
             device = torch.device("cuda", args.local_rank)
             torch.distributed.init_process_group(backend="nccl")
-        elif args.device_choice == 'xpu':
+        elif args.device_choice == "xpu":
             torch.xpu.set_device(args.local_rank)
             device = torch.device("xpu", args.local_rank)
         args.n_gpu = 1
@@ -1507,7 +1595,7 @@ def main():
         cache_dir=args.cache_dir if args.cache_dir else None,
         use_fast=False,  # SquadDataset is not compatible with Fast tokenizers which have a smarter overflow handeling
     )
-    model = load_model(args, config = config)
+    model = load_model(args, config=config)
 
     for m in model.modules():
         if hasattr(m, "maybe_block_params"):
@@ -1594,7 +1682,7 @@ def main():
         for checkpoint in checkpoints:
             # Reload the model
             global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
-            model = load_model(args, checkpoint = checkpoint)
+            model = load_model(args, checkpoint=checkpoint)
 
             # Evaluate
             result = evaluate(args, model, tokenizer, prefix=global_step)

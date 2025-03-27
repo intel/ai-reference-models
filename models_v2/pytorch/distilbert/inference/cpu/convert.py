@@ -13,10 +13,11 @@
 # limitations under the License.
 #
 
-import pandas as pd 
-tsv_file='SST-2/dev.tsv'
-csv_table=pd.read_table(tsv_file,sep='\t')
-csv_table.to_csv('SST-2/dev.csv',index=False)
-tsv_file='SST-2/train.tsv'
-csv_table=pd.read_table(tsv_file,sep='\t')
-csv_table.to_csv('SST-2/train.csv',index=False)
+import pandas as pd
+
+tsv_file = "SST-2/dev.tsv"
+csv_table = pd.read_table(tsv_file, sep="\t")
+csv_table.to_csv("SST-2/dev.csv", index=False)
+tsv_file = "SST-2/train.tsv"
+csv_table = pd.read_table(tsv_file, sep="\t")
+csv_table.to_csv("SST-2/train.csv", index=False)

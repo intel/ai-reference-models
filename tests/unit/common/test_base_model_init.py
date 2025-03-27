@@ -53,12 +53,12 @@ def catch_stdout():
 
 @pytest.fixture
 def mock_json(patch):
-    return patch('json')
+    return patch("json")
 
 
 @pytest.fixture
 def mock_glob(patch):
-    return patch('glob.glob')
+    return patch("glob.glob")
 
 
 # Example args and output strings for testing mocks
@@ -67,11 +67,18 @@ test_framework = "tensorflow"
 test_mode = "inference"
 test_precision = "fp32"
 test_docker_image = "foo"
-example_req_args = ["--model-name", test_model_name,
-                    "--framework", test_framework,
-                    "--mode", test_mode,
-                    "--precision", test_precision,
-                    "--docker-image", test_docker_image]
+example_req_args = [
+    "--model-name",
+    test_model_name,
+    "--framework",
+    test_framework,
+    "--mode",
+    test_mode,
+    "--precision",
+    test_precision,
+    "--docker-image",
+    test_docker_image,
+]
 
 
 @patch("benchmarks.common.base_model_init.open")
@@ -80,11 +87,16 @@ example_req_args = ["--model-name", test_model_name,
 @patch("common.platform_util.subprocess")
 @patch("os.system")
 def test_base_model_initializer(
-        mock_system, mock_subprocess, mock_platform, mock_os, mock_open):
+    mock_system, mock_subprocess, mock_platform, mock_os, mock_open
+):
     # Setup base model init with test settings
     platform_util = MagicMock()
-    args = MagicMock(verbose=True, model_name=test_model_name, batch_size=100,
-                     numa_cores_per_instance=None)
+    args = MagicMock(
+        verbose=True,
+        model_name=test_model_name,
+        batch_size=100,
+        numa_cores_per_instance=None,
+    )
     os.environ["PYTHON_EXE"] = "python"
     os.environ["MPI_HOSTNAMES"] = "None"
     os.environ["MPI_NUM_PROCESSES"] = "None"
@@ -97,7 +109,7 @@ def test_base_model_initializer(
 
 
 def test_env_var_already_set():
-    """ Tests setting and env var when it's already set """
+    """Tests setting and env var when it's already set"""
     env_var = "model-zoo-test-env-var-name"
     original_value = "original"
     modified_value = "modified"
@@ -123,7 +135,7 @@ def test_env_var_already_set():
 
 
 def test_env_var_not_already_set():
-    """ Tests setting and env var when it's not already set """
+    """Tests setting and env var when it's not already set"""
     env_var = "model-zoo-test-env-var-name"
     new_value = "new_value"
 
@@ -158,14 +170,19 @@ def test_set_kmp_vars_config_json_does_not_exists():
     os.environ["PYTHON_EXE"] = "python"
     base_model_init = BaseModelInitializer(args, [], platform_util)
 
-    config_file_path = '/test/foo/config.json'
+    config_file_path = "/test/foo/config.json"
 
     with catch_stdout() as caught_output:
         base_model_init.set_kmp_vars(config_file_path)
         output = caught_output.getvalue()
 
-    assert "Warning: File {} does not exist and \
-            cannot be used to set KMP environment variables".format(config_file_path) == output.strip()
+    assert (
+        "Warning: File {} does not exist and \
+            cannot be used to set KMP environment variables".format(
+            config_file_path
+        )
+        == output.strip()
+    )
 
 
 def test_set_kmp_vars_config_json_exists(mock_json):
@@ -181,10 +198,10 @@ def test_set_kmp_vars_config_json_exists(mock_json):
     base_model_init.set_kmp_vars(config_file_path)
 
 
-@pytest.mark.parametrize('precision', ['int8'])
+@pytest.mark.parametrize("precision", ["int8"])
 def test_command_prefix_tcmalloc_int8(precision, mock_glob):
-    """ For Int8 models, TCMalloc should be enabled by default and models should include
-     LD_PRELOAD in the command prefix, unless disable_tcmalloc=True is set """
+    """For Int8 models, TCMalloc should be enabled by default and models should include
+    LD_PRELOAD in the command prefix, unless disable_tcmalloc=True is set"""
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
     test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
@@ -218,10 +235,11 @@ def test_command_prefix_tcmalloc_int8(precision, mock_glob):
     assert "numactl" not in command_prefix
 
 
-@pytest.mark.parametrize('precision', ['fp32'])
+@pytest.mark.parametrize("precision", ["fp32"])
 def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
-    """ FP32 models should have TC Malloc disabled by default, but models should
-    include LD_PRELOAD in the command prefix if disable_tcmalloc=False is explicitly set. """
+    """FP32 models should have TC Malloc disabled by default, but models should
+    include LD_PRELOAD in the command prefix if disable_tcmalloc=False is explicitly set.
+    """
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
     test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
@@ -253,11 +271,11 @@ def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
     assert "numactl" not in command_prefix
 
 
-@pytest.mark.parametrize('precision', ['fp32', 'int8', 'bfloat16'])
+@pytest.mark.parametrize("precision", ["fp32", "int8", "bfloat16"])
 def test_command_prefix_numa_multi_instance(precision, mock_glob):
-    """ Tests that models don't get a numactl command prefix from
+    """Tests that models don't get a numactl command prefix from
     base_model_init.get_command_prefix, if numa_cores_per_instance is set, since numactl
-    commands will be added later for each instance run. """
+    commands will be added later for each instance run."""
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
     test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
@@ -279,29 +297,73 @@ def test_multi_instance_train_prefix():
     args.num_processes = 2
     args.num_processes_per_node = 1
     base_model_init = BaseModelInitializer(args, [], platform_util)
-    command = base_model_init.get_multi_instance_train_prefix(option_list=["--genv:test"])
+    command = base_model_init.get_multi_instance_train_prefix(
+        option_list=["--genv:test"]
+    )
     assert command == "mpirun -n 2 -ppn 1 --genv test "
 
     args.num_processes = None
     args.num_processes_per_node = None
     base_model_init = BaseModelInitializer(args, [], platform_util)
-    command = base_model_init.get_multi_instance_train_prefix(option_list=["--genv:test", "--genv:test2"])
+    command = base_model_init.get_multi_instance_train_prefix(
+        option_list=["--genv:test", "--genv:test2"]
+    )
     assert command == "mpirun --genv test --genv test2 "
 
 
-@pytest.mark.parametrize('test_num_instances,test_socket_id,test_cpu_list, expected_cpu_bind,precision',
-                         [['2', -1, [['0', '1'], ['2', '3']], ['0,1', '2,3'], 'fp32'],
-                          ['2', 0, [['0', '1'], ['2', '3']], ['0,1'], 'fp32'],
-                          ['2', 1, [['0', '1'], ['2', '3']], ['2,3'], 'fp32'],
-                          ['4', -1, [['4', '5', '6', '7', '0', '1', '2', '3']], ['4,5,6,7', '0,1,2,3'], 'fp32'],
-                          ['8', -1, [['4', '5', '6', '7', '0', '1', '2', '3']], ['4,5,6,7,0,1,2,3'], 'fp32'],
-                          ['3', -1, [['4', '5', '6', '7'], ['0', '1', '2', '3']], ['4,5,6', '7,0,1'], 'fp32'],
-                          ['2', -1, [['0', '1'], ['2', '3']], ['0,1', '2,3'], 'int8'],
-                          ['2', 0, [['0', '1'], ['2', '3']], ['0,1'], 'int8'],
-                          ['2', 1, [['0', '1'], ['2', '3']], ['2,3'], 'int8'],
-                          ['4', -1, [['4', '5', '6', '7', '0', '1', '2', '3']], ['4,5,6,7', '0,1,2,3'], 'int8'],
-                          ['8', -1, [['4', '5', '6', '7', '0', '1', '2', '3']], ['4,5,6,7,0,1,2,3'], 'int8'],
-                          ['3', -1, [['4', '5', '6', '7'], ['0', '1', '2', '3']], ['4,5,6', '7,0,1'], 'int8']])
+@pytest.mark.parametrize(
+    "test_num_instances,test_socket_id,test_cpu_list, expected_cpu_bind,precision",
+    [
+        ["2", -1, [["0", "1"], ["2", "3"]], ["0,1", "2,3"], "fp32"],
+        ["2", 0, [["0", "1"], ["2", "3"]], ["0,1"], "fp32"],
+        ["2", 1, [["0", "1"], ["2", "3"]], ["2,3"], "fp32"],
+        [
+            "4",
+            -1,
+            [["4", "5", "6", "7", "0", "1", "2", "3"]],
+            ["4,5,6,7", "0,1,2,3"],
+            "fp32",
+        ],
+        [
+            "8",
+            -1,
+            [["4", "5", "6", "7", "0", "1", "2", "3"]],
+            ["4,5,6,7,0,1,2,3"],
+            "fp32",
+        ],
+        [
+            "3",
+            -1,
+            [["4", "5", "6", "7"], ["0", "1", "2", "3"]],
+            ["4,5,6", "7,0,1"],
+            "fp32",
+        ],
+        ["2", -1, [["0", "1"], ["2", "3"]], ["0,1", "2,3"], "int8"],
+        ["2", 0, [["0", "1"], ["2", "3"]], ["0,1"], "int8"],
+        ["2", 1, [["0", "1"], ["2", "3"]], ["2,3"], "int8"],
+        [
+            "4",
+            -1,
+            [["4", "5", "6", "7", "0", "1", "2", "3"]],
+            ["4,5,6,7", "0,1,2,3"],
+            "int8",
+        ],
+        [
+            "8",
+            -1,
+            [["4", "5", "6", "7", "0", "1", "2", "3"]],
+            ["4,5,6,7,0,1,2,3"],
+            "int8",
+        ],
+        [
+            "3",
+            -1,
+            [["4", "5", "6", "7"], ["0", "1", "2", "3"]],
+            ["4,5,6", "7,0,1"],
+            "int8",
+        ],
+    ],
+)
 @patch("os.path.exists")
 @patch("glob.glob")
 @patch("benchmarks.common.base_model_init.open")
@@ -310,17 +372,35 @@ def test_multi_instance_train_prefix():
 @patch("common.platform_util.subprocess")
 @patch("os.system")
 def test_numa_multi_instance_run_command(
-        mock_system, mock_subprocess, mock_platform, mock_os, mock_open, mock_glob,
-        mock_path_exists, test_num_instances, test_socket_id, test_cpu_list, expected_cpu_bind, precision):
-    """ Test the multi instance run using numactl by trying different combinations of
+    mock_system,
+    mock_subprocess,
+    mock_platform,
+    mock_os,
+    mock_open,
+    mock_glob,
+    mock_path_exists,
+    test_num_instances,
+    test_socket_id,
+    test_cpu_list,
+    expected_cpu_bind,
+    precision,
+):
+    """Test the multi instance run using numactl by trying different combinations of
     cpu lists and the number of cores used per instance. Checks the system call that
-    is run to verify that it matches the cpu groups that are expected. """
+    is run to verify that it matches the cpu groups that are expected."""
     platform_util = MagicMock(cpu_core_list=test_cpu_list)
     test_output_dir = "/tmp/output"
-    args = MagicMock(verbose=True, model_name=test_model_name, batch_size=100,
-                     numa_cores_per_instance=test_num_instances, precision=precision,
-                     output_dir=test_output_dir, mode="inference", socket_id=test_socket_id,
-                     benchmark_only=True)
+    args = MagicMock(
+        verbose=True,
+        model_name=test_model_name,
+        batch_size=100,
+        numa_cores_per_instance=test_num_instances,
+        precision=precision,
+        output_dir=test_output_dir,
+        mode="inference",
+        socket_id=test_socket_id,
+        benchmark_only=True,
+    )
     os.environ["PYTHON_EXE"] = "python"
     os.environ["MPI_HOSTNAMES"] = "None"
     os.environ["MPI_NUM_PROCESSES"] = "None"
@@ -351,18 +431,51 @@ def test_numa_multi_instance_run_command(
     system_call_args = mock_system.call_args[0][0]
 
     for cpu_bind in expected_cpu_bind:
-        expected_cmd = "{}{} numactl --localalloc --physcpubind={} {} >> {}".\
-            format(expected_ld_preload, expected_omp_num_threads, cpu_bind, test_run_command, test_output_dir)
+        expected_cmd = "{}{} numactl --localalloc --physcpubind={} {} >> {}".format(
+            expected_ld_preload,
+            expected_omp_num_threads,
+            cpu_bind,
+            test_run_command,
+            test_output_dir,
+        )
         assert expected_cmd in system_call_args
 
 
-@pytest.mark.parametrize('test_num_instances,test_socket_id,test_num_cores,test_cpu_list,test_cpuset,'
-                         'expected_inter_threads,expected_intra_threads',
-                         [[2, -1, -1, [['0', '1'], ['2', '3']], {0: ['0', '1'], 1: ['2', '3']}, 1, 2],
-                          [None, 0, -1, [['1', '2', '3'], ['10', '11']], {0: ['1', '2', '3'], 1: ['10', '11']}, 1, 3],
-                          [None, 1, -1, [['1', '2', '3'], ['10', '11']], {0: ['1', '2', '3'], 1: ['10', '11']}, 1, 2],
-                          [None, 1, -1, [['1', '2', '3'], ['10', '11']], None, 1, 3],
-                          [None, 1, 8, [['1', '2', '3'], ['10', '11']], {0: ['1', '2', '3'], 1: ['10', '11']}, 1, 8]])
+@pytest.mark.parametrize(
+    "test_num_instances,test_socket_id,test_num_cores,test_cpu_list,test_cpuset,"
+    "expected_inter_threads,expected_intra_threads",
+    [
+        [2, -1, -1, [["0", "1"], ["2", "3"]], {0: ["0", "1"], 1: ["2", "3"]}, 1, 2],
+        [
+            None,
+            0,
+            -1,
+            [["1", "2", "3"], ["10", "11"]],
+            {0: ["1", "2", "3"], 1: ["10", "11"]},
+            1,
+            3,
+        ],
+        [
+            None,
+            1,
+            -1,
+            [["1", "2", "3"], ["10", "11"]],
+            {0: ["1", "2", "3"], 1: ["10", "11"]},
+            1,
+            2,
+        ],
+        [None, 1, -1, [["1", "2", "3"], ["10", "11"]], None, 1, 3],
+        [
+            None,
+            1,
+            8,
+            [["1", "2", "3"], ["10", "11"]],
+            {0: ["1", "2", "3"], 1: ["10", "11"]},
+            1,
+            8,
+        ],
+    ],
+)
 @patch("os.path.exists")
 @patch("benchmarks.common.base_model_init.open")
 @patch("common.platform_util.os")
@@ -370,20 +483,42 @@ def test_numa_multi_instance_run_command(
 @patch("common.platform_util.subprocess")
 @patch("os.system")
 def test_num_inter_intra_threads_settings(
-        mock_system, mock_subprocess, mock_platform, mock_os, mock_open,
-        mock_path_exists, test_num_instances, test_socket_id, test_num_cores,
-        test_cpu_list, test_cpuset, expected_inter_threads, expected_intra_threads):
+    mock_system,
+    mock_subprocess,
+    mock_platform,
+    mock_os,
+    mock_open,
+    mock_path_exists,
+    test_num_instances,
+    test_socket_id,
+    test_num_cores,
+    test_cpu_list,
+    test_cpuset,
+    expected_inter_threads,
+    expected_intra_threads,
+):
     """
     Tests the base model init function that determines the num_inter_threads and
     num_intra_thread values.
     """
-    platform_util = MagicMock(cpu_core_list=test_cpu_list, cpuset_cpus=test_cpuset,
-                              num_cores_per_socket=len(test_cpu_list[0]))
+    platform_util = MagicMock(
+        cpu_core_list=test_cpu_list,
+        cpuset_cpus=test_cpuset,
+        num_cores_per_socket=len(test_cpu_list[0]),
+    )
     test_output_dir = "/tmp/output"
-    args = MagicMock(verbose=True, model_name=test_model_name, batch_size=100,
-                     numa_cores_per_instance=test_num_instances, precision="fp32",
-                     output_dir=test_output_dir, socket_id=test_socket_id, num_cores=test_num_cores,
-                     num_inter_threads=None, num_intra_threads=None)
+    args = MagicMock(
+        verbose=True,
+        model_name=test_model_name,
+        batch_size=100,
+        numa_cores_per_instance=test_num_instances,
+        precision="fp32",
+        output_dir=test_output_dir,
+        socket_id=test_socket_id,
+        num_cores=test_num_cores,
+        num_inter_threads=None,
+        num_intra_threads=None,
+    )
     os.environ["PYTHON_EXE"] = "python"
     os.environ["MPI_HOSTNAMES"] = "None"
     os.environ["MPI_NUM_PROCESSES"] = "None"

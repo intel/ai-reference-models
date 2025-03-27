@@ -35,8 +35,9 @@ except ImportError as e:
     pass
 
 try:
-    if torch.__version__[:6] >= '1.12.0':
+    if torch.__version__[:6] >= "1.12.0":
         import oneccl_bindings_for_pytorch
+
         torch_ccl = False
     else:
         import torch_ccl
@@ -79,7 +80,7 @@ def get_my_slice(n):
 
 
 def get_split_lengths(n):
-    if my_size >1:
+    if my_size > 1:
         tmp_size = dist.get_world_size()
         tmp_rank = dist.get_rank()
     else:
@@ -111,7 +112,7 @@ def init_distributed(rank=-1, local_rank=-1, size=-1, use_device="cpu", backend=
     if backend == "" and num_mpi_ranks > 1:
         if torch_ccl or oneccl_bindings_for_pytorch:
             backend = "ccl"
-        elif use_device=="cuda" and dist.is_nccl_available():
+        elif use_device == "cuda" and dist.is_nccl_available():
             backend = "nccl"
         elif dist.is_mpi_available():
             backend = "mpi"
@@ -182,7 +183,7 @@ def init_distributed(rank=-1, local_rank=-1, size=-1, use_device="cpu", backend=
             ],
             1,
         )
-        if use_device=="cuda":
+        if use_device == "cuda":
             if my_local_size > torch.cuda.device_count():
                 print(
                     "Not sufficient GPUs available... local_size = %d, ngpus = %d"
@@ -190,7 +191,7 @@ def init_distributed(rank=-1, local_rank=-1, size=-1, use_device="cpu", backend=
                 )
                 sys.exit(1)
             torch.cuda.set_device(my_local_rank)
-        elif use_device=="xpu":
+        elif use_device == "xpu":
             if my_local_size > torch.xpu.device_count():
                 print(
                     "Not sufficient GPUs available... local_size = %d, ngpus = %d"
@@ -201,8 +202,8 @@ def init_distributed(rank=-1, local_rank=-1, size=-1, use_device="cpu", backend=
         dist.init_process_group(backend, rank=rank, world_size=size)
         this_rank = dist.get_rank()
         my_size = dist.get_world_size()
-        #my_local_rank = env2int(['MPI_LOCALRANKID', 'OMPI_COMM_WORLD_LOCAL_RANK', 'MV2_COMM_WORLD_LOCAL_RANK'], 0)
-        #my_local_size = env2int(['MPI_LOCALNRANKS', 'OMPI_COMM_WORLD_LOCAL_SIZE', 'MV2_COMM_WORLD_LOCAL_SIZE'], 1)
+        # my_local_rank = env2int(['MPI_LOCALRANKID', 'OMPI_COMM_WORLD_LOCAL_RANK', 'MV2_COMM_WORLD_LOCAL_RANK'], 0)
+        # my_local_size = env2int(['MPI_LOCALNRANKS', 'OMPI_COMM_WORLD_LOCAL_SIZE', 'MV2_COMM_WORLD_LOCAL_SIZE'], 1)
         if this_rank == 0:
             print("Running on %d ranks using %s backend" % (my_size, backend))
         if hasattr(dist, "all_to_all_single"):
@@ -216,21 +217,38 @@ def init_distributed(rank=-1, local_rank=-1, size=-1, use_device="cpu", backend=
 
                 a = torch.rand([1, 3]).to(test_device)
                 dist.broadcast(a, src=0)
-                print("Successfully execute distributed broadcast on the xpu:{}".format(this_rank))
+                print(
+                    "Successfully execute distributed broadcast on the xpu:{}".format(
+                        this_rank
+                    )
+                )
 
-                tensor_list = [torch.zeros(2, dtype=torch.int64).to(test_device) for _ in range(my_size)]
-                tensor = (torch.arange(2, dtype=torch.int64) + 1 + 2 * rank).to(test_device)
+                tensor_list = [
+                    torch.zeros(2, dtype=torch.int64).to(test_device)
+                    for _ in range(my_size)
+                ]
+                tensor = (torch.arange(2, dtype=torch.int64) + 1 + 2 * rank).to(
+                    test_device
+                )
                 dist.all_gather(tensor_list, tensor)
-                print("Successfully execute distributed all_gather on the xpu:{}".format(this_rank))
+                print(
+                    "Successfully execute distributed all_gather on the xpu:{}".format(
+                        this_rank
+                    )
+                )
 
-                t = torch.zeros([4*my_size])
+                t = torch.zeros([4 * my_size])
                 if use_device == "cuda":
                     t = t.cuda()
-                elif  use_device == "xpu":
+                elif use_device == "xpu":
                     t = t.xpu()
                 dist.all_to_all_single(t, t)
 
-                print("Successfully execute distributed all_to_all_single on the xpu:{}".format(this_rank))
+                print(
+                    "Successfully execute distributed all_to_all_single on the xpu:{}".format(
+                        this_rank
+                    )
+                )
                 alltoall_supported = True
             except RuntimeError as err:
                 print("fail to enable all_to_all_single primitive: %s" % err)
@@ -665,14 +683,16 @@ def barrier():
 
 # Override builtin print function to print only from rank 0
 orig_print = builtins.print
+
+
 #
 #
-#def rank0_print(*args, **kwargs):
+# def rank0_print(*args, **kwargs):
 #    if my_rank <= 0 or kwargs.get("print_all", False):
 #        orig_print(*args, **kwargs)
 #
 #
-#builtins.print = rank0_print
+# builtins.print = rank0_print
 #
 # Allow printing from all rank with explicit print_all
 def print_all(*args, **kwargs):

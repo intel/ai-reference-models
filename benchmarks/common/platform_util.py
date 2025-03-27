@@ -37,7 +37,7 @@ NUMA_NODE_CPU_RANGE_STR_ = "NUMA node{} CPU(s):"
 ONLINE_CPUS_LIST = "On-line CPU(s) list:"
 
 
-class CPUInfo():
+class CPUInfo:
     """CPU information class."""
 
     def __init__(self):
@@ -56,7 +56,9 @@ class CPUInfo():
         :rtype: List[List[str, Any]]
         """
         args = ["lscpu", "--parse=CPU,Core,Socket,Node"]
-        process_lscpu = subprocess.check_output(args, universal_newlines=True).split("\n")
+        process_lscpu = subprocess.check_output(args, universal_newlines=True).split(
+            "\n"
+        )
 
         # Get information about core, node, socket and cpu. On a machine with no NUMA nodes, the last column is empty
         # so regex also check for empty string on the last column
@@ -100,13 +102,15 @@ class CPUInfo():
 
                 # Add core info
                 if cpu_id == core_id:
-                    core_info.update({
-                        core_id: {
-                            "cpu_id": cpu_id,
-                            "node_id": node_id,
-                            "socket_id": socket_id,
-                        },
-                    })
+                    core_info.update(
+                        {
+                            core_id: {
+                                "cpu_id": cpu_id,
+                                "node_id": node_id,
+                                "socket_id": socket_id,
+                            },
+                        }
+                    )
                 else:
                     # Add information about Hyper Threading
                     core_info[core_id]["ht_cpu_id"] = cpu_id
@@ -182,10 +186,10 @@ class CPUInfo():
 
 
 class PlatformUtil:
-    '''
+    """
     This module implements a platform utility that exposes functions that
     detects platform information.
-    '''
+    """
 
     def __init__(self, args):
         self.args = args
@@ -256,13 +260,14 @@ class PlatformUtil:
     def linux_init(self):
         lscpu_cmd = "lscpu"
         try:
-            lscpu_output = subprocess.check_output([lscpu_cmd],
-                                                   stderr=subprocess.STDOUT)
+            lscpu_output = subprocess.check_output(
+                [lscpu_cmd], stderr=subprocess.STDOUT
+            )
             # handle python2 vs 3 (bytes vs str type)
             if isinstance(lscpu_output, bytes):
-                lscpu_output = lscpu_output.decode('utf-8')
+                lscpu_output = lscpu_output.decode("utf-8")
 
-            cpu_info = lscpu_output.split('\n')
+            cpu_info = lscpu_output.split("\n")
 
         except Exception as e:
             print("Problem getting CPU info: {}".format(e))
@@ -296,7 +301,9 @@ class PlatformUtil:
                 for node in range(0, self.num_numa_nodes):
                     if line.find(NUMA_NODE_CPU_RANGE_STR_.format(str(node))) == 0:
                         range_for_node = line.split(":")[1].strip()
-                        range_list_for_node = self._get_list_from_string_ranges(range_for_node)
+                        range_list_for_node = self._get_list_from_string_ranges(
+                            range_for_node
+                        )
                         core_list_per_node[node] = range_list_for_node
 
         # Try to get the cpuset.cpus info, since lscpu does not know if the cpuset is limited
@@ -310,7 +317,11 @@ class PlatformUtil:
             # machine, so let's avoid unnecessary complexity and don't bother with the cpuset_cpu list.
             # The cpuset_cpus list will also get populated if the num_cores arg is being specified,
             # since this list will be used to create the numactl args in base_model_init.py
-            if (online_cpus_list != "" and online_cpus_list != cpuset) or online_cpus_list == "" or num_cores_arg != -1:
+            if (
+                (online_cpus_list != "" and online_cpus_list != cpuset)
+                or online_cpus_list == ""
+                or num_cores_arg != -1
+            ):
                 self.cpuset_cpus = self._get_list_from_string_ranges(cpuset)
 
         # Uses numactl get the core number for each numa node and adds the cores for each
@@ -323,38 +334,55 @@ class PlatformUtil:
         else:
             cores_per_node = self.num_cores_per_socket
         if hasattr(self.args, "numa_cores_per_instance"):
-            if self.num_numa_nodes > 0 and self.args.numa_cores_per_instance is not None:
+            if (
+                self.num_numa_nodes > 0
+                and self.args.numa_cores_per_instance is not None
+            ):
                 try:
                     # Get the list of cores
-                    cpu_array_command = \
-                        "numactl -H | grep 'node [0-9]* cpus:' |" \
+                    cpu_array_command = (
+                        "numactl -H | grep 'node [0-9]* cpus:' |"
                         "sed 's/.*node [0-9]* cpus: *//' | head -{0} |cut -f1-{1} -d' '".format(
-                            self.num_numa_nodes, int(cores_per_node))
+                            self.num_numa_nodes, int(cores_per_node)
+                        )
+                    )
                     cpu_array = subprocess.Popen(
-                        cpu_array_command, shell=True, stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE).stdout.readlines()
+                        cpu_array_command,
+                        shell=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                    ).stdout.readlines()
 
                     for node_cpus in cpu_array:
                         node_cpus = str(node_cpus).lstrip("b'").replace("\\n'", " ")
-                        self.cpu_core_list.append([x for x in node_cpus.split(" ") if x != ''])
+                        self.cpu_core_list.append(
+                            [x for x in node_cpus.split(" ") if x != ""]
+                        )
 
                     # If we have the cpuset list, cross check that list with our core list and
                     # remove cores that are not part of the cpuset list
                     if self.cpuset_cpus is not None:
                         for socket, core_list in enumerate(self.cpu_core_list):
-                            self.cpu_core_list[socket] = [x for x in core_list if int(x) in self.cpuset_cpus]
+                            self.cpu_core_list[socket] = [
+                                x for x in core_list if int(x) in self.cpuset_cpus
+                            ]
 
                     if hasattr(self.args, "verbose") and self.args.verbose:
                         print("Core list: {}".format(self.cpu_core_list), flush=True)
 
                 except Exception as e:
-                    print("Warning: An error occured when getting the list of cores using '{}':\n {}".
-                          format(cpu_array_command, e))
+                    print(
+                        "Warning: An error occured when getting the list of cores using '{}':\n {}".format(
+                            cpu_array_command, e
+                        )
+                    )
 
         if self.cpuset_cpus is not None:
             # Reformat the cpuset_cpus list so that it's split up by node
             for node in core_list_per_node.keys():
-                core_list_per_node[node] = [x for x in core_list_per_node[node] if x in self.cpuset_cpus]
+                core_list_per_node[node] = [
+                    x for x in core_list_per_node[node] if x in self.cpuset_cpus
+                ]
             self.cpuset_cpus = core_list_per_node
 
             # Remove cores that aren't part of the cpu_core_list
@@ -382,9 +410,9 @@ class PlatformUtil:
 
             # handle python2 vs 3 (bytes vs str type)
             if isinstance(wmic_output, bytes):
-                wmic_output = wmic_output.decode('utf-8')
+                wmic_output = wmic_output.decode("utf-8")
 
-            cpu_info = wmic_output.split('\r\r\n')
+            cpu_info = wmic_output.split("\r\r\n")
 
         except Exception as e:
             print("Problem getting CPU info: {}".format(e))
@@ -402,12 +430,12 @@ class PlatformUtil:
             elif line.find(THREAD_COUNT_STR_) == 0:
                 num_threads = int(line.split("=")[1].strip())
 
-        self.num_cpu_sockets = len(re.findall(
-            r'\b%s\b' % re.escape(NUM_SOCKETS_STR_), wmic_output))
+        self.num_cpu_sockets = len(
+            re.findall(r"\b%s\b" % re.escape(NUM_SOCKETS_STR_), wmic_output)
+        )
 
         if self.num_cpu_sockets > 0 and num_threads:
-            self.num_threads_per_core =\
-                int(num_threads / self.num_cpu_sockets)
+            self.num_threads_per_core = int(num_threads / self.num_cpu_sockets)
 
     def mac_init(self):
         raise NotImplementedError("Mac Support not yet implemented")

@@ -27,36 +27,52 @@ import pandas
 import argparse
 import numpy as np
 import tensorflow as tf
+
+
 def version_is_less_than(a, b):
-    a_parts = a.split('.')
-    b_parts = b.split('.')
-    
+    a_parts = a.split(".")
+    b_parts = b.split(".")
+
     for i in range(len(a_parts)):
         if int(a_parts[i]) < int(b_parts[i]):
-            print('{} < {}, version_is_less_than() returning False'.format(
-              a_parts[i], b_parts[i]))
+            print(
+                "{} < {}, version_is_less_than() returning False".format(
+                    a_parts[i], b_parts[i]
+                )
+            )
             return True
     return False
+
+
 print("TensorFlow version {}".format(tf.__version__))
-required_tf_version = '2.0.0'
-if version_is_less_than(tf.__version__ , required_tf_version):
+required_tf_version = "2.0.0"
+if version_is_less_than(tf.__version__, required_tf_version):
     tf.compat.v1.enable_eager_execution()
 parser = argparse.ArgumentParser()
-parser.add_argument('--inputcsv-datafile', type=str,
-                    help='full path of data file e.g. eval.csv',
-                    dest='evaldatafile_path',
-                    required=True)
-parser.add_argument('--calibrationcsv-datafile', type=str,
-                    help='full path of data file of calibration/train dataset to get normalization ranges',
-                    dest='traindatafile_path',
-                    default='NULL',
-                    required=False)
+parser.add_argument(
+    "--inputcsv-datafile",
+    type=str,
+    help="full path of data file e.g. eval.csv",
+    dest="evaldatafile_path",
+    required=True,
+)
+parser.add_argument(
+    "--calibrationcsv-datafile",
+    type=str,
+    help="full path of data file of calibration/train dataset to get normalization ranges",
+    dest="traindatafile_path",
+    default="NULL",
+    required=False,
+)
 
-parser.add_argument('--outputfile-name', type=str,
-                    help='output tfrecord file name e.g. processed_eval.[tfrecords]',
-                    dest='outputfile_path',
-                    default="processed_data.tfrecords",
-                    required=False)
+parser.add_argument(
+    "--outputfile-name",
+    type=str,
+    help="output tfrecord file name e.g. processed_eval.[tfrecords]",
+    dest="outputfile_path",
+    default="processed_data.tfrecords",
+    required=False,
+)
 
 args = parser.parse_args()
 
@@ -74,72 +90,73 @@ in_filename, _ = os.path.splitext(os.path.basename(eval_csv_file))
 if file_ext != ".tfrecords":
     output_file = output_file + ".tfrecords"
 
-output_file = "{}_{}".format(in_filename,output_file)
+output_file = "{}_{}".format(in_filename, output_file)
 csv = pandas.read_csv(eval_csv_file, header=None)
-if len(csv.columns)==39:
-    dataset_type = 'test'
+if len(csv.columns) == 39:
+    dataset_type = "test"
 else:
-    dataset_type = 'eval'
-fill_na_dict  = {}
-if dataset_type=='test':
-    for i in range(0,13):
-        fill_na_dict[i]=0.0
-    for i in range(13,39):
-        fill_na_dict[i]=""
+    dataset_type = "eval"
+fill_na_dict = {}
+if dataset_type == "test":
+    for i in range(0, 13):
+        fill_na_dict[i] = 0.0
+    for i in range(13, 39):
+        fill_na_dict[i] = ""
 else:
-    for i in range(1,14):
-        fill_na_dict[i]=0.0
-    for i in range(14,40):
-        fill_na_dict[i]=""
-csv=csv.fillna(value=fill_na_dict).values
+    for i in range(1, 14):
+        fill_na_dict[i] = 0.0
+    for i in range(14, 40):
+        fill_na_dict[i] = ""
+csv = csv.fillna(value=fill_na_dict).values
 numeric_feature_names = ["numeric_1"]
 string_feature_names = ["string_1"]
-LABEL_COLUMN =["clicked"]
-CATEGORICAL_COLUMNS1 = ["C"+str(i)+"_embedding" for i in range(1, 27)]
-NUMERIC_COLUMNS1 = ["I"+str(i) for i in range(1, 14)]
-if dataset_type=='eval':
+LABEL_COLUMN = ["clicked"]
+CATEGORICAL_COLUMNS1 = ["C" + str(i) + "_embedding" for i in range(1, 27)]
+NUMERIC_COLUMNS1 = ["I" + str(i) for i in range(1, 14)]
+if dataset_type == "eval":
     DATA_COLUMNS = LABEL_COLUMN + NUMERIC_COLUMNS1 + CATEGORICAL_COLUMNS1
 else:
     DATA_COLUMNS = NUMERIC_COLUMNS1 + CATEGORICAL_COLUMNS1
-CATEGORICAL_COLUMNS2 = ["C"+str(i)+"_embedding" for i in range(1, 27)]
-NUMERIC_COLUMNS2 = ["I"+str(i) for i in range(1, 14)]
+CATEGORICAL_COLUMNS2 = ["C" + str(i) + "_embedding" for i in range(1, 27)]
+NUMERIC_COLUMNS2 = ["I" + str(i) for i in range(1, 14)]
 
 CATEGORICAL_COLUMNS1.sort()
 NUMERIC_COLUMNS1.sort()
 no_of_rows = 0
-with open(eval_csv_file, 'r') as f:
+with open(eval_csv_file, "r") as f:
     if not os.path.isfile(train_csv_file):
-        nums=[line.strip('\n\r').split(',') for line in f.readlines()]
-    else: 
-        f1 = open(train_csv_file, 'r')
-        nums=[line.strip('\n\r').split(',') for line in f.readlines(
-        )]+[line.strip('\n\t').split(',') for line in f1.readlines()]
+        nums = [line.strip("\n\r").split(",") for line in f.readlines()]
+    else:
+        f1 = open(train_csv_file, "r")
+        nums = [line.strip("\n\r").split(",") for line in f.readlines()] + [
+            line.strip("\n\t").split(",") for line in f1.readlines()
+        ]
     numpy_arr = np.array(nums)
-    numpy_arr[numpy_arr=='']='0'
-    min_list,max_list,range_list = [],[],[]
+    numpy_arr[numpy_arr == ""] = "0"
+    min_list, max_list, range_list = [], [], []
     for i in range(len(DATA_COLUMNS)):
         if DATA_COLUMNS[i] in NUMERIC_COLUMNS1:
-            col_min = numpy_arr[:,i].astype(np.float32).min()
-            col_max = numpy_arr[:,i].astype(np.float32).max()
+            col_min = numpy_arr[:, i].astype(np.float32).min()
+            col_max = numpy_arr[:, i].astype(np.float32).max()
             min_list.append(col_min)
             max_list.append(col_max)
-            range_list.append(col_max-col_min)
+            range_list.append(col_max - col_min)
     if os.path.isfile(train_csv_file):
         f1.close()
-    print('min list',min_list)
-    print('max list',max_list)
-    print('range list',range_list)
+    print("min list", min_list)
+    print("max list", max_list)
+    print("range list", range_list)
 
 with tf.io.TFRecordWriter(output_file) as writer:
-    print('*****Processing data******')
+    print("*****Processing data******")
     for row in csv:
-        no_of_rows = no_of_rows+1
-        if dataset_type == 'eval':
+        no_of_rows = no_of_rows + 1
+        if dataset_type == "eval":
             unnormalized_vals = np.array(row[1:14])
         else:
             unnormalized_vals = np.array(row[0:13])
-        normalized_vals = (unnormalized_vals-min_list)/range_list
-        if dataset_type == 'eval':
+        normalized_vals = (unnormalized_vals - min_list) / range_list
+        if dataset_type == "eval":
             new_categorical_dict = dict(zip(CATEGORICAL_COLUMNS2, row[14:40]))
         else:
             new_categorical_dict = dict(zip(CATEGORICAL_COLUMNS2, row[13:39]))
@@ -149,18 +166,23 @@ with tf.io.TFRecordWriter(output_file) as writer:
                 new_categorical_list.append("")
             else:
                 new_categorical_list.append(new_categorical_dict[i])
-        hash_values =  tf.strings.to_hash_bucket_fast(
-            new_categorical_list, 1000).numpy()
+        hash_values = tf.strings.to_hash_bucket_fast(new_categorical_list, 1000).numpy()
         new_numerical_dict = dict(zip(NUMERIC_COLUMNS2, normalized_vals))
         example = tf.train.Example()
         for i in NUMERIC_COLUMNS1:
-            example.features.feature[numeric_feature_names[0]].float_list.value.extend([new_numerical_dict[i]])
+            example.features.feature[numeric_feature_names[0]].float_list.value.extend(
+                [new_numerical_dict[i]]
+            )
         for i in range(0, 26):
-            example.features.feature[string_feature_names[0]].int64_list.value.extend([i])
-            example.features.feature[string_feature_names[0]].int64_list.value.extend([hash_values[i]])
-        if dataset_type == 'eval':
+            example.features.feature[string_feature_names[0]].int64_list.value.extend(
+                [i]
+            )
+            example.features.feature[string_feature_names[0]].int64_list.value.extend(
+                [hash_values[i]]
+            )
+        if dataset_type == "eval":
             example.features.feature["label"].int64_list.value.append(row[0])
         writer.write(example.SerializeToString())
 
-print('Total number of rows ', no_of_rows)
-print('Generated output file name :'+output_file)
+print("Total number of rows ", no_of_rows)
+print("Generated output file name :" + output_file)

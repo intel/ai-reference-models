@@ -198,9 +198,11 @@ class pretraining_dataset(Dataset):
             masked_lm_ids,
             next_sentence_labels,
         ] = [
-            torch.from_numpy(input[index].astype(np.int64))
-            if indice < 5
-            else torch.from_numpy(np.asarray(input[index].astype(np.int64)))
+            (
+                torch.from_numpy(input[index].astype(np.int64))
+                if indice < 5
+                else torch.from_numpy(np.asarray(input[index].astype(np.int64)))
+            )
             for indice, input in enumerate(self.inputs)
         ]
         masked_lm_labels = torch.zeros(input_ids.shape, dtype=torch.long) - 100
@@ -1064,9 +1066,11 @@ def main():
     )
     mlperf_logger.log_event(
         key="num_warmup_steps",
-        value=int(args.warmup_proportion * args.max_steps)
-        if args.warmup_steps == 0
-        else args.warmup_steps,
+        value=(
+            int(args.warmup_proportion * args.max_steps)
+            if args.warmup_steps == 0
+            else args.warmup_steps
+        ),
         sync=False,
     )
     # Initialize the accelerator. We will let the accelerator handle device placement for us in this example.

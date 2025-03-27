@@ -1,19 +1,19 @@
 #
 # -*- coding: utf-8 -*-
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -55,6 +55,7 @@ from maskrcnn_benchmark.utils.metric_logger import MetricLogger
 from maskrcnn_benchmark.engine.inference import inference
 from ..utils.timer import Timer, get_time_str
 
+
 def reduce_loss_dict(loss_dict):
     """
     Reduce the loss dictionary from all processes so that process with rank
@@ -95,7 +96,7 @@ def do_train(
     bf16=False,
     bf32=False,
     iterations=-1,
-    iter_warmup=-1
+    iter_warmup=-1,
 ):
     logger = logging.getLogger("maskrcnn_benchmark.trainer")
     logger.info("Start training")
@@ -117,7 +118,9 @@ def do_train(
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
 
         if any(len(target) < 1 for target in targets):
-            logger.error(f"Iteration={iteration + 1} || Image Ids used for training {_} || targets Length={[len(target) for target in targets]}" )
+            logger.error(
+                f"Iteration={iteration + 1} || Image Ids used for training {_} || targets Length={[len(target) for target in targets]}"
+            )
             continue
         data_time = time.time() - end
         iteration = iteration + 1
@@ -174,14 +177,23 @@ def do_train(
             )
         if iteration % checkpoint_period == 0:
             checkpointer.save("model_{:07d}".format(iteration), **arguments)
-        if data_loader_val is not None and test_period > 0 and iteration % test_period == 0:
+        if (
+            data_loader_val is not None
+            and test_period > 0
+            and iteration % test_period == 0
+        ):
             meters_val = MetricLogger(delimiter="  ")
             synchronize()
             _ = inference(  # The result can be used for additional logging, e. g. for TensorBoard
                 model,
                 # The method changes the segmentation mask format in a data loader,
                 # so every time a new data loader is created:
-                make_data_loader(cfg, is_train=False, is_distributed=(get_world_size() > 1), is_for_period=True),
+                make_data_loader(
+                    cfg,
+                    is_train=False,
+                    is_distributed=(get_world_size() > 1),
+                    is_for_period=True,
+                ),
                 dataset_name="[Validation]",
                 iou_types=iou_types,
                 box_only=False if cfg.MODEL.RETINANET_ON else cfg.MODEL.RPN_ONLY,
@@ -194,7 +206,9 @@ def do_train(
             model.train()
             with torch.no_grad():
                 # Should be one image for each GPU:
-                for iteration_val, (images_val, targets_val, _) in enumerate(tqdm(data_loader_val)):
+                for iteration_val, (images_val, targets_val, _) in enumerate(
+                    tqdm(data_loader_val)
+                ):
                     images_val = images_val.to(device)
                     targets_val = [target.to(device) for target in targets_val]
                     loss_dict = model(images_val, targets_val)
@@ -244,8 +258,12 @@ def do_train(
     total_train_time = get_time_str(training_timer.total_time)
     logger.info(
         "Model training time: {} ({} s / iter per device)".format(
-            total_train_time,
-            training_timer.total_time / iterations
+            total_train_time, training_timer.total_time / iterations
         )
     )
-    print("Training throughput: {:.3f} fps".format((iterations * cfg.SOLVER.IMS_PER_BATCH / get_world_size()) / (training_timer.total_time)))
+    print(
+        "Training throughput: {:.3f} fps".format(
+            (iterations * cfg.SOLVER.IMS_PER_BATCH / get_world_size())
+            / (training_timer.total_time)
+        )
+    )

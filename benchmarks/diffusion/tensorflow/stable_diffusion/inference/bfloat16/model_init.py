@@ -42,42 +42,63 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 1
 
-        arg_parser = ArgumentParser(description='Parse args')
+        arg_parser = ArgumentParser(description="Parse args")
 
         arg_parser.add_argument(
-            '--kmp-blocktime', dest='kmp_blocktime',
-            help='number of kmp block time',
-            type=int, default=1)
+            "--kmp-blocktime",
+            dest="kmp_blocktime",
+            help="number of kmp block time",
+            type=int,
+            default=1,
+        )
         arg_parser.add_argument(
-            "--output-dir", dest='output_dir',
-            type=str, default='/tmp/stable_diffusion/',
-            help='Specify the location of the '
-            'output directory for saving original and generated images')
+            "--output-dir",
+            dest="output_dir",
+            type=str,
+            default="/tmp/stable_diffusion/",
+            help="Specify the location of the "
+            "output directory for saving original and generated images",
+        )
         arg_parser.add_argument(
-            "--steps", dest='steps',
-            type=int, default=50,
-            help="number of steps for diffusion model")
+            "--steps",
+            dest="steps",
+            type=int,
+            default=50,
+            help="number of steps for diffusion model",
+        )
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
         # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode, "eval_inference.py")
+            self.args.intelai_models, self.args.mode, "eval_inference.py"
+        )
 
-        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
-            self.python_exe + " " + benchmark_script
+        self.benchmark_command = (
+            self.get_command_prefix(args.socket_id)
+            + self.python_exe
+            + " "
+            + benchmark_script
+        )
 
-        self.benchmark_command = \
-            self.benchmark_command + \
-            " --precision=" + str(self.args.precision) + \
-            " --batch-size=" + str(self.args.batch_size) + \
-            " --steps=" + str(self.args.steps) + \
-            " --output-dir=" + str(self.args.output_dir)
+        self.benchmark_command = (
+            self.benchmark_command
+            + " --precision="
+            + str(self.args.precision)
+            + " --batch-size="
+            + str(self.args.batch_size)
+            + " --steps="
+            + str(self.args.steps)
+            + " --output-dir="
+            + str(self.args.output_dir)
+        )
 
         # if the data location directory is not empty, then include the arg
         if self.args.data_location and os.listdir(self.args.data_location):

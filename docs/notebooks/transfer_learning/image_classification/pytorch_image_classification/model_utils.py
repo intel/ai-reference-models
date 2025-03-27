@@ -21,43 +21,23 @@ from pydoc import locate
 
 # Dictionary of Torchvision image classification models
 torchvision_model_map = {
-    "resnet18": {
-        "classifier": "fc"
-    },
-    "resnet50": {
-        "classifier": "fc"
-    },
-    "efficientnet_b0": {
-        "classifier": ["classifier", 1]
-    },
-    "efficientnet_b1": {
-        "classifier": ["classifier", 1]
-    },
-    "efficientnet_b2": {
-        "classifier": ["classifier", 1]
-    },
-    "densenet121": {
-        "classifier": "classifier"
-    },
-    "densenet161": {
-        "classifier": "classifier"
-    },
-    "googlenet": {
-        "classifier": "fc"
-    },
-    "shufflenet_v2_x1_0": {
-        "classifier": "fc"
-    },
-    "mobilenet_v2": {
-        "classifier": ["classifier", 1]
-    }
+    "resnet18": {"classifier": "fc"},
+    "resnet50": {"classifier": "fc"},
+    "efficientnet_b0": {"classifier": ["classifier", 1]},
+    "efficientnet_b1": {"classifier": ["classifier", 1]},
+    "efficientnet_b2": {"classifier": ["classifier", 1]},
+    "densenet121": {"classifier": "classifier"},
+    "densenet161": {"classifier": "classifier"},
+    "googlenet": {"classifier": "fc"},
+    "shufflenet_v2_x1_0": {"classifier": "fc"},
+    "mobilenet_v2": {"classifier": ["classifier", 1]},
 }
 
 
 def get_retrainable_model(model_name, num_classes, do_fine_tuning=False):
     # Load an image classification model pretrained on ImageNet
-    pretrained_model_class = locate('torchvision.models.{}'.format(model_name))
-    classifier_layer = torchvision_model_map[model_name]['classifier']
+    pretrained_model_class = locate("torchvision.models.{}".format(model_name))
+    classifier_layer = torchvision_model_map[model_name]["classifier"]
 
     model = pretrained_model_class(pretrained=True)
 
@@ -68,7 +48,9 @@ def get_retrainable_model(model_name, num_classes, do_fine_tuning=False):
     if isinstance(classifier_layer, list):
         classifier = getattr(model, classifier_layer[0])[classifier_layer[1]]
         num_features = classifier.in_features
-        model.classifier[classifier_layer[1]] = torch.nn.Linear(num_features, num_classes)
+        model.classifier[classifier_layer[1]] = torch.nn.Linear(
+            num_features, num_classes
+        )
     else:
         classifier = getattr(model, classifier_layer)
         num_features = classifier.in_features

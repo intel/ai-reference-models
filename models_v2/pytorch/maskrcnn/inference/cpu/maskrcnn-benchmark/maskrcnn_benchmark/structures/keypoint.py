@@ -1,19 +1,19 @@
 import torch
 
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,19 +26,24 @@ import torch
 FLIP_LEFT_RIGHT = 0
 FLIP_TOP_BOTTOM = 1
 
+
 class Keypoints(object):
     def __init__(self, keypoints, size, mode=None):
         # FIXME remove check once we have better integration with device
         # in my version this would consistently return a CPU tensor
-        device = keypoints.device if isinstance(keypoints, torch.Tensor) else torch.device('cpu')
+        device = (
+            keypoints.device
+            if isinstance(keypoints, torch.Tensor)
+            else torch.device("cpu")
+        )
         keypoints = torch.as_tensor(keypoints, dtype=torch.float32, device=device)
         num_keypoints = keypoints.shape[0]
         if num_keypoints:
             keypoints = keypoints.view(num_keypoints, -1, 3)
-        
+
         # TODO should I split them?
         # self.visibility = keypoints[..., 2]
-        self.keypoints = keypoints# [..., :2]
+        self.keypoints = keypoints  # [..., :2]
 
         self.size = size
         self.mode = mode
@@ -60,8 +65,7 @@ class Keypoints(object):
 
     def transpose(self, method):
         if method not in (FLIP_LEFT_RIGHT,):
-            raise NotImplementedError(
-                    "Only FLIP_LEFT_RIGHT implemented")
+            raise NotImplementedError("Only FLIP_LEFT_RIGHT implemented")
 
         flip_inds = type(self).FLIP_INDS
         flipped_data = self.keypoints[:, flip_inds]
@@ -100,10 +104,10 @@ class Keypoints(object):
         return self.extra_fields[field]
 
     def __repr__(self):
-        s = self.__class__.__name__ + '('
-        s += 'num_instances={}, '.format(len(self.keypoints))
-        s += 'image_width={}, '.format(self.size[0])
-        s += 'image_height={})'.format(self.size[1])
+        s = self.__class__.__name__ + "("
+        s += "num_instances={}, ".format(len(self.keypoints))
+        s += "image_width={}, ".format(self.size[0])
+        s += "image_height={})".format(self.size[1])
         return s
 
 
@@ -117,57 +121,63 @@ def _create_flip_indices(names, flip_map):
 
 class PersonKeypoints(Keypoints):
     NAMES = [
-        'nose',
-        'left_eye',
-        'right_eye',
-        'left_ear',
-        'right_ear',
-        'left_shoulder',
-        'right_shoulder',
-        'left_elbow',
-        'right_elbow',
-        'left_wrist',
-        'right_wrist',
-        'left_hip',
-        'right_hip',
-        'left_knee',
-        'right_knee',
-        'left_ankle',
-        'right_ankle'
+        "nose",
+        "left_eye",
+        "right_eye",
+        "left_ear",
+        "right_ear",
+        "left_shoulder",
+        "right_shoulder",
+        "left_elbow",
+        "right_elbow",
+        "left_wrist",
+        "right_wrist",
+        "left_hip",
+        "right_hip",
+        "left_knee",
+        "right_knee",
+        "left_ankle",
+        "right_ankle",
     ]
     FLIP_MAP = {
-        'left_eye': 'right_eye',
-        'left_ear': 'right_ear',
-        'left_shoulder': 'right_shoulder',
-        'left_elbow': 'right_elbow',
-        'left_wrist': 'right_wrist',
-        'left_hip': 'right_hip',
-        'left_knee': 'right_knee',
-        'left_ankle': 'right_ankle'
+        "left_eye": "right_eye",
+        "left_ear": "right_ear",
+        "left_shoulder": "right_shoulder",
+        "left_elbow": "right_elbow",
+        "left_wrist": "right_wrist",
+        "left_hip": "right_hip",
+        "left_knee": "right_knee",
+        "left_ankle": "right_ankle",
     }
 
 
 # TODO this doesn't look great
-PersonKeypoints.FLIP_INDS = _create_flip_indices(PersonKeypoints.NAMES, PersonKeypoints.FLIP_MAP)
+PersonKeypoints.FLIP_INDS = _create_flip_indices(
+    PersonKeypoints.NAMES, PersonKeypoints.FLIP_MAP
+)
+
+
 def kp_connections(keypoints):
     kp_lines = [
-        [keypoints.index('left_eye'), keypoints.index('right_eye')],
-        [keypoints.index('left_eye'), keypoints.index('nose')],
-        [keypoints.index('right_eye'), keypoints.index('nose')],
-        [keypoints.index('right_eye'), keypoints.index('right_ear')],
-        [keypoints.index('left_eye'), keypoints.index('left_ear')],
-        [keypoints.index('right_shoulder'), keypoints.index('right_elbow')],
-        [keypoints.index('right_elbow'), keypoints.index('right_wrist')],
-        [keypoints.index('left_shoulder'), keypoints.index('left_elbow')],
-        [keypoints.index('left_elbow'), keypoints.index('left_wrist')],
-        [keypoints.index('right_hip'), keypoints.index('right_knee')],
-        [keypoints.index('right_knee'), keypoints.index('right_ankle')],
-        [keypoints.index('left_hip'), keypoints.index('left_knee')],
-        [keypoints.index('left_knee'), keypoints.index('left_ankle')],
-        [keypoints.index('right_shoulder'), keypoints.index('left_shoulder')],
-        [keypoints.index('right_hip'), keypoints.index('left_hip')],
+        [keypoints.index("left_eye"), keypoints.index("right_eye")],
+        [keypoints.index("left_eye"), keypoints.index("nose")],
+        [keypoints.index("right_eye"), keypoints.index("nose")],
+        [keypoints.index("right_eye"), keypoints.index("right_ear")],
+        [keypoints.index("left_eye"), keypoints.index("left_ear")],
+        [keypoints.index("right_shoulder"), keypoints.index("right_elbow")],
+        [keypoints.index("right_elbow"), keypoints.index("right_wrist")],
+        [keypoints.index("left_shoulder"), keypoints.index("left_elbow")],
+        [keypoints.index("left_elbow"), keypoints.index("left_wrist")],
+        [keypoints.index("right_hip"), keypoints.index("right_knee")],
+        [keypoints.index("right_knee"), keypoints.index("right_ankle")],
+        [keypoints.index("left_hip"), keypoints.index("left_knee")],
+        [keypoints.index("left_knee"), keypoints.index("left_ankle")],
+        [keypoints.index("right_shoulder"), keypoints.index("left_shoulder")],
+        [keypoints.index("right_hip"), keypoints.index("left_hip")],
     ]
     return kp_lines
+
+
 PersonKeypoints.CONNECTIONS = kp_connections(PersonKeypoints.NAMES)
 
 
@@ -195,7 +205,7 @@ def keypoints_to_heat_map(keypoints, rois, heatmap_size):
     x = x.floor().long()
     y = (y - offset_y) * scale_y
     y = y.floor().long()
-    
+
     x[x_boundary_inds] = heatmap_size - 1
     y[y_boundary_inds] = heatmap_size - 1
 

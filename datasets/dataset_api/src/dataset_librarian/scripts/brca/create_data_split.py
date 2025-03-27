@@ -27,7 +27,7 @@ from typing import List, Tuple
 from sklearn.model_selection import train_test_split
 from pathlib import Path
 
-root_folder = os.environ.get('DATASET_DIR')
+root_folder = os.environ.get("DATASET_DIR")
 
 
 def get_subject_id(image_name):
@@ -50,7 +50,10 @@ def get_subject_id(image_name):
 
     return patient_id
 
-def create_train_and_test_nlp(df: DataFrame, test_size: float) -> Tuple[DataFrame, DataFrame]:
+
+def create_train_and_test_nlp(
+    df: DataFrame, test_size: float
+) -> Tuple[DataFrame, DataFrame]:
     """Split the dataset into training and testing sets for NLP.
 
     Args:
@@ -71,14 +74,21 @@ def copy_images(patient_ids: DataFrame, source_folder: str, target_folder: str) 
         source_folder: Path to the source folder containing the images.
         target_folder: Path to the target folder where the images need to be copied.
     """
-    
+
     for f in listdir(source_folder):
         if ("_CM_" in f) and (get_subject_id(f) in patient_ids.Patient_ID.to_list()):
             full_src_path = path.join(source_folder, f)
             shutil.copy(full_src_path, target_folder)
 
 
-def create_train_and_test_vision_data(label_column, label_list, train_data, test_data, segmented_image_folder, target_folder):
+def create_train_and_test_vision_data(
+    label_column,
+    label_list,
+    train_data,
+    test_data,
+    segmented_image_folder,
+    target_folder,
+):
     """
     Creates training and testing data for vision-based tasks by organizing segmented images based on labels.
 
@@ -102,12 +112,12 @@ def create_train_and_test_vision_data(label_column, label_list, train_data, test
     for cat in ["test", "train"]:
         # Get the data based on the current category
         df = test_data if cat == "test" else train_data
-        
+
         # Iterate over each label
         for label in label_list:
             # Source folder for images
             source_folder = path.join(segmented_image_folder, label)
-            
+
             # Create target folder
             temp_target_folder = path.join(target_folder, cat, label)
             Path(temp_target_folder).mkdir(parents=True, exist_ok=True)
@@ -116,7 +126,14 @@ def create_train_and_test_vision_data(label_column, label_list, train_data, test
             patient_ids = df[df[label_column] == label]
             copy_images(patient_ids, source_folder, temp_target_folder)
 
-def data_preparation(annotation_file, target_annotation_folder, segmented_image_folder, target_image_folder, split_ratio):
+
+def data_preparation(
+    annotation_file,
+    target_annotation_folder,
+    segmented_image_folder,
+    target_image_folder,
+    split_ratio,
+):
     """
     Performs data preparation for breast cancer prediction, including creating training and testing data.
 
@@ -130,26 +147,34 @@ def data_preparation(annotation_file, target_annotation_folder, segmented_image_
     Returns:
         None
     """
-    
+
     input_data = read_csv(annotation_file)
-    
+
     # create training and testing data
     training_data, testing_data = create_train_and_test_nlp(input_data, split_ratio)
 
-   # get the path to training and testing data
+    # get the path to training and testing data
     training_data_path = path.join(target_annotation_folder, "training_data.csv")
     testing_data_path = path.join(target_annotation_folder, "testing_data.csv")
- 
+
     # save training and testing data
     training_data.to_csv(training_data_path, index=False)
     testing_data.to_csv(testing_data_path, index=False)
-    
+
     # Get the list of class labels and the column containing the class label
-    label_column = 'label'
+    label_column = "label"
     label_list = np.sort(input_data[label_column].unique()).tolist()
-    
-    # create vision data    
-    create_train_and_test_vision_data(label_column, label_list, training_data, testing_data, segmented_image_folder, target_image_folder)
+
+    # create vision data
+    create_train_and_test_vision_data(
+        label_column,
+        label_list,
+        training_data,
+        testing_data,
+        segmented_image_folder,
+        target_image_folder,
+    )
+
 
 if __name__ == "__main__":
     """
@@ -166,8 +191,7 @@ if __name__ == "__main__":
     Returns:
         None
     """
-    
-    
+
     parser = argparse.ArgumentParser(
         description="This function create testing and training data for Breast Cancer prediction."
     )
@@ -176,30 +200,30 @@ if __name__ == "__main__":
         "--annotation_file",
         type=str,
         help="Location of annotation file.",
-        default=os.path.join(root_folder, "annotation", "annotation.csv")
+        default=os.path.join(root_folder, "annotation", "annotation.csv"),
     )
-    
+
     parser.add_argument(
         "--target_annotation_folder",
         type=str,
         help="Location of target annotation folder.",
-        default=os.path.join(root_folder, "annotation")
+        default=os.path.join(root_folder, "annotation"),
     )
-    
+
     parser.add_argument(
         "--segmented_image_folder",
         type=str,
         help="Location of segmented image folder.",
-        default=os.path.join(root_folder, "segmented_images")
+        default=os.path.join(root_folder, "segmented_images"),
     )
-    
+
     parser.add_argument(
         "--target_image_folder",
         type=str,
         help="Location of target imagefolder for train and test images.",
-        default=os.path.join(root_folder, "train_test_split_images")
+        default=os.path.join(root_folder, "train_test_split_images"),
     )
-    
+
     parser.add_argument(
         "--split_ratio",
         type=float,
@@ -208,11 +232,11 @@ if __name__ == "__main__":
     )
 
     params = parser.parse_args()
-    
+
     data_preparation(
         params.annotation_file,
         params.target_annotation_folder,
         params.segmented_image_folder,
         params.target_image_folder,
-        params.split_ratio
+        params.split_ratio,
     )

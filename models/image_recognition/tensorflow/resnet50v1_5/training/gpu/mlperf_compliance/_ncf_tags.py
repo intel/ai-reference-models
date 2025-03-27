@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Keys which only appear in NCF Recommendation.
-"""
+"""Keys which only appear in NCF Recommendation."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -57,4 +56,3 @@ MODEL_HP_MF_DIM = "model_hp_mf_dim"
 
 # The sizes of the fully connected layers in the dense section of the model.
 MODEL_HP_MLP_LAYER_SIZES = "model_hp_mlp_layer_sizes"
-

@@ -18,6 +18,7 @@ import torch
 import torch.nn.functional as F
 from model_rnnt import label_collate
 
+
 class TransducerDecoder:
     """Decoder base class.
 
@@ -30,7 +31,7 @@ class TransducerDecoder:
 
     def __init__(self, blank_index, model):
         self._model = model
-        self._SOS = -1   # start of sequence
+        self._SOS = -1  # start of sequence
         self._blank_id = blank_index
 
     def _pred_step(self, label, hidden, device):
@@ -66,6 +67,7 @@ class RNNTGreedyDecoder(TransducerDecoder):
         cutoff_prob: Skip to next step in search if current highest character
             probability is less than this.
     """
+
     def __init__(self, blank_index, model, max_symbols_per_step=30):
         super().__init__(blank_index, model)
         assert max_symbols_per_step is None or max_symbols_per_step > 0
@@ -112,12 +114,10 @@ class RNNTGreedyDecoder(TransducerDecoder):
             symbols_added = 0
 
             while not_blank and (
-                    self.max_symbols is None or
-                    symbols_added < self.max_symbols):
+                self.max_symbols is None or symbols_added < self.max_symbols
+            ):
                 g, hidden_prime = self._pred_step(
-                    self._get_last_symb(label),
-                    hidden,
-                    device
+                    self._get_last_symb(label), hidden, device
                 )
                 logp = self._joint_step(f, g, log_normalize=False)[0, :]
 

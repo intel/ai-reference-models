@@ -26,23 +26,100 @@ from typing import Any, Tuple
 
 
 COCO_LABELS = [
-    '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-    'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A', 'stop sign',
-    'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
-    'elephant', 'bear', 'zebra', 'giraffe', 'N/A', 'backpack', 'umbrella', 'N/A', 'N/A',
-    'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
-    'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
-    'bottle', 'N/A', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-    'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
-    'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'N/A', 'dining table',
-    'N/A', 'N/A', 'toilet', 'N/A', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
-    'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'N/A', 'book',
-    'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
+    "__background__",
+    "person",
+    "bicycle",
+    "car",
+    "motorcycle",
+    "airplane",
+    "bus",
+    "train",
+    "truck",
+    "boat",
+    "traffic light",
+    "fire hydrant",
+    "N/A",
+    "stop sign",
+    "parking meter",
+    "bench",
+    "bird",
+    "cat",
+    "dog",
+    "horse",
+    "sheep",
+    "cow",
+    "elephant",
+    "bear",
+    "zebra",
+    "giraffe",
+    "N/A",
+    "backpack",
+    "umbrella",
+    "N/A",
+    "N/A",
+    "handbag",
+    "tie",
+    "suitcase",
+    "frisbee",
+    "skis",
+    "snowboard",
+    "sports ball",
+    "kite",
+    "baseball bat",
+    "baseball glove",
+    "skateboard",
+    "surfboard",
+    "tennis racket",
+    "bottle",
+    "N/A",
+    "wine glass",
+    "cup",
+    "fork",
+    "knife",
+    "spoon",
+    "bowl",
+    "banana",
+    "apple",
+    "sandwich",
+    "orange",
+    "broccoli",
+    "carrot",
+    "hot dog",
+    "pizza",
+    "donut",
+    "cake",
+    "chair",
+    "couch",
+    "potted plant",
+    "bed",
+    "N/A",
+    "dining table",
+    "N/A",
+    "N/A",
+    "toilet",
+    "N/A",
+    "tv",
+    "laptop",
+    "mouse",
+    "remote",
+    "keyboard",
+    "cell phone",
+    "microwave",
+    "oven",
+    "toaster",
+    "sink",
+    "refrigerator",
+    "N/A",
+    "book",
+    "clock",
+    "vase",
+    "scissors",
+    "teddy bear",
+    "hair drier",
+    "toothbrush",
 ]
 
-KITTI_LABELS = [
-    '__background__', 'Person', 'Vehicle'
-]
+KITTI_LABELS = ["__background__", "Person", "Vehicle"]
 
 
 class PennFudanDataset(torch.utils.data.Dataset):
@@ -117,20 +194,22 @@ class Kitti(torchvision.datasets.Kitti):
         with open(self.targets[index]) as inp:
             content = csv.reader(inp, delimiter=" ")
             for line in content:
-                if line[0] in ['Pedestrian', 'Person_sitting', 'Cyclist']:
+                if line[0] in ["Pedestrian", "Person_sitting", "Cyclist"]:
                     boxes.append([float(x) for x in line[4:8]])
-                    labels.append(1)  # Re-label Pedestrian, Person_sitting, Cyclist to Person=1
-                if line[0] in ['Car', 'Truck', 'Van', 'Tram']:
+                    labels.append(
+                        1
+                    )  # Re-label Pedestrian, Person_sitting, Cyclist to Person=1
+                if line[0] in ["Car", "Truck", "Van", "Tram"]:
                     boxes.append([float(x) for x in line[4:8]])
                     labels.append(2)  # Re-label Car, Truck, Van, Tram to Vehicle=2
 
         boxes = torch.FloatTensor(boxes)
         target = {}
-        target['image_id'] = torch.tensor([index])
-        target['boxes'] = boxes
-        target['labels'] = torch.tensor(labels)
-        target['area'] = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
-        target['iscrowd'] = torch.zeros((len(target['labels']),), dtype=torch.int64)
+        target["image_id"] = torch.tensor([index])
+        target["boxes"] = boxes
+        target["labels"] = torch.tensor(labels)
+        target["area"] = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
+        target["iscrowd"] = torch.zeros((len(target["labels"]),), dtype=torch.int64)
 
         return target
 

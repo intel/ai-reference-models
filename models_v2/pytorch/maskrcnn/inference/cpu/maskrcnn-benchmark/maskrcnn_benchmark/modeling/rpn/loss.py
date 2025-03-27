@@ -1,19 +1,19 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 """
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -44,8 +44,9 @@ class RPNLossComputation(object):
     This class computes the RPN loss.
     """
 
-    def __init__(self, proposal_matcher, fg_bg_sampler, box_coder,
-                 generate_labels_func):
+    def __init__(
+        self, proposal_matcher, fg_bg_sampler, box_coder, generate_labels_func
+    ):
         """
         Arguments:
             proposal_matcher (Matcher)
@@ -58,7 +59,7 @@ class RPNLossComputation(object):
         self.box_coder = box_coder
         self.copied_fields = []
         self.generate_labels_func = generate_labels_func
-        self.discard_cases = ['not_visibility', 'between_thresholds']
+        self.discard_cases = ["not_visibility", "between_thresholds"]
 
     def match_targets_to_anchors(self, anchor, target, copied_fields=[]):
         match_quality_matrix = boxlist_iou(target, anchor)
@@ -109,7 +110,6 @@ class RPNLossComputation(object):
 
         return labels, regression_targets
 
-
     def __call__(self, anchors, objectness, box_regression, targets):
         """
         Arguments:
@@ -130,8 +130,9 @@ class RPNLossComputation(object):
 
         sampled_inds = torch.cat([sampled_pos_inds, sampled_neg_inds], dim=0)
 
-        objectness, box_regression = \
-                concat_box_prediction_layers(objectness, box_regression)
+        objectness, box_regression = concat_box_prediction_layers(
+            objectness, box_regression
+        )
 
         objectness = objectness.squeeze()
 
@@ -150,6 +151,7 @@ class RPNLossComputation(object):
         )
 
         return objectness_loss, box_loss
+
 
 # This function should be overwritten in RetinaNet
 def generate_rpn_labels(matched_targets):
@@ -170,9 +172,6 @@ def make_rpn_loss_evaluator(cfg, box_coder):
     )
 
     loss_evaluator = RPNLossComputation(
-        matcher,
-        fg_bg_sampler,
-        box_coder,
-        generate_rpn_labels
+        matcher, fg_bg_sampler, box_coder, generate_rpn_labels
     )
     return loss_evaluator

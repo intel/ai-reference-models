@@ -1,19 +1,20 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
+
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,12 +26,15 @@ import torch.nn.functional as F
 from torch import nn
 
 from maskrcnn_benchmark.structures.bounding_box import BoxList
+
 # from maskrcnn_benchmark.structures.boxlist_ops import boxlist_nms
 from maskrcnn_benchmark.structures.boxlist_ops import cat_boxlist
 from maskrcnn_benchmark.modeling.box_coder import BoxCoder
 
 import intel_extension_for_pytorch as ipex
+
 box_head_nms = torch.ops.torch_ipex.box_head_nms
+
 
 class PostProcessor(nn.Module):
     """
@@ -46,7 +50,7 @@ class PostProcessor(nn.Module):
         detections_per_img=100,
         box_coder=None,
         cls_agnostic_bbox_reg=False,
-        bbox_aug_enabled=False
+        bbox_aug_enabled=False,
     ):
         """
         Arguments:
@@ -60,7 +64,7 @@ class PostProcessor(nn.Module):
         self.nms = nms
         self.detections_per_img = detections_per_img
         if box_coder is None:
-            box_coder = BoxCoder(weights=(10., 10., 5., 5.))
+            box_coder = BoxCoder(weights=(10.0, 10.0, 5.0, 5.0))
         self.box_coder = box_coder
         self.cls_agnostic_bbox_reg = cls_agnostic_bbox_reg
         self.bbox_aug_enabled = bbox_aug_enabled
@@ -107,8 +111,18 @@ class PostProcessor(nn.Module):
         #     if not self.bbox_aug_enabled:  # If bbox aug is enabled, we will do it later
         #         boxlist = self.filter_results(boxlist, num_classes)
         #     results.append(boxlist)
-        new_boxes, new_scores, new_labels = box_head_nms(proposals, class_prob, image_shapes, self.score_thresh, self.nms, self.detections_per_img, num_classes)
-        for box, score, label, image_shape in zip(new_boxes, new_scores, new_labels, image_shapes):
+        new_boxes, new_scores, new_labels = box_head_nms(
+            proposals,
+            class_prob,
+            image_shapes,
+            self.score_thresh,
+            self.nms,
+            self.detections_per_img,
+            num_classes,
+        )
+        for box, score, label, image_shape in zip(
+            new_boxes, new_scores, new_labels, image_shapes
+        ):
             boxlist_for_class = BoxList(box, image_shape, mode="xyxy")
             boxlist_for_class.add_field("scores", score)
             boxlist_for_class.add_field("labels", label)
@@ -155,9 +169,7 @@ class PostProcessor(nn.Module):
             boxes_j = boxes[inds, j * 4 : (j + 1) * 4]
             boxlist_for_class = BoxList(boxes_j, boxlist.size, mode="xyxy")
             boxlist_for_class.add_field("scores", scores_j)
-            boxlist_for_class = boxlist_nms(
-                boxlist_for_class, self.nms
-            )
+            boxlist_for_class = boxlist_nms(boxlist_for_class, self.nms)
             num_labels = len(boxlist_for_class)
             boxlist_for_class.add_field(
                 "labels", torch.full((num_labels,), j, dtype=torch.int64, device=device)
@@ -197,6 +209,6 @@ def make_roi_box_post_processor(cfg):
         detections_per_img,
         box_coder,
         cls_agnostic_bbox_reg,
-        bbox_aug_enabled
+        bbox_aug_enabled,
     )
     return postprocessor

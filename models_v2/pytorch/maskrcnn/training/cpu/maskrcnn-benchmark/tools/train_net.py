@@ -47,7 +47,9 @@ from maskrcnn_benchmark.utils.miscellaneous import mkdir, save_config
 import intel_extension_for_pytorch as ipex
 
 
-def train(cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, iter_warmup=-1):
+def train(
+    cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, iter_warmup=-1
+):
     model = build_detection_model(cfg)
     device = torch.device(cfg.MODEL.DEVICE)
     model.to(device)
@@ -58,15 +60,27 @@ def train(cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, i
 
     if bf32:
         ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
-        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, inplace=True, auto_kernel_selection=True)
+        model, optimizer = ipex.optimize(
+            model,
+            dtype=torch.float32,
+            optimizer=optimizer,
+            inplace=True,
+            auto_kernel_selection=True,
+        )
     elif bf16:
-        model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer, inplace=True)
+        model, optimizer = ipex.optimize(
+            model, dtype=torch.bfloat16, optimizer=optimizer, inplace=True
+        )
     else:
-        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, inplace=True)
+        model, optimizer = ipex.optimize(
+            model, dtype=torch.float32, optimizer=optimizer, inplace=True
+        )
 
     if distributed:
         device_ids = None
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids, find_unused_parameters=True)
+        model = torch.nn.parallel.DistributedDataParallel(
+            model, device_ids=device_ids, find_unused_parameters=True
+        )
 
     arguments = {}
     arguments["iteration"] = 0
@@ -89,7 +103,9 @@ def train(cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, i
 
     test_period = cfg.SOLVER.TEST_PERIOD
     if test_period > 0:
-        data_loader_val = make_data_loader(cfg, is_train=False, is_distributed=distributed, is_for_period=True)
+        data_loader_val = make_data_loader(
+            cfg, is_train=False, is_distributed=distributed, is_for_period=True
+        )
     else:
         data_loader_val = None
 
@@ -110,7 +126,7 @@ def train(cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, i
         bf16=bf16,
         bf32=bf32,
         iterations=iterations,
-        iter_warmup=iter_warmup
+        iter_warmup=iter_warmup,
     )
 
     return model
@@ -133,7 +149,9 @@ def run_test(cfg, model, distributed):
             mkdir(output_folder)
             output_folders[idx] = output_folder
     data_loaders_val = make_data_loader(cfg, is_train=False, is_distributed=distributed)
-    for output_folder, dataset_name, data_loader_val in zip(output_folders, dataset_names, data_loaders_val):
+    for output_folder, dataset_name, data_loader_val in zip(
+        output_folders, dataset_names, data_loaders_val
+    ):
         inference(
             model,
             data_loader_val,
@@ -172,44 +190,68 @@ def main():
         default=None,
         nargs=argparse.REMAINDER,
     )
-    parser.add_argument('--bf16', action='store_true', default=False,
-                        help='enable BF16 by IPEX autocast')
-    parser.add_argument('--bf32', action='store_true', default=False,
-                        help='enable IPEX bf32 path')
-    parser.add_argument('-i', '--iterations', default=-1, type=int, metavar='N',
-                        help='number of total iterations to run')
-    parser.add_argument('--iter-warmup', default=-1, type=int, metavar='N',
-                        help='number of warm-up iterations to run')
-    parser.add_argument('-b', '--local-batch-size', default=1, type=int, metavar='N',
-                        help='local batch size')
-    parser.add_argument("--world-size", default=1, type=int, help='world size')
-    parser.add_argument("--master-addr", default='127.0.0.1', type=str, help='Master Addr')
-    parser.add_argument("--port", default='29500', type=str, help='Port')
-    parser.add_argument("--rank", default=0, type=int, help='rank')
-    parser.add_argument('--backend', default='gloo', type=str, help='DDP backend, default to gloo')
+    parser.add_argument(
+        "--bf16",
+        action="store_true",
+        default=False,
+        help="enable BF16 by IPEX autocast",
+    )
+    parser.add_argument(
+        "--bf32", action="store_true", default=False, help="enable IPEX bf32 path"
+    )
+    parser.add_argument(
+        "-i",
+        "--iterations",
+        default=-1,
+        type=int,
+        metavar="N",
+        help="number of total iterations to run",
+    )
+    parser.add_argument(
+        "--iter-warmup",
+        default=-1,
+        type=int,
+        metavar="N",
+        help="number of warm-up iterations to run",
+    )
+    parser.add_argument(
+        "-b",
+        "--local-batch-size",
+        default=1,
+        type=int,
+        metavar="N",
+        help="local batch size",
+    )
+    parser.add_argument("--world-size", default=1, type=int, help="world size")
+    parser.add_argument(
+        "--master-addr", default="127.0.0.1", type=str, help="Master Addr"
+    )
+    parser.add_argument("--port", default="29500", type=str, help="Port")
+    parser.add_argument("--rank", default=0, type=int, help="rank")
+    parser.add_argument(
+        "--backend", default="gloo", type=str, help="DDP backend, default to gloo"
+    )
 
     args = parser.parse_args()
 
     args.distributed = False
     batch_size = args.local_batch_size
-    if torch.distributed.is_available() and int(os.environ.get('PMI_SIZE', '0')) > 1:
-        print('Distributed training with DDP')
-        os.environ['RANK'] = os.environ.get('PMI_RANK', '0')
-        os.environ['WORLD_SIZE'] = os.environ.get('PMI_SIZE', '1')
-        if not 'MASTER_ADDR' in os.environ:
-            os.environ['MASTER_ADDR'] = args.master_addr
-        if not 'MASTER_PORT' in os.environ:
-            os.environ['MASTER_PORT'] = args.port
+    if torch.distributed.is_available() and int(os.environ.get("PMI_SIZE", "0")) > 1:
+        print("Distributed training with DDP")
+        os.environ["RANK"] = os.environ.get("PMI_RANK", "0")
+        os.environ["WORLD_SIZE"] = os.environ.get("PMI_SIZE", "1")
+        if not "MASTER_ADDR" in os.environ:
+            os.environ["MASTER_ADDR"] = args.master_addr
+        if not "MASTER_PORT" in os.environ:
+            os.environ["MASTER_PORT"] = args.port
 
         # Initialize the process group with ccl backend
-        if args.backend == 'ccl':
-            if torch.__version__[:6] >= '1.12.0':
+        if args.backend == "ccl":
+            if torch.__version__[:6] >= "1.12.0":
                 import oneccl_bindings_for_pytorch
             else:
                 import torch_ccl
-        torch.distributed.init_process_group(
-                backend=args.backend                
-        )
+        torch.distributed.init_process_group(backend=args.backend)
         args.distributed = True
         if torch.distributed.is_initialized():
             print("Torch distributed is initialized.")
@@ -220,20 +262,27 @@ def main():
             args.rank = 0
             args.world_size = 1
         batch_size = args.local_batch_size * args.world_size
-        print("Rank and world size: ", args.rank," ", args.world_size)
+        print("Rank and world size: ", args.rank, " ", args.world_size)
         print("Using local batch size: ", args.local_batch_size)
         print("Using global batch size: ", batch_size)
 
     cfg.merge_from_file(args.config_file)
     args.opts.append("SOLVER.IMS_PER_BATCH")
     args.opts.append(batch_size)
-    if "SOLVER.STEPS_1" in args.opts and \
-        "SOLVER.STEPS_2" in args.opts and \
-        "SOLVER.STEPS" not in args.opts:
+    if (
+        "SOLVER.STEPS_1" in args.opts
+        and "SOLVER.STEPS_2" in args.opts
+        and "SOLVER.STEPS" not in args.opts
+    ):
         steps_1_ind = args.opts.index("SOLVER.STEPS_1") + 1
         steps_2_ind = args.opts.index("SOLVER.STEPS_2") + 1
-        new_steps = ["SOLVER.STEPS", '({},{})'.format(args.opts[steps_1_ind], args.opts[steps_2_ind])]
-        print(f"Combine SOLVER.STEPS_1 and SOLVER.STEPS_2 together to generate {new_steps}")
+        new_steps = [
+            "SOLVER.STEPS",
+            "({},{})".format(args.opts[steps_1_ind], args.opts[steps_2_ind]),
+        ]
+        print(
+            f"Combine SOLVER.STEPS_1 and SOLVER.STEPS_2 together to generate {new_steps}"
+        )
         steps_1_key_ind = args.opts.index("SOLVER.STEPS_1")
         args.opts.pop(steps_1_key_ind)
         args.opts.pop(steps_1_key_ind)
@@ -262,13 +311,20 @@ def main():
         logger.info(config_str)
     logger.info("Running with config:\n{}".format(cfg))
 
-    output_config_path = os.path.join(cfg.OUTPUT_DIR, 'config.yml')
+    output_config_path = os.path.join(cfg.OUTPUT_DIR, "config.yml")
     logger.info("Saving config into: {}".format(output_config_path))
     # save overloaded model config in the output directory
     save_config(cfg, output_config_path)
 
-    model = train(cfg, args.local_rank, args.distributed,
-                  bf16=args.bf16, bf32=args.bf32, iterations=args.iterations, iter_warmup=args.iter_warmup)
+    model = train(
+        cfg,
+        args.local_rank,
+        args.distributed,
+        bf16=args.bf16,
+        bf32=args.bf32,
+        iterations=args.iterations,
+        iter_warmup=args.iter_warmup,
+    )
 
     if not args.skip_test:
         run_test(cfg, model, args.distributed)

@@ -30,6 +30,4 @@ PERF = {
     "unit": "sent/s",
 }
 
-FUNCTIONAL = {
-    "pattern": r"\'f1\': \d+.\d+"
-}
+FUNCTIONAL = {"pattern": r"\'f1\': \d+.\d+"}

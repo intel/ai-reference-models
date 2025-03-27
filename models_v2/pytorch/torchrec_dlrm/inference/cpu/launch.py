@@ -1,4 +1,5 @@
 import sys
+
 args = sys.argv
 sockets = int(args[1])
 numas = int(args[2])
@@ -8,9 +9,12 @@ enable_2nd_process = int(args[4])
 aot_inductor = int(args[5])
 
 import os
+
 os.environ["KMP_BLOCKTIME"] = "1"
 os.environ["KMP_AFFINITY"] = "granularity=fine,compact,1,0"
-os.environ["MALLOC_CONF"] = "oversize_threshold:1,background_thread:true,metadata_thp:auto"
+os.environ["MALLOC_CONF"] = (
+    "oversize_threshold:1,background_thread:true,metadata_thp:auto"
+)
 assert "LD_PRELOAD" in os.environ.keys()
 assert "iomp" in os.environ["LD_PRELOAD"]
 assert "jemalloc" in os.environ["LD_PRELOAD"]
@@ -32,6 +36,7 @@ if aot_inductor:
     BS = int(os.environ["BATCH_SIZE"])
     EVAL_BATCH = int(os.environ["EVAL_BATCH"])
     from dlrm_main import aoti_benchmark_compile
+
     composed_cmd = ""
     for i in range(numas):
         target_dir = f"./aoti-dir-{i}"
@@ -40,7 +45,9 @@ if aot_inductor:
         os.system(f"mkdir {target_dir}")
         start = coreidx_per_numa[i]
         end = coreidx_per_numa[i + 1] - 1
-        bench_bin = aoti_benchmark_compile(end-start+1, EVAL_BATCH, BS, model_dir, target_dir)
+        bench_bin = aoti_benchmark_compile(
+            end - start + 1, EVAL_BATCH, BS, model_dir, target_dir
+        )
         composed_cmd += f"taskset -c {start}-{end} {bench_bin} "
         if i != (numas - 1):
             composed_cmd += " & "
@@ -55,11 +62,17 @@ else:
         end = coreidx_per_numa[i + 1] - 1
         if enable_2nd_process:
             mid = (start + end) // 2
-            composed_cmd += f"taskset -c {start}-{mid} {cmd} --share-weight-instance={mid-start+1} "
+            composed_cmd += (
+                f"taskset -c {start}-{mid} {cmd} --share-weight-instance={mid-start+1} "
+            )
             composed_cmd += " & "
-            composed_cmd += f"taskset -c {mid + 1}-{end} {cmd} --share-weight-instance={end-mid} "
+            composed_cmd += (
+                f"taskset -c {mid + 1}-{end} {cmd} --share-weight-instance={end-mid} "
+            )
         else:
-            composed_cmd += f"taskset -c {start}-{end} {cmd} --share-weight-instance={end-start+1} "
+            composed_cmd += (
+                f"taskset -c {start}-{end} {cmd} --share-weight-instance={end-start+1} "
+            )
         if i != (numas - 1):
             composed_cmd += " & "
     print(composed_cmd)

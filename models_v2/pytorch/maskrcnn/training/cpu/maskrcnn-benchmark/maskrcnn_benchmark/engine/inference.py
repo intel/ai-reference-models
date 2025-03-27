@@ -1,19 +1,19 @@
 #
 # -*- coding: utf-8 -*-
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -55,10 +55,24 @@ from ..utils.timer import Timer, get_time_str
 from .bbox_aug import im_detect_bbox_aug
 import intel_extension_for_pytorch as ipex
 import numpy as np
+
 # from maskrcnn_benchmark.engine.utils_vis import draw, make_dot
 
 
-def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, p99_timer=None, bf16=False, bf32=False, jit=False, iterations=-1, iter_warmup=-1, enable_profiling=False):
+def compute_on_dataset(
+    model,
+    data_loader,
+    device,
+    bbox_aug,
+    timer=None,
+    p99_timer=None,
+    bf16=False,
+    bf32=False,
+    jit=False,
+    iterations=-1,
+    iter_warmup=-1,
+    enable_profiling=False,
+):
     model.eval()
     results_dict = {}
     timeBuff = []
@@ -67,18 +81,44 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, p99_tim
     iter_warmup = max(0, iter_warmup)
     total_steps = (iterations if iterations > 0 else steps_per_epoch) + iter_warmup
     test_epoches = int(total_steps / steps_per_epoch)
-    print('Evaluating MaskRCNN: Steps per Epoch {} total Steps {}'.format(steps_per_epoch, total_steps))
+    print(
+        "Evaluating MaskRCNN: Steps per Epoch {} total Steps {}".format(
+            steps_per_epoch, total_steps
+        )
+    )
 
     model = model.to(memory_format=torch.channels_last)
     if bf32:
         ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
-        model.backbone = ipex.optimize(model.backbone, dtype=torch.float32, inplace=True, auto_kernel_selection=True)
-        model.rpn = ipex.optimize(model.rpn, dtype=torch.float32, inplace=True, auto_kernel_selection=True)
-        model.roi_heads = ipex.optimize(model.roi_heads, dtype=torch.float32, inplace=True, auto_kernel_selection=True)
+        model.backbone = ipex.optimize(
+            model.backbone,
+            dtype=torch.float32,
+            inplace=True,
+            auto_kernel_selection=True,
+        )
+        model.rpn = ipex.optimize(
+            model.rpn, dtype=torch.float32, inplace=True, auto_kernel_selection=True
+        )
+        model.roi_heads = ipex.optimize(
+            model.roi_heads,
+            dtype=torch.float32,
+            inplace=True,
+            auto_kernel_selection=True,
+        )
     else:
-        model.backbone = ipex.optimize(model.backbone, dtype=torch.bfloat16 if bf16 else torch.float32, inplace=True)
-        model.rpn = ipex.optimize(model.rpn, dtype=torch.bfloat16 if bf16 else torch.float32, inplace=True)
-        model.roi_heads = ipex.optimize(model.roi_heads, dtype=torch.bfloat16 if bf16 else torch.float32, inplace=True)
+        model.backbone = ipex.optimize(
+            model.backbone,
+            dtype=torch.bfloat16 if bf16 else torch.float32,
+            inplace=True,
+        )
+        model.rpn = ipex.optimize(
+            model.rpn, dtype=torch.bfloat16 if bf16 else torch.float32, inplace=True
+        )
+        model.roi_heads = ipex.optimize(
+            model.roi_heads,
+            dtype=torch.bfloat16 if bf16 else torch.float32,
+            inplace=True,
+        )
 
     with torch.autocast("cpu", enabled=bf16), torch.no_grad():
         # generate trace model
@@ -86,9 +126,13 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, p99_tim
             print("generate trace model")
             for i, batch in enumerate(tqdm(data_loader)):
                 images, targets, image_ids = batch
-                model.backbone = torch.jit.trace(model.backbone, images.tensors.to(memory_format=torch.channels_last))
+                model.backbone = torch.jit.trace(
+                    model.backbone, images.tensors.to(memory_format=torch.channels_last)
+                )
                 model.backbone = torch.jit.freeze(model.backbone)
-                trace_graph = model.backbone.graph_for(images.tensors.to(memory_format=torch.channels_last))
+                trace_graph = model.backbone.graph_for(
+                    images.tensors.to(memory_format=torch.channels_last)
+                )
                 print(trace_graph)
                 break
         # Inference
@@ -101,7 +145,7 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, p99_tim
                             break
                         images, targets, image_ids = batch
                         images = images.to(memory_format=torch.channels_last)
-                        
+
                         if bf16:
                             images = images.to(torch.bfloat16)
                         if timer and epoch * steps_per_epoch + i >= iter_warmup:
@@ -116,7 +160,10 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, p99_tim
                             timeBuff.append(p99_timer.toc())
                         output = [o.to(cpu_device) for o in output]
                         results_dict.update(
-                            {img_id: result for img_id, result in zip(image_ids, output)}
+                            {
+                                img_id: result
+                                for img_id, result in zip(image_ids, output)
+                            }
                         )
                         pbar.update(1)
         if enable_profiling:
@@ -147,36 +194,51 @@ def _accumulate_predictions_from_multiple_gpus(predictions_per_gpu):
 
 
 def inference(
-        model,
-        data_loader,
-        dataset_name,
-        ims_per_patch,
-        iou_types=("bbox",),
-        box_only=False,
-        bbox_aug=False,
-        device="cuda",
-        expected_results=(),
-        expected_results_sigma_tol=4,
-        output_folder=None,
-        bf16=False,
-        bf32=False,
-        jit=False,
-        iterations=-1,
-        iter_warmup=-1,
-        accuracy=False,
-        enable_profiling=False
+    model,
+    data_loader,
+    dataset_name,
+    ims_per_patch,
+    iou_types=("bbox",),
+    box_only=False,
+    bbox_aug=False,
+    device="cuda",
+    expected_results=(),
+    expected_results_sigma_tol=4,
+    output_folder=None,
+    bf16=False,
+    bf32=False,
+    jit=False,
+    iterations=-1,
+    iter_warmup=-1,
+    accuracy=False,
+    enable_profiling=False,
 ):
     # convert to a torch.device for efficiency
     device = torch.device(device)
     num_devices = get_world_size()
     logger = logging.getLogger("maskrcnn_benchmark.inference")
     dataset = data_loader.dataset
-    logger.info("Start evaluation on {} dataset({} images).".format(dataset_name, len(dataset)))
+    logger.info(
+        "Start evaluation on {} dataset({} images).".format(dataset_name, len(dataset))
+    )
     total_timer = Timer()
     inference_timer = Timer()
     p99 = Timer()
     total_timer.tic()
-    predictions, timeBuff = compute_on_dataset(model, data_loader, device, bbox_aug, inference_timer, p99, bf16, bf32, jit, iterations, iter_warmup, enable_profiling)
+    predictions, timeBuff = compute_on_dataset(
+        model,
+        data_loader,
+        device,
+        bbox_aug,
+        inference_timer,
+        p99,
+        bf16,
+        bf32,
+        jit,
+        iterations,
+        iter_warmup,
+        enable_profiling,
+    )
     # wait for all processes to complete before measuring the time
     synchronize()
     total_time = total_timer.toc()
@@ -187,7 +249,7 @@ def inference(
 
     timeBuff_output = np.asarray(timeBuff)
     p99 = np.percentile(timeBuff_output, 99)
-    logger.info('P99 Latency {:.2f} ms'.format(p99*1000))
+    logger.info("P99 Latency {:.2f} ms".format(p99 * 1000))
     logger.info(
         "Total run time: {} ({} s / iter per device, on {} devices)".format(
             total_time_str, total_time * num_devices / iterations, num_devices
@@ -202,7 +264,11 @@ def inference(
         )
     )
 
-    print("Throughput: {:.3f} fps".format((iterations * ims_per_patch) / (inference_timer.total_time * num_devices)))  
+    print(
+        "Throughput: {:.3f} fps".format(
+            (iterations * ims_per_patch) / (inference_timer.total_time * num_devices)
+        )
+    )
 
     if accuracy:
         predictions = _accumulate_predictions_from_multiple_gpus(predictions)
@@ -219,9 +285,11 @@ def inference(
             expected_results_sigma_tol=expected_results_sigma_tol,
         )
 
-        return evaluate(dataset=dataset,
-                        predictions=predictions,
-                        output_folder=output_folder,
-                        **extra_args)
+        return evaluate(
+            dataset=dataset,
+            predictions=predictions,
+            output_folder=output_folder,
+            **extra_args,
+        )
     else:
         return

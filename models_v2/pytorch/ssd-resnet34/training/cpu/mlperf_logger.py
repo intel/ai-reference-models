@@ -30,17 +30,20 @@ import numpy as np
 import os
 from mlperf_logging import mllog
 from mlperf_logging.mllog import constants as mllog_const
+
 mllogger = mllog.get_mllogger()
 mllog.config(
     filename=(os.getenv("COMPLIANCE_FILE") or "mlperf_compliance.log"),
-    root_dir=os.path.normpath(os.path.dirname(os.path.realpath(__file__))))
+    root_dir=os.path.normpath(os.path.dirname(os.path.realpath(__file__))),
+)
+
 
 def ssd_print(*args, sync=True, **kwargs):
-    use_cuda = os.getenv('USE_CUDA')
-    if sync and use_cuda=='True':
+    use_cuda = os.getenv("USE_CUDA")
+    if sync and use_cuda == "True":
         barrier()
     if get_rank() == 0:
-        kwargs['stack_offset'] = 2
+        kwargs["stack_offset"] = 2
         mllogger.event(*args, **kwargs)
 
 
@@ -62,8 +65,9 @@ def get_rank():
     if torch.distributed.is_initialized():
         rank = torch.distributed.get_rank()
     else:
-        rank = os.getenv('RANK', os.getenv('LOCAL_RANK', 0))
+        rank = os.getenv("RANK", os.getenv("LOCAL_RANK", 0))
     return rank
+
 
 def broadcast_seeds(seed, device):
     if torch.distributed.is_initialized():

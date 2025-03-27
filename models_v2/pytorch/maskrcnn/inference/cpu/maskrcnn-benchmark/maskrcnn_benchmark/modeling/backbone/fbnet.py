@@ -1,19 +1,19 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -90,7 +90,7 @@ def create_builder(cfg):
 
 
 def _get_trunk_cfg(arch_def):
-    """ Get all stages except the last one """
+    """Get all stages except the last one"""
     num_stages = mbuilder.get_num_stages(arch_def)
     trunk_stages = arch_def.get("backbone", range(num_stages - 1))
     ret = mbuilder.get_blocks(arch_def, stage_indices=trunk_stages)
@@ -99,7 +99,10 @@ def _get_trunk_cfg(arch_def):
 
 class FBNetTrunk(nn.Module):
     def __init__(
-        self, builder, arch_def, dim_in,
+        self,
+        builder,
+        arch_def,
+        dim_in,
     ):
         super(FBNetTrunk, self).__init__()
         self.first = builder.add_first(arch_def["first"], dim_in=dim_in)
@@ -129,7 +132,7 @@ def _get_rpn_stage(arch_def, num_blocks):
     rpn_stage = arch_def.get("rpn")
     ret = mbuilder.get_blocks(arch_def, stage_indices=rpn_stage)
     if num_blocks > 0:
-        logger.warn('Use last {} blocks in {} as rpn'.format(num_blocks, ret))
+        logger.warn("Use last {} blocks in {} as rpn".format(num_blocks, ret))
         block_count = len(ret["stages"])
         assert num_blocks <= block_count, "use block {}, block count {}".format(
             num_blocks, block_count
@@ -141,7 +144,11 @@ def _get_rpn_stage(arch_def, num_blocks):
 
 class FBNetRPNHead(nn.Module):
     def __init__(
-        self, cfg, in_channels, builder, arch_def,
+        self,
+        cfg,
+        in_channels,
+        builder,
+        arch_def,
     ):
         super(FBNetRPNHead, self).__init__()
         assert in_channels == builder.last_depth
@@ -170,8 +177,7 @@ def add_rpn_head(cfg, in_channels, num_anchors):
     # builder.name_prefix = "[rpn]"
 
     rpn_feature = FBNetRPNHead(cfg, in_channels, builder, model_arch)
-    rpn_regressor = rpn.RPNHeadConvRegressor(
-        cfg, rpn_feature.out_channels, num_anchors)
+    rpn_regressor = rpn.RPNHeadConvRegressor(cfg, rpn_feature.out_channels, num_anchors)
     return nn.Sequential(rpn_feature, rpn_regressor)
 
 
@@ -194,8 +200,15 @@ ARCH_CFG_NAME_MAPPING = {
 
 class FBNetROIHead(nn.Module):
     def __init__(
-        self, cfg, in_channels, builder, arch_def,
-        head_name, use_blocks, stride_init, last_layer_scale,
+        self,
+        cfg,
+        in_channels,
+        builder,
+        arch_def,
+        head_name,
+        use_blocks,
+        stride_init,
+        last_layer_scale,
     ):
         super(FBNetROIHead, self).__init__()
         assert in_channels == builder.last_depth
@@ -215,10 +228,7 @@ class FBNetROIHead(nn.Module):
         last_info[1] = last_layer_scale
         last = builder.add_last(last_info)
 
-        self.head = nn.Sequential(OrderedDict([
-            ("blocks", blocks),
-            ("last", last)
-        ]))
+        self.head = nn.Sequential(OrderedDict([("blocks", blocks), ("last", last)]))
 
         self.out_channels = builder.last_depth
 
@@ -235,7 +245,10 @@ def add_roi_head(cfg, in_channels):
     # builder.name_prefix = "_[bbox]_"
 
     return FBNetROIHead(
-        cfg, in_channels, builder, model_arch,
+        cfg,
+        in_channels,
+        builder,
+        model_arch,
         head_name="bbox",
         use_blocks=cfg.MODEL.FBNET.DET_HEAD_BLOCKS,
         stride_init=cfg.MODEL.FBNET.DET_HEAD_STRIDE,
@@ -250,7 +263,10 @@ def add_roi_head_keypoints(cfg, in_channels):
     # builder.name_prefix = "_[kpts]_"
 
     return FBNetROIHead(
-        cfg, in_channels, builder, model_arch,
+        cfg,
+        in_channels,
+        builder,
+        model_arch,
         head_name="kpts",
         use_blocks=cfg.MODEL.FBNET.KPTS_HEAD_BLOCKS,
         stride_init=cfg.MODEL.FBNET.KPTS_HEAD_STRIDE,
@@ -265,7 +281,10 @@ def add_roi_head_mask(cfg, in_channels):
     # builder.name_prefix = "_[mask]_"
 
     return FBNetROIHead(
-        cfg, in_channels, builder, model_arch,
+        cfg,
+        in_channels,
+        builder,
+        model_arch,
         head_name="mask",
         use_blocks=cfg.MODEL.FBNET.MASK_HEAD_BLOCKS,
         stride_init=cfg.MODEL.FBNET.MASK_HEAD_STRIDE,

@@ -25,14 +25,16 @@ import pkg_resources
 
 def download_dataset(dataset_name, dataset_directory):
     # Get the path to the file relative to the package root
-    datasets = pkg_resources.resource_filename('dataset_librarian', 'datasets_urls.json')
+    datasets = pkg_resources.resource_filename(
+        "dataset_librarian", "datasets_urls.json"
+    )
     # Load the JSON file that contains the dataset URLs
-    with open(datasets, 'r') as f:
+    with open(datasets, "r") as f:
         dataset_urls = json.load(f)
 
     # Check if the dataset name is in the JSON file
     if dataset_name not in dataset_urls:
-        print(f'{dataset_name} is not a valid dataset name')
+        print(f"{dataset_name} is not a valid dataset name")
         return
     # Check if the dataset destination directory is given or create one using the dataset name
     if not dataset_directory:
@@ -42,12 +44,12 @@ def download_dataset(dataset_name, dataset_directory):
 
     # Get the URL for the dataset
     dataset_url = dataset_urls[dataset_name]
-    for url in dataset_url['urls']:
+    for url in dataset_url["urls"]:
         # Check if the key 'file_name' exists in the JSON file
-        if 'file_name' in url:
-            filename = url['file_name']
+        if "file_name" in url:
+            filename = url["file_name"]
         else:
-            filename = url['url'].split('/')[-1]
+            filename = url["url"].split("/")[-1]
 
         destination_file_path = os.path.join(dataset_directory, filename)
         if os.path.exists(destination_file_path):
@@ -55,5 +57,9 @@ def download_dataset(dataset_name, dataset_directory):
             print("Please delete it and try again!.\n")
         else:
             # Download the file if it does not exist in the desired dataset directory
-            subprocess.run(["wget", url['url'], "-O", destination_file_path])
-            print("\n{} downloaded successfully in {}\n".format(filename, dataset_directory))
+            subprocess.run(["wget", url["url"], "-O", destination_file_path])
+            print(
+                "\n{} downloaded successfully in {}\n".format(
+                    filename, dataset_directory
+                )
+            )

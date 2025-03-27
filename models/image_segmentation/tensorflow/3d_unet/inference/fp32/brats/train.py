@@ -12,63 +12,78 @@ import keras
 import time
 import sys
 
-parser = argparse.ArgumentParser(description='train opts:')
-parser.add_argument('--bs', type=int, default=1)
-parser.add_argument('--intra', '--num_intra_threads', type=int, default=56)
-parser.add_argument('--inter', '--num_inter_threads', type=int, default=1)
-parser.add_argument('--warmup', '--nw', type=int, default=10)
-parser.add_argument('--report_interval', type=int, default=1)
-parser.add_argument('--nb', type=int, default=10)
+parser = argparse.ArgumentParser(description="train opts:")
+parser.add_argument("--bs", type=int, default=1)
+parser.add_argument("--intra", "--num_intra_threads", type=int, default=56)
+parser.add_argument("--inter", "--num_inter_threads", type=int, default=1)
+parser.add_argument("--warmup", "--nw", type=int, default=10)
+parser.add_argument("--report_interval", type=int, default=1)
+parser.add_argument("--nb", type=int, default=10)
 
 args = parser.parse_args()
 
 import tensorflow as tf
 from keras import backend as K
-config = tf.ConfigProto(intra_op_parallelism_threads=args.intra, inter_op_parallelism_threads=args.inter)
+
+config = tf.ConfigProto(
+    intra_op_parallelism_threads=args.intra, inter_op_parallelism_threads=args.inter
+)
 sess = tf.Session(graph=tf.get_default_graph(), config=config)
 K.set_session(sess)
+
 
 class TimeReporter(keras.callbacks.Callback):
     def on_batch_begin(self, batch, logs=None):
         self.__start_time = time.time()
+
     def on_batch_end(self, batch, logs=None):
         self.__end_time = time.time()
 
-        if hasattr(self, '__stop'):
+        if hasattr(self, "__stop"):
             return
 
-        if not hasattr(self, 'elapsed_time'):
+        if not hasattr(self, "elapsed_time"):
             self.elapsed_time = 0
-        if not hasattr(self, 'elapsed_step'):
+        if not hasattr(self, "elapsed_step"):
             self.elapsed_step = 0
 
-        warmup = config['warmup']
-        report_interval = config['report_interval']
+        warmup = config["warmup"]
+        report_interval = config["report_interval"]
 
         if batch >= warmup:
             # print('\ntime of this step: {}'.format(self.__end_time - self.__start_time))
-            self.elapsed_time += (self.__end_time - self.__start_time)
+            self.elapsed_time += self.__end_time - self.__start_time
             self.elapsed_step += 1
             # print('elapsed_step: {}'.format(self.elapsed_step))
             # print('warmup: {}'.format(warmup))
             # print('n_batch: {}'.format(config['n_batch']))
-            if self.elapsed_step + warmup == config['n_batch']:
+            if self.elapsed_step + warmup == config["n_batch"]:
                 # print('bs: {}'.format(config['batch_size']))
                 # print('elapsed_time: {}'.format(self.elapsed_time))
-                print('\nTotal samples/sec: %.4f samples/s' % (self.elapsed_step * config["batch_size"] / self.elapsed_time))
+                print(
+                    "\nTotal samples/sec: %.4f samples/s"
+                    % (self.elapsed_step * config["batch_size"] / self.elapsed_time)
+                )
                 self.elapsed_time = 0
                 self.elapsed_step = 0
                 self.__stop = True
                 sys.exit()
 
+
 config = dict()
 config["pool_size"] = (2, 2, 2)  # pool size for the max pooling operations
-config["image_shape"] = (144, 144, 144)  # This determines what shape the images will be cropped/resampled to.
+config["image_shape"] = (
+    144,
+    144,
+    144,
+)  # This determines what shape the images will be cropped/resampled to.
 config["patch_shape"] = (64, 64, 64)  # switch to None to train on the whole image
 config["labels"] = (1, 2, 4)  # the label numbers on the input image
 config["n_labels"] = len(config["labels"])
 config["all_modalities"] = ["t1", "t1Gd", "flair", "t2"]
-config["training_modalities"] = config["all_modalities"]  # change this if you want to only use some of the modalities
+config["training_modalities"] = config[
+    "all_modalities"
+]  # change this if you want to only use some of the modalities
 config["nb_channels"] = len(config["training_modalities"])
 if "patch_shape" in config and config["patch_shape"] is not None:
     config["input_shape"] = tuple([config["nb_channels"]] + list(config["patch_shape"]))
@@ -80,32 +95,53 @@ config["deconvolution"] = True  # if False, will use upsampling instead of decon
 config["batch_size"] = args.bs
 config["validation_batch_size"] = 12
 config["n_epochs"] = 500  # cutoff the training after this many epochs
-config["patience"] = 10  # learning rate will be reduced after this many epochs if the validation loss is not improving
-config["early_stop"] = 50  # training will be stopped after this many epochs without the validation loss improving
+config["patience"] = (
+    10  # learning rate will be reduced after this many epochs if the validation loss is not improving
+)
+config["early_stop"] = (
+    50  # training will be stopped after this many epochs without the validation loss improving
+)
 config["initial_learning_rate"] = 0.00001
 config["learning_rate_drop"] = 0.5  # factor by which the learning rate will be reduced
 config["validation_split"] = 0.8  # portion of the data that will be used for training
 config["flip"] = False  # augments the data by randomly flipping an axis during
-config["permute"] = True  # data shape must be a cube. Augments the data by permuting in various directions
+config["permute"] = (
+    True  # data shape must be a cube. Augments the data by permuting in various directions
+)
 config["distort"] = None  # switch to None if you want no distortion
 config["augment"] = config["flip"] or config["distort"]
-config["validation_patch_overlap"] = 0  # if > 0, during training, validation patches will be overlapping
-config["training_patch_start_offset"] = (16, 16, 16)  # randomly offset the first patch index by up to this offset
+config["validation_patch_overlap"] = (
+    0  # if > 0, during training, validation patches will be overlapping
+)
+config["training_patch_start_offset"] = (
+    16,
+    16,
+    16,
+)  # randomly offset the first patch index by up to this offset
 config["skip_blank"] = True  # if True, then patches without any target will be skipped
 
 config["data_file"] = os.path.join(os.environ["DATASET_LOCATION"], "brats_data.h5")
 config["model_file"] = os.environ["IN_GRAPH"]
-config["training_file"] = os.path.join(os.environ["DATASET_LOCATION"], "training_ids.pkl")
-config["validation_file"] = os.path.join(os.environ["DATASET_LOCATION"], "validation_ids.pkl")
-config["overwrite"] = False  # If True, will previous files. If False, will use previously written files.
+config["training_file"] = os.path.join(
+    os.environ["DATASET_LOCATION"], "training_ids.pkl"
+)
+config["validation_file"] = os.path.join(
+    os.environ["DATASET_LOCATION"], "validation_ids.pkl"
+)
+config["overwrite"] = (
+    False  # If True, will previous files. If False, will use previously written files.
+)
 
-config['warmup'] = args.warmup
-config['report_interval'] = args.report_interval
-config['n_batch'] = args.nb
+config["warmup"] = args.warmup
+config["report_interval"] = args.report_interval
+config["n_batch"] = args.nb
+
 
 def fetch_training_data_files():
     training_data_files = list()
-    for subject_dir in glob.glob(os.path.join(os.path.dirname(__file__), "data", "preprocessed", "*", "*")):
+    for subject_dir in glob.glob(
+        os.path.join(os.path.dirname(__file__), "data", "preprocessed", "*", "*")
+    ):
         subject_files = list()
         for modality in config["training_modalities"] + ["truth"]:
             subject_files.append(os.path.join(subject_dir, modality + ".nii.gz"))
@@ -118,21 +154,30 @@ def main(overwrite=False):
     if overwrite or not os.path.exists(config["data_file"]):
         training_files = fetch_training_data_files()
 
-        write_data_to_file(training_files, config["data_file"], image_shape=config["image_shape"])
+        write_data_to_file(
+            training_files, config["data_file"], image_shape=config["image_shape"]
+        )
     data_file_opened = open_data_file(config["data_file"])
 
     if not overwrite and os.path.exists(config["model_file"]):
         model = load_old_model(config["model_file"])
     else:
         # instantiate new model
-        model = unet_model_3d(input_shape=config["input_shape"],
-                              pool_size=config["pool_size"],
-                              n_labels=config["n_labels"],
-                              initial_learning_rate=config["initial_learning_rate"],
-                              deconvolution=config["deconvolution"])
+        model = unet_model_3d(
+            input_shape=config["input_shape"],
+            pool_size=config["pool_size"],
+            n_labels=config["n_labels"],
+            initial_learning_rate=config["initial_learning_rate"],
+            deconvolution=config["deconvolution"],
+        )
 
     # get training and testing generators
-    train_generator, validation_generator, n_train_steps, n_validation_steps = get_training_and_validation_generators(
+    (
+        train_generator,
+        validation_generator,
+        n_train_steps,
+        n_validation_steps,
+    ) = get_training_and_validation_generators(
         data_file_opened,
         batch_size=config["batch_size"],
         data_split=config["validation_split"],
@@ -149,22 +194,25 @@ def main(overwrite=False):
         augment=config["augment"],
         skip_blank=config["skip_blank"],
         augment_flip=config["flip"],
-        augment_distortion_factor=config["distort"])
+        augment_distortion_factor=config["distort"],
+    )
 
-    print('run training')
+    print("run training")
     # run training
-    train_model(model=model,
-                model_file=config["model_file"],
-                training_generator=train_generator,
-                validation_generator=validation_generator,
-                steps_per_epoch=n_train_steps,
-                validation_steps=n_validation_steps,
-                initial_learning_rate=config["initial_learning_rate"],
-                learning_rate_drop=config["learning_rate_drop"],
-                learning_rate_patience=config["patience"],
-                early_stopping_patience=config["early_stop"],
-                n_epochs=config["n_epochs"],
-                timer=TimeReporter)
+    train_model(
+        model=model,
+        model_file=config["model_file"],
+        training_generator=train_generator,
+        validation_generator=validation_generator,
+        steps_per_epoch=n_train_steps,
+        validation_steps=n_validation_steps,
+        initial_learning_rate=config["initial_learning_rate"],
+        learning_rate_drop=config["learning_rate_drop"],
+        learning_rate_patience=config["patience"],
+        early_stopping_patience=config["early_stop"],
+        n_epochs=config["n_epochs"],
+        timer=TimeReporter,
+    )
     data_file_opened.close()
 
 

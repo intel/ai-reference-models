@@ -1,19 +1,20 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import errno
+
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -41,20 +42,23 @@ def save_labels(dataset_list, output_dir):
 
         ids_to_labels = {}
         for dataset in dataset_list:
-            if hasattr(dataset, 'categories'):
+            if hasattr(dataset, "categories"):
                 ids_to_labels.update(dataset.categories)
             else:
-                logger.warning("Dataset [{}] has no categories attribute, labels.json file won't be created".format(
-                    dataset.__class__.__name__))
+                logger.warning(
+                    "Dataset [{}] has no categories attribute, labels.json file won't be created".format(
+                        dataset.__class__.__name__
+                    )
+                )
 
         if ids_to_labels:
-            labels_file = os.path.join(output_dir, 'labels.json')
+            labels_file = os.path.join(output_dir, "labels.json")
             logger.info("Saving labels mapping into {}".format(labels_file))
-            with open(labels_file, 'w') as f:
+            with open(labels_file, "w") as f:
                 json.dump(ids_to_labels, f, indent=2)
 
 
 def save_config(cfg, path):
     if is_main_process():
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(cfg.dump())

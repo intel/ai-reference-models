@@ -127,6 +127,7 @@ def trace_handler(prof):
     )
     prof.export_chrome_trace(log_path)
 
+
 # beam search = 4
 num_beams = 4
 generate_kwargs = dict(do_sample=False, temperature=0.9, num_beams=num_beams)
@@ -196,8 +197,9 @@ if args.dtype == "bf16" or args.dtype == "fp32":
         from torch._inductor import config as inductor_config
 
         inductor_config.cpp_wrapper = True
-        with torch.no_grad(), torch.autocast("cpu", 
-            enabled=amp_enabled, dtype=amp_dtype
+        with (
+            torch.no_grad(),
+            torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
         ):
             if args.ipex:
                 print("[Info] Running torch.compile() with IPEX backend")
@@ -219,8 +221,9 @@ elif args.dtype == "fp16":
         from torch._inductor import config as inductor_config
 
         inductor_config.cpp_wrapper = True
-        with torch.no_grad(), torch.autocast("cpu", 
-            enabled=amp_enabled, dtype=amp_dtype
+        with (
+            torch.no_grad(),
+            torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
         ):
             if args.ipex:
                 print("[Info] Running torch.compile() with IPEX backend")
@@ -565,7 +568,9 @@ else:
     if "chatglm" in prompt_pool and args.input_tokens in prompt_pool["chatglm"]:
         prompt = prompt_pool["chatglm"][args.input_tokens]
     else:
-        raise SystemExit("[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input.")
+        raise SystemExit(
+            "[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input."
+        )
 
 if args.benchmark:
     input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
@@ -641,6 +646,7 @@ if args.dtype == "int8" and args.ipex:
         print("model quantization - Done!")
 elif args.dtype == "int8" and args.inductor:
     from torch._inductor import config as inductor_config
+
     inductor_config.cpp_wrapper = True
 
     if args.ipex_smooth_quant:
@@ -650,6 +656,7 @@ elif args.dtype == "int8" and args.inductor:
             smooth_quant,
         )
         from torchao.quantization import quantize_
+
         with torch.no_grad():
             encoded_input = tokenizer(prompt, return_tensors="pt")
             print("encoded_input is: {}".format(encoded_input), flush=True)
@@ -698,34 +705,46 @@ elif args.dtype == "int8" and args.inductor:
                 user_model(**encoded_input)
                 user_model(**encoded_input)
 
+
 def benchmark_warmup(prompt):
     # start
     if args.profile:
 
-        with torch.profiler.profile(
-            activities=[torch.profiler.ProfilerActivity.CPU],
-            schedule=torch.profiler.schedule(wait=1, warmup=3, active=1),
-            on_trace_ready=trace_handler,
-        ) as prof, torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
-            enabled=amp_enabled, dtype=amp_dtype
+        with (
+            torch.profiler.profile(
+                activities=[torch.profiler.ProfilerActivity.CPU],
+                schedule=torch.profiler.schedule(wait=1, warmup=3, active=1),
+                on_trace_ready=trace_handler,
+            ) as prof,
+            torch.inference_mode(),
+            torch.no_grad(),
+            torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
         ):
             for i in range(5):
                 input_ids = tokenizer(prompt, return_tensors="pt").input_ids
                 output = user_model.generate(
-                    input_ids, max_new_tokens=args.max_new_tokens, min_new_tokens=args.max_new_tokens, **generate_kwargs
+                    input_ids,
+                    max_new_tokens=args.max_new_tokens,
+                    min_new_tokens=args.max_new_tokens,
+                    **generate_kwargs,
                 )
                 prof.step()
 
     num_iter = args.num_warmup
-    with torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
-        enabled=amp_enabled, dtype=amp_dtype
+    with (
+        torch.inference_mode(),
+        torch.no_grad(),
+        torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
     ):
         for i in range(num_iter):
             get_memory_usage("Iteration: " + str(i), args)
 
             input_ids = tokenizer(prompt, return_tensors="pt").input_ids
             output = user_model.generate(
-                input_ids, max_new_tokens=args.max_new_tokens, min_new_tokens=args.max_new_tokens, **generate_kwargs
+                input_ids,
+                max_new_tokens=args.max_new_tokens,
+                min_new_tokens=args.max_new_tokens,
+                **generate_kwargs,
             )
     print("warmup done")
 
@@ -735,15 +754,20 @@ def benchmark_evaluate(prompt):
     total_time = 0.0
     num_iter = args.num_iter - args.num_warmup
     total_list = []
-    with torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
-        enabled=amp_enabled, dtype=amp_dtype
+    with (
+        torch.inference_mode(),
+        torch.no_grad(),
+        torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
     ):
         for i in range(num_iter):
             get_memory_usage("Iteration: " + str(i), args)
             tic = time.time()
             input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(args.device)
             output = user_model.generate(
-                input_ids, max_new_tokens=args.max_new_tokens, min_new_tokens=args.max_new_tokens, **generate_kwargs
+                input_ids,
+                max_new_tokens=args.max_new_tokens,
+                min_new_tokens=args.max_new_tokens,
+                **generate_kwargs,
             )
             gen_ids = output[0] if args.token_latency else output
             gen_text = tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
@@ -815,8 +839,9 @@ if args.accuracy_only:
                     "return_last_logit": torch.tensor(True),
                 }
             )
-            with torch.no_grad(), torch.autocast("cpu", 
-                enabled=amp_enabled, dtype=amp_dtype
+            with (
+                torch.no_grad(),
+                torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
             ):
                 user_model = torch.jit.trace(
                     user_model.eval(),

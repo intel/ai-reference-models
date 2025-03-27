@@ -36,7 +36,7 @@ from common.base_model_init import BaseModelInitializer
 
 
 class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
-    """Launches benchmarking job based on the specified args """
+    """Launches benchmarking job based on the specified args"""
 
     def __init__(self, *args, **kwargs):
         super(LaunchBenchmark, self).__init__(*args, **kwargs)
@@ -53,66 +53,100 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         use_case = self.get_model_use_case(benchmark_scripts, os_type)
         intelai_models = self.get_model_dir(benchmark_scripts, use_case, os_type)
         intelai_models_common = self.get_model_dir(benchmark_scripts, "common", os_type)
-        env_var_dict = self.get_env_vars(benchmark_scripts, use_case, intelai_models,
-                                         intelai_models_common, os_type)
+        env_var_dict = self.get_env_vars(
+            benchmark_scripts, use_case, intelai_models, intelai_models_common, os_type
+        )
         if "Windows" == os_type:
             if os.getenv("PYTHONPATH") is None:
                 os.environ["PYTHONPATH"] = os.path.dirname(sys.executable)
             os.environ["PYTHONPATH"] = "{};{};{}".format(
-                benchmark_scripts, intelai_models, os.environ["PYTHONPATH"])
+                benchmark_scripts, intelai_models, os.environ["PYTHONPATH"]
+            )
 
         if self.args.docker_image:
-            if self.args.framework == 'tensorflow_serving':
-                self.run_bare_metal(benchmark_scripts, intelai_models,
-                                    intelai_models_common, env_var_dict, os_type)
-            elif self.args.framework == 'tensorflow':
-                self.run_docker_container(benchmark_scripts, intelai_models,
-                                          intelai_models_common, env_var_dict)
+            if self.args.framework == "tensorflow_serving":
+                self.run_bare_metal(
+                    benchmark_scripts,
+                    intelai_models,
+                    intelai_models_common,
+                    env_var_dict,
+                    os_type,
+                )
+            elif self.args.framework == "tensorflow":
+                self.run_docker_container(
+                    benchmark_scripts,
+                    intelai_models,
+                    intelai_models_common,
+                    env_var_dict,
+                )
         else:
-            self.run_bare_metal(benchmark_scripts, intelai_models,
-                                intelai_models_common, env_var_dict, os_type)
+            self.run_bare_metal(
+                benchmark_scripts,
+                intelai_models,
+                intelai_models_common,
+                env_var_dict,
+                os_type,
+            )
 
     def parse_args(self):
         # Additional args that are only used with the launch script
         arg_parser = ArgumentParser(
             parents=[self._common_arg_parser],
-            description="Parse args for benchmark interface")
+            description="Parse args for benchmark interface",
+        )
 
         arg_parser.add_argument(
             "--docker-image",
             help="Specify the docker image/tag to use when running benchmarking within a container."
-                 "If no docker image is specified, then no docker container will be used.",
-            dest="docker_image", default=None, type=check_no_spaces)
+            "If no docker image is specified, then no docker container will be used.",
+            dest="docker_image",
+            default=None,
+            type=check_no_spaces,
+        )
 
         arg_parser.add_argument(
             "--volume",
             help="Specify a custom volume to mount in the container, which follows the same format as the "
-                 "docker --volume flag (https://docs.docker.com/storage/volumes/). "
-                 "This argument can only be used in conjunction with a --docker-image.",
-            action="append", dest="custom_volumes", type=check_volume_mount)
+            "docker --volume flag (https://docs.docker.com/storage/volumes/). "
+            "This argument can only be used in conjunction with a --docker-image.",
+            action="append",
+            dest="custom_volumes",
+            type=check_volume_mount,
+        )
 
         arg_parser.add_argument(
             "--shm-size",
             help="Specify the size of docker /dev/shm. The format is <number><unit>. "
-                 "number must be greater than 0. Unit is optional and can be b (bytes), k (kilobytes), "
-                 "m (megabytes), or g (gigabytes).",
-            dest="shm_size", default="64m", type=check_shm_size)
+            "number must be greater than 0. Unit is optional and can be b (bytes), k (kilobytes), "
+            "m (megabytes), or g (gigabytes).",
+            dest="shm_size",
+            default="64m",
+            type=check_shm_size,
+        )
 
         arg_parser.add_argument(
             "--debug",
             help="Launches debug mode which doesn't execute "
-                 "start.sh when running in a docker container.", action="store_true")
+            "start.sh when running in a docker container.",
+            action="store_true",
+        )
 
         arg_parser.add_argument(
             "--noinstall",
             help="whether to install packages for a given model when running in docker "
-                 "(default --noinstall='False') or on bare metal (default --noinstall='True')",
-            dest="noinstall", action="store_true", default=None)
+            "(default --noinstall='False') or on bare metal (default --noinstall='True')",
+            dest="noinstall",
+            action="store_true",
+            default=None,
+        )
 
         arg_parser.add_argument(
             "--dry-run",
             help="Shows the call to the model without actually running it",
-            dest="dry_run", action="store_true", default=None)
+            dest="dry_run",
+            action="store_true",
+            default=None,
+        )
 
         return arg_parser.parse_known_args()
 
@@ -121,8 +155,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # validate that we support this framework by checking folder names
         benchmark_dir = os.path.dirname(os.path.realpath(__file__))
         if glob.glob("{}/*/{}".format(benchmark_dir, self.args.framework)) == []:
-            raise ValueError("The specified framework is not supported: {}".
-                             format(self.args.framework))
+            raise ValueError(
+                "The specified framework is not supported: {}".format(
+                    self.args.framework
+                )
+            )
 
         # if neither benchmark_only or accuracy_only are specified, then enable
         # benchmark_only as the default
@@ -134,16 +171,23 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             self.args.disable_tcmalloc = str(self.args.precision != "int8")
 
         if self.args.custom_volumes and not self.args.docker_image:
-            raise ValueError("Volume mounts can only be used when running in a docker container "
-                             "(a --docker-image must be specified when using --volume).")
+            raise ValueError(
+                "Volume mounts can only be used when running in a docker container "
+                "(a --docker-image must be specified when using --volume)."
+            )
 
         if self.args.mode == "inference" and self.args.checkpoint:
-            print("Warning: The --checkpoint argument is being deprecated in favor of using frozen graphs.")
+            print(
+                "Warning: The --checkpoint argument is being deprecated in favor of using frozen graphs."
+            )
 
         # if itex is installed, OneDNN Graph is enabled by default.
         try:
             import intel_extension_for_tensorflow as itex
-            print("Intel Extension for Tensorflow " + itex.__version__ + " is installed.")
+
+            print(
+                "Intel Extension for Tensorflow " + itex.__version__ + " is installed."
+            )
             if self.args.onednn_graph is None and self.args.precision == "int8":
                 self.args.onednn_graph = True
         except ModuleNotFoundError:
@@ -157,8 +201,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         # find the path to the model's benchmarks folder
         search_path = os.path.join(
-            benchmark_scripts, "*", args.framework, args.model_name,
-            args.mode, args.precision)
+            benchmark_scripts,
+            "*",
+            args.framework,
+            args.model_name,
+            args.mode,
+            args.precision,
+        )
         matches = glob.glob(search_path)
         error_str = ""
         if len(matches) > 1:
@@ -166,7 +215,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         elif len(matches) == 0:
             error_str = "No model was found for {} {} {}"
         if error_str:
-            raise ValueError(error_str.format(args.framework, args.model_name, args.precision))
+            raise ValueError(
+                error_str.format(args.framework, args.model_name, args.precision)
+            )
 
         # use the benchmarks directory path to find the use case
         if "Windows" == os_type:
@@ -176,8 +227,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         # find the last occurrence of framework in the list, then return
         # the element before it in the path, which is the use case
-        return next(dir_list[elem - 1] for elem in range(len(dir_list) - 1, -1, -1)
-                    if dir_list[elem] == args.framework)
+        return next(
+            dir_list[elem - 1]
+            for elem in range(len(dir_list) - 1, -1, -1)
+            if dir_list[elem] == args.framework
+        )
 
     def get_model_dir(self, benchmark_scripts, use_case, os_type):
         """
@@ -192,8 +246,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         # find the intelai_optimized model directory
         args = self.args
-        optimized_model_dir = os.path.join(intelai_models, use_case,
-                                           args.framework, args.model_name)
+        optimized_model_dir = os.path.join(
+            intelai_models, use_case, args.framework, args.model_name
+        )
         if "Windows" == os_type:
             optimized_model_dir = optimized_model_dir.replace("\\", "/")
 
@@ -203,8 +258,14 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         return intelai_models
 
-    def get_env_vars(self, benchmark_scripts, use_case, intelai_models,
-                     intelai_models_common, os_type):
+    def get_env_vars(
+        self,
+        benchmark_scripts,
+        use_case,
+        intelai_models,
+        intelai_models_common,
+        os_type,
+    ):
         """
         Sets up dictionary of standard env vars that are used by start.sh
         """
@@ -237,7 +298,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "MPI_NUM_PROCESSES": args.mpi,
             "MPI_NUM_PROCESSES_PER_SOCKET": args.num_mpi,
             "NUMA_CORES_PER_INSTANCE": args.numa_cores_per_instance,
-            "NOINSTALL": str(args.noinstall) if args.noinstall is not None else "True" if not args.docker_image else "False",  # noqa: E501
+            "NOINSTALL": (
+                str(args.noinstall)
+                if args.noinstall is not None
+                else "True" if not args.docker_image else "False"
+            ),  # noqa: E501
             "NUM_CORES": args.num_cores,
             "NUM_INTER_THREADS": args.num_inter_threads,
             "NUM_INTRA_THREADS": args.num_intra_threads,
@@ -253,25 +318,32 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "WEIGHT_SHARING": args.weight_sharing,
             "SYNTHETIC_DATA": args.synthetic_data,
             "GPU": str(args.gpu),
-            "ONEDNN_GRAPH": str(args.onednn_graph)
+            "ONEDNN_GRAPH": str(args.onednn_graph),
         }
 
         # Add custom model args as env vars)
         for custom_arg in args.model_args + self.unknown_args:
             if "=" not in custom_arg:
-                raise ValueError("Expected model args in the format "
-                                 "`name=value` but received: {}".
-                                 format(custom_arg))
+                raise ValueError(
+                    "Expected model args in the format "
+                    "`name=value` but received: {}".format(custom_arg)
+                )
             split_arg = custom_arg.split("=")
-            split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
+            split_arg[0] = split_arg[0].replace("-", "_").lstrip("_")
             # Convert the arg names to upper case to work on both Windows and Linux systems
             split_arg[0] = split_arg[0].upper()
             env_var_dict[split_arg[0]] = split_arg[1]
 
         return env_var_dict
 
-    def run_bare_metal(self, benchmark_scripts, intelai_models,
-                       intelai_models_common, env_var_dict, os_type):
+    def run_bare_metal(
+        self,
+        benchmark_scripts,
+        intelai_models,
+        intelai_models_common,
+        env_var_dict,
+        os_type,
+    ):
         """
         Runs the model without a container
         """
@@ -293,7 +365,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # It does not support checkpoint files.
         if args.framework == "tensorflow_serving":
             if checkpoint_path:
-                raise ValueError("--checkpoint-path arg is not supported with tensorflow serving benchmarking")
+                raise ValueError(
+                    "--checkpoint-path arg is not supported with tensorflow serving benchmarking"
+                )
 
             if args.mode != "inference":
                 raise ValueError("--mode arg should be set to inference")
@@ -301,17 +375,23 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             if in_graph_path:
                 env_var_dict["IN_GRAPH"] = in_graph_path
             else:
-                raise ValueError("--in-graph arg is required to run tensorflow serving benchmarking")
+                raise ValueError(
+                    "--in-graph arg is required to run tensorflow serving benchmarking"
+                )
 
             for env_var_name in env_var_dict:
                 os.environ[env_var_name] = str(env_var_dict[env_var_name])
 
             # We need this env to be set for the platform util
-            os.environ["PYTHON_EXE"] = str(sys.executable if not args.docker_image else "python")
+            os.environ["PYTHON_EXE"] = str(
+                sys.executable if not args.docker_image else "python"
+            )
             # Get Platformutil
             platform_util_obj = None or platform_util.PlatformUtil(self.args)
             # Configure num_inter_threads and num_intra_threads
-            base_obj = BaseModelInitializer(args=self.args, custom_args=[], platform_util=platform_util_obj)
+            base_obj = BaseModelInitializer(
+                args=self.args, custom_args=[], platform_util=platform_util_obj
+            )
             base_obj.set_num_inter_intra_threads()
 
             # Update num_inter_threads and num_intra_threads in env dictionary
@@ -329,7 +409,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             # Add env vars with bare metal settings
             env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
             env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
-            env_var_dict["MOUNT_INTELAI_MODELS_COMMON_SOURCE"] = mount_intelai_models_common
+            env_var_dict["MOUNT_INTELAI_MODELS_COMMON_SOURCE"] = (
+                mount_intelai_models_common
+            )
 
             if in_graph_path:
                 env_var_dict["IN_GRAPH"] = in_graph_path
@@ -366,8 +448,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         else:
             self._launch_command(["bash", start_script])
 
-    def run_docker_container(self, benchmark_scripts, intelai_models,
-                             intelai_models_common, env_var_dict):
+    def run_docker_container(
+        self, benchmark_scripts, intelai_models, intelai_models_common, env_var_dict
+    ):
         """
         Runs a docker container with the specified image and environment
         variables to start running the benchmarking job.
@@ -380,24 +463,32 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         workspace = os.path.join(mount_benchmark, "common", args.framework)
 
         mount_output_dir = False
-        output_dir = os.path.join(workspace, 'logs')
+        output_dir = os.path.join(workspace, "logs")
         if args.output_dir != "/models/benchmarks/common/tensorflow/logs":
             # we don't need to mount log dir otherwise since default is workspace folder
             mount_output_dir = True
             output_dir = args.output_dir
 
-        in_graph_dir = os.path.dirname(args.input_graph) if args.input_graph \
-            else ""
-        in_graph_filename = os.path.basename(args.input_graph) if \
-            args.input_graph else ""
+        in_graph_dir = os.path.dirname(args.input_graph) if args.input_graph else ""
+        in_graph_filename = (
+            os.path.basename(args.input_graph) if args.input_graph else ""
+        )
 
         # env vars with docker settings
-        env_vars = ["--env", "WORKSPACE={}".format(workspace),
-                    "--env", "MOUNT_BENCHMARK={}".format(mount_benchmark),
-                    "--env", "MOUNT_EXTERNAL_MODELS_SOURCE={}".format(mount_external_models_source),
-                    "--env", "MOUNT_INTELAI_MODELS_SOURCE={}".format(mount_intelai_models),
-                    "--env", "MOUNT_INTELAI_MODELS_COMMON_SOURCE={}".format(mount_intelai_models_common),
-                    "--env", "OUTPUT_DIR={}".format(output_dir)]
+        env_vars = [
+            "--env",
+            "WORKSPACE={}".format(workspace),
+            "--env",
+            "MOUNT_BENCHMARK={}".format(mount_benchmark),
+            "--env",
+            "MOUNT_EXTERNAL_MODELS_SOURCE={}".format(mount_external_models_source),
+            "--env",
+            "MOUNT_INTELAI_MODELS_SOURCE={}".format(mount_intelai_models),
+            "--env",
+            "MOUNT_INTELAI_MODELS_COMMON_SOURCE={}".format(mount_intelai_models_common),
+            "--env",
+            "OUTPUT_DIR={}".format(output_dir),
+        ]
 
         if args.input_graph:
             env_vars += ["--env", "IN_GRAPH=/in_graph/{}".format(in_graph_filename)]
@@ -416,7 +507,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         # Add env vars with common settings
         for env_var_name in env_var_dict:
-            env_vars += ["--env", "{}={}".format(env_var_name, env_var_dict[env_var_name])]
+            env_vars += [
+                "--env",
+                "{}={}".format(env_var_name, env_var_dict[env_var_name]),
+            ]
 
         # Add proxy to env variables if any set on host
         for environment_proxy_setting in [
@@ -428,35 +522,45 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             if not os.environ.get(environment_proxy_setting):
                 continue
             env_vars.append("--env")
-            env_vars.append("{}={}".format(
-                environment_proxy_setting,
-                os.environ.get(environment_proxy_setting)
-            ))
+            env_vars.append(
+                "{}={}".format(
+                    environment_proxy_setting, os.environ.get(environment_proxy_setting)
+                )
+            )
 
-        volume_mounts = ["--volume", "{}:{}".format(benchmark_scripts, mount_benchmark),
-                         "--volume", "{}:{}".format(args.model_source_dir, mount_external_models_source),
-                         "--volume", "{}:{}".format(intelai_models, mount_intelai_models),
-                         "--volume", "{}:{}".format(intelai_models_common, mount_intelai_models_common)]
+        volume_mounts = [
+            "--volume",
+            "{}:{}".format(benchmark_scripts, mount_benchmark),
+            "--volume",
+            "{}:{}".format(args.model_source_dir, mount_external_models_source),
+            "--volume",
+            "{}:{}".format(intelai_models, mount_intelai_models),
+            "--volume",
+            "{}:{}".format(intelai_models_common, mount_intelai_models_common),
+        ]
 
         if mount_output_dir:
-            volume_mounts.extend([
-                "--volume", "{}:{}".format(output_dir, output_dir)])
+            volume_mounts.extend(["--volume", "{}:{}".format(output_dir, output_dir)])
 
         if args.data_location:
-            volume_mounts.extend([
-                "--volume", "{}:{}".format(args.data_location, "/dataset")])
+            volume_mounts.extend(
+                ["--volume", "{}:{}".format(args.data_location, "/dataset")]
+            )
 
         if args.checkpoint:
-            volume_mounts.extend([
-                "--volume", "{}:{}".format(args.checkpoint, "/checkpoints")])
+            volume_mounts.extend(
+                ["--volume", "{}:{}".format(args.checkpoint, "/checkpoints")]
+            )
 
         if args.backbone_model:
-            volume_mounts.extend([
-                "--volume", "{}:{}".format(args.backbone_model, "/backbone_model")])
+            volume_mounts.extend(
+                ["--volume", "{}:{}".format(args.backbone_model, "/backbone_model")]
+            )
 
         if in_graph_dir:
-            volume_mounts.extend([
-                "--volume", "{}:{}".format(in_graph_dir, "/in_graph")])
+            volume_mounts.extend(
+                ["--volume", "{}:{}".format(in_graph_dir, "/in_graph")]
+            )
 
         if args.custom_volumes:
             for custom_volume in args.custom_volumes:
@@ -468,14 +572,30 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if args.debug:
             docker_run_cmd.append("-it")
 
-        if args.numa_cores_per_instance is not None or args.socket_id != -1 or \
-                args.num_cores != -1 or args.mpi is not None or args.num_mpi > 1:
+        if (
+            args.numa_cores_per_instance is not None
+            or args.socket_id != -1
+            or args.num_cores != -1
+            or args.mpi is not None
+            or args.num_mpi > 1
+        ):
             docker_run_cmd.append("--privileged")
 
         docker_shm_size = "--shm-size={}".format(args.shm_size)
-        docker_run_cmd = docker_run_cmd + env_vars + volume_mounts + [
-            docker_shm_size, "-u", "root:root", "-w",
-            workspace, args.docker_image, "/bin/bash"]
+        docker_run_cmd = (
+            docker_run_cmd
+            + env_vars
+            + volume_mounts
+            + [
+                docker_shm_size,
+                "-u",
+                "root:root",
+                "-w",
+                workspace,
+                args.docker_image,
+                "/bin/bash",
+            ]
+        )
 
         if not args.debug:
             docker_run_cmd.append("start.sh")

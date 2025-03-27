@@ -24,8 +24,16 @@ import torch
 from torch.nn import Parameter
 
 
-def rnn(rnn, input_size, hidden_size, num_layers, norm=None,
-        forget_gate_bias=1.0, dropout=0.0, **kwargs):
+def rnn(
+    rnn,
+    input_size,
+    hidden_size,
+    num_layers,
+    norm=None,
+    forget_gate_bias=1.0,
+    dropout=0.0,
+    **kwargs,
+):
     """TODO"""
     if rnn != "lstm":
         raise ValueError(f"Unknown rnn={rnn}")
@@ -40,7 +48,7 @@ def rnn(rnn, input_size, hidden_size, num_layers, norm=None,
                 num_layers=num_layers,
                 dropout=dropout,
                 forget_gate_bias=forget_gate_bias,
-                **kwargs
+                **kwargs,
             )
 
         if norm == "batch_norm":
@@ -51,18 +59,20 @@ def rnn(rnn, input_size, hidden_size, num_layers, norm=None,
                 batch_norm=True,
                 dropout=dropout,
                 forget_gate_bias=forget_gate_bias,
-                **kwargs
+                **kwargs,
             )
 
         if norm == "layer_norm":
-            return torch.jit.script(lnlstm(
-                input_size=input_size,
-                hidden_size=hidden_size,
-                num_layers=num_layers,
-                dropout=dropout,
-                forget_gate_bias=forget_gate_bias,
-                **kwargs
-            ))
+            return torch.jit.script(
+                lnlstm(
+                    input_size=input_size,
+                    hidden_size=hidden_size,
+                    num_layers=num_layers,
+                    dropout=dropout,
+                    forget_gate_bias=forget_gate_bias,
+                    **kwargs,
+                )
+            )
 
 
 class OverLastDim(torch.nn.Module):
@@ -98,9 +108,9 @@ class OverLastDim(torch.nn.Module):
 
 
 class LstmDrop(torch.nn.Module):
-
-    def __init__(self, input_size, hidden_size, num_layers, dropout, forget_gate_bias,
-             **kwargs):
+    def __init__(
+        self, input_size, hidden_size, num_layers, dropout, forget_gate_bias, **kwargs
+    ):
         """Returns an LSTM with forget gate bias init to `forget_gate_bias`.
 
         Args:
@@ -126,10 +136,10 @@ class LstmDrop(torch.nn.Module):
             for name, v in self.lstm.named_parameters():
                 if "bias_ih" in name:
                     bias = getattr(self.lstm, name)
-                    bias.data[hidden_size:2*hidden_size].fill_(forget_gate_bias)
+                    bias.data[hidden_size : 2 * hidden_size].fill_(forget_gate_bias)
                 if "bias_hh" in name:
                     bias = getattr(self.lstm, name)
-                    bias.data[hidden_size:2*hidden_size].fill_(0)
+                    bias.data[hidden_size : 2 * hidden_size].fill_(0)
 
         self.dropout = torch.nn.Dropout(dropout) if dropout else None
 
@@ -143,11 +153,17 @@ class LstmDrop(torch.nn.Module):
         return x, h
 
 
-
 class RNNLayer(torch.nn.Module):
     """A single RNNLayer with optional batch norm."""
-    def __init__(self, input_size, hidden_size, rnn_type=torch.nn.LSTM,
-                 batch_norm=True, forget_gate_bias=1.0):
+
+    def __init__(
+        self,
+        input_size,
+        hidden_size,
+        rnn_type=torch.nn.LSTM,
+        batch_norm=True,
+        forget_gate_bias=1.0,
+    ):
         super().__init__()
 
         if batch_norm:
@@ -155,16 +171,18 @@ class RNNLayer(torch.nn.Module):
 
         if isinstance(rnn_type, torch.nn.LSTM) and not batch_norm:
             # batch_norm will apply bias, no need to add a second to LSTM
-            self.rnn = lstm(input_size=input_size,
-                            hidden_size=hidden_size,
-                            forget_gate_bias=forget_gate_bias)
+            self.rnn = lstm(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                forget_gate_bias=forget_gate_bias,
+            )
         else:
-            self.rnn = rnn_type(input_size=input_size,
-                                hidden_size=hidden_size,
-                                bias=not batch_norm)
+            self.rnn = rnn_type(
+                input_size=input_size, hidden_size=hidden_size, bias=not batch_norm
+            )
 
     def forward(self, x, hx=None):
-        if hasattr(self, 'bn'):
+        if hasattr(self, "bn"):
             x = x.contiguous()
             x = self.bn(x)
         x, h = self.rnn(x, hx=hx)
@@ -182,9 +200,19 @@ class BNRNNSum(torch.nn.Module):
     the input with the statistics computed over all time steps.  If dropout > 0
     then it is applied to all layer outputs except the last.
     """
-    def __init__(self, input_size, hidden_size, rnn_type=torch.nn.LSTM,
-                 rnn_layers=1, batch_norm=True, dropout=0.0,
-                 forget_gate_bias=1.0, norm_first_rnn=False, **kwargs):
+
+    def __init__(
+        self,
+        input_size,
+        hidden_size,
+        rnn_type=torch.nn.LSTM,
+        rnn_layers=1,
+        batch_norm=True,
+        dropout=0.0,
+        forget_gate_bias=1.0,
+        norm_first_rnn=False,
+        **kwargs,
+    ):
         super().__init__()
         self.rnn_layers = rnn_layers
 
@@ -261,7 +289,7 @@ class StackTime(torch.nn.Module):
             tmp[:-i, :, :] = x[i:, :, :]
             seq.append(tmp)
         x_lens = torch.ceil(x_lens.float() / self.factor).int()
-        return torch.cat(seq, dim=2)[::self.factor, :, :], x_lens
+        return torch.cat(seq, dim=2)[:: self.factor, :, :], x_lens
 
 
 class IPEXStackTime(torch.nn.Module):
@@ -280,20 +308,21 @@ class IPEXStackTime(torch.nn.Module):
 
         x_lens = torch.ceil(x_lens.float() / self.factor).int()
 
-        output = torch.empty((math.ceil(T / self.factor), B, U * self.factor), dtype=x.dtype)
+        output = torch.empty(
+            (math.ceil(T / self.factor), B, U * self.factor), dtype=x.dtype
+        )
 
-        output[:, :, :U] = x[::self.factor, :, :]
+        output[:, :, :U] = x[:: self.factor, :, :]
 
         if T % 2 != 0:
-            output[:-1, :, U:] = x[1::self.factor, :, :]
+            output[:-1, :, U:] = x[1 :: self.factor, :, :]
             output[-1, :, U:] = 0
         else:
-            output[:, :, U:] = x[1::self.factor, :, :]
+            output[:, :, U:] = x[1 :: self.factor, :, :]
         return output, x_lens
 
 
-def lnlstm(input_size, hidden_size, num_layers, dropout, forget_gate_bias,
-           **kwargs):
+def lnlstm(input_size, hidden_size, num_layers, dropout, forget_gate_bias, **kwargs):
     """Returns a ScriptModule that mimics a PyTorch native LSTM."""
     # The following are not implemented.
     assert dropout == 0.0
@@ -312,7 +341,7 @@ def lnlstm(input_size, hidden_size, num_layers, dropout, forget_gate_bias,
             hidden_size,
             hidden_size,
             forget_gate_bias,
-        ]
+        ],
     )
 
 
@@ -322,9 +351,7 @@ class LSTMLayer(torch.nn.Module):
         self.cell = cell(*cell_args)
 
     def forward(
-        self,
-        input: torch.Tensor,
-        state: Tuple[torch.Tensor, torch.Tensor]
+        self, input: torch.Tensor, state: Tuple[torch.Tensor, torch.Tensor]
     ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         inputs = input.unbind(0)
         outputs = []
@@ -349,8 +376,8 @@ class LayerNormLSTMCell(torch.nn.Module):
 
         self.reset_parameters()
 
-        self.layernorm_i.bias.data[hidden_size:2*hidden_size].fill_(0.0)
-        self.layernorm_h.bias.data[hidden_size:2*hidden_size].fill_(
+        self.layernorm_i.bias.data[hidden_size : 2 * hidden_size].fill_(0.0)
+        self.layernorm_h.bias.data[hidden_size : 2 * hidden_size].fill_(
             forget_gate_bias
         )
 
@@ -360,9 +387,7 @@ class LayerNormLSTMCell(torch.nn.Module):
             torch.nn.init.uniform_(weight, -stdv, stdv)
 
     def forward(
-        self,
-        input: torch.Tensor,
-        state: Tuple[torch.Tensor, torch.Tensor]
+        self, input: torch.Tensor, state: Tuple[torch.Tensor, torch.Tensor]
     ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
         hx, cx = state
         igates = self.layernorm_i(torch.mm(input, self.weight_ih.t()))
@@ -382,8 +407,9 @@ class LayerNormLSTMCell(torch.nn.Module):
 
 
 def init_stacked_lstm(num_layers, layer, first_layer_args, other_layer_args):
-    layers = [layer(*first_layer_args)] + [layer(*other_layer_args)
-                                           for _ in range(num_layers - 1)]
+    layers = [layer(*first_layer_args)] + [
+        layer(*other_layer_args) for _ in range(num_layers - 1)
+    ]
     return torch.nn.ModuleList(layers)
 
 
@@ -397,25 +423,26 @@ class StackedLSTM(torch.nn.Module):
     def forward(
         self,
         input: torch.Tensor,
-        states: Optional[List[Tuple[torch.Tensor, torch.Tensor]]]
+        states: Optional[List[Tuple[torch.Tensor, torch.Tensor]]],
     ) -> Tuple[torch.Tensor, List[Tuple[torch.Tensor, torch.Tensor]]]:
         if states is None:
             states: List[Tuple[torch.Tensor, torch.Tensor]] = []
             batch = input.size(1)
             for layer in self.layers:
                 states.append(
-                    (torch.zeros(
-                        batch,
-                        layer.cell.hidden_size,
-                        dtype=input.dtype,
-                        device=input.device
-                     ),
-                     torch.zeros(
-                         batch,
-                         layer.cell.hidden_size,
-                         dtype=input.dtype,
-                         device=input.device
-                     )
+                    (
+                        torch.zeros(
+                            batch,
+                            layer.cell.hidden_size,
+                            dtype=input.dtype,
+                            device=input.device,
+                        ),
+                        torch.zeros(
+                            batch,
+                            layer.cell.hidden_size,
+                            dtype=input.dtype,
+                            device=input.device,
+                        ),
                     )
                 )
 

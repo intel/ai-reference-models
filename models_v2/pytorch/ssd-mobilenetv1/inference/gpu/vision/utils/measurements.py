@@ -40,16 +40,18 @@ def compute_average_precision(precision, recall):
     changing_points = np.where(recall[1:] != recall[:-1])[0]
 
     # compute under curve area
-    areas = (recall[changing_points + 1] - recall[changing_points]) * precision[changing_points + 1]
+    areas = (recall[changing_points + 1] - recall[changing_points]) * precision[
+        changing_points + 1
+    ]
     return areas.sum()
 
 
 def compute_voc2007_average_precision(precision, recall):
-    ap = 0.
-    for t in np.arange(0., 1.1, 0.1):
+    ap = 0.0
+    for t in np.arange(0.0, 1.1, 0.1):
         if np.sum(recall >= t) == 0:
             p = 0
         else:
             p = np.max(precision[recall >= t])
-        ap = ap + p / 11.
+        ap = ap + p / 11.0
     return ap

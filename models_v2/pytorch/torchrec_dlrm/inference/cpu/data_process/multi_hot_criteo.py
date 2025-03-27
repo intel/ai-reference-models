@@ -232,7 +232,9 @@ class MultiHotCriteoIterDataPipe(IterableDataset):
         offset_per_key = torch.cumsum(
             torch.concat((torch.tensor([0]), torch.tensor(length_per_key))), dim=0
         )
-        values = torch.concat([torch.from_numpy(feat.copy()).flatten() for feat in sparse])
+        values = torch.concat(
+            [torch.from_numpy(feat.copy()).flatten() for feat in sparse]
+        )
         return Batch(
             dense_features=torch.from_numpy(dense.copy()),
             sparse_features=KeyedJaggedTensor(
@@ -285,9 +287,8 @@ class MultiHotCriteoIterDataPipe(IterableDataset):
                     buffer = None
                 buffer_row_count = 0
                 batch_idx += 1
-                if (
-                    0 <= batch_idx - self.num_full_batches < self.world_size
-                    and (self.last_batch_sizes[0] > 0)
+                if 0 <= batch_idx - self.num_full_batches < self.world_size and (
+                    self.last_batch_sizes[0] > 0
                 ):
                     cur_batch_size = self.last_batch_sizes[
                         batch_idx - self.num_full_batches
@@ -331,6 +332,9 @@ class MultiHotCriteoIterDataPipe(IterableDataset):
         if sample_list is None:
             sample_list = list(range(self.batch_size))
         dense = self.dense_arrs[0][sample_list, :]
-        sparse = [arr[sample_list, :] % self.hashes[i] for i, arr in enumerate(self.sparse_arrs[0])]
+        sparse = [
+            arr[sample_list, :] % self.hashes[i]
+            for i, arr in enumerate(self.sparse_arrs[0])
+        ]
         labels = self.labels_arrs[0][sample_list, :]
         return self._np_arrays_to_batch(dense, sparse, labels)

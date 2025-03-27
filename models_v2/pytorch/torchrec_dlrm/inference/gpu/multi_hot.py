@@ -124,7 +124,9 @@ class Multihot:
         )
         for k, multi_hot_size in enumerate(multi_hot_sizes):
             lS_o[k * batch_size : (k + 1) * batch_size] = multi_hot_size
-        lS_o = torch.cumsum(torch.concat((torch.tensor([0]), lS_o)), axis=0, dtype=torch.int32)
+        lS_o = torch.cumsum(
+            torch.concat((torch.tensor([0]), lS_o)), axis=0, dtype=torch.int32
+        )
         return lS_o
 
     def __make_new_batch(

@@ -267,9 +267,8 @@ class MultiHotCriteoIterDataPipe(IterableDataset):
                     buffer = None
                 buffer_row_count = 0
                 batch_idx += 1
-                if (
-                    0 <= batch_idx - self.num_full_batches < self.world_size
-                    and (self.last_batch_sizes[0] > 0)
+                if 0 <= batch_idx - self.num_full_batches < self.world_size and (
+                    self.last_batch_sizes[0] > 0
                 ):
                     cur_batch_size = self.last_batch_sizes[
                         batch_idx - self.num_full_batches

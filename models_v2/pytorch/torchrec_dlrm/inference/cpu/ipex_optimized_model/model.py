@@ -25,10 +25,13 @@ from torchrec.modules.embedding_modules import EmbeddingBagCollection
 from typing import Dict, List, Optional, Tuple
 import numpy as np
 
+
 def _calculate_fan_in_and_fan_out(shape):
     # numpy array version
     dimensions = len(shape)
-    assert dimensions >= 2, "Fan in and fan out can not be computed for tensor with fewer than 2 dimensions"
+    assert (
+        dimensions >= 2
+    ), "Fan in and fan out can not be computed for tensor with fewer than 2 dimensions"
 
     num_input_fmaps = shape[1]
     num_output_fmaps = shape[0]
@@ -43,54 +46,74 @@ def _calculate_fan_in_and_fan_out(shape):
 
     return fan_in, fan_out
 
+
 def _calculate_correct_fan(shape, mode):
     mode = mode.lower()
-    valid_modes = ['fan_in', 'fan_out']
+    valid_modes = ["fan_in", "fan_out"]
     if mode not in valid_modes:
-        raise ValueError("Mode {} not supported, please use one of {}".format(mode, valid_modes))
+        raise ValueError(
+            "Mode {} not supported, please use one of {}".format(mode, valid_modes)
+        )
 
     fan_in, fan_out = _calculate_fan_in_and_fan_out(shape)
-    return fan_in if mode == 'fan_in' else fan_out
+    return fan_in if mode == "fan_in" else fan_out
+
 
 def calculate_gain(nonlinearity, param=None):
-    linear_fns = ['linear', 'conv1d', 'conv2d', 'conv3d', 'conv_transpose1d', 'conv_transpose2d', 'conv_transpose3d']
-    if nonlinearity in linear_fns or nonlinearity == 'sigmoid':
+    linear_fns = [
+        "linear",
+        "conv1d",
+        "conv2d",
+        "conv3d",
+        "conv_transpose1d",
+        "conv_transpose2d",
+        "conv_transpose3d",
+    ]
+    if nonlinearity in linear_fns or nonlinearity == "sigmoid":
         return 1
-    elif nonlinearity == 'tanh':
+    elif nonlinearity == "tanh":
         return 5.0 / 3
-    elif nonlinearity == 'relu':
+    elif nonlinearity == "relu":
         return np.sqrt(2.0)
-    elif nonlinearity == 'leaky_relu':
+    elif nonlinearity == "leaky_relu":
         if param is None:
             negative_slope = 0.01
-        elif not isinstance(param, bool) and isinstance(param, int) or isinstance(param, float):
+        elif (
+            not isinstance(param, bool)
+            and isinstance(param, int)
+            or isinstance(param, float)
+        ):
             # True/False are instances of int, hence check above
             negative_slope = param
         else:
             raise ValueError("negative_slope {} not a valid number".format(param))
-        return np.sqrt(2.0 / (1 + negative_slope ** 2))
-    elif nonlinearity == 'selu':
-        return 3.0 / 4  # Value found empirically (https://github.com/pytorch/pytorch/pull/50664)
+        return np.sqrt(2.0 / (1 + negative_slope**2))
+    elif nonlinearity == "selu":
+        return (
+            3.0 / 4
+        )  # Value found empirically (https://github.com/pytorch/pytorch/pull/50664)
     else:
         raise ValueError("Unsupported nonlinearity {}".format(nonlinearity))
 
-def xavier_norm_(shape: tuple, gain: float = 1.):
+
+def xavier_norm_(shape: tuple, gain: float = 1.0):
     fan_in, fan_out = _calculate_fan_in_and_fan_out(shape)
     std = gain * np.sqrt(2.0 / float(fan_in + fan_out))
     mean = 0.0
     d = np.random.normal(mean, std, size=shape).astype(np.float32)
     return d
 
-def kaiming_uniform_(shape: tuple, a: float = 0,
-                     mode: str = 'fan_in',
-                     nonlinearity: str = 'leaky_relu'
+
+def kaiming_uniform_(
+    shape: tuple, a: float = 0, mode: str = "fan_in", nonlinearity: str = "leaky_relu"
 ):
-    assert (0 not in shape), "Initializing zero-element tensors is a no-op"
+    assert 0 not in shape, "Initializing zero-element tensors is a no-op"
     fan = _calculate_correct_fan(shape, mode)
     gain = calculate_gain(nonlinearity, a)
     std = gain / np.sqrt(fan)
     bound = np.sqrt(3.0) * std  # Calculate uniform bounds from standard deviation
     return np.random.uniform(-bound, bound, size=shape)
+
 
 def init_weight(dlrm):
     # Sparse Arch
@@ -99,7 +122,8 @@ def init_weight(dlrm):
         W = np.random.uniform(
             low=-np.sqrt(1 / num_embeddings),
             high=np.sqrt(1 / num_embeddings),
-            size=(num_embeddings, embedding_dim)).astype(np.float32)
+            size=(num_embeddings, embedding_dim),
+        ).astype(np.float32)
         with torch.no_grad():
             m.weight.data = torch.tensor(W, requires_grad=True)
     # Dense Arch
@@ -141,6 +165,7 @@ def init_weight(dlrm):
         last_layer.weight.data = torch.tensor(W, requires_grad=True)
         last_layer.bias.data.zero_()
 
+
 class _LowRankCrossNet(torch.nn.Module):
     def __init__(
         self,
@@ -153,8 +178,12 @@ class _LowRankCrossNet(torch.nn.Module):
         self.V_linears = torch.nn.ModuleList()
         self.W_linears = torch.nn.ModuleList()
         for i in range(self._num_layers):
-            self.V_linears.append(torch.nn.Linear(self._in_features, self._low_rank, bias=False))
-            self.W_linears.append(torch.nn.Linear(self._low_rank, self._in_features, bias=True))
+            self.V_linears.append(
+                torch.nn.Linear(self._in_features, self._low_rank, bias=False)
+            )
+            self.W_linears.append(
+                torch.nn.Linear(self._low_rank, self._in_features, bias=True)
+            )
             self.V_linears[i].weight.data = lr_crossnet.V_kernels[i]
             self.W_linears[i].weight.data = lr_crossnet.W_kernels[i]
             self.W_linears[i].bias.data = lr_crossnet.bias[i]
@@ -168,14 +197,15 @@ class _LowRankCrossNet(torch.nn.Module):
             x_l = x_0 * x_l_w + x_l  # (B, N)
         return x_l
 
+
 def replace_crossnet(dlrm):
     crossnet = dlrm.inter_arch.crossnet
     new_crossnet = _LowRankCrossNet(crossnet)
     dlrm.inter_arch.crossnet = new_crossnet
-    del(crossnet)
+    del crossnet
+
 
 class SparseArchCatDenseIPEX(SparseArch):
-
     def forward(
         self,
         embedded_dense_features,
@@ -191,21 +221,29 @@ class SparseArchCatDenseIPEX(SparseArch):
         """
         (B, _) = embedded_dense_features.shape
         embedding_bag_collection = self.embedding_bag_collection
-        indices = tuple([sf['values'] for _, sf in sparse_features.items()])
-        offsets = tuple([sf['offsets'] for _, sf in sparse_features.items()])
-        if 'MergedEmbeddingBagWithCat' ==  embedding_bag_collection.__class__.__name__:
+        indices = tuple([sf["values"] for _, sf in sparse_features.items()])
+        offsets = tuple([sf["offsets"] for _, sf in sparse_features.items()])
+        if "MergedEmbeddingBagWithCat" == embedding_bag_collection.__class__.__name__:
             return embedding_bag_collection(indices, offsets, embedded_dense_features)
-        elif 'DistMergeEmbeddingBagWithAdaGrad' ==  embedding_bag_collection.__class__.__name__:
+        elif (
+            "DistMergeEmbeddingBagWithAdaGrad"
+            == embedding_bag_collection.__class__.__name__
+        ):
             embedded_sparse_features = embedding_bag_collection(indices, offsets)
-            return torch.cat((embedded_dense_features.unsqueeze(1), embedded_sparse_features), dim=1).reshape(B, -1)
-        elif 'MergedEmbeddingBagWithAdaGrad' ==  embedding_bag_collection.__class__.__name__:
+            return torch.cat(
+                (embedded_dense_features.unsqueeze(1), embedded_sparse_features), dim=1
+            ).reshape(B, -1)
+        elif (
+            "MergedEmbeddingBagWithAdaGrad"
+            == embedding_bag_collection.__class__.__name__
+        ):
             embedded_sparse_features = embedding_bag_collection(indices, offsets)
         to_cat = [embedded_dense_features] + list(embedded_sparse_features)
         out = torch.cat(to_cat, dim=1)
         return out
 
-class SparseArchCatDense(SparseArch):
 
+class SparseArchCatDense(SparseArch):
     def forward(
         self,
         embedded_dense_features,
@@ -221,15 +259,17 @@ class SparseArchCatDense(SparseArch):
         """
         (B, _) = embedded_dense_features.shape
         embedding_bag_collection = self.embedding_bag_collection
-        indices = tuple([sf['values'] for _, sf in sparse_features.items()])
-        offsets = tuple([sf['offsets'] for _, sf in sparse_features.items()])
+        indices = tuple([sf["values"] for _, sf in sparse_features.items()])
+        offsets = tuple([sf["offsets"] for _, sf in sparse_features.items()])
         embedded_sparse_features: List[torch.Tensor] = []
-        for i, embedding_bag in enumerate(embedding_bag_collection.embedding_bags.values()):
+        for i, embedding_bag in enumerate(
+            embedding_bag_collection.embedding_bags.values()
+        ):
             for feature_name in embedding_bag_collection._feature_names[i]:
                 f = sparse_features[feature_name]
                 res = embedding_bag(
-                    f['values'],
-                    f['offsets'],
+                    f["values"],
+                    f["offsets"],
                     per_sample_weights=None,
                 )
                 embedded_sparse_features.append(res)
@@ -237,31 +277,45 @@ class SparseArchCatDense(SparseArch):
         out = torch.cat(to_cat, dim=1)
         return out
 
+
 def replace_embeddingbag_collection(dlrm, args):
     if args.ipex_optimize:
-        from intel_extension_for_pytorch.nn.modules import MergedEmbeddingBagWithCat, MergedEmbeddingBagWithAdaGrad, DistMergeEmbeddingBagWithAdaGrad
+        from intel_extension_for_pytorch.nn.modules import (
+            MergedEmbeddingBagWithCat,
+            MergedEmbeddingBagWithAdaGrad,
+            DistMergeEmbeddingBagWithAdaGrad,
+        )
+
         new_collection = None
-        collection = list(dlrm.sparse_arch.embedding_bag_collection.embedding_bags.values())
+        collection = list(
+            dlrm.sparse_arch.embedding_bag_collection.embedding_bags.values()
+        )
         if args.inference_only and args.ipex_merged_emb_cat:
-            new_collection = MergedEmbeddingBagWithCat.from_embeddingbag_list(collection)
+            new_collection = MergedEmbeddingBagWithCat.from_embeddingbag_list(
+                collection
+            )
         if not args.inference_only:
             if args.ipex_dist_merged_emb_adagrad:
-                new_collection = DistMergeEmbeddingBagWithAdaGrad.from_embeddingbag_list(collection, lr=args.learning_rate, eps=1e-8)
+                new_collection = (
+                    DistMergeEmbeddingBagWithAdaGrad.from_embeddingbag_list(
+                        collection, lr=args.learning_rate, eps=1e-8
+                    )
+                )
             elif args.ipex_merged_emb_adagrad:
-                new_collection = MergedEmbeddingBagWithAdaGrad.from_embeddingbag_list(collection, lr=args.learning_rate, eps=1e-8)
+                new_collection = MergedEmbeddingBagWithAdaGrad.from_embeddingbag_list(
+                    collection, lr=args.learning_rate, eps=1e-8
+                )
             else:
                 for emb in collection:
                     emb.sparse = True
 
         if new_collection:
             dlrm.sparse_arch.embedding_bag_collection = new_collection
-            del(collection)
+            del collection
+
 
 class InteractionDCNArchWithoutCat(InteractionDCNArch):
-
-    def forward(
-        self, concat_dense_sparse: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, concat_dense_sparse: torch.Tensor) -> torch.Tensor:
         """
         Args:
             concat_dense_sparse (torch.Tensor): an input tensor of size B X (F*D + D).
@@ -272,6 +326,7 @@ class InteractionDCNArchWithoutCat(InteractionDCNArch):
 
         # size B X (F * D + D)
         return self.crossnet(concat_dense_sparse)
+
 
 class IPEX_DLRM_DCN(DLRM_DCN):
     """

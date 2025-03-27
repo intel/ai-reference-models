@@ -1,19 +1,19 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 """
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -134,6 +134,7 @@ def interpolate(
 
 class DFConv2d(nn.Module):
     """Deformable convolutional layer"""
+
     def __init__(
         self,
         in_channels,
@@ -144,7 +145,7 @@ class DFConv2d(nn.Module):
         groups=1,
         dilation=1,
         deformable_groups=1,
-        bias=False
+        bias=False,
     ):
         super(DFConv2d, self).__init__()
         if isinstance(kernel_size, (list, tuple)):
@@ -155,7 +156,7 @@ class DFConv2d(nn.Module):
             assert len(dilation) == 2
             padding = (
                 dilation[0] * (kernel_size[0] - 1) // 2,
-                dilation[1] * (kernel_size[1] - 1) // 2
+                dilation[1] * (kernel_size[1] - 1) // 2,
             )
             offset_base_channels = kernel_size[0] * kernel_size[1]
         else:
@@ -163,11 +164,13 @@ class DFConv2d(nn.Module):
             offset_base_channels = kernel_size * kernel_size
         if with_modulated_dcn:
             from maskrcnn_benchmark.layers import ModulatedDeformConv
-            offset_channels = offset_base_channels * 3 #default: 27
+
+            offset_channels = offset_base_channels * 3  # default: 27
             conv_block = ModulatedDeformConv
         else:
             from maskrcnn_benchmark.layers import DeformConv
-            offset_channels = offset_base_channels * 2 #default: 18
+
+            offset_channels = offset_base_channels * 2  # default: 18
             conv_block = DeformConv
         self.offset = Conv2d(
             in_channels,
@@ -176,11 +179,13 @@ class DFConv2d(nn.Module):
             stride=stride,
             padding=padding,
             groups=1,
-            dilation=dilation
+            dilation=dilation,
         )
-        for l in [self.offset,]:
+        for l in [
+            self.offset,
+        ]:
             nn.init.kaiming_uniform_(l.weight, a=1)
-            torch.nn.init.constant_(l.bias, 0.)
+            torch.nn.init.constant_(l.bias, 0.0)
         self.conv = conv_block(
             in_channels,
             out_channels,
@@ -190,7 +195,7 @@ class DFConv2d(nn.Module):
             dilation=dilation,
             groups=groups,
             deformable_groups=deformable_groups,
-            bias=bias
+            bias=bias,
         )
         self.with_modulated_dcn = with_modulated_dcn
         self.kernel_size = kernel_size
@@ -213,11 +218,7 @@ class DFConv2d(nn.Module):
         output_shape = [
             (i + 2 * p - (di * (k - 1) + 1)) // d + 1
             for i, p, di, k, d in zip(
-                x.shape[-2:],
-                self.padding,
-                self.dilation,
-                self.kernel_size,
-                self.stride
+                x.shape[-2:], self.padding, self.dilation, self.kernel_size, self.stride
             )
         ]
         output_shape = [x.shape[0], self.conv.weight.shape[0]] + output_shape

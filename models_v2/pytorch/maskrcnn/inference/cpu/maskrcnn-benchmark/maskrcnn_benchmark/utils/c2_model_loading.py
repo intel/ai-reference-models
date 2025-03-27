@@ -1,19 +1,20 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import logging
+
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -75,12 +76,15 @@ def _rename_basic_resnet_weights(layer_keys):
     layer_keys = [k.replace("conv2.gn.bias", "bn2.bias") for k in layer_keys]
     layer_keys = [k.replace("conv3.gn.s", "bn3.weight") for k in layer_keys]
     layer_keys = [k.replace("conv3.gn.bias", "bn3.bias") for k in layer_keys]
-    layer_keys = [k.replace("downsample.0.gn.s", "downsample.1.weight") \
-        for k in layer_keys]
-    layer_keys = [k.replace("downsample.0.gn.bias", "downsample.1.bias") \
-        for k in layer_keys]
+    layer_keys = [
+        k.replace("downsample.0.gn.s", "downsample.1.weight") for k in layer_keys
+    ]
+    layer_keys = [
+        k.replace("downsample.0.gn.bias", "downsample.1.bias") for k in layer_keys
+    ]
 
     return layer_keys
+
 
 def _rename_fpn_weights(layer_keys, stage_names):
     for mapped_idx, stage_name in enumerate(stage_names, 1):
@@ -88,10 +92,18 @@ def _rename_fpn_weights(layer_keys, stage_names):
         if mapped_idx < 4:
             suffix = ".lateral"
         layer_keys = [
-            k.replace("fpn.inner.layer{}.sum{}".format(stage_name, suffix), "fpn_inner{}".format(mapped_idx)) for k in layer_keys
+            k.replace(
+                "fpn.inner.layer{}.sum{}".format(stage_name, suffix),
+                "fpn_inner{}".format(mapped_idx),
+            )
+            for k in layer_keys
         ]
-        layer_keys = [k.replace("fpn.layer{}.sum".format(stage_name), "fpn_layer{}".format(mapped_idx)) for k in layer_keys]
-
+        layer_keys = [
+            k.replace(
+                "fpn.layer{}.sum".format(stage_name), "fpn_layer{}".format(mapped_idx)
+            )
+            for k in layer_keys
+        ]
 
     layer_keys = [k.replace("rpn.conv.fpn2", "rpn.conv") for k in layer_keys]
     layer_keys = [k.replace("rpn.bbox_pred.fpn2", "rpn.bbox_pred") for k in layer_keys]
@@ -163,6 +175,7 @@ def _load_c2_pickled_weights(file_path):
 
 def _rename_conv_weights_for_deformable_conv_layers(state_dict, cfg):
     import re
+
     logger = logging.getLogger(__name__)
     logger.info("Remapping conv weights for deformable conv weights")
     layer_keys = sorted(state_dict.keys())
@@ -180,9 +193,11 @@ def _rename_conv_weights_for_deformable_conv_layers(state_dict, cfg):
                 new_key = old_key.replace(
                     "conv2.{}".format(param), "conv2.conv.{}".format(param)
                 )
-                logger.info("pattern: {}, old_key: {}, new_key: {}".format(
-                    pattern, old_key, new_key
-                ))
+                logger.info(
+                    "pattern: {}, old_key: {}, new_key: {}".format(
+                        pattern, old_key, new_key
+                    )
+                )
                 state_dict[new_key] = state_dict[old_key]
                 del state_dict[old_key]
     return state_dict

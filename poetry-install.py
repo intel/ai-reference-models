@@ -737,9 +737,10 @@ class Installer:
     def get_windows_path_var(self) -> Optional[str]:
         import winreg
 
-        with winreg.ConnectRegistry(
-            None, winreg.HKEY_CURRENT_USER
-        ) as root, winreg.OpenKey(root, "Environment", 0, winreg.KEY_ALL_ACCESS) as key:
+        with (
+            winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER) as root,
+            winreg.OpenKey(root, "Environment", 0, winreg.KEY_ALL_ACCESS) as key,
+        ):
             path, _ = winreg.QueryValueEx(key, "PATH")
 
             return path

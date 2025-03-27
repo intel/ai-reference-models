@@ -22,24 +22,32 @@ import argparse
 from dataset_librarian.dataset_api.download import download_dataset
 from dataset_librarian.dataset_api.preprocess import preprocess_dataset
 
+
 def accept_terms_and_conditions(package_path):
-    print("Please read and accept terms and conditions to be able to to use the dataset API.")
-    print("*********************************************************************************")
-    with open(package_path + "/terms_and_conditions.txt", 'r') as f:
+    print(
+        "Please read and accept terms and conditions to be able to to use the dataset API."
+    )
+    print(
+        "*********************************************************************************"
+    )
+    with open(package_path + "/terms_and_conditions.txt", "r") as f:
         print(f.read())
-    print("*********************************************************************************")
+    print(
+        "*********************************************************************************"
+    )
     while True:
-            acceptance = input("Do you agree to the terms and conditions? (y/n): ")
-            acceptance = acceptance.lower()
-            if acceptance == 'n':
-                print("Terms and conditions disagreed")
-                break
-            elif acceptance == 'y':
-                print("Terms and conditions agreed")
-                break
-            else:
-                print("Invalid Response. Please choose: y or n")
+        acceptance = input("Do you agree to the terms and conditions? (y/n): ")
+        acceptance = acceptance.lower()
+        if acceptance == "n":
+            print("Terms and conditions disagreed")
+            break
+        elif acceptance == "y":
+            print("Terms and conditions agreed")
+            break
+        else:
+            print("Invalid Response. Please choose: y or n")
     return acceptance
+
 
 def main():
     package_name = "dataset_librarian"
@@ -47,7 +55,7 @@ def main():
     package_path = os.path.join(package_path, package_name)
     # Check if the .env file exists
     env_file_path = os.path.join(package_path, ".env")
-    if  not os.path.isfile(env_file_path):
+    if not os.path.isfile(env_file_path):
         with open(env_file_path, "w") as file:
             file.write("USER_CONSENT=None\n")
     # Extract key
@@ -63,13 +71,25 @@ def main():
         quit()
 
     # Create the parser for the CLI
-    parser = argparse.ArgumentParser(description='Download and preprocess datasets')
-    parser.add_argument('-n', '--name', type=str, help='name of the dataset to download')
-    parser.add_argument('-l', '--list', action='store_true', help='list the supported datasets')
-    parser.add_argument('-d', '--directory', type=str, help='the desired dataset directory location')
-    parser.add_argument('--download', action='store_true', help='download the raw dataset')
-    parser.add_argument('--preprocess', action='store_true', help='preprocess the dataset')
-    parser.add_argument('--split_ratio', type=float, help="split ratio of the test data", default=0.1)
+    parser = argparse.ArgumentParser(description="Download and preprocess datasets")
+    parser.add_argument(
+        "-n", "--name", type=str, help="name of the dataset to download"
+    )
+    parser.add_argument(
+        "-l", "--list", action="store_true", help="list the supported datasets"
+    )
+    parser.add_argument(
+        "-d", "--directory", type=str, help="the desired dataset directory location"
+    )
+    parser.add_argument(
+        "--download", action="store_true", help="download the raw dataset"
+    )
+    parser.add_argument(
+        "--preprocess", action="store_true", help="preprocess the dataset"
+    )
+    parser.add_argument(
+        "--split_ratio", type=float, help="split ratio of the test data", default=0.1
+    )
 
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -84,13 +104,16 @@ def main():
 
     # List the supported datasets if the --list flag is true
     if args.list:
-        datasets = pkg_resources.resource_filename('dataset_librarian', 'datasets_urls.json')
-        with open(datasets) as f: 
+        datasets = pkg_resources.resource_filename(
+            "dataset_librarian", "datasets_urls.json"
+        )
+        with open(datasets) as f:
             datasets = json.load(f)
         # Get the list of keys
         keys = list(datasets.keys())
         # Print the list of keys
         print(keys)
+
 
 if __name__ == "__main__":
     main()

@@ -32,6 +32,7 @@ import warnings
 from typing import Tuple
 
 import torch
+
 # from warprnnt_pytorch import RNNTLoss as WarpRNNTLoss
 
 
@@ -54,7 +55,7 @@ class RNNTLoss(torch.nn.Module):
     def __init__(self, blank, reduction="mean"):
         super().__init__()
         self.rnnt_loss = WarpRNNTLoss(blank=blank)
-        #self.use_cuda = torch.cuda.is_available()
+        # self.use_cuda = torch.cuda.is_available()
         self.use_cuda = False
 
     def forward(
@@ -130,6 +131,7 @@ class RNNTLoss(torch.nn.Module):
 
         return loss
 
+
 class TransducerLoss(torch.nn.Module):
     def __init__(self, blank_idx, precision):
         super().__init__()
@@ -149,11 +151,12 @@ class TransducerLoss(torch.nn.Module):
 
         if y_lens.dtype != torch.int32:
             y_lens = y_lens.int()
-        loss_grad = torch.ones(logits.size(0), dtype=logits.dtype, device=logits.device)/logits.size(0)
+        loss_grad = torch.ones(
+            logits.size(0), dtype=logits.dtype, device=logits.device
+        ) / logits.size(0)
 
         # loss = transducer_loss_reference(logits, y, logit_lens, y_lens, self.blank_idx, loss_grad
         #                     ).mean()
         loss = self.t_loss(logits, y, logit_lens, y_lens, self.blank_idx).mean()
 
         return loss
-

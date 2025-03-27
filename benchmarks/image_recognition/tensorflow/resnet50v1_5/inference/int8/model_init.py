@@ -40,32 +40,43 @@ class ModelInitializer(BaseModelInitializer):
     def parse_args(self):
         parser = argparse.ArgumentParser()
         parser.add_argument(
-            "--warmup-steps", dest="warmup_steps",
+            "--warmup-steps",
+            dest="warmup_steps",
             help="number of warmup steps",
-            type=int, default=10)
+            type=int,
+            default=10,
+        )
         parser.add_argument(
-            "--steps", dest="steps",
-            help="number of steps",
-            type=int, default=50)
+            "--steps", dest="steps", help="number of steps", type=int, default=50
+        )
         parser.add_argument(
-            '--kmp-blocktime', dest='kmp_blocktime',
-            help='number of kmp block time',
-            type=int, default=1)
+            "--kmp-blocktime",
+            dest="kmp_blocktime",
+            help="number of kmp block time",
+            type=int,
+            default=1,
+        )
         parser.add_argument(
             "--calibration-only",
             help="Calibrate the accuracy.",
-            dest="calibration_only", action="store_true")
+            dest="calibration_only",
+            action="store_true",
+        )
         parser.add_argument(
-            "--calibrate", dest="calibrate",
+            "--calibrate",
+            dest="calibrate",
             help=" run accuracy with calibration data, "
-                 "to generate min_max ranges, calibrate=[True/False]",
-            type=bool, default=False)
+            "to generate min_max ranges, calibrate=[True/False]",
+            type=bool,
+            default=False,
+        )
 
-        self.args = parser.parse_args(self.custom_args,
-                                      namespace=self.args)
+        self.args = parser.parse_args(self.custom_args, namespace=self.args)
 
         # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
         if not self.args.gpu:
@@ -75,32 +86,56 @@ class ModelInitializer(BaseModelInitializer):
         # If weight-sharing flag is ON, then use the weight-sharing script.
         if self.args.weight_sharing and not self.args.accuracy_only:
             cmd = os.path.join(
-                self.args.intelai_models, self.args.mode, "cpu",
-                "eval_image_classifier_inference_weight_sharing.py")
+                self.args.intelai_models,
+                self.args.mode,
+                "cpu",
+                "eval_image_classifier_inference_weight_sharing.py",
+            )
         else:
             if self.args.gpu:
                 cmd = os.path.join(
-                    self.args.intelai_models, self.args.mode, "gpu", self.args.precision,
-                    "eval_image_classifier_inference.py")
+                    self.args.intelai_models,
+                    self.args.mode,
+                    "gpu",
+                    self.args.precision,
+                    "eval_image_classifier_inference.py",
+                )
             else:
                 cmd = os.path.join(
-                    self.args.intelai_models, self.args.mode, "cpu",
-                    "eval_image_classifier_inference.py")
+                    self.args.intelai_models,
+                    self.args.mode,
+                    "cpu",
+                    "eval_image_classifier_inference.py",
+                )
 
         cmd = self.get_command_prefix(self.args.socket_id) + self.python_exe + " " + cmd
 
         if self.args.gpu:
-            cmd += " --input-graph=" + self.args.input_graph + \
-                   " --batch-size=" + str(self.args.batch_size) + \
-                   " --warmup-steps=" + str(self.args.warmup_steps) + \
-                   " --steps=" + str(self.args.steps)
+            cmd += (
+                " --input-graph="
+                + self.args.input_graph
+                + " --batch-size="
+                + str(self.args.batch_size)
+                + " --warmup-steps="
+                + str(self.args.warmup_steps)
+                + " --steps="
+                + str(self.args.steps)
+            )
         else:
-            cmd += " --input-graph=" + self.args.input_graph + \
-                   " --num-inter-threads=" + str(self.args.num_inter_threads) + \
-                   " --num-intra-threads=" + str(self.args.num_intra_threads) + \
-                   " --batch-size=" + str(self.args.batch_size) + \
-                   " --warmup-steps=" + str(self.args.warmup_steps) + \
-                   " --steps=" + str(self.args.steps)
+            cmd += (
+                " --input-graph="
+                + self.args.input_graph
+                + " --num-inter-threads="
+                + str(self.args.num_inter_threads)
+                + " --num-intra-threads="
+                + str(self.args.num_intra_threads)
+                + " --batch-size="
+                + str(self.args.batch_size)
+                + " --warmup-steps="
+                + str(self.args.warmup_steps)
+                + " --steps="
+                + str(self.args.steps)
+            )
 
         if self.args.calibrate:
             cmd += " --calibrate=" + str(self.args.calibrate)
@@ -122,15 +157,24 @@ class ModelInitializer(BaseModelInitializer):
         self.run_command(cmd)
 
     def run_calibration(self):
-        calibration_script = os.path.join(self.args.intelai_models,
-                                          self.args.precision,
-                                          "generate_calibration_data.py")
+        calibration_script = os.path.join(
+            self.args.intelai_models,
+            self.args.precision,
+            "generate_calibration_data.py",
+        )
         script_args_list = [
-            "input_graph", "data_location",
+            "input_graph",
+            "data_location",
             "batch_size",
-            "num_inter_threads", "num_intra_threads"]
-        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
-            self.python_exe + " " + calibration_script
+            "num_inter_threads",
+            "num_intra_threads",
+        ]
+        cmd_prefix = (
+            self.get_command_prefix(self.args.socket_id)
+            + self.python_exe
+            + " "
+            + calibration_script
+        )
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 

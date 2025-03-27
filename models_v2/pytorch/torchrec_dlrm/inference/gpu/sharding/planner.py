@@ -76,11 +76,15 @@ class ShardingState:
                 self.array_hotness = np.concatenate(
                     (
                         self.array_hotness,
-                        np.ones(self.array_num_split[table_id]) * (hotness / self.array_num_split[table_id]),
+                        np.ones(self.array_num_split[table_id])
+                        * (hotness / self.array_num_split[table_id]),
                     )
                 )
                 self.array_table_id = np.concatenate(
-                    (self.array_table_id, np.ones(self.array_num_split[table_id], dtype=int) * table_id)
+                    (
+                        self.array_table_id,
+                        np.ones(self.array_num_split[table_id], dtype=int) * table_id,
+                    )
                 )
                 break
 
@@ -99,11 +103,15 @@ class ShardingState:
             self.array_hotness = np.concatenate(
                 (
                     self.array_hotness,
-                    np.ones(self.array_num_split[table_id]) * (hotness / self.array_num_split[table_id]),
+                    np.ones(self.array_num_split[table_id])
+                    * (hotness / self.array_num_split[table_id]),
                 )
             )
             self.array_table_id = np.concatenate(
-                (self.array_table_id, np.ones(self.array_num_split[table_id], dtype=int) * table_id)
+                (
+                    self.array_table_id,
+                    np.ones(self.array_num_split[table_id], dtype=int) * table_id,
+                )
             )
             sorted_idx = np.argsort(self.array_hotness)[::-1]
             self.array_hotness = self.array_hotness[sorted_idx]
@@ -176,12 +184,18 @@ class CostModel:
         for shard_list in ss.shard_ll:
             hotness_cost = (
                 self.unit_hotness_cost
-                * (ss.array_unshard_hotness[shard_list] / np.array(ss.array_num_split)[shard_list]).sum()
+                * (
+                    ss.array_unshard_hotness[shard_list]
+                    / np.array(ss.array_num_split)[shard_list]
+                ).sum()
             )
             table_cost = self.unit_table_cost * len(shard_list)
             mem_cost = (
                 self.unit_mem_cost
-                * (self.array_table_size[shard_list] / np.array(ss.array_num_split)[shard_list]).sum()
+                * (
+                    self.array_table_size[shard_list]
+                    / np.array(ss.array_num_split)[shard_list]
+                ).sum()
             )
             list_cost.append(hotness_cost + table_cost)
             list_hotness_cost.append(hotness_cost)
@@ -189,7 +203,12 @@ class CostModel:
             list_mem_cost.append(mem_cost)
 
         return (
-            Cost(np.array(list_cost), np.array(list_hotness_cost), np.array(list_table_cost), np.array(list_mem_cost)),
+            Cost(
+                np.array(list_cost),
+                np.array(list_hotness_cost),
+                np.array(list_table_cost),
+                np.array(list_mem_cost),
+            ),
             max(list_mem_cost) > self.mem_capacity,
         )
 
@@ -197,9 +216,13 @@ class CostModel:
         self,
         dp_table_id: list,
     ) -> None:
-        self.mem_capacity -= self.array_table_size[dp_table_id].sum() * self.unit_mem_cost
+        self.mem_capacity -= (
+            self.array_table_size[dp_table_id].sum() * self.unit_mem_cost
+        )
         if self.mem_capacity < 0:
-            raise Exception("OOM due to DP. Please considering increase the DP threshold")
+            raise Exception(
+                "OOM due to DP. Please considering increase the DP threshold"
+            )
 
 
 class Planner:
@@ -239,13 +262,25 @@ class Planner:
         if oom:
             raise Exception("OOM even with the most memory-efficient sharding plan")
         self.list_candidate.append(
-            (cost.cost.max(), cost.hotness_cost, cost.table_cost, cost.mem_cost, sharding_state_default.shard_ll)
+            (
+                cost.cost.max(),
+                cost.hotness_cost,
+                cost.table_cost,
+                cost.mem_cost,
+                sharding_state_default.shard_ll,
+            )
         )
 
         # Create DP sharding plan based on the DP threshold
-        self.dp_table_id = np.where(cost_model.array_table_size < dp_threshold / cost_model.unit_mem_cost)[0]
-        self.mp_table_id = np.setdiff1d(np.arange(self.array_hotness.size), self.dp_table_id)
-        self.sharding_state = ShardingState(self.array_hotness, self.num_bucket, self.dp_table_id)
+        self.dp_table_id = np.where(
+            cost_model.array_table_size < dp_threshold / cost_model.unit_mem_cost
+        )[0]
+        self.mp_table_id = np.setdiff1d(
+            np.arange(self.array_hotness.size), self.dp_table_id
+        )
+        self.sharding_state = ShardingState(
+            self.array_hotness, self.num_bucket, self.dp_table_id
+        )
         self.cost_model.deduct_mem_cap_for_dp(self.dp_table_id)
 
         logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -281,10 +316,18 @@ class Planner:
     def plan(self):
         t0 = time.time()
         for i in range(self.max_search_iter):
-            oom_table_id, self.sharding_state, cost = self.greedy_plan(self.sharding_state)
+            oom_table_id, self.sharding_state, cost = self.greedy_plan(
+                self.sharding_state
+            )
             if oom_table_id is None:
                 self.list_candidate.append(
-                    (cost.cost.max(), cost.hotness_cost, cost.table_cost, cost.mem_cost, self.sharding_state.shard_ll)
+                    (
+                        cost.cost.max(),
+                        cost.hotness_cost,
+                        cost.table_cost,
+                        cost.mem_cost,
+                        self.sharding_state.shard_ll,
+                    )
                 )
                 self.sharding_state.split_hot_shard()
             else:

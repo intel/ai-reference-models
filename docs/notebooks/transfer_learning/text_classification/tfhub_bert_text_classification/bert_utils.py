@@ -31,24 +31,33 @@ def get_model_map(json_path, return_data_frame=False):
 
     if return_data_frame:
         # Generate list of model names and URL links to TF Hub based on the model map
-        model_options = [[i,
-                          tfhub_model_map[i]["num_hidden_layers"],
-                          tfhub_model_map[i]["hidden_size"],
-                          tfhub_model_map[i]["num_attention_heads"],
-                          "<a href=\"{0}\" target=\"_blank\">{0}</a>".format(
-                              tfhub_model_map[i]["bert_encoder"])]
-                         for i in tfhub_model_map.keys()]
+        model_options = [
+            [
+                i,
+                tfhub_model_map[i]["num_hidden_layers"],
+                tfhub_model_map[i]["hidden_size"],
+                tfhub_model_map[i]["num_attention_heads"],
+                '<a href="{0}" target="_blank">{0}</a>'.format(
+                    tfhub_model_map[i]["bert_encoder"]
+                ),
+            ]
+            for i in tfhub_model_map.keys()
+        ]
 
         if len(model_options) == 0:
             print("Warning: No models were found in the json file:", json_path)
 
-        pd.set_option('display.max_colwidth', None)
-        models_df = pd.DataFrame(model_options,
-                                 columns=["Model",
-                                          "Hidden layers",
-                                          "Hidden size",
-                                          "Attention heads",
-                                          "TF Hub BERT encoder URL"])
+        pd.set_option("display.max_colwidth", None)
+        models_df = pd.DataFrame(
+            model_options,
+            columns=[
+                "Model",
+                "Hidden layers",
+                "Hidden size",
+                "Attention heads",
+                "TF Hub BERT encoder URL",
+            ],
+        )
         return tfhub_model_map, models_df
     else:
         return tfhub_model_map

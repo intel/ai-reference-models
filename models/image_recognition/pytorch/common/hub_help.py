@@ -21,18 +21,25 @@ from torch.hub import load_state_dict_from_url
 import argparse
 
 
-parser = argparse.ArgumentParser(description='Download PyTorch pretrained model')
+parser = argparse.ArgumentParser(description="Download PyTorch pretrained model")
 
-parser.add_argument('-u', '--url', type=str, metavar='URL',
-                    help="url for pretrained checkpoint your download")
+parser.add_argument(
+    "-u",
+    "--url",
+    type=str,
+    metavar="URL",
+    help="url for pretrained checkpoint your download",
+)
+
 
 def main():
     args = parser.parse_args()
 
-    torch.hub._validate_not_a_forked_repo=lambda a,b,c: True
-    hub_model_names = torch.hub.list('facebookresearch/WSL-Images')
+    torch.hub._validate_not_a_forked_repo = lambda a, b, c: True
+    hub_model_names = torch.hub.list("facebookresearch/WSL-Images")
 
     state_dict = load_state_dict_from_url(args.url, progress=True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

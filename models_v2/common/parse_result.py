@@ -28,6 +28,7 @@ import importlib.util
 import re
 from typing import Optional
 import os
+
 # from common.utils import check_python_version
 
 
@@ -72,7 +73,7 @@ def parse_log_total_for_hvd_ddp(log_path: str, pattern_dict: dict) -> Optional[f
             if match:
                 sum_value.append(float(match.group(1)))
     if sum_value:
-        return float(sum(sum_value[-len(sum_value):]))
+        return float(sum(sum_value[-len(sum_value) :]))
     return None
 
 
@@ -119,7 +120,8 @@ def parse_log_mean(log_path: str, pattern_dict: dict) -> Optional[float]:
 def parse_log(args) -> None:
     """Parse log and save results."""
     spec = importlib.util.spec_from_file_location(
-        args.model_name, os.path.abspath(args.model_name+".py"))
+        args.model_name, os.path.abspath(args.model_name + ".py")
+    )
     patterns = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(patterns)
     acc_pattern = patterns.ACC
@@ -130,11 +132,10 @@ def parse_log(args) -> None:
     accuracy = "N/A"
     accuracy_unit = ""
     if acc_pattern.get("unit"):
-        accuracy_unit = acc_pattern['unit']
+        accuracy_unit = acc_pattern["unit"]
         if args.hvd or args.ddp:
             if acc_pattern.get("type") == "total":
-                accuracy = parse_log_total_for_hvd_ddp(
-                    args.log_dir, acc_pattern)
+                accuracy = parse_log_total_for_hvd_ddp(args.log_dir, acc_pattern)
             elif acc_pattern.get("type") == "mean":
                 accuracy = parse_log_mean(args.log_dir, acc_pattern)
         else:
@@ -149,16 +150,13 @@ def parse_log(args) -> None:
     if perf_pattern.get("unit"):
         performance_unit = perf_pattern["unit"]
         if args.hvd or args.ddp:
-            performance_min = parse_log_min_for_hvd_ddp(
-                args.log_dir, perf_pattern)
+            performance_min = parse_log_min_for_hvd_ddp(args.log_dir, perf_pattern)
             if perf_pattern["type"] == "total":
-                performance = parse_log_total_for_hvd_ddp(
-                    args.log_dir, perf_pattern)
+                performance = parse_log_total_for_hvd_ddp(args.log_dir, perf_pattern)
             elif perf_pattern["type"] == "mean":
                 performance = parse_log_mean(args.log_dir, perf_pattern)
             elif perf_pattern["type"] == "max":
-                performance = parse_log_max_for_hvd_ddp(
-                    args.log_dir, perf_pattern)
+                performance = parse_log_max_for_hvd_ddp(args.log_dir, perf_pattern)
         else:
             if perf_pattern["type"] == "total":
                 performance = parse_log_total(args.log_dir, perf_pattern)
@@ -182,28 +180,32 @@ def parse_log(args) -> None:
     else:
         if perf_pattern.get("unit") and isinstance(performance, float):
             performance_unit = perf_pattern["unit"]
-            if bool(re.search('/s$', performance_unit)) or performance_unit == "fps":
+            if bool(re.search("/s$", performance_unit)) or performance_unit == "fps":
                 latency = int(args.batch_size) / performance
 
     # get functional status
     functional_status = get_functional_status(args.log_dir, functional_pattern)
 
-    performance = f"{float(f'{performance:.8g}')}" if isinstance(
-        performance, float) else performance
+    performance = (
+        f"{float(f'{performance:.8g}')}"
+        if isinstance(performance, float)
+        else performance
+    )
     if args.hvd or args.ddp:
-        performance_min = f"{float(f'{performance_min:.8g}')}" if isinstance(
-            performance_min, float) else performance_min
+        performance_min = (
+            f"{float(f'{performance_min:.8g}')}"
+            if isinstance(performance_min, float)
+            else performance_min
+        )
     accuracy = f"{accuracy:.3f}" if isinstance(accuracy, float) else accuracy
 
     # save results to log file
-    result_dir = args.log_dir.replace('_raw.log', '.log')
-    result_file = open(result_dir, 'w')
+    result_dir = args.log_dir.replace("_raw.log", ".log")
+    result_file = open(result_dir, "w")
     result_file.write(f"Batch Size: {args.batch_size}")
     if args.hvd or args.ddp:
-        result_file.write(
-            f"\nSum Performance: {performance} {performance_unit}")
-        result_file.write(
-            f"\nMin Performance: {performance_min} {performance_unit}")
+        result_file.write(f"\nSum Performance: {performance} {performance_unit}")
+        result_file.write(f"\nMin Performance: {performance_min} {performance_unit}")
     else:
         result_file.write(f"\nPerformance: {performance} {performance_unit}")
     result_file.write(f"\nLatency: {latency} s")
@@ -222,14 +224,21 @@ def main():
     """
     # check_python_version()
     parser = argparse.ArgumentParser(description=f"Model result parser")
-    parser.add_argument('--model_name', '-m', type=str, required=True,
-                        help="Test scope type")
-    parser.add_argument('--ddp', action='store_true',
-                        help="parse results for models that leverage Torch DDP backend")
-    parser.add_argument('--hvd', action='store_true',
-                        help="parse results for models that leverage Horovod backend")
-    parser.add_argument('--batch_size', '-b', required=True, help='Batch size')
-    parser.add_argument('--log_dir', '-l', required=True, help='Log directory')
+    parser.add_argument(
+        "--model_name", "-m", type=str, required=True, help="Test scope type"
+    )
+    parser.add_argument(
+        "--ddp",
+        action="store_true",
+        help="parse results for models that leverage Torch DDP backend",
+    )
+    parser.add_argument(
+        "--hvd",
+        action="store_true",
+        help="parse results for models that leverage Horovod backend",
+    )
+    parser.add_argument("--batch_size", "-b", required=True, help="Batch size")
+    parser.add_argument("--log_dir", "-l", required=True, help="Log directory")
     args = parser.parse_args()
     parse_log(args)
 

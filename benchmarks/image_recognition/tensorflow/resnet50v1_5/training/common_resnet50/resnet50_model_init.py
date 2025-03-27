@@ -31,8 +31,7 @@ class ResNet50ModelInitializer(BaseModelInitializer):
     """initialize mode and run benchmark"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
-        super(ResNet50ModelInitializer, self).__init__(
-            args, custom_args, platform_util)
+        super(ResNet50ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         self.benchmark_command = ""
         if not platform_util:
@@ -45,36 +44,56 @@ class ResNet50ModelInitializer(BaseModelInitializer):
         # set num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()
 
-        arg_parser = ArgumentParser(description='Parse args')
+        arg_parser = ArgumentParser(description="Parse args")
 
-        arg_parser.add_argument("--steps", dest='steps',
-                                type=int, default=112590,
-                                help="number of steps")
-        arg_parser.add_argument("--train_epochs", dest='trainepochs',
-                                type=int, default=72,
-                                help="number of epochs")
-        arg_parser.add_argument("--epochs_between_evals", dest='epochsbtwevals',
-                                type=int, default=1,
-                                help="number of epochs between eval")
-        arg_parser.add_argument('--kmp-blocktime', dest='kmp_blocktime',
-                                help='number of kmp block time',
-                                type=int, default=1)
+        arg_parser.add_argument(
+            "--steps", dest="steps", type=int, default=112590, help="number of steps"
+        )
+        arg_parser.add_argument(
+            "--train_epochs",
+            dest="trainepochs",
+            type=int,
+            default=72,
+            help="number of epochs",
+        )
+        arg_parser.add_argument(
+            "--epochs_between_evals",
+            dest="epochsbtwevals",
+            type=int,
+            default=1,
+            help="number of epochs between eval",
+        )
+        arg_parser.add_argument(
+            "--kmp-blocktime",
+            dest="kmp_blocktime",
+            help="number of kmp block time",
+            type=int,
+            default=1,
+        )
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
         # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
         if self.args.gpu:
             benchmark_script = os.path.join(
-                self.args.intelai_models, self.args.mode, "gpu",
-                "mlperf_resnet/imagenet_main.py")
+                self.args.intelai_models,
+                self.args.mode,
+                "gpu",
+                "mlperf_resnet/imagenet_main.py",
+            )
         else:
             set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
             benchmark_script = os.path.join(
-                self.args.intelai_models, self.args.mode, "cpu",
-                "mlperf_resnet/imagenet_main.py")
+                self.args.intelai_models,
+                self.args.mode,
+                "cpu",
+                "mlperf_resnet/imagenet_main.py",
+            )
 
         # We need to change directory to model source to avoid python
         # module name conflicts.
@@ -82,42 +101,60 @@ class ResNet50ModelInitializer(BaseModelInitializer):
         #    "/models && " + self.get_command_prefix(args.socket_id) + \
         #    self.python_exe + " " + benchmark_script
 
-        os.environ["PYTHONPATH"] = "{}:{}".format(os.environ["PYTHONPATH"],
-                                                  os.path.join(self.args.intelai_models, self.args.mode))
-        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
-            self.python_exe + " " + benchmark_script
+        os.environ["PYTHONPATH"] = "{}:{}".format(
+            os.environ["PYTHONPATH"],
+            os.path.join(self.args.intelai_models, self.args.mode),
+        )
+        self.benchmark_command = (
+            self.get_command_prefix(args.socket_id)
+            + self.python_exe
+            + " "
+            + benchmark_script
+        )
 
         # Model requires random_seed. Just setting it to a random value.
         if self.args.gpu:
             random_seed = 1
-            self.benchmark_command = \
-                self.benchmark_command + \
-                " " + str(random_seed) + \
-                " --batch_size=" + str(self.args.batch_size) + \
-                " --max_train_steps=" + str(self.args.steps) + \
-                " --train_epochs=" + str(self.args.trainepochs) + \
-                " --epochs_between_evals=" + str(self.args.epochsbtwevals) + \
-                " --num_gpus 1 --stop_threshold 0.75 --version 1 --resnet_size 50"
+            self.benchmark_command = (
+                self.benchmark_command
+                + " "
+                + str(random_seed)
+                + " --batch_size="
+                + str(self.args.batch_size)
+                + " --max_train_steps="
+                + str(self.args.steps)
+                + " --train_epochs="
+                + str(self.args.trainepochs)
+                + " --epochs_between_evals="
+                + str(self.args.epochsbtwevals)
+                + " --num_gpus 1 --stop_threshold 0.75 --version 1 --resnet_size 50"
+            )
         else:
             random_seed = 2
-            self.benchmark_command = \
-                self.benchmark_command + \
-                " " + str(random_seed) + \
-                " --batch_size=" + str(self.args.batch_size) + \
-                " --max_train_steps=" + str(self.args.steps) + \
-                " --train_epochs=" + str(self.args.trainepochs) + \
-                " --epochs_between_evals=" + str(self.args.epochsbtwevals) + \
-                " --inter_op_parallelism_threads " + str(self.args.num_inter_threads) + \
-                " --intra_op_parallelism_threads " + str(self.args.num_intra_threads) + \
-                " --version 1 --resnet_size 50 --data_format=channels_last"
+            self.benchmark_command = (
+                self.benchmark_command
+                + " "
+                + str(random_seed)
+                + " --batch_size="
+                + str(self.args.batch_size)
+                + " --max_train_steps="
+                + str(self.args.steps)
+                + " --train_epochs="
+                + str(self.args.trainepochs)
+                + " --epochs_between_evals="
+                + str(self.args.epochsbtwevals)
+                + " --inter_op_parallelism_threads "
+                + str(self.args.num_inter_threads)
+                + " --intra_op_parallelism_threads "
+                + str(self.args.num_intra_threads)
+                + " --version 1 --resnet_size 50 --data_format=channels_last"
+            )
 
         # if the data location and checkpoint directory is not empty, then include the arg
         if self.args.data_location and os.listdir(self.args.data_location):
-            self.benchmark_command += " --data_dir=" + \
-                                      self.args.data_location
+            self.benchmark_command += " --data_dir=" + self.args.data_location
         if self.args.checkpoint:
-            self.benchmark_command += " --model_dir=" + \
-                                      self.args.checkpoint
+            self.benchmark_command += " --model_dir=" + self.args.checkpoint
 
     def run(self):
         if self.benchmark_command:

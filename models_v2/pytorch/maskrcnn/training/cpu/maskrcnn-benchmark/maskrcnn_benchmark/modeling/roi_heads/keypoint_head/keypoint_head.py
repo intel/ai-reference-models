@@ -1,19 +1,19 @@
 import torch
 
 # MIT License
-# 
+#
 # Copyright (c) 2018 Facebook
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,7 +33,8 @@ class ROIKeypointHead(torch.nn.Module):
         self.cfg = cfg.clone()
         self.feature_extractor = make_roi_keypoint_feature_extractor(cfg, in_channels)
         self.predictor = make_roi_keypoint_predictor(
-            cfg, self.feature_extractor.out_channels)
+            cfg, self.feature_extractor.out_channels
+        )
         self.post_processor = make_roi_keypoint_post_processor(cfg)
         self.loss_evaluator = make_roi_keypoint_loss_evaluator(cfg)
 

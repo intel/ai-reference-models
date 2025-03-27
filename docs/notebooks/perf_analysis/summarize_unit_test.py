@@ -19,14 +19,15 @@
 #
 
 from profiling.unit_test_utils import Utils
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--folder', required=False)
+    parser.add_argument("-f", "--folder", required=False)
     args = parser.parse_args()
 
-    if args.folder != '':
+    if args.folder != "":
         print(args.folder)
     ut = Utils()
     ut.mvCSV2Results(folder=args.folder)
