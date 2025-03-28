@@ -27,115 +27,101 @@ from os import path
 from PIL import Image, ImageDraw
 import json
 
-root_folder = os.environ.get("DATASET_DIR")
-
+root_folder = os.environ.get('DATASET_DIR')
 
 def classify_images(image_folder, annotation_file):
     print("Create folders for classified images")
     print(root_folder)
     benign = root_folder + "/vision_images/Benign"
-    malignant = root_folder + "/vision_images/Malignant"
+    malignant =  root_folder + "/vision_images/Malignant"
     normal = root_folder + "/vision_images/Normal"
     os.makedirs(benign, exist_ok=True)
     os.makedirs(malignant, exist_ok=True)
     os.makedirs(normal, exist_ok=True)
-
+    
     print("----- Classifying the images for data preprocessing -----")
     manual_annotations = pd.read_excel(annotation_file)
     print("Classify Low energy images")
     directory = image_folder + "/Low energy images of CDD-CESM"
     for filename in os.listdir(directory):
         src = os.path.join(directory, filename)
-        # checking if it is a file
+        # checking if it is a file   
         if os.path.isfile(src):
             patient_id = filename.strip(".jpg")
-            classification_type = manual_annotations[
-                manual_annotations["Image_name"] == patient_id
-            ]["Pathology Classification/ Follow up"]
-            if classification_type.size != 0:
-                tgt = (
-                    root_folder + "/vision_images/" + str(classification_type.values[0])
-                )
-                shutil.copy2(src, tgt)
+            classification_type = manual_annotations [manual_annotations ['Image_name'] == patient_id]["Pathology Classification/ Follow up"]
+            if(classification_type.size != 0):
+                tgt = root_folder + "/vision_images/" + str(classification_type.values[0])
+                shutil.copy2(src, tgt)             
     print("Classify Subtracted energy images")
     directory = image_folder + "/Subtracted images of CDD-CESM"
     for filename in os.listdir(directory):
         src = os.path.join(directory, filename)
-        # checking if it is a file
+        # checking if it is a file   
         if os.path.isfile(src):
             patient_id = filename.strip(".jpg")
-            classification_type = manual_annotations[
-                manual_annotations["Image_name"] == patient_id
-            ]["Pathology Classification/ Follow up"]
-            if classification_type.size != 0:
-                tgt = (
-                    root_folder + "/vision_images/" + str(classification_type.values[0])
-                )
+            classification_type = manual_annotations [manual_annotations ['Image_name'] == patient_id]["Pathology Classification/ Follow up"]
+            if(classification_type.size != 0):
+                tgt = root_folder + "/vision_images/" + str(classification_type.values[0])
                 shutil.copy2(src, tgt)
+    
 
-
-def segment_images(segmentation_path, cesm_only=True):
+def segment_images(segmentation_path,cesm_only = True):
     new_width = 512
     new_height = 512
 
     df = pd.read_csv(segmentation_path)
 
     # iterate over files in
-    # Creating segmented images for Normal cases
+    # Creating segmented images for Normal cases 
     directory = path.join(root_folder, "vision_images/Normal/")
     save_directory = path.join(root_folder, "segmented_images/Normal/")
     print(save_directory)
     os.makedirs(save_directory, exist_ok=True)
-    print('Creating segmented images for "Normal" cases .........')
+    print("Creating segmented images for \"Normal\" cases .........")
     for filename in os.listdir(directory):
         if cesm_only:
-            if "_CM_" not in filename:
+            if '_CM_' not in filename:
                 continue
         f = os.path.join(directory, filename)
         # checking if it is a file
         if os.path.isfile(f):
-            # print(f)
+            #print(f)
             new_file = os.path.join(save_directory, filename)
             im = Image.open(f)
-            width, height = im.size  # Get dimensions
-
-            cx, cy = width // 2, height // 2
-            left, top = max(0, cx - new_width // 2), max(0, cy - new_height // 2)
-            right, bottom = min(width, cx + new_width // 2), min(
-                height, cy + new_height // 2
-            )
+            width, height = im.size   # Get dimensions
+            
+            cx, cy = width//2, height//2
+            left, top = max(0, cx - new_width//2), max(0, cy - new_height//2) 
+            right, bottom = min(width, cx + new_width//2), min(height, cy + new_height//2)
 
             # Crop the center of the image
             im = im.crop((left, top, right, bottom))
             im.save(new_file)
 
-    # Creating segmented images for malignant cases
+    # Creating segmented images for malignant cases 
     directory = path.join(root_folder, "vision_images/Malignant/")
     save_directory = path.join(root_folder, "segmented_images/Malignant/")
     os.makedirs(save_directory, exist_ok=True)
-    print('Creating segmented images for "malignant" cases ..........')
+    print("Creating segmented images for \"malignant\" cases ..........")
     for filename in os.listdir(directory):
         if cesm_only:
-            if "_CM_" not in filename:
+            if '_CM_' not in filename:
                 continue
         f = os.path.join(directory, filename)
         # checking if it is a file
         if os.path.isfile(f):
-            rows = df.loc[df["#filename"] == filename]
-            shapes = rows["region_shape_attributes"].values
+            rows = df.loc[df['#filename'] == filename]
+            shapes = rows['region_shape_attributes'].values
             i = 0
             for shape in shapes:
                 x = json.loads(shape)
                 i = i + 1
-                # print(filename)
-                new_file = os.path.join(
-                    save_directory,
-                    filename.split(".")[0] + str(i) + "." + filename.split(".")[1],
-                )
-                # print(new_file)
+                #print(filename)
+                new_file = os.path.join(save_directory,  filename.split('.')[0]+str(i)+ '.' + filename.split('.')[1])
+                #print(new_file)
                 im = Image.open(f)
-                width, height = im.size  # Get dimensions
-                if x["name"] == "polygon":
+                width, height = im.size   # Get dimensions    
+                if(x["name"] == "polygon"):
                     left = min(x["all_points_x"])
                     top = min(x["all_points_y"])
                     right = max(x["all_points_x"])
@@ -146,54 +132,53 @@ def segment_images(segmentation_path, cesm_only=True):
                     if (bottom - top) < new_height:
                         top, bottom = max(0, (top+bottom)//2 - new_height//2), min(height,  (top+bottom)//2 + new_height//2)
                     """
-                    # print((left, top, right, bottom))
+                    #print((left, top, right, bottom))
                     im = im.crop((left, top, right, bottom))
                     im.save(new_file)
-                elif x["name"] == "ellipse":
-                    # new_file = os.path.join(save_directory, str(i) + filename)
-                    left = max(0, x["cx"] - new_width // 2)
-                    top = max(0, x["cy"] - new_height // 2)
-                    right = min(width, x["cx"] + new_width // 2)
-                    bottom = min(height, x["cy"] + new_height // 2)
+                elif(x["name"] == "ellipse"):
+                    #new_file = os.path.join(save_directory, str(i) + filename)
+                    left = max(0, x["cx"] - new_width//2)
+                    top = max(0, x["cy"] - new_height//2)
+                    right = min(width, x["cx"] +  new_width//2)
+                    bottom = min(height, x["cy"] + new_height//2)
                     im = im.crop((left, top, right, bottom))
                     im.save(new_file)
 
-                elif x["name"] == "circle":
-                    left = max(0, x["cx"] - new_width // 2)
-                    top = max(0, x["cy"] - new_height // 2)
-                    right = min(width, x["cx"] + new_width // 2)
-                    bottom = min(height, x["cy"] + new_height // 2)
+                elif(x["name"] == "circle"):
+                    left = max(0, x["cx"] - new_width//2)
+                    top = max(0, x["cy"] - new_height//2)
+                    right = min(width, x["cx"] +  new_width//2)
+                    bottom = min(height, x["cy"] + new_height//2)
                     im = im.crop((left, top, right, bottom))
                     im.save(new_file)
+
+
 
     # Creating segmented images for Benign cases
     directory = path.join(root_folder, "vision_images/Benign/")
     save_directory = path.join(root_folder, "segmented_images/Benign/")
-
+    
     os.makedirs(save_directory, exist_ok=True)
-    print('Creating segmented images for "Benign" cases ........')
+    print("Creating segmented images for \"Benign\" cases ........")
     for filename in os.listdir(directory):
         if cesm_only:
-            if "_CM_" not in filename:
+            if '_CM_' not in filename:
                 continue
         f = os.path.join(directory, filename)
         # checking if it is a file
         if os.path.isfile(f):
-            rows = df.loc[df["#filename"] == filename]
-            shapes = rows["region_shape_attributes"].values
+            rows = df.loc[df['#filename'] == filename]
+            shapes = rows['region_shape_attributes'].values
             i = 0
             for shape in shapes:
                 x = json.loads(shape)
                 i = i + 1
-                # print(filename)
-                new_file = os.path.join(
-                    save_directory,
-                    filename.split(".")[0] + str(i) + "." + filename.split(".")[1],
-                )
-                # print(new_file)
+                #print(filename)
+                new_file = os.path.join(save_directory,  filename.split('.')[0]+str(i)+ '.' + filename.split('.')[1])
+                #print(new_file)
                 im = Image.open(f)
-                width, height = im.size  # Get dimensions
-                if x["name"] == "polygon":
+                width, height = im.size   # Get dimensions    
+                if(x["name"] == "polygon"):
                     left = min(x["all_points_x"])
                     top = min(x["all_points_y"])
                     right = max(x["all_points_x"])
@@ -204,32 +189,32 @@ def segment_images(segmentation_path, cesm_only=True):
                     if (bottom - top) < new_height:
                         top, bottom = max(0, (top+bottom)//2 - new_height//2), min(height,  (top+bottom)//2 + new_height//2)
                     """
-                    # print((left, top, right, bottom))
+                    #print((left, top, right, bottom))
                     im = im.crop((left, top, right, bottom))
                     im.save(new_file)
-                elif x["name"] == "ellipse":
-                    # new_file = os.path.join(save_directory, str(i) + filename)
-                    left = max(0, x["cx"] - new_width // 2)
-                    top = max(0, x["cy"] - new_height // 2)
-                    right = min(width, x["cx"] + new_width // 2)
-                    bottom = min(height, x["cy"] + new_height // 2)
+                elif(x["name"] == "ellipse"):
+                    #new_file = os.path.join(save_directory, str(i) + filename)
+                    left = max(0, x["cx"] - new_width//2)
+                    top = max(0, x["cy"] - new_height//2)
+                    right = min(width, x["cx"] +  new_width//2)
+                    bottom = min(height, x["cy"] + new_height//2)
                     im = im.crop((left, top, right, bottom))
                     im.save(new_file)
 
-                elif x["name"] == "circle":
-                    left = max(0, x["cx"] - new_width // 2)
-                    top = max(0, x["cy"] - new_height // 2)
-                    right = min(width, x["cx"] + new_width // 2)
-                    bottom = min(height, x["cy"] + new_height // 2)
+                elif(x["name"] == "circle"):
+                    left = max(0, x["cx"] - new_width//2)
+                    top = max(0, x["cy"] - new_height//2)
+                    right = min(width, x["cx"] +  new_width//2)
+                    bottom = min(height, x["cy"] + new_height//2)
                     im = im.crop((left, top, right, bottom))
                     im.save(new_file)
     return 0
 
 
 def prepare_vision_data(image_folder, radiology_annotations_file, segmentation_path):
-    # Classify images data into Benign,Malignant,Normal
+    #Classify images data into Benign,Malignant,Normal
     classify_images(image_folder, radiology_annotations_file)
-    # Segment the classified images and save the ROI tiles
+    #Segment the classified images and save the ROI tiles
     segment_images(segmentation_path)
 
 
@@ -257,7 +242,8 @@ if __name__ == "__main__":
     )
 
     params = parser.parse_args()
-    # Preprocess data
+	#Preprocess data
     prepare_vision_data(
-        params.image_folder, params.radiology_annotations_file, params.segmentation_path
-    )
+        params.image_folder,
+        params.radiology_annotations_file,
+        params.segmentation_path)

@@ -26,7 +26,7 @@ from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
-    """Model initializer for 3D UNet"""
+    """ Model initializer for 3D UNet"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
@@ -36,29 +36,22 @@ class ModelInitializer(BaseModelInitializer):
 
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "config.json"
-        )
+            os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
-        set_env_var("KMP_HW_SUBSET", "{}c,1T".format(self.args.num_intra_threads))
-        script_path = os.path.join(
-            self.args.intelai_models,
-            self.args.mode,
-            self.args.precision,
-            "brats",
-            "predict.py",
-        )
+        set_env_var("KMP_HW_SUBSET",
+                    "{}c,1T".format(self.args.num_intra_threads))
+        script_path = os.path.join(self.args.intelai_models, self.args.mode,
+                                   self.args.precision, "brats", "predict.py")
 
         # add numactl prefix to the command
-        self.command_prefix = (
-            self.get_command_prefix(self.args.socket_id) + "python " + script_path
-        )
+        self.command_prefix = self.get_command_prefix(self.args.socket_id) + \
+            "python " + script_path
 
         # add additional args to the command
-        self.command_prefix += " --inter {} --intra {} --nw 1 --nb 5 --bs {}".format(
-            self.args.num_inter_threads,
-            self.args.num_intra_threads,
-            self.args.batch_size,
-        )
+        self.command_prefix += \
+            " --inter {} --intra {} --nw 1 --nb 5 --bs {}".\
+            format(self.args.num_inter_threads, self.args.num_intra_threads,
+                   self.args.batch_size)
 
     def run(self):
         self.run_command(self.command_prefix)

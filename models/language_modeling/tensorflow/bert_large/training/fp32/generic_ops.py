@@ -25,107 +25,88 @@ _inprecision = tf.float32
 _rprecision = tf.float32
 _use_experimental_gelu = False
 
-
 def set_rprecision(dt):
-    global _rprecision
-    _rprecision = dt
-
+  global _rprecision
+  _rprecision=dt
 
 def set_global_flags(experimental_gelu):
-    global _use_experimental_gelu
-    _use_experimental_gelu = experimental_gelu
+  global _use_experimental_gelu
+  _use_experimental_gelu = experimental_gelu
 
+def i_cast(x) :
+     return tf.cast(x, _inprecision)
 
-def i_cast(x):
-    return tf.cast(x, _inprecision)
+def r_cast(x) :
+     return tf.cast(x, _rprecision)
 
-
-def r_cast(x):
-    return tf.cast(x, _rprecision)
-
-
-def matmul(matA, matB, transpose_b=False):
+def matmul(matA, matB, transpose_b=False) :
     matA = i_cast(matA)
     matB = i_cast(matB)
     matC = tf.matmul(matA, matB, transpose_b=transpose_b)
     return r_cast(matC)
 
-
-def multiply(x, y):
+def multiply(x,y):
     x = r_cast(x)
     y = r_cast(y)
-    return tf.multiply(x, y)
+    return tf.multiply(x,y)
 
-
-def mzip(x, y):
-    if x.dtype == tf.bfloat16:
-        x = r_cast(x)
-        y = r_cast(y)
-    return zip(x, y)
-
+def mzip(x,y):
+    if x.dtype== tf.bfloat16:
+      x = r_cast(x)
+      y = r_cast(y)
+    return zip(x,y)
 
 def tanh(x):
     x = i_cast(x)
     rval = tf.tanh(x)
     return r_cast(rval)
 
-
 def softmax(scores, axis=None):
     scores = i_cast(scores)
     rval = tf.nn.softmax(scores, axis)
     return r_cast(rval)
-
 
 def layer_norm(inputs, begin_norm_axis, begin_params_axis, scope):
     lnorm = tf.keras.layers.LayerNormalization()
 
     # Try to use ITEX first
     try:
-        import intel_extension_for_tensorflow as itex
-
-        lnorm = itex.ops.LayerNormalization(dtype=_rprecision)
+      import intel_extension_for_tensorflow as itex
+      lnorm = itex.ops.LayerNormalization(dtype=_rprecision)
     except ImportError:
-        pass
+      pass
 
     return lnorm(inputs)
 
-
 "Moved from modeling.py"
-
-
 def gelu(x):
-    """Gaussian Error Linear Unit.
+  """Gaussian Error Linear Unit.
 
-    This is a smoother version of the RELU.
-    Original paper: https://arxiv.org/abs/1606.08415
-    Args:
-      x: float Tensor to perform activation.
+  This is a smoother version of the RELU.
+  Original paper: https://arxiv.org/abs/1606.08415
+  Args:
+    x: float Tensor to perform activation.
 
-    Returns:
-      `x` with the GELU activation applied.
-    """
-    if _use_experimental_gelu:
-        gelu_func = tf.nn.gelu
+  Returns:
+    `x` with the GELU activation applied.
+  """
+  if _use_experimental_gelu :
+    gelu_func = tf.nn.gelu
 
-        # Try to use ITXE first.
-        try:
-            import intel_extension_for_tensorflow as itex
+    # Try to use ITXE first.
+    try:
+      import intel_extension_for_tensorflow as itex
+      gelu_func = itex.ops.gelu
+    except ImportError:
+      pass
 
-            gelu_func = itex.ops.gelu
-        except ImportError:
-            pass
-
-        return gelu_func(features=x, approximate=True)
-    else:
-        x = i_cast(x)
-        cdf = 0.5 * (
-            1.0 + tf.tanh((np.sqrt(2 / np.pi) * (x + 0.044715 * tf.pow(x, 3))))
-        )
-        rval = x * cdf
-        return r_cast(rval)
-
+    return gelu_func(features=x, approximate=True)
+  else:
+    x = i_cast(x)
+    cdf = 0.5 * (1.0 + tf.tanh(
+        (np.sqrt(2 / np.pi) * (x + 0.044715 * tf.pow(x, 3)))))
+    rval = x * cdf
+    return r_cast(rval)
 
 def logTheLossHook(total_loss, n):
-    return tf.compat.v1.train.LoggingTensorHook(
-        {"\t Loss ": total_loss}, every_n_iter=n
-    )
+    return tf.compat.v1.train.LoggingTensorHook({"\t Loss " : total_loss}, every_n_iter=n)

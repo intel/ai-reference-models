@@ -1,19 +1,19 @@
 #!/usr/bin/python
 #
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -381,11 +381,9 @@ def preparePredImage(dataset, predictions, idx):
         maskTensor = perImagePredictions.get_field("mask")
 
         # sanity checks
-        assert len(perImagePredictions) == len(
-            maskTensor
-        ), "number of masks (%d) do not match the number of boxes (%d)" % (
-            len(perImagePredictions),
-            len(maskTensor),
+        assert len(perImagePredictions) == len(maskTensor), (
+            "number of masks (%d) do not match the number of boxes (%d)"
+            % (len(perImagePredictions), len(maskTensor))
         )
 
         maskTensor = maskTensor.float()
@@ -475,8 +473,8 @@ def evaluateBoxMatches(matches, args):
     ap = np.zeros((len(minRegionSizes), len(args.instLabels), len(overlaps)), np.float)
 
     for dI, minRegionSize in enumerate(minRegionSizes):
-        for oI, overlapTh in enumerate(overlaps):
-            for lI, labelName in enumerate(args.instLabels):
+        for (oI, overlapTh) in enumerate(overlaps):
+            for (lI, labelName) in enumerate(args.instLabels):
                 y_true = np.empty(0)
                 y_score = np.empty(0)
                 # count hard false negatives
@@ -503,7 +501,7 @@ def evaluateBoxMatches(matches, args):
                     curMatch = np.zeros(len(gtInstances), dtype=np.bool)
 
                     # collect matches
-                    for gtI, gt in enumerate(gtInstances):
+                    for (gtI, gt) in enumerate(gtInstances):
                         foundMatch = False
                         for pred in gt["matchedPred"]:
                             overlap = float(pred["boxIntersection"]) / (
@@ -676,8 +674,8 @@ def evaluateMaskMatches(matches, args):
     ap = np.zeros((len(minRegionSizes), len(args.instLabels), len(overlaps)), np.float)
 
     for dI, minRegionSize in enumerate(minRegionSizes):
-        for oI, overlapTh in enumerate(overlaps):
-            for lI, labelName in enumerate(args.instLabels):
+        for (oI, overlapTh) in enumerate(overlaps):
+            for (lI, labelName) in enumerate(args.instLabels):
                 y_true = np.empty(0)
                 y_score = np.empty(0)
                 # count hard false negatives
@@ -704,7 +702,7 @@ def evaluateMaskMatches(matches, args):
                     curMatch = np.zeros(len(gtInstances), dtype=np.bool)
 
                     # collect matches
-                    for gtI, gt in enumerate(gtInstances):
+                    for (gtI, gt) in enumerate(gtInstances):
                         foundMatch = False
                         for pred in gt["matchedPred"]:
                             overlap = float(pred["maskIntersection"]) / (
@@ -858,7 +856,7 @@ def computeAverages(aps, args):
     avgDict["allAp75%"] = np.nanmean(aps[dInf, :, o75])
 
     avgDict["classes"] = {}
-    for lI, labelName in enumerate(args.instLabels):
+    for (lI, labelName) in enumerate(args.instLabels):
         avgDict["classes"][labelName] = {}
         avgDict["classes"][labelName]["ap"] = np.average(aps[dInf, lI, :])
         avgDict["classes"][labelName]["ap50%"] = np.average(aps[dInf, lI, o50])
@@ -891,7 +889,7 @@ def printResults(avgDict, args):
         if not args.csv:
             print("#" * lineLen)
 
-        for lI, labelName in enumerate(args.instLabels):
+        for (lI, labelName) in enumerate(args.instLabels):
             apAvg = avgDict["classes"][labelName]["ap"]
             ap50o = avgDict["classes"][labelName]["ap50%"]
             ap75o = avgDict["classes"][labelName]["ap75%"]

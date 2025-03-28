@@ -31,18 +31,14 @@ def TestOneInput(data):
         common.utils.validators.check_shm_size,
         common.utils.validators.check_num_cores_per_instance,
         common.utils.validators.check_positive_number,
-        common.utils.validators.check_positive_number_or_equal_to_negative_one,
+        common.utils.validators.check_positive_number_or_equal_to_negative_one
     )
 
     for test_function in test_functions:
         for value in (str_value, int_value, float_value):
             try:
                 test_function(value=value)
-            except (
-                ArgumentTypeError,
-                ValueError,
-                TypeError,
-            ):  # Expected exception types
+            except (ArgumentTypeError, ValueError, TypeError):  # Expected exception types
                 pass
             except OverflowError as e:
                 if isinstance(value, numbers.Number):

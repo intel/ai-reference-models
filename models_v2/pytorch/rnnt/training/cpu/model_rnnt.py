@@ -20,7 +20,6 @@ import torch.nn as nn
 from rnn import rnn
 from rnn import StackTime
 
-
 class BnReLUDropout(torch.nn.Module):
     def __init__(self, input_size, dropout):
         super(BnReLUDropout, self).__init__()
@@ -33,7 +32,6 @@ class BnReLUDropout(torch.nn.Module):
         x = self.relu(x)
         x = self.dropout(x)
         return x
-
 
 class RNNT(torch.nn.Module):
     """A Recurrent Neural Network Transducer (RNN-T).
@@ -53,16 +51,15 @@ class RNNT(torch.nn.Module):
         joint_n_hidden: Internal hidden unit size of the joint network.
         rnn_type: string. Type of rnn in SUPPORTED_RNNS.
     """
-
     def __init__(self, rnnt=None, num_classes=1, **kwargs):
         super().__init__()
         if kwargs.get("no_featurizer", False):
             in_features = kwargs.get("in_features")
         else:
             feat_config = kwargs.get("feature_config")
-            in_features = feat_config["features"] * feat_config.get("frame_splicing", 1)
+            in_features = feat_config['features'] * feat_config.get("frame_splicing", 1)
 
-        self._pred_n_hidden = rnnt["pred_n_hidden"]
+        self._pred_n_hidden = rnnt['pred_n_hidden']
 
         self.encoder_n_hidden = rnnt["encoder_n_hidden"]
         self.encoder_pre_rnn_layers = rnnt["encoder_pre_rnn_layers"]
@@ -101,88 +98,61 @@ class RNNT(torch.nn.Module):
             rnnt["dropout"],
         )
 
-    def _encoder(
-        self,
-        in_features,
-        encoder_n_hidden,
-        encoder_pre_rnn_layers,
-        encoder_post_rnn_layers,
-        forget_gate_bias,
-        norm,
-        rnn_type,
-        encoder_stack_time_factor,
-        dropout,
-    ):
-        layers = torch.nn.ModuleDict(
-            {
-                "pre_rnn": rnn(
-                    rnn=rnn_type,
-                    input_size=in_features,
-                    hidden_size=encoder_n_hidden,
-                    num_layers=encoder_pre_rnn_layers,
-                    norm=norm,
-                    forget_gate_bias=forget_gate_bias,
-                    dropout=dropout,
-                ),
-                "stack_time": StackTime(factor=encoder_stack_time_factor),
-                "post_rnn": rnn(
-                    rnn=rnn_type,
-                    input_size=encoder_stack_time_factor * encoder_n_hidden,
-                    hidden_size=encoder_n_hidden,
-                    num_layers=encoder_post_rnn_layers,
-                    norm=norm,
-                    forget_gate_bias=forget_gate_bias,
-                    norm_first_rnn=True,
-                    dropout=dropout,
-                ),
-            }
-        )
+    def _encoder(self, in_features, encoder_n_hidden,
+                 encoder_pre_rnn_layers, encoder_post_rnn_layers,
+                 forget_gate_bias, norm, rnn_type, encoder_stack_time_factor,
+                 dropout):
+        layers = torch.nn.ModuleDict({
+            "pre_rnn": rnn(
+                rnn=rnn_type,
+                input_size=in_features,
+                hidden_size=encoder_n_hidden,
+                num_layers=encoder_pre_rnn_layers,
+                norm=norm,
+                forget_gate_bias=forget_gate_bias,
+                dropout=dropout,
+            ),
+            "stack_time": StackTime(factor=encoder_stack_time_factor),
+            "post_rnn": rnn(
+                rnn=rnn_type,
+                input_size=encoder_stack_time_factor*encoder_n_hidden,
+                hidden_size=encoder_n_hidden,
+                num_layers=encoder_post_rnn_layers,
+                norm=norm,
+                forget_gate_bias=forget_gate_bias,
+                norm_first_rnn=True,
+                dropout=dropout,
+            ),
+        })
         return layers
 
-    def _predict(
-        self,
-        vocab_size,
-        pred_n_hidden,
-        pred_rnn_layers,
-        forget_gate_bias,
-        norm,
-        rnn_type,
-        dropout,
-    ):
-        layers = torch.nn.ModuleDict(
-            {
-                "embed": torch.nn.Embedding(vocab_size - 1, pred_n_hidden),
-                "dec_rnn": rnn(
-                    rnn=rnn_type,
-                    input_size=pred_n_hidden,
-                    hidden_size=pred_n_hidden,
-                    num_layers=pred_rnn_layers,
-                    norm=norm,
-                    forget_gate_bias=forget_gate_bias,
-                    dropout=dropout,
-                ),
-            }
-        )
+    def _predict(self, vocab_size, pred_n_hidden, pred_rnn_layers,
+                 forget_gate_bias, norm, rnn_type, dropout):
+        layers = torch.nn.ModuleDict({
+            "embed": torch.nn.Embedding(vocab_size - 1, pred_n_hidden),
+            "dec_rnn": rnn(
+                rnn=rnn_type,
+                input_size=pred_n_hidden,
+                hidden_size=pred_n_hidden,
+                num_layers=pred_rnn_layers,
+                norm=norm,
+                forget_gate_bias=forget_gate_bias,
+                dropout=dropout,
+            ),
+        })
         return layers
 
-    def _joint_net(
-        self, vocab_size, pred_n_hidden, enc_n_hidden, joint_n_hidden, dropout
-    ):
-        layers = (
-            [
-                torch.nn.Linear(pred_n_hidden + enc_n_hidden, joint_n_hidden),
-                torch.nn.ReLU(),
-            ]
-            + (
-                [
-                    torch.nn.Dropout(p=dropout),
-                ]
-                if dropout
-                else []
-            )
-            + [torch.nn.Linear(joint_n_hidden, vocab_size)]
+    def _joint_net(self, vocab_size, pred_n_hidden, enc_n_hidden,
+                   joint_n_hidden, dropout):
+        layers = [
+            torch.nn.Linear(pred_n_hidden + enc_n_hidden, joint_n_hidden),
+            torch.nn.ReLU(),
+        ] + ([ torch.nn.Dropout(p=dropout), ] if dropout else [ ]) + [
+            torch.nn.Linear(joint_n_hidden, vocab_size)
+        ]
+        return torch.nn.Sequential(
+                *layers
         )
-        return torch.nn.Sequential(*layers)
 
     def forward(self, batch, state=None):
         # batch: ((x, y), (x_lens, y_lens))
@@ -240,18 +210,18 @@ class RNNT(torch.nn.Module):
             B = 1 if state is None else state[0].size(1)
             y = torch.zeros((B, 1, self.pred_n_hidden)).to(
                 device=self.joint_net[0].weight.device,
-                dtype=self.joint_net[0].weight.dtype,
+                dtype=self.joint_net[0].weight.dtype
             )
 
         # preprend blank "start of sequence" symbol
         if add_sos:
             B, U, H = y.shape
             start = torch.zeros((B, 1, H)).to(device=y.device, dtype=y.dtype)
-            y = torch.cat([start, y], dim=1).contiguous()  # (B, U + 1, H)
+            y = torch.cat([start, y], dim=1).contiguous()   # (B, U + 1, H)
         else:
-            start = None  # makes del call later easier
+            start = None   # makes del call later easier
 
-        # if state is None:
+        #if state is None:
         #    batch = y.size(0)
         #    state = [
         #        (torch.zeros(batch, self.pred_n_hidden, dtype=y.dtype, device=y.device),
@@ -259,9 +229,9 @@ class RNNT(torch.nn.Module):
         #        for _ in range(self.pred_rnn_layers)
         #    ]
 
-        y = y.transpose(0, 1)  # .contiguous()   # (U + 1, B, H)
+        y = y.transpose(0, 1)#.contiguous()   # (U + 1, B, H)
         g, hid = self.prediction["dec_rnn"](y, state)
-        g = g.transpose(0, 1)  # .contiguous()   # (B, U + 1, H)
+        g = g.transpose(0, 1)#.contiguous()   # (B, U + 1, H)
         del y, start, state
         return g, hid
 
@@ -277,13 +247,13 @@ class RNNT(torch.nn.Module):
         B, T, H = f.shape
         B, U_, H2 = g.shape
 
-        f = f.unsqueeze(dim=2)  # (B, T, 1, H)
+        f = f.unsqueeze(dim=2)   # (B, T, 1, H)
         f = f.expand((B, T, U_, H))
 
-        g = g.unsqueeze(dim=1)  # (B, 1, U + 1, H)
+        g = g.unsqueeze(dim=1)   # (B, 1, U + 1, H)
         g = g.expand((B, T, U_, H2))
 
-        inp = torch.cat([f, g], dim=3)  # (B, T, U, 2H)
+        inp = torch.cat([f, g], dim=3)   # (B, T, U, 2H)
         res = self.joint_net(inp)
         del f, g, inp
         return res
@@ -304,14 +274,16 @@ def label_collate(labels):
     if isinstance(labels, torch.Tensor):
         return labels.type(torch.int64)
     if not isinstance(labels, (list, tuple)):
-        raise ValueError(f"`labels` should be a list or tensor not {type(labels)}")
+        raise ValueError(
+            f"`labels` should be a list or tensor not {type(labels)}"
+        )
 
     batch_size = len(labels)
     max_len = max(len(l) for l in labels)
 
     cat_labels = np.full((batch_size, max_len), fill_value=0.0, dtype=np.int32)
     for e, l in enumerate(labels):
-        cat_labels[e, : len(l)] = l
+        cat_labels[e, :len(l)] = l
     labels = torch.LongTensor(cat_labels)
 
     return labels

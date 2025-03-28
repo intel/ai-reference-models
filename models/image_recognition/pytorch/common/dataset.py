@@ -24,17 +24,12 @@ import torch.utils.data
 from torchvision.transforms.functional import InterpolationMode
 import torchvision.transforms as transforms
 
-
 def _get_cache_path(filepath):
     import hashlib
-
     h = hashlib.sha224(filepath.encode()).hexdigest()
-    cache_path = os.path.join(
-        "~", ".torch", "vision", "datasets", "imagefolder", h[:10] + ".pt"
-    )
+    cache_path = os.path.join("~", ".torch", "vision", "datasets", "imagefolder", h[:10] + ".pt")
     cache_path = os.path.expanduser(cache_path)
     return cache_path
-
 
 def get_transform_params(model):
     resize_size, crop_size = 256, 224
@@ -57,7 +52,6 @@ def get_transform_params(model):
         interpolation = InterpolationMode.BICUBIC
     return resize_size, crop_size, interpolation
 
-
 def get_imagenet_test_data_loader(args):
     valdir = os.path.join(args.data_path, "val")
     resize_size, crop_size, interpolation = get_transform_params(args.arch)
@@ -69,11 +63,7 @@ def get_imagenet_test_data_loader(args):
     else:
         dataset_test = torchvision.datasets.ImageFolder(
             valdir,
-            presets.ClassificationPresetEval(
-                crop_size=crop_size,
-                resize_size=resize_size,
-                interpolation=interpolation,
-            ),
+            presets.ClassificationPresetEval(crop_size=crop_size, resize_size=resize_size, interpolation=interpolation)
         )
         if args.cache_dataset:
             print("Saving dataset_test to {}".format(cache_path))
@@ -82,12 +72,9 @@ def get_imagenet_test_data_loader(args):
 
     print("Creating data loaders")
     test_sampler = torch.utils.data.SequentialSampler(dataset_test)
-
+    
     imagenet_test_data_loader = torch.utils.data.DataLoader(
-        dataset_test,
-        batch_size=args.batch_size,
-        sampler=test_sampler,
-        num_workers=args.workers,
-        pin_memory=True,
+        dataset_test, batch_size=args.batch_size, sampler=test_sampler, num_workers=args.workers, pin_memory=True
     )
     return imagenet_test_data_loader
+

@@ -35,4 +35,6 @@ PERF = {
     "unit": "inst/s",
 }
 
-FUNCTIONAL = {"pattern": r"Average Precision Across All Classes:\d+.\d+"}
+FUNCTIONAL = {
+    "pattern": r"Average Precision Across All Classes:\d+.\d+"
+}

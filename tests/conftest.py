@@ -26,12 +26,12 @@ import sys
 from mock import MagicMock
 
 
-MODULES = ("common",)
-MODULES_REPLACE = ("tests.unit", "benchmarks")
+MODULES = ('common',)
+MODULES_REPLACE = ('tests.unit', 'benchmarks')
 
 
 def patch_setattr(module_names, module_replace, monkeypatch, path, m):
-    """Credit for this goes mostly to @megawidget
+    """ Credit for this goes mostly to @megawidget
     do not call this directly -- assumes the fixture's caller is two stacks up
     and will correspondingly guess the module path to patch
     `path` can be:
@@ -39,10 +39,10 @@ def patch_setattr(module_names, module_replace, monkeypatch, path, m):
         2. a name, if it's imported in the module you're testing
         3. a full path a la traditional monkeypatch
     """
-    if hasattr(path, "__module__"):
-        monkeypatch.setattr(".".join((path.__module__, path.__name__)), m)
+    if hasattr(path, '__module__'):
+        monkeypatch.setattr('.'.join((path.__module__, path.__name__)), m)
         return
-    elif any(path.startswith(i + ".") for i in module_names):
+    elif any(path.startswith(i + '.') for i in module_names):
         # full path.  OK.
         monkeypatch.setattr(path, m)
     else:
@@ -50,17 +50,16 @@ def patch_setattr(module_names, module_replace, monkeypatch, path, m):
         # be testing
         fn = inspect.getouterframes(inspect.currentframe())[2][1]
         fn = os.path.splitext(os.path.relpath(fn))[0]
-        module = (
-            fn.replace(os.path.sep, ".").replace("test_", "").replace(*module_replace)
-        )
+        module = fn.replace(os.path.sep, '.').replace('test_', '').replace(
+            *module_replace)
         try:
-            monkeypatch.setattr(".".join((module, path)), m)
+            monkeypatch.setattr('.'.join((module, path)), m)
         except AttributeError:
             # handle mocking builtins like `open`
             if sys.version_info.major == 3:
-                builtin = "builtins"
+                builtin = 'builtins'
             else:
-                builtin = "__builtin__"
+                builtin = '__builtin__'
             # NOTE: `path` should be just the builtin, like `open`
             # usage: patch('open')
             monkeypatch.setattr("{}.{}".format(builtin, path), m)
@@ -69,9 +68,9 @@ def patch_setattr(module_names, module_replace, monkeypatch, path, m):
 @pytest.fixture
 def patch(monkeypatch):
     """allows us to add easy autouse fixtures by patching anything we want
-    Usage: return something like this in a @pytest.fixture
-    - patch('files.fetch_action_arg', MagicMock(return_value='output'))
-    Without the second arg, will default to just MagicMock()
+       Usage: return something like this in a @pytest.fixture
+       - patch('files.fetch_action_arg', MagicMock(return_value='output'))
+       Without the second arg, will default to just MagicMock()
     """
 
     def wrapper(path, mock=None):

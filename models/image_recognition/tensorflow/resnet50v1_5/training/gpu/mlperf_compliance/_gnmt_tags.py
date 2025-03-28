@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Keys which only appear in GNMT RNN Translation."""
+"""Keys which only appear in GNMT RNN Translation.
+"""
 
 from __future__ import absolute_import
 from __future__ import division

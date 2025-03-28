@@ -30,7 +30,6 @@ from torchrec.datasets.utils import Batch
 from torchrec.sparse.jagged_tensor import KeyedJaggedTensor
 import gc
 
-
 class RestartableMap:
     def __init__(self, f, source):
         self.source = source

@@ -1,20 +1,19 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,7 +29,6 @@ from torch.nn.modules.utils import _pair
 from maskrcnn_benchmark import _C
 
 # from apex import amp
-
 
 class _ROIAlign(Function):
     @staticmethod
@@ -48,7 +46,7 @@ class _ROIAlign(Function):
     @staticmethod
     @once_differentiable
     def backward(ctx, grad_output):
-        (rois,) = ctx.saved_tensors
+        rois, = ctx.saved_tensors
         output_size = ctx.output_size
         spatial_scale = ctx.spatial_scale
         sampling_ratio = ctx.sampling_ratio
@@ -69,7 +67,6 @@ class _ROIAlign(Function):
 
 
 roi_align = _ROIAlign.apply
-
 
 class ROIAlign(nn.Module):
     def __init__(self, output_size, spatial_scale, sampling_ratio):

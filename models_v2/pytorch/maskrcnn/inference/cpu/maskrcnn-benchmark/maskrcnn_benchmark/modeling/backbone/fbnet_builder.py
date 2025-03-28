@@ -1,19 +1,19 @@
 """
 FBNet model builder
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -124,7 +124,7 @@ PRIMITIVES = {
         shuffle_type="mid",
         pw_group=4,
         se=True,
-        **kwargs,
+        **kwargs
     ),
     "ir_k5_e1_se": lambda C_in, C_out, expansion, stride, **kwargs: IRFBlock(
         C_in, C_out, 1, stride, kernel=5, se=True, **kwargs
@@ -144,7 +144,7 @@ PRIMITIVES = {
         shuffle_type="mid",
         pw_group=4,
         se=True,
-        **kwargs,
+        **kwargs
     ),
     # layer search 3 (in addition to layer search 2)
     "ir_k3_s2": lambda C_in, C_out, expansion, stride, **kwargs: IRFBlock(
@@ -162,7 +162,7 @@ PRIMITIVES = {
         shuffle_type="mid",
         pw_group=2,
         se=True,
-        **kwargs,
+        **kwargs
     ),
     "ir_k5_s2_se": lambda C_in, C_out, expansion, stride, **kwargs: IRFBlock(
         C_in,
@@ -173,7 +173,7 @@ PRIMITIVES = {
         shuffle_type="mid",
         pw_group=2,
         se=True,
-        **kwargs,
+        **kwargs
     ),
     # layer search 4 (in addition to layer search 3)
     "ir_k3_sep": lambda C_in, C_out, expansion, stride, **kwargs: IRFBlock(
@@ -273,7 +273,7 @@ class Shift(nn.Module):
         self.dilation = 1
 
         hks = kernel_size // 2
-        ksq = kernel_size**2
+        ksq = kernel_size ** 2
 
         for i in range(kernel_size):
             for j in range(kernel_size):
@@ -373,7 +373,7 @@ class ConvBNRelu(nn.Sequential):
         bn_type,
         group=1,
         *args,
-        **kwargs,
+        **kwargs
     ):
         super(ConvBNRelu, self).__init__()
 
@@ -395,7 +395,7 @@ class ConvBNRelu(nn.Sequential):
             bias=not no_bias,
             groups=group,
             *args,
-            **kwargs,
+            **kwargs
         )
         nn.init.kaiming_normal_(op.weight, mode="fan_out", nonlinearity="relu")
         if op.bias is not None:
@@ -441,7 +441,8 @@ class Upsample(nn.Module):
 
     def forward(self, x):
         return interpolate(
-            x, scale_factor=self.scale, mode=self.mode, align_corners=self.align_corners
+            x, scale_factor=self.scale, mode=self.mode,
+            align_corners=self.align_corners
         )
 
 
@@ -592,7 +593,7 @@ def _expand_block_cfg(block_cfg):
 
 
 def expand_stage_cfg(stage_cfg):
-    """For a single stage"""
+    """ For a single stage """
     assert isinstance(stage_cfg, list)
     ret = []
     for x in stage_cfg:
@@ -601,7 +602,7 @@ def expand_stage_cfg(stage_cfg):
 
 
 def expand_stages_cfg(stage_cfgs):
-    """For a list of stages"""
+    """ For a list of stages """
     assert isinstance(stage_cfgs, list)
     ret = []
     for x in stage_cfgs:
@@ -621,26 +622,26 @@ def _block_cfgs_to_list(block_cfgs):
 
 
 def _add_to_arch(arch, info, name):
-    """arch = [{block_0}, {block_1}, ...]
-    info = [
-        # stage 0
-        [
-            block0_info,
-            block1_info,
-            ...
-        ], ...
-    ]
-    convert to:
-    arch = [
-        {
-            block_0,
-            name: block0_info,
-        },
-        {
-            block_1,
-            name: block1_info,
-        }, ...
-    ]
+    """ arch = [{block_0}, {block_1}, ...]
+        info = [
+            # stage 0
+            [
+                block0_info,
+                block1_info,
+                ...
+            ], ...
+        ]
+        convert to:
+        arch = [
+            {
+                block_0,
+                name: block0_info,
+            },
+            {
+                block_1,
+                name: block1_info,
+            }, ...
+        ]
     """
     assert isinstance(arch, list) and all(isinstance(x, dict) for x in arch)
     assert isinstance(info, list) and all(isinstance(x, list) for x in info)
@@ -659,18 +660,18 @@ def _add_to_arch(arch, info, name):
 
 
 def unify_arch_def(arch_def):
-    """unify the arch_def to:
-    {
-        ...,
-        "arch": [
-            {
-                "stage_idx": idx,
-                "block_idx": idx,
-                ...
-            },
-            {}, ...
-        ]
-    }
+    """ unify the arch_def to:
+        {
+            ...,
+            "arch": [
+                {
+                    "stage_idx": idx,
+                    "block_idx": idx,
+                    ...
+                },
+                {}, ...
+            ]
+        }
     """
     ret = copy.deepcopy(arch_def)
 
@@ -750,7 +751,8 @@ class FBNetBuilder(object):
         return out
 
     def add_blocks(self, blocks):
-        """blocks: [{}, {}, ...]"""
+        """ blocks: [{}, {}, ...]
+        """
         assert isinstance(blocks, list) and all(
             isinstance(x, dict) for x in blocks
         ), blocks
@@ -771,8 +773,8 @@ class FBNetBuilder(object):
         return ret
 
     def add_last(self, stage_info):
-        """skip last layer if channel_scale == 0
-        use the same output channel if channel_scale < 0
+        """ skip last layer if channel_scale == 0
+            use the same output channel if channel_scale < 0
         """
         assert len(stage_info) == 2
         channels = stage_info[0]
@@ -823,7 +825,7 @@ class FBNetBuilder(object):
             width_divisor=self.width_divisor,
             dw_skip_bn=self.dw_skip_bn,
             dw_skip_relu=self.dw_skip_relu,
-            **kwargs,
+            **kwargs
         )
         return ret, ret.output_depth
 
@@ -838,7 +840,7 @@ class FBNetBuilder(object):
             stride=s,
             expand_ratio=t,
             block_op_type=block_op_types[0],
-            **kwargs,
+            **kwargs
         )
         self.last_depth = ret_depth
         return op

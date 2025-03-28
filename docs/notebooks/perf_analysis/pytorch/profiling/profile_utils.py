@@ -22,7 +22,6 @@ import configparser
 
 try:
     import torch
-
     has_torch = True
 except ImportError as e:
     print(e)
@@ -32,23 +31,22 @@ except ImportError as e:
 
 try:
     import intel_pytorch_extension as ipex
-
     has_ipex = True
 except ImportError as e:
     print(e)
     print("IPEX not available")
     has_ipex = False
 
-
 class MKLUtils:
     def is_mkl_enabled(self):
         if has_torch:
-            search_str = "USE_MKL="
+            search_str="USE_MKL="
             offset = len(search_str)
             config_str = torch.__config__.show()
             idx = config_str.find(search_str)
-            return config_str[idx + offset : idx + offset + 2] == "ON"
+            return config_str[idx+offset:idx+offset+2] == "ON"
         return None
+
 
 
 import json
@@ -58,7 +56,6 @@ import subprocess
 
 try:
     from git import Repo
-
     has_git = True
 except ImportError as e:
     print(e)
@@ -66,22 +63,21 @@ except ImportError as e:
     has_git = False
     pass
 
-
 class PlatformUtils:
+
     def __init_(self):
-        self.cpufreq = ""
-        self.cpu_socket_count = ""
-        self.svmem = ""
+        self.cpufreq = ''
+        self.cpu_socket_count = ''
+        self.svmem = ''
         return
 
     def dump_platform_info(self):
         # let's print CPU information
         file_dir = os.path.dirname(os.path.abspath(__file__))
-        platform_util_path = os.path.join(file_dir, "../../../../../benchmarks/common")
+        platform_util_path = os.path.join(file_dir, '../../../../../benchmarks/common')
         print(platform_util_path)
         sys.path.insert(0, platform_util_path)
         import platform_util
-
         cpu_info = platform_util.CPUInfo()
         print("=" * 20, "CPU Info", "=" * 20)
         # number of cores
@@ -95,27 +91,29 @@ class PlatformUtils:
         print("=" * 20, "Memory Information", "=" * 20)
         # get the memory details
         svmem = psutil.virtual_memory()
-        print("Total: ", int(svmem.total / (1024**3)), "GB")
+        print("Total: ", int(svmem.total / (1024 ** 3)), "GB")
         self.cpufreq = cpufreq
         self.cpu_socket_count = cpu_info.sockets
         self.svmem = svmem
 
 
+
 class ConfigFile:
-    def __init__(self, confpath="profiling/topo.ini"):
+
+    def __init__(self, confpath='profiling/topo.ini'):
         self.configpath = confpath
-        self.data_download = ""
-        self.data_location = ""
-        self.checkpoint = ""
+        self.data_download = ''
+        self.data_location = ''
+        self.checkpoint = ''
         self.mkl_util = MKLUtils()
-        self.json_fname = ""
+        self.json_fname = ''
         if self.mkl_util.is_mkl_enabled() is True:
-            self.json_fname = "mkl_"
+            self.json_fname = 'mkl_'
         else:
-            self.json_fname = "stock_"
+            self.json_fname = 'stock_'
         if has_ipex:
-            self.json_fname += "ipex_"
-        self.throughput_keyword = ""
+            self.json_fname += 'ipex_'
+        self.throughput_keyword = ''
         self.throughput_index = -1
         self.support_accuracy = False
 
@@ -131,7 +129,7 @@ class ConfigFile:
         for each_section in config.sections():
             is_supported = True
             for each_key, each_val in config.items(each_section):
-                if each_key == "support-accuracy":
+                if each_key == 'support-accuracy':
                     if each_val is not None:
                         if eval(each_val) is False and accuracy_only is True:
                             is_supported = False
@@ -149,14 +147,7 @@ class ConfigFile:
 
         index_list = []
         data_list = []
-        columns_list = [
-            "benchmark",
-            "model-name",
-            "mode",
-            "precision",
-            "patches",
-            "json-fname",
-        ]
+        columns_list = ['benchmark','model-name', 'mode', 'precision','patches','json-fname']
         for section in config.sections():
             index_list.append(section)
             data = []
@@ -167,13 +158,11 @@ class ConfigFile:
             data.append(config.get(section, columns_list[4]))
             data.append(config.get(section, columns_list[5]))
             data_list.append(data)
-        df = pd.DataFrame(data_list, columns=columns_list)
+        df = pd.DataFrame(data_list, columns = columns_list)
 
-        df_types = df.groupby([columns_list[1], columns_list[2]]).filter(
-            lambda x: len(x) >= 2
-        )
+        df_types = df.groupby([ columns_list[1],  columns_list[2]]).filter(lambda x: len(x) >= 2)
 
-        df_types_obj = df_types.groupby([columns_list[1], columns_list[2]])
+        df_types_obj = df_types.groupby([ columns_list[1],  columns_list[2]])
 
         return df, df_types, df_types_obj
 
@@ -189,8 +178,8 @@ class ConfigFile:
         config.set(topo_name, key, val)
 
         # save to a file
-        with open(self.configpath, "w") as configfile:
-            config.write(configfile)
+        with open(self.configpath, 'w') as configfile:
+             config.write(configfile)
         return
 
     def read_config(self, topo_name):
@@ -200,57 +189,49 @@ class ConfigFile:
         for each_section in config.sections():
             if each_section == topo_name:
                 for each_key, each_val in config.items(each_section):
-                    key = "--" + each_key
-                    # if each_key == 'data-location':
+                    key = '--' + each_key
+                    #if each_key == 'data-location':
                     #    if each_val is not None:
                     #        self.benchmark_only = False
-                    if each_key == "throughput-keyword":
+                    if each_key == 'throughput-keyword':
                         if each_val is not None:
                             self.throughput_keyword = each_val
-                    elif each_key == "throughput-index":
+                    elif each_key == 'throughput-index':
                         if each_val is not None:
                             self.throughput_index = each_val
-                    elif each_key == "data-download":
+                    elif each_key == 'data-download':
                         if each_val is not None:
                             self.data_download = each_val
-                    elif each_key == "data-location":
+                    elif each_key == 'data-location':
                         if each_val is not None:
-                            if each_val != "":
+                            if each_val != '':
                                 print("data-location : ", each_val)
                                 configs.append(key)
                                 configs.append(each_val)
                                 self.data_location = each_val
-                    elif each_key == "checkpoint":
-                        if each_val != "":
+                    elif each_key == 'checkpoint':
+                        if each_val != '':
                             configs.append(key)
                             configs.append(each_val)
                             self.checkpoint = each_val
-                        self.in_graph = "NA"
-                    elif each_key == "json-fname":
+                        self.in_graph = 'NA'
+                    elif each_key == 'json-fname':
                         if each_val is not None:
                             self.json_fname = self.json_fname + each_val
                     else:
-                        if len(each_val) != 0:
-                            if each_val[0] == "=":
-                                configs.append(key + each_val)
+                        if len(each_val) != 0 :
+                            if each_val[0] == '=':
+                                configs.append(key+each_val)
                             else:
                                 configs.append(key)
                                 configs.append(each_val)
 
         return configs
 
-    def get_main_parameters(
-        self,
-        topology_name="resnet50",
-        mode="infer",
-        batch_size=1,
-        has_ipex=False,
-        precision="fp32",
-        warmup_iter=30,
-        log_path="",
-    ):
+    def get_main_parameters(self, topology_name = "resnet50", mode = "infer", batch_size=1,
+            has_ipex = False, precision="fp32", warmup_iter=30, log_path = ""):
         main_args = []
-        main_args.append("--batch-size")
+        main_args.append('--batch-size')
         main_args.append(str(batch_size))
         main_args.append("--arch")
         main_args.append(topology_name)
@@ -265,68 +246,59 @@ class ConfigFile:
         main_args.append("--jit")
         main_args.append("--warmup-iterations")
         main_args.append(str(warmup_iter))
-        if log_path != "":
-            main_args.append("--log-path=" + log_path)
+        if log_path !="":
+            main_args.append("--log-path="+log_path)
 
-        return main_args
+        return main_args 
 
     def get_launch_parameters(
-        self,
-        configvals,
-        thread_number=1,
-        socket_number=1,
-        num_inter_threads=0,
-        num_intra_threads=0,
-        accuracy_only=False,
-    ):
+            self, configvals, thread_number=1,
+            socket_number=1, num_inter_threads=0, num_intra_threads=0, accuracy_only=False):
         benchmark_argvs = []
         benchmark_argvs = benchmark_argvs + configvals
 
-        benchmark_argvs.append("--nnodes=" + str(num_inter_threads))
-        benchmark_argvs.append("--node_rank=" + str(socket_number))
-        benchmark_argvs.append("--nproc_per_node=" + str(num_intra_threads))
-        benchmark_argvs.append("--use_env")
+        benchmark_argvs.append('--nnodes=' + str(num_inter_threads))
+        benchmark_argvs.append('--node_rank=' + str(socket_number))
+        benchmark_argvs.append('--nproc_per_node=' + str(num_intra_threads))
+        benchmark_argvs.append('--use_env')
 
         return benchmark_argvs
-
-    def uncompress_file(self, filepath, pretrainfd="pretrained", current_path="./"):
+   
+    def uncompress_file(self, filepath, pretrainfd='pretrained', current_path='./'):
         import shutil
-
         uncompress_path = filepath
         full_filename = filepath.split(os.sep)[-1]
 
-        file_ext = full_filename.split(".")[-1]
-        filename = full_filename.split(".")[0]
-        cmd = ""
-        if file_ext == "zip":
+        file_ext = full_filename.split('.')[-1]
+        filename = full_filename.split('.')[0]
+        cmd = ''
+        if file_ext == 'zip':
             cmd = "unzip " + filepath
-        elif file_ext == "gz":
+        elif file_ext == 'gz':
             cmd = "tar -xzvf  " + filepath
-        if cmd != "":
+        if cmd != '':
             os.system(cmd)
             if os.path.exists(pretrainfd + os.sep + filename) is False:
                 shutil.move(filename, pretrainfd)
-            uncompress_path = filepath.split(".")[0]
+            uncompress_path = filepath.split('.')[0]
 
         return uncompress_path
 
-    def download_dataset(self, datasetfd="dataset", current_path="./"):
+    def download_dataset(self, datasetfd='dataset', current_path='./'):
         import shutil
-
         cmd = self.data_download
-        filename = self.wget.split("/")[-1]
+        filename = self.wget.split('/')[-1]
         dataset_path = current_path + os.sep + datasetfd
         if os.path.exists(dataset_path) is True:
             return dataset_path
         os.system(cmd)
-        print("Downloaded the model in:", dataset_path)
+        print('Downloaded the model in:', dataset_path)
         return dataset_path
 
-    def download_pretrained_model(self, pretrainfd="pretrained", current_path="./"):
+    def download_pretrained_model(self, pretrainfd='pretrained', current_path='./'):
         import shutil
-
         cmd = "wget " + self.wget
-        filename = self.wget.split("/")[-1]
+        filename = self.wget.split('/')[-1]
         pretrain_model_path = current_path + os.sep + pretrainfd + os.sep + filename
         if os.path.exists(pretrain_model_path) is True:
             return pretrain_model_path
@@ -335,11 +307,12 @@ class ConfigFile:
             os.mkdir(pretrainfd)
         if os.path.exists(pretrainfd + os.sep + filename) is False:
             shutil.move(filename, pretrainfd)
-        print("Downloaded the model in:", pretrain_model_path)
+        print('Downloaded the model in:', pretrain_model_path)
         return pretrain_model_path
 
 
 class PerfPresenter:
+
     def __init__(self, showAbsNumber=False):
         self.showAbsNumber = showAbsNumber
         pass
@@ -349,26 +322,22 @@ class PerfPresenter:
         for rect in rects:
             height = rect.get_height()
             ax.annotate(
-                "{}".format(height),
+                '{}'.format(height),
                 xy=(rect.get_x() + rect.get_width() / 2, height),
-                xytext=(0, 3),
-                textcoords="offset points",
-                ha="center",
-                va="bottom",
-            )
+                xytext=(0, 3), textcoords='offset points',
+                ha='center', va='bottom')
 
     def draw_perf_diag(self, topo_name, a_means, b_means, a_label, b_label):
         import matplotlib.pyplot as plt
         import numpy as np
-
         labels = [topo_name]
         x = np.arange(len(labels))
         width = 0.35
         fig, ax = plt.subplots()
         rects1 = ax.bar(x - width / 2, a_means, width, label=a_label)
         rects2 = ax.bar(x + width / 2, b_means, width, label=b_label)
-        ax.set_ylabel("Throughput")
-        ax.set_title("stock Torch vs Intel Torch")
+        ax.set_ylabel('Throughput')
+        ax.set_title('stock Torch vs Intel Torch')
         ax.set_xticks(x)
         ax.set_xticklabels(labels)
         ax.legend()
@@ -380,7 +349,6 @@ class PerfPresenter:
     def draw_perf_ratio_diag(self, topo_name, a_means, b_means, a_label, b_label):
         import matplotlib.pyplot as plt
         import numpy as np
-
         labels = [topo_name]
         a_ratio = 1
         b_ratio = float(b_means / a_means)
@@ -389,8 +357,8 @@ class PerfPresenter:
         fig, ax = plt.subplots()
         rects1 = ax.bar(x - width / 2, a_ratio, width, label=a_label)
         rects2 = ax.bar(x + width / 2, b_ratio, width, label=b_label)
-        ax.set_ylabel("Throughput Speedup ")
-        ax.set_title("stock Torch vs Intel Torch")
+        ax.set_ylabel('Throughput Speedup ')
+        ax.set_title('stock Torch vs Intel Torch')
         ax.set_xticks(x)
         ax.set_xticklabels(labels)
         ax.legend()
@@ -402,62 +370,55 @@ class PerfPresenter:
     def create_csv_logfile(self, Type, filename):
         import csv
         import os.path
-
-        if Type == "training":
-            fnames = ["ipex", "elapsed_time"]
+        if Type == 'training':
+            fnames = ['ipex', 'elapsed_time']
         else:
-            fnames = ["ipex", "elapsed_time", "throughput", "accuracy"]
+            fnames = ['ipex', 'elapsed_time', 'throughput', 'accuracy']
         if os.path.isfile(filename):
-            print("file exists")
+            print('file exists')
         else:
-            f = open(filename, "w")
+            f = open(filename, 'w')
             with f:
                 writer = csv.DictWriter(f, fieldnames=fnames)
                 writer.writeheader()
 
     def get_diff_from_csv_filenames(self, x, y):
-        x_split = x.split("_")
-        y_split = y.split("_")
+        x_split=x.split('_')
+        y_split=y.split('_')
         if len(x_split) != len(y_split):
             print("ERROR! can't two files have different formats")
-            return "", ""
+            return '',''
         for i in range(len(x_split)):
-            if x_split[i] != y_split[i]:
+            if x_split[i] !=  y_split[i]:
                 break
         return x_split[i], y_split[i]
 
-    def log_infer_perfcsv(
-        self, elapsed_time, throughput, accuracy, filename, ipex_enabled
-    ):
+    def log_infer_perfcsv(self, elapsed_time, throughput, accuracy ,filename, ipex_enabled):
         import csv
-
-        f = open(filename, "a")
+        f = open(filename, 'a')
         with f:
-            fnames = ["ipex", "elapsed_time", "throughput", "accuracy"]
+            fnames = ['ipex', 'elapsed_time', 'throughput', 'accuracy']
             writer = csv.DictWriter(f, fieldnames=fnames)
             writer.writerow(
-                {
-                    "ipex": ipex_enabled,
-                    "elapsed_time": elapsed_time,
-                    "throughput": throughput,
-                    "accuracy": accuracy,
-                }
-            )
+                {'ipex': ipex_enabled,
+                 'elapsed_time': elapsed_time,
+                 'throughput': throughput,
+                 'accuracy': accuracy})
 
     def log_train_perfcsv(self, elapsed_time, filename, ipex_enabled):
         import csv
-
-        f = open(filename, "a")
+        f = open(filename, 'a')
         with f:
-            fnames = ["ipex", "elapsed_time"]
+            fnames = ['ipex', 'elapsed_time']
             writer = csv.DictWriter(f, fieldnames=fnames)
-            writer.writerow({"ipex": ipex_enabled, "elapsed_time": elapsed_time})
+            writer.writerow(
+                {'ipex': ipex_enabled,
+                 'elapsed_time': elapsed_time})
 
     def read_number_from_csv(self, filepath, framename):
         import csv
         import statistics
-
-        f = open(filepath, "r")
+        f = open(filepath, 'r')
         col1 = []
         col2 = []
         mean1 = 0
@@ -467,7 +428,7 @@ class PerfPresenter:
         with f:
             reader = csv.DictReader(f)
             for row in reader:
-                if row["ipex"] == "True":
+                if row['ipex'] == 'True':
                     col1.append(float(row[framename]))
                 else:
                     col2.append(float(row[framename]))
@@ -482,24 +443,17 @@ class PerfPresenter:
             stdev2 = statistics.stdev(col2)
         return (mean1, mean2, len(col1), len(col2), stdev1, stdev2)
 
-    def plot_perf_graph(
-        self, ylabel, xlabel, stock_number, intel_number, stock_stdev, intel_stdev
-    ):
+    def plot_perf_graph(self, ylabel, xlabel, stock_number, intel_number, stock_stdev, intel_stdev):
         import matplotlib.pyplot as plt
         import numpy as np
-
         labels = [xlabel]
         x = np.arange(len(labels))
         width = 0.35
         fig, ax = plt.subplots()
-        rects1 = ax.bar(
-            x - width / 2, stock_number, width, yerr=stock_stdev, label="stock Torch"
-        )
-        rects2 = ax.bar(
-            x + width / 2, intel_number, width, yerr=intel_stdev, label="intel Torch"
-        )
+        rects1 = ax.bar(x - width / 2, stock_number, width, yerr=stock_stdev, label='stock Torch')
+        rects2 = ax.bar(x + width / 2, intel_number, width, yerr=intel_stdev, label='intel Torch')
         ax.set_ylabel(ylabel)
-        ax.set_title("stock Torch vs Intel Torch")
+        ax.set_title('stock Torch vs Intel Torch')
         ax.set_xticks(x)
         ax.set_xticklabels(labels)
         ax.legend()
@@ -509,32 +463,21 @@ class PerfPresenter:
             for rect in rects:
                 height = rect.get_height()
                 ax.annotate(
-                    "{}".format(height),
+                    '{}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
                     xytext=(0, 3),
-                    textcoords="offset points",
-                    ha="center",
-                    va="bottom",
-                )
+                    textcoords='offset points',
+                    ha='center',
+                    va='bottom')
 
         autolabel(rects1)
         autolabel(rects2)
         fig.tight_layout()
         plt.show()
 
-    def plot_perf_graph_v2(
-        self,
-        ylabel,
-        xlabel,
-        means_list,
-        stddev_list,
-        filepath_list,
-        label_list,
-        title="stock Torch vs Intel Torch",
-    ):
+    def plot_perf_graph_v2(self, ylabel, xlabel, means_list, stddev_list, filepath_list, label_list,title='stock Torch vs Intel Torch'):
         import matplotlib.pyplot as plt
         import numpy as np
-
         labels = [xlabel]
         x = np.arange(len(labels))
         width = 0.35
@@ -546,9 +489,7 @@ class PerfPresenter:
             stddev = stddev_list[i]
             filepath = filepath_list[i]
             label = label_list[i]
-            rects = ax.bar(
-                x - width / 2 + width * i, number, width, yerr=stddev, label=label
-            )
+            rects = ax.bar(x - width / 2 + width*i, number, width, yerr=stddev, label=label )
             rects_list.append(rects)
 
         ax.set_ylabel(ylabel)
@@ -562,13 +503,12 @@ class PerfPresenter:
             for rect in rects:
                 height = rect.get_height()
                 ax.annotate(
-                    "{}".format(height),
+                    '{}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
                     xytext=(0, 3),
-                    textcoords="offset points",
-                    ha="center",
-                    va="bottom",
-                )
+                    textcoords='offset points',
+                    ha='center',
+                    va='bottom')
 
         for i in range(len(rects_list)):
             autolabel(rects_list[i])
@@ -582,52 +522,28 @@ class PerfPresenter:
         intel_means = []
         stock_stdev = []
         intel_stdev = []
-        mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(
-            filepath, framename
-        )
+        mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(filepath, framename)
         stock_means.append(float(mean2))
         intel_means.append(float(mean1))
         stock_stdev.append(float(stdev2))
         intel_stdev.append(float(stdev1))
-        self.plot_perf_graph(
-            y_axis_name, title, stock_means, intel_means, stock_stdev, intel_stdev
-        )
+        self.plot_perf_graph(y_axis_name, title, stock_means, intel_means, stock_stdev, intel_stdev)
 
     def draw_perf_ratio_diag_from_csv(self, filepath, framename, y_axis_name, title):
         stock_ratio_means = [1]
         intel_ratio_means = []
         stock_stdev = []
         intel_stdev = []
-        mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(
-            filepath, framename
-        )
+        mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(filepath, framename)
         if mean1 is 0 or mean2 is 0:
-            print(
-                "ERROR. Users must run the benchmark with both Stock Torch and Intel Torch\n"
-            )
+            print("ERROR. Users must run the benchmark with both Stock Torch and Intel Torch\n")
             return
         intel_ratio_means.append(float(mean1 / mean2))
         stock_stdev.append(float(stdev2 / mean2))
         intel_stdev.append(float(stdev1 / mean1))
-        self.plot_perf_graph(
-            y_axis_name,
-            title,
-            stock_ratio_means,
-            intel_ratio_means,
-            stock_stdev,
-            intel_stdev,
-        )
+        self.plot_perf_graph(y_axis_name, title, stock_ratio_means, intel_ratio_means, stock_stdev, intel_stdev)
 
-    def draw_perf_diag_from_csvs(
-        self,
-        filepath_list,
-        label_list,
-        framename,
-        y_axis_name,
-        x_axis_name,
-        title,
-        analyze_mkl=True,
-    ):
+    def draw_perf_diag_from_csvs(self, filepath_list,label_list ,framename, y_axis_name, x_axis_name, title, analyze_mkl=True):
         if self.showAbsNumber is False:
             return
         means_list = []
@@ -635,9 +551,7 @@ class PerfPresenter:
         for filepath in filepath_list:
             means = []
             stdev = []
-            mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(
-                filepath, framename
-            )
+            mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(filepath, framename)
             if analyze_mkl == True:
                 means.append(float(mean1))
                 stdev.append(float(stdev1))
@@ -646,26 +560,9 @@ class PerfPresenter:
                 stdev.append(float(stdev2))
             means_list.append(means)
             stddev_list.append(stdev)
-        self.plot_perf_graph_v2(
-            y_axis_name,
-            x_axis_name,
-            means_list,
-            stddev_list,
-            filepath_list,
-            label_list,
-            title=title,
-        )
+        self.plot_perf_graph_v2(y_axis_name, x_axis_name, means_list, stddev_list, filepath_list, label_list,title=title)
 
-    def draw_perf_ratio_diag_from_csvs(
-        self,
-        filepath_list,
-        label_list,
-        framename,
-        y_axis_name,
-        x_axis_name,
-        title,
-        analyze_mkl=True,
-    ):
+    def draw_perf_ratio_diag_from_csvs(self, filepath_list,label_list ,framename, y_axis_name, x_axis_name, title, analyze_mkl=True):
         means_list = []
         stddev_list = []
         dividend = 0
@@ -674,9 +571,7 @@ class PerfPresenter:
             stdev = []
             ratio_means = []
             ratio_stddev = []
-            mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(
-                filepath, framename
-            )
+            mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(filepath, framename)
             if analyze_mkl == True:
                 means.append(float(mean1))
                 stdev.append(0)
@@ -691,61 +586,53 @@ class PerfPresenter:
                 ratio_means.append(float(mean2 / dividend))
             means_list.append(ratio_means)
             stddev_list.append(stdev)
-        self.plot_perf_graph_v2(
-            y_axis_name,
-            x_axis_name,
-            means_list,
-            stddev_list,
-            filepath_list,
-            label_list,
-            title=title,
-        )
+        self.plot_perf_graph_v2(y_axis_name, x_axis_name, means_list, stddev_list, filepath_list, label_list,title=title)
 
     def parse_stdout(self, output, keyword):
         output = str(output)
         output = output.split("\n")
-        lines = output[0].split("\\")
+        lines = output[0].split('\\')
         for l in lines:
             if l.find("Throughput") > 0:
                 return l
         return None
 
-    def read_throughput(self, filepath, keyword="Throughput", index=1):
+    def read_throughput(self, filepath, keyword='Throughput', index=1):
         with open(filepath) as (fp):
             line = fp.readline()
             while line:
                 line = fp.readline()
                 if line.find(keyword) != -1:
                     print(line)
-                    number = line.split(" ")[index]
+                    number = line.split(' ')[index]
                     print(number)
                     return number
         return None
 
-    def read_accuracy(self, filepath, keyword="accuracy", index=-2):
-        accuracy = []
+    def read_accuracy(self, filepath, keyword='accuracy', index=-2):
+        accuracy=[]
         with open(filepath) as (fp):
             line = fp.readline()
             while line:
                 line = fp.readline()
                 if line.find(keyword) != -1:
-                    number = line.split(" ")[index]
-                    number = number.strip(",")
-                    number = number.strip("(")
-                    number = number.strip(")")
+                    number = line.split(' ')[index]
+                    number = number.strip(',')
+                    number = number.strip('(')
+                    number = number.strip(')')
                     accuracy.append(float(number))
         return accuracy
 
-    def read_iteration_time(self, filepath, keyword="Iteration", index=-2):
-        iteration = []
+    def read_iteration_time(self, filepath, keyword='Iteration', index=-2):
+        iteration=[]
         with open(filepath) as (fp):
             line = fp.readline()
             while line:
                 line = fp.readline()
                 if line.find(keyword) != -1:
-                    number = line.split(" ")[index]
-                    number = number.strip(",")
-                    number = number.strip("(")
-                    number = number.strip(")")
+                    number = line.split(' ')[index]
+                    number = number.strip(',')
+                    number = number.strip('(')
+                    number = number.strip(')')
                     iteration.append(float(number))
         return iteration

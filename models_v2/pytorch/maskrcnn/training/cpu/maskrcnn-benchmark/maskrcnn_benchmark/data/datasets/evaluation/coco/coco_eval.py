@@ -1,20 +1,19 @@
 import logging
 import tempfile
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -67,9 +66,9 @@ def do_coco_evaluation(
     if "segm" in iou_types:
         logger.info("Preparing segm results")
         coco_results["segm"] = prepare_for_coco_segmentation(predictions, dataset)
-    if "keypoints" in iou_types:
-        logger.info("Preparing keypoints results")
-        coco_results["keypoints"] = prepare_for_coco_keypoint(predictions, dataset)
+    if 'keypoints' in iou_types:
+        logger.info('Preparing keypoints results')
+        coco_results['keypoints'] = prepare_for_coco_keypoint(predictions, dataset)
 
     results = COCOResults(*iou_types)
     logger.info("Evaluating predictions")
@@ -186,33 +185,26 @@ def prepare_for_coco_keypoint(predictions, dataset):
             continue
 
         # TODO replace with get_img_info?
-        image_width = dataset.coco.imgs[original_id]["width"]
-        image_height = dataset.coco.imgs[original_id]["height"]
+        image_width = dataset.coco.imgs[original_id]['width']
+        image_height = dataset.coco.imgs[original_id]['height']
         prediction = prediction.resize((image_width, image_height))
-        prediction = prediction.convert("xywh")
+        prediction = prediction.convert('xywh')
 
         boxes = prediction.bbox.tolist()
-        scores = prediction.get_field("scores").tolist()
-        labels = prediction.get_field("labels").tolist()
-        keypoints = prediction.get_field("keypoints")
+        scores = prediction.get_field('scores').tolist()
+        labels = prediction.get_field('labels').tolist()
+        keypoints = prediction.get_field('keypoints')
         keypoints = keypoints.resize((image_width, image_height))
         keypoints = keypoints.keypoints.view(keypoints.keypoints.shape[0], -1).tolist()
 
         mapped_labels = [dataset.contiguous_category_id_to_json_id[i] for i in labels]
 
-        coco_results.extend(
-            [
-                {
-                    "image_id": original_id,
-                    "category_id": mapped_labels[k],
-                    "keypoints": keypoint,
-                    "score": scores[k],
-                }
-                for k, keypoint in enumerate(keypoints)
-            ]
-        )
+        coco_results.extend([{
+            'image_id': original_id,
+            'category_id': mapped_labels[k],
+            'keypoints': keypoint,
+            'score': scores[k]} for k, keypoint in enumerate(keypoints)])
     return coco_results
-
 
 # inspired from Detectron
 def evaluate_box_proposals(
@@ -235,14 +227,14 @@ def evaluate_box_proposals(
         "512-inf": 7,
     }
     area_ranges = [
-        [0**2, 1e5**2],  # all
-        [0**2, 32**2],  # small
-        [32**2, 96**2],  # medium
-        [96**2, 1e5**2],  # large
-        [96**2, 128**2],  # 96-128
-        [128**2, 256**2],  # 128-256
-        [256**2, 512**2],  # 256-512
-        [512**2, 1e5**2],
+        [0 ** 2, 1e5 ** 2],  # all
+        [0 ** 2, 32 ** 2],  # small
+        [32 ** 2, 96 ** 2],  # medium
+        [96 ** 2, 1e5 ** 2],  # large
+        [96 ** 2, 128 ** 2],  # 96-128
+        [128 ** 2, 256 ** 2],  # 128-256
+        [256 ** 2, 512 ** 2],  # 256-512
+        [512 ** 2, 1e5 ** 2],
     ]  # 512-inf
     assert area in areas, "Unknown area range: {}".format(area)
     area_range = area_ranges[areas[area]]
@@ -393,13 +385,13 @@ class COCOResults(object):
             res[metric] = s[idx]
 
     def __repr__(self):
-        results = "\n"
+        results = '\n'
         for task, metrics in self.results.items():
-            results += "Task: {}\n".format(task)
+            results += 'Task: {}\n'.format(task)
             metric_names = metrics.keys()
-            metric_vals = ["{:.4f}".format(v) for v in metrics.values()]
-            results += ", ".join(metric_names) + "\n"
-            results += ", ".join(metric_vals) + "\n"
+            metric_vals = ['{:.4f}'.format(v) for v in metrics.values()]
+            results += (', '.join(metric_names) + '\n')
+            results += (', '.join(metric_vals) + '\n')
             print("Accuracy: ", task, "AP: ", metric_vals[0])
         return results
 

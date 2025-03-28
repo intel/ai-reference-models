@@ -1,20 +1,19 @@
 import cv2
 import copy
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -59,15 +58,15 @@ class BinaryMaskList(object):
 
     def __init__(self, masks, size):
         """
-        Arguments:
-            masks: Either torch.tensor of [num_instances, H, W]
-                or list of torch.tensors of [H, W] with num_instances elems,
-                or RLE (Run Length Encoding) - interpreted as list of dicts,
-                or BinaryMaskList.
-            size: absolute image size, width first
+            Arguments:
+                masks: Either torch.tensor of [num_instances, H, W]
+                    or list of torch.tensors of [H, W] with num_instances elems,
+                    or RLE (Run Length Encoding) - interpreted as list of dicts,
+                    or BinaryMaskList.
+                size: absolute image size, width first
 
-        After initialization, a hard copy will be made, to leave the
-        initializing source data intact.
+            After initialization, a hard copy will be made, to leave the
+            initializing source data intact.
         """
 
         assert isinstance(size, (list, tuple))
@@ -82,7 +81,7 @@ class BinaryMaskList(object):
             elif isinstance(masks[0], torch.Tensor):
                 masks = torch.stack(masks, dim=0).clone()
             elif isinstance(masks[0], dict) and "counts" in masks[0]:
-                if isinstance(masks[0]["counts"], (list, tuple)):
+                if(isinstance(masks[0]["counts"], (list, tuple))):
                     masks = mask_utils.frPyObjects(masks, size[1], size[0])
                 # RLE interpretation
                 rle_sizes = [tuple(inst["size"]) for inst in masks]
@@ -109,14 +108,16 @@ class BinaryMaskList(object):
                     )[0].type_as(masks)
             else:
                 RuntimeError(
-                    "Type of `masks[0]` could not be interpreted: %s" % type(masks)
+                    "Type of `masks[0]` could not be interpreted: %s"
+                    % type(masks)
                 )
         elif isinstance(masks, BinaryMaskList):
             # just hard copy the BinaryMaskList instance's underlying data
             masks = masks.masks.clone()
         else:
             RuntimeError(
-                "Type of `masks` argument could not be interpreted:%s" % type(masks)
+                "Type of `masks` argument could not be interpreted:%s"
+                % type(masks)
             )
 
         if len(masks.shape) == 2:
@@ -199,7 +200,9 @@ class BinaryMaskList(object):
             reshaped_contour = []
             for entity in contour:
                 assert len(entity.shape) == 3
-                assert entity.shape[1] == 1, "Hierarchical contours are not allowed"
+                assert (
+                    entity.shape[1] == 1
+                ), "Hierarchical contours are not allowed"
                 reshaped_contour.append(entity.reshape(-1).tolist())
             contours.append(reshaped_contour)
         return contours
@@ -232,10 +235,10 @@ class PolygonInstance(object):
 
     def __init__(self, polygons, size):
         """
-        Arguments:
-            a list of lists of numbers.
-            The first level refers to all the polygons that compose the
-            object, and the second level to the polygon coordinates.
+            Arguments:
+                a list of lists of numbers.
+                The first level refers to all the polygons that compose the
+                object, and the second level to the polygon coordinates.
         """
         if isinstance(polygons, (list, tuple)):
             valid_polygons = []
@@ -250,7 +253,8 @@ class PolygonInstance(object):
 
         else:
             RuntimeError(
-                "Type of argument `polygons` is not allowed:%s" % (type(polygons))
+                "Type of argument `polygons` is not allowed:%s"
+                % (type(polygons))
             )
 
         """ This crashes the training way too many times...
@@ -322,7 +326,9 @@ class PolygonInstance(object):
             assert isinstance(size, (int, float))
             size = size, size
 
-        ratios = tuple(float(s) / float(s_orig) for s, s_orig in zip(size, self.size))
+        ratios = tuple(
+            float(s) / float(s_orig) for s, s_orig in zip(size, self.size)
+        )
 
         if ratios[0] == ratios[1]:
             ratio = ratios[0]
@@ -393,7 +399,9 @@ class PolygonList(object):
                     type(polygons[0][0])
                 )
             else:
-                assert isinstance(polygons[0], PolygonInstance), str(type(polygons[0]))
+                assert isinstance(polygons[0], PolygonInstance), str(
+                    type(polygons[0])
+                )
 
         elif isinstance(polygons, PolygonList):
             size = polygons.size
@@ -401,7 +409,8 @@ class PolygonList(object):
 
         else:
             RuntimeError(
-                "Type of argument `polygons` is not allowed:%s" % (type(polygons))
+                "Type of argument `polygons` is not allowed:%s"
+                % (type(polygons))
             )
 
         assert isinstance(size, (list, tuple)), str(type(size))
@@ -448,7 +457,9 @@ class PolygonList(object):
 
     def convert_to_binarymask(self):
         if len(self) > 0:
-            masks = torch.stack([p.convert_to_binarymask() for p in self.polygons])
+            masks = torch.stack(
+                [p.convert_to_binarymask() for p in self.polygons]
+            )
         else:
             size = self.size
             masks = torch.empty([0, size[1], size[0]], dtype=torch.bool)
@@ -486,6 +497,7 @@ class PolygonList(object):
 
 
 class SegmentationMask(object):
+
     """
     This class stores the segmentations for all objects in the image.
     It wraps BinaryMaskList and PolygonList conveniently.

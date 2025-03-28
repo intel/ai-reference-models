@@ -1,20 +1,19 @@
 import torch
 from torch.autograd import Function
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,6 +27,7 @@ from maskrcnn_benchmark import _C
 
 
 class DeformRoIPoolingFunction(Function):
+
     @staticmethod
     def forward(
         ctx,
@@ -41,7 +41,7 @@ class DeformRoIPoolingFunction(Function):
         group_size=1,
         part_size=None,
         sample_per_part=4,
-        trans_std=0.0,
+        trans_std=.0
     ):
         ctx.spatial_scale = spatial_scale
         ctx.out_size = out_size
@@ -72,7 +72,7 @@ class DeformRoIPoolingFunction(Function):
             ctx.out_size,
             ctx.part_size,
             ctx.sample_per_part,
-            ctx.trans_std,
+            ctx.trans_std
         )
 
         if data.requires_grad or rois.requires_grad or offset.requires_grad:
@@ -108,21 +108,9 @@ class DeformRoIPoolingFunction(Function):
             ctx.out_size,
             ctx.part_size,
             ctx.sample_per_part,
-            ctx.trans_std,
+            ctx.trans_std
         )
-        return (
-            grad_input,
-            grad_rois,
-            grad_offset,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
+        return (grad_input, grad_rois, grad_offset, None, None, None, None, None, None, None, None)
 
 
 deform_roi_pooling = DeformRoIPoolingFunction.apply

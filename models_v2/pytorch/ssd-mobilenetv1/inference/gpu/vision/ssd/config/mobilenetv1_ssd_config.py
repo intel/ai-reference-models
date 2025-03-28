@@ -39,7 +39,7 @@ specs = [
     SSDSpec(5, 64, SSDBoxSizes(150, 195), [2, 3]),
     SSDSpec(3, 100, SSDBoxSizes(195, 240), [2, 3]),
     SSDSpec(2, 150, SSDBoxSizes(240, 285), [2, 3]),
-    SSDSpec(1, 300, SSDBoxSizes(285, 330), [2, 3]),
+    SSDSpec(1, 300, SSDBoxSizes(285, 330), [2, 3])
 ]
 
 

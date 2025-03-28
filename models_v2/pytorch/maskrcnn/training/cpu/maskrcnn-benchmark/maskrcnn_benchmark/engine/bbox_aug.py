@@ -1,20 +1,19 @@
 import torch
 import torchvision.transforms as TT
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,9 +26,7 @@ from maskrcnn_benchmark.config import cfg
 from maskrcnn_benchmark.data import transforms as T
 from maskrcnn_benchmark.structures.image_list import to_image_list
 from maskrcnn_benchmark.structures.bounding_box import BoxList
-from maskrcnn_benchmark.modeling.roi_heads.box_head.inference import (
-    make_roi_box_post_processor,
-)
+from maskrcnn_benchmark.modeling.roi_heads.box_head.inference import make_roi_box_post_processor
 
 
 def im_detect_bbox_aug(model, images, device):
@@ -63,7 +60,9 @@ def im_detect_bbox_aug(model, images, device):
     # Compute detections at different scales
     for scale in cfg.TEST.BBOX_AUG.SCALES:
         max_size = cfg.TEST.BBOX_AUG.MAX_SIZE
-        boxlists_scl = im_detect_bbox_scale(model, images, scale, max_size, device)
+        boxlists_scl = im_detect_bbox_scale(
+            model, images, scale, max_size, device
+        )
         add_preds_t(boxlists_scl)
 
         if cfg.TEST.BBOX_AUG.SCALE_H_FLIP:
@@ -76,18 +75,16 @@ def im_detect_bbox_aug(model, images, device):
     boxlists = []
     for i, boxlist_ts in enumerate(boxlists_ts):
         bbox = torch.cat([boxlist_t.bbox for boxlist_t in boxlist_ts])
-        scores = torch.cat([boxlist_t.get_field("scores") for boxlist_t in boxlist_ts])
+        scores = torch.cat([boxlist_t.get_field('scores') for boxlist_t in boxlist_ts])
         boxlist = BoxList(bbox, boxlist_ts[0].size, boxlist_ts[0].mode)
-        boxlist.add_field("scores", scores)
+        boxlist.add_field('scores', scores)
         boxlists.append(boxlist)
 
     # Apply NMS and limit the final detections
     results = []
     post_processor = make_roi_box_post_processor(cfg)
     for boxlist in boxlists:
-        results.append(
-            post_processor.filter_results(boxlist, cfg.MODEL.ROI_BOX_HEAD.NUM_CLASSES)
-        )
+        results.append(post_processor.filter_results(boxlist, cfg.MODEL.ROI_BOX_HEAD.NUM_CLASSES))
 
     return results
 
@@ -96,17 +93,13 @@ def im_detect_bbox(model, images, target_scale, target_max_size, device):
     """
     Performs bbox detection on the original image.
     """
-    transform = TT.Compose(
-        [
-            T.Resize(target_scale, target_max_size),
-            TT.ToTensor(),
-            T.Normalize(
-                mean=cfg.INPUT.PIXEL_MEAN,
-                std=cfg.INPUT.PIXEL_STD,
-                to_bgr255=cfg.INPUT.TO_BGR255,
-            ),
-        ]
-    )
+    transform = TT.Compose([
+        T.Resize(target_scale, target_max_size),
+        TT.ToTensor(),
+        T.Normalize(
+            mean=cfg.INPUT.PIXEL_MEAN, std=cfg.INPUT.PIXEL_STD, to_bgr255=cfg.INPUT.TO_BGR255
+        )
+    ])
     images = [transform(image) for image in images]
     images = to_image_list(images, cfg.DATALOADER.SIZE_DIVISIBILITY)
     return model(images.to(device))
@@ -117,18 +110,14 @@ def im_detect_bbox_hflip(model, images, target_scale, target_max_size, device):
     Performs bbox detection on the horizontally flipped image.
     Function signature is the same as for im_detect_bbox.
     """
-    transform = TT.Compose(
-        [
-            T.Resize(target_scale, target_max_size),
-            TT.RandomHorizontalFlip(1.0),
-            TT.ToTensor(),
-            T.Normalize(
-                mean=cfg.INPUT.PIXEL_MEAN,
-                std=cfg.INPUT.PIXEL_STD,
-                to_bgr255=cfg.INPUT.TO_BGR255,
-            ),
-        ]
-    )
+    transform = TT.Compose([
+        T.Resize(target_scale, target_max_size),
+        TT.RandomHorizontalFlip(1.0),
+        TT.ToTensor(),
+        T.Normalize(
+            mean=cfg.INPUT.PIXEL_MEAN, std=cfg.INPUT.PIXEL_STD, to_bgr255=cfg.INPUT.TO_BGR255
+        )
+    ])
     images = [transform(image) for image in images]
     images = to_image_list(images, cfg.DATALOADER.SIZE_DIVISIBILITY)
     boxlists = model(images.to(device))
@@ -138,19 +127,13 @@ def im_detect_bbox_hflip(model, images, target_scale, target_max_size, device):
     return boxlists_inv
 
 
-def im_detect_bbox_scale(
-    model, images, target_scale, target_max_size, device, hflip=False
-):
+def im_detect_bbox_scale(model, images, target_scale, target_max_size, device, hflip=False):
     """
     Computes bbox detections at the given scale.
     Returns predictions in the scaled image space.
     """
     if hflip:
-        boxlists_scl = im_detect_bbox_hflip(
-            model, images, target_scale, target_max_size, device
-        )
+        boxlists_scl = im_detect_bbox_hflip(model, images, target_scale, target_max_size, device)
     else:
-        boxlists_scl = im_detect_bbox(
-            model, images, target_scale, target_max_size, device
-        )
+        boxlists_scl = im_detect_bbox(model, images, target_scale, target_max_size, device)
     return boxlists_scl

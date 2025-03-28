@@ -1,20 +1,19 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import math
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -81,7 +80,7 @@ class AnchorGenerator(nn.Module):
                 generate_anchors(
                     anchor_stride,
                     size if isinstance(size, (tuple, list)) else (size,),
-                    aspect_ratios,
+                    aspect_ratios
                 ).float()
                 for anchor_stride, size in zip(anchor_strides, sizes)
             ]
@@ -187,7 +186,6 @@ def make_anchor_generator_retinanet(config):
         tuple(new_anchor_sizes), aspect_ratios, anchor_strides, straddle_thresh
     )
     return anchor_generator
-
 
 # Copyright (c) 2017-present, Facebook, Inc.
 #

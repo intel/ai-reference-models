@@ -20,7 +20,6 @@ import os
 import tarfile
 import tqdm
 
-
 def download_file(url, dest_folder, fname, overwrite=False):
     fpath = os.path.join(dest_folder, fname)
     if os.path.isfile(fpath):
@@ -30,18 +29,17 @@ def download_file(url, dest_folder, fname, overwrite=False):
             print("File exists, skipping download.")
             return
 
-    tmp_fpath = fpath + ".tmp"
+    tmp_fpath = fpath + '.tmp'
 
     r = requests.get(url, stream=True)
-    file_size = int(r.headers["Content-Length"])
+    file_size = int(r.headers['Content-Length'])
     chunk_size = 1024 * 1024  # 1MB
     total_chunks = int(file_size / chunk_size)
 
-    with open(tmp_fpath, "wb") as fp:
+    with open(tmp_fpath, 'wb') as fp:
         content_iterator = r.iter_content(chunk_size=chunk_size)
-        chunks = tqdm.tqdm(
-            content_iterator, total=total_chunks, unit="MB", desc=fpath, leave=True
-        )
+        chunks = tqdm.tqdm(content_iterator, total=total_chunks,
+                           unit='MB', desc=fpath, leave=True)
         for chunk in chunks:
             fp.write(chunk)
 
@@ -51,18 +49,18 @@ def download_file(url, dest_folder, fname, overwrite=False):
 def md5_checksum(fpath, target_hash):
     file_hash = hashlib.md5(usedforsecurity=False)
     with open(fpath, "rb") as fp:
-        for chunk in iter(lambda: fp.read(1024 * 1024), b""):
+        for chunk in iter(lambda: fp.read(1024*1024), b""):
             file_hash.update(chunk)
     return file_hash.hexdigest() == target_hash
 
 
 def extract(fpath, dest_folder):
-    if fpath.endswith(".tar.gz"):
-        mode = "r:gz"
-    elif fpath.endswith(".tar"):
-        mode = "r:"
+    if fpath.endswith('.tar.gz'):
+        mode = 'r:gz'
+    elif fpath.endswith('.tar'):
+        mode = 'r:'
     else:
-        raise IOError("fpath has unknown extention: %s" % fpath)
+        raise IOError('fpath has unknown extention: %s' % fpath)
 
     with tarfile.open(fpath, mode) as tar:
         members = tar.getmembers()

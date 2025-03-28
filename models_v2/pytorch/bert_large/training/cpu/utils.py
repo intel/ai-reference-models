@@ -18,30 +18,24 @@ from contextlib import contextmanager
 import logging.config
 import random
 
-
 def convert_weight_names(names):
 
-    extra_params = {
-        "cls/predictions/bias": "cls/predictions/output_bias",
-        "cls/seq_relationship/kernel": "cls/seq_relationship/output_weights",
-        "cls/seq_relationship/bias": "cls/seq_relationship/output_bias",
-    }
+    extra_params = {"cls/predictions/bias": "cls/predictions/output_bias",
+                    "cls/seq_relationship/kernel": "cls/seq_relationship/output_weights",
+                    "cls/seq_relationship/bias": "cls/seq_relationship/output_bias"}
     new_names = []
     for name in names:
 
-        name = (
-            name.replace("layer.", "layer_")
-            .replace(".", "/")
-            .replace("LayerNorm/bias", "LayerNorm/beta")
-            .replace("LayerNorm/weight", "LayerNorm/gamma")
-            .replace("weight", "kernel")
-            .replace("embeddings/kernel", "embeddings")
-        )
+        name = name.replace("layer.", "layer_").replace(
+                ".", "/").replace(
+                        "LayerNorm/bias", "LayerNorm/beta").replace(
+                                "LayerNorm/weight", "LayerNorm/gamma").replace(
+                                        "weight", "kernel").replace(
+                                                "embeddings/kernel", "embeddings")
         if name in extra_params:
             name = extra_params[name]
         new_names.append(name)
-    return new_names
-
+    return  new_names
 
 def generate_seeds(rng, size):
     """
@@ -90,10 +84,10 @@ def setup_seeds(master_seed, epochs, device):
             # master seed is reported only from rank=0 worker, it's to avoid
             # confusion, seeds from rank=0 are later broadcasted to other
             # workers
-            logging.info(f"Using random master seed: {master_seed}")
+            logging.info(f'Using random master seed: {master_seed}')
     else:
         # master seed was specified from command line
-        logging.info(f"Using master seed from command line: {master_seed}")
+        logging.info(f'Using master seed from command line: {master_seed}')
 
     # initialize seeding RNG
     seeding_rng = random.Random(master_seed)
@@ -142,7 +136,7 @@ def get_world_size():
         print("Torch distributed is available.")
     else:
         print("Torch distributed is not available.")
-
+    
     if torch.distributed.is_initialized():
         print("Torch distributed is initialized.")
     else:
@@ -164,9 +158,9 @@ def set_device(cuda, local_rank):
     """
     if cuda:
         torch.cuda.set_device(local_rank)
-        device = torch.device("cuda")
+        device = torch.device('cuda')
     else:
-        device = torch.device("cpu")
+        device = torch.device('cpu')
     return device
 
 
@@ -179,10 +173,8 @@ def sync_workers():
     yield rank
     barrier()
 
-
 def is_main_process():
     return get_rank() == 0
-
 
 def format_step(step):
     if isinstance(step, str):

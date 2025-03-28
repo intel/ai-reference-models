@@ -30,25 +30,25 @@ def plot_curves(history, checkpoint_dir):
     if not history:
         raise FileNotFoundError("The pickle file {} does not exist".format(history))
 
-    acc = history["acc"]
-    val_acc = history["val_acc"]
-    loss = history["loss"]
-    val_loss = history["val_loss"]
+    acc = history['acc']
+    val_acc = history['val_acc']
+    loss = history['loss']
+    val_loss = history['val_loss']
     plt.figure(figsize=(7, 7))
     plt.subplot(2, 1, 1)
-    plt.plot(acc, label="Training Accuracy")
-    plt.plot(val_acc, label="Validation Accuracy")
-    plt.legend(loc="lower right")
-    plt.ylabel("Accuracy")
-    plt.title("Training and Validation Accuracy")
+    plt.plot(acc, label='Training Accuracy')
+    plt.plot(val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.ylabel('Accuracy')
+    plt.title('Training and Validation Accuracy')
 
     plt.subplot(2, 1, 2)
-    plt.plot(loss, label="Training Loss")
-    plt.plot(val_loss, label="Validation Loss")
-    plt.legend(loc="upper right")
-    plt.ylabel("Cross Entropy")
-    plt.title("Training and Validation Loss")
-    plt.xlabel("epoch")
-    if not os.path.exists(os.path.join(checkpoint_dir, "train_val_plot.png")):
+    plt.plot(loss, label='Training Loss')
+    plt.plot(val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.ylabel('Cross Entropy')
+    plt.title('Training and Validation Loss')
+    plt.xlabel('epoch')
+    if not os.path.exists(os.path.join(checkpoint_dir, 'train_val_plot.png')):
         print("Saving plot in checkpoint_dir:", checkpoint_dir)
-        plt.savefig(os.path.join(checkpoint_dir, "train_val_plot.png"))
+        plt.savefig(os.path.join(checkpoint_dir, 'train_val_plot.png'))

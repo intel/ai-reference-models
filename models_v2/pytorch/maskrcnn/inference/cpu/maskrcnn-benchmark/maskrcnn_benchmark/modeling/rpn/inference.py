@@ -1,20 +1,19 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,7 +25,6 @@ import torch
 from maskrcnn_benchmark.modeling.box_coder import BoxCoder
 from maskrcnn_benchmark.structures.bounding_box import BoxList
 from maskrcnn_benchmark.structures.boxlist_ops import cat_boxlist
-
 # from maskrcnn_benchmark.structures.boxlist_ops import boxlist_nms
 from maskrcnn_benchmark.structures.boxlist_ops import remove_small_boxes
 
@@ -34,9 +32,7 @@ from ..utils import cat
 from .utils import permute_and_flatten
 
 import intel_extension_for_pytorch as ipex
-
 rpn_nms = torch.ops.torch_ipex.rpn_nms
-
 
 class RPNPostProcessor(torch.nn.Module):
     """
@@ -148,14 +144,7 @@ class RPNPostProcessor(torch.nn.Module):
         #         score_field="objectness",
         #     )
         #     result.append(boxlist)
-        new_proposal, new_score = rpn_nms(
-            proposals,
-            objectness,
-            image_shapes,
-            self.min_size,
-            self.nms_thresh,
-            self.post_nms_top_n,
-        )
+        new_proposal, new_score = rpn_nms(proposals, objectness, image_shapes, self.min_size, self.nms_thresh, self.post_nms_top_n)
 
         for proposal, score, im_shape in zip(new_proposal, new_score, image_shapes):
             boxlist = BoxList(proposal, im_shape, mode="xyxy")
@@ -198,7 +187,7 @@ class RPNPostProcessor(torch.nn.Module):
         # different behavior during training and during testing:
         # during training, post_nms_top_n is over *all* the proposals combined, while
         # during testing, it is over the proposals for each image
-        # NOTE: it should be per image, and not per batch. However, to be consistent
+        # NOTE: it should be per image, and not per batch. However, to be consistent 
         # with Detectron, the default is per batch (see Issue #672)
         if self.training and self.fpn_post_nms_per_batch:
             objectness = torch.cat(

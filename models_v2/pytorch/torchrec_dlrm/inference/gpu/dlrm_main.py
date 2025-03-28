@@ -38,18 +38,16 @@ from torch import distributed as dist
 from torch.utils.data import DataLoader
 from torchrec import EmbeddingBagCollection
 from torchrec.datasets.criteo import DEFAULT_CAT_NAMES, DEFAULT_INT_NAMES
-
-# from torchrec.distributed import TrainPipelineSparseDist
+#from torchrec.distributed import TrainPipelineSparseDist
 from torchrec.distributed.comm import get_local_size
-
-# from torchrec.distributed.model_parallel import (
+#from torchrec.distributed.model_parallel import (
 #    DistributedModelParallel,
 #    get_default_sharders,
-# )
-# from torchrec.distributed.planner import EmbeddingShardingPlanner, Topology
-# from torchrec.distributed.planner.storage_reservations import (
+#)
+#from torchrec.distributed.planner import EmbeddingShardingPlanner, Topology
+#from torchrec.distributed.planner.storage_reservations import (
 #    HeuristicalStorageReservation,
-# )
+#)
 from dist_models import DIST_DLRM_DCN, replace_embeddingbag_collection
 from torchrec.models.dlrm import DLRM, DLRM_DCN, DLRM_Projection, DLRMTrain
 from torchrec.modules.embedding_configs import EmbeddingBagConfig
@@ -95,7 +93,7 @@ except ImportError:
 TRAIN_PIPELINE_STAGES = 3  # Number of stages in TrainPipelineSparseDist.
 
 n_emb = None
-# local_emb_slice = None
+#local_emb_slice = None
 local_emb_indices = None
 default_embedding_names = None
 idx_name = None
@@ -104,43 +102,17 @@ idx_name = None
 def load_checkoutpoint(args, device):
     checkpoint = None
     if args.checkpoint_floder is not None:
-        if (not os.path.exists(args.checkpoint_floder)) or (
-            not os.path.isdir(args.checkpoint_floder)
-        ):
+        if (not os.path.exists(args.checkpoint_floder)) or (not os.path.isdir(args.checkpoint_floder)):
             logger.error("The checkpoint dir is not exist.")
             exit()
-        if not os.path.exists(
-            args.checkpoint_floder
-            + "/dlrm_training_"
-            + str(dist.get_rank())
-            + "_save.pt"
-        ):
-            logger.warning(
-                "The checkpoint "
-                + args.checkpoint_floder
-                + "/dlrm_training_"
-                + str(dist.get_rank())
-                + "_save.pt"
-                + " doesn't exist. If converge isn't zero step, your behavior will cause exceptions."
-            )
+        if  not os.path.exists(args.checkpoint_floder + '/dlrm_training_' + str(dist.get_rank()) + '_save.pt'):
+            logger.warning("The checkpoint " + args.checkpoint_floder + '/dlrm_training_' + str(dist.get_rank()) + '_save.pt' +  " doesn't exist. If converge isn't zero step, your behavior will cause exceptions.")
         else:
-            print(
-                "load...",
-                args.checkpoint_floder
-                + "/dlrm_training_"
-                + str(dist.get_rank())
-                + "_save.pt",
-                " to ",
-                device,
-            )
-            checkpoint = torch.load(
-                args.checkpoint_floder
-                + "/dlrm_training_"
-                + str(dist.get_rank())
-                + "_save.pt",
-                map_location=torch.device("cpu"),
-            )
+            print('load...', args.checkpoint_floder + '/dlrm_training_' + str(dist.get_rank()) + '_save.pt', ' to ',
+                  device)
+            checkpoint = torch.load(args.checkpoint_floder + '/dlrm_training_' + str(dist.get_rank()) + '_save.pt', map_location=torch.device('cpu'))
     return checkpoint
+
 
 
 class InteractionType(Enum):
@@ -154,7 +126,6 @@ class InteractionType(Enum):
 
 def load_snapshot(model, snapshot_dir):
     from torchsnapshot import Snapshot
-
     snapshot = Snapshot(path=snapshot_dir)
     snapshot.restore(app_state={"model": model})
 
@@ -429,12 +400,11 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="whether use ipex customer op for distributed merged embedding",
     )
     parser.add_argument(
-        "--sharding_plan",
-        help="Sharding plan to use",
-        type=str,
-        choices=["round_robin", "uniform", "auto", "hier_auto", "custom", "max_min"],
-        default="round_robin",
-    )
+    "--sharding_plan",
+    help="Sharding plan to use",
+    type=str,
+    choices=["round_robin", "uniform", "auto", "hier_auto", "custom", "max_min"],
+    default="round_robin",)
     parser.add_argument(
         "--snapshot_dir",
         help="Weight path for dlrm-v2",
@@ -450,15 +420,17 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "--dynamo",
         action="store_true",
         help="Use torch compile for model test",
-        default=False,
+        default=False
     )
+
+
 
     return parser.parse_args(argv)
 
 
 def _evaluate(
     limit_batches: Optional[int],
-    # eval_pipeline: TrainPipelineSparseDist,
+    #eval_pipeline: TrainPipelineSparseDist,
     eval_model,
     eval_dataloader: DataLoader,
     stage: str,
@@ -486,57 +458,31 @@ def _evaluate(
             if args.use_device == "xpu":
                 with torch.no_grad():
                     print(" Use dynamo for compiling")
-                    if (
-                        args.amp_dtype == torch.bfloat16
-                        or args.amp_dtype == torch.float16
-                    ):
-                        with torch.autocast(
-                            device_type="xpu", enabled=args.amp, dtype=args.amp_dtype
-                        ):
-                            eval_model = torch.compile(
-                                eval_model,
-                                backend="inductor",
-                                options={"freezing": True},
-                            )
+                    if args.amp_dtype == torch.bfloat16 or args.amp_dtype == torch.float16:
+                        with torch.autocast(device_type="xpu", enabled=args.amp, dtype=args.amp_dtype):
+                            eval_model = torch.compile(eval_model, backend="inductor", options={"freezing": True} )
                     else:
-                        eval_model = torch.compile(
-                            eval_model, backend="inductor", options={"freezing": True}
-                        )
+                        eval_model = torch.compile(eval_model, backend="inductor", options={"freezing": True} )
 
     def eval_step(model, batch):
         batch_size = batch.dense_features.size(0)
         if args.amp:
-            batch.dense_features = batch.dense_features[
-                ext_dist.get_my_slice(batch_size)
-            ].to(device)
+            batch.dense_features = batch.dense_features[ext_dist.get_my_slice(batch_size)].to(device)
         else:
-            batch.dense_features = (
-                batch.dense_features[ext_dist.get_my_slice(batch_size)]
-                .to(device)
-                .to(args.amp_dtype)
-            )
+            batch.dense_features = batch.dense_features[ext_dist.get_my_slice(batch_size)].to(device).to(args.amp_dtype)
         batch.labels = batch.labels[ext_dist.get_my_slice(batch_size)].to(device)
         if not args.ipex_optimize:
             for k, v in batch.sparse_features.items():
-                batch.sparse_features[k]["values"] = batch.sparse_features[k][
-                    "values"
-                ].to(device)
-                batch.sparse_features[k]["offsets"] = batch.sparse_features[k][
-                    "offsets"
-                ].to(device)
+                batch.sparse_features[k]['values'] = batch.sparse_features[k]['values'].to(device)
+                batch.sparse_features[k]['offsets'] = batch.sparse_features[k]['offsets'].to(device)
 
-        # if args.converge and args.dense and (args.use_device == "xpu"):
+        #if args.converge and args.dense and (args.use_device == "xpu"):
         #    torch.xpu.empty_cache()
         with torch.no_grad():
             if args.amp:
                 if args.use_device == "xpu":
-                    if (
-                        args.amp_dtype == torch.bfloat16
-                        or args.amp_dtype == torch.float16
-                    ):
-                        with torch.autocast(
-                            device_type="xpu", enabled=args.amp, dtype=args.amp_dtype
-                        ):
+                    if args.amp_dtype == torch.bfloat16 or args.amp_dtype == torch.float16:
+                        with torch.autocast(device_type="xpu", enabled=args.amp, dtype=args.amp_dtype):
                             logits = model(batch.dense_features, batch.sparse_features)
                     else:
                         logits = model(batch.dense_features, batch.sparse_features)
@@ -548,16 +494,15 @@ def _evaluate(
                         logits = model(batch.dense_features, batch.sparse_features)
             else:
                 logits = model(batch.dense_features, batch.sparse_features)
-        # if args.converge and args.dense and (args.use_device == "xpu"):
+        #if args.converge and args.dense and (args.use_device == "xpu"):
         #    torch.xpu.empty_cache()
         return logits, batch.labels
-
     # Set eval_pipeline._connected to False to cause the pipeline to refill with new batches as if it were newly created and empty.
-    # eval_pipeline._connected = False
+    #eval_pipeline._connected = False
 
     iterator = itertools.islice(iter(eval_dataloader), limit_batches)
 
-    auroc = metrics.AUROC(compute_on_step=False, task="binary").to(device)
+    auroc = metrics.AUROC(compute_on_step=False, task='binary').to(device)
 
     is_rank_zero = dist.get_rank() == 0
     total_t = 0
@@ -567,10 +512,8 @@ def _evaluate(
             try:
                 batch = next(iterator)
                 if not args.ipex_optimize:
-                    batch.sparse_features = unpack(
-                        batch.sparse_features, default_embedding_names
-                    )
-                # ext_dist.barrier()
+                    batch.sparse_features = unpack(batch.sparse_features, default_embedding_names)
+                #ext_dist.barrier()
                 if args.use_device == "xpu":
                     torch.xpu.synchronize()
                 elif args.use_device == "cuda":
@@ -579,21 +522,15 @@ def _evaluate(
                     pass
                 t1 = time.time()
                 with (
-                    contextlib.nullcontext(None)
-                    if not args.enable_profiling
-                    else (
-                        torch.profiler.profile(
-                            activities=[
-                                torch.profiler.ProfilerActivity.CPU,
-                                torch.profiler.ProfilerActivity.XPU,
-                            ],
-                            record_shapes=False,
-                        )
-                        if args.use_xpu
-                        else torch.profiler.profile(
-                            activities=[torch.profiler.ProfilerActivity.CPU],
-                            record_shapes=False,
-                        )
+                    contextlib.nullcontext(None) if not args.enable_profiling else
+                    torch.profiler.profile(
+                        activities=[torch.profiler.ProfilerActivity.CPU,
+                                    torch.profiler.ProfilerActivity.XPU],
+                        record_shapes=False,
+                    ) if args.use_xpu else
+                    torch.profiler.profile(
+                        activities=[torch.profiler.ProfilerActivity.CPU],
+                        record_shapes=False,
                     )
                 ) as prof:
                     logits, labels = eval_step(eval_model, batch)
@@ -607,34 +544,24 @@ def _evaluate(
                         pass
                     if it > 5 and args.inference_only:
                         total_t += time.time() - t1
-                        logger.info(
-                            f"avg eval time per iter at ITER: {it - 5}, {total_t/(it-5)} s"
-                        )
+                        logger.info(f"avg eval time per iter at ITER: {it - 5}, {total_t/(it-5)} s")
             except StopIteration:
                 break
             if args.enable_profiling and it == 35 and args.inference_only:
                 rank_index = ""
                 if ext_dist.my_size > 1:
                     rank_index = "rank_" + str(dist.get_rank()) + "_"
-                path = "./report/dlrm_inference_" + rank_index + "profiling"
+                path ='./report/dlrm_inference_' + rank_index + 'profiling'
                 if args.use_xpu:
-                    torch.save(
-                        prof.key_averages().table(
-                            sort_by="self_xpu_time_total", row_limit=100000
-                        ),
-                        path + ".pt",
-                    )
-                    prof.export_chrome_trace(path + ".json")
+                    torch.save(prof.key_averages().table(sort_by="self_xpu_time_total", row_limit=100000), \
+                        path + '.pt')
+                    prof.export_chrome_trace(path + '.json')
                     # Cannot sort by id when using kineto
                     # torch.save(prof.table(sort_by="id", row_limit=100000), path + '_detail.pt')
                 elif args.use_device == "cuda":
-                    torch.save(
-                        prof.key_averages().table(
-                            sort_by="self_cuda_time_total", row_limit=100000
-                        ),
-                        path + ".pt",
-                    )
-                    prof.export_chrome_trace(path + ".json")
+                    torch.save(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=100000), \
+                        path + '.pt')
+                    prof.export_chrome_trace(path + '.json')
                 else:
                     pass
             it += 1
@@ -647,7 +574,6 @@ def _evaluate(
         print(f"AUROC over {stage} set: {auroc_result}.")
         print(f"Number of {stage} samples: {num_samples}")
     return auroc_result
-
 
 def _train(
     train_model,
@@ -683,40 +609,25 @@ def _train(
     """
     train_model.train()
     global n_emb, local_emb_indices, default_embedding_names, idx_name
-
     def train_step(model, opt, next_batch):
         batch_size = next_batch.dense_features.size(0)
         opt.zero_grad(set_to_none=True)
         if args.amp:
-            next_batch.dense_features = next_batch.dense_features[
-                ext_dist.get_my_slice(batch_size)
-            ].to(device)
+            next_batch.dense_features = next_batch.dense_features[ext_dist.get_my_slice(batch_size)].to(device)
         else:
-            next_batch.dense_features = (
-                next_batch.dense_features[ext_dist.get_my_slice(batch_size)]
-                .to(device)
-                .to(args.amp_dtype)
-            )
-        next_batch.labels = next_batch.labels[ext_dist.get_my_slice(batch_size)].to(
-            device
-        )
+            next_batch.dense_features = next_batch.dense_features[ext_dist.get_my_slice(batch_size)].to(device).to(args.amp_dtype)
+        next_batch.labels = next_batch.labels[ext_dist.get_my_slice(batch_size)].to(device)
 
         if not args.ipex_optimize:
             for k, v in next_batch.sparse_features.items():
-                next_batch.sparse_features[k]["values"] = next_batch.sparse_features[k][
-                    "values"
-                ].to(device)
-                next_batch.sparse_features[k]["offsets"] = next_batch.sparse_features[
-                    k
-                ]["offsets"].to(device)
-        # if args.converge and args.dense and (args.use_device == "xpu"):
+                next_batch.sparse_features[k]['values'] = next_batch.sparse_features[k]['values'].to(device)
+                next_batch.sparse_features[k]['offsets'] = next_batch.sparse_features[k]['offsets'].to(device)
+        #if args.converge and args.dense and (args.use_device == "xpu"):
         #    torch.xpu.empty_cache()
         if args.amp:
             if args.use_device == "xpu":
                 if args.amp_dtype == torch.bfloat16 or args.amp_dtype == torch.float16:
-                    with torch.autocast(
-                        device_type="xpu", enabled=args.amp, dtype=args.amp_dtype
-                    ):
+                    with torch.autocast(device_type="xpu", enabled=args.amp, dtype=args.amp_dtype):
                         losses, _ = model(next_batch)
                         loss = torch.sum(losses, dim=0)
                 else:
@@ -734,11 +645,10 @@ def _train(
             losses, _ = model(next_batch)
             loss = torch.sum(losses, dim=0)
 
-        # if args.converge and args.dense and (args.use_device == "xpu"):
+        #if args.converge and args.dense and (args.use_device == "xpu"):
         #    torch.xpu.empty_cache()
         loss.backward()
         opt.step()
-
     start_item = 0
     if args.converge:
         start_item = args.step
@@ -754,10 +664,8 @@ def _train(
                     print(f"lr: {it} {i} {g['lr']:.6f}")
             next_batch = next(iterator)
             if not args.ipex_optimize:
-                next_batch.sparse_features = unpack(
-                    next_batch.sparse_features, default_embedding_names
-                )
-            # ext_dist.barrier()
+                next_batch.sparse_features = unpack(next_batch.sparse_features, default_embedding_names)
+            #ext_dist.barrier()
             if args.use_device == "xpu":
                 torch.xpu.synchronize()
             elif args.use_device == "cuda":
@@ -766,21 +674,15 @@ def _train(
                 pass
             t1 = time.time()
             with (
-                contextlib.nullcontext(None)
-                if not args.enable_profiling
-                else (
-                    torch.profiler.profile(
-                        activities=[
-                            torch.profiler.ProfilerActivity.CPU,
-                            torch.profiler.ProfilerActivity.XPU,
-                        ],
-                        record_shapes=False,
-                    )
-                    if args.use_xpu
-                    else torch.profiler.profile(
-                        activities=[torch.profiler.ProfilerActivity.CPU],
-                        record_shapes=False,
-                    )
+                contextlib.nullcontext(None) if not args.enable_profiling else
+                torch.profiler.profile(
+                    activities=[torch.profiler.ProfilerActivity.CPU,
+                                torch.profiler.ProfilerActivity.XPU],
+                    record_shapes=False,
+                ) if args.use_xpu else
+                torch.profiler.profile(
+                    activities=[torch.profiler.ProfilerActivity.CPU],
+                    record_shapes=False,
                 )
             ) as prof:
                 train_step(train_model, train_optimizer, next_batch)
@@ -793,41 +695,27 @@ def _train(
 
                 if it > 5:
                     total_t += time.time() - t1
-                    # if log_freq != 0 and it % log_freq == 0:
-                    logger.info(
-                        f"avg training time per iter at ITER: {it - 5}, {total_t/(it - 5)} s"
-                    )
+                    #if log_freq != 0 and it % log_freq == 0:
+                    logger.info(f"avg training time per iter at ITER: {it - 5}, {total_t/(it - 5)} s")
             if args.enable_profiling and it == 35:
                 rank_index = ""
                 if ext_dist.my_size > 1:
                     rank_index = "rank_" + str(dist.get_rank()) + "_"
-                path = "./report/dlrm_training_" + rank_index + "profiling"
+                path ='./report/dlrm_training_' + rank_index + 'profiling'
                 if args.use_device == "xpu":
-                    torch.save(
-                        prof.key_averages().table(
-                            sort_by="self_xpu_time_total", row_limit=100000
-                        ),
-                        path + ".pt",
-                    )
-                    prof.export_chrome_trace(path + ".json")
+                    torch.save(prof.key_averages().table(sort_by="self_xpu_time_total", row_limit=100000), \
+                        path + '.pt')
+                    prof.export_chrome_trace(path + '.json')
                     # Cannot sort by id when using kineto
                     # torch.save(prof.table(sort_by="id", row_limit=100000), path + '_detail.pt')
                 elif args.use_device == "cuda":
-                    torch.save(
-                        prof.key_averages().table(
-                            sort_by="self_cuda_time_total", row_limit=100000
-                        ),
-                        path + ".pt",
-                    )
-                    prof.export_chrome_trace(path + ".json")
+                    torch.save(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=100000), \
+                        path + '.pt')
+                    prof.export_chrome_trace(path + '.json')
                 else:
-                    torch.save(
-                        prof.key_averages().table(
-                            sort_by="self_cpu_time_total", row_limit=100000
-                        ),
-                        path + ".pt",
-                    )
-                    prof.export_chrome_trace(path + ".json")
+                    torch.save(prof.key_averages().table(sort_by="self_cpu_time_total", row_limit=100000), \
+                        path + '.pt')
+                    prof.export_chrome_trace(path + '.json')
                     pass
             lr_scheduler.step()
 
@@ -837,33 +725,27 @@ def _train(
                     train_model.model,
                     val_dataloader,
                     "val",
-                    log_freq,
-                    device,
-                    args,
+                    log_freq, 
+                    device, 
+                    args
                 )
                 if is_rank_zero:
                     logger.info(f"The val auc = {auroc_result}")
                 train_model.train()
 
-            if args.converge and it % args.converge_freq == 0:
+            if args.converge and it  % args.converge_freq == 0:
                 model_state_dict = {}
                 for k, v in train_model.state_dict().items():
                     k_split = k.split("module")
                     k_str = k_split[0][:-1] + k_split[1] if len(k_split) == 2 else k
                     model_state_dict[k_str] = v
-                torch.save(
-                    {
-                        "model": model_state_dict,
-                        "optimizer": train_optimizer.state_dict(),
-                        "lr_scheduler": lr_scheduler.state_dict(),
-                        "epoch": epoch,
-                        "step": it,
-                    },
-                    args.checkpoint_floder
-                    + "/dlrm_training_"
-                    + str(dist.get_rank())
-                    + "_save.pt",
-                )
+                torch.save({
+                    "model": model_state_dict, 
+                    "optimizer": train_optimizer.state_dict(),
+                    "lr_scheduler": lr_scheduler.state_dict(),
+                    "epoch": epoch,
+                    "step": it}, 
+                    args.checkpoint_floder + '/dlrm_training_' + str(dist.get_rank()) + '_save.pt')
         except StopIteration:
             # Dataset traversal complete
             break
@@ -927,39 +809,21 @@ def train_val_test(
                 args.limit_val_batches,
                 args.log_freq,
                 device,
-                args,
+                args
             )
             if args.train_with_val:
                 val_auroc = _evaluate(
-                    args.limit_val_batches,
-                    model.model,
-                    val_dataloader,
-                    "val",
-                    args.log_freq,
-                    device,
-                    args,
+                    args.limit_val_batches, model.model, val_dataloader, "val", args.log_freq, device, args
                 )
                 results.val_aurocs.append(val_auroc)
         if args.train_with_val:
             test_auroc = _evaluate(
-                args.limit_test_batches,
-                model.model,
-                test_dataloader,
-                "test",
-                args.log_freq,
-                device,
-                args,
+                args.limit_test_batches, model.model, test_dataloader, "test", args.log_freq, device, args
             )
 
     else:
         test_auroc = _evaluate(
-            args.limit_test_batches,
-            model.model,
-            test_dataloader,
-            "test",
-            args.log_freq,
-            device,
-            args,
+            args.limit_test_batches, model.model, test_dataloader, "test", args.log_freq, device, args
         )
         results.test_auroc = test_auroc
 
@@ -994,12 +858,10 @@ def main(argv: List[str]) -> None:
         except (ValueError, AttributeError):
             pass
     args.enable_profiling = False
-    if os.getenv("PROFILE") == "1":
-        args.enable_profiling = True
+    if os.getenv('PROFILE') == '1': args.enable_profiling=True
 
     if args.use_xpu:
         import intel_extension_for_pytorch
-
         try:
             import oneccl_bindings_for_pytorch
         except ImportError as e:
@@ -1020,9 +882,7 @@ def main(argv: List[str]) -> None:
         or args.synthetic_multi_hot_criteo_path is None
     ), "--in_memory_binary_criteo_path and --synthetic_multi_hot_criteo_path are mutually exclusive CLI arguments."
     assert (
-        args.multi_hot_sizes is None
-        or (not args.trans_data)
-        or args.synthetic_multi_hot_criteo_path is None
+        args.multi_hot_sizes is None or (not args.trans_data) or args.synthetic_multi_hot_criteo_path is None
     ), "--multi_hot_sizes is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
     assert (
         args.multi_hot_distribution_type is None
@@ -1031,7 +891,7 @@ def main(argv: List[str]) -> None:
 
     np.random.seed(args.numpy_rand_seed)
     torch.manual_seed(args.numpy_rand_seed)
-    # rank = int(os.environ["LOCAL_RANK"])
+    #rank = int(os.environ["LOCAL_RANK"])
     rank = env2int(
         [
             "MPI_LOCALRANKID",
@@ -1087,9 +947,9 @@ def main(argv: List[str]) -> None:
     # use dist_models, if not you can comment out
     global n_emb, local_emb_indices, default_embedding_names, idx_name
     n_emb = len(DEFAULT_CAT_NAMES)
-    # if dist.get_world_size() == 8 and dist.get_rank() == 6:
+    #if dist.get_world_size() == 8 and dist.get_rank() == 6:
     #    local_emb_indices[1] = 25
-    # if dist.get_world_size() == 8 and dist.get_rank() == 7:
+    #if dist.get_world_size() == 8 and dist.get_rank() == 7:
     #    local_emb_indices[2] = 21
 
     if args.ipex_optimize:
@@ -1097,30 +957,17 @@ def main(argv: List[str]) -> None:
             EmbeddingBagConfig(
                 name=f"t_{feature_name}",
                 embedding_dim=args.embedding_dim,
-                num_embeddings=(
-                    none_throws(args.num_embeddings_per_feature)[feature_idx]
-                    if args.num_embeddings is None
-                    else args.num_embeddings
-                ),
+                num_embeddings=none_throws(args.num_embeddings_per_feature)[feature_idx]
+                if args.num_embeddings is None
+                else args.num_embeddings,
                 feature_names=[feature_name],
             )
             for feature_idx, feature_name in enumerate(DEFAULT_CAT_NAMES)
         ]
     else:
-        (
-            shard_matrix_str,
-            shard_strategy_str,
-            shard_matrix,
-            shard_strategy,
-        ) = sharding.generate_plan(
-            args.num_embeddings_per_feature,
-            args.multi_hot_sizes,
-            args.num_nodes,
-            dist.get_world_size(),
-            args,
-            dist.get_rank() == 0,
-        )
-        # local_emb_slice = ext_dist.get_my_slice(n_emb)
+        shard_matrix_str, shard_strategy_str, shard_matrix, shard_strategy = sharding.generate_plan(
+        args.num_embeddings_per_feature, args.multi_hot_sizes, args.num_nodes, dist.get_world_size(), args, dist.get_rank() == 0)
+        #local_emb_slice = ext_dist.get_my_slice(n_emb)
         local_emb_indices = shard_matrix[rank]
         default_embedding_names = [DEFAULT_CAT_NAMES[i] for i in local_emb_indices]
         idx_name = zip(local_emb_indices, default_embedding_names)
@@ -1129,14 +976,12 @@ def main(argv: List[str]) -> None:
             EmbeddingBagConfig(
                 name=f"t_{feature_name}",
                 embedding_dim=args.embedding_dim,
-                num_embeddings=(
-                    none_throws(args.num_embeddings_per_feature)[feature_idx]
-                    if args.num_embeddings is None
-                    else args.num_embeddings
-                ),
+                num_embeddings=none_throws(args.num_embeddings_per_feature)[feature_idx]
+                if args.num_embeddings is None
+                else args.num_embeddings,
                 feature_names=[feature_name],
             )
-            # for feature_idx, feature_name in enumerate(DEFAULT_CAT_NAMES)
+            #for feature_idx, feature_name in enumerate(DEFAULT_CAT_NAMES)
             for feature_idx, feature_name in idx_name
         ]
     sharded_module_kwargs = {}
@@ -1178,21 +1023,16 @@ def main(argv: List[str]) -> None:
                 dcn_num_layers=args.dcn_num_layers,
                 dcn_low_rank_dim=args.dcn_low_rank_dim,
                 n_emb=n_emb,
-                shard_matrix=shard_matrix,
-                shard_strategy=shard_strategy,
+                shard_matrix=shard_matrix, 
+                shard_strategy = shard_strategy,
                 args=args,
                 dense_device="cpu",
             )
-            for (
-                embedding_bag
-            ) in (
-                dlrm_model.sparse_arch.embedding_bag_collection.embedding_bags.values()
-            ):
+            for embedding_bag in dlrm_model.sparse_arch.embedding_bag_collection.embedding_bags.values():
                 _W = np.random.uniform(
                     low=-np.sqrt(1 / embedding_bag.num_embeddings),
                     high=np.sqrt(1 / embedding_bag.num_embeddings),
-                    size=(embedding_bag.num_embeddings, embedding_bag.embedding_dim),
-                ).astype(np.float32)
+                    size=(embedding_bag.num_embeddings, embedding_bag.embedding_dim)).astype(np.float32)
                 embedding_bag.weight.data = torch.tensor(_W, requires_grad=True)
 
     elif args.interaction_type == InteractionType.PROJECTION:
@@ -1219,6 +1059,7 @@ def main(argv: List[str]) -> None:
         assert args.snapshot_dir
         load_snapshot(train_model, args.snapshot_dir)
 
+
     # This will apply the Adagrad optimizer in the backward pass for the embeddings (sparse_arch). This means that
     # the optimizer update will be applied in the backward pass, in this case through a fused op.
     # TorchRec will use the FBGEMM implementation of EXACT_ADAGRAD. For GPU devices, a fused CUDA kernel is invoked. For CPU, FBGEMM_GPU invokes CPU kernels
@@ -1233,13 +1074,9 @@ def main(argv: List[str]) -> None:
     model = train_model
     optimizer_param = None
     if args.ipex_optimize:
-        model.model, optimizer_param = replace_embeddingbag_collection(
-            model.model, device, args
-        )
+        model.model, optimizer_param = replace_embeddingbag_collection(model.model, device, args)
     else:
-        model.model.sparse_arch = SparseArchTraceAbleWrapper(
-            model.model.sparse_arch, args.dense
-        )
+        model.model.sparse_arch = SparseArchTraceAbleWrapper(model.model.sparse_arch, args.dense)
         optimizer_param = model.parameters()
     print(model)
     checkpoint = None
@@ -1248,38 +1085,30 @@ def main(argv: List[str]) -> None:
     if args.converge:
         checkpoint = load_checkoutpoint(args, device)
         if checkpoint is not None:
-            args.epoch = checkpoint["epoch"]
-            args.step = checkpoint["step"]
-            print("[info] loadind model state dict...")
-            train_model.load_state_dict(checkpoint["model"])
+            args.epoch = checkpoint['epoch']
+            args.step = checkpoint['step']
+            print('[info] loadind model state dict...')
+            train_model.load_state_dict(checkpoint['model'])
         logger.info(f"The start epoch is : {args.epoch}")
         logger.info(f"The start step is : {args.step}")
 
     optimizer = None
     if not args.inference_only:
         if args.adagrad:
-            optimizer = torch.optim.Adagrad(
-                optimizer_param, lr=args.learning_rate, eps=args.eps
-            )
+            optimizer = torch.optim.Adagrad(optimizer_param, lr=args.learning_rate, eps=args.eps)
         else:
             optimizer = torch.optim.SGD(optimizer_param, lr=args.learning_rate)
         if args.converge and checkpoint is not None:
-            print("[info] loadind optimizer state dict...")
-            optimizer.load_state_dict(checkpoint["optimizer"])
+            print('[info] loadind optimizer state dict...')
+            optimizer.load_state_dict(checkpoint['optimizer'])
 
     if ext_dist.my_size > 1:
         if args.use_device == "cuda":
             device_ids = [rank]
             model.to(device)
-            model.model.dense_arch = ext_dist.DDP(
-                model.model.dense_arch, device_ids=device_ids
-            )
-            model.model.inter_arch = ext_dist.DDP(
-                model.model.inter_arch, device_ids=device_ids
-            )
-            model.model.over_arch = ext_dist.DDP(
-                model.model.over_arch, device_ids=device_ids
-            )
+            model.model.dense_arch = ext_dist.DDP(model.model.dense_arch, device_ids=device_ids)
+            model.model.inter_arch = ext_dist.DDP(model.model.inter_arch, device_ids=device_ids)
+            model.model.over_arch = ext_dist.DDP(model.model.over_arch, device_ids=device_ids)
             if not args.inference_only:
                 for k, v in optimizer.state.items():
                     for name, value in v.items():
@@ -1288,16 +1117,10 @@ def main(argv: List[str]) -> None:
         elif args.use_device == "xpu":
             device_ids = [device]
             model.to(device)
-            model.model.dense_arch = ext_dist.DDP(
-                model.model.dense_arch, device_ids=device_ids
-            )
-            model.model.inter_arch = ext_dist.DDP(
-                model.model.inter_arch, device_ids=device_ids
-            )
-            model.model.over_arch = ext_dist.DDP(
-                model.model.over_arch, device_ids=device_ids
-            )
-            if not args.inference_only:
+            model.model.dense_arch = ext_dist.DDP(model.model.dense_arch, device_ids=device_ids)
+            model.model.inter_arch = ext_dist.DDP(model.model.inter_arch, device_ids=device_ids)
+            model.model.over_arch = ext_dist.DDP(model.model.over_arch, device_ids=device_ids)
+            if (not args.inference_only):
                 for k, v in optimizer.state.items():
                     for name, value in v.items():
                         if isinstance(value, torch.Tensor):
@@ -1313,13 +1136,12 @@ def main(argv: List[str]) -> None:
             optimizer, args.lr_warmup_steps, args.lr_decay_start, args.lr_decay_steps
         )
         if args.converge and checkpoint is not None:
-            print("[info] loadind lr_scheduler state dict...")
-            lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
+            print('[info] loadind lr_scheduler state dict...')
+            lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
         model.train()
         if args.use_device == "xpu":
-            model, optimizer = torch.xpu.optimize(
-                model=model, optimizer=optimizer, level="O1", dtype=torch.float32
-            )
+            model, optimizer = torch.xpu.optimize(model=model, optimizer=optimizer, level="O1",
+                                                  dtype=torch.float32)
     else:
         model.eval()
         if args.use_device == "xpu":

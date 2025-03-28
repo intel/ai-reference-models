@@ -64,36 +64,17 @@ def main():
         default=None,
         nargs=argparse.REMAINDER,
     )
-    parser.add_argument(
-        "--bf16",
-        action="store_true",
-        default=False,
-        help="enable BF16 by IPEX autocast",
-    )
-    parser.add_argument(
-        "--bf32", action="store_true", default=False, help="enable IPEX bf32 path"
-    )
-    parser.add_argument(
-        "--jit", action="store_true", default=False, help="enable IPEX JIT path"
-    )
-    parser.add_argument(
-        "-i",
-        "--iterations",
-        default=-1,
-        type=int,
-        metavar="N",
-        help="number of total iterations to run",
-    )
-    parser.add_argument(
-        "--iter-warmup",
-        default=-1,
-        type=int,
-        metavar="N",
-        help="number of warm-up iterations to run",
-    )
-    parser.add_argument(
-        "--accuracy", action="store_true", default=False, help="test accuracy"
-    )
+    parser.add_argument('--bf16', action='store_true', default=False,
+                        help='enable BF16 by IPEX autocast')
+    parser.add_argument('--bf32', action='store_true', default=False,
+                        help='enable IPEX bf32 path')
+    parser.add_argument('--jit', action='store_true', default=False,
+                        help='enable IPEX JIT path')
+    parser.add_argument('-i', '--iterations', default=-1, type=int, metavar='N',
+                        help='number of total iterations to run')
+    parser.add_argument('--iter-warmup', default=-1, type=int, metavar='N',
+                        help='number of warm-up iterations to run')
+    parser.add_argument('--accuracy', action='store_true', default=False, help='test accuracy')
     parser.add_argument("--enable-profiling", action="store_true", default=False)
 
     args = parser.parse_args()
@@ -103,7 +84,9 @@ def main():
 
     if distributed:
         torch.cuda.set_device(args.local_rank)
-        torch.distributed.init_process_group(backend="nccl", init_method="env://")
+        torch.distributed.init_process_group(
+            backend="nccl", init_method="env://"
+        )
         synchronize()
 
     cfg.merge_from_file(args.config_file)
@@ -143,9 +126,7 @@ def main():
             mkdir(output_folder)
             output_folders[idx] = output_folder
     data_loaders_val = make_data_loader(cfg, is_train=False, is_distributed=distributed)
-    for output_folder, dataset_name, data_loader_val in zip(
-        output_folders, dataset_names, data_loaders_val
-    ):
+    for output_folder, dataset_name, data_loader_val in zip(output_folders, dataset_names, data_loaders_val):
         inference(
             model,
             data_loader_val,
@@ -164,9 +145,11 @@ def main():
             iterations=args.iterations,
             iter_warmup=args.iter_warmup,
             accuracy=args.accuracy,
-            enable_profiling=args.enable_profiling,
+            enable_profiling=args.enable_profiling
         )
         synchronize()
+
+
 
 
 if __name__ == "__main__":

@@ -34,13 +34,14 @@ def check_for_link(value):
     True for sym links.  For files, we also look at the number of links in
     os.stat() to determine if it's a hard link.
     """
-    if os.path.islink(value) or (os.path.isfile(value) and os.stat(value).st_nlink > 1):
+    if os.path.islink(value) or \
+            (os.path.isfile(value) and os.stat(value).st_nlink > 1):
         raise ArgumentTypeError("{} cannot be a link.".format(value))
 
 
 def check_no_spaces(value):
     """checks for spaces in string"""
-    if " " in value:
+    if ' ' in value:
         raise ArgumentTypeError("{} should not have whitespace(s).")
     return value
 
@@ -65,7 +66,8 @@ def check_valid_filename(value):
     """verifies filename exists and isn't a link"""
     if value is not None:
         if not os.path.isfile(value):
-            raise ArgumentTypeError("{} does not exist or is not a file.".format(value))
+            raise ArgumentTypeError("{} does not exist or is not a file.".
+                                    format(value))
         check_for_link(value)
     return value
 
@@ -74,9 +76,8 @@ def check_valid_folder(value):
     """verifies filename exists and isn't a link"""
     if value is not None:
         if not os.path.isdir(value):
-            raise ArgumentTypeError(
-                "{} does not exist or is not a directory.".format(value)
-            )
+            raise ArgumentTypeError("{} does not exist or is not a directory.".
+                                    format(value))
         check_for_link(value)
     return value
 
@@ -103,21 +104,18 @@ def check_volume_mount(value):
             raise ArgumentTypeError(
                 "{} is not a valid volume mount string where ':' is used to separate the fields. "
                 "See https://docs.docker.com/storage/volumes for information on formatting the volume "
-                "mount string".format(value)
-            )
+                "mount string".format(value))
 
         # Check that the local directory specified is a valid folder and not a link
-        check_valid_folder(value.split(":")[0])
+        check_valid_folder(value.split(':')[0])
     return value
 
 
 def check_shm_size(value):
-    """verfies the format of docker shm-size"""
+    """verfies the format of docker shm-size """
     if value is not None:
         if not re.match("([1-9][0-9]*)['b','k','m','g']", value):
-            raise ArgumentTypeError(
-                "{} does not follow the --shm-size format definition.".format(value)
-            )
+            raise ArgumentTypeError("{} does not follow the --shm-size format definition.".format(value))
     return value
 
 
@@ -127,10 +125,8 @@ def check_num_cores_per_instance(value):
     to use the number of cores per socket) or a positive integer.
     """
     if value:
-        error_message = (
-            "Invalid number of cores per instance ({}). The value "
-            "must be a positive integer or 'socket'".format(value)
-        )
+        error_message = "Invalid number of cores per instance ({}). The value " \
+                        "must be a positive integer or 'socket'".format(value)
 
         if value.lower().strip() == "socket":
             return "socket"

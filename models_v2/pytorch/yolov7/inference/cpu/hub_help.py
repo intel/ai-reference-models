@@ -26,15 +26,14 @@ import torch
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download PyTorch pretrained model")
-    parser.add_argument("--weight", type=str, default="yolov7.pt", help="model name")
-    parser.add_argument("--checkpoint-dir", type=str, default="", help="model path")
+    parser = argparse.ArgumentParser(description='Download PyTorch pretrained model')
+    parser.add_argument('--weight', type=str, default='yolov7.pt', help='model name')
+    parser.add_argument('--checkpoint-dir', type=str, default='', help='model path')
 
     args = parser.parse_args()
     file = os.path.join(args.checkpoint_dir, args.weight)
-    url = f"https://github.com/WongKinYiu/yolov7/releases/download/v0.1/{args.weight}"
+    url = f'https://github.com/WongKinYiu/yolov7/releases/download/v0.1/{args.weight}'
     torch.hub.download_url_to_file(url, file)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

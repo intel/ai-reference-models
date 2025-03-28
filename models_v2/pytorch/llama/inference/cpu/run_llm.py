@@ -108,7 +108,7 @@ parser.add_argument("--torchao", action="store_true")
 parser.add_argument(
     "--weight-dtype",
     type=str,
-    choices=["INT8", "INT4"],
+    choices=["INT8","INT4"],
     help="int8 or int4",
     default="int8",
 )
@@ -174,12 +174,7 @@ else:
     amp_enabled = True if args.int8_bf16_mixed else False
     amp_dtype = torch.bfloat16 if args.int8_bf16_mixed else torch.float
 
-if (
-    args.weight_only_quant
-    and args.torchao
-    and args.weight_dtype
-    and args.int8_bf16_mixed
-):
+if args.weight_only_quant and args.torchao and args.weight_dtype and args.int8_bf16_mixed:
     amp_enabled = True
     amp_dtype = torch.bfloat16
 
@@ -216,9 +211,8 @@ if args.dtype == "bf16" or args.dtype == "fp32":
         inductor_config.cpp_wrapper = True
         inductor_config.max_autotune = True
         inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
-        with (
-            torch.no_grad(),
-            torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+        with torch.no_grad(), torch.autocast("cpu", 
+            enabled=amp_enabled, dtype=amp_dtype
         ):
             if args.ipex:
                 print("[Info] Running torch.compile() with IPEX backend")
@@ -242,9 +236,8 @@ elif args.dtype == "fp16":
         inductor_config.cpp_wrapper = True
         inductor_config.max_autotune = True
         inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
-        with (
-            torch.no_grad(),
-            torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+        with torch.no_grad(), torch.autocast("cpu", 
+            enabled=amp_enabled, dtype=amp_dtype
         ):
             if args.ipex:
                 print("[Info] Running torch.compile() with IPEX backend")
@@ -550,9 +543,7 @@ else:
     if "llama" in prompt_pool and args.input_tokens in prompt_pool["llama"]:
         prompt = prompt_pool["llama"][args.input_tokens]
     else:
-        raise SystemExit(
-            "[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input."
-        )
+        raise SystemExit("[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input.")
 
 if args.benchmark:
     input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
@@ -628,7 +619,6 @@ if args.dtype == "int8" and args.ipex:
         print("model quantization - Done!")
 elif args.dtype == "int8" and args.inductor:
     from torch._inductor import config as inductor_config
-
     inductor_config.cpp_wrapper = True
     if args.profile:
         inductor_config.profiler_mark_wrapper_call = True
@@ -641,7 +631,6 @@ elif args.dtype == "int8" and args.inductor:
             smooth_quant,
         )
         from torchao.quantization import quantize_
-
         with torch.no_grad():
             encoded_input = tokenizer(prompt, return_tensors="pt")
             print("encoded_input is: {}".format(encoded_input), flush=True)
@@ -660,39 +649,30 @@ elif args.dtype == "int8" and args.inductor:
         from torch._inductor import config as inductor_config
         from torchao.quantization import quant_api
         from torchao.utils import unwrap_tensor_subclass
-
         inductor_config.cpp_wrapper = True
         inductor_config.max_autotune = True
         inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
-        with torch.no_grad(), torch.autocast("cpu", enabled=True, dtype=torch.bfloat16):
+        with torch.no_grad(),torch.autocast("cpu", 
+                enabled=True, dtype=torch.bfloat16
+        ):
             if args.weight_dtype == "INT8":
                 print("---- apply torchao woq int8 api ----", flush=True)
-                quant_api.quantize_(
-                    user_model, quant_api.int8_weight_only(), set_inductor_config=False
-                )
+                quant_api.quantize_(user_model, quant_api.int8_weight_only(), set_inductor_config=False)
                 unwrap_tensor_subclass(user_model)
             elif args.weight_dtype == "INT4":
-                quant_api.quantize_(
-                    user_model, quant_api.int4_weight_only(), set_inductor_config=False
-                )
+                quant_api.quantize_(user_model, quant_api.int4_weight_only(), set_inductor_config=False)
                 unwrap_tensor_subclass(user_model)
 
             user_model.forward = torch.compile(user_model.forward)
     else:
-        print(
-            "---- to run inductor quant, please use --weight-only-quant and --torchao, and choose --weight_dtype in INT8 or INT4 ",
-            flush=True,
-        )
-
+        print("---- to run inductor quant, please use --weight-only-quant and --torchao, and choose --weight_dtype in INT8 or INT4 ", flush=True)
+        
 
 def benchmark_warmup(prompt):
     # start
     if args.profile:
-        with (
-            profile_ctx as prof,
-            torch.inference_mode(),
-            torch.no_grad(),
-            torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+        with profile_ctx as prof, torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
+            enabled=amp_enabled, dtype=amp_dtype
         ):
             for i in range(5):
                 input_ids = tokenizer(prompt, return_tensors="pt").input_ids
@@ -702,10 +682,8 @@ def benchmark_warmup(prompt):
                 prof.step()
 
     num_iter = args.num_warmup
-    with (
-        torch.inference_mode(),
-        torch.no_grad(),
-        torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+    with torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
+        enabled=amp_enabled, dtype=amp_dtype
     ):
         for i in range(num_iter):
             get_memory_usage("Iteration: " + str(i), args)
@@ -722,10 +700,8 @@ def benchmark_evaluate(prompt):
     total_time = 0.0
     num_iter = args.num_iter - args.num_warmup
     total_list = []
-    with (
-        torch.inference_mode(),
-        torch.no_grad(),
-        torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+    with torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
+        enabled=amp_enabled, dtype=amp_dtype
     ):
         for i in range(num_iter):
             get_memory_usage("Iteration: " + str(i), args)
@@ -802,9 +778,8 @@ if args.accuracy_only:
                     "past_key_values": tuple(global_past_key_value),
                 }
             )
-            with (
-                torch.no_grad(),
-                torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+            with torch.no_grad(), torch.autocast("cpu", 
+                enabled=amp_enabled, dtype=amp_dtype
             ):
                 user_model = torch.jit.trace(
                     user_model.eval(),

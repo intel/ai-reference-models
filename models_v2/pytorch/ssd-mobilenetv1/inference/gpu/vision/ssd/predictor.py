@@ -1,3 +1,4 @@
+
 # Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,19 +47,8 @@ from ..utils.misc import Timer
 
 
 class Predictor:
-    def __init__(
-        self,
-        net,
-        size,
-        mean=0.0,
-        std=1.0,
-        nms_method=None,
-        iou_threshold=0.45,
-        filter_threshold=0.01,
-        candidate_size=200,
-        sigma=0.5,
-        device=None,
-    ):
+    def __init__(self, net, size, mean=0.0, std=1.0, nms_method=None,
+                 iou_threshold=0.45, filter_threshold=0.01, candidate_size=200, sigma=0.5, device=None):
         self.net = net
         self.transform = PredictionTransform(size, mean, std)
         self.iou_threshold = iou_threshold
@@ -77,17 +67,7 @@ class Predictor:
 
         self.timer = Timer()
 
-    def predict(
-        self,
-        flag,
-        channels_flag,
-        image,
-        top_k=-1,
-        prob_threshold=None,
-        profiling=False,
-        args=None,
-        iter=0,
-    ):
+    def predict(self, flag, channels_flag, image, top_k=-1, prob_threshold=None, profiling=False, args=None, iter=0):
         cpu_device = torch.device("cpu")
         if args is not None and args.dummy > 0:
             height = args.image_size
@@ -105,9 +85,7 @@ class Predictor:
             images = images.to(memory_format=torch.channels_last)
         if args is not None and args.benchmark == 1:
             images = images.to(self.device)
-        with torch.autograd.profiler_legacy.profile(
-            enabled=profiling, use_xpu=True, record_shapes=False
-        ) as prof:
+        with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
             with torch.inference_mode():
                 self.timer.start()
                 if args is None or args.benchmark == 0:
@@ -143,15 +121,12 @@ class Predictor:
                 continue
             subset_boxes = boxes[mask, :]
             box_probs = torch.cat([subset_boxes, probs.reshape(-1, 1)], dim=1)
-            box_probs = box_utils.nms(
-                box_probs,
-                self.nms_method,
-                score_threshold=prob_threshold,
-                iou_threshold=self.iou_threshold,
-                sigma=self.sigma,
-                top_k=top_k,
-                candidate_size=self.candidate_size,
-            )
+            box_probs = box_utils.nms(box_probs, self.nms_method,
+                                      score_threshold=prob_threshold,
+                                      iou_threshold=self.iou_threshold,
+                                      sigma=self.sigma,
+                                      top_k=top_k,
+                                      candidate_size=self.candidate_size)
             picked_box_probs.append(box_probs)
             picked_labels.extend([class_index] * box_probs.size(0))
         if not picked_box_probs:
@@ -162,17 +137,13 @@ class Predictor:
         picked_box_probs[:, 2] *= width
         picked_box_probs[:, 3] *= height
 
-        ret = (
-            picked_box_probs[:, :4],
-            torch.tensor(picked_labels),
-            picked_box_probs[:, 4],
-        )
+        ret = picked_box_probs[:, :4], torch.tensor(picked_labels), picked_box_probs[:, 4]
         post_end_time = time.time()
         print("Post time: ", post_end_time - post_start_time)
         if args is None or args.benchmark == 0:
             print("Inference time: ", self.timer.end())
 
-        if profiling and iter == args.profile_iter:
+        if profiling and iter==args.profile_iter:
             title = "/ssd_mobilenetv1_inference_"
             if args.channels_last:
                 title += "channels_last_"
@@ -187,18 +158,12 @@ class Predictor:
             if args.batch_size:
                 title += "bs" + str(args.batch_size) + "_"
 
-            profiling_path = os.getenv("PROFILE_PATH")
+            profiling_path = os.getenv('PROFILE_PATH')
             if not profiling_path:
-                profiling_path = "./"
-            torch.save(
-                prof.key_averages().table(sort_by="self_xpu_time_total"),
-                profiling_path + title + "profiling.pt",
-            )
-            torch.save(
-                prof.key_averages(group_by_input_shape=True).table(),
-                profiling_path + title + "profiling_detailed.pt",
-            )
-            prof.export_chrome_trace(profiling_path + title + "profiling.json")
+                profiling_path = './'
+            torch.save(prof.key_averages().table(sort_by="self_xpu_time_total"), profiling_path + title + 'profiling.pt')
+            torch.save(prof.key_averages(group_by_input_shape=True).table(), profiling_path + title + 'profiling_detailed.pt')
+            prof.export_chrome_trace(profiling_path + title + 'profiling.json')
             print(prof.key_averages().table(sort_by="self_xpu_time_total"))
             print(prof.key_averages(group_by_input_shape=True).table())
         return ret

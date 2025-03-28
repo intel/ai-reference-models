@@ -56,7 +56,9 @@ class Prompter(object):
                 instruction=instruction, input=input
             )
         else:
-            res = self.template["prompt_no_input"].format(instruction=instruction)
+            res = self.template["prompt_no_input"].format(
+                instruction=instruction
+            )
         if label:
             res = f"{res}{label}"
         if self._verbose:

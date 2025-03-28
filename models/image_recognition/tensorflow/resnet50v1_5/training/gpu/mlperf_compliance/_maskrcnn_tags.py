@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Keys which only appear in MASKRCNN."""
+"""Keys which only appear in MASKRCNN.
+"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -29,7 +30,7 @@ RPN_PRE_NMS_TOP_N_TEST = "rpn_pre_nms_top_n_test"
 RPN_POST_NMS_TOP_N_TRAIN = "rpn_post_nms_top_n_train"
 RPN_POST_NMS_TOP_N_TEST = "rpn_post_nms_top_n_test"
 
-# Global batch size during training
+#Global batch size during training
 GLOBAL_BATCH_SIZE = "global_batch_size"
 
 # Batch size during eval

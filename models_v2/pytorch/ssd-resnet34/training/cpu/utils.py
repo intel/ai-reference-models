@@ -1,6 +1,5 @@
 ### This file is originally from: [mlcommons repo](https://github.com/mlcommons/training/tree/9947bdf21ee3f2488fa4b362eec2ce7deb2ec4dd/single_stage_detector/ssd/utils.py)
 import torch
-
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,13 +35,13 @@ from mlperf_logging.mllog import constants as mllog_const
 
 # This function is from https://github.com/kuangliu/pytorch-ssd.
 def calc_iou_tensor(box1, box2):
-    """Calculation of IoU based on two boxes tensor,
-    Reference to https://github.com/kuangliu/pytorch-ssd
-    input:
-        box1 (N, 4)
-        box2 (M, 4)
-    output:
-        IoU (N, M)
+    """ Calculation of IoU based on two boxes tensor,
+        Reference to https://github.com/kuangliu/pytorch-ssd
+        input:
+            box1 (N, 4)
+            box2 (M, 4)
+        output:
+            IoU (N, M)
     """
     N = box1.size(0)
     M = box2.size(0)
@@ -75,23 +74,23 @@ def calc_iou_tensor(box1, box2):
 # This function is from https://github.com/kuangliu/pytorch-ssd.
 class Encoder(object):
     """
-    Inspired by https://github.com/kuangliu/pytorch-ssd
-    Transform between (bboxes, lables) <-> SSD output
+        Inspired by https://github.com/kuangliu/pytorch-ssd
+        Transform between (bboxes, lables) <-> SSD output
 
-    dboxes: default boxes in size 8732 x 4,
-        encoder: input ltrb format, output xywh format
-        decoder: input xywh format, output ltrb format
+        dboxes: default boxes in size 8732 x 4,
+            encoder: input ltrb format, output xywh format
+            decoder: input xywh format, output ltrb format
 
-    encode:
-        input  : bboxes_in (Tensor nboxes x 4), labels_in (Tensor nboxes)
-        output : bboxes_out (Tensor 8732 x 4), labels_out (Tensor 8732)
-        criteria : IoU threshold of bboexes
+        encode:
+            input  : bboxes_in (Tensor nboxes x 4), labels_in (Tensor nboxes)
+            output : bboxes_out (Tensor 8732 x 4), labels_out (Tensor 8732)
+            criteria : IoU threshold of bboexes
 
-    decode:
-        input  : bboxes_in (Tensor 8732 x 4), scores_in (Tensor 8732 x nitems)
-        output : bboxes_out (Tensor nboxes x 4), labels_out (Tensor nboxes)
-        criteria : IoU threshold of bboexes
-        max_output : maximum number of output bboxes
+        decode:
+            input  : bboxes_in (Tensor 8732 x 4), scores_in (Tensor 8732 x nitems)
+            output : bboxes_out (Tensor nboxes x 4), labels_out (Tensor nboxes)
+            criteria : IoU threshold of bboexes
+            max_output : maximum number of output bboxes
     """
 
     def __init__(self, dboxes):
@@ -122,12 +121,10 @@ class Encoder(object):
         bboxes_out = self.dboxes.clone()
         bboxes_out[masks, :] = bboxes_in[best_dbox_idx[masks], :]
         # Transform format to xywh format
-        x, y, w, h = (
-            0.5 * (bboxes_out[:, 0] + bboxes_out[:, 2]),
-            0.5 * (bboxes_out[:, 1] + bboxes_out[:, 3]),
-            -bboxes_out[:, 0] + bboxes_out[:, 2],
-            -bboxes_out[:, 1] + bboxes_out[:, 3],
-        )
+        x, y, w, h = 0.5 * (bboxes_out[:, 0] + bboxes_out[:, 2]), \
+                     0.5 * (bboxes_out[:, 1] + bboxes_out[:, 3]), \
+                     -bboxes_out[:, 0] + bboxes_out[:, 2], \
+                     -bboxes_out[:, 1] + bboxes_out[:, 3]
         bboxes_out[:, 0] = x
         bboxes_out[:, 1] = y
         bboxes_out[:, 2] = w
@@ -136,8 +133,8 @@ class Encoder(object):
 
     def scale_back_batch(self, bboxes_in, scores_in):
         """
-        Do scale and transform from xywh to ltrb
-        suppose input Nx4xnum_bbox Nxlabel_numxnum_bbox
+            Do scale and transform from xywh to ltrb
+            suppose input Nx4xnum_bbox Nxlabel_numxnum_bbox
         """
         if bboxes_in.device == torch.device("cpu"):
             self.dboxes = self.dboxes.cpu()
@@ -153,19 +150,17 @@ class Encoder(object):
         bboxes_in[:, :, :2] = self.scale_xy * bboxes_in[:, :, :2]
         bboxes_in[:, :, 2:] = self.scale_wh * bboxes_in[:, :, 2:]
 
-        bboxes_in[:, :, :2] = (
-            bboxes_in[:, :, :2] * self.dboxes_xywh[:, :, 2:]
-            + self.dboxes_xywh[:, :, :2]
-        )
-        bboxes_in[:, :, 2:] = bboxes_in[:, :, 2:].exp() * self.dboxes_xywh[:, :, 2:]
+        bboxes_in[:, :, :2] = bboxes_in[:, :, :2] * self.dboxes_xywh[:, :,
+                                                    2:] + self.dboxes_xywh[:, :,
+                                                          :2]
+        bboxes_in[:, :, 2:] = bboxes_in[:, :, 2:].exp() * self.dboxes_xywh[:, :,
+                                                          2:]
 
         # Transform format to ltrb
-        l, t, r, b = (
-            bboxes_in[:, :, 0] - 0.5 * bboxes_in[:, :, 2],
-            bboxes_in[:, :, 1] - 0.5 * bboxes_in[:, :, 3],
-            bboxes_in[:, :, 0] + 0.5 * bboxes_in[:, :, 2],
-            bboxes_in[:, :, 1] + 0.5 * bboxes_in[:, :, 3],
-        )
+        l, t, r, b = bboxes_in[:, :, 0] - 0.5 * bboxes_in[:, :, 2], \
+                     bboxes_in[:, :, 1] - 0.5 * bboxes_in[:, :, 3], \
+                     bboxes_in[:, :, 0] + 0.5 * bboxes_in[:, :, 2], \
+                     bboxes_in[:, :, 1] + 0.5 * bboxes_in[:, :, 3]
 
         bboxes_in[:, :, 0] = l
         bboxes_in[:, :, 1] = t
@@ -174,33 +169,21 @@ class Encoder(object):
 
         return bboxes_in, F.softmax(scores_in, dim=-1)
 
-    def decode_batch(
-        self, bboxes_in, scores_in, criteria=0.45, max_output=200, nms_valid_thresh=0.05
-    ):
+    def decode_batch(self, bboxes_in, scores_in, criteria=0.45, max_output=200, nms_valid_thresh=0.05):
         bboxes, probs = self.scale_back_batch(bboxes_in, scores_in)
 
         output = []
         for bbox, prob in zip(bboxes.split(1, 0), probs.split(1, 0)):
             bbox = bbox.squeeze(0)
             prob = prob.squeeze(0)
-            output.append(
-                self.decode_single(
-                    bbox, prob, criteria, max_output, nms_valid_thresh=nms_valid_thresh
-                )
-            )
+            output.append(self.decode_single(bbox, prob, criteria, max_output,
+					     nms_valid_thresh=nms_valid_thresh))
             # print(output[-1])
         return output
 
     # perform non-maximum suppression
-    def decode_single(
-        self,
-        bboxes_in,
-        scores_in,
-        criteria,
-        max_output,
-        max_num=200,
-        nms_valid_thresh=0.05,
-    ):
+    def decode_single(self, bboxes_in, scores_in, criteria, max_output,
+                      max_num=200, nms_valid_thresh=0.05):
         # Reference to https://github.com/amdegroot/ssd.pytorch
 
         bboxes_out = []
@@ -210,16 +193,14 @@ class Encoder(object):
         for i, score in enumerate(scores_in.split(1, 1)):
             # skip background
             # print(score[score>0.90])
-            if i == 0:
-                continue
+            if i == 0: continue
             # print(i)
 
             score = score.squeeze(1)
             mask = score > nms_valid_thresh
 
             bboxes, score = bboxes_in[mask, :], score[mask]
-            if score.size(0) == 0:
-                continue
+            if score.size(0) == 0: continue
 
             score_sorted, score_idx_sorted = score.sort(dim=0)
 
@@ -232,7 +213,8 @@ class Encoder(object):
                 idx = score_idx_sorted[-1].item()
                 bboxes_sorted = bboxes[score_idx_sorted, :]
                 bboxes_idx = bboxes[idx, :].unsqueeze(dim=0)
-                iou_sorted = calc_iou_tensor(bboxes_sorted, bboxes_idx).squeeze()
+                iou_sorted = calc_iou_tensor(bboxes_sorted,
+                                             bboxes_idx).squeeze()
                 # we only need iou < criteria
                 score_idx_sorted = score_idx_sorted[iou_sorted < criteria]
                 candidates.append(idx)
@@ -241,11 +223,10 @@ class Encoder(object):
             scores_out.append(score[candidates])
             labels_out.extend([i] * len(candidates))
 
-        bboxes_out, labels_out, scores_out = (
-            torch.cat(bboxes_out, dim=0),
-            torch.tensor(labels_out, dtype=torch.long),
-            torch.cat(scores_out, dim=0),
-        )
+        bboxes_out, labels_out, scores_out = torch.cat(bboxes_out, dim=0), \
+                                             torch.tensor(labels_out,
+                                                          dtype=torch.long), \
+                                             torch.cat(scores_out, dim=0)
 
         _, max_ids = scores_out.sort(dim=0)
         max_ids = max_ids[-max_output:]
@@ -253,16 +234,8 @@ class Encoder(object):
 
 
 class DefaultBoxes(object):
-    def __init__(
-        self,
-        fig_size,
-        feat_size,
-        steps,
-        scales,
-        aspect_ratios,
-        scale_xy=0.1,
-        scale_wh=0.2,
-    ):
+    def __init__(self, fig_size, feat_size, steps, scales, aspect_ratios, \
+                 scale_xy=0.1, scale_wh=0.2):
 
         self.feat_size = feat_size
         self.fig_size = fig_size
@@ -314,20 +287,18 @@ class DefaultBoxes(object):
         return self.scale_wh_
 
     def __call__(self, order="ltrb"):
-        if order == "ltrb":
-            return self.dboxes_ltrb
-        if order == "xywh":
-            return self.dboxes
+        if order == "ltrb": return self.dboxes_ltrb
+        if order == "xywh": return self.dboxes
 
 
 # This function is from https://github.com/chauhan-utk/ssd.DomainAdaptation.
 class SSDCropping(object):
-    """Cropping for SSD, according to original paper
-    Choose between following 3 conditions:
-    1. Preserve the original image
-    2. Random crop minimum IoU is among 0.1, 0.3, 0.5, 0.7, 0.9
-    3. Random crop
-    Reference to https://github.com/chauhan-utk/ssd.DomainAdaptation
+    """ Cropping for SSD, according to original paper
+        Choose between following 3 conditions:
+        1. Preserve the original image
+        2. Random crop minimum IoU is among 0.1, 0.3, 0.5, 0.7, 0.9
+        3. Random crop
+        Reference to https://github.com/chauhan-utk/ssd.DomainAdaptation
     """
 
     def __init__(self, num_cropping_iterations=1):
@@ -347,9 +318,7 @@ class SSDCropping(object):
         # Implementation uses 1 iteration to find a possible candidate, this
         # was shown to produce the same mAP as using more iterations.
         self.num_cropping_iterations = num_cropping_iterations
-        ssd_print(
-            key=mllog_const.MAX_SAMPLES, value=self.num_cropping_iterations, sync=False
-        )
+        ssd_print(key=mllog_const.MAX_SAMPLES, value=self.num_cropping_iterations, sync=False)
 
     def __call__(self, img, img_size, bboxes, labels):
 
@@ -381,9 +350,8 @@ class SSDCropping(object):
                 right = left + w
                 bottom = top + h
 
-                ious = calc_iou_tensor(
-                    bboxes, torch.tensor([[left, top, right, bottom]])
-                )
+                ious = calc_iou_tensor(bboxes, torch.tensor(
+                    [[left, top, right, bottom]]))
 
                 # tailor all the bboxes and return
                 if not ((ious > min_iou) & (ious < max_iou)).all():
@@ -440,19 +408,16 @@ class ToTensor(object):
 
 class LightingNoice(object):
     """
-    See this question, AlexNet data augumentation:
-    https://stackoverflow.com/questions/43328600
+        See this question, AlexNet data augumentation:
+        https://stackoverflow.com/questions/43328600
     """
 
     def __init__(self):
         self.eigval = torch.tensor([55.46, 4.794, 1.148])
-        self.eigvec = torch.tensor(
-            [
-                [-0.5675, 0.7192, 0.4009],
-                [-0.5808, -0.0045, -0.8140],
-                [-0.5836, -0.6948, 0.4203],
-            ]
-        )
+        self.eigvec = torch.tensor([
+            [-0.5675, 0.7192, 0.4009],
+            [-0.5808, -0.0045, -0.8140],
+            [-0.5836, -0.6948, 0.4203]])
 
     def __call__(self, img):
         img = torch.Tensor(np.array(img))
@@ -463,11 +428,9 @@ class LightingNoice(object):
         alpha1 = random.gauss(sigma=0.1, mu=0)
         alpha2 = random.gauss(sigma=0.1, mu=0)
 
-        channels = (
-            alpha0 * self.eigval[0] * self.eigvec[0, :]
-            + alpha1 * self.eigval[1] * self.eigvec[1, :]
-            + alpha2 * self.eigval[2] * self.eigvec[2, :]
-        )
+        channels = alpha0 * self.eigval[0] * self.eigvec[0, :] + \
+                   alpha1 * self.eigval[1] * self.eigvec[1, :] + \
+                   alpha2 * self.eigval[2] * self.eigvec[2, :]
         channels = channels.view(3, 1, 1)
         img += channels
 
@@ -487,12 +450,12 @@ class RandomHorizontalFlip(object):
 
 # Do data augumentation
 class SSDTransformer(object):
-    """SSD Data Augumentation, according to original paper
-    Composed by several steps:
-    Cropping
-    Resize
-    Flipping
-    Jittering
+    """ SSD Data Augumentation, according to original paper
+        Composed by several steps:
+        Cropping
+        Resize
+        Flipping
+        Jittering
     """
 
     def __init__(self, dboxes, size=(300, 300), val=False, num_cropping_iterations=1):
@@ -504,38 +467,32 @@ class SSDTransformer(object):
         self.encoder = Encoder(self.dboxes_)
 
         self.crop = SSDCropping(num_cropping_iterations=num_cropping_iterations)
-        self.img_trans = transforms.Compose(
-            [
-                transforms.Resize(self.size),
-                # transforms.Resize((300, 300)),
-                # transforms.RandomHorizontalFlip(),
-                transforms.ColorJitter(
-                    brightness=0.125, contrast=0.5, saturation=0.5, hue=0.05
-                ),
-                transforms.ToTensor(),
-                # LightingNoice(),
-            ]
-        )
+        self.img_trans = transforms.Compose([
+            transforms.Resize(self.size),
+            # transforms.Resize((300, 300)),
+            # transforms.RandomHorizontalFlip(),
+            transforms.ColorJitter(brightness=0.125, contrast=0.5,
+                                   saturation=0.5, hue=0.05
+                                   ),
+            transforms.ToTensor()
+            # LightingNoice(),
+        ])
         self.hflip = RandomHorizontalFlip()
 
         # All Pytorch Tensor will be normalized
         # https://discuss.pytorch.org/t/how-to-preprocess-input-for-pre-trained-networks/683
         normalization_mean = [0.485, 0.456, 0.406]
         normalization_std = [0.229, 0.224, 0.225]
-        self.normalize = transforms.Normalize(
-            mean=normalization_mean, std=normalization_std
-        )
+        self.normalize = transforms.Normalize(mean=normalization_mean,
+                                              std=normalization_std)
         # self.normalize = transforms.Normalize(mean = [104.0, 117.0, 123.0],
         #                                      std = [1.0, 1.0, 1.0])
 
-        self.trans_val = transforms.Compose(
-            [
-                transforms.Resize(self.size),
-                transforms.ToTensor(),
-                # ToTensor(),
-                self.normalize,
-            ]
-        )
+        self.trans_val = transforms.Compose([
+            transforms.Resize(self.size),
+            transforms.ToTensor(),
+            # ToTensor(),
+            self.normalize, ])
 
     @property
     def dboxes(self):
@@ -546,8 +503,8 @@ class SSDTransformer(object):
         if self.val:
             bbox_out = torch.zeros(max_num, 4)
             label_out = torch.zeros(max_num, dtype=torch.long)
-            bbox_out[: bbox.size(0), :] = bbox
-            label_out[: label.size(0)] = label
+            bbox_out[:bbox.size(0), :] = bbox
+            label_out[:label.size(0)] = label
             return self.trans_val(img), img_size, bbox_out, label_out
 
         # print("before", img.size, bbox)
@@ -594,8 +551,7 @@ class COCODetection(data.Dataset):
             img_name = img["file_name"]
             img_size = (img["height"], img["width"])
             # print(img_name)
-            if img_id in self.images:
-                raise Exception("dulpicated image record")
+            if img_id in self.images: raise Exception("dulpicated image record")
             self.images[img_id] = (img_name, img_size, [])
 
         # read bboxes
@@ -658,9 +614,8 @@ class COCODetection(data.Dataset):
         bbox_labels = torch.tensor(bbox_labels)
 
         if self.transform != None:
-            img, (htot, wtot), bbox_sizes, bbox_labels = self.transform(
-                img, (htot, wtot), bbox_sizes, bbox_labels
-            )
+            img, (htot, wtot), bbox_sizes, bbox_labels = \
+                self.transform(img, (htot, wtot), bbox_sizes, bbox_labels)
         else:
             pass
 
@@ -670,21 +625,14 @@ class COCODetection(data.Dataset):
 
 
 class VOCDetection(data.Dataset):
-    """VOC PASCAL 07/12 DataReader
-    params:
-       img:        image folder
-       annotate:   annotation folder (xml)
+    """  VOC PASCAL 07/12 DataReader
+         params:
+            img:        image folder
+            annotate:   annotation folder (xml)
     """
 
-    def __init__(
-        self,
-        img_folder,
-        annotate_folder,
-        file_filter,
-        transform=None,
-        label_map={},
-        difficult=True,
-    ):
+    def __init__(self, img_folder, annotate_folder, file_filter, transform=None,
+                 label_map={}, difficult=True):
         # print("Reading data informations")
 
         self.img_folder = img_folder
@@ -724,8 +672,7 @@ class VOCDetection(data.Dataset):
         img_size = (
             int(root.find("size").find("height").text),
             int(root.find("size").find("width").text),
-            int(root.find("size").find("depth").text),
-        )
+            int(root.find("size").find("depth").text),)
 
         tmp_data = []
         for obj in root.findall("object"):
@@ -737,8 +684,7 @@ class VOCDetection(data.Dataset):
                 int(obj.find("bndbox").find("xmin").text),
                 int(obj.find("bndbox").find("ymin").text),
                 int(obj.find("bndbox").find("xmax").text),
-                int(obj.find("bndbox").find("ymax").text),
-            )
+                int(obj.find("bndbox").find("ymax").text),)
             bbox_label = obj.find("name").text
             if bbox_label in self.label_map:
                 bbox_label = self.label_map[bbox_label]
@@ -785,9 +731,8 @@ class VOCDetection(data.Dataset):
 
         # Perform image transformation
         if self.transform != None:
-            img, (htot, wtot), bbox_sizes, bbox_labels = self.transform(
-                img, (htot, wtot), bbox_sizes, bbox_labels
-            )
+            img, (htot, wtot), bbox_sizes, bbox_labels = \
+                self.transform(img, (htot, wtot), bbox_sizes, bbox_labels)
         else:
             pass
 
@@ -803,7 +748,6 @@ class VOCDetection(data.Dataset):
 def draw_patches(img, bboxes, labels, order="xywh", label_map={}):
     import matplotlib.pyplot as plt
     import matplotlib.patches as patches
-
     # Suppose bboxes in fractional coordinate:
     # cx, cy, w, h
     # img = img.numpy()
@@ -815,8 +759,10 @@ def draw_patches(img, bboxes, labels, order="xywh", label_map={}):
         labels = [label_map.get(l) for l in labels]
 
     if order == "ltrb":
-        xmin, ymin, xmax, ymax = bboxes[:, 0], bboxes[:, 1], bboxes[:, 2], bboxes[:, 3]
-        cx, cy, w, h = (xmin + xmax) / 2, (ymin + ymax) / 2, xmax - xmin, ymax - ymin
+        xmin, ymin, xmax, ymax = bboxes[:, 0], bboxes[:, 1], bboxes[:,
+                                                             2], bboxes[:, 3]
+        cx, cy, w, h = (xmin + xmax) / 2, (
+                    ymin + ymax) / 2, xmax - xmin, ymax - ymin
     else:
         cx, cy, w, h = bboxes[:, 0], bboxes[:, 1], bboxes[:, 2], bboxes[:, 3]
 
@@ -831,21 +777,12 @@ def draw_patches(img, bboxes, labels, order="xywh", label_map={}):
     plt.imshow(img)
     ax = plt.gca()
     for (cx, cy, w, h), label in zip(bboxes, labels):
-        if label == "background":
-            continue
-        ax.add_patch(
-            patches.Rectangle((cx - 0.5 * w, cy - 0.5 * h), w, h, fill=False, color="r")
-        )
+        if label == "background": continue
+        ax.add_patch(patches.Rectangle((cx - 0.5 * w, cy - 0.5 * h),
+                                       w, h, fill=False, color="r"))
         bbox_props = dict(boxstyle="round", fc="y", ec="0.5", alpha=0.3)
-        ax.text(
-            cx - 0.5 * w,
-            cy - 0.5 * h,
-            label,
-            ha="center",
-            va="center",
-            size=15,
-            bbox=bbox_props,
-        )
+        ax.text(cx - 0.5 * w, cy - 0.5 * h, label, ha="center", va="center",
+                size=15, bbox=bbox_props)
     plt.show()
 
 

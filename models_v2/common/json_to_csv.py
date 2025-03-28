@@ -19,16 +19,14 @@ import os
 import sys
 import csv
 
-
 def base_formatter(value: str):
-    return str(value).lower().replace("_", "-").replace(" ", "-")
-
+    return str(value).lower().replace('_', '-').replace(' ', '-')
 
 # Serializes dictionary to have no nested values, i.e.
 #   { a: {b: c} }
 # will become:
 #   { a.b: c }
-def serialize(what: dict, path=[], sep: str = ".", format=base_formatter):
+def serialize(what: dict, path = [], sep: str='.', format=base_formatter):
     res = {}
 
     def recurse(res, what, key):
@@ -48,17 +46,15 @@ def serialize(what: dict, path=[], sep: str = ".", format=base_formatter):
             res = recurse(res, what, key)
     return res
 
-
 def read_data(files: list):
     data = []
     for file in files:
-        with open(file, "r") as f:
+        with open(file, 'r') as f:
             data += [json.load(f)]
 
     return data
 
-
-def make_csv(data: list, sep: str = ".", format=base_formatter):
+def make_csv(data: list, sep: str='.', format=base_formatter):
     table = []
     all_keys = set()
     for d in data:
@@ -72,35 +68,25 @@ def make_csv(data: list, sep: str = ".", format=base_formatter):
     for key in sorted(all_keys, key=lambda x: x):
         for d in table:
             if key not in d:
-                d[key] = ""
+                d[key] = ''
 
     return table
 
-
 def write_table(file: str, csv_table: list):
-    with open(file, "w") as f:
+    with open(file, 'w') as f:
         writer = csv.DictWriter(f, fieldnames=csv_table[0].keys())
         writer.writeheader()
         for row in csv_table:
             writer.writerow(row)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        prog="js_to_csv",
-        description="Dump few JSON files content into a single CSV",
-        epilog="Copyright (c) 2024 Intel Corporation",
-    )
+        prog='js_to_csv',
+          description='Dump few JSON files content into a single CSV',
+          epilog='Copyright (c) 2024 Intel Corporation')
 
-    parser.add_argument(
-        "-o",
-        "--output",
-        action="store",
-        type=str,
-        required=True,
-        help="File to store output",
-    )
-    parser.add_argument("file", help="JSON file to dump into CSV", nargs="+")
+    parser.add_argument('-o', '--output', action="store", type=str, required=True, help='File to store output')
+    parser.add_argument('file', help='JSON file to dump into CSV', nargs='+')
 
     args = parser.parse_args()
 

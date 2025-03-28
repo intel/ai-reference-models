@@ -25,35 +25,32 @@ import argparse
 import zipfile
 import shutil
 
-root_folder = os.environ.get("DATASET_DIR")
+root_folder = os.environ.get('DATASET_DIR')
 
-
-def remove_item(item, s):
+def remove_item(item, s):  
     for c in range(s.count(item)):
         if item in s:
             str_indx = s.index(item)
-            s = s[:str_indx] + s[str_indx + len(item) + 3 :]
-
+            s = s[:str_indx] + s[str_indx+len(item)+3:]
+            
     return s
-
 
 def remove_BIRADS(df):
     symptoms_list = []
-    for i, s in enumerate(df.symptoms):  # [:10]:
-        if "(BIRADS" in s:
-            item = "(BIRADS"
+    for i, s in enumerate(df.symptoms): # [:10]:
+        if '(BIRADS' in s:
+            item = '(BIRADS'  
             s = remove_item(item, s)
 
-        if "(BIRAD" in s:
-            item = "(BIRAD"
+        if '(BIRAD' in s:
+            item = '(BIRAD'
             s = remove_item(item, s)
-
+        
         symptoms_list.append(s)
 
     df.symptoms = symptoms_list
-
+    
     return df
-
 
 def read_right_and_left(tx):
     tx_right, tx_left = "", ""
@@ -79,7 +76,7 @@ def read_right_and_left(tx):
 
 def read_content(file_content):
 
-    annotation = file_content.split("OPINION:")
+    annotation = file_content.split("OPINION:")  
     mm_revealed = annotation[0].split("REVEALED:")[1]
     mm_revealed_right, mm_revealed_left = read_right_and_left(mm_revealed)
 
@@ -193,7 +190,7 @@ def prepare_data(
     medical_reports_folder = unzip_file(medical_reports_zip_file)
 
     df = pd.DataFrame(columns=["ID", "Image", "Side", "Type", "label", "symptoms"])
-
+    
     for f in os.listdir(medical_reports_folder):
         DM_R, DM_L, OP_R, OP_L, CESM_R, CESM_L = "", "", "", "", "", ""
         f_id = f.split(".docx")[0].split("P")[1]
@@ -261,5 +258,4 @@ if __name__ == "__main__":
         params.medical_reports_folder,
         params.manual_annotations_file,
         params.output_annotations_folder,
-        params.output_annotations_file,
-    )
+        params.output_annotations_file)

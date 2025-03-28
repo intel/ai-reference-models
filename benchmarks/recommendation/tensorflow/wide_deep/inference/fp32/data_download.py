@@ -24,22 +24,18 @@ import os
 import sys
 import requests
 
-DATA_URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult"
-TRAINING_FILE = "adult.data"
-TRAINING_URL = "%s/%s" % (DATA_URL, TRAINING_FILE)
-EVAL_FILE = "adult.test"
-EVAL_URL = "%s/%s" % (DATA_URL, EVAL_FILE)
+DATA_URL = 'https://archive.ics.uci.edu/ml/machine-learning-databases/adult'
+TRAINING_FILE = 'adult.data'
+TRAINING_URL = '%s/%s' % (DATA_URL, TRAINING_FILE)
+EVAL_FILE = 'adult.test'
+EVAL_URL = '%s/%s' % (DATA_URL, EVAL_FILE)
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument(
-    "--data_dir",
-    type=str,
-    default="/tmp/census_data",
-    help="Directory to download census data",
-)
-parser.add_argument("--http_proxy", type=str, default=None)
-parser.add_argument("--https_proxy", type=str, default=None)
+parser.add_argument('--data_dir', type=str, default='/tmp/census_data',
+                    help='Directory to download census data')
+parser.add_argument('--http_proxy', type=str, default=None)
+parser.add_argument('--https_proxy', type=str, default=None)
 
 
 def download_and_clean_file(filename, url):
@@ -47,21 +43,21 @@ def download_and_clean_file(filename, url):
     proxies = {}
     print(filename)
     if ARGS.http_proxy:
-        proxies["http"] = ARGS.http_proxy
+        proxies['http'] = ARGS.http_proxy
     if ARGS.https_proxy:
-        proxies["https"] = ARGS.https_proxy
+        proxies['https'] = ARGS.https_proxy
     try:
         request = requests.get(url, stream=True, proxies=proxies)
         request.raise_for_status()
-        with open(filename, "wb") as eval_file:
+        with open(filename, 'wb') as eval_file:
             for line in request.iter_lines():
                 line = line.strip()
-                line = line.replace(b", ", b",")
-                if not line or b"," not in line:
+                line = line.replace(b', ', b',')
+                if not line or b',' not in line:
                     continue
-                if line[-1] == ".":
+                if line[-1] == '.':
                     line = line[:-1]
-                line += b"\n"
+                line += b'\n'
                 eval_file.write(line)
     except requests.exceptions.HTTPError as err:
         print(err)
@@ -79,7 +75,7 @@ def main():
     download_and_clean_file(eval_file_path, EVAL_URL)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ARGS = parser.parse_args()
     main()
     print("Wide & Deep dataset is downloaded at {}".format(ARGS.data_dir))

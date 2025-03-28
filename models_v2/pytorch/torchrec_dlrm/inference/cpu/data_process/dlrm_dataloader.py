@@ -70,11 +70,9 @@ def _get_random_dataloader(
             keys=DEFAULT_CAT_NAMES,
             batch_size=batch_size,
             hash_size=args.num_embeddings,
-            hash_sizes=(
-                args.num_embeddings_per_feature
-                if hasattr(args, "num_embeddings_per_feature")
-                else None
-            ),
+            hash_sizes=args.num_embeddings_per_feature
+            if hasattr(args, "num_embeddings_per_feature")
+            else None,
             manual_seed=args.seed if hasattr(args, "seed") else None,
             ids_per_feature=1,
             num_dense=len(DEFAULT_INT_NAMES),
@@ -121,18 +119,16 @@ def _get_in_memory_dataloader(
             stage,
             *stage_files,  # pyre-ignore[6]
             batch_size=batch_size,
-            rank=0,  #  dist.get_rank(),
-            world_size=1,  #  dist.get_world_size(),
+            rank=0, #  dist.get_rank(),
+            world_size=1, #  dist.get_world_size(),
             drop_last=args.drop_last_training_batch if stage == "train" else False,
             shuffle_batches=args.shuffle_batches,
             shuffle_training_set=args.shuffle_training_set,
             shuffle_training_set_random_seed=args.seed,
             mmap_mode=args.mmap_mode,
-            hashes=(
-                args.num_embeddings_per_feature
-                if args.num_embeddings is None
-                else ([args.num_embeddings] * CAT_FEATURE_COUNT)
-            ),
+            hashes=args.num_embeddings_per_feature
+            if args.num_embeddings is None
+            else ([args.num_embeddings] * CAT_FEATURE_COUNT),
         ),
         batch_size=None,
         pin_memory=args.pin_memory,

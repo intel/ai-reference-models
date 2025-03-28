@@ -49,12 +49,12 @@ def get_sorted_filelist(filelist, expected_result_dict):
 def send_report(sender, recipients, subject, html):
     """Send report."""
     msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = sender
-    msg["To"] = recipients
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = recipients
     msg.set_content(html, subtype="html")
     try:
-        with SMTP("smtp.intel.com") as session:
+        with SMTP('smtp.intel.com') as session:
             session.sendmail(sender, recipients, msg.as_string())
     except SMTPException as e:
         raise e
@@ -64,9 +64,5 @@ def check_python_version():
     """Check python version."""
     if not (sys.version_info.major == 3 and sys.version_info.minor >= 6):
         print("Python 3.6 or higher is required.")
-        print(
-            "You are using Python {}.{}.".format(
-                sys.version_info.major, sys.version_info.minor
-            )
-        )
+        print("You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor))
         sys.exit(1)

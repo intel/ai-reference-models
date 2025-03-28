@@ -1,3 +1,4 @@
+
 # Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,120 +53,61 @@ def create_mobilenetv1_ssd(num_classes, is_test=False, device=None):
         12,
         14,
     ]
-    extras = ModuleList(
-        [
-            Sequential(
-                Conv2d(in_channels=1024, out_channels=256, kernel_size=1),
-                ReLU(),
-                Conv2d(
-                    in_channels=256,
-                    out_channels=512,
-                    kernel_size=3,
-                    stride=2,
-                    padding=1,
-                ),
-                ReLU(),
-            ),
-            Sequential(
-                Conv2d(in_channels=512, out_channels=128, kernel_size=1),
-                ReLU(),
-                Conv2d(
-                    in_channels=128,
-                    out_channels=256,
-                    kernel_size=3,
-                    stride=2,
-                    padding=1,
-                ),
-                ReLU(),
-            ),
-            Sequential(
-                Conv2d(in_channels=256, out_channels=128, kernel_size=1),
-                ReLU(),
-                Conv2d(
-                    in_channels=128,
-                    out_channels=256,
-                    kernel_size=3,
-                    stride=2,
-                    padding=1,
-                ),
-                ReLU(),
-            ),
-            Sequential(
-                Conv2d(in_channels=256, out_channels=128, kernel_size=1),
-                ReLU(),
-                Conv2d(
-                    in_channels=128,
-                    out_channels=256,
-                    kernel_size=3,
-                    stride=2,
-                    padding=1,
-                ),
-                ReLU(),
-            ),
-        ]
-    )
+    extras = ModuleList([
+        Sequential(
+            Conv2d(in_channels=1024, out_channels=256, kernel_size=1),
+            ReLU(),
+            Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=2, padding=1),
+            ReLU()
+        ),
+        Sequential(
+            Conv2d(in_channels=512, out_channels=128, kernel_size=1),
+            ReLU(),
+            Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1),
+            ReLU()
+        ),
+        Sequential(
+            Conv2d(in_channels=256, out_channels=128, kernel_size=1),
+            ReLU(),
+            Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1),
+            ReLU()
+        ),
+        Sequential(
+            Conv2d(in_channels=256, out_channels=128, kernel_size=1),
+            ReLU(),
+            Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=2, padding=1),
+            ReLU()
+        )
+    ])
 
-    regression_headers = ModuleList(
-        [
-            Conv2d(in_channels=512, out_channels=6 * 4, kernel_size=3, padding=1),
-            Conv2d(in_channels=1024, out_channels=6 * 4, kernel_size=3, padding=1),
-            Conv2d(in_channels=512, out_channels=6 * 4, kernel_size=3, padding=1),
-            Conv2d(in_channels=256, out_channels=6 * 4, kernel_size=3, padding=1),
-            Conv2d(in_channels=256, out_channels=6 * 4, kernel_size=3, padding=1),
-            Conv2d(
-                in_channels=256, out_channels=6 * 4, kernel_size=3, padding=1
-            ),  # TODO: change to kernel_size=1, padding=0?
-        ]
-    )
+    regression_headers = ModuleList([
+        Conv2d(in_channels=512, out_channels=6 * 4, kernel_size=3, padding=1),
+        Conv2d(in_channels=1024, out_channels=6 * 4, kernel_size=3, padding=1),
+        Conv2d(in_channels=512, out_channels=6 * 4, kernel_size=3, padding=1),
+        Conv2d(in_channels=256, out_channels=6 * 4, kernel_size=3, padding=1),
+        Conv2d(in_channels=256, out_channels=6 * 4, kernel_size=3, padding=1),
+        Conv2d(in_channels=256, out_channels=6 * 4, kernel_size=3, padding=1), # TODO: change to kernel_size=1, padding=0?
+    ])
 
-    classification_headers = ModuleList(
-        [
-            Conv2d(
-                in_channels=512, out_channels=6 * num_classes, kernel_size=3, padding=1
-            ),
-            Conv2d(
-                in_channels=1024, out_channels=6 * num_classes, kernel_size=3, padding=1
-            ),
-            Conv2d(
-                in_channels=512, out_channels=6 * num_classes, kernel_size=3, padding=1
-            ),
-            Conv2d(
-                in_channels=256, out_channels=6 * num_classes, kernel_size=3, padding=1
-            ),
-            Conv2d(
-                in_channels=256, out_channels=6 * num_classes, kernel_size=3, padding=1
-            ),
-            Conv2d(
-                in_channels=256, out_channels=6 * num_classes, kernel_size=3, padding=1
-            ),  # TODO: change to kernel_size=1, padding=0?
-        ]
-    )
+    classification_headers = ModuleList([
+        Conv2d(in_channels=512, out_channels=6 * num_classes, kernel_size=3, padding=1),
+        Conv2d(in_channels=1024, out_channels=6 * num_classes, kernel_size=3, padding=1),
+        Conv2d(in_channels=512, out_channels=6 * num_classes, kernel_size=3, padding=1),
+        Conv2d(in_channels=256, out_channels=6 * num_classes, kernel_size=3, padding=1),
+        Conv2d(in_channels=256, out_channels=6 * num_classes, kernel_size=3, padding=1),
+        Conv2d(in_channels=256, out_channels=6 * num_classes, kernel_size=3, padding=1), # TODO: change to kernel_size=1, padding=0?
+    ])
 
-    return SSD(
-        num_classes,
-        base_net,
-        source_layer_indexes,
-        extras,
-        classification_headers,
-        regression_headers,
-        is_test=is_test,
-        config=config,
-        device=device,
-    )
+    return SSD(num_classes, base_net, source_layer_indexes,
+               extras, classification_headers, regression_headers, is_test=is_test, config=config, device=device)
 
 
-def create_mobilenetv1_ssd_predictor(
-    net, candidate_size=200, nms_method=None, sigma=0.5, device=None
-):
-    predictor = Predictor(
-        net,
-        config.image_size,
-        config.image_mean,
-        config.image_std,
-        nms_method=nms_method,
-        iou_threshold=config.iou_threshold,
-        candidate_size=candidate_size,
-        sigma=sigma,
-        device=device,
-    )
+def create_mobilenetv1_ssd_predictor(net, candidate_size=200, nms_method=None, sigma=0.5, device=None):
+    predictor = Predictor(net, config.image_size, config.image_mean,
+                          config.image_std,
+                          nms_method=nms_method,
+                          iou_threshold=config.iou_threshold,
+                          candidate_size=candidate_size,
+                          sigma=sigma,
+                          device=device)
     return predictor

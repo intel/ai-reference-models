@@ -1,20 +1,19 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -76,7 +75,7 @@ class COCODataset(torchvision.datasets.coco.CocoDetection):
                     ids.append(img_id)
             self.ids = ids
 
-        self.categories = {cat["id"]: cat["name"] for cat in self.coco.cats.values()}
+        self.categories = {cat['id']: cat['name'] for cat in self.coco.cats.values()}
 
         self.json_category_id_to_contiguous_id = {
             v: i + 1 for i, v in enumerate(self.coco.getCatIds())
@@ -105,7 +104,7 @@ class COCODataset(torchvision.datasets.coco.CocoDetection):
 
         if anno and "segmentation" in anno[0]:
             masks = [obj["segmentation"] for obj in anno]
-            masks = SegmentationMask(masks, img.size, mode="poly")
+            masks = SegmentationMask(masks, img.size, mode='poly')
             target.add_field("masks", masks)
 
         if anno and "keypoints" in anno[0]:

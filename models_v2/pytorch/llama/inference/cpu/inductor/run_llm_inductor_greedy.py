@@ -25,16 +25,11 @@ from transformers import (
 )
 
 import torch
-
-
 def trace_handler(prof):
-    print(prof.key_averages().table(sort_by="self_cpu_time_total", row_limit=-1))
-
-
-parser = argparse.ArgumentParser(
-    "LLM generation (greedy search) script for inductor torch.compile path",
-    add_help=False,
-)
+    print(prof.key_averages().table(
+        sort_by="self_cpu_time_total", row_limit=-1))
+    
+parser = argparse.ArgumentParser("LLM generation (greedy search) script for inductor torch.compile path", add_help=False)
 parser.add_argument(
     "-m",
     "--model-name-or-path",
@@ -58,9 +53,7 @@ parser.add_argument("--prompt", default=None, type=str)
 parser.add_argument("--num-iter", default=100, type=int, help="num iter")
 parser.add_argument("--num-warmup", default=10, type=int, help="num warmup")
 parser.add_argument("--batch-size", default=1, type=int, help="batch size")
-parser.add_argument(
-    "--group-size", default=64, type=int, help="group size for woq int4"
-)
+parser.add_argument("--group-size", default=64, type=int, help="group size for woq int4")
 parser.add_argument("--profile", action="store_true")
 parser.add_argument("--accuracy_only", action="store_true")
 parser.add_argument("--dataset", nargs="?", default="lambada", const="lambada")
@@ -69,7 +62,7 @@ parser.add_argument("--disable-grouped-gemm", action="store_true")
 parser.add_argument(
     "--weight-dtype",
     type=str,
-    choices=["INT8", "INT4"],
+    choices=["INT8","INT4"],
     help="int8 or int4",
     default="INT8",
 )
@@ -106,22 +99,17 @@ elif args.dtype == "fp16":
     amp_enabled = False
     load_dtype = torch.float16
 else:
-    assert (
-        False
-    ), "This script (inductor peak perf with flexAttention) only support int8, bf16, fp16, int8-bf16, int8 (da8w8) and fp32 as dtype"
+    assert False, "This script (inductor peak perf with flexAttention) only support int8, bf16, fp16, int8-bf16, int8 (da8w8) and fp32 as dtype"
 
 attn_type = "paged_attention"
 tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
-model = AutoModelForCausalLM.from_pretrained(
-    args.model_name_or_path, torch_dtype=load_dtype, attn_implementation=attn_type
-)
+model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path, torch_dtype=load_dtype, attn_implementation=attn_type)
 if attn_type == "paged_attention":
     model.generation_config.cache_implementation = "paged"
-    model.config.page_size = args.page_size
+    model.config.page_size = args.page_size 
 
 
 from torch._inductor import config as inductor_config
-
 if args.profile:
     inductor_config.profiler_mark_wrapper_call = True
     inductor_config.cpp.enable_kernel_profile = True
@@ -130,52 +118,32 @@ inductor_config.cpp_wrapper = True
 inductor_config.max_autotune = True
 inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
 
-if args.dtype in ["fp32", "bf16", "fp16"]:
-    if not args.disable_grouped_gemm and hasattr(
-        inductor_config.cpp, "enable_grouped_gemm_template"
-    ):
+if args.dtype in ["fp32","bf16", "fp16"]:
+    if not args.disable_grouped_gemm and hasattr(inductor_config.cpp, "enable_grouped_gemm_template"):
         inductor_config.cpp.enable_grouped_gemm_template = True
     elif not args.disable_concat_linear:
         inductor_config.cpp.enable_concat_linear = True
     with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
-        model.forward = torch.compile(model.forward)
+        model.forward=torch.compile(model.forward)
 elif args.dtype in ["int8", "int8-bf16"]:
     from torch._inductor import config as inductor_config
     from torchao.quantization import quant_api
     from torchao.utils import unwrap_tensor_subclass
-
-    with torch.no_grad(), torch.autocast("cpu", enabled=True, dtype=torch.bfloat16):
+    
+    with torch.no_grad(),torch.autocast("cpu", enabled=True, dtype=torch.bfloat16):
         if args.weight_dtype == "INT8":
             if args.dtype == "int8-bf16":
                 print("---- apply torchao woq int8 api ----", flush=True)
-                quant_api.quantize_(
-                    model, quant_api.int8_weight_only(set_inductor_config=False)
-                )
+                quant_api.quantize_(model, quant_api.int8_weight_only(set_inductor_config=False))
                 unwrap_tensor_subclass(model)
             elif args.dtype == "int8":
-                print(
-                    "---- apply torchao int8_dynamic_activation_int8_weight api ----",
-                    flush=True,
-                )
-                quant_api.quantize_(
-                    model,
-                    quant_api.int8_dynamic_activation_int8_weight(
-                        set_inductor_config=False
-                    ),
-                )
+                print("---- apply torchao int8_dynamic_activation_int8_weight api ----", flush=True)
+                quant_api.quantize_(model, quant_api.int8_dynamic_activation_int8_weight(set_inductor_config=False))
         elif args.weight_dtype == "INT4":
-            from torchao.dtypes import Int4CPULayout
-
-            print("---- apply torchao woq int4 api ----", flush=True)
-            quant_api.quantize_(
-                model,
-                quant_api.int4_weight_only(
-                    group_size=args.group_size,
-                    layout=Int4CPULayout(),
-                    set_inductor_config=False,
-                ),
-            )
-            unwrap_tensor_subclass(model)
+                from torchao.dtypes import Int4CPULayout
+                print("---- apply torchao woq int4 api ----", flush=True)
+                quant_api.quantize_(model, quant_api.int4_weight_only(group_size=args.group_size, layout=Int4CPULayout(), set_inductor_config=False))
+                unwrap_tensor_subclass(model)
 
         model.forward = torch.compile(model.forward)
 
@@ -183,7 +151,6 @@ if args.accuracy_only:
     from torch.nn.functional import pad
     from datasets import load_dataset
     from torch.utils.data import DataLoader
-
     class Evaluator:
         def __init__(self, dataset, tokenizer, batch_size=8, pad_val=1, pad_max=196):
             self.dataset = dataset
@@ -259,7 +226,7 @@ if args.accuracy_only:
 
     full_dataset = load_dataset(args.dataset)
     dataset = full_dataset["validation"]
-
+    
     evaluator = Evaluator(dataset, tokenizer, 1)
     test_dataloader = DataLoader(
         evaluator.dataset,
@@ -299,9 +266,7 @@ else:
     if model_type in prompt_pool and args.input_tokens in prompt_pool[model_type]:
         prompt = prompt_pool[model_type][args.input_tokens]
     else:
-        raise SystemExit(
-            "[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input."
-        )
+        raise SystemExit("[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input.")
 
 input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
 print("---- Prompt size:", input_size)
@@ -312,21 +277,27 @@ prompt = [prompt] * args.batch_size
 with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
     for i in range(args.num_warmup):
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids
-        model.generate(input_ids, max_new_tokens=args.max_new_tokens, **generate_kwargs)
+        model.generate(
+            input_ids, max_new_tokens=args.max_new_tokens, **generate_kwargs
+        )
 if args.profile:
     with torch.profiler.profile(
-        activities=[torch.profiler.ProfilerActivity.CPU],
-        schedule=torch.profiler.schedule(wait=1, warmup=1, active=1),
+        activities=[
+            torch.profiler.ProfilerActivity.CPU],
+        schedule=torch.profiler.schedule(
+            wait=1,
+            warmup=1,
+            active=1),
         on_trace_ready=trace_handler,
-        record_shapes=True,
-    ) as prof:
-        with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
-            for i in range(3):
-                input_ids = tokenizer(prompt, return_tensors="pt").input_ids
-                model.generate(
-                    input_ids, max_new_tokens=args.max_new_tokens, **generate_kwargs
-                )
-                prof.step()
+        record_shapes = True,
+        ) as prof:
+            with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
+                for i in range(3):
+                    input_ids = tokenizer(prompt, return_tensors="pt").input_ids
+                    model.generate(
+                        input_ids, max_new_tokens=args.max_new_tokens, **generate_kwargs
+                    )
+                    prof.step()
 # benchmark
 num_iter = args.num_iter - args.num_warmup
 total_time = 0.0

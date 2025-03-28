@@ -30,4 +30,6 @@ PERF = {
     "unit": "fps",
 }
 
-FUNCTIONAL = {"pattern": r"Throughput:\s*(\d+.\d+)"}
+FUNCTIONAL = {
+        "pattern": r"Throughput:\s*(\d+.\d+)"
+}

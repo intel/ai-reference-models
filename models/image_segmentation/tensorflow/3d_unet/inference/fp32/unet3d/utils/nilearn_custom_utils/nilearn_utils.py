@@ -31,9 +31,8 @@ def crop_img(img, rtol=1e-8, copy=True, return_slices=False):
     img = check_niimg(img)
     data = img.get_data()
     infinity_norm = max(-data.min(), data.max())
-    passes_threshold = np.logical_or(
-        data < -rtol * infinity_norm, data > rtol * infinity_norm
-    )
+    passes_threshold = np.logical_or(data < -rtol * infinity_norm,
+                                     data > rtol * infinity_norm)
 
     if data.ndim == 4:
         passes_threshold = np.any(passes_threshold, axis=-1)

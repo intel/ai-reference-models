@@ -27,11 +27,9 @@ import itertools
 from typing import List
 import math
 
-SSDBoxSizes = collections.namedtuple("SSDBoxSizes", ["min", "max"])
+SSDBoxSizes = collections.namedtuple('SSDBoxSizes', ['min', 'max'])
 
-SSDSpec = collections.namedtuple(
-    "SSDSpec", ["feature_map_size", "shrinkage", "box_sizes", "aspect_ratios"]
-)
+SSDSpec = collections.namedtuple('SSDSpec', ['feature_map_size', 'shrinkage', 'box_sizes', 'aspect_ratios'])
 
 
 def generate_ssd_priors(specs: List[SSDSpec], image_size, clamp=True) -> torch.Tensor:
@@ -64,20 +62,40 @@ def generate_ssd_priors(specs: List[SSDSpec], image_size, clamp=True) -> torch.T
             # small sized square box
             size = spec.box_sizes.min
             h = w = size / image_size
-            priors.append([x_center, y_center, w, h])
+            priors.append([
+                x_center,
+                y_center,
+                w,
+                h
+            ])
 
             # big sized square box
             size = math.sqrt(spec.box_sizes.max * spec.box_sizes.min)
             h = w = size / image_size
-            priors.append([x_center, y_center, w, h])
+            priors.append([
+                x_center,
+                y_center,
+                w,
+                h
+            ])
 
             # change h/w ratio of the small sized box
             size = spec.box_sizes.min
             h = w = size / image_size
             for ratio in spec.aspect_ratios:
                 ratio = math.sqrt(ratio)
-                priors.append([x_center, y_center, w * ratio, h / ratio])
-                priors.append([x_center, y_center, w / ratio, h * ratio])
+                priors.append([
+                    x_center,
+                    y_center,
+                    w * ratio,
+                    h / ratio
+                ])
+                priors.append([
+                    x_center,
+                    y_center,
+                    w / ratio,
+                    h * ratio
+                ])
 
     priors = torch.tensor(priors)
     if clamp:
@@ -85,7 +103,8 @@ def generate_ssd_priors(specs: List[SSDSpec], image_size, clamp=True) -> torch.T
     return priors
 
 
-def convert_locations_to_boxes(locations, priors, center_variance, size_variance):
+def convert_locations_to_boxes(locations, priors, center_variance,
+                               size_variance):
     """Convert regressional location results of SSD into boxes in the form of (center_x, center_y, h, w).
 
     The conversion:
@@ -104,31 +123,20 @@ def convert_locations_to_boxes(locations, priors, center_variance, size_variance
     # priors can have one dimension less.
     if priors.dim() + 1 == locations.dim():
         priors = priors.unsqueeze(0)
-    return torch.cat(
-        [
-            locations[..., :2] * center_variance * priors[..., 2:] + priors[..., :2],
-            torch.exp(locations[..., 2:] * size_variance) * priors[..., 2:],
-        ],
-        dim=locations.dim() - 1,
-    )
+    return torch.cat([
+        locations[..., :2] * center_variance * priors[..., 2:] + priors[..., :2],
+        torch.exp(locations[..., 2:] * size_variance) * priors[..., 2:]
+    ], dim=locations.dim() - 1)
 
 
-def convert_boxes_to_locations(
-    center_form_boxes, center_form_priors, center_variance, size_variance
-):
+def convert_boxes_to_locations(center_form_boxes, center_form_priors, center_variance, size_variance):
     # priors can have one dimension less
     if center_form_priors.dim() + 1 == center_form_boxes.dim():
         center_form_priors = center_form_priors.unsqueeze(0)
-    return torch.cat(
-        [
-            (center_form_boxes[..., :2] - center_form_priors[..., :2])
-            / center_form_priors[..., 2:]
-            / center_variance,
-            torch.log(center_form_boxes[..., 2:] / center_form_priors[..., 2:])
-            / size_variance,
-        ],
-        dim=center_form_boxes.dim() - 1,
-    )
+    return torch.cat([
+        (center_form_boxes[..., :2] - center_form_priors[..., :2]) / center_form_priors[..., 2:] / center_variance,
+        torch.log(center_form_boxes[..., 2:] / center_form_priors[..., 2:]) / size_variance
+    ], dim=center_form_boxes.dim() - 1)
 
 
 def area_of(left_top, right_bottom) -> torch.Tensor:
@@ -164,7 +172,8 @@ def iou_of(boxes0, boxes1, eps=1e-5):
     return overlap_area / (area0 + area1 - overlap_area + eps)
 
 
-def assign_priors(gt_boxes, gt_labels, corner_form_priors, iou_threshold):
+def assign_priors(gt_boxes, gt_labels, corner_form_priors,
+                  iou_threshold):
     """Assign ground truth boxes and targets to priors.
 
     Args:
@@ -219,20 +228,15 @@ def hard_negative_mining(loss, labels, neg_pos_ratio):
 
 
 def center_form_to_corner_form(locations):
-    return torch.cat(
-        [
-            locations[..., :2] - locations[..., 2:] / 2,
-            locations[..., :2] + locations[..., 2:] / 2,
-        ],
-        locations.dim() - 1,
-    )
+    return torch.cat([locations[..., :2] - locations[..., 2:]/2,
+                     locations[..., :2] + locations[..., 2:]/2], locations.dim() - 1) 
 
 
 def corner_form_to_center_form(boxes):
-    return torch.cat(
-        [(boxes[..., :2] + boxes[..., 2:]) / 2, boxes[..., 2:] - boxes[..., :2]],
-        boxes.dim() - 1,
-    )
+    return torch.cat([
+        (boxes[..., :2] + boxes[..., 2:]) / 2,
+         boxes[..., 2:] - boxes[..., :2]
+    ], boxes.dim() - 1)
 
 
 def hard_nms(box_scores, iou_threshold, top_k=-1, candidate_size=200):
@@ -268,15 +272,8 @@ def hard_nms(box_scores, iou_threshold, top_k=-1, candidate_size=200):
     return box_scores[picked, :]
 
 
-def nms(
-    box_scores,
-    nms_method=None,
-    score_threshold=None,
-    iou_threshold=None,
-    sigma=0.5,
-    top_k=-1,
-    candidate_size=200,
-):
+def nms(box_scores, nms_method=None, score_threshold=None, iou_threshold=None,
+        sigma=0.5, top_k=-1, candidate_size=200):
     if nms_method == "soft":
         return soft_nms(box_scores, score_threshold, sigma, top_k)
     else:
@@ -316,3 +313,6 @@ def soft_nms(box_scores, score_threshold, sigma=0.5, top_k=-1):
         return torch.stack(picked_box_scores)
     else:
         return torch.tensor([])
+
+
+

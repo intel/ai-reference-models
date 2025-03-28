@@ -8,48 +8,46 @@ def accuracy(output, target):
     pred = output.max(1, keepdim=True)[1]
     return pred.eq(target.view_as(pred)).cpu().float().mean()
 
-
 def save_checkpoint(model, optimizer, checkpoint_format, epoch):
     if hvd.rank() == 0:
         filepath = checkpoint_format.format(epoch=epoch + 1)
         state = {
-            "model": model.state_dict(),
-            "optimizer": optimizer.state_dict(),
+            'model': model.state_dict(),
+            'optimizer': optimizer.state_dict(),
         }
         torch.save(state, filepath)
 
-
 class LabelSmoothLoss(torch.nn.Module):
+    
     def __init__(self, smoothing=0.0):
         super(LabelSmoothLoss, self).__init__()
         self.smoothing = smoothing
-
+    
     def forward(self, input, target):
         log_prob = F.log_softmax(input, dim=-1)
-        weight = input.new_ones(input.size()) * self.smoothing / (input.size(-1) - 1.0)
-        weight.scatter_(-1, target.unsqueeze(-1), (1.0 - self.smoothing))
+        weight = input.new_ones(input.size()) * \
+            self.smoothing / (input.size(-1) - 1.)
+        weight.scatter_(-1, target.unsqueeze(-1), (1. - self.smoothing))
         loss = (-weight * log_prob).sum(dim=-1).mean()
         return loss
-
 
 def metric_average(val_tensor):
     avg_tensor = hvd.allreduce(val_tensor)
     return avg_tensor.item()
 
-
 def create_lr_schedule(workers, warmup_epochs, decay_schedule, alpha=0.1):
     def lr_schedule(epoch):
-        lr_adj = 1.0
+        lr_adj = 1.
         if epoch < warmup_epochs:
-            lr_adj = 1.0 / workers * (epoch * (workers - 1) / warmup_epochs + 1)
+            lr_adj = 1. / workers * (epoch * (workers - 1) / warmup_epochs + 1)
         else:
             decay_schedule.sort(reverse=True)
             for e in decay_schedule:
                 if epoch >= e:
                     lr_adj *= alpha
         return lr_adj
-
     return lr_schedule
+
 
 
 class PolynomialDecay(_LRScheduler):
@@ -64,15 +62,10 @@ class PolynomialDecay(_LRScheduler):
 
     def _get_closed_form_lr(self):
         return [
-            (base_lr - self.end_lr)
-            * (
-                (1 - min(self.last_epoch, self.decay_steps) / self.decay_steps)
-                ** self.power
-            )
-            + self.end_lr
+            (base_lr - self.end_lr) * ((1 - min(self.last_epoch, self.decay_steps) /
+                                        self.decay_steps) ** self.power) + self.end_lr
             for base_lr in self.base_lrs
         ]
-
 
 class WarmupScheduler(_LRScheduler):
     def __init__(self, optimizer, warmup_epochs, after_scheduler, last_epoch=-1):
@@ -101,50 +94,26 @@ class WarmupScheduler(_LRScheduler):
 
 
 class PolynomialWarmup(WarmupScheduler):
-    def __init__(
-        self,
-        optimizer,
-        decay_steps,
-        warmup_steps=0,
-        end_lr=0.0001,
-        power=1.0,
-        last_epoch=-1,
-    ):
+    def __init__(self, optimizer, decay_steps, warmup_steps=0, end_lr=0.0001, power=1.0, last_epoch=-1):
         base_scheduler = PolynomialDecay(
-            optimizer,
-            decay_steps - warmup_steps,
-            end_lr=end_lr,
-            power=power,
-            last_epoch=last_epoch,
-        )
+            optimizer, decay_steps - warmup_steps, end_lr=end_lr, power=power, last_epoch=last_epoch)
         super().__init__(optimizer, warmup_steps, base_scheduler, last_epoch=last_epoch)
 
-
 class MLPerfLRScheduler:
-    """
+    '''
     Implements LR schedule according to MLPerf Tensorflow2 reference for Resnet50
-    This scheduler needs to be called before optimizer.step()
-    """
-
-    def __init__(
-        self,
-        optimizer,
-        train_epochs,
-        warmup_epochs,
-        steps_per_epoch,
-        base_lr,
-        end_lr=0.001,
-        power=2.0,
-    ):
-
+    This scheduler needs to be called before optimizer.step()    
+    '''
+    def __init__(self, optimizer, train_epochs, warmup_epochs, steps_per_epoch, base_lr, end_lr=0.001, power=2.0):
+        
         self.optimizer = optimizer
-        self.base_lr = base_lr
+        self.base_lr =  base_lr
         self.end_lr = end_lr
         self.power = power
-        self.train_steps = train_epochs * steps_per_epoch
-        self.warmup_steps = warmup_epochs * steps_per_epoch
+        self.train_steps = train_epochs*steps_per_epoch
+        self.warmup_steps = warmup_epochs*steps_per_epoch
         self.decay_steps = self.train_steps - self.warmup_steps + 1
-        self.current_lr = None
+        self.current_lr = None 
         self.current_step = 0
 
     def step(self):
@@ -152,24 +121,23 @@ class MLPerfLRScheduler:
 
         if self.current_step <= self.warmup_steps:
             self.current_lr = self._get_warmup_rate(self.current_step)
-        else:
-            self.current_lr = self._get_poly_rate(self.current_step)
+        else: 
+            self.current_lr = self._get_poly_rate(self.current_step) 
 
-        self._update_optimizer_lr(self.current_lr)
+        self._update_optimizer_lr(self.current_lr) 
 
     def _get_warmup_rate(self, step):
 
-        return self.base_lr * (step / self.warmup_steps)
+        return self.base_lr*(step/self.warmup_steps) 
 
-    def _get_poly_rate(self, step):
+    def _get_poly_rate(self, step): 
 
         poly_step = step - self.warmup_steps
-        poly_rate = (self.base_lr - self.end_lr) * (
-            1 - (poly_step / self.decay_steps)
-        ) ** self.power + self.end_lr
-        return poly_rate
+        poly_rate = (self.base_lr - self.end_lr)*(1-(poly_step/self.decay_steps))**self.power + self.end_lr
+        return poly_rate 
 
-    def _update_optimizer_lr(self, lr):
+    def _update_optimizer_lr(self, lr): 
 
         for param_group in self.optimizer.param_groups:
-            param_group["lr"] = lr
+            param_group['lr'] = lr
+    

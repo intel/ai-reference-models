@@ -23,7 +23,6 @@ from metrics import word_error_rate
 class Optimization(Enum):
     """Various levels of Optimization.
     WARNING: This might have effect on model accuracy."""
-
     nothing = 0
     mxprO0 = 1
     mxprO1 = 2
@@ -31,27 +30,20 @@ class Optimization(Enum):
     mxprO3 = 4
 
 
-AmpOptimizations = {
-    Optimization.mxprO0: "O0",
-    Optimization.mxprO1: "O1",
-    Optimization.mxprO2: "O2",
-    Optimization.mxprO3: "O3",
-}
-
+AmpOptimizations = {Optimization.mxprO0: "O0",
+                    Optimization.mxprO1: "O1",
+                    Optimization.mxprO2: "O2",
+                    Optimization.mxprO3: "O3"}
 
 def print_once(msg):
-    if not torch.distributed.is_initialized() or (
-        torch.distributed.is_initialized() and torch.distributed.get_rank() == 0
-    ):
+    if (not torch.distributed.is_initialized() or (torch.distributed.is_initialized() and torch.distributed.get_rank() == 0)):
         print(msg)
-
 
 def add_blank_label(labels):
     if not isinstance(labels, list):
         raise ValueError("labels must be a list of symbols")
     labels.append("<BLANK>")
     return labels
-
 
 def __rnnt_decoder_predictions_tensor(tensor, labels):
     """
@@ -66,7 +58,7 @@ def __rnnt_decoder_predictions_tensor(tensor, labels):
     labels_map = dict([(i, labels[i]) for i in range(len(labels))])
     # iterate over batch
     for ind in range(len(tensor)):
-        hypothesis = "".join([labels_map[c] for c in tensor[ind]])
+        hypothesis = ''.join([labels_map[c] for c in tensor[ind]])
         hypotheses.append(hypothesis)
     return hypotheses
 
@@ -93,14 +85,14 @@ def monitor_asr_train_progress(tensors: list, labels: list):
         for ind in range(targets_cpu_tensor.shape[0]):
             tgt_len = tgt_lenths_cpu_tensor[ind].item()
             target = targets_cpu_tensor[ind][:tgt_len].numpy().tolist()
-            reference = "".join([labels_map[c] for c in target])
+            reference = ''.join([labels_map[c] for c in target])
             references.append(reference)
         hypotheses = __rnnt_decoder_predictions_tensor(tensors[0], labels=labels)
     tag = "training_batch_WER"
     wer, _, _ = word_error_rate(hypotheses, references)
-    print_once("{0}: {1}".format(tag, wer))
-    print_once("Prediction: {0}".format(hypotheses[0]))
-    print_once("Reference: {0}".format(references[0]))
+    print_once('{0}: {1}'.format(tag, wer))
+    print_once('Prediction: {0}'.format(hypotheses[0]))
+    print_once('Reference: {0}'.format(references[0]))
     return wer
 
 
@@ -115,9 +107,8 @@ def __gather_predictions(predictions_list: list, labels: list) -> list:
     return results
 
 
-def __gather_transcripts(
-    transcript_list: list, transcript_len_list: list, labels: list
-) -> list:
+def __gather_transcripts(transcript_list: list, transcript_len_list: list,
+                                                 labels: list) -> list:
     results = []
     labels_map = dict([(i, labels[i]) for i in range(len(labels))])
     # iterate over workers
@@ -128,7 +119,7 @@ def __gather_transcripts(
         for ind in range(t.shape[0]):
             tgt_len = ln_lc[ind].item()
             target = t_lc[ind][:tgt_len].numpy().tolist()
-            reference = "".join([labels_map[c] for c in target])
+            reference = ''.join([labels_map[c] for c in target])
             results.append(reference)
     return results
 
@@ -142,21 +133,21 @@ def process_evaluation_batch(tensors: dict, global_vars: dict, labels: list):
         labels: A list of labels
     """
     for kv, v in tensors.items():
-        if kv.startswith("loss"):
-            global_vars["EvalLoss"] += __gather_losses(v)
-        elif kv.startswith("predictions"):
-            global_vars["predictions"] += __gather_predictions(v, labels=labels)
-        elif kv.startswith("transcript_length"):
+        if kv.startswith('loss'):
+            global_vars['EvalLoss'] += __gather_losses(v)
+        elif kv.startswith('predictions'):
+            global_vars['predictions'] += __gather_predictions(v, labels=labels)
+        elif kv.startswith('transcript_length'):
             transcript_len_list = v
-        elif kv.startswith("transcript"):
+        elif kv.startswith('transcript'):
 
             transcript_list = v
-        elif kv.startswith("output"):
-            global_vars["logits"] += v
+        elif kv.startswith('output'):
+            global_vars['logits'] += v
 
-    global_vars["transcripts"] += __gather_transcripts(
-        transcript_list, transcript_len_list, labels=labels
-    )
+    global_vars['transcripts'] += __gather_transcripts(transcript_list,
+                                                       transcript_len_list,
+                                                       labels=labels)
 
 
 def process_evaluation_epoch(global_vars: dict, tag=None):
@@ -168,16 +159,14 @@ def process_evaluation_epoch(global_vars: dict, tag=None):
         wer: final word error rate
         loss: final loss
     """
-    if "EvalLoss" in global_vars:
-        eloss = torch.mean(torch.stack(global_vars["EvalLoss"])).item()
+    if 'EvalLoss' in global_vars:
+        eloss = torch.mean(torch.stack(global_vars['EvalLoss'])).item()
     else:
         eloss = None
-    hypotheses = global_vars["predictions"]
-    references = global_vars["transcripts"]
+    hypotheses = global_vars['predictions']
+    references = global_vars['transcripts']
 
-    wer, scores, num_words = word_error_rate(
-        hypotheses=hypotheses, references=references
-    )
+    wer, scores, num_words = word_error_rate(hypotheses=hypotheses, references=references)
     multi_gpu = torch.distributed.is_initialized()
     if multi_gpu:
         if eloss is not None:
@@ -195,8 +184,9 @@ def process_evaluation_epoch(global_vars: dict, tag=None):
         dist.all_reduce(num_words_tensor)
         num_words = num_words_tensor.item()
         del num_words_tensor
-        wer = scores * 1.0 / num_words
+        wer = scores *1.0/num_words
     return wer, eloss
+
 
 
 def norm(x):
@@ -208,7 +198,7 @@ def norm(x):
 
 def print_dict(d):
     maxLen = max([len(ii) for ii in d.keys()])
-    fmtString = "\t%" + str(maxLen) + "s : %s"
-    print("Arguments:")
+    fmtString = '\t%' + str(maxLen) + 's : %s'
+    print('Arguments:')
     for keyPair in sorted(d.items()):
-        print(fmtString % keyPair)
+            print(fmtString % keyPair)

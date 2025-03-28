@@ -9,10 +9,7 @@ def scale_image(image, scale_factor):
     scale_factor = np.asarray(scale_factor)
     new_affine = np.copy(image.affine)
     new_affine[:3, :3] = image.affine[:3, :3] * scale_factor
-    new_affine[:, 3][:3] = (
-        image.affine[:, 3][:3]
-        + (image.shape * np.diag(image.affine)[:3] * (1 - scale_factor)) / 2
-    )
+    new_affine[:, 3][:3] = image.affine[:, 3][:3] + (image.shape * np.diag(image.affine)[:3] * (1 - scale_factor)) / 2
     return new_img_like(image, data=image.get_data(), affine=new_affine)
 
 
@@ -63,20 +60,13 @@ def augment_data(data, truth, affine, scale_deviation=None, flip=True):
     data_list = list()
     for data_index in range(data.shape[0]):
         image = get_image(data[data_index], affine)
-        data_list.append(
-            resample_to_img(
-                distort_image(image, flip_axis=flip_axis, scale_factor=scale_factor),
-                image,
-                interpolation="continuous",
-            ).get_data()
-        )
+        data_list.append(resample_to_img(distort_image(image, flip_axis=flip_axis,
+                                                       scale_factor=scale_factor), image,
+                                         interpolation="continuous").get_data())
     data = np.asarray(data_list)
     truth_image = get_image(truth, affine)
-    truth_data = resample_to_img(
-        distort_image(truth_image, flip_axis=flip_axis, scale_factor=scale_factor),
-        truth_image,
-        interpolation="nearest",
-    ).get_data()
+    truth_data = resample_to_img(distort_image(truth_image, flip_axis=flip_axis, scale_factor=scale_factor),
+                                 truth_image, interpolation="nearest").get_data()
     return data, truth_data
 
 
@@ -99,15 +89,8 @@ def generate_permutation_keys():
     48 unique rotations & reflections:
     https://en.wikipedia.org/wiki/Octahedral_symmetry#The_isometries_of_the_cube
     """
-    return set(
-        itertools.product(
-            itertools.combinations_with_replacement(range(2), 2),
-            range(2),
-            range(2),
-            range(2),
-            range(2),
-        )
-    )
+    return set(itertools.product(
+        itertools.combinations_with_replacement(range(2), 2), range(2), range(2), range(2), range(2)))
 
 
 def random_permutation_key():

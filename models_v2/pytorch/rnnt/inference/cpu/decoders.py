@@ -21,7 +21,6 @@ from model_rnnt import label_collate
 
 import time
 
-
 class TransducerDecoder:
     """Decoder base class.
 
@@ -34,7 +33,7 @@ class TransducerDecoder:
 
     def __init__(self, blank_index, model):
         self._model = model
-        self._SOS = -1  # start of sequence
+        self._SOS = -1   # start of sequence
         self._blank_id = blank_index
 
     def _pred_step(self, label, hidden, device):
@@ -57,27 +56,9 @@ class TransducerDecoder:
     def _get_last_symb(self, labels):
         return self._SOS if labels == [] else labels[-1]
 
-
-def _update_batch(
-    dim,
-    max_lens,
-    max_symbols,
-    _SOS,
-    blankness,
-    blank_vec,
-    x,
-    hidden_prime,
-    hidden,
-    label_col,
-    label_row,
-    label_tensor,
-    symbols_added,
-    time_idxs,
-    f,
-    k,
-):
+def _update_batch(dim, max_lens, max_symbols, _SOS, blankness, blank_vec, x, hidden_prime, hidden, label_col, label_row, label_tensor, symbols_added, time_idxs, f, k):
     # ones = torch.ones_like(label_col)
-
+    
     symbols_added *= blankness.logical_not()
     tmp_blank_vec = blank_vec.logical_or(blankness)
 
@@ -90,16 +71,14 @@ def _update_batch(
         hidden = [torch.zeros_like(hidden_prime[0]), torch.zeros_like(hidden_prime[1])]
 
     not_blank = tmp_blank_vec.eq(0)
-
+    
     idx = (not_blank).nonzero(as_tuple=True)[0]
 
     hidden[0][:, idx, :] = hidden_prime[0][:, idx, :]
     hidden[1][:, idx, :] = hidden_prime[1][:, idx, :]
 
     label_col += not_blank
-    label_tensor.index_put_(
-        [label_row, label_col], (k - _SOS) * not_blank, accumulate=True
-    )
+    label_tensor.index_put_([label_row, label_col], (k-_SOS)*not_blank, accumulate=True)
 
     symbols_added += not_blank
 
@@ -125,7 +104,6 @@ def _update_batch(
 
     return hidden, label_tensor, label_col, f, time_idxs, symbols_added
 
-
 class RNNTGreedyDecoder(TransducerDecoder):
     """A greedy transducer decoder.
 
@@ -138,7 +116,6 @@ class RNNTGreedyDecoder(TransducerDecoder):
         cutoff_prob: Skip to next step in search if current highest character
             probability is less than this.
     """
-
     def __init__(self, blank_index, model, max_symbols_per_step=30):
         super().__init__(blank_index, model)
         assert max_symbols_per_step is None or max_symbols_per_step > 0
@@ -170,7 +147,7 @@ class RNNTGreedyDecoder(TransducerDecoder):
             #     logitlen = out_lens[batch_idx]
             #     sentence = self._greedy_decode(inseq, logitlen)
             #     output.append(sentence)
-
+            
             if args.print_time:
                 t1 = time.time()
 
@@ -180,11 +157,7 @@ class RNNTGreedyDecoder(TransducerDecoder):
                 output = self._greedy_decode_batch_origin(logits, out_lens, args.ipex)
 
             if args.print_time:
-                print(
-                    "encoder time: {0}, decoder time: {1}".format(
-                        t1 - t0, time.time() - t1
-                    )
-                )
+                print("encoder time: {0}, decoder time: {1}".format(t1 - t0, time.time() - t1))
 
         return output
 
@@ -203,10 +176,12 @@ class RNNTGreedyDecoder(TransducerDecoder):
             symbols_added = 0
 
             while not_blank and (
-                self.max_symbols is None or symbols_added < self.max_symbols
-            ):
+                    self.max_symbols is None or
+                    symbols_added < self.max_symbols):
                 g, hidden_prime = self._pred_step(
-                    self._get_last_symb(label), hidden, device
+                    self._get_last_symb(label),
+                    hidden,
+                    device
                 )
                 logp = self._joint_step(f, g, log_normalize=False)[0, :]
 
@@ -228,14 +203,10 @@ class RNNTGreedyDecoder(TransducerDecoder):
         batch_size = x.size(0)
         hidden = None
         max_len = out_lens.max()
-        max_lens = torch.tensor(
-            [max_len - 1 for i in range(batch_size)], dtype=torch.int64
-        )
+        max_lens = torch.tensor([max_len-1 for i in range(batch_size)], dtype=torch.int64)
         # pos 0 of label_tensor is set to _SOS to simplify computation
         # real label start from pos 1
-        label_tensor = torch.tensor([self._SOS]).repeat(
-            batch_size, max_len * self.max_symbols
-        )
+        label_tensor = torch.tensor([self._SOS]).repeat(batch_size, max_len*self.max_symbols)
         # (row, col) of current labels end
         label_row = torch.tensor([i for i in range(batch_size)])
         label_col = torch.tensor([0 for i in range(batch_size)])
@@ -252,7 +223,10 @@ class RNNTGreedyDecoder(TransducerDecoder):
 
         while True:
             g, hidden_prime = self._pred_step_batch(
-                label_tensor.gather(1, label_col.unsqueeze(1)), hidden, batch_size, ipex
+                label_tensor.gather(1, label_col.unsqueeze(1)),
+                hidden,
+                batch_size,
+                ipex
             )
             logp = self._joint_step_batch(f, g, ipex, log_normalize=False)
 
@@ -278,15 +252,8 @@ class RNNTGreedyDecoder(TransducerDecoder):
                 #     import intel_extension_for_pytorch as ipex
                 #     _update_batch = ipex.rnnt_update_batch
 
-                (
-                    hidden,
-                    label_tensor,
-                    label_col,
-                    f,
-                    time_idxs,
-                    symbols_added,
-                ) = _update_batch(
-                    f.size()[2],
+                hidden, label_tensor, label_col, f, time_idxs, symbols_added = _update_batch(
+                    f.size()[2], 
                     max_lens,
                     self.max_symbols,
                     self._SOS,
@@ -301,12 +268,11 @@ class RNNTGreedyDecoder(TransducerDecoder):
                     symbols_added,
                     time_idxs,
                     f,
-                    k,
-                )
+                    k)
 
         for i in range(batch_size):
-            label_copy[i] = label_tensor[i][1 : label_col[i] + 1].tolist()
-        return label_copy
+            label_copy[i]=label_tensor[i][1:label_col[i]+1].tolist()
+        return label_copy        
 
     def _greedy_decode_batch(self, x, out_lens, ipex):
         batch_size = x.size(0)
@@ -321,13 +287,11 @@ class RNNTGreedyDecoder(TransducerDecoder):
 
         # pos 0 of label_tensor is set to _SOS to simplify computation
         # real label start from pos 1
-        label_tensor = torch.empty(
-            (batch_size, max_len * self.max_symbols), dtype=torch.long
-        ).fill_(self._SOS)
+        label_tensor = torch.empty((batch_size, max_len*self.max_symbols), dtype=torch.long).fill_(self._SOS)
         # TODO: use custom kernel to init tensors
         # label_tensor = torch.empty((batch_size, max_len*self.max_symbols), dtype=torch.long)
         # torch.ops.torch_ipex.rnnt_tensor_init(label_tensor, self._SOS, batch_size*max_len*self.max_symbols)
-
+        
         # (row, col) of current labels end
         label_col = torch.zeros((batch_size), dtype=torch.int)
         ones = torch.ones((1), dtype=torch.int)
@@ -338,12 +302,13 @@ class RNNTGreedyDecoder(TransducerDecoder):
         not_blank = torch.zeros((batch_size), dtype=torch.int)
         label_to_put = torch.zeros((batch_size), dtype=torch.long)
 
-        label_for_next_loop = torch.tensor(
-            [self._SOS for i in range(batch_size)], dtype=torch.long
-        )
+        label_for_next_loop = torch.tensor([self._SOS for i in range(batch_size)], dtype=torch.long)
         while True:
             g, hidden_prime = self._pred_step_batch(
-                label_for_next_loop.unsqueeze(1), hidden, batch_size, ipex
+                label_for_next_loop.unsqueeze(1),
+                hidden,
+                batch_size,
+                ipex
             )
             logp = self._joint_step_batch(f, g, ipex, log_normalize=False)
 
@@ -351,10 +316,7 @@ class RNNTGreedyDecoder(TransducerDecoder):
             v, k = logp.max(1)
 
             if hidden == None:
-                hidden = [
-                    torch.zeros_like(hidden_prime[0]),
-                    torch.zeros_like(hidden_prime[1]),
-                ]
+                hidden = [torch.zeros_like(hidden_prime[0]), torch.zeros_like(hidden_prime[1])]
 
             # out_lens dtype int32 or int64?
             finished = torch.ops.torch_ipex.rnnt_update_batch(
@@ -379,20 +341,20 @@ class RNNTGreedyDecoder(TransducerDecoder):
                 self._blank_id,
                 batch_size,
                 self._SOS,
-                max_len,
-            )
+                max_len)
+
 
             if finished:
                 # all time_idxs processed, stop
                 break
 
         for i in range(batch_size):
-            label_copy[i] = label_tensor[i][1 : label_col[i] + ones].tolist()
+            label_copy[i]=label_tensor[i][1:label_col[i]+ones].tolist()
         return label_copy
 
     def _pred_step_batch(self, label, hidden, batch_size, ipex):
         # not really need this line, _blank_id is the last id of dict
-        # label = label - label.gt(self._blank_id).int()
+        #label = label - label.gt(self._blank_id).int()
         if ipex:
             result = self._model.predict_batch(label, hidden, batch_size)
         else:

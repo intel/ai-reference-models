@@ -24,9 +24,7 @@ def get_cropping_parameters(in_files):
 def reslice_image_set(in_files, image_shape, out_files=None, label_indices=None):
     if label_indices is None:
         label_indices = []
-    elif not isinstance(label_indices, collections.Iterable) or isinstance(
-        label_indices, str
-    ):
+    elif not isinstance(label_indices, collections.Iterable) or isinstance(label_indices, str):
         label_indices = [label_indices]
 
     crop_slices = get_cropping_parameters([in_files])
@@ -35,14 +33,7 @@ def reslice_image_set(in_files, image_shape, out_files=None, label_indices=None)
         interpolation = "continuous"
         if index in label_indices:
             interpolation = "nearest"
-        images.append(
-            read_image(
-                in_file,
-                image_shape=image_shape,
-                crop=crop_slices,
-                interpolation=interpolation,
-            )
-        )
+        images.append(read_image(in_file, image_shape=image_shape, crop=crop_slices, interpolation=interpolation))
     if out_files:
         for image, out_file in zip(images, out_files):
             image.to_filename(out_file)
@@ -62,15 +53,11 @@ def get_complete_foreground(training_data_files):
     return new_img_like(read_image(training_data_files[0][-1]), foreground)
 
 
-def get_foreground_from_set_of_files(
-    set_of_files, background_value=0, tolerance=0.00001
-):
+def get_foreground_from_set_of_files(set_of_files, background_value=0, tolerance=0.00001):
     for i, image_file in enumerate(set_of_files):
         image = read_image(image_file)
-        is_foreground = np.logical_or(
-            image.get_data() < (background_value - tolerance),
-            image.get_data() > (background_value + tolerance),
-        )
+        is_foreground = np.logical_or(image.get_data() < (background_value - tolerance),
+                                      image.get_data() > (background_value + tolerance))
         if i == 0:
             foreground = np.zeros(is_foreground.shape, dtype=np.uint8)
 
@@ -97,3 +84,5 @@ def normalize_data_storage(data_storage):
     for index in range(data_storage.shape[0]):
         data_storage[index] = normalize_data(data_storage[index], mean, std)
     return data_storage
+
+

@@ -30,4 +30,6 @@ PERF = {
     "unit": "sample/s",
 }
 
-FUNCTIONAL = {"pattern": r"No warnings encountered during test."}
+FUNCTIONAL = {
+    "pattern": r"No warnings encountered during test."
+}

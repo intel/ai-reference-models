@@ -1,19 +1,19 @@
 # A modification version from chainercv repository.
 # (See https://github.com/chainer/chainercv/blob/master/chainercv/evaluations/eval_detection_voc.py)
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -90,7 +90,7 @@ def calc_detection_voc_prec_rec(gt_boxlists, pred_boxlists, iou_thresh=0.5):
     predicted bounding boxes obtained from a dataset which has :math:`N`
     images.
     The code is based on the evaluation code used in PASCAL VOC Challenge.
-    """
+   """
     n_pos = defaultdict(int)
     score = defaultdict(list)
     match = defaultdict(list)

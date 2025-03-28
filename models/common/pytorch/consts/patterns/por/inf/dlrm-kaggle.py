@@ -30,4 +30,6 @@ PERF = {
     "unit": "inst/s",
 }
 
-FUNCTIONAL = {"pattern": r"dlrm_inf throughput:  \d+.\d+  samples/s"}
+FUNCTIONAL = {
+    "pattern": r"dlrm_inf throughput:  \d+.\d+  samples/s"
+}

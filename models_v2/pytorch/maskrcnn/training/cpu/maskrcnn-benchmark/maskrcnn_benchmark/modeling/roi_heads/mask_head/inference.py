@@ -1,20 +1,19 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import numpy as np
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -111,10 +110,10 @@ class MaskPostProcessorCOCOFormat(MaskPostProcessor):
 # but are kept here for the moment while we need them
 # temporarily gor paste_mask_in_image
 def expand_boxes(boxes, scale):
-    w_half = (boxes[:, 2] - boxes[:, 0]) * 0.5
-    h_half = (boxes[:, 3] - boxes[:, 1]) * 0.5
-    x_c = (boxes[:, 2] + boxes[:, 0]) * 0.5
-    y_c = (boxes[:, 3] + boxes[:, 1]) * 0.5
+    w_half = (boxes[:, 2] - boxes[:, 0]) * .5
+    h_half = (boxes[:, 3] - boxes[:, 1]) * .5
+    x_c = (boxes[:, 2] + boxes[:, 0]) * .5
+    y_c = (boxes[:, 3] + boxes[:, 1]) * .5
 
     w_half *= scale
     h_half *= scale
@@ -159,7 +158,7 @@ def paste_mask_in_image(mask, box, im_h, im_w, thresh=0.5, padding=1):
 
     # Resize mask
     mask = mask.to(torch.float32)
-    mask = interpolate(mask, size=(h, w), mode="bilinear", align_corners=False)
+    mask = interpolate(mask, size=(h, w), mode='bilinear', align_corners=False)
     mask = mask[0][0]
 
     if thresh >= 0:

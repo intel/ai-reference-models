@@ -20,7 +20,7 @@ import json
 
 
 def transfer_res_to_json(prefix):
-    print("Performance for " + prefix)
+    print("Performance for "+prefix)
     with open(prefix + "_throughput.txt") as f:
         throughput = float(f.readlines()[0].split(" ")[1])
         print(throughput)
@@ -35,15 +35,14 @@ def transfer_res_to_json(prefix):
         for line in lines:
             accu = float(line.split(" ")[-2][1:-1])
             accus.append(accu)
-        accuracy = sum(accus) / len(accus)
+        accuracy = sum(accus)/len(accus)        
         print(accuracy)
-
-    json_file = prefix + ".json"
+        
+    json_file = prefix+".json"
     with open(json_file, "w") as f:
-        res = {"accuracy": accuracy, "throughput": throughput, "latency": latency}
+        res={'accuracy':accuracy, 'throughput':throughput, 'latency':latency}
         json.dump(res, f)
-        print("Save to " + json_file + "\n")
-
+        print("Save to "+json_file+"\n")
 
 transfer_res_to_json("fp32")
 transfer_res_to_json("int8")

@@ -50,7 +50,8 @@ class GainPerturbation(Perturbation):
 
     def perturb(self, data):
         gain = self._rng.uniform(self._min_gain_dbfs, self._max_gain_dbfs)
-        data._samples = data._samples * (10.0 ** (gain / 20.0))
+        data._samples = data._samples * (10. ** (gain / 20.))
+
 
 
 class ShiftPerturbation(Perturbation):
@@ -87,14 +88,14 @@ class AudioAugmentor(object):
         self._pipeline = perturbations if perturbations is not None else []
 
     def perturb(self, segment):
-        for prob, p in self._pipeline:
+        for (prob, p) in self._pipeline:
             if self._rng.random() < prob:
                 p.perturb(segment)
         return
 
     def max_augmentation_length(self, length):
         newlen = length
-        for prob, p in self._pipeline:
+        for (prob, p) in self._pipeline:
             newlen = p.max_augmentation_length(newlen)
         return newlen
 
@@ -102,9 +103,9 @@ class AudioAugmentor(object):
     def from_config(cls, config):
         ptbs = []
         for p in config:
-            if p["aug_type"] not in perturbation_types:
-                print(p["aug_type"], "perturbation not known. Skipping.")
+            if p['aug_type'] not in perturbation_types:
+                print(p['aug_type'], "perturbation not known. Skipping.")
                 continue
-            perturbation = perturbation_types[p["aug_type"]]
-            ptbs.append((p["prob"], perturbation(**p["cfg"])))
+            perturbation = perturbation_types[p['aug_type']]
+            ptbs.append((p['prob'], perturbation(**p['cfg'])))
         return cls(perturbations=ptbs)

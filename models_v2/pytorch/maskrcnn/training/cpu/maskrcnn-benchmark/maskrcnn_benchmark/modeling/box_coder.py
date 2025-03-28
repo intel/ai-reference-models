@@ -1,20 +1,19 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import math
-
 # MIT License
-#
+# 
 # Copyright (c) 2018 Facebook
-#
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
+# 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-#
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,7 +31,7 @@ class BoxCoder(object):
     the representation used for training the regressors.
     """
 
-    def __init__(self, weights, bbox_xform_clip=math.log(1000.0 / 16)):
+    def __init__(self, weights, bbox_xform_clip=math.log(1000. / 16)):
         """
         Arguments:
             weights (4-element tuple)
@@ -123,12 +122,8 @@ class BoxCoder(object):
         wx, wy, ww, wh = self.weights
         dx = rel_codes[:, 0::4] / wx + 0.5
         dy = rel_codes[:, 1::4] / wy + 0.5
-        exp_dw = 0.5 * torch.exp(
-            torch.clamp(rel_codes[:, 2::4] / ww, max=self.bbox_xform_clip)
-        )
-        exp_dh = 0.5 * torch.exp(
-            torch.clamp(rel_codes[:, 3::4] / wh, max=self.bbox_xform_clip)
-        )
+        exp_dw = 0.5 * torch.exp(torch.clamp(rel_codes[:, 2::4] / ww, max=self.bbox_xform_clip))
+        exp_dh = 0.5 * torch.exp(torch.clamp(rel_codes[:, 3::4] / wh, max=self.bbox_xform_clip))
 
         pred_boxes = torch.zeros_like(rel_codes)
         # x1
@@ -136,12 +131,8 @@ class BoxCoder(object):
         # y1
         pred_boxes[:, 1::4] = (dy - exp_dh) * heights[:, None] + (boxes[:, 1])[:, None]
         # x2 (note: "- 1" is correct; don't be fooled by the asymmetry)
-        pred_boxes[:, 2::4] = (
-            (dx + exp_dw) * widths[:, None] + (boxes[:, 0])[:, None] - 1
-        )
+        pred_boxes[:, 2::4] = (dx + exp_dw) * widths[:, None] + (boxes[:, 0])[:, None] - 1
         # y2 (note: "- 1" is correct; don't be fooled by the asymmetry)
-        pred_boxes[:, 3::4] = (
-            (dy + exp_dh) * heights[:, None] + (boxes[:, 1])[:, None] - 1
-        )
+        pred_boxes[:, 3::4] = (dy + exp_dh) * heights[:, None] + (boxes[:, 1])[:, None] - 1
 
         return pred_boxes

@@ -19,7 +19,7 @@ ACC = {
     "type": "total",
     "pattern": r"AUROC over test set: (\d+.\d+)",
     "unit": "AUROC",
-    "number_of_partials": 2,
+    "number_of_partials": 2
 }
 
 

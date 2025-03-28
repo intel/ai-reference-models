@@ -22,7 +22,9 @@ import torch
 
 # Dictionary of Torchvision object detection models
 torchvision_model_map = {
-    "fasterrcnn_resnet50_fpn": {"predictor_model": "faster_rcnn.FastRCNNPredictor"},
+    "fasterrcnn_resnet50_fpn": {
+        "predictor_model": "faster_rcnn.FastRCNNPredictor"
+    },
     "fasterrcnn_mobilenet_v3_large_fpn": {
         "predictor_model": "faster_rcnn.FastRCNNPredictor"
     },
@@ -31,28 +33,24 @@ torchvision_model_map = {
     },
     "retinanet_resnet50_fpn": {
         "predictor_model": "retinanet.RetinaNetClassificationHead"
-    },
+    }
 }
 
 
-def get_retrainable_model(
-    model_name, num_classes, pretrained_model_class, predictor_class
-):
+def get_retrainable_model(model_name, num_classes, pretrained_model_class, predictor_class):
     # Load an object detection model pre-trained on COCO
     model = pretrained_model_class(pretrained=True)
 
-    if "fasterrcnn" in model_name:
+    if 'fasterrcnn' in model_name:
         in_features = model.roi_heads.box_predictor.cls_score.in_features
         model.roi_heads.box_predictor = predictor_class(in_features, num_classes)
 
-    elif "retinanet" in model_name:
+    elif 'retinanet' in model_name:
         # To keep the pretrained weights, do not overwrite the classification_head
         in_features = model.head.classification_head.conv[0].in_channels
         num_anchors = model.head.classification_head.num_anchors
         model.head.classification_head.num_classes = num_classes
-        cls_logits = torch.nn.Conv2d(
-            in_features, num_anchors * num_classes, kernel_size=3, stride=1, padding=1
-        )
+        cls_logits = torch.nn.Conv2d(in_features, num_anchors * num_classes, kernel_size=3, stride=1, padding=1)
         torch.nn.init.normal_(cls_logits.weight, std=0.01)
         torch.nn.init.constant_(cls_logits.bias, -math.log((1 - 0.01) / 0.01))
         model.head.classification_head.cls_logits = cls_logits

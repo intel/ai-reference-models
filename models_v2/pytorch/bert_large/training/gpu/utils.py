@@ -41,7 +41,7 @@ def generate_seeds(rng, size):
     :param rng: random number generator
     :param size: length of the returned list
     """
-    seeds = [rng.randint(0, 2**32 - 1) for _ in range(size)]
+    seeds = [rng.randint(0, 2 ** 32 - 1) for _ in range(size)]
     return seeds
 
 
@@ -74,7 +74,7 @@ def setup_seeds(master_seed, epochs, device):
     """
     if master_seed is None:
         # random master seed, random.SystemRandom() uses /dev/urandom on Unix
-        master_seed = random.SystemRandom().randint(0, 2**32 - 1)
+        master_seed = random.SystemRandom().randint(0, 2 ** 32 - 1)
         if get_rank() == 0:
             # master seed is reported only from rank=0 worker, it's to avoid
             # confusion, seeds from rank=0 are later broadcasted to other

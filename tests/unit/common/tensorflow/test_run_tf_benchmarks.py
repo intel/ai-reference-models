@@ -79,27 +79,10 @@ test_arg_values = parse_model_args_file()
 @patch("common.platform_util.system_platform")
 @patch("common.platform_util.subprocess")
 @patch("common.base_model_init.BaseModelInitializer.run_command")
-def test_run_benchmark(
-    mock_run_command,
-    mock_subprocess,
-    mock_platform,
-    mock_os,
-    mock_get_cpuset,
-    mock_glob,
-    mock_remove,
-    mock_chdir,
-    mock_stat,
-    mock_path_exists,
-    mock_is_file,
-    mock_is_dir,
-    mock_listdir,
-    mock_rmtree,
-    mock_mkdir,
-    test_args,
-    expected_cmd,
-    comment,
-    cpuset,
-):
+def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform, mock_os, mock_get_cpuset,
+                       mock_glob, mock_remove, mock_chdir, mock_stat, mock_path_exists,
+                       mock_is_file, mock_is_dir, mock_listdir, mock_rmtree, mock_mkdir,
+                       test_args, expected_cmd, comment, cpuset):
     """
     Runs through executing the specified run_tf_benchmarks.py command from the
     test_args and verifying that the model_init file calls run_command with
@@ -113,13 +96,11 @@ def test_run_benchmark(
         os.environ["MPI_HOSTNAMES"] = "None"
     else:
         if "--mpi_num_processes=" in test_args:
-            match_mpi_procs = re.search("--mpi_num_processes=([0-9]+)", test_args)
+            match_mpi_procs = re.search('--mpi_num_processes=([0-9]+)', test_args)
             if match_mpi_procs and match_mpi_procs.lastindex >= 1:
                 os.environ["MPI_NUM_PROCESSES"] = match_mpi_procs.group(1)
         if "--mpi_num_processes_per_socket=" in test_args:
-            match_per_socket = re.search(
-                "--mpi_num_processes_per_socket=([0-9]+)", test_args
-            )
+            match_per_socket = re.search('--mpi_num_processes_per_socket=([0-9]+)', test_args)
             if match_per_socket and match_per_socket.lastindex >= 1:
                 os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] = match_per_socket.group(1)
 
@@ -135,12 +116,8 @@ def test_run_benchmark(
     platform_config.set_mock_system_type(mock_platform)
     platform_config.set_mock_os_access(mock_os)
     platform_config.set_mock_lscpu_subprocess_values(mock_subprocess)
-    test_args = re.sub(
-        " +", " ", test_args
-    )  # get rid of extra spaces in the test_args string
-    expected_cmd = re.sub(
-        " +", " ", expected_cmd
-    )  # get rid of extra spaces in the expected_cmd string
+    test_args = re.sub(" +", " ", test_args)        # get rid of extra spaces in the test_args string
+    expected_cmd = re.sub(" +", " ", expected_cmd)  # get rid of extra spaces in the expected_cmd string
     test_arg_list = test_args.split(" ")
     with patch.object(sys, "argv", test_arg_list):
         model_benchmark = ModelBenchmarkUtil()
@@ -149,36 +126,21 @@ def test_run_benchmark(
     call_args = mock_run_command.call_args_list[0][0][0]
     # python3 argparse parses things in different order than python2
     # we'll check that the args are all there though
-    for actual_arg, expected_arg in zip(
-        sorted(call_args.split()), sorted(expected_cmd.split())
-    ):
+    for actual_arg, expected_arg in zip(sorted(call_args.split()), sorted(expected_cmd.split())):
         # use fnmatch in case we have file names with wildcards (like timestamps in output files)
-        assert fnmatch.fnmatch(
-            actual_arg, expected_arg
-        ), "Expected: {}\nActual: {}".format(expected_cmd, call_args)
+        assert fnmatch.fnmatch(actual_arg, expected_arg), \
+            "Expected: {}\nActual: {}".format(expected_cmd, call_args)
 
 
-@pytest.mark.parametrize(
-    "test_args,socket_id,cpuset",
-    [
-        [
-            "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 "
-            "--mode inference --model-name inceptionv3 --batch-size 128 "
-            "--in-graph /final_int8_inceptionv3.pb --intelai-models . --socket-id 1 "
-            "--benchmark-only",
-            "1",
-            "0-2",
-        ],
-        [
-            "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 "
-            "--mode inference --model-name inceptionv3 --batch-size 128 "
-            "--in-graph /final_int8_inceptionv3.pb --intelai-models . --socket-id 0 "
-            "--benchmark-only",
-            "0",
-            "50-55",
-        ],
-    ],
-)
+@pytest.mark.parametrize("test_args,socket_id,cpuset",
+                         [["run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 "
+                           "--mode inference --model-name inceptionv3 --batch-size 128 "
+                           "--in-graph /final_int8_inceptionv3.pb --intelai-models . --socket-id 1 "
+                           "--benchmark-only", "1", "0-2"],
+                          ["run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 "
+                           "--mode inference --model-name inceptionv3 --batch-size 128 "
+                           "--in-graph /final_int8_inceptionv3.pb --intelai-models . --socket-id 0 "
+                           "--benchmark-only", "0", "50-55"]])
 @patch("os.mkdir")
 @patch("shutil.rmtree")
 @patch("os.listdir")
@@ -194,26 +156,10 @@ def test_run_benchmark(
 @patch("common.platform_util.system_platform")
 @patch("common.platform_util.subprocess")
 @patch("common.base_model_init.BaseModelInitializer.run_command")
-def test_run_benchmark_bad_socket(
-    mock_run_command,
-    mock_subprocess,
-    mock_platform,
-    mock_os,
-    mock_get_cpuset,
-    mock_glob,
-    mock_remove,
-    mock_chdir,
-    mock_stat,
-    mock_path_exists,
-    mock_is_file,
-    mock_is_dir,
-    mock_listdir,
-    mock_rmtree,
-    mock_mkdir,
-    test_args,
-    socket_id,
-    cpuset,
-):
+def test_run_benchmark_bad_socket(mock_run_command, mock_subprocess, mock_platform, mock_os, mock_get_cpuset,
+                                  mock_glob, mock_remove, mock_chdir, mock_stat, mock_path_exists,
+                                  mock_is_file, mock_is_dir, mock_listdir, mock_rmtree, mock_mkdir,
+                                  test_args, socket_id, cpuset):
     """
     Checks to ensure that the proper error handling is done when the cpuset does not include any cores
     for the specified socket_id
@@ -225,13 +171,11 @@ def test_run_benchmark_bad_socket(
         os.environ["MPI_HOSTNAMES"] = "None"
     else:
         if "--mpi_num_processes=" in test_args:
-            match_mpi_procs = re.search("--mpi_num_processes=([0-9]+)", test_args)
+            match_mpi_procs = re.search('--mpi_num_processes=([0-9]+)', test_args)
             if match_mpi_procs and match_mpi_procs.lastindex >= 1:
                 os.environ["MPI_NUM_PROCESSES"] = match_mpi_procs.group(1)
         if "--mpi_num_processes_per_socket=" in test_args:
-            match_per_socket = re.search(
-                "--mpi_num_processes_per_socket=([0-9]+)", test_args
-            )
+            match_per_socket = re.search('--mpi_num_processes_per_socket=([0-9]+)', test_args)
             if match_per_socket and match_per_socket.lastindex >= 1:
                 os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] = match_per_socket.group(1)
 
@@ -247,14 +191,10 @@ def test_run_benchmark_bad_socket(
     platform_config.set_mock_system_type(mock_platform)
     platform_config.set_mock_os_access(mock_os)
     platform_config.set_mock_lscpu_subprocess_values(mock_subprocess)
-    test_args = re.sub(
-        " +", " ", test_args
-    )  # get rid of extra spaces in the test_args string
+    test_args = re.sub(" +", " ", test_args)        # get rid of extra spaces in the test_args string
     test_arg_list = test_args.split(" ")
-    with pytest.raises(
-        SystemExit,
-        match="ERROR: There are no socket id {} cores in the cpuset.".format(socket_id),
-    ):
+    with pytest.raises(SystemExit,
+                       match="ERROR: There are no socket id {} cores in the cpuset.".format(socket_id)):
         with patch.object(sys, "argv", test_arg_list):
             model_benchmark = ModelBenchmarkUtil()
             model_benchmark.main()

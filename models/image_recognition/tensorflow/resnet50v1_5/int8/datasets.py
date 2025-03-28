@@ -43,82 +43,72 @@ import tensorflow as tf
 IMAGENET_NUM_TRAIN_IMAGES = 1281167
 IMAGENET_NUM_VAL_IMAGES = 50000
 
-
 class Dataset(object):
-    """Abstract class for cnn benchmarks dataset."""
+  """Abstract class for cnn benchmarks dataset."""
 
-    def __init__(
-        self,
-        name,
-        height=None,
-        width=None,
-        depth=None,
-        data_dir=None,
-        queue_runner_required=False,
-        num_classes=1000,
-    ):
-        self.name = name
-        self.height = height
-        self.width = width
-        self.depth = depth or 3
+  def __init__(self, name, height=None, width=None, depth=None, data_dir=None,
+               queue_runner_required=False, num_classes=1000):
+    self.name = name
+    self.height = height
+    self.width = width
+    self.depth = depth or 3
 
-        self.data_dir = data_dir
-        self._queue_runner_required = queue_runner_required
-        self._num_classes = num_classes
+    self.data_dir = data_dir
+    self._queue_runner_required = queue_runner_required
+    self._num_classes = num_classes
 
-    def tf_record_pattern(self, subset):
-        return os.path.join(self.data_dir, "%s-*-of-*" % subset)
+  def tf_record_pattern(self, subset):
+    return os.path.join(self.data_dir, '%s-*-of-*' % subset)
 
-    def reader(self):
-        return tf.compat.v1.TFRecordReader()
+  def reader(self):
+    return tf.compat.v1.TFRecordReader()
 
-    @property
-    def num_classes(self):
-        return self._num_classes
+  @property
+  def num_classes(self):
+    return self._num_classes
 
-    @num_classes.setter
-    def num_classes(self, val):
-        self._num_classes = val
+  @num_classes.setter
+  def num_classes(self, val):
+    self._num_classes = val
 
-    @abstractmethod
-    def num_examples_per_epoch(self, subset):
-        pass
+  @abstractmethod
+  def num_examples_per_epoch(self, subset):
+    pass
 
-    def __str__(self):
-        return self.name
+  def __str__(self):
+    return self.name
 
-    def get_image_preprocessor(self):
-        return None
+  def get_image_preprocessor(self):
+    return None
 
-    def queue_runner_required(self):
-        return self._queue_runner_required
+  def queue_runner_required(self):
+    return self._queue_runner_required
 
-    def use_synthetic_gpu_images(self):
-        return not self.data_dir
+  def use_synthetic_gpu_images(self):
+    return not self.data_dir
 
 
 class ImagenetData(Dataset):
-    """Configuration for Imagenet dataset."""
+  """Configuration for Imagenet dataset."""
 
-    def __init__(self, data_dir=None):
-        super(ImagenetData, self).__init__("imagenet", 300, 300, data_dir=data_dir)
+  def __init__(self, data_dir=None):
+    super(ImagenetData, self).__init__('imagenet', 300, 300, data_dir=data_dir)
 
-    def num_examples_per_epoch(self, subset="train"):
-        if subset == "train":
-            return IMAGENET_NUM_TRAIN_IMAGES
-        elif subset == "validation":
-            return IMAGENET_NUM_VAL_IMAGES
-        elif subset == "calibrate" or subset == "calibration":
-            return 100
-        else:
-            raise ValueError('Invalid data subset "%s"' % subset)
+  def num_examples_per_epoch(self, subset='train'):
+    if subset == 'train':
+      return IMAGENET_NUM_TRAIN_IMAGES
+    elif subset == 'validation':
+      return IMAGENET_NUM_VAL_IMAGES
+    elif subset == 'calibrate' or subset == 'calibration':
+      return 100
+    else:
+      raise ValueError('Invalid data subset "%s"' % subset)
 
-    def get_image_preprocessor(self, benchmark=False):
-        if benchmark:
-            import preprocessing_benchmark
+  def get_image_preprocessor(self, benchmark=False):
+    if benchmark:
+      import preprocessing_benchmark
+      return preprocessing_benchmark.RecordInputImagePreprocessor
+    else:
+      import preprocessing
+      return preprocessing.RecordInputImagePreprocessor
 
-            return preprocessing_benchmark.RecordInputImagePreprocessor
-        else:
-            import preprocessing
-
-            return preprocessing.RecordInputImagePreprocessor

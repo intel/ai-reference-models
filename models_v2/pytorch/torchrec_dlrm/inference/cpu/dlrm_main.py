@@ -35,7 +35,6 @@ import time
 
 import torch
 import torch.distributed as dist
-
 print(f"torch version {torch.__version__}")
 import torchmetrics as metrics
 from pyre_extensions import none_throws
@@ -83,10 +82,8 @@ ADAGRAD_EPS = 1e-8
 WEIGHT_DECAY = 0
 
 import logging
-
 logging.basicConfig(level=logging.INFO)
 logger: logging.Logger = logging.getLogger(__name__)
-
 
 class InteractionType(Enum):
     ORIGINAL = "original"
@@ -96,17 +93,13 @@ class InteractionType(Enum):
     def __str__(self):
         return self.value
 
-
 def load_snapshot(model, snapshot_dir):
     from torchsnapshot import Snapshot
-
     snapshot = Snapshot(path=snapshot_dir)
     snapshot.restore(app_state={"model": model})
 
-
 def trace_handler(prof):
     import os
-
     try:
         profile_dir = os.environ["PROFLIE_DIR"]
     except:
@@ -124,41 +117,32 @@ def trace_handler(prof):
     print(trace_dir)
     prof.export_chrome_trace(trace_dir)
 
-
-prof_schedule = torch.profiler.schedule(wait=10, warmup=10, active=1, repeat=10)
-
+prof_schedule=torch.profiler.schedule(
+    wait=10,
+    warmup=10,
+    active=1,
+    repeat=10
+)
 
 def print_memory(stage):
     import os
     import psutil
-
-    logger.info(
-        f"dlrmv2-memory-usage-log: {time.time()}, {stage}, {psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024}"
-    )
-
+    logger.info(f"dlrmv2-memory-usage-log: {time.time()}, {stage}, {psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024}")
 
 def fetch_batch(dataloader):
     try:
         batch = dataloader.dataset.load_batch()
     except:
         import torchrec
-
         dataset = dataloader.source.dataset
-        if isinstance(
-            dataset, torchrec.datasets.criteo.InMemoryBinaryCriteoIterDataPipe
-        ):
+        if isinstance(dataset, torchrec.datasets.criteo.InMemoryBinaryCriteoIterDataPipe):
             sample_list = list(range(dataset.batch_size))
             dense = dataset.dense_arrs[0][sample_list, :]
-            sparse = [arr[sample_list, :] for arr in dataset.sparse_arrs][
-                0
-            ] % dataset.hashes
+            sparse = [arr[sample_list, :] for arr in dataset.sparse_arrs][0] % dataset.hashes
             labels = dataset.labels_arrs[0][sample_list, :]
             return dataloader.func(dataset._np_arrays_to_batch(dense, sparse, labels))
-        batch = dataloader.func(
-            dataloader.source.dataset.batch_generator._generate_batch()
-        )
+        batch = dataloader.func(dataloader.source.dataset.batch_generator._generate_batch())
     return batch
-
 
 def split_dense_input_and_label_for_ranks(batch):
     my_rank = dist.get_rank()
@@ -170,43 +154,28 @@ def split_dense_input_and_label_for_ranks(batch):
     batch.labels = batch.labels[start:end]
     return batch
 
-
 def parse_autocast(dtype: str):
     _dtype = None
     autocast = False
-    if dtype == "bf16":
+    if dtype == 'bf16':
         autocast = True
         _dtype = torch.bfloat16
-    elif dtype == "fp16":
-        autocast = True
+    elif dtype == 'fp16':
+        autocast= True
         _dtype = torch.float16
-    elif dtype == "int8":
+    elif dtype == 'int8':
         _dtype = torch.int8
     else:
-        assert dtype in ["fp32", "bf32"]
+        assert dtype in ['fp32', 'bf32']
         _dtype = torch.float
     return autocast, _dtype
 
-
 def convert_int8(args, model, dataloader):
-    from torch.ao.quantization import (
-        HistogramObserver,
-        PerChannelMinMaxObserver,
-        QConfig,
-    )
+    from torch.ao.quantization import HistogramObserver, PerChannelMinMaxObserver, QConfig
     from intel_extension_for_pytorch.quantization import prepare, convert
-
     qconfig = QConfig(
-        activation=HistogramObserver.with_args(
-            qscheme=torch.per_tensor_symmetric,
-            dtype=torch.qint8,
-            bins=127,
-            quant_min=-127,
-            quant_max=126,
-        ),
-        weight=PerChannelMinMaxObserver.with_args(
-            dtype=torch.qint8, qscheme=torch.per_channel_symmetric
-        ),
+        activation=HistogramObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8, bins=127, quant_min= -127, quant_max=126),
+        weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric)
     )
     batch = fetch_batch(dataloader)
     batch.sparse_features = unpack(batch.sparse_features)
@@ -215,7 +184,7 @@ def convert_int8(args, model, dataloader):
         model,
         qconfig,
         example_inputs=(batch.dense_features, batch.sparse_features),
-        inplace=True,
+        inplace=True
     )
     if args.calibration:
         # https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorch#calibration-set
@@ -228,22 +197,19 @@ def convert_int8(args, model, dataloader):
         logger.info("calibration done and save to %s", args.int8_configure_dir)
         exit()
     else:
-        model.load_qconf_summary(qconf_summary=args.int8_configure_dir)
+        model.load_qconf_summary(qconf_summary = args.int8_configure_dir)
         print_memory("int8 convert")
         convert(model, inplace=True)
         model.eval()
         torch._C._jit_set_texpr_fuser_enabled(False)
         print_memory("int8 trace")
-        model = torch.jit.trace(
-            model, (batch.dense_features, batch.sparse_features), check_trace=True
-        )
+        model = torch.jit.trace(model, (batch.dense_features, batch.sparse_features), check_trace=True)
         print_memory("int8 freeze")
         model = torch.jit.freeze(model)
         print_memory("int8 jit optimize")
         model(batch.dense_features, batch.sparse_features)
         model(batch.dense_features, batch.sparse_features)
         return model
-
 
 def ipex_optimize(args, model, optimizer, dataloader):
     example_batch = fetch_batch(dataloader)
@@ -254,20 +220,19 @@ def ipex_optimize(args, model, optimizer, dataloader):
     autocast, dtype = parse_autocast(args.dtype)
     auto_kernel_selection = True
     import intel_extension_for_pytorch as ipex
-
     if dtype == torch.int8:
         assert args.inference_only
         with torch.no_grad():
             if args.int8_prepare or args.calibration:
-                model = convert_int8(args, model, dataloader)
-                torch.jit.save(model, args.int8_model_dir)
-                print(f"save int8 model to {args.int8_model_dir}")
-                exit()
+                    model = convert_int8(args, model, dataloader)
+                    torch.jit.save(model, args.int8_model_dir)
+                    print(f"save int8 model to {args.int8_model_dir}")
+                    exit()
             else:
                 # just run JIT, since we load optimized INT8 model
                 print_memory("int8 jit optimize")
                 model(dense, sparse)
-                model(dense, sparse)
+                model(dense, sparse)            
     elif args.inference_only:
         with torch.no_grad():
             model = ipex.optimize(
@@ -277,9 +242,9 @@ def ipex_optimize(args, model, optimizer, dataloader):
                 inplace=True,
                 auto_kernel_selection=auto_kernel_selection,
                 linear_bn_folding=False,
-                conv_bn_folding=False,
+                conv_bn_folding=False
             )
-            if args.dtype == "bf32":
+            if args.dtype == 'bf32':
                 ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
             if args.jit:
                 with torch.autocast("cpu", enabled=autocast, dtype=dtype):
@@ -297,20 +262,18 @@ def ipex_optimize(args, model, optimizer, dataloader):
             inplace=True,
             auto_kernel_selection=auto_kernel_selection,
             linear_bn_folding=False,
-            conv_bn_folding=False,
+            conv_bn_folding=False
         )
         if dtype == torch.bfloat16:
             model.sparse_arch.embedding_bag_collection.to_bfloat16_train()
         # if dtype == torch.float16:
         #     model.sparse_arch.embedding_bag_collection.to_float16_train()
-    if args.dtype == "bf32":
+    if args.dtype == 'bf32':
         ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
     return model, optimizer
 
-
 def aoti_benchmark_compile(ninstances, nbatches, bs, tmp_dir, target_dir):
     import textwrap
-
     inference_template = textwrap.dedent(
         """
         #include <vector>
@@ -434,11 +397,8 @@ def aoti_benchmark_compile(ninstances, nbatches, bs, tmp_dir, target_dir):
     cmake_prefix_path = torch.utils.cmake_prefix_path
     pytorch_install_dir = os.path.dirname(os.path.abspath(torch.__file__))
     torch_libraries = os.path.join(pytorch_install_dir, "lib")
-    os.system(
-        f"export CMAKE_PREFIX_PATH={cmake_prefix_path} && export TORCH_LIBRARIES={torch_libraries} && cd {target_dir} && cmake . && make"
-    )
+    os.system(f"export CMAKE_PREFIX_PATH={cmake_prefix_path} && export TORCH_LIBRARIES={torch_libraries} && cd {target_dir} && cmake . && make")
     return f"{target_dir}/aoti_example"
-
 
 def aot_inductor_benchmark(args, model, dtype, example_inputs):
     t = time.time()
@@ -447,20 +407,18 @@ def aot_inductor_benchmark(args, model, dtype, example_inputs):
     model_dir = f"{tmp_dir}/model.so"
     inputs_dir = f"{tmp_dir}/inputs.pt"
     torch._export.aot_compile(
-        model, example_inputs, options={"aot_inductor.output_path": model_dir}
+        model, example_inputs,
+        options={"aot_inductor.output_path":model_dir}
     )
     logger.info(f"AOTI model saved to : {model_dir}")
     # save example inputs and loaded it in cpp later
     runner = torch._C._aoti.AOTIModelContainerRunnerCpu(model_dir, 1)  # type: ignore[call-arg]
     call_spec = runner.get_call_spec()  # type: ignore[attr-defined]
     import torch.utils._pytree as pytree
-
     in_spec = pytree.treespec_loads(call_spec[0])
     from torch.export._tree_utils import reorder_kwargs
-
     flat_inputs = pytree.tree_flatten((example_inputs, reorder_kwargs({}, in_spec)))[0]
     flat_inputs = [x for x in flat_inputs if isinstance(x, torch.Tensor)]
-
     class TensorListModule(torch.nn.Module):
         def __init__(self, tensor_list):
             super(TensorListModule, self).__init__()
@@ -479,7 +437,6 @@ def aot_inductor_benchmark(args, model, dtype, example_inputs):
     # gen/compile benchmark
     aoti_benchmark_compile(args, tmp_dir)
 
-
 def stock_pt_optimize(args, model, optimizer, dataloader):
     example_batch = fetch_batch(dataloader)
     example_batch.sparse_features = unpack(example_batch.sparse_features)
@@ -488,7 +445,6 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
     if args.inductor:
         from torch._inductor import config as inductor_config
         from torch._dynamo import config
-
         config.error_on_recompile = True
         inductor_config.cpp_wrapper = True
         inductor_config.cpp.enable_kernel_profile = True
@@ -500,15 +456,15 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
             assert args.inference_only
             from torch.ao.quantization.quantize_pt2e import prepare_pt2e, convert_pt2e
             import torch.ao.quantization.quantizer.x86_inductor_quantizer as xiq
-            from torch.ao.quantization.quantizer.x86_inductor_quantizer import (
-                X86InductorQuantizer,
-            )
+            from torch.ao.quantization.quantizer.x86_inductor_quantizer import X86InductorQuantizer
             from torch.export import export_for_training
-
-            print("[Info] Running torch.compile() INT8 quantization")
+            print('[Info] Running torch.compile() INT8 quantization')
             with torch.no_grad():
                 example_inputs = (dense, sparse)
-                exported_model = export_for_training(model, example_inputs).module()
+                exported_model = export_for_training(
+                    model,
+                    example_inputs
+                ).module()
                 quantizer = X86InductorQuantizer()
                 quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
                 prepared_model = prepare_pt2e(exported_model, quantizer)
@@ -516,21 +472,13 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
                 converted_model = convert_pt2e(prepared_model)
                 torch.ao.quantization.move_exported_model_to_eval(converted_model)
                 if args.ipex:
-                    print("[Info] Running torch.compile() with IPEX backend")
+                    print('[Info] Running torch.compile() with IPEX backend')
                     model(dense, sparse)
                     model = torch.compile(converted_model, backend="ipex")
                 else:
-                    print("[Info] Running torch.compile() with default backend")
+                    print('[Info] Running torch.compile() with default backend')
                     if args.aot_inductor:
-                        aot_inductor_benchmark(
-                            args,
-                            converted_model,
-                            torch.int8,
-                            (
-                                dense,
-                                sparse,
-                            ),
-                        )
+                        aot_inductor_benchmark(args, converted_model, torch.int8, (dense, sparse, ))
                     else:
                         model(dense, sparse)
                         model = torch.compile(converted_model)
@@ -538,24 +486,15 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
                 model(dense, sparse)
         else:
             with torch.no_grad(), torch.autocast("cpu", enabled=autocast, dtype=dtype):
-                print("[Info] Running torch.compile() with default backend")
+                print('[Info] Running torch.compile() with default backend')
                 if args.aot_inductor:
-                    aot_inductor_benchmark(
-                        args,
-                        model,
-                        dtype,
-                        (
-                            dense,
-                            sparse,
-                        ),
-                    )
+                    aot_inductor_benchmark(args, model, dtype, (dense, sparse, ))
                 else:
                     model(dense, sparse)
                     model = torch.compile(model)
                     model(dense, sparse)
                     model(dense, sparse)
     return model, optimizer
-
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="torchrec dlrm example trainer")
@@ -859,7 +798,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "--test_auroc",
         action="store_true",
         help="Test auroc.",
-    )
+    )    
     parser.add_argument(
         "--log-freq",
         type=int,
@@ -1018,10 +957,10 @@ def _evaluate(
 
     logger.info(f"EVAL_START, EPOCH_NUM: {epoch_num}")
 
-    if not (args.inductor and args.dtype == "int8"):
+    if not (args.inductor and args.dtype == 'int8'):
         eval_model.eval()
 
-    device = torch.device("cpu")
+    device = torch.device('cpu')
 
     iterator = itertools.islice(iter(eval_dataloader), limit_batches)
     # Two filler batches are appended to the end of the iterator to keep the pipeline active while the
@@ -1035,7 +974,7 @@ def _evaluate(
     labels = []
 
     if not args.ipex_optimize:
-        auroc_computer = metrics.AUROC(task="binary").to(device)
+        auroc_computer = metrics.AUROC(task='binary').to(device)
     else:
         import intel_extension_for_pytorch as ipex
 
@@ -1043,16 +982,12 @@ def _evaluate(
     it = 0
     ctx1 = torch.no_grad()
     ctx2 = torch.autocast("cpu", enabled=autocast_enabled, dtype=autocast_dtype)
-    ctx3 = torch.profiler.profile(
-        activities=[ProfilerActivity.CPU],
-        schedule=prof_schedule,
-        on_trace_ready=trace_handler,
-    )
+    ctx3 = torch.profiler.profile(activities=[ProfilerActivity.CPU], schedule=prof_schedule, on_trace_ready=trace_handler)
     with ctx1, ctx2:
         if enable_torch_profile:
             p = ctx3.__enter__()
-            setattr(p, "_dtype", autocast_dtype)
-            setattr(p, "_mode", "eval")
+            setattr(p, '_dtype', autocast_dtype)
+            setattr(p, '_mode', 'eval')
         while True:
             try:
                 logits, label, fw_t = eval_step(eval_model, iterator, it)
@@ -1060,29 +995,17 @@ def _evaluate(
                     if enable_torch_profile:
                         p.step()
                     total_t += fw_t
-                    if (
-                        log_freq != 0
-                        and it % log_freq == 0
-                        and it > args.warmup_batches
-                    ):
+                    if log_freq != 0 and it % log_freq == 0 and it > args.warmup_batches:
                         assert not args.distributed_training
                         preds = [torch.cat(preds)]
                         labels = [torch.cat(labels)]
-                        num_samples = (
-                            labels[0].shape[0] - args.warmup_batches * args.batch_size
-                        )
+                        num_samples = labels[0].shape[0] - args.warmup_batches * args.batch_size
                         if not args.ipex_optimize:
-                            auroc = auroc_computer(
-                                preds[0].squeeze().float(), labels[0].float()
-                            )
+                            auroc = auroc_computer(preds[0].squeeze().float(), labels[0].float())
                         else:
-                            auroc = ipex._C.roc_auc_score(
-                                labels[0].float(), preds[0].squeeze().float()
-                            )
+                            auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze().float())
 
-                        logger.info(
-                            f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}"
-                        )
+                        logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
                 pred = torch.sigmoid(logits)
                 preds.append(pred)
                 labels.append(label)
@@ -1099,9 +1022,7 @@ def _evaluate(
     if args.distributed_training and dist.get_world_size() > 1:
         labels, preds = gather_output(labels, preds)
 
-    is_rank_zero = (
-        args.distributed_training and dist.get_world_size() > 1 and dist.get_rank() == 0
-    )
+    is_rank_zero = args.distributed_training and dist.get_world_size() > 1 and dist.get_rank() == 0
     if is_rank_zero or not args.distributed_training:
         num_samples = labels.shape[0] - args.warmup_batches * args.batch_size
         if not args.ipex_optimize:
@@ -1192,9 +1113,7 @@ def _train(
             opt.zero_grad(set_to_none=True)
         with record_function("fw"):
             if autocast_enabled:
-                with torch.autocast(
-                    "cpu", enabled=autocast_enabled, dtype=autocast_dtype
-                ):
+                with torch.autocast("cpu", enabled=autocast_enabled, dtype=autocast_dtype):
                     losses, _ = model(next_batch)
                     loss = torch.sum(losses, dim=0)
             else:
@@ -1234,18 +1153,14 @@ def _train(
     is_success = False
     total_t = 0
     num_samples = 0
-    ctx = torch.profiler.profile(
-        activities=[ProfilerActivity.CPU],
-        schedule=prof_schedule,
-        on_trace_ready=trace_handler,
-    )
+    ctx = torch.profiler.profile(activities=[ProfilerActivity.CPU], schedule=prof_schedule, on_trace_ready=trace_handler)
     if enable_torch_profile:
         p = ctx.__enter__()
-        setattr(p, "_dtype", autocast_dtype)
-        setattr(p, "_mode", "train")
+        setattr(p, '_dtype', autocast_dtype)
+        setattr(p, '_mode', 'train')
     for it in itertools.count(1):
         try:
-            if print_lr:
+            if  print_lr:
                 for i, g in enumerate(train_optimizer.param_groups):
                     logger.info(f"lr: {it} {i} {g['lr']:.6f}")
             samples, train_t = train_step(train_model, train_optimizer, iterator, it)
@@ -1255,10 +1170,8 @@ def _train(
                 if enable_torch_profile:
                     p.step()
 
-            if log_freq != 0 and it % log_freq == 0 and it > args.warmup_batches:
-                logger.info(
-                    f"avg training time per iter at ITER: {it}, {total_t/ (it - args.warmup_batches)} s"
-                )
+            if log_freq != 0 and it % log_freq == 0 and it > args.warmup_batches: 
+                logger.info(f"avg training time per iter at ITER: {it}, {total_t/ (it - args.warmup_batches)} s")
                 print_memory(f"memory usage at iter {it}")
 
             # lr_scheduler.step()
@@ -1266,14 +1179,16 @@ def _train(
             if validation_freq and it % validation_freq == 0:
                 epoch_num = epoch + it / len(train_dataloader)
                 auroc_result = _evaluate(
-                    train_model.model, val_dataloader, "val", epoch_num, args
+                    train_model.model,
+                    val_dataloader,
+                    "val",
+                    epoch_num,
+                    args
                 )
                 if isinstance(auroc_result, list):
                     auroc_result = auroc_result[0]
                 if validation_auroc is not None and auroc_result >= validation_auroc:
-                    logger.info(
-                        "auc = {auroc_result} >= validation_auroc {validation_auroc}, stopped since success"
-                    )
+                    logger.info("auc = {auroc_result} >= validation_auroc {validation_auroc}, stopped since success")
                     is_success = True
                     break
                 train_model.train()
@@ -1288,7 +1203,6 @@ def _train(
 
     return is_success
 
-
 def _share_weight_benchmark(
     model,
     data_loader,
@@ -1296,7 +1210,6 @@ def _share_weight_benchmark(
 ):
     import contextlib
     from torch.utils import ThroughputBenchmark
-
     print_memory("start to init throughput benchmark")
     bench = ThroughputBenchmark(model)
     batch = fetch_batch(data_loader)
@@ -1305,9 +1218,9 @@ def _share_weight_benchmark(
     bench.add_input(batch.dense_features, batch.sparse_features)
     print_memory("start to run throughput benchmark")
     ctx = contextlib.suppress()
-    if args.dtype == "bf16":
+    if args.dtype == 'bf16':
         ctx = torch.autocast("cpu", enabled=True, dtype=torch.bfloat16)
-    if args.dtype == "fp16":
+    if args.dtype == 'fp16':
         ctx = torch.autocast("cpu", enabled=True, dtype=torch.float16)
     with ctx:
         stats = bench.benchmark(
@@ -1320,7 +1233,6 @@ def _share_weight_benchmark(
     batch_size = batch.dense_features.shape[0]
     throughput = (1 / latency) * 1000 * batch_size * args.share_weight_instance
     print("Throughput: {:.3f} fps".format(throughput))
-
 
 @dataclass
 class TrainValTestResults:
@@ -1359,7 +1271,11 @@ def train_val_test(
     if args.inference_only:
         with torch.no_grad():
             if args.share_weight_instance > 0:
-                _share_weight_benchmark(model.model, val_dataloader, args)
+                _share_weight_benchmark(
+                    model.model,
+                    val_dataloader,
+                    args
+                )
                 exit()
         # Mlperf is using val set to test auroc
         # https://github.com/mlcommons/inference/blob/master/recommendation/dlrm_v2/pytorch/python/multihot_criteo.py#L99-L107
@@ -1425,14 +1341,8 @@ def train_val_test(
 
     return results
 
-
 def construct_model(args):
-    if (
-        args.dtype == "int8"
-        and not args.int8_prepare
-        and not args.calibration
-        and args.jit
-    ):
+    if args.dtype == "int8" and not args.int8_prepare and not args.calibration and args.jit:
         assert args.inference_only
         print(f"loading int8 model from {args.int8_model_dir}")
         model = torch.jit.load(args.int8_model_dir)
@@ -1444,11 +1354,9 @@ def construct_model(args):
         EmbeddingBagConfig(
             name=f"t_{feature_name}",
             embedding_dim=args.embedding_dim,
-            num_embeddings=(
-                none_throws(args.num_embeddings_per_feature)[feature_idx]
-                if args.num_embeddings is None
-                else args.num_embeddings
-            ),
+            num_embeddings=none_throws(args.num_embeddings_per_feature)[feature_idx]
+            if args.num_embeddings is None
+            else args.num_embeddings,
             feature_names=[feature_name],
         )
         for feature_idx, feature_name in enumerate(DEFAULT_CAT_NAMES)
@@ -1456,7 +1364,6 @@ def construct_model(args):
 
     assert args.interaction_type == InteractionType.DCN
     from ipex_optimized_model.model import IPEX_DLRM_DCN, init_weight
-
     dcn_init_fn = IPEX_DLRM_DCN
     dlrm_model = dcn_init_fn(
         embedding_bag_collection=EmbeddingBagCollection(
@@ -1479,12 +1386,8 @@ def construct_model(args):
         assert args.snapshot_dir
         print_memory("start loading checkpoint ")
         load_snapshot(train_model, args.snapshot_dir)
-
-    from ipex_optimized_model.model import (
-        replace_crossnet,
-        replace_embeddingbag_collection,
-    )
-
+    
+    from ipex_optimized_model.model import replace_crossnet, replace_embeddingbag_collection
     # change the crossnet and embeddingbag-collection for ipex
     # we do not integrate this part in IPEX_DLRM_DCN because this will change the paramter names
     # and will impact the loading for checkpoint, so we do this after loading snapshot
@@ -1534,15 +1437,11 @@ def construct_model(args):
     #     optimizer_with_params(),
     # )
     # optimizer = CombinedOptimizer([model.fused_optimizer, dense_optimizer])
-    optimizer, lr_scheduler = None, None
+    optimizer,  lr_scheduler = None, None
     if not args.inference_only:
         print_memory("start create optimizer ")
         assert args.adagrad
-        param = (
-            list(model.model.dense_arch.parameters())
-            + list(model.model.inter_arch.parameters())
-            + list(model.model.over_arch.parameters())
-        )
+        param = list(model.model.dense_arch.parameters()) + list(model.model.inter_arch.parameters()) + list(model.model.over_arch.parameters())
         optimizer = torch.optim.Adagrad(
             param,
             lr=args.learning_rate,
@@ -1556,7 +1455,6 @@ def construct_model(args):
             optimizer, args.lr_warmup_steps, args.lr_decay_start, args.lr_decay_steps
         )
     return model, optimizer, lr_scheduler
-
 
 def main(argv: List[str]) -> None:
     """
@@ -1578,7 +1476,6 @@ def main(argv: List[str]) -> None:
     args = parse_args(argv)
     if args.ipex_optimize:
         import intel_extension_for_pytorch as ipex
-
         print(f"IPEX version {ipex.__version__}")
     for name, val in vars(args).items():
         try:
@@ -1612,11 +1509,10 @@ def main(argv: List[str]) -> None:
     ), "--multi_hot_distribution_type is used to convert 1-hot to multi-hot. It's inapplicable with --synthetic_multi_hot_criteo_path."
 
     backend = "gloo"
-    device = torch.device("cpu")
+    device = torch.device('cpu')
 
     pprint(vars(args))
     import numpy as np
-
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     # logger.event(
@@ -1651,14 +1547,12 @@ def main(argv: List[str]) -> None:
 
     if args.distributed_training:
         import oneccl_bindings_for_pytorch
-
         def env2int(env_list, default=-1):
             for e in env_list:
                 val = int(os.environ.get(e, -1))
                 if val >= 0:
                     return val
             return default
-
         rank = env2int(
             ["PMI_RANK", "OMPI_COMM_WORLD_RANK", "MV2_COMM_WORLD_RANK", "RANK"], 0
         )
@@ -1680,7 +1574,7 @@ def main(argv: List[str]) -> None:
     test_dataloader = get_dataloader(args, backend, "test")
 
     if args.multi_hot_sizes is not None:
-        args.limit_val_batches, args.limit_test_batches = vb, tb
+        args.limit_val_batches, args.limit_test_batches = vb, tb 
 
     if args.inference_only:
         train_dataloader = None
@@ -1712,34 +1606,15 @@ def main(argv: List[str]) -> None:
 
     if args.ipex_optimize:
         print_memory("start ipex_optimize ")
-        model.model, optimizer = ipex_optimize(
-            args, model.model, optimizer, test_dataloader
-        )
+        model.model, optimizer = ipex_optimize(args, model.model, optimizer, test_dataloader)
 
     if args.distributed_training and dist.get_world_size() > 1:
         from torch.nn.parallel import DistributedDataParallel as DDP
-
-        model.model.dense_arch = DDP(
-            model.model.dense_arch,
-            gradient_as_bucket_view=True,
-            broadcast_buffers=False,
-            find_unused_parameters=True,
-        )
-        model.model.inter_arch = DDP(
-            model.model.inter_arch,
-            gradient_as_bucket_view=True,
-            broadcast_buffers=False,
-            find_unused_parameters=True,
-        )
-        model.model.over_arch = DDP(
-            model.model.over_arch,
-            gradient_as_bucket_view=True,
-            broadcast_buffers=False,
-            find_unused_parameters=True,
-        )
+        model.model.dense_arch = DDP(model.model.dense_arch, gradient_as_bucket_view=True, broadcast_buffers=False, find_unused_parameters=True)
+        model.model.inter_arch = DDP(model.model.inter_arch, gradient_as_bucket_view=True, broadcast_buffers=False, find_unused_parameters=True)
+        model.model.over_arch = DDP(model.model.over_arch, gradient_as_bucket_view=True, broadcast_buffers=False, find_unused_parameters=True)
 
     if args.inductor:
-
         def randomrize_crossnet_bias(bias):
             r"""
             the bias is initialized as all zeros and in inductor will create 1 bias for all 3 bias since they are same:
@@ -1767,20 +1642,18 @@ def main(argv: List[str]) -> None:
             with torch.no_grad():
                 for b in bias:
                     b.data = torch.randn_like(b)
-
+        
         if not (args.test_auroc and args.snapshot_dir):
             # do not need to randomrize bias while loading from pre-trained weight
             randomrize_crossnet_bias(model.model.inter_arch.crossnet.bias)
         print_memory("start StockPT ")
-        if args.dtype == "bf16":
+        if args.dtype == 'bf16':
             model.model.sparse_arch = model.model.sparse_arch.bfloat16()
             # model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.bfloat16()
-        if args.dtype == "fp16":
+        if args.dtype == 'fp16':
             model.model.sparse_arch = model.model.sparse_arch.half()
             # model.model.inter_arch.crossnet.bias = model.model.inter_arch.crossnet.bias.half()
-        model.model, optimizer = stock_pt_optimize(
-            args, model.model, optimizer, test_dataloader
-        )
+        model.model, optimizer = stock_pt_optimize(args, model.model, optimizer, test_dataloader)
 
     print_memory("start running model")
     train_val_test(

@@ -31,9 +31,8 @@ from torchrec.datasets.criteo import (
     DEFAULT_INT_NAMES,
     InMemoryBinaryCriteoIterDataPipe,
 )
-
 # This is for crop dataset
-DAYS_MIN = 1
+DAYS_MIN=1
 from torchrec.datasets.random import RandomRecDataset
 
 # OSS import
@@ -69,11 +68,9 @@ def _get_random_dataloader(
             keys=DEFAULT_CAT_NAMES,
             batch_size=batch_size,
             hash_size=args.num_embeddings,
-            hash_sizes=(
-                args.num_embeddings_per_feature
-                if hasattr(args, "num_embeddings_per_feature")
-                else None
-            ),
+            hash_sizes=args.num_embeddings_per_feature
+            if hasattr(args, "num_embeddings_per_feature")
+            else None,
             manual_seed=args.seed if hasattr(args, "seed") else None,
             ids_per_feature=1,
             num_dense=len(DEFAULT_INT_NAMES),
@@ -114,27 +111,15 @@ def _get_in_memory_dataloader(
         if args.converge:
             stage_files: List[List[str]] = [
                 [os.path.join(dir_path, f"day_{i}_dense.npy") for i in range(DAYS - 1)],
-                [
-                    os.path.join(dir_path, f"day_{i}_{sparse_part}")
-                    for i in range(DAYS - 1)
-                ],
-                [
-                    os.path.join(dir_path, f"day_{i}_labels.npy")
-                    for i in range(DAYS - 1)
-                ],
+                [os.path.join(dir_path, f"day_{i}_{sparse_part}") for i in range(DAYS - 1)],
+                [os.path.join(dir_path, f"day_{i}_labels.npy") for i in range(DAYS - 1)],
             ]
         else:
             stage_files: List[List[str]] = [
                 # for crop dataset
                 [os.path.join(dir_path, f"day_{i}_dense.npy") for i in range(DAYS_MIN)],
-                [
-                    os.path.join(dir_path, f"day_{i}_{sparse_part}")
-                    for i in range(DAYS_MIN)
-                ],
-                [
-                    os.path.join(dir_path, f"day_{i}_labels.npy")
-                    for i in range(DAYS_MIN)
-                ],
+                [os.path.join(dir_path, f"day_{i}_{sparse_part}") for i in range(DAYS_MIN)],
+                [os.path.join(dir_path, f"day_{i}_labels.npy") for i in range(DAYS_MIN)],
             ]
     elif stage in ["val", "test"]:
         if args.converge:
@@ -158,8 +143,8 @@ def _get_in_memory_dataloader(
             stage,
             *stage_files,  # pyre-ignore[6]
             batch_size=batch_size,
-            # rank=dist.get_rank(),
-            # world_size=dist.get_world_size(),
+            #rank=dist.get_rank(),
+            #world_size=dist.get_world_size(),
             # The rand and world_size set for custom dist-dlrm
             rank=0,
             world_size=1,
@@ -168,11 +153,9 @@ def _get_in_memory_dataloader(
             shuffle_training_set=args.shuffle_training_set,
             shuffle_training_set_random_seed=args.seed,
             mmap_mode=args.mmap_mode,
-            hashes=(
-                args.num_embeddings_per_feature
-                if args.num_embeddings is None
-                else ([args.num_embeddings] * CAT_FEATURE_COUNT)
-            ),
+            hashes=args.num_embeddings_per_feature
+            if args.num_embeddings is None
+            else ([args.num_embeddings] * CAT_FEATURE_COUNT),
         ),
         batch_size=None,
         num_workers=0,

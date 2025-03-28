@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Utils to train DistilBERT
-adapted in part from Facebook, Inc XLM model (https://github.com/facebookresearch/XLM)
+""" Utils to train DistilBERT
+    adapted in part from Facebook, Inc XLM model (https://github.com/facebookresearch/XLM)
 """
 import json
 import logging
@@ -32,20 +32,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-MAP_TORCH_DTYPE = {
-    "FP32": torch.float32,
-    "FP16": torch.float16,
-    "BF16": torch.bfloat16,
-    "FP64": torch.float64,
-    "CF64": torch.cfloat,
-    "CF128": torch.cdouble,
-    "UINT8": torch.uint8,
-    "INT8": torch.int8,
-    "INT16": torch.int16,
-    "INT": torch.int32,
-    "INT64": torch.int64,
-    "BOOL": torch.bool,
-}
+MAP_TORCH_DTYPE = {"FP32": torch.float32, "FP16": torch.float16,
+                   "BF16": torch.bfloat16, "FP64": torch.float64,
+                   "CF64": torch.cfloat, "CF128": torch.cdouble,
+                   "UINT8": torch.uint8, "INT8": torch.int8,
+                   "INT16": torch.int16, "INT": torch.int32,
+                   "INT64": torch.int64, "BOOL": torch.bool,
+                  }
 
 
 def git_log(folder_path: str):

@@ -20,23 +20,23 @@ import six
 
 
 PRETRAINED_VOCAB_ARCHIVE_MAP = {
-    "bert-base-uncased": "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-uncased-vocab.txt",
-    "bert-large-uncased": "https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-vocab.txt",
-    "bert-base-cased": "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-cased-vocab.txt",
-    "bert-large-cased": "https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-cased-vocab.txt",
-    "bert-base-multilingual-uncased": "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-uncased-vocab.txt",
-    "bert-base-multilingual-cased": "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-cased-vocab.txt",
-    "bert-base-chinese": "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt",
+    'bert-base-uncased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-uncased-vocab.txt",
+    'bert-large-uncased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-vocab.txt",
+    'bert-base-cased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-cased-vocab.txt",
+    'bert-large-cased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-cased-vocab.txt",
+    'bert-base-multilingual-uncased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-uncased-vocab.txt",
+    'bert-base-multilingual-cased': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-multilingual-cased-vocab.txt",
+    'bert-base-chinese': "https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt",
 }
 
 PRETRAINED_VOCAB_POSITIONAL_EMBEDDINGS_SIZE_MAP = {
-    "bert-base-uncased": 512,
-    "bert-large-uncased": 512,
-    "bert-base-cased": 512,
-    "bert-large-cased": 512,
-    "bert-base-multilingual-uncased": 512,
-    "bert-base-multilingual-cased": 512,
-    "bert-base-chinese": 512,
+    'bert-base-uncased': 512,
+    'bert-large-uncased': 512,
+    'bert-base-cased': 512,
+    'bert-large-cased': 512,
+    'bert-base-multilingual-uncased': 512,
+    'bert-base-multilingual-cased': 512,
+    'bert-base-chinese': 512,
 }
 
 
@@ -58,16 +58,13 @@ def validate_case_matches_checkpoint(do_lower_case, init_checkpoint):
     model_name = m.group(1)
 
     lower_models = [
-        "uncased_L-24_H-1024_A-16",
-        "uncased_L-12_H-768_A-12",
-        "multilingual_L-12_H-768_A-12",
-        "chinese_L-12_H-768_A-12",
+        "uncased_L-24_H-1024_A-16", "uncased_L-12_H-768_A-12",
+        "multilingual_L-12_H-768_A-12", "chinese_L-12_H-768_A-12"
     ]
 
     cased_models = [
-        "cased_L-12_H-768_A-12",
-        "cased_L-24_H-1024_A-16",
-        "multi_cased_L-12_H-768_A-12",
+        "cased_L-12_H-768_A-12", "cased_L-24_H-1024_A-16",
+        "multi_cased_L-12_H-768_A-12"
     ]
 
     is_bad_config = False
@@ -89,9 +86,8 @@ def validate_case_matches_checkpoint(do_lower_case, init_checkpoint):
             "However, `%s` seems to be a %s model, so you "
             "should pass in `--do_lower_case=%s` so that the fine-tuning matches "
             "how the model was pre-training. If this error is wrong, please "
-            "just comment out this check."
-            % (actual_flag, init_checkpoint, model_name, case_name, opposite_flag)
-        )
+            "just comment out this check." % (actual_flag, init_checkpoint,
+                                              model_name, case_name, opposite_flag))
 
 
 def convert_to_unicode(text):
@@ -183,12 +179,10 @@ class FullTokenizer(object):
     def __init__(self, vocab_file, do_lower_case=True):
         if not os.path.isfile(vocab_file):
             raise ValueError(
-                "Can't find a vocabulary file at path '{}'.".format(vocab_file)
-            )
+                "Can't find a vocabulary file at path '{}'.".format(vocab_file))
         self.vocab = load_vocab(vocab_file)
         self.ids_to_tokens = collections.OrderedDict(
-            [(ids, tok) for tok, ids in self.vocab.items()]
-        )
+            [(ids, tok) for tok, ids in self.vocab.items()])
         self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
         self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
 
@@ -209,11 +203,9 @@ class FullTokenizer(object):
 class BasicTokenizer(object):
     """Runs basic tokenization (punctuation splitting, lower casing, etc.)."""
 
-    def __init__(
-        self,
-        do_lower_case=True,
-        never_split=("[UNK]", "[SEP]", "[PAD]", "[CLS]", "[MASK]"),
-    ):
+    def __init__(self,
+                 do_lower_case=True,
+                 never_split=("[UNK]", "[SEP]", "[PAD]", "[CLS]", "[MASK]")):
         """Constructs a BasicTokenizer.
         Args:
           do_lower_case: Whether to lower case the input.
@@ -302,16 +294,14 @@ class BasicTokenizer(object):
         # as is Japanese Hiragana and Katakana. Those alphabets are used to write
         # space-separated words, so they are not treated specially and handled
         # like the all of the other languages.
-        if (
-            (cp >= 0x4E00 and cp <= 0x9FFF)
-            or (cp >= 0x3400 and cp <= 0x4DBF)  #
-            or (cp >= 0x20000 and cp <= 0x2A6DF)  #
-            or (cp >= 0x2A700 and cp <= 0x2B73F)  #
-            or (cp >= 0x2B740 and cp <= 0x2B81F)  #
-            or (cp >= 0x2B820 and cp <= 0x2CEAF)  #
-            or (cp >= 0xF900 and cp <= 0xFAFF)
-            or (cp >= 0x2F800 and cp <= 0x2FA1F)  #
-        ):  #
+        if ((cp >= 0x4E00 and cp <= 0x9FFF) or  #
+            (cp >= 0x3400 and cp <= 0x4DBF) or  #
+            (cp >= 0x20000 and cp <= 0x2A6DF) or  #
+            (cp >= 0x2A700 and cp <= 0x2B73F) or  #
+            (cp >= 0x2B740 and cp <= 0x2B81F) or  #
+            (cp >= 0x2B820 and cp <= 0x2CEAF) or
+            (cp >= 0xF900 and cp <= 0xFAFF) or  #
+                (cp >= 0x2F800 and cp <= 0x2FA1F)):  #
             return True
 
         return False
@@ -321,7 +311,7 @@ class BasicTokenizer(object):
         output = []
         for char in text:
             cp = ord(char)
-            if cp == 0 or cp == 0xFFFD or _is_control(char):
+            if cp == 0 or cp == 0xfffd or _is_control(char):
                 continue
             if _is_whitespace(char):
                 output.append(" ")
@@ -419,12 +409,8 @@ def _is_punctuation(char):
     # Characters such as "^", "$", and "`" are not in the Unicode
     # Punctuation class but we treat them as punctuation anyways, for
     # consistency.
-    if (
-        (cp >= 33 and cp <= 47)
-        or (cp >= 58 and cp <= 64)
-        or (cp >= 91 and cp <= 96)
-        or (cp >= 123 and cp <= 126)
-    ):
+    if ((cp >= 33 and cp <= 47) or (cp >= 58 and cp <= 64) or
+            (cp >= 91 and cp <= 96) or (cp >= 123 and cp <= 126)):
         return True
     cat = unicodedata.category(char)
     if cat.startswith("P"):
@@ -433,9 +419,9 @@ def _is_punctuation(char):
 
 
 # Just an example to use tokenizer
-if __name__ == "__main__":
-    tokenizer = FullTokenizer("vocab.txt")
-    text = "We treat all non-letter/number ASCII as punctuation."
+if __name__ == '__main__':
+    tokenizer = FullTokenizer('vocab.txt')
+    text = 'We treat all non-letter/number ASCII as punctuation.'
     tokens = tokenizer.tokenize(text)
     ids = tokenizer.convert_tokens_to_ids(tokens)
     print(tokens)

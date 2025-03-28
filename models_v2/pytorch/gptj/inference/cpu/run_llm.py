@@ -201,9 +201,8 @@ if args.dtype == "bf16" or args.dtype == "fp32":
         from torch._inductor import config as inductor_config
 
         inductor_config.cpp_wrapper = True
-        with (
-            torch.no_grad(),
-            torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+        with torch.no_grad(), torch.autocast("cpu", 
+            enabled=amp_enabled, dtype=amp_dtype
         ):
             if args.ipex:
                 print("[Info] Running torch.compile() with IPEX backend")
@@ -225,9 +224,8 @@ elif args.dtype == "fp16":
         from torch._inductor import config as inductor_config
 
         inductor_config.cpp_wrapper = True
-        with (
-            torch.no_grad(),
-            torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+        with torch.no_grad(), torch.autocast("cpu", 
+            enabled=amp_enabled, dtype=amp_dtype
         ):
             if args.ipex:
                 print("[Info] Running torch.compile() with IPEX backend")
@@ -550,9 +548,7 @@ else:
     if "gpt-j" in prompt_pool and args.input_tokens in prompt_pool["gpt-j"]:
         prompt = prompt_pool["gpt-j"][args.input_tokens]
     else:
-        raise SystemExit(
-            "[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input."
-        )
+        raise SystemExit("[ERROR] No such input_tokens prompt in prompt.json, Plese use --prompt if want to use custom input.")
 
 if args.benchmark:
     input_size = tokenizer(prompt, return_tensors="pt").input_ids.size(dim=1)
@@ -628,7 +624,6 @@ if args.dtype == "int8" and args.ipex:
         print("model quantization - Done!")
 elif args.dtype == "int8" and args.inductor:
     from torch._inductor import config as inductor_config
-
     inductor_config.cpp_wrapper = True
 
     if args.ipex_smooth_quant:
@@ -638,7 +633,6 @@ elif args.dtype == "int8" and args.inductor:
             smooth_quant,
         )
         from torchao.quantization import quantize_
-
         with torch.no_grad():
             encoded_input = tokenizer(prompt, return_tensors="pt")
             print("encoded_input is: {}".format(encoded_input), flush=True)
@@ -740,11 +734,8 @@ elif args.dtype == "fp8":
 def benchmark_warmup(prompt):
     # start
     if args.profile:
-        with (
-            profile_ctx as prof,
-            torch.inference_mode(),
-            torch.no_grad(),
-            torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+        with profile_ctx as prof, torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
+            enabled=amp_enabled, dtype=amp_dtype
         ):
             for i in range(5):
                 input_ids = tokenizer(prompt, return_tensors="pt").input_ids
@@ -754,10 +745,8 @@ def benchmark_warmup(prompt):
                 prof.step()
 
     num_iter = args.num_warmup
-    with (
-        torch.inference_mode(),
-        torch.no_grad(),
-        torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+    with torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
+        enabled=amp_enabled, dtype=amp_dtype
     ):
         for i in range(num_iter):
             get_memory_usage("Iteration: " + str(i), args)
@@ -774,10 +763,8 @@ def benchmark_evaluate(prompt):
     total_time = 0.0
     num_iter = args.num_iter - args.num_warmup
     total_list = []
-    with (
-        torch.inference_mode(),
-        torch.no_grad(),
-        torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+    with torch.inference_mode(), torch.no_grad(), torch.autocast("cpu", 
+        enabled=amp_enabled, dtype=amp_dtype
     ):
         for i in range(num_iter):
             get_memory_usage("Iteration: " + str(i), args)
@@ -854,9 +841,8 @@ if args.accuracy_only:
                     "past_key_values": tuple(global_past_key_value),
                 }
             )
-            with (
-                torch.no_grad(),
-                torch.autocast("cpu", enabled=amp_enabled, dtype=amp_dtype),
+            with torch.no_grad(), torch.autocast("cpu", 
+                enabled=amp_enabled, dtype=amp_dtype
             ):
                 user_model = torch.jit.trace(
                     user_model.eval(),
