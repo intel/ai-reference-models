@@ -36,10 +36,8 @@ WORKDIR /workspace/tf-max-series-bert-large-training/models
 
 COPY models_v2/tensorflow/bert_large/training/gpu .
 
-RUN git clone https://github.com/titipata/pubmed_parser && \
-    pip install ./pubmed_parser
-
-RUN python -m pip install --no-cache-dir -r requirements.txt
+COPY models_v2/common/install-python-dependencies.sh .
+RUN ./install-python-dependencies.sh
 
 RUN git clone https://github.com/NVIDIA/DeepLearningExamples.git && \
     cd DeepLearningExamples/TensorFlow2/LanguageModeling/BERT && \

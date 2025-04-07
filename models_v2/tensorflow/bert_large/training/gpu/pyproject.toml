@@ -1,0 +1,28 @@
+[project]
+name = "models_v2-tensorflow-bert_large-training-gpu"
+version = "3.4"
+description = "Intel(R) AI Reference Models - models_v2-tensorflow-bert-large-training-gpu"
+authors = [
+    {name = "Intel(R) AI Reference Models",email = "ai.reference.models@intel.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4"
+dependencies = [
+    "dllogger @ git+https://github.com/NVIDIA/dllogger",
+    "intel-optimization-for-horovod (==0.28.1.4)",
+    "nltk (>=3.9.1,<4.0.0)",
+    "progressbar (>=2.5,<3.0)",
+    "requests (>=2.32.3,<3.0.0)",
+    "sentencepiece (>=0.2.0,<0.3.0)",
+    "tensorflow-addons (>=0.23.0,<0.24.0)",
+    "tensorflow-hub (==0.15.0)",
+    "tqdm (>=4.67.1,<5.0.0)",
+    "wget (>=3.2,<4.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

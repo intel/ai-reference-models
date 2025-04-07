@@ -2,7 +2,7 @@ single-tile-bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-maskrcnn-training
   ipc: host
   cmd: mpirun -np 1 -prepend-rank -ppn 1 bash run_model.sh
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: bfloat16
     EPOCHS: '1'
@@ -21,7 +21,7 @@ single-tile-bf16-training:
 multi-tile-bf16-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-maskrcnn-training
   cmd: bash run_model.sh
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: bfloat16
     EPOCHS: '1'
@@ -41,7 +41,7 @@ single-tile-fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-maskrcnn-training
   ipc: host
   cmd: mpirun -np 1 -prepend-rank -ppn 1 bash run_model.sh
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: fp32
     EPOCHS: '1'
@@ -60,7 +60,7 @@ single-tile-fp32-training:
 multi-tile-fp32-training:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-maskrcnn-training
   cmd: bash run_model.sh
-  device: /dev/dri
+  device: ["/dev/dri"]
   env:
     PRECISION: fp32
     EPOCHS: '1'

@@ -1,9 +1,0 @@
-gin
-gin-config
-intel-optimization-for-horovod==0.28.1.4
-protobuf==3.20.3
-pyyaml
-tensorflow-datasets
-tensorflow-model-optimization
-tf-keras==2.15.0
-tfa-nightly

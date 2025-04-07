@@ -31,14 +31,12 @@ RUN apt-get update && \
         intel-oneapi-ccl=${CCL_VER} && \
     rm -rf /var/lib/apt/lists/*
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
 WORKDIR /workspace/tf-max-series-resnet50v1-5-training/models
 
 COPY models_v2/tensorflow/resnet50v1_5/training/gpu .
 
-RUN /root/.local/bin/poetry install
-
-RUN /root/.local/bin/poetry add intel-optimization-for-horovod
+COPY models_v2/common/install-python-dependencies.sh .
+RUN ./install-python-dependencies.sh
 
 RUN mkdir -p resnet50 && \
     cd resnet50 && \
@@ -57,6 +55,7 @@ ENV PATH=/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/bin:/opt/intel/oneapi/m
 ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.13
 ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.13
 ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
+ENV PYTHONPATH=/root/.cache/pypoetry/virtualenvs/models-v2-tensorflow-resnet50v1-5-training-WKRPeTfh-py3.10/lib/python3.10/site-packages:$PYTHONPATH
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party 

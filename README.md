@@ -147,9 +147,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [DLRM v2](https://arxiv.org/abs/1906.00091) | PyTorch | Training | Max Series | [FP32 TF32 BF16](/models_v2/pytorch/torchrec_dlrm/training/gpu/README.md)
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | PyTorch | Inference | Max Series | [FP16 INT8 FP32](/models_v2/pytorch/3d_unet/inference/gpu/README.md) |
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | TensorFlow | Training | Max Series | [BFloat16 FP32](/models_v2/tensorflow/3d_unet/training/gpu/README.md) |
-| [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | PyTorch | Inference | Flex Series, Max Series, Arc Series | [FP16 FP32](/models_v2/pytorch/stable_diffusion/inference/gpu/README.md) |
-| [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | TensorFlow | Inference | Flex Series | [FP16 FP32](/models_v2/tensorflow/stable_diffusion/inference/gpu/README.md) |
-| [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Inference | Flex Series | [FP32 Float16](/models_v2/tensorflow/maskrcnn/inference/gpu/README.md) |
+| [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | PyTorch | Inference |  Max Series, Arc Series | [FP16 FP32](/models_v2/pytorch/stable_diffusion/inference/gpu/README.md) |
 | [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Training | Max Series | [FP32 BFloat16](/models_v2/tensorflow/maskrcnn/training/gpu/README.md) |
 | [Swin Transformer](https://arxiv.org/pdf/2103.14030.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/swin-transformer/inference/gpu/README.md) |
 | [FastPitch](https://arxiv.org/pdf/1703.06870.pdf)  | PyTorch | Inference | Flex Series | [FP16](/models_v2/pytorch/fastpitch/inference/gpu/README.md) |

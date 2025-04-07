@@ -22,4 +22,5 @@
 
 set -e
 apt-get update && apt-get install -y python3-venv
-pip install -r requirements.txt
+
+../../../../common/install-python-dependencies.sh
