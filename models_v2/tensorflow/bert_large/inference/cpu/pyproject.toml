@@ -1,0 +1,20 @@
+[project]
+name = "models-v2-tensorflow-bert-large-inference-cpu"
+version = "3.4"
+description = "Intel(R) AI Reference Models - models_v2-tensorflow-bert-large-inference-cpu"
+authors = [
+    {name = "[{name = \"Intel(R) AI Reference Models\",email = \"ai.reference.models@intel.com\"}]"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<12"
+dependencies = [
+    "tensorflow (>=2.19.0,<3.0.0)",
+    "wheel (>=0.45.1,<0.46.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
