@@ -19,7 +19,8 @@ dependencies = [
     "intel-optimization-for-horovod (==0.28.1.4)",
     "numpy (==1.24.0)",
     "pytest-xdist (>=3.6.1,<4.0.0)",
-    "pubmed-parser (>=0.5.1,<0.6.0)"
+    "pubmed-parser (>=0.5.1,<0.6.0)",
+    "keras (==3.8.0)"
 ]
 
 [tool.poetry]
