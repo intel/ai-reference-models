@@ -34,7 +34,7 @@ services:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-max-gpu-resnet50v1-5-training
     cap_drop:
       - NET_RAW
-  bert-large-training-gpu:
+  bert_large-training-gpu:
     build:
       dockerfile: docker/tensorflow/bert_large/training/gpu/tf-max-series-bert-large-training.Dockerfile
     extends: resnet50v1_5-training-gpu

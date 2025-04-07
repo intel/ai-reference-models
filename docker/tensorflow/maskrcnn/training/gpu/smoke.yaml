@@ -1,0 +1,20 @@
+single-tile-bf16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-segmentation-tf-max-gpu-maskrcnn-training
+  ipc: host
+  cmd: mpirun -np 1 -prepend-rank -ppn 1 bash run_model.sh
+  device: ["/dev/dri"]
+  env:
+    PRECISION: bfloat16
+    EPOCHS: '1'
+    STEPS_PER_EPOCH: '20'
+    BATCH_SIZE: '4'
+    MULTI_TILE: 'False'
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
+  volumes:
+    - src: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
+      dst: /tf_dataset/dataset/coco_dataset/COCO2017_training_data/
+    - src: /dev/dri/by-path
+      dst: /dev/dri/by-path
+    - src: /tmp
+      dst: /tmp

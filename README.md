@@ -139,6 +139,7 @@ For best performance on Intel® Data Center GPU Max Series, please check the [li
 | [DLRM v2](https://arxiv.org/abs/1906.00091) | PyTorch | Training | Max Series | [FP32 TF32 BF16](/models_v2/pytorch/torchrec_dlrm/training/gpu/README.md)
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | PyTorch | Inference | Max Series | [FP16 INT8 FP32](/models_v2/pytorch/3d_unet/inference/gpu/README.md) |
 | [3D-Unet](https://arxiv.org/pdf/1606.06650.pdf) | TensorFlow | Training | Max Series | [BFloat16 FP32](/models_v2/tensorflow/3d_unet/training/gpu/README.md) |
+| [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | PyTorch | Inference |  Max Series, Arc Series | [FP16 FP32](/models_v2/pytorch/stable_diffusion/inference/gpu/README.md) |
 | [Mask R-CNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Training | Max Series | [FP32 BFloat16](/models_v2/tensorflow/maskrcnn/training/gpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Inference | Max Series | [FP16 BF16 FP32](/models_v2/pytorch/rnnt/inference/gpu/README.md) |
 | [RNN-T](https://arxiv.org/abs/1211.3711) | PyTorch | Training | Max Series | [FP32 BF16 TF32](/models_v2/pytorch/rnnt/training/gpu/README.md) |

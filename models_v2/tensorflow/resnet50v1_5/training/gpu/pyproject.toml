@@ -1,12 +1,12 @@
 [project]
 name = "models-v2-tensorflow-resnet50v1-5-training-gpu"
 version = "3.4"
-description = "AIRM - models_v2-tensorflow-resnet50v1_5-training-gpu"
+description = "Intel(R) AI Reference Models - models_v2-tensorflow-resnet50v1_5-training-gpu"
 authors = [
     {name = "Intel(R) AI Reference Models",email = "ai.reference.models@intel.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10,<=3.11"
+requires-python = ">=3.10,<4"
 dependencies = [
     "gin (>=0.1.6,<0.2.0)",
     "gin-config (>=0.5.0,<0.6.0)",

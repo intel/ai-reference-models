@@ -1,16 +1,22 @@
-[tool.poetry]
+[project]
 name = "tf-maskrcnn-trn-gpu"
-version = "0.1.0"
-description = ""
+version = "3.4"
+description = "Intel(R) AI Reference Models - models_v2-tensorflow-maskrcnn-training-gpu"
 readme = "README.md"
+authors = [
+    {name = "Intel(R) AI Reference Models",email = "ai.reference.models@intel.com"}
+]
+
+[tool.poetry]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
 opencv-python-headless = "^4.10.0.84"
-pybind11 = "^2.13.6"
+pybind11 = "2.12"
 pycocotools = "^2.0.8"
 dllogger = { git = "https://github.com/NVIDIA/dllogger.git" }
-intel-optimization-for-horovod = "^0.28.1.4"
+intel-optimization-for-horovod = "0.28.1.4"
 
 [build-system]
 requires = ["poetry-core"]

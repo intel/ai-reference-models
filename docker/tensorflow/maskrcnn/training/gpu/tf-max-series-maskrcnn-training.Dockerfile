@@ -39,10 +39,9 @@ WORKDIR /workspace/tf-max-series-maskrcnn-inference-training/models
 
 COPY models_v2/tensorflow/maskrcnn/training/gpu .
 
-RUN python -m pip install opencv-python-headless \
-        pybind11 \
-        pycocotools \
-        -e "git+https://github.com/NVIDIA/dllogger#egg=dllogger" 
+COPY models_v2/common/install-python-dependencies.sh .
+
+RUN ./install-python-dependencies.sh
 
 RUN git clone https://github.com/NVIDIA/DeepLearningExamples.git &&  \
     cd DeepLearningExamples/TensorFlow2/Segmentation/MaskRCNN && \
@@ -54,6 +53,7 @@ ENV PATH=/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/bin:/opt/intel/oneapi/m
 ENV CCL_ROOT=/opt/intel/oneapi/ccl/2021.13
 ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/2021.13
 ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/2021.13/opt/mpi/libfabric/lib/prov:/usr/lib/x86_64-linux-gnu/libfabric
+ENV PYTHONPATH=/root/.cache/pypoetry/virtualenvs/tf-maskrcnn-trn-gpu-3khfSOyS-py3.10/lib/python3.10/site-packages:$PYTHONPATH
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party 
