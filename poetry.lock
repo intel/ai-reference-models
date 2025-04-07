@@ -579,14 +579,14 @@ test = ["mock", "parameterized", "pytest", "pytest-forked", "pytest-subtests"]
 
 [[package]]
 name = "keras"
-version = "3.8.0"
+version = "3.9.0"
 description = "Multi-backend Keras"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "keras-3.8.0-py3-none-any.whl", hash = "sha256:b65d125976b0f8bf8ad1e93311a98e7dfb334ff6023627a59a52b35499165ec3"},
-    {file = "keras-3.8.0.tar.gz", hash = "sha256:6289006e6f6cb2b68a563b58cf8ae5a45569449c5a791df6b2f54c1877f3f344"},
+    {file = "keras-3.9.0-py3-none-any.whl", hash = "sha256:71078e833994384f45d5ea192d18f0969a12bd2572a5d15968c755945ad91d1c"},
+    {file = "keras-3.9.0.tar.gz", hash = "sha256:b5bf04e7c64c3176eda5124d035005bb7a676fb505f42496c7b03a99d5683652"},
 ]
 
 [package.dependencies]
@@ -1499,4 +1499,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<=3.11"
-content-hash = "74e6ebf50dcbc499697eb6dcae8a346ea74d9503112c38f385580c27856c683d"
+content-hash = "2a5fb37215f9fc5b57bb157ef99eddbf552fcf79e03a75a6ace2752b099d0b33"
