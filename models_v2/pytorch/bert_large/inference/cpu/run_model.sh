@@ -126,7 +126,11 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
         done
         wait
     elif [[ "0" == ${TORCH_INDUCTOR} ]];then
-        python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter ${num_warmup} --use_jit --ipex --perf_run_iters ${num_iter} --int8_config ${INT8_CONFIG}
+        if [[ "$PRECISION" == "int8" || "$PRECISION" == "avx-int8" ]]; then
+            python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter ${num_warmup} --inductor --ipex --perf_run_iters ${num_iter} --int8_config ${INT8_CONFIG}
+        else
+            python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --memory-allocator jemalloc --log_dir=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter ${num_warmup} --use_jit --ipex --perf_run_iters ${num_iter} --int8_config ${INT8_CONFIG}
+        fi
     else
         echo "Running Bert_Large inference with torch.compile() indutor backend enabled."
         export TORCHINDUCTOR_FREEZING=1
@@ -134,7 +138,11 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     fi
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
-        python -m intel_extension_for_pytorch.cpu.launch --ninstances ${NUMAS} --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE  --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter ${num_warmup} --perf_run_iters ${num_iter} --use_jit --ipex --int8_config ${INT8_CONFIG} --use_share_weight --total_cores ${CORES_PER_NUMA}
+        if [[ "$PRECISION" == "int8" || "$PRECISION" == "avx-int8" ]]; then
+            python -m intel_extension_for_pytorch.cpu.launch --ninstances ${NUMAS} --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE  --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter ${num_warmup} --perf_run_iters ${num_iter} --inductor --ipex --int8_config ${INT8_CONFIG} --use_share_weight --total_cores ${CORES_PER_NUMA}
+        else
+            python -m intel_extension_for_pytorch.cpu.launch --ninstances ${NUMAS} --log_dir=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE  --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter ${num_warmup} --perf_run_iters ${num_iter} --use_jit --ipex --int8_config ${INT8_CONFIG} --use_share_weight --total_cores ${CORES_PER_NUMA}
+        fi
     else
         echo "Running Bert_Large inference with torch.compile() indutor backend enabled."
         export TORCHINDUCTOR_FREEZING=1
@@ -173,6 +181,8 @@ elif [[ "$TEST_MODE" == "ACCURACY" ]]; then
     elif [[ "0" == ${TORCH_INDUCTOR} ]]; then
         if [[ "$PRECISION" == "fp8" ]]; then
             python -m intel_extension_for_pytorch.cpu.launch --log_dir=${OUTPUT_DIR} --log_file_prefix="accuracy_log" $EVAL_SCRIPT $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL}  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE  --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad --ipex --fp8_config ${FP8_CONFIG} 2>&1 | tee $LOG_0
+        elif [[ "$PRECISION" == "int8" || "$PRECISION" == "avx-int8" ]]; then
+            python -m intel_extension_for_pytorch.cpu.launch --log_dir=${OUTPUT_DIR} --log_file_prefix="accuracy_log" $EVAL_SCRIPT $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL}  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE  --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad --inductor --ipex --int8_config ${INT8_CONFIG} 2>&1 | tee $LOG_0
         else
             python -m intel_extension_for_pytorch.cpu.launch --log_dir=${OUTPUT_DIR} --log_file_prefix="accuracy_log" $EVAL_SCRIPT $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL}  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE  --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad --use_jit --ipex --int8_config ${INT8_CONFIG} 2>&1 | tee $LOG_0
         fi

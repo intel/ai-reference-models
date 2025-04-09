@@ -65,7 +65,7 @@ index 999752485..96e679a97 100644
 +                    else torch.ones((args.eval_batch_size//args.num_streams, 384), dtype=torch.long)
 +    jit_inputs = (dumpy_tensor, dumpy_tensor, dumpy_tensor)
 +    print(args)
-+    if args.int8 and args.ipex:
++    if args.int8 and args.ipex and args.use_jit:
 +        from intel_extension_for_pytorch.quantization import prepare, convert
 +        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
 +        qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
