@@ -60,7 +60,8 @@ RUN python -m pip install torchmetrics \
         scipy \
         lightning-utilities \
         accelerate \
-        tokenizers==0.15.2
+        tokenizers==0.15.2 \
+        huggingface_hub==0.25.2
 
 COPY models_v2/pytorch/stable_diffusion/inference/cpu .
 

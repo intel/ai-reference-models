@@ -9,9 +9,9 @@ fp32-throughput-inference:
     TEST_MODE: 'THROUGHPUT'
     TORCH_INDUCTOR: '0'
     DISTRIBUTED: 'False'
-    DATASET_DIR: /localdisk/coco
+    DATASET_DIR: /pytorch/coco/coco
   volumes:
     - src: /tmp
       dst: /tmp
-    - src: /localdisk/coco
-      dst: /localdisk/coco
+    - src: /pytorch/coco/coco
+      dst: /pytorch/coco/coco
