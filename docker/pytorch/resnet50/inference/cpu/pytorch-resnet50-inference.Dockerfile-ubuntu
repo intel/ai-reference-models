@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG BASE_TAG="2.0.0-pip-base"
+ARG BASE_IMAGE
+ARG BASE_TAG
 
-FROM ${BASE_IMAGE}:${BASE_TAG} AS intel-optimized-pytorch
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /workspace/pytorch-resnet50-inference 
 
