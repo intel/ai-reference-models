@@ -9,10 +9,11 @@ fp32-online_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 fp16-online_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -25,10 +26,11 @@ fp16-online_inference:
     TEST_MODE: REALTIME
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 avx-fp32-online_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -40,10 +42,11 @@ avx-fp32-online_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 bf16-online_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -55,10 +58,11 @@ bf16-online_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 int8-online_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -70,10 +74,11 @@ int8-online_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 avx-int8-online_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -85,11 +90,12 @@ avx-int8-online_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
--online_inference:
+    - src: /tmp
+      dst: /tmp
+bf32-online_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
   shm-size: 8G
@@ -100,10 +106,11 @@ avx-int8-online_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: REALTIME
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 fp32-throughput_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -115,10 +122,12 @@ fp32-throughput_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
+    BATCH_SIZE: '40'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 fp16-throughput_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -131,10 +140,12 @@ fp16-throughput_inference:
     TEST_MODE: THROUGHPUT
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
+    BATCH_SIZE: '40'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 avx-fp32-throughput_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -146,10 +157,12 @@ avx-fp32-throughput_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
+    BATCH_SIZE: '40'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 bf16-throughput_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -161,10 +174,12 @@ bf16-throughput_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
+    BATCH_SIZE: '40'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 int8-throughput_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -176,10 +191,12 @@ int8-throughput_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
+    BATCH_SIZE: '40'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 avx-int8-throughput_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -191,10 +208,12 @@ avx-int8-throughput_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
+    BATCH_SIZE: '40'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 bf32-throughput_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -206,10 +225,12 @@ bf32-throughput_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: THROUGHPUT
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
+    BATCH_SIZE: '40'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp
 fp32-accuracy_inference:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-inference
   cmd: sh -c " cd models_v2/pytorch/resnet50/inference/cpu && ./run_model.sh"
@@ -221,7 +242,6 @@ fp32-accuracy_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -237,7 +257,6 @@ fp16-accuracy_inference:
     TEST_MODE: ACCURACY
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -252,7 +271,6 @@ avx-fp32-accuracy_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -267,7 +285,6 @@ bf16-accuracy_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -282,7 +299,6 @@ int8-accuracy_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -297,7 +313,6 @@ avx-int8-accuracy_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
@@ -312,7 +327,6 @@ bf32-accuracy_inference:
     DATASET_DIR: /pytorch/Imagenet_FullData
     TEST_MODE: ACCURACY
     TORCH_INDUCTOR: '0'
-    WEIGHT_SHARING: 'False'
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData

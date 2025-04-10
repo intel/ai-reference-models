@@ -12,3 +12,5 @@ bf16-online_inference:
   volumes:
     - src: /pytorch/Imagenet_FullData
       dst: /pytorch/Imagenet_FullData
+    - src: /tmp
+      dst: /tmp

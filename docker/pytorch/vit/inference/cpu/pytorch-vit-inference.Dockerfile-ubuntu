@@ -66,7 +66,7 @@ RUN git clone https://github.com/huggingface/transformers.git && \
     git checkout v4.38.1 && \
     pip install datasets>=2.14.0 \
         evaluate \
-        cchardet \
+        cchardet==2.2.0a2 \
         scikit-learn \
         accelerate==0.34.2 && \
     git apply /workspace/pytorch-vit-inference/enable_ipex_for_transformers.diff && \
