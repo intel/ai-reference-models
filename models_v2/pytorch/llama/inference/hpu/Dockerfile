@@ -29,9 +29,9 @@ RUN git clone https://github.com/huggingface/optimum-habana && cd optimum-habana
 WORKDIR /workspace/optimum-habana/examples/text-generation
 RUN python3 -m pip install -r requirements.txt
 RUN python3 -m pip install -r requirements_lm_eval.txt
-COPY . .
-COPY Gaudi_1-20.json Gaudi.json
-COPY HQT_1-20.zip HQT.zip
+COPY ./Gaudi-tutorials/PyTorch/Hugging_Face_pipelines/Benchmarking_on_Optimum-habana_with_fp8/. .
+COPY ./Gaudi-tutorials/PyTorch/Hugging_Face_pipelines/Benchmarking_on_Optimum-habana_with_fp8/Gaudi_1-20.json Gaudi.json
+COPY ./Gaudi-tutorials/PyTorch/Hugging_Face_pipelines/Benchmarking_on_Optimum-habana_with_fp8/HQT_1-20.zip HQT.zip
 RUN python3 -m pip install -r requirements_bm.txt
 
 WORKDIR /workspace
