@@ -8,7 +8,7 @@ This document provides instructions for running Llama2 and Llama3 inference usin
 Please make sure to follow [Driver Installation](https://docs.habana.ai/en/latest/Installation_Guide/Driver_Installation.html) to install Gaudi driver on the system.
 To use dockerfile provided for the sample, please follow [Docker Installation](https://docs.habana.ai/en/latest/Installation_Guide/Additional_Installation/Docker_Installation.html) to setup habana runtime for Docker images.
 
-#### Dpcker Build
+#### Docker Build
 To build the image from the Dockerfile, please follow below command to build the optimum-habana-text-gen image with run scripts from Gaudi-Tutorials
 ```bash
 git clone https://github.com/HabanaAI/Gaudi-tutorials.git
