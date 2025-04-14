@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# PyTorch LLaMA2 and LLaMA38B inference using Optimum-Habana and vLLM on Gaudi (generation)
+# PyTorch LLaMA2 and LLaMA3 inference using Optimum-Habana and vLLM on Gaudi (generation)
 
 <!-- 10. Description -->
 ## Description
