@@ -1,15 +1,15 @@
 <!--- 0. Title -->
-# PyTorch LLaMA2 7B/13B and LLaMA3.1 8B inference (generation)
+# PyTorch LLaMA2 and LLaMA38B inference using Optimum-Habana and vLLM on Gaudi (generation)
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf), [LLaMA2 13B](https://huggingface.co/meta-llama/Llama-2-13b-hf) and [LLaMA3.1 8B](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) inference (generation) using Intel-optimized PyTorch.
+This document has instructions for running Llama2 and Llama3 inference (generation) using Optimum-Habana and vLLM on Gaudi.
 
 ## Bare Metal
 ### General setup
-
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison and TCMalloc.
+Please make sure to follow [Driver Installation](https://docs.habana.ai/en/latest/Installation_Guide/Driver_Installation.html) to install Gaudi driver on the system.
+To use dockerfile provided for the sample, please follow [Docker Installation](https://docs.habana.ai/en/latest/Installation_Guide/Additional_Installation/Docker_Installation.html) to setup habana runtime for Docker images.
 
 ### Model Specific Setup
 
