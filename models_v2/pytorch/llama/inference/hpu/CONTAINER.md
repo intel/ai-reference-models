@@ -9,8 +9,9 @@ Please make sure to follow [Driver Installation](https://docs.habana.ai/en/lates
 To use dockerfile provided for the sample, please follow [Docker Installation](https://docs.habana.ai/en/latest/Installation_Guide/Additional_Installation/Docker_Installation.html) to setup habana runtime for Docker images.
 
 #### Dpcker Build
-To build the image from the Dockerfile, please follow below command to build the optimum-habana-text-gen image.
+To build the image from the Dockerfile, please follow below command to build the optimum-habana-text-gen image with run scripts from Gaudi-Tutorials
 ```bash
+git clone https://github.com/HabanaAI/Gaudi-tutorials.git
 docker build --no-cache -t optimum-habana-text-gen:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f Dockerfile .
 ```
 
