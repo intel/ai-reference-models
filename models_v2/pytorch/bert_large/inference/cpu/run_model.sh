@@ -134,7 +134,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     else
         echo "Running Bert_Large inference with torch.compile() indutor backend enabled."
         export TORCHINDUCTOR_FREEZING=1
-        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput_mode --enable_jemalloc --log_path=${OUTPUT_DIR} ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter 15 --inductor --perf_run_iters 40 --int8_config ${INT8_CONFIG} 2>&1 | tee ${OUTPUT_DIR}/throughput_log_${precision}.log
+        python -m torch.backends.xeon.run_cpu --disable-numactl --throughput_mode --enable_jemalloc --log_path=${OUTPUT_DIR} ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_begin_iter ${num_warmup} --inductor --perf_run_iters ${num_iter} --int8_config ${INT8_CONFIG} 2>&1 | tee ${OUTPUT_DIR}/throughput_log_${precision}.log
     fi
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     if [[ "0" == ${TORCH_INDUCTOR} ]];then
@@ -197,7 +197,7 @@ throughput="0"
 latency="0"
 accuracy="0"
 if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
-    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_${PRECISION}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
     BEGIN {
             sum = 0;
         i = 0;
@@ -213,7 +213,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     echo "--------------------------------Performance Summary per NUMA Node--------------------------------"
     echo ""BERT";"throughput";${precision}; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
-    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/latency_log_${PRECISION}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
     BEGIN {
             sum = 0;
     i = 0;
@@ -227,7 +227,7 @@ elif [[ "$TEST_MODE" == "REALTIME" ]]; then
             printf("%.2f", sum);
     }')
 
-    latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/latency_log_${PRECISION}* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
     BEGIN {
         sum = 0;
         i = 0;
