@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index 999752485b..d5c4528c34 100644
+index 999752485b..75c2bfc127 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -272,15 +272,17 @@ index 999752485b..d5c4528c34 100644
      if not os.path.exists(args.output_dir) and args.local_rank in [-1, 0]:
          os.makedirs(args.output_dir)
  
-@@ -278,6 +521,8 @@ def evaluate(args, model, tokenizer, prefix=""):
-     eval_sampler = SequentialSampler(dataset)
-     eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
+@@ -276,7 +519,9 @@ def evaluate(args, model, tokenizer, prefix=""):
  
-+    model = wrap_model(model, args, eval_dataloader)
+     # Note that DistributedSampler samples randomly
+     eval_sampler = SequentialSampler(dataset)
+-    eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
++    eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size, drop_last=args.benchmark)
 +
++    model = wrap_model(model, args, eval_dataloader)
+ 
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
-         model = torch.nn.DataParallel(model)
 @@ -286,12 +531,63 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
