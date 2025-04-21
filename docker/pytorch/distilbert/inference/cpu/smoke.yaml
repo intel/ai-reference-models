@@ -4,17 +4,17 @@ fp32-realtime:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
+    TEST_MODE: REALTIME
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '4'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'REALTIME'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp

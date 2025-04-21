@@ -81,5 +81,7 @@ RUN apt-get update && \
         numactl \
         libegl1-mesa 
 
+RUN python -m pip install accelerate==0.28.0
+
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

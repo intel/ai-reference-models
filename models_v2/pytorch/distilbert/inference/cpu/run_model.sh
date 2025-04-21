@@ -231,7 +231,7 @@ if [[ "$TEST_MODE" == "THROUGHPUT" ]]; then
     echo ""distilbert-base";"p99_latency";${precision};${BATCH_SIZE};${latency}" | tee -a ${WORK_SPACE}/summary.log
 elif [[ "$TEST_MODE" == "REALTIME" ]]; then
     # Capture and aggregate latency values
-    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/distilbert_throughput* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/distilbert_latency* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
     BEGIN {
             sum = 0;
     i = 0;

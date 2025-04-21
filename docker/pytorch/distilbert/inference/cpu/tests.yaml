@@ -4,18 +4,18 @@ fp32-accuracy:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
+    TEST_MODE: ACCURACY
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'ACCURACY'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 fp32-realtime:
@@ -24,18 +24,18 @@ fp32-realtime:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
+    TEST_MODE: REALTIME
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '4'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'REALTIME'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 fp32-throughput:
@@ -44,18 +44,19 @@ fp32-throughput:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: fp32
+    TEST_MODE: THROUGHPUT
     SEQUENCE_LENGTH: '128'
+    BATCH_SIZE: '128'
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'THROUGHPUT'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 bf32-accuracy:
@@ -68,14 +69,13 @@ bf32-accuracy:
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'ACCURACY'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 bf32-realtime:
@@ -84,18 +84,18 @@ bf32-realtime:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf32
+    TEST_MODE: REALTIME
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '4'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'REALTIME'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 bf32-throughput:
@@ -104,18 +104,19 @@ bf32-throughput:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf32
+    TEST_MODE: THROUGHPUT
     SEQUENCE_LENGTH: '128'
+    BATCH_SIZE: '128'
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'THROUGHPUT'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 int8-bf16-accuracy:
@@ -124,18 +125,18 @@ int8-bf16-accuracy:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-bf16
+    TEST_MODE: ACCURACY
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'ACCURACY'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 int8-bf16-realtime:
@@ -144,18 +145,18 @@ int8-bf16-realtime:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-bf16
+    TEST_MODE: REALTIME
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '4'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'REALTIME'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 int8-bf16-throughput:
@@ -164,18 +165,19 @@ int8-bf16-throughput:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-bf16
+    TEST_MODE: THROUGHPUT
     SEQUENCE_LENGTH: '128'
+    BATCH_SIZE: '128'
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'THROUGHPUT'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 int8-fp32-accuracy:
@@ -184,18 +186,18 @@ int8-fp32-accuracy:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
+    TEST_MODE: ACCURACY
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'ACCURACY'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 int8-fp32-realtime:
@@ -204,18 +206,18 @@ int8-fp32-realtime:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
+    TEST_MODE: REALTIME
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '4'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'REALTIME'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 int8-fp32-throughput:
@@ -224,18 +226,19 @@ int8-fp32-throughput:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: int8-fp32
+    TEST_MODE: THROUGHPUT
     SEQUENCE_LENGTH: '128'
+    BATCH_SIZE: '128'
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'THROUGHPUT'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 bf16-accuracy:
@@ -244,18 +247,18 @@ bf16-accuracy:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
+    TEST_MODE: ACCURACY
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'ACCURACY'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 bf16-realtime:
@@ -264,36 +267,38 @@ bf16-realtime:
   cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
+    TEST_MODE: REALTIME
     SEQUENCE_LENGTH: '128'
     CORE_PER_INSTANCE: '4'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'REALTIME'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
 bf16-throughput:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-distilbert-inference
   cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
   env:
     PRECISION: bf16
+    TEST_MODE: THROUGHPUT
     SEQUENCE_LENGTH: '128'
+    BATCH_SIZE: '128'
     CORE_PER_INSTANCE: '32'
     HF_DATASETS_OFFLINE: '0'
     OUTPUT_DIR: /tmp
-    PRETRAINED_MODEL: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    FINETUNED_MODEL: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     DATASET_DIR: /pytorch/distilbert_dataset/SST-2/
-    TEST_MODE: 'THROUGHPUT'
   volumes:
     - src: /pytorch/distilbert_dataset/SST-2/
       dst: /pytorch/distilbert_dataset/SST-2/
-    - src: /pytorch/distilbert/SST-2/uncased-finetuned-english
-      dst: /pytorch/distilbert/SST-2/uncased-finetuned-english
+    - src: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
+      dst: /pytorch/pretrained_models/distilbert/distilbert-base-uncased-finetuned-sst-2-english/
     - src: /tmp
       dst: /tmp
