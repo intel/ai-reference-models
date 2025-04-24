@@ -13,6 +13,7 @@ matplotlib = "^3.9.2"
 notebook = "^7.2.2"
 runipy = "^0.1.5"
 wheel = "^0.44.0"
+h11 = "0.16.0"
 
 
 [build-system]
