@@ -111,7 +111,7 @@ then
 elif [[ "${PRECISION}" == "int8-bf16" ]] || [[ "${PRECISION}" == "int8" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --dtype int8 --int8_bf16_mixed --int8-qconfig ${OUTPUT_DIR}/${MODEL_HF}-qconfig.json"
+    ARGS="$ARGS --dtype int8-bf16 --int8_bf16_mixed --int8-qconfig ${OUTPUT_DIR}/${MODEL_HF}-qconfig.json"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
