@@ -17,7 +17,7 @@ ARG PYT_BASE_TAG="2.3.110-xpu"
 
 FROM ${PYT_BASE_IMAGE}:${PYT_BASE_TAG}
 
-WORKDIR /workspace/pytorch-flex-series-distilbert-inference/models
+WORKDIR /workspace/pytorch-max-series-distilbert-inference/models
 
 ENV DEBIAN_FRONTEND=noninteractive
 
