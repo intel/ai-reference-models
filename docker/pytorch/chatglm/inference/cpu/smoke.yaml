@@ -1,0 +1,15 @@
+fp16-t1-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-chatglm-inference
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    TORCH_INDUCTOR: '0'
+    TEST_MODE: REALTIME
+    INPUT_TOKEN: '1024'
+    OUTPUT_TOKEN: '128'
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+  volumes:
+    - src: /tmp
+      dst: /tmp

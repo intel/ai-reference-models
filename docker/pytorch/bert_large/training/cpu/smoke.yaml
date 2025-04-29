@@ -1,0 +1,21 @@
+bf16-training-phase1:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
+  cmd: bash run_model.sh
+  shm_size: 16G
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    BERT_MODEL_CONFIG: /pytorch/bert_squad/config/bert_config.json
+    OUTPUT_DIR: /tmp
+    TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
+    DATASET_DIR: /pytorch/bert_squad/datasets/bert_results4_dataset
+    TRAINING_PHASE: '1'
+    DDP: 'false'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /pytorch/bert_squad/config/bert_config.json
+      dst: /pytorch/bert_squad/config/bert_config.json
+    - src: /tmp
+      dst: /tmp
+    - src: /pytorch/bert_squad/datasets/bert_results4_dataset
+      dst: /pytorch/bert_squad/datasets/bert_results4_dataset
