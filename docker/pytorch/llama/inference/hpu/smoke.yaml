@@ -1,0 +1,9 @@
+fp16-t1-realtime-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai:gaudi-benchmark
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  ipc: host
+  runtime: habana
+  volumes:
+    - src: /tmp
+      dst: /tmp

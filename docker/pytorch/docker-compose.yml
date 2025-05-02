@@ -177,6 +177,21 @@ services:
     extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  llama-inference-hpu:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-gaudi-benchmark
+    pull_policy: always
+    cap_drop:
+      - NET_RAW
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ""
+        NO_PROXY: ""
+      dockerfile: docker/pytorch/llama/inference/hpu/pytorch-gaudi-benchmark.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
+    command: >
+      bash -c "python -c 'import torch; print(\"torch:\", torch.__version__)'"
   torchrec_dlrm-inference-cpu:
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-recommendation-dlrm-v2-inference
     pull_policy: always
