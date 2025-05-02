@@ -66,20 +66,6 @@ cd /workdir/
 ./perftest.sh
 ```
 
-## Output
-
-### Optimum-Habana
-
-![image](https://github.com/user-attachments/assets/db44e6b5-4be2-4559-a5d2-f369e35cf4ea)
-
-
-### vLLM
-
-![image](https://github.com/user-attachments/assets/02a2ea48-7c27-461a-8dff-9529f27b304c)
-
-
-
-
 <!--- 80. License -->
 ## License
 [LICENSE](https://github.com/IntelAI/models/blob/master/LICENSE)
