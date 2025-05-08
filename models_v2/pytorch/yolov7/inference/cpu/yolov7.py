@@ -270,6 +270,7 @@ def test(opt,
                     exported_model = export_for_training(
                         model,
                         example_inputs,
+                        strict=True,
                     ).module()
                     quantizer = X86InductorQuantizer()
                     quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
@@ -341,6 +342,7 @@ def test(opt,
                     exported_model = export_for_training(
                         model,
                         example_inputs,
+                        strict=True,
                     ).module()
                     quantizer = X86InductorQuantizer()
                     quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())

@@ -52,8 +52,10 @@ cd -
 
 # Sometimes data may be mounted on read-only paths like NFS. So, workaround is to copy data to /tmp to enable script write val2017.cache to /tmp
 
-cp -r ${DATASET_DIR} /tmp 
-export DATASET_DIR=/tmp/data
+TARGET_DIR="/tmp/data"
+rm -rf "$TARGET_DIR"
+cp -r ${DATASET_DIR} "$TARGET_DIR"
+export DATASET_DIR="$TARGET_DIR"
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
