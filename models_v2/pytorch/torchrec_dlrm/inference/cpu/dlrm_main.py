@@ -463,7 +463,8 @@ def stock_pt_optimize(args, model, optimizer, dataloader):
                 example_inputs = (dense, sparse)
                 exported_model = export_for_training(
                     model,
-                    example_inputs
+                    example_inputs,
+                    strict=True,
                 ).module()
                 quantizer = X86InductorQuantizer()
                 quantizer.set_global(xiq.get_default_x86_inductor_quantization_config())
