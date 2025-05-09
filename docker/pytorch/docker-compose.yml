@@ -30,7 +30,7 @@ services:
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
         BASE_IMAGE: intel/intel-extension-for-pytorch
-        BASE_TAG: 2.6.0-pip-base
+        BASE_TAG: 2.7.0-pip-base
       dockerfile: docker/pytorch/bert_large/inference/cpu/pytorch-bert-large-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"

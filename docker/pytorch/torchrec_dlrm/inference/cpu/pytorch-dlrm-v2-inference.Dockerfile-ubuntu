@@ -48,16 +48,16 @@ RUN git clone https://github.com/jemalloc/jemalloc.git && \
     make && \ 
     make install
 
-RUN pip install torchrec==0.3.2 --no-deps \
-        torchmetrics==0.11.0 \
-        fbgemm-gpu==0.3.2 \
-        torchsnapshot \
+RUN pip install torchrec --index-url https://download.pytorch.org/whl/cpu --no-deps \
+        torchmetrics==1.0.3 \
+        fbgemm-gpu --index-url https://download.pytorch.org/whl/cpu \
         pyre_extensions \
         iopath \
         typing-inspect \
         mypy_extensions \
         portalocker \
         tqdm
+RUN pip install torchsnapshot lightning_utilities
 
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
