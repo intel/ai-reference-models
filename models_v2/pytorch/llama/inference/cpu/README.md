@@ -42,6 +42,14 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
     # Choice: If to run peak performance with PyTorch only with inductor (only support greedy search for now)
     source ./inductor/setup.sh
     ```
+    Note: In `setup.sh` script a `prompt.json` file is downloaded, which provides prompt samples with pre-defined input token lengths for benchmarking. For **Llama-3 models** benchmarking, the users need to download a specific `prompt.json` file, overwriting the original one.
+    ```
+    wget -O prompt.json https://intel-extension-for-pytorch.s3.amazonaws.com/miscellaneous/llm/prompt-3.json
+    ```
+    The original prompt.json file can be restored from the repository if needed.
+    ```
+    wget https://intel-extension-for-pytorch.s3.amazonaws.com/miscellaneous/llm/prompt.json
+    ```
 5. Install the latest CPU versions of [torch, torchvision and intel_extension_for_pytorch](https://intel.github.io/intel-extension-for-pytorch/index.html#installation)
 
 6. Set INPUT_TOKEN before running the model
