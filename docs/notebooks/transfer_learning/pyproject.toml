@@ -40,6 +40,7 @@ torchvision = "0.22.0"
 transformers = "^4.48.0"
 urllib3 = "^2.2.3"
 wget = "^3.2"
+tornado = "6.5.0"
 
 
 [build-system]
