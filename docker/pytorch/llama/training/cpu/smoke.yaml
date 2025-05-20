@@ -1,0 +1,18 @@
+bf16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-llama-training
+  cmd: sh -c "huggingface-cli login --token ${TOKEN} && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    NNODES: '1'
+    DDP: 'False'
+    TORCH_INDUCTOR: '0'
+    FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
+    BATCH_SIZE: '32'
+    DATASET_DIR: /pytorch/llama_training/cpu/
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /pytorch/llama_training/cpu/
+      dst: /pytorch/llama_training/cpu/

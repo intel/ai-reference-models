@@ -12,6 +12,8 @@ fp32-training-phase1:
     TRAINING_PHASE: '1'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '224'
+    HOSTFILE: /localdisk/hostfile
   volumes:
     - src: /pytorch/bert_squad/config/bert_config.json
       dst: /pytorch/bert_squad/config/bert_config.json
@@ -19,6 +21,8 @@ fp32-training-phase1:
       dst: /tmp
     - src: /pytorch/bert_squad/datasets/bert_results4_dataset
       dst: /pytorch/bert_squad/datasets/bert_results4_dataset
+    - src: /localdisk/hostfile
+      dst: /localdisk/hostfile
 fp32-training-phase2:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
@@ -32,16 +36,19 @@ fp32-training-phase2:
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
     DATASET_DIR: /pytorch/bert_squad/datasets/bert_results4_dataset
     TRAINING_PHASE: '2'
-    DDP: 'false'
+    DDP: 'true'
     TORCH_INDUCTOR: '0'
     batch_size: '28'
+    HOSTFILE: /localdisk/hostfile
   volumes:
     - src: /pytorch/bert_squad/config/bert_config.json
       dst: /pytorch/bert_squad/config/bert_config.json
-    - src: /tmp/model_save_fp32
-      dst: /tmp/model_save_fp32
+    - src: /tmp
+      dst: /tmp
     - src: /pytorch/bert_squad/datasets/bert_results4_dataset
       dst: /pytorch/bert_squad/datasets/bert_results4_dataset
+    - src: /localdisk/hostfile
+      dst: /localdisk/hostfile
 bf16-training-phase1:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
@@ -56,6 +63,8 @@ bf16-training-phase1:
     TRAINING_PHASE: '1'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '448'
+    HOSTFILE: /localdisk/hostfile
   volumes:
     - src: /pytorch/bert_squad/config/bert_config.json
       dst: /pytorch/bert_squad/config/bert_config.json
@@ -63,6 +72,8 @@ bf16-training-phase1:
       dst: /tmp
     - src: /pytorch/bert_squad/datasets/bert_results4_dataset
       dst: /pytorch/bert_squad/datasets/bert_results4_dataset
+    - src: /localdisk/hostfile
+      dst: /localdisk/hostfile
 bf16-training-phase2:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
@@ -76,16 +87,19 @@ bf16-training-phase2:
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
     DATASET_DIR: /pytorch/bert_squad/datasets/bert_results4_dataset
     TRAINING_PHASE: '2'
-    DDP: 'false'
+    DDP: 'true'
     TORCH_INDUCTOR: '0'
     batch_size: '56'
+    HOSTFILE: /localdisk/hostfile
   volumes:
     - src: /pytorch/bert_squad/config/bert_config.json
       dst: /pytorch/bert_squad/config/bert_config.json
-    - src: /tmp/model_save_bf16
-      dst: /tmp/model_save_bf16
+    - src: /tmp
+      dst: /tmp
     - src: /pytorch/bert_squad/datasets/bert_results4_dataset
       dst: /pytorch/bert_squad/datasets/bert_results4_dataset
+    - src: /localdisk/hostfile
+      dst: /localdisk/hostfile
 bf32-training-phase1:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
@@ -100,6 +114,8 @@ bf32-training-phase1:
     TRAINING_PHASE: '1'
     DDP: 'false'
     TORCH_INDUCTOR: '0'
+    BATCH_SIZE: '224'
+    HOSTFILE: /localdisk/hostfile
   volumes:
     - src: /pytorch/bert_squad/config/bert_config.json
       dst: /pytorch/bert_squad/config/bert_config.json
@@ -107,6 +123,8 @@ bf32-training-phase1:
       dst: /tmp
     - src: /pytorch/bert_squad/datasets/bert_results4_dataset
       dst: /pytorch/bert_squad/datasets/bert_results4_dataset
+    - src: /localdisk/hostfile
+      dst: /localdisk/hostfile
 bf32-training-phase2:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
@@ -120,16 +138,19 @@ bf32-training-phase2:
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
     DATASET_DIR: /pytorch/bert_squad/datasets/bert_results4_dataset
     TRAINING_PHASE: '2'
-    DDP: 'false'
+    DDP: 'true'
     TORCH_INDUCTOR: '0'
     batch_size: '28'
+    HOSTFILE: /localdisk/hostfile
   volumes:
     - src: /pytorch/bert_squad/config/bert_config.json
       dst: /pytorch/bert_squad/config/bert_config.json
-    - src: /tmp/model_save_bf32
-      dst: /tmp/model_save_bf32
+    - src: /tmp
+      dst: /tmp
     - src: /pytorch/bert_squad/datasets/bert_results4_dataset
       dst: /pytorch/bert_squad/datasets/bert_results4_dataset
+    - src: /localdisk/hostfile
+      dst: /localdisk/hostfile
 fp16-training-phase1:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
@@ -145,6 +166,8 @@ fp16-training-phase1:
     DDP: 'false'
     TORCH_INDUCTOR: '0'
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+    BATCH_SIZE: '224'
+    HOSTFILE: /localdisk/hostfile
   volumes:
     - src: /pytorch/bert_squad/config/bert_config.json
       dst: /pytorch/bert_squad/config/bert_config.json
@@ -152,6 +175,8 @@ fp16-training-phase1:
       dst: /tmp
     - src: /pytorch/bert_squad/datasets/bert_results4_dataset
       dst: /pytorch/bert_squad/datasets/bert_results4_dataset
+    - src: /localdisk/hostfile
+      dst: /localdisk/hostfile
 fp16-training-phase2:
   img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-language-modeling-bert-large-training
   cmd: bash run_model.sh
@@ -165,14 +190,17 @@ fp16-training-phase2:
     TRAIN_SCRIPT: /workspace/pytorch-bert-large-training/run_pretrain_mlperf.py
     DATASET_DIR: /pytorch/bert_squad/datasets/bert_results4_dataset
     TRAINING_PHASE: '1'
-    DDP: 'false'
+    DDP: 'true'
     TORCH_INDUCTOR: '0'
     batch_size: '28'
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+    HOSTFILE: /localdisk/hostfile
   volumes:
     - src: /pytorch/bert_squad/config/bert_config.json
       dst: /pytorch/bert_squad/config/bert_config.json
-    - src: /tmp/model_save_fp16
-      dst: /tmp/model_save_fp16
+    - src: /tmp
+      dst: /tmp
     - src: /pytorch/bert_squad/datasets/bert_results4_dataset
       dst: /pytorch/bert_squad/datasets/bert_results4_dataset
+    - src: /localdisk/hostfile
+      dst: /localdisk/hostfile

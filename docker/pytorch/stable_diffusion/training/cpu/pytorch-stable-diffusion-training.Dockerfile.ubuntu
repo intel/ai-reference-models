@@ -18,7 +18,7 @@ ARG BASE_TAG
 
 FROM ${BASE_IMAGE}:${BASE_TAG}
 
-WORKDIR /workspace/pytorch-vit-inference
+WORKDIR /workspace/pytorch-stable-diffusion
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
@@ -36,7 +36,8 @@ RUN apt-get update && \
         tar \
         unzip \
         bc \
-        python3-dev
+        g++-17 \
+        python3.11-dev
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -53,25 +54,27 @@ RUN wget https://github.com/gperftools/gperftools/releases/download/gperftools-2
     make && \
     make install
 
-RUN python -m pip install packaging \
-    intel-openmp 
+RUN python -m pip install torchmetrics \
+        pycocotools \
+        transformers==4.38.1 \
+        peft==0.6.2 \
+        torch-fidelity --no-deps \
+        scipy \
+        lightning-utilities \
+        accelerate \
+        tokenizers==0.15.2 \
+        huggingface_hub==0.25.2
+
+COPY models_v2/pytorch/stable_diffusion/training/cpu .
+
+RUN git clone https://github.com/huggingface/diffusers.git && \
+    cd diffusers && \
+    git checkout v0.23.1 && \
+    git apply /workspace/pytorch-stable-diffusion/diffusers.patch && \
+    pip install -e .
 
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so":"/workspace/lib/tcmalloc/lib/libtcmalloc.so":"/usr/local/lib/libiomp5.so":$LD_PRELOAD
-
-COPY models_v2/pytorch/vit/inference/cpu .
-COPY models_v2/common/enable_ipex_for_transformers.diff .
-
-RUN git clone https://github.com/huggingface/transformers.git && \
-    cd transformers && \
-    git checkout v4.38.1 && \
-    pip install datasets>=2.14.0 \
-        evaluate \
-        scikit-learn \
-        accelerate==0.34.2 && \
-    git apply /workspace/pytorch-vit-inference/enable_ipex_for_transformers.diff && \
-    pip install -e ./
-
-RUN python -m pip install cchardet==2.2.0a2
+#ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
@@ -79,6 +82,15 @@ RUN apt-get update && \
         libegl1-mesa 
 
 RUN rm -rf gperftools-2.7.90* jemalloc 
+
+RUN git clone https://github.com/intel/torch-ccl.git && \
+    cd torch-ccl && \
+    git checkout 8c0fd87ec2cf8ab99f5bada4b85f151ac9984818 && \
+    git submodule sync && \
+    git submodule update --init --recursive && \
+    python setup.py install
+
+RUN python -m pip install impi-devel
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

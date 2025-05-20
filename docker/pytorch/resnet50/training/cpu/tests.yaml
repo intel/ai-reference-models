@@ -7,11 +7,15 @@ fp32-training:
     OUTPUT_DIR: /tmp
     DATASET_DIR: /pytorch/Imagenet_FullData/
     TRAINING_EPOCHS: '1'
-    DISTRIBUTED: 'False'
+    DISTRIBUTED: 'True'
     TORCH_INDUCTOR: '0'
+    LOCAL_BATCH_SIZE: '512'
+    HOSTFILE: /localdisk/hostfile
   volumes:
     - src: /pytorch/Imagenet_FullData/
       dst: /pytorch/Imagenet_FullData/
+    - src: /localdisk/hostfile
+      dst: /localdisk/hostfile
     - src: /tmp
       dst: /tmp
 avx-fp32-training:

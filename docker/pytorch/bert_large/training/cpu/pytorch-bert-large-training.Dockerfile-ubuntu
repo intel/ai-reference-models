@@ -30,7 +30,7 @@ RUN apt-get update && \
         autoconf \
         bzip2 \
         tar \
-        python3-dev
+        python3.11.dev
 
 RUN wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz && \
     tar -xzf gperftools-2.7.90.tar.gz && \
@@ -54,6 +54,7 @@ RUN python -m pip install tensorboardX \
         accelerate \
         tfrecord \
         intel-openmp \
+        impi-devel \
         faiss-cpu \
         tfrecord \
         h5py \
@@ -83,7 +84,7 @@ RUN git clone https://github.com/huggingface/transformers.git && \
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
         numactl \
-        libegl1-mesa 
+        libegl1-mesa
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

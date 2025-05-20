@@ -55,8 +55,8 @@ RUN pip install packaging \
         intel-openmp \
         evaluate \ 
         scikit-learn \
-        scipy 
-        
+        scipy
+
 RUN apt-get update && \
     apt-get install -y git-lfs 
     
@@ -74,13 +74,10 @@ RUN git clone https://github.com/huggingface/transformers.git && \
     git apply ../enable_ipex_for_transformers.diff && \
     pip install -e ./ 
 
-RUN python -m pip install accelerate==0.28.0
-
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
         numactl \
         libegl1-mesa 
-
 RUN python -m pip install accelerate==0.28.0
 
 COPY LICENSE licenses/LICENSE

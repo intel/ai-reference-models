@@ -93,7 +93,7 @@ fp32-throughput-inference:
     TEST_MODE: 'THROUGHPUT'
     DUMMY_INPUT: '1'
     TORCH_INDUCTOR: '0'
-    BATCH_SIZE: '224'
+    BATCH_SIZE: '288'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -107,7 +107,7 @@ bf32-throughput-inference:
     TEST_MODE: 'THROUGHPUT'
     DUMMY_INPUT: '1'
     TORCH_INDUCTOR: '0'
-    BATCH_SIZE: '224'
+    BATCH_SIZE: '288'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -121,7 +121,7 @@ bf16-throughput-inference:
     TEST_MODE: 'THROUGHPUT'
     DUMMY_INPUT: '1'
     TORCH_INDUCTOR: '0'
-    BATCH_SIZE: '224'
+    BATCH_SIZE: '288'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -136,7 +136,7 @@ fp16-throughput-inference:
     DUMMY_INPUT: '1'
     TORCH_INDUCTOR: '0'
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
-    BATCH_SIZE: '224'
+    BATCH_SIZE: '288'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -150,7 +150,7 @@ int8-fp32-throughput-inference:
     TEST_MODE: 'THROUGHPUT'
     DUMMY_INPUT: '1'
     TORCH_INDUCTOR: '0'
-    BATCH_SIZE: '224'
+    BATCH_SIZE: '288'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -164,7 +164,7 @@ int8-bf16-throughput-inference:
     TEST_MODE: 'THROUGHPUT'
     DUMMY_INPUT: '1'
     TORCH_INDUCTOR: '0'
-    BATCH_SIZE: '224'
+    BATCH_SIZE: '288'
   volumes:
     - src: /tmp
       dst: /tmp

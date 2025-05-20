@@ -30,7 +30,7 @@ services:
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
         BASE_IMAGE: intel/intel-extension-for-pytorch
-        BASE_TAG: 2.7.0-pip-base
+        BASE_TAG: 2.6.0-pip-base
       dockerfile: docker/pytorch/bert_large/inference/cpu/pytorch-bert-large-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
@@ -266,6 +266,17 @@ services:
     build:
       context: ../../
       dockerfile: docker/pytorch/stable_diffusion/inference/cpu/pytorch-stable-diffusion-inference.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
+    extends: bert_large-inference-cpu
+    command: >
+      bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  stable_diffusion-training-cpu:
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-stable-diffusion-training
+    pull_policy: always
+    cap_drop:
+      - NET_RAW
+    build:
+      context: ../../
+      dockerfile: docker/pytorch/stable_diffusion/training/cpu/pytorch-stable-diffusion-training.Dockerfile-${BASE_IMAGE_NAME:-ubuntu}
     extends: bert_large-inference-cpu
     command: >
       bash -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"

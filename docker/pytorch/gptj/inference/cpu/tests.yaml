@@ -243,7 +243,7 @@ bf32-t2-throughput-inference:
     OUTPUT_TOKEN: '32'
     TEST_MODE: "THROUGHPUT"
     TORCH_INDUCTOR: '0'
-    BATCH_SIZE: '8'
+    BATCH_SIZE: '4'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -273,7 +273,7 @@ fp16-t2-throughput-inference:
     OUTPUT_TOKEN: '32'
     TEST_MODE: "THROUGHPUT"
     TORCH_INDUCTOR: '0'
-    BATCH_SIZE: '8'
+    BATCH_SIZE: '4'
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
   volumes:
     - src: /tmp

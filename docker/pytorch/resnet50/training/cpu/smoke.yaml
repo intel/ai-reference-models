@@ -1,0 +1,16 @@
+bf16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-pytorch-image-recognition-resnet50-training
+  cmd: sh -c "cd models_v2/pytorch/resnet50/training/cpu && ./run_model.sh"
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: bf16
+    OUTPUT_DIR: /tmp
+    DATASET_DIR: /pytorch/Imagenet_FullData/
+    TRAINING_EPOCHS: '1'
+    DISTRIBUTED: 'False'
+    TORCH_INDUCTOR: '0'
+  volumes:
+    - src: /pytorch/Imagenet_FullData/
+      dst: /pytorch/Imagenet_FullData/
+    - src: /tmp
+      dst: /tmp

@@ -32,7 +32,9 @@ RUN apt-get update && \
         cmake \
         autoconf \
         bzip2 \
-        tar
+        tar \
+        g++-17 \
+        python3.11-dev
 
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -62,6 +64,13 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
         numactl \
         libegl1-mesa 
+
+RUN git clone https://github.com/intel/torch-ccl.git && \
+    cd torch-ccl && \
+    git checkout 8c0fd87ec2cf8ab99f5bada4b85f151ac9984818 && \
+    git submodule sync && \
+    git submodule update --init --recursive && \
+    python setup.py install
 
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party

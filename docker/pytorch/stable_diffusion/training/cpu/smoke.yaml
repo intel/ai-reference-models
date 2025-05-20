@@ -1,0 +1,17 @@
+fp16-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${BASE_IMAGE_NAME:-ubuntu}-${BASE_IMAGE_TAG:-22.04}-generative-ai-stable-diffusion-training
+  cmd: bash run_model.sh
+  cap_add: 'SYS_NICE'
+  env:
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+    NNODES: '1'
+    DISTRIBUTED: 'False'
+    TORCH_INDUCTOR: '0'
+    DATASET_DIR: /localdisk/pytorch/sd-train
+    DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
+  volumes:
+    - src: /tmp
+      dst: /tmp
+    - src: /localdisk/pytorch/sd-train
+      dst: /localdisk/pytorch/sd-train

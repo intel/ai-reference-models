@@ -119,7 +119,7 @@ fp16-t1-throughput-inference:
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
-    BATCH_SIZE: '24'
+    BATCH_SIZE: '4'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -151,7 +151,7 @@ bf32-t1-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
-    BATCH_SIZE: '24'
+    BATCH_SIZE: '4'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -276,7 +276,7 @@ fp16-t2-throughput-inference:
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
     DNNL_MAX_CPU_ISA: AVX512_CORE_AMX_FP16
-    BATCH_SIZE: '8'
+    BATCH_SIZE: '4'
   volumes:
     - src: /tmp
       dst: /tmp
@@ -308,7 +308,7 @@ bf32-t2-throughput-inference:
     TORCH_INDUCTOR: '0'
     TEST_MODE: "THROUGHPUT"
     FINETUNED_MODEL: meta-llama/Llama-2-7b-hf
-    BATCH_SIZE: '8'
+    BATCH_SIZE: '4'
   volumes:
     - src: /tmp
       dst: /tmp
