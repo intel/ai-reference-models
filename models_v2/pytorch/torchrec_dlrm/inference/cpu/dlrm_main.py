@@ -1213,10 +1213,14 @@ def _share_weight_benchmark(
     from torch.utils import ThroughputBenchmark
     print_memory("start to init throughput benchmark")
     bench = ThroughputBenchmark(model)
-    batch = fetch_batch(data_loader)
-    batch.sparse_features = unpack(batch.sparse_features)
     print_memory("start to add input to throughput benchmark")
-    bench.add_input(batch.dense_features, batch.sparse_features)
+    batch_count = 0
+    for batch in data_loader:
+        if batch_count >= args.limit_val_batches:
+            break
+        batch.sparse_features = unpack(batch.sparse_features)
+        bench.add_input(batch.dense_features, batch.sparse_features)
+        batch_count += 1
     print_memory("start to run throughput benchmark")
     ctx = contextlib.suppress()
     if args.dtype == 'bf16':
