@@ -68,6 +68,6 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
         numactl \
         libegl1-mesa 
-        
+
 COPY LICENSE licenses/LICENSE
 COPY third_party licenses/third_party
