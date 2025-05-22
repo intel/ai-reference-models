@@ -173,7 +173,7 @@ else
             $mrun_cmd python $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
         else
             if [[ "0" != ${MANUALLY_LAUNCH} ]];then
-                python launch.py $SOCKETS $NUMA_NODES $CORES_PER_SOCKET $ENABLE_2ND_PROCESS 0 "python $MODEL_SCRIPT $COMMON_ARGS --inductor"  2>&1 | tee ${OUTPUT_DIR}/$LOG
+                python launch.py $SOCKETS $NUMA_NODES $CORES_PER_SOCKET $ENABLE_2ND_PROCESS 0 "python $MODEL_SCRIPT $COMMON_ARGS --inductor"  2>&1 | tee $LOG
             else
                 $mrun_cmd python $launcher_cmd $MODEL_SCRIPT $COMMON_ARGS --inductor 2>&1 | tee $LOG
             fi
@@ -195,7 +195,7 @@ mprof plot ${MEMLOG} -o ${MEMPIC}
 fi
 
 if [[ "${TEST_MODE}" == "THROUGHPUT" ]]; then
-    throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/${LOG} |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v enable_2nd_process="$ENABLE_2ND_PROCESS" '
+    throughput=$(grep 'Throughput:' "${LOG}" |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v enable_2nd_process="$ENABLE_2ND_PROCESS" '
     BEGIN {
             sum = 0;
             i = 0;
