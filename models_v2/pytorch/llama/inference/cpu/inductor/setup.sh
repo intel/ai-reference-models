@@ -20,7 +20,7 @@ pip install datasets sentencepiece psutil
 
 # Clone the Transformers repo in the LLAMA2 inference directory
 cd ${MODEL_DIR}
-git clone https://github.com/blzheng/transformers -b beilei/enable_flex_attn
+git clone https://github.com/jianan-gu/transformers -b flex_attention_enabling_2.7
 cd transformers
 pip install -e ./
 cd ..
