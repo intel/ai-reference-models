@@ -21,7 +21,8 @@ dependencies = [
     "pytest-xdist (>=3.6.1,<4.0.0)",
     "pubmed-parser (>=0.5.1,<0.6.0)",
     "keras (==3.9.0)",
-    "torch (==2.7.0)"
+    "torch (==2.7.0)",
+    "requests (==2.32.4)"
 ]
 
 [tool.poetry]
