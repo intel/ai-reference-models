@@ -117,7 +117,7 @@ if args.profile:
 inductor_config.cpp_wrapper = True
 inductor_config.max_autotune = True
 inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
-
+torch._dynamo.config.allow_unspec_int_on_nn_module = True
 if args.dtype in ["fp32","bf16", "fp16"]:
     if not args.disable_grouped_gemm and hasattr(inductor_config.cpp, "enable_grouped_gemm_template"):
         inductor_config.cpp.enable_grouped_gemm_template = True
