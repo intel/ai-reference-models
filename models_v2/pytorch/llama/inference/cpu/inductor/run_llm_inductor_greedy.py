@@ -96,7 +96,7 @@ elif args.dtype in ["int8-bf16", "int8"]:
     amp_enabled = True
     load_dtype = torch.bfloat16
 elif args.dtype == "fp16":
-    amp_enabled = False
+    amp_enabled = True
     load_dtype = torch.float16
 else:
     assert False, "This script (inductor peak perf with flexAttention) only support int8, bf16, fp16, int8-bf16, int8 (da8w8) and fp32 as dtype"
@@ -123,7 +123,7 @@ if args.dtype in ["fp32","bf16", "fp16"]:
         inductor_config.cpp.enable_grouped_gemm_template = True
     elif not args.disable_concat_linear:
         inductor_config.cpp.enable_concat_linear = True
-    with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
+    with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled, dtype=load_dtype):
         model.forward=torch.compile(model.forward)
 elif args.dtype in ["int8", "int8-bf16"]:
     from torch._inductor import config as inductor_config
@@ -243,7 +243,7 @@ if args.accuracy_only:
         return acc
 
     model.eval()
-    with torch.autocast("cpu", enabled=amp_enabled):
+    with torch.autocast("cpu", enabled=amp_enabled, dtype=load_dtype):
         eval_func(model)
     print("Acc test done, exit..")
     exit(0)
@@ -274,7 +274,7 @@ print("---- Prompt size:", input_size)
 prompt = [prompt] * args.batch_size
 
 # warmup
-with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
+with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled, dtype=load_dtype):
     for i in range(args.num_warmup):
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids
         model.generate(
@@ -291,7 +291,7 @@ if args.profile:
         on_trace_ready=trace_handler,
         record_shapes = True,
         ) as prof:
-            with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
+            with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled, dtype=load_dtype):
                 for i in range(3):
                     input_ids = tokenizer(prompt, return_tensors="pt").input_ids
                     model.generate(
@@ -302,7 +302,7 @@ if args.profile:
 num_iter = args.num_iter - args.num_warmup
 total_time = 0.0
 total_list = []
-with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled):
+with torch.no_grad(), torch.autocast("cpu", enabled=amp_enabled, dtype=load_dtype):
     for i in range(num_iter):
         tic = time.time()
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids
