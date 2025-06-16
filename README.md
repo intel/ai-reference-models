@@ -6,6 +6,12 @@
 </a>
 <a href="https://www.bestpractices.dev/projects/8925"><img src="https://www.bestpractices.dev/projects/8925/badge"></a>
 
+# Deprecation Notice
+
+The Intel® AI Reference Models project has reached the end of its development. The v3.4.0 is the last release with new features. The project will be archived in March 2026. Until then, only critical vulnerabilities (CVEs) will be fixed. Starting with the release v3.4.1, no new features will be added. The user may refer to the links to pre-trained models, sample scripts, best practices, and step-by-step tutorials in the [Intel® Extension for PyTorch*](https://github.com/intel/intel-extension-for-pytorch) and [Intel® Extension for OpenXLA*](https://github.com/intel/intel-extension-for-openxla) projects as alternatives. 
+
+Thanks to all the contributors and users who supported this project!
+
 # Intel® AI Reference Models
 
 This repository contains **links to pre-trained models, sample scripts, best practices, and step-by-step tutorials** for many popular open-source machine learning models optimized by Intel to run on Intel® Xeon® Scalable processors and Intel® Data Center GPUs.
