@@ -134,6 +134,7 @@ elif args.dtype in ["int8", "int8-bf16"]:
         if args.weight_dtype == "INT8":
             if args.dtype == "int8-bf16":
                 print("---- apply torchao woq int8 api ----", flush=True)
+                inductor_config.cpp.enable_concat_linear = True
                 quant_api.quantize_(model, quant_api.int8_weight_only(set_inductor_config=False))
                 unwrap_tensor_subclass(model)
             elif args.dtype == "int8":
