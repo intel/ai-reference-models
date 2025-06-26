@@ -25,6 +25,7 @@ from transformers import (
 )
 
 import torch
+
 def trace_handler(prof):
     print(prof.key_averages().table(
         sort_by="self_cpu_time_total", row_limit=-1))
@@ -83,6 +84,7 @@ parser.add_argument(
     action="store_true",
     help="by default it is int8-fp32 mixed, to enable int8 mixed amp bf16 (work on platforms like SPR)",
 )
+parser.add_argument("--asym-quant-act", action="store_true")
 args = parser.parse_args()
 
 if args.dtype == "bf16":
@@ -118,6 +120,7 @@ inductor_config.cpp_wrapper = True
 inductor_config.max_autotune = True
 inductor_config.max_autotune_gemm_backends = "CPP,ATEN"
 torch._dynamo.config.allow_unspec_int_on_nn_module = True
+
 if args.dtype in ["fp32","bf16", "fp16"]:
     if not args.disable_grouped_gemm and hasattr(inductor_config.cpp, "enable_grouped_gemm_template"):
         inductor_config.cpp.enable_grouped_gemm_template = True
@@ -141,10 +144,23 @@ elif args.dtype in ["int8", "int8-bf16"]:
                 print("---- apply torchao int8_dynamic_activation_int8_weight api ----", flush=True)
                 quant_api.quantize_(model, quant_api.int8_dynamic_activation_int8_weight(set_inductor_config=False))
         elif args.weight_dtype == "INT4":
+            if args.dtype == "int8-bf16":
                 from torchao.dtypes import Int4CPULayout
-                print("---- apply torchao woq int4 api ----", flush=True)
+                print("---- apply torchao a16w4 api ----", flush=True)
                 quant_api.quantize_(model, quant_api.int4_weight_only(group_size=args.group_size, layout=Int4CPULayout(), set_inductor_config=False))
                 unwrap_tensor_subclass(model)
+            elif args.dtype == "int8":
+                from torchao.dtypes import Int8DynamicActInt4WeightCPULayout
+                from torchao.quantization.quant_primitives import MappingType
+                print("---- apply torchao da8w4 api ----", flush=True)
+                quant_api.quantize_(
+                    model,
+                    quant_api.Int8DynamicActivationInt4WeightConfig(
+                        group_size=args.group_size,
+                        layout=Int8DynamicActInt4WeightCPULayout(),
+                        act_mapping_type=MappingType.ASYMMETRIC if args.asym_quant_act else MappingType.SYMMETRIC,
+                    )
+                )
 
         model.forward = torch.compile(model.forward)
 
