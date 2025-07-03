@@ -1,0 +1,15 @@
+---
+- name: List contents of the current user's home directory
+  hosts: localhost
+  tasks:
+    - name: Get the current user's home directory
+      command: echo $HOME
+      register: home_directory
+
+    - name: List contents of the home directory
+      command: ls -l {{ home_directory.stdout }}
+      register: directory_contents
+
+    - name: Display contents of the home directory
+      debug:
+        var: directory_contents.stdout_lines
