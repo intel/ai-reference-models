@@ -7,7 +7,7 @@
       register: home_directory
 
     - name: List contents of the home directory
-      command: ls -lah {{ home_directory.stdout }}
+      command: ls -l {{ home_directory.stdout }}
       register: directory_contents
 
     - name: Display contents of the home directory
