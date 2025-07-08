@@ -1,4 +1,4 @@
 tensorboardX
-transformers==4.51.0
+transformers==4.52.1
 tensorboard
 tqdm

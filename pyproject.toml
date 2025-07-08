@@ -24,7 +24,7 @@ dependencies = [
     "torch (==2.7.0)",
     "requests (==2.32.4)",
     "urllib3 (==2.5.0)",
-    "transformers (==4.51.0)"
+    "transformers (==4.52.1)"
 ]
 
 [tool.poetry]
