@@ -29,7 +29,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
-To run YOLOv7 inference, set environment variables to specify the precision and an output directory. Refer to instructions [here](./README.md#prepare-dataset) and [here](./README.md#download-pretrained-model) to download datasets and pre-trained models.
+To run YOLOv7 inference, set environment variables to specify the precision and an output directory. Refer to instructions for [dataset](./README.md#prepare-dataset) and [model](./README.md#download-pretrained-model) to download datasets and pre-trained models.
 
 ```bash
 ##Optional

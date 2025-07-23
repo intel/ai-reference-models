@@ -21,7 +21,7 @@ export DNNL_MAX_CPU_ISA=AVX2_VNNI_2
 
 ## Datasets and Pre-Trained Model
 
-Refer to instructions [here](README.md#datasets) and [here](README.md#pre-trained-checkpoint) to download datasets and pre-trained model respectively. These two inputs are required only when testing accuracy and not required for performance calculations. 
+Refer to instructions for [datasets](README.md#datasets) and [pre-trained-checkpoints](README.md#pre-trained-checkpoint) to download datasets and pre-trained model respectively. These two inputs are required only when testing accuracy and not required for performance calculations. 
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.

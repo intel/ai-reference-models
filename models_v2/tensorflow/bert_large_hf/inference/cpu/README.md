@@ -6,7 +6,7 @@
 
 This document has instructions for running BERT Large inference (using SQuAD dataset) from Hugging Face using TensorFlow.
 
-The original Hugging Face model can be found [here](https://github.com/huggingface/transformers/tree/main/examples/tensorflow/question-answering). This model has been slightly modified to print benchmarking information such as latency and throughput.
+Here is the original [model](https://github.com/huggingface/transformers/tree/main/examples/tensorflow/question-answering). This model has been slightly modified to print benchmarking information such as latency and throughput.
 
 <!--- 40. Datasets -->
 ## Dataset

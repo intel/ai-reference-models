@@ -12,7 +12,7 @@ DLRM v2 Inference best known configurations with Intel® Extension for PyTorch.
 ## Bare Metal
 ### General setup
 
-Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to build Pytorch, IPEX, TorchVison and TCMalloc.
+[Follow](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to build Pytorch, IPEX, TorchVison and TCMalloc.
 
 ### Model Specific Setup
 

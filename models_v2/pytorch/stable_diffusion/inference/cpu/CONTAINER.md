@@ -29,10 +29,10 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e NO_PROXY=${NO_PROXY} -e socks_proxy=${socks_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
-To run stable diffusion inference, set environment variables to specify the precision, an output directory and the dataset directory .Refer to instructions [here](README.md#datasets) on how to download the required dataset.
+To run stable diffusion inference, set environment variables to specify the precision, an output directory and the dataset directory .Refer to [instructions](README.md#datasets) on how to download the required dataset.
 
 ## INT8 Model
-For int8 precision,prepare the model [here](./README.md#noteint8-model) and volume mount to the container and set environment variable as `INT8_MODEL`.
+For int8 precision,prepare the [model](./README.md#noteint8-model) and volume mount to the container and set environment variable as `INT8_MODEL`.
 
 ```bash
 export OUTPUT_DIR=<path to output directory>

@@ -14,7 +14,7 @@ Stable Diffusion training best known configurations with Intel® Extension for P
 ## Bare Metal
 ### General setup
 
-Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to istall and build Pytorch, IPEX, TorchVison and TCMalloc.
+[Follow](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to istall and build Pytorch, IPEX, TorchVison and TCMalloc.
 
 ### Initialize an [🤗Accelerate](https://github.com/huggingface/accelerate/) environment with:
 ```bash

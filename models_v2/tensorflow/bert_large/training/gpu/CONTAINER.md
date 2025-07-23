@@ -5,7 +5,7 @@ This document has instructions for running BERT Large training with BF16,FP32 an
 
 ## Datasets
 
-Follow instructions [here](README.md#prepare-dataset) to download and prepare the dataset for training. Set the environment variable `DATA_DIR` to point to the dataset directory.
+Follow [instructions](README.md#prepare-dataset) to download and prepare the dataset for training. Set the environment variable `DATA_DIR` to point to the dataset directory.
 
 ## Quick Start Scripts
 | Script name | Description |

@@ -102,5 +102,5 @@ As an example, if the pretrained model path on Windows is `D:\user\transformer_l
 
 ## Additional Resources
 
-* To run more advanced use cases, see the instructions [here](fp32/Advanced.md)
+* To run more advanced use cases, see the [instructions](fp32/Advanced.md)
   for calling the `launch_benchmark.py` script directly.

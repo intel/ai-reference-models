@@ -14,7 +14,7 @@ Stable Diffusion inference best known configurations with Intel® Extension for 
 ## Bare Metal
 ### General setup
 
-Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to install build Pytorch, IPEX, TorchVison and TCMalloc.
+[Follow](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to install build Pytorch, IPEX, TorchVison and TCMalloc.
 
 ### Model Specific Setup
 * Set Tcmalloc Preload for better performance
@@ -76,7 +76,7 @@ bash download_dataset.sh
 
 * NOTE:
 Please get quantized model before running `INT8-BF16` or `INT8-FP32`.
-For `ipex-jit` mode, please refer the [link](https://github.com/intel/intel-extension-for-transformers/blob/v1.5/examples/huggingface/pytorch/text-to-image/quantization/qat/README.md).
+For `ipex-jit` mode, please [refer](https://github.com/intel/intel-extension-for-transformers/blob/v1.5/examples/huggingface/pytorch/text-to-image/quantization/qat/README.md).
 For `compile-inductor` mode, please do calibration first:
   ```
   bash do_calibration.sh

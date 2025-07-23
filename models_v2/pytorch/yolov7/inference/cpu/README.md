@@ -12,7 +12,7 @@ Intel-optimized PyTorch and PyTorch inductor.
 | Inference   | Pytorch     | https://github.com/WongKinYiu/yolov7 | main/a207844 | [`yolov7_ipex_and_inductor.patch`](/models_v2/pytorch/yolov7/inference/cpu/yolov7_ipex_and_inductor.patch). Enable yolov7 inference with IPEX and torch inductor for specified precision (fp32, int8, bf16, fp16, or bf32). |
 
 ## Pre-Requisite
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniforge and build Pytorch, IPEX, TorchVison and Tcmalloc.
+[Follow](/docs/general/pytorch/BareMetalSetup.md) to install Miniforge and build Pytorch, IPEX, TorchVison and Tcmalloc.
 
 * Set Tcmalloc Preload for better performance
 
@@ -41,7 +41,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniforge and 
 ```
     export DNNL_MAX_CPU_ISA=AVX2_VNNI_2
 ```
-For more detailed information about `DNNL_MAX_CPU_ISA` of oneDNN, see oneDNN [link](https://oneapi-src.github.io/oneDNN/index.html).
+For more detailed information about `DNNL_MAX_CPU_ISA` of oneDNN, see [oneDNN](https://oneapi-src.github.io/oneDNN/index.html).
 
 
 ## Download pretrained model

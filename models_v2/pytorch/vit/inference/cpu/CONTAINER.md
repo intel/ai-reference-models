@@ -30,7 +30,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 
-To run ViT inference, set environment variables to specify the precision and an output directory. Refer to instructions [here](https://huggingface.co/datasets/imagenet-1k) if you want to use a dataset. For Accuracy test, it is required. You will need to get access to the dataset and a token.
+To run ViT inference, set environment variables to specify the precision and an output directory. Refer to [instructions](https://huggingface.co/datasets/imagenet-1k) if you want to use a dataset. For Accuracy test, it is required. You will need to get access to the dataset and a token.
 
 ```bash
 ##Optional

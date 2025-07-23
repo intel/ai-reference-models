@@ -12,7 +12,7 @@ This document has instructions for running Stable Diffusion inference using Inte
 | Drivers | [GPU drivers](https://www.intel.com/content/www/us/en/products/docs/discrete-gpus/arc/software/drivers.html) |
 | Software | [Docker Desktop](https://docs.docker.com/desktop/wsl) |
 
-Follow addtional pre-requisite steps mentioned [here](WSL2_ARC_BASE.md) when accessing WSL2 remotely. 
+Follow addtional pre-requisite [steps](WSL2_ARC_BASE.md) when accessing WSL2 remotely. 
 
 ## Quick Start Scripts
 
