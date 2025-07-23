@@ -10,13 +10,13 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
 ## How it Works
 
 1. The script [`launch_benchmark.py`](/benchmarks/launch_benchmark.py) pulls a docker image specified by the script's `--docker-image` argument and runs a container. 
-   [Here](#launch_benchmarkpy-flags) is the full list of available flags. To run a model without a docker container,
+   is the full [list](#launch_benchmarkpy-flags) of available flags. To run a model without a docker container,
    see the [bare metal instructions](#alpha-feature-running-on-bare-metal).
 2. The container's entrypoint script [`start.sh`](/benchmarks/common/tensorflow/start.sh) installs required dependencies, e.g. python packages and `numactl`, and sets the PYTHONPATH environment variable to point to the required dependencies. 
-   [Here](#startsh-flags) is the full list of available flags.
-3. The [`run_tf_benchmark.py`](/benchmarks/common/tensorflow/run_tf_benchmark.py) script calls the model's initialization routine, called `model_init.py` (see [here](#model-scripts-for-tensorflow-fp32-inference)).
+   is the full [list](#startsh-flags) of available flags.
+3. The [`run_tf_benchmark.py`](/benchmarks/common/tensorflow/run_tf_benchmark.py) script calls the model's initialization [routine](#model-scripts-for-tensorflow-fp32-inference)), called `model_init.py`.
    The `model_init.py` is different for every model and sets environment variables (like `KMP_BLOCKTIME`, `KMP_SETTINGS`, `KMP_AFFINITY`, and `OMP_NUM_THREADS`) to the best known settings. It also sets `num_inter_threads` and `num_intra_threads` to the best known settings, if the user has not set them explicitly.
-4. Then `model_init.py` creates the command to call the model's inference script, including the `numactl` prefix. This inference script invokes a TensorFlow session and is also different for every model (see [here](#model-scripts-for-tensorflow-fp32-inference)).
+4. Then `model_init.py` creates the command to call the model's inference script, including the `numactl` prefix. This inference script [invokes](#model-scripts-for-tensorflow-fp32-inference) a TensorFlow session and is also different for every model.
 5. The inference script calls preprocessing modules (usually but not always named `preprocessing.py`) to prepare the data with any pre- or post-processing routines required by the model.
 
 ## Model Scripts for TensorFlow FP32 Inference

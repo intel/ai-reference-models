@@ -14,7 +14,7 @@ docker pull intel/intel-optimized-tensorflow-serving:2.2.0
 
 ## Description
 
-Intel® Optimizations for TensorFlow\* Serving is a binary distribution of TensorFlow\* Serving with Intel® oneAPI Deep Neural Network Library(Intel® oneDNN) primitives, a popular performance library for deep learning applications. To learn more about TensorFlow\* Serving please see [here](https://www.tensorflow.org/tfx/guide/serving)
+Intel® Optimizations for TensorFlow\* Serving is a binary distribution of TensorFlow\* Serving with Intel® oneAPI Deep Neural Network Library(Intel® oneDNN) primitives, a popular performance library for deep learning applications. To learn more about TensorFlow\* Serving please see the [documentation](https://www.tensorflow.org/tfx/guide/serving)
 
 Includes the Python3 interpreter and TensorFlow Serving pre-compiled with OneDNN optimizations
 

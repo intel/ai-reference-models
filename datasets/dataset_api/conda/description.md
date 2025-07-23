@@ -15,7 +15,7 @@ conda install dataset_librarian -c https://software.repos.intel.com/python/conda
 ***
 
 ### PyPI Package
-[Here](https://pypi.org/project/dataset-librarian/ )
+[Package](https://pypi.org/project/dataset-librarian/ )
 
 ***
 

@@ -25,7 +25,7 @@ installed before running it. Please follow the instructions in each model docume
 
 The following list of models are tested on Windows, please check each model instructions from the `Model Documentation` column based on the available precisions.
 >Note that on Windows systems all of the system cores will be used.
->For users of Windows desktop/laptops, it is strongly encouraged to instead use the batch file provided [here](/benchmarks/common/windows_intel1dnn_setenv.bat) to open a Windows command prompt pre-configured with optimized settings to achieve high AI workload performance on Intel hardware (e.g. TigerLake & AlderLake) for image recognition models.
+>For users of Windows desktop/laptops, it is strongly encouraged to instead use the batch file [provided](/benchmarks/common/windows_intel1dnn_setenv.bat) to open a Windows command prompt pre-configured with optimized settings to achieve high AI workload performance on Intel hardware (e.g. TigerLake & AlderLake) for image recognition models.
 
 | Use Case                | Model              | Mode      | Model Documentation |
 | ----------------------- | ------------------ | --------- | --------------------------------- |
