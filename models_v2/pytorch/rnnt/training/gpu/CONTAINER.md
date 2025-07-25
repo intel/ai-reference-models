@@ -18,7 +18,7 @@ This document has instructions for running RNN-T Training using Intel® Extensio
 
 ## Datasets and Pre-trained Models
 
-Refer to instructions [here](./README.md#prepare-dataset) to download and pre-process LibriSpeech dataset.Set the `DATASET_DIR` environment variable to point to the dataset directory respectively. 
+Refer to [instructions](./README.md#prepare-dataset) to download and pre-process LibriSpeech dataset.Set the `DATASET_DIR` environment variable to point to the dataset directory respectively. 
 
 ### Docker pull command:
 

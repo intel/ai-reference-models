@@ -15,7 +15,7 @@ Intel-optimized PyTorch.
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniforge, Pytorch, IPEX, TorchVison, Torch-CCL and Tcmalloc.
+[Follow](/docs/general/pytorch/BareMetalSetup.md) to install Miniforge, Pytorch, IPEX, TorchVison, Torch-CCL and Tcmalloc.
 
 * Install dependencies
 ```

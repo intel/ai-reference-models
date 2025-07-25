@@ -43,7 +43,7 @@ The folder that contains the `val` and `train` directories should be set as the 
 
 ## Multi-Node Setup 
 
-Refer to instructions provided [here](https://github.com/intel/ai-containers/tree/main/preset/deep-learning/demo/pytorch-distributed#setup-ssh) to configure SSH keys on worker and launcher nodes. This step ensures the launcher node has password-less access to the worker node(s).
+Refer to [instructions](https://github.com/intel/ai-containers/tree/main/preset/deep-learning/demo/pytorch-distributed#setup-ssh) provided to configure SSH keys on worker and launcher nodes. This step ensures the launcher node has password-less access to the worker node(s).
 
 Create a `hostfile.txt` that needs to contain the hostnames/ IP addresses of the laucher and worker node(s).
 

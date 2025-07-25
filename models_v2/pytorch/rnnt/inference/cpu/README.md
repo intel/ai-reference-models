@@ -14,7 +14,7 @@ RNNT Inference best known configurations with Intel® Extension for PyTorch.
 ## Bare Metal
 ### General setup
 
-Follow [link](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to install Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
+[Follow](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md) to install Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
 
 ### Model Specific Setup
 

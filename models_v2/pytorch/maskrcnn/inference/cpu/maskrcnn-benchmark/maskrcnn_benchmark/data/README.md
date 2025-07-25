@@ -33,10 +33,10 @@ cd ~/github/maskrcnn-benchmark
 mkdir -p datasets/voc/VOC<year>
 ln -s /path/to/VOC<year> /datasets/voc/VOC<year>
 ```
-Example configuration files for PASCAL VOC could be found [here](https://github.com/facebookresearch/maskrcnn-benchmark/blob/master/configs/pascal_voc/).
+Please refer [configuration](https://github.com/facebookresearch/maskrcnn-benchmark/blob/master/configs/pascal_voc/) files for PASCAL VOC.
 
 ### PASCAL VOC Annotations in COCO Format
-To output COCO-style evaluation result, PASCAL VOC annotations in COCO json format is required and could be downloaded from [here](https://storage.googleapis.com/coco-dataset/external/PASCAL_VOC.zip)
+To output COCO-style evaluation result, PASCAL VOC annotations in COCO json format is required and could be [downloaded](https://storage.googleapis.com/coco-dataset/external/PASCAL_VOC.zip)
 via http://cocodataset.org/#external.
 
 ## Creating Symlinks for Cityscapes:
@@ -87,4 +87,4 @@ cd ~/github/maskrcnn-benchmark
 python tools/cityscapes/convert_cityscapes_to_coco.py --datadir /path/to/cityscapes --outdir /path/to/cityscapes/annotations
 ```
 
-Example configuration files for Cityscapes could be found [here](https://github.com/facebookresearch/maskrcnn-benchmark/blob/master/configs/cityscapes/).
+Example configuration [files](https://github.com/facebookresearch/maskrcnn-benchmark/blob/master/configs/cityscapes/) for Cityscapes could be found.

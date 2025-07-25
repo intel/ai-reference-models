@@ -31,7 +31,7 @@ SSD-RN34 Training best known configurations with Intel® Extension for PyTorch.
 ```
 * Set ENV to use multi-node distributed training (no need for single-node multi-sockets)
 
-  In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
+  In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can [refer](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
   ```
   export NNODES=#your_node_number
   export HOSTFILE=your_ip_list_file #one ip per line

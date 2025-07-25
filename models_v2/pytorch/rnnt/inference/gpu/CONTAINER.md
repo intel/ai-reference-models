@@ -18,7 +18,7 @@ This document has instructions for running RNN-T Inference using Intel® Extensi
 
 ## Datasets and Pre-trained Models
 
-Refer to instructions [here](./README.md#prepare-dataset) to download and pre-process LibriSpeech dataset. Refer to the instructions to download the pre-trained model.
+Refer to [instructions](./README.md#prepare-dataset) to download and pre-process LibriSpeech dataset. Refer to the instructions to download the pre-trained model.
 
 Set the `DATASET_DIR` and `WEIGHT_DIR` environment variables to point to the dataset and model directories respectively. 
 

@@ -13,8 +13,8 @@ MaskRCNN Inference best known configurations with Intel® Extension for PyTorch.
 * Installation of [Build PyTorch + IPEX + TorchVision Jemalloc and TCMalloc](https://github.com/IntelAI/models/blob/master/docs/general/pytorch/BareMetalSetup.md)
 * Set Jemalloc and tcmalloc Preload for better performance
 
-  The jemalloc and tcmalloc should be built from the [General setup](#general-setup) section.
-  ```
+  The jemalloc and tcmalloc should be built from the [General](#general-setup) setup section.
+  ```bash
   export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":"path_to/tcmalloc/lib/libtcmalloc.so":$LD_PRELOAD
   export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
   ```

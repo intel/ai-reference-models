@@ -19,10 +19,10 @@ docker pull intel/language-modeling:centos-pytorch-cpu-rnnt-inference
 **Note:** The `avx-fp32` precision runs the same scripts as `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
 
 # Datasets 
-Follow instructions to download and pre-process instructions from [here](https://github.com/IntelAI/models/blob/v2.9.0/quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_dataset.sh) and set `DATASET_DIR` variable to point to the dataset. 
+Follow instructions to download and pre-process [instructions](https://github.com/IntelAI/models/blob/v2.9.0/quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_dataset.sh) and set `DATASET_DIR` variable to point to the dataset. 
 
 # Pre-Trained Model
-Follow instructions [here](https://github.com/IntelAI/models/blob/v2.9.0/quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_model.sh) to download the RNNT pre-trained model.
+Follow [instructions](https://github.com/IntelAI/models/blob/v2.9.0/quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_model.sh) to download the RNNT pre-trained model.
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
