@@ -16,7 +16,7 @@ docker pull intel/language-modeling:pytorch-cpu-bert-large-training
 Follow instructions to [download and preprocess](./README.md#download-the-preprocessed-text-dataset)  the text dataset and set the `DATASET_DIR` to point to the pre-processed dataset.
 
 # BERT Config File
-BERT Training happens in two stages. Download the BERT Config file from [here](https://drive.google.com/drive/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT) and export `BERT_MODEL_CONFIG` variable to point to this file path. 
+BERT Training happens in two stages. [Download](https://drive.google.com/drive/folders/1oQF4diVHNPCclykwdvQJw8n_VIWwV0PT) the BERT Config file and export `BERT_MODEL_CONFIG` variable to point to this file path. 
 
 # Checkpoint Directory
 The checkpoint directory is created as a result of Phase 1 Training. Please set the `PRETRAINED_MODEL` to point to the pre-trained model path and volume mount it for Phase 2 training. 

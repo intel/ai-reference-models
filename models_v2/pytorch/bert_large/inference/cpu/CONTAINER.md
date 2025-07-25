@@ -12,7 +12,7 @@ docker pull intel/language-modeling:pytorch-cpu-bert-large-inference
 **Note:** The `avx-int8` and `avx-fp32` precisions run the same scripts as `int8` and `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
 
 ## Datasets
-Please following this [link](https://github.com/huggingface/transformers/tree/v3.0.2/examples/question-answering) to get `dev-v1.1.json` and set the `EVAL_DATA_FILE` environment variable to point to the file:
+Please [follow](https://github.com/huggingface/transformers/tree/v3.0.2/examples/question-answering) the link to get `dev-v1.1.json` and set the `EVAL_DATA_FILE` environment variable to point to the file:
 
 ```bash
 wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json

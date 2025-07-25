@@ -76,7 +76,7 @@ Below are the set of run-time options recommended by Intel on ResNet50, ResNet10
 </table>
 <br>
 
-*Note: Refer to the [link](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) here to learn more about the run time options.*
+*Note: [Refer](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) here to learn more about the run time options.*
 
 Run the following commands to get your processor information
 
@@ -144,7 +144,7 @@ You can refer to [ImageNet](/datasets/imagenet) or [Coco Dataset](http://cocodat
 ### Run inference
 
 1. Pull the relevant Intel-optimized TensorFlow Docker image. We'll be running the pretrained model to infer on Docker container.
-[Click here](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) to find  all the available Docker images.
+Click here to find  all the [available](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) docker images.
 ```bash
 docker pull intel/intel-optimized-tensorflow:latest
 ```
@@ -157,7 +157,7 @@ cd ~/models/benchmarks
 inference on pretrained models trained of popular topologies.
 The script will automatically set the recommended run-time options for supported topologies,
 but if you choose to set your own options, refer to the full list of available flags and a detailed
-explanation of the ```launch_benchmark.py``` script [here](/docs/general/tensorflow/LaunchBenchmark.md).
+explanation of the ```launch_benchmark.py``` [script](/docs/general/tensorflow/LaunchBenchmark.md).
 This step will automatically launch a new container on every run and terminate. Go to the [Step 4](#step_4) to interactively run the script on the container.
 
 3.1. <b> *Online inference*</b>(or real-time inference, batch_size=1)

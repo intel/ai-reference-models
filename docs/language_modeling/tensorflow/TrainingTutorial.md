@@ -30,7 +30,7 @@ Below are the set of run-time options tested empirically on BERT Large and recom
 |KMP_BLOCKTIME| 1 |
 |OMP_NUM_THREADS |physical cores|
  
-Note 1: Refer to this [link](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) to learn more about the run time options.
+Note 1: [Refer](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) to learn more about the run time options.
 
 Note 2: You can remove `verbose` from `KMP_AFFINITY` setting to avoid verbose output at runtime. 
 

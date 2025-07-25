@@ -16,7 +16,7 @@ The Jupyter notebook helps users to analyze the performance benefit from using I
     * Users do not need to change those configurations. The just have to select from one of them using topo_index in the notebook.
 
 # Getting Started
-To run this experiment please install the latest version of miniforge with python 3.8. The installer can be downloaded from following [link](https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh)
+To run this experiment please install the latest version of miniforge with python 3.8. The installer can be [downloaded](https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh)
 ## Environment Setup
 
 ##### Stock PyTorch 

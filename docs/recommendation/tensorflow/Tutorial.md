@@ -147,7 +147,7 @@ Follow the instructions below to download and prepare the dataset.
 ### Run inference
 
 1. Pull the relevant Intel Optimizations for TensorFlow Docker image. We'll be running the pretrained model to infer in a Docker container.
-   [Click here](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) to find  all the available Docker images.
+   Click here to find  all the [available](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) docker images.
 ```bash
 docker pull intel/intel-optimized-tensorflow:latest
 ```
@@ -160,7 +160,7 @@ The ```launch_benchmark.py``` script can be treated as an entry point to conveni
 inference on pretrained models of popular topologies.
 The script will automatically set the recommended run-time options for supported topologies,
 but if you choose to set your own options, refer to the full list of available flags and a detailed
-explanation of the ```launch_benchmark.py``` script [here](/docs/general/tensorflow/LaunchBenchmark.md).
+explanation of the ```launch_benchmark.py``` [script](/docs/general/tensorflow/LaunchBenchmark.md).
 This step will automatically launch a new container on every run and terminate. Go to [Step 4](#step_4) to interactively run the script in the container.
 
 &nbsp;&nbsp;&nbsp;&nbsp;3.1. <b> *Online Inference*</b> (also called real-time inference, batch_size=1)

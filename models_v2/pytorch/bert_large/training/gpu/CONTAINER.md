@@ -17,7 +17,7 @@ This document has instructions for running BERT Large training using BF16,TF32 a
 
 ## Datasets
 ### Download and Extract the Dataset
-Refer to the [link](README.md#dataset) to download and prepare dataset for training. Set `DATASET_DIR` to point to the dataset directory. 
+[Refer](README.md#dataset) to download and prepare dataset for training. Set `DATASET_DIR` to point to the dataset directory. 
 
 ## Docker pull Command
 ```

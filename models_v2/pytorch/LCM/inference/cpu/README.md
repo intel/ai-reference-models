@@ -12,7 +12,7 @@ This document has instructions for running [Latent Consistency Models (LCMs).](h
 
 ## Pre-Requisite
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison, Jemalloc and TCMalloc.
+[Follow](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison, Jemalloc and TCMalloc.
 
 * Install Intel OpenMP
   ```

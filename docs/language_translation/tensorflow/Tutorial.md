@@ -33,7 +33,7 @@ Below are the set of run-time options tested empirically on Transformer-LT and r
 |KMP_BLOCKTIME| 1 |
 |OMP_NUM_THREADS |physical cores|
 
-Note 1: Refer to this [link](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) to learn more about the run time options.
+Note 1: [Refer](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) to learn more about the run time options.
 
 Note 2: You can remove `verbose` from `KMP_AFFINITY` setting to avoid verbose output at runtime.
 
@@ -123,7 +123,7 @@ Or, if you have your own model/data, ensure the folder structure following the s
 ### Run inference
 
 1. Pull the relevant Intel-optimized TensorFlow Docker image.
-   [Click here](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) to find  all the available Docker images.
+   Click here to find  all the [available](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) docker images.
 ```bash
 docker pull docker.io/intel/intel-optimized-tensorflow:latest
 ```
@@ -136,7 +136,7 @@ cd ~/models/benchmarks
 inference on pretrained models trained of popular topologies.
 The script will automatically set the recommended run-time options for supported topologies,
 but if you choose to set your own options, refer to full of available flags and a detailed
-explanation on ```launch_benchmarking.py``` script [here](/docs/general/tensorflow/LaunchBenchmark.md).
+explanation on ```launch_benchmarking.py``` [script](/docs/general/tensorflow/LaunchBenchmark.md).
  This step will automatically launch a new container on every run and terminate. Go to [Step 4](#step_4) to interactively run the script on the container.
 
 3.1. <b> *Online inference*</b> (using `--socket-id 0` and `--batch-size 1`)

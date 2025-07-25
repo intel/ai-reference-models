@@ -9,7 +9,7 @@ This document has instructions for running [LLaMA2 7B](https://huggingface.co/me
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison and TCMalloc.
+[Follow](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison and TCMalloc.
 
 ### Model Specific Setup
 
@@ -24,7 +24,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pyto
 
 * Set ENV to use multi-nodes distributed training (no need for single-node multi-sockets)
 
-In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
+In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can [refer](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
 ```
 export NNODES=#your_node_number (default using 1 node)
 # create your_ip_list_file, one ip per line, like (or self edit):

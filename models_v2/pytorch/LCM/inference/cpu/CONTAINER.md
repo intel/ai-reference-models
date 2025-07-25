@@ -33,7 +33,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 
-To run LCM inference, set environment variables to specify the precision, dataset path and an output directory. Refer to instructions [here](./README.md#datasets) to download the COCO dataset.
+To run LCM inference, set environment variables to specify the precision, dataset path and an output directory. Refer to [instructions](./README.md#datasets) to download the COCO dataset.
 
 ```bash
 ##Required

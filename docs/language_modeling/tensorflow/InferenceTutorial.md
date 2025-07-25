@@ -32,7 +32,7 @@ Below are the set of run-time options tested empirically on BERT Large and recom
 |KMP_SETTINGS| 1 |
 |OMP_NUM_THREADS |# physical cores - 1 or # physical cores - 2|
 
-Note 1: Refer to this [link](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) to learn more about the run-time options.
+Note 1: [Refer](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) to learn more about the run-time options.
 
 Note 2: You can remove `verbose` from `KMP_AFFINITY` setting to avoid verbose output at runtime.
 
@@ -100,7 +100,7 @@ This directory will be passed as the `--checkpoint` location when running infere
 4. Install [Docker](https://docs.docker.com/v17.09/engine/installation/) since the tutorial runs in a Docker container.
 
 5. Pull the relevant Intel-optimized TensorFlow Docker image.
-[Click here](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) to find  all the available Docker images.
+Click here to find  all the [available](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) docker images.
 ```bash
 docker pull intel/intel-optimized-tensorflow:latest
 ```
@@ -114,7 +114,7 @@ cd ~/models/benchmarks
 
 Run the Python script `launch_benchmark.py` with the pre-trained model.
 The `launch_benchmark.py` script can be treated as an entry point to conveniently perform out-of-box high performance inference on pre-trained models from the Intel Model Zoo.
-The script will automatically set the recommended run-time options for supported topologies, but if you choose to set your own options, refer to the full list of available flags and a detailed explanation of `launch_benchmark.py` [here](/docs/general/tensorflow/LaunchBenchmark.md).
+The script will automatically set the recommended run-time options for supported topologies, but if you choose to set your own options, refer to the full list of available flags and a detailed explanation of [`launch_benchmark.py`](/docs/general/tensorflow/LaunchBenchmark.md).
 This step will automatically launch a new container on every run and terminate. Go to [this optional step](#optional) to interactively run the script on the container.
 
 1. <b>*BF16 Batch Inference*</b>

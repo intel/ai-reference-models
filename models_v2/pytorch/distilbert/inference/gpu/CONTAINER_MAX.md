@@ -13,7 +13,7 @@ This document has instructions for running DistilBERT inference inference using 
 
 # Datasets
 
-Refer to instructions [here](README.md#dataset) to download and prepare the dataset. Set `DATASET_DIR` to point to the dataset directory. 
+Refer to [instructions](README.md#dataset) to download and prepare the dataset. Set `DATASET_DIR` to point to the dataset directory. 
 
 ## Quick Start Scripts
 

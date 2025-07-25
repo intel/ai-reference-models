@@ -9,7 +9,7 @@ This document has instructions for running [LLaMA2 7B](https://huggingface.co/me
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison and TCMalloc.
+[Follow](/docs/general/pytorch/BareMetalSetup.md) to install and build Pytorch, IPEX, TorchVison and TCMalloc.
 
 ### Model Specific Setup
 
