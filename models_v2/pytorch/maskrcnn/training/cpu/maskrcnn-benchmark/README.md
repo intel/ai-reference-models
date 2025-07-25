@@ -236,7 +236,7 @@ if isinstance(dataset, datasets.MyDataset):
 ```
 
 ## Finetuning from Detectron weights on custom datasets
-Create a script `tools/trim_detectron_model.py` like [here](https://gist.github.com/wangg12/aea194aa6ab6a4de088f14ee193fd968).
+Create a [script](https://gist.github.com/wangg12/aea194aa6ab6a4de088f14ee193fd968) `tools/trim_detectron_model.py` like [here].
 You can decide which keys to be removed and which keys to be kept by modifying the script.
 
 Then you can simply point the converted model path in the config file by changing `MODEL.WEIGHT`.
