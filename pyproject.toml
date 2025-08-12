@@ -6,7 +6,7 @@ authors = [
     {name = "Intel(R) AI Reference Models",email = "ai.reference.models@intel.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.9,<=3.11"
+requires-python = ">=3.10,<=3.11"
 dependencies = [
     "atheris (>=2.3.0,<3.0.0)",
     "conditional (>=2.0,<3.0)",
@@ -20,16 +20,23 @@ dependencies = [
     "numpy (==1.24.0)",
     "pytest-xdist (>=3.6.1,<4.0.0)",
     "pubmed-parser (>=0.5.1,<0.6.0)",
-    "keras (==3.9.0)",
-    "torch (==2.7.0)",
+    "keras (==3.11.0)",
     "requests (==2.32.4)",
     "urllib3 (==2.5.0)",
-    "transformers (==4.52.1)"
+    "transformers (==4.53.0)",
+    "torch (>=2.8.0,<3.0.0)"
 ]
 
 [tool.poetry]
 package-mode = false
 
+[tool.poetry.dependencies]
+torch = {source = "torch-cpu"}
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "torch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
