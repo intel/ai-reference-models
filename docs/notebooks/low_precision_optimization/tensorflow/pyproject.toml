@@ -15,6 +15,7 @@ runipy = "^0.1.5"
 wheel = "^0.44.0"
 h11 = "0.16.0"
 tornado = "6.5.0"
+keras = "3.11.0"
 
 
 [build-system]

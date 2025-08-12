@@ -302,14 +302,14 @@ all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2
 
 [[package]]
 name = "keras"
-version = "3.10.0"
+version = "3.11.0"
 description = "Multi-backend Keras"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "keras-3.10.0-py3-none-any.whl", hash = "sha256:c095a6bf90cd50defadf73d4859ff794fad76b775357ef7bd1dbf96388dae7d3"},
-    {file = "keras-3.10.0.tar.gz", hash = "sha256:6e9100bf66eaf6de4b7f288d34ef9bb8b5dcdd62f42c64cfd910226bb34ad2d2"},
+    {file = "keras-3.11.0-py3-none-any.whl", hash = "sha256:28babe8dc69370a2b7c3bc385be6c1f22d702b00b3c47cae62559b6f80d6073a"},
+    {file = "keras-3.11.0.tar.gz", hash = "sha256:f5dfeaf4fcaea180e032f7c1e373f1868961e2940dcfcaaf9a5b711baf41bd60"},
 ]
 
 [package.dependencies]
@@ -1110,4 +1110,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<12"
-content-hash = "40fb5b5f8f73b44a2c485d0163f661edd3c1d9ad722903e81da01555c055d632"
+content-hash = "ded0d73f15f2164e7f096323e1dfbb5de9c109f1098580cf3e34d1728ea85caf"
